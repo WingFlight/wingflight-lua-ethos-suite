@@ -1,31 +1,31 @@
 ## 1. System Architecture Overview
 
-This section provides a high-level view of the Rotorflight Lua Ethos Suite (`rfsuite`) and its major components.
+This section provides a high-level view of the Rotorflight Lua Ethos Suite (`wfsuite`) and its major components.
 
 ### Directory Structure
 
-* **`src/rfsuite/main.lua`**: Entry point that initializes the suite, loads configuration, user preferences, session state, tasks, and the application.
-* **`src/rfsuite/app/`**: UI application logic (`app.lua`), module definitions (`modules/`), and UI libraries (`lib/ui.lua`, `lib/utils.lua`).
-* **`src/rfsuite/tasks/`**: Background tasks and services.
-* **`src/rfsuite/tasks/scheduler/`**: MSP communication, telemetry, sensors, logging, and scheduler plumbing.
-* **`src/rfsuite/tasks/events/`**: Event hooks (connect/disconnect, model change, etc.).
-* **`src/rfsuite/widgets/`**: Reusable UI widgets for dashboard elements and toolbox tools.
-* **`src/rfsuite/lib/`**: Utility libraries (INI, i18n, compilation, general utils).
+* **`src/wfsuite/main.lua`**: Entry point that initializes the suite, loads configuration, user preferences, session state, tasks, and the application.
+* **`src/wfsuite/app/`**: UI application logic (`app.lua`), module definitions (`modules/`), and UI libraries (`lib/ui.lua`, `lib/utils.lua`).
+* **`src/wfsuite/tasks/`**: Background tasks and services.
+* **`src/wfsuite/tasks/scheduler/`**: MSP communication, telemetry, sensors, logging, and scheduler plumbing.
+* **`src/wfsuite/tasks/events/`**: Event hooks (connect/disconnect, model change, etc.).
+* **`src/wfsuite/widgets/`**: Reusable UI widgets for dashboard elements and toolbox tools.
+* **`src/wfsuite/lib/`**: Utility libraries (INI, i18n, compilation, general utils).
 
 ### Interaction Flow
 
-1. **Initialization**: `main.lua` sets up `rfsuite.config`, loads or creates user preferences (`rfsuite.preferences`), initializes session variables (`rfsuite.session`), and starts the background task (`rfsuite.tasks`) alongside the UI application (`rfsuite.app`).
+1. **Initialization**: `main.lua` sets up `wfsuite.config`, loads or creates user preferences (`wfsuite.preferences`), initializes session variables (`wfsuite.session`), and starts the background task (`wfsuite.tasks`) alongside the UI application (`wfsuite.app`).
 2. **Tasks vs. App**:
 
-   * **Tasks**: Handle MSP interactions, scheduling, parsing, telemetry, and callbacks. Exposed via `rfsuite.tasks.msp.api` and `rfsuite.tasks.callback`.
+   * **Tasks**: Handle MSP interactions, scheduling, parsing, telemetry, and callbacks. Exposed via `wfsuite.tasks.msp.api` and `wfsuite.tasks.callback`.
    * **App**: Manages pages and user interaction. Loads modules from `app/modules`, builds menus, and invokes MSP operations through the API loader.
 3. **Widgets**: Modules and pages incorporate widgets for consistent UI elements. Widgets are loaded from `widgets/dashboard/objects` and can be configured via module parameters.
 4. **Session & Preferences**:
 
-* **Preferences**: Stored in `SCRIPTS:/rfsuite.user/preferences.ini`, merged with defaults on startup.
-   * **Session**: Runtime state (e.g., `activeProfile`, `apiVersion`, `flightMode`) tracked in `rfsuite.session` to coordinate between tasks and UI.
+* **Preferences**: Stored in `SCRIPTS:/wfsuite.user/preferences.ini`, merged with defaults on startup.
+   * **Session**: Runtime state (e.g., `activeProfile`, `apiVersion`, `flightMode`) tracked in `wfsuite.session` to coordinate between tasks and UI.
 
-## 2. Module Creation Guide (`rfsuite/app/modules`)
+## 2. Module Creation Guide (`wfsuite/app/modules`)
 
 This section details how to add a new application module that leverages the API data system for form generation.
 
@@ -55,7 +55,7 @@ Modules leverage the `app.Page.apidata` object to generate forms and interact wi
 1. **Initialization**:
 
    ```lua
-   local API = rfsuite.app.Page.apidata.load(apiName)
+   local API = wfsuite.app.Page.apidata.load(apiName)
    app.Page.apidata = {
      api      = API,
      formdata = API.data(),
@@ -79,7 +79,7 @@ Modules leverage the `app.Page.apidata` object to generate forms and interact wi
 4. **Submission & Callbacks**:
 
    * On form submission, modules call `app.Page.apidata.api.write()` to push updates.
-   * Use `rfsuite.tasks.callback.now()` via `api.scheduleWakeup()` for asynchronous operations.
+   * Use `wfsuite.tasks.callback.now()` via `api.scheduleWakeup()` for asynchronous operations.
 
 ### MSP API Delta Cache
 
@@ -123,7 +123,7 @@ Optional per-API write override:
 Direct API override:
 
 ```lua
-local API = rfsuite.tasks.msp.api.load("STATUS")
+local API = wfsuite.tasks.msp.api.load("STATUS")
 API.enableDeltaCache(false)
 ```
 
@@ -137,7 +137,7 @@ Boolean semantics:
 ### Integration with MSP Tasks
 
 * Modules do **not** parse raw MSP data directly. Instead, they rely on the `tasks/scheduler/msp/api` loader to fetch parsed data structures and buffer states.
-* For custom behavior, modules can invoke `rfsuite.tasks.msp.api.scheduleWakeup()` to schedule periodic reads or writes.
+* For custom behavior, modules can invoke `wfsuite.tasks.msp.api.scheduleWakeup()` to schedule periodic reads or writes.
 
 ### MSP Queue Backpressure and Tuning
 
@@ -163,7 +163,7 @@ Queue pacing and throughput tuning live in:
 
 Tune in small steps and monitor retries/timeouts before reducing delays further.
 
-## 3. MSP API Documentation (`rfsuite/tasks/scheduler/msp/api`)
+## 3. MSP API Documentation (`wfsuite/tasks/scheduler/msp/api`)
 
 This section describes the MSP API loader and its capabilities for parsing and interacting with MultiWii Serial Protocol data.
 

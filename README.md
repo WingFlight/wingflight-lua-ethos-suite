@@ -1,17 +1,17 @@
 
-![Rotorflight](https://github.com/rotorflight/rotorflight/blob/master/images/rotorflight2.png?raw=true)
+![Wingflight](https://github.com/rotorflight/rotorflight/blob/master/images/rotorflight2.png?raw=true)
 
-# RFSuite Lua Scripts for Ethos
+# WFSuite Lua Scripts for Ethos
 
-**Rotorflight** is a powerful flight control software suite built specifically for **single-rotor RC helicopters**. It is not designed for multirotors or airplanes. The software includes:
+**Wingflight** is a powerful flight control software suite built specifically for **fixed-wing RC aircraft**. It is not designed for multirotors or helicopters. The software includes:
 
--   **Rotorflight Flight Controller Firmware**
+-   **Wingflight Flight Controller Firmware**
     
--   **Rotorflight Configurator** – used for flashing and configuring the flight controller
+-   **Wingflight Configurator** – used for flashing and configuring the flight controller
     
--   **Rotorflight Blackbox Explorer** – for analyzing flight logs
+-   **Wingflight Blackbox Explorer** – for analyzing flight logs
     
--   **Rotorflight Lua Scripts** – used to configure the flight controller directly from your transmitter
+-   **Wingflight Lua Scripts** – used to configure the flight controller directly from your transmitter
     
 
 These scripts support the following transmitter operating systems:
@@ -21,13 +21,15 @@ These scripts support the following transmitter operating systems:
 -   **Ethos** (this repository)
     
 
-Rotorflight is based on **Betaflight 4.3**, but includes a wide range of advanced features optimized for helicopter flight. This version of Rotorflight is also referred to as **Rotorflight 2 (RF2)**.
+Wingflight is a fixed-wing fork of [Rotorflight](https://github.com/rotorflight), which is itself based on **Betaflight 4.3**.
+
+> Note: the screenshots and web-simulator demo linked below still show the upstream Rotorflight UI/branding — they haven't been retaken for Wingflight yet. Treat them as illustrative of the underlying suite, not final Wingflight branding.
 
 ----------
 
-## What is RFSuite?
+## What is WFSuite?
 
-**RFSuite** is a touch-based, Lua-scripted GUI suite for the Ethos platform. It enables easy setup, tuning, and diagnostics of Rotorflight-based helicopters using supported FrSky transmitters. It offers:
+**WFSuite** is a touch-based, Lua-scripted GUI suite for the Ethos platform. It enables easy setup, tuning, and diagnostics of Wingflight-based aircraft using supported FrSky transmitters. It offers:
 
 -   Full touchscreen interface
     
@@ -40,7 +42,7 @@ You can preview the experience using the interactive simulator:
 
 👉 [**Launch Web Simulator**](https://ethos.studio1247.com/nightly16/X20PRO_FCC?backup=https://github.com/rotorflight/rotorflight-lua-ethos-suite/raw/refs/heads/master/demo/DEMO.zip&reset=all&language=en)
 
-This opens the RFSuite in your browser, showcasing its functionality within the Ethos UI.
+This opens the WFSuite in your browser, showcasing its functionality within the Ethos UI.
 
 ### Key UI Screens
 
@@ -60,9 +62,9 @@ Dashboard themes are available for different flight states. See the [Dashboard T
 
 ----------
 
-## Rotorflight Features
+## Features
 
-Rotorflight includes a rich feature set, including:
+Inherited from Rotorflight/Betaflight, including:
 
 ### Protocol Support
 
@@ -71,19 +73,6 @@ Rotorflight includes a rich feature set, including:
 -   Telemetry: CRSF, S.Port, HoTT, and more
     
 -   ESC telemetry: BLHeli32, Hobbywing, Scorpion, Kontronik, OMP Hobby, ZTW, APD, YGE
-    
-
-### Helicopter-Specific Features
-
--   Advanced PID control tuned for helicopters
-    
--   Rotor speed governor
-    
--   Stabilization modes (6D)
-    
--   Tail Torque Assist (TTA or TALY)
-    
--   Motorized tail support
     
 
 ### Remote Tuning & Configuration
@@ -117,11 +106,15 @@ Rotorflight includes a rich feature set, including:
 -   GPS integration
     
 
+> Note: the helicopter-specific feature list (rotor governor, swash/TTA tuning, etc.) from the
+> Rotorflight original has been dropped above pending a proper fixed-wing feature audit — this
+> still needs a follow-up pass.
+
 ----------
 
 ## Lua Script Requirements
 
-To use RFSuite, you'll need:
+To use WFSuite, you'll need:
 
 -   **Ethos 1.6.2 or later**
     
@@ -140,7 +133,7 @@ To use RFSuite, you'll need:
 
 ## Verified Compatible Receivers
 
-RFSuite has been successfully tested on the following receiver models (with X10, X14, X18, X20, XLite):
+WFSuite has been successfully tested on the following receiver models (with X10, X14, X18, X20, XLite):
 
 -   TWMX
     
@@ -164,7 +157,7 @@ RFSuite has been successfully tested on the following receiver models (with X10,
 
 ### Radio Updater (GUI)
 
-For Windows, Mac & Linux users, a prebuilt GUI updater is available to simplify updating files on the radio without using VS Code or Python.
+For Windows, Mac & Linux users, a prebuilt GUI updater is available to simplify updating files on the radio without using VS Code or Python. Wingflight doesn't have its own updater build yet, so the Rotorflight updater tool is referenced here in the meantime:
 
 - **Download:** https://github.com/rotorflight/rotorflight-lua-ethos-suite-updater/releases
 - Standalone Windows executable (plus macOS/Linux builds)
@@ -177,7 +170,7 @@ For Windows, Mac & Linux users, a prebuilt GUI updater is available to simplify 
 
 ## Development Guide
 
-To build and deploy RFSuite locally:
+To build and deploy WFSuite locally:
 
 ### Requirements
 
@@ -234,34 +227,31 @@ See `docs/dev-environment.md` for the full developer environment setup guide.
 
 ## Contributing
 
-Rotorflight is a community-driven open-source project. You can contribute by:
+Wingflight is a community-driven open-source project. You can contribute by:
 
--   Helping users on [Rotorflight Discord](https://discord.com/) or forums
+-   Helping other users in [GitHub Discussions](https://github.com/WingFlight) or forums
     
--   Reporting issues or requesting features via [GitHub](https://github.com/rotorflight)
+-   Reporting issues or requesting features via [GitHub](https://github.com/WingFlight)
     
 -   Testing and giving feedback on new versions
     
--   Updating documentation and tutorials on the [Rotorflight Website](https://www.rotorflight.org/)
+-   Updating documentation and tutorials
     
--   Translating the configurator to other languages
+-   Translating the suite into other languages
     
 -   Contributing code (fixes, features, enhancements)
     
-
-🔧 See the full [Contributing Guide](https://www.rotorflight.org/docs/Contributing/intro)
 
 ----------
 
 ## Project Origins
 
-Rotorflight is **open source** and available free of charge, with no warranties.
+Wingflight is **open source** and available free of charge, with no warranties.
 
--   Forked from [Betaflight](https://github.com/betaflight)
+-   Forked from [Rotorflight](https://github.com/rotorflight)
+-   Which was forked from [Betaflight](https://github.com/betaflight)
     
 -   Which was forked from [Cleanflight](https://github.com/cleanflight)
-    
--   Also draws inspiration and code from [HeliFlight3D](https://github.com/heliflight3d/)
     
 
 🙏 A big thank you to everyone who has contributed along the way!
@@ -270,10 +260,4 @@ Rotorflight is **open source** and available free of charge, with no warranties.
 
 ## Contact
 
-📧 Reach out to the Rotorflight team at:  
-**[rotorflightfc@gmail.com](mailto:rotorflightfc@gmail.com)**
-
-
-## Donate
-
-If you find Rotorflight useful, please consider [supporting the development by donating](https://opencollective.com/rotorflight/donate) to the Rotorflight Project.
+📧 Reach out to the Wingflight team via [GitHub Issues and Discussions](https://github.com/WingFlight).

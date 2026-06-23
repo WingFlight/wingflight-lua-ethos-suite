@@ -9,11 +9,11 @@ Keep behavior correct while minimizing runtime memory churn and CPU load on Etho
 
 ## 2) Architecture Quick Map
 
-- Entry point: `src/rfsuite/main.lua`
-- App/UI: `src/rfsuite/app/`
-- Background scheduler/tasks/MSP: `src/rfsuite/tasks/`
-- Dashboard widgets/objects: `src/rfsuite/widgets/`
-- Shared utilities: `src/rfsuite/lib/`
+- Entry point: `src/wfsuite/main.lua`
+- App/UI: `src/wfsuite/app/`
+- Background scheduler/tasks/MSP: `src/wfsuite/tasks/`
+- Dashboard widgets/objects: `src/wfsuite/widgets/`
+- Shared utilities: `src/wfsuite/lib/`
 - Menu source and generator: `bin/menu/`
 - i18n sources and generators: `bin/i18n/`
 
@@ -69,14 +69,14 @@ Menu source of truth:
 - `bin/menu/manifest.source.json`
 
 Generated runtime manifest:
-- `src/rfsuite/app/modules/manifest.lua`
+- `src/wfsuite/app/modules/manifest.lua`
 
 Commands:
 - `python bin/menu/generate.py`
 - `python bin/menu/generate.py --check`
 
 Rules:
-- Do not manually edit `src/rfsuite/app/modules/manifest.lua`.
+- Do not manually edit `src/wfsuite/app/modules/manifest.lua`.
 - If menu structure changes, update source JSON and regenerate.
 - Keep `docs/menu-structure.md` aligned with structural changes.
 
@@ -86,7 +86,7 @@ i18n source of truth:
 - `bin/i18n/json/<locale>.json`
 
 Generated runtime locale files:
-- `src/rfsuite/i18n/<locale>.json`
+- `src/wfsuite/i18n/<locale>.json`
 
 Commands:
 - `python bin/i18n/update-missing-translations.py [--only <locale...>]`
@@ -94,7 +94,7 @@ Commands:
 - `python bin/i18n/build-single-json.py [--only <locale...>]`
 
 Rules:
-- Do not hand-edit generated files in `src/rfsuite/i18n/` if a source JSON change is intended.
+- Do not hand-edit generated files in `src/wfsuite/i18n/` if a source JSON change is intended.
 - Keep translation key structure consistent with `en.json`.
 
 ## 8) MSP/API/Scheduler Notes

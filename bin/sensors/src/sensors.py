@@ -19,10 +19,10 @@ class SensorApp:
         #   GITREPO/bin/sensors/sensors.exe
         #   or GITREPO/bin/sensors/src/sensors.py
         # Sensors live under:
-        #   GITREPO/simulators/<target>/scripts/rfsuite/sim/sensors
+        #   GITREPO/simulators/<target>/scripts/wfsuite/sim/sensors
 
         # Fixed scripts subfolder name under each simulator target
-        self.tgt_name = "rfsuite"
+        self.tgt_name = "wfsuite"
 
         # Auto-discover all simulator targets with a matching sensors folder
         self.dest_paths = self._discover_simulator_targets()
@@ -47,7 +47,7 @@ class SensorApp:
     def _discover_simulator_targets(self):
         """
         Discover all simulator targets that contain:
-            ../../simulators/<target>/scripts/rfsuite/sim/sensors
+            ../../simulators/<target>/scripts/wfsuite/sim/sensors
 
         Returns a list of Path objects pointing to the 'scripts' folder
         for each matching simulator target.
@@ -73,7 +73,7 @@ class SensorApp:
                 continue
 
             scripts_dir = target_dir / "scripts"
-            sensors_dir = scripts_dir / "rfsuite" / "sim" / "sensors"
+            sensors_dir = scripts_dir / "wfsuite" / "sim" / "sensors"
 
             if sensors_dir.exists():
                 print(f"[DEBUG] Found sensors dir: {sensors_dir}")
@@ -81,14 +81,14 @@ class SensorApp:
 
         if not dest_paths:
             raise FileNotFoundError(
-                f"No sensor folders found under: {simulator_root}/<target>/scripts/rfsuite/sim/sensors"
+                f"No sensor folders found under: {simulator_root}/<target>/scripts/wfsuite/sim/sensors"
             )
 
         return dest_paths
 
     def _find_repo_root(self, base_dir):
         for path in (base_dir, *base_dir.parents):
-            if (path / ".vscode").is_dir() and (path / "src" / "rfsuite").is_dir():
+            if (path / ".vscode").is_dir() and (path / "src" / "wfsuite").is_dir():
                 return path
         return base_dir.parent.parent
 

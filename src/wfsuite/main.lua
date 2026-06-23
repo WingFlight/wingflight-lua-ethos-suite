@@ -1,0 +1,472 @@
+--[[
+  Copyright (C) 2025 Rotorflight Project
+  GPLv3 — https://www.gnu.org/licenses/gpl-3.0.en.html
+]] --
+
+local wfsuite = {session = {}}
+package.loaded.wfsuite = wfsuite
+
+local _ENV = setmetatable({wfsuite = wfsuite}, {__index = _G, __newindex = function(_, k) print("attempt to create global '" .. tostring(k) .. "'", 2) end})
+
+if not FONT_STD then FONT_STD = FONT_STD end
+
+-- LuaFormatter off
+local config = {
+    toolName = "Wingflight",
+    icon = lcd.loadMask("app/gfx/icon.png"),
+    icon_logtool = lcd.loadMask("app/gfx/icon_logtool.png"),
+    icon_unsupported = lcd.loadMask("app/gfx/unsupported.png"),
+    version = {major = 2, minor = 3, revision = 0, suffix = "20251111"},
+    ethosVersion = {1, 6, 2},
+    supportedMspApiVersion = {"22.00"},
+    baseDir = "wfsuite",
+    preferences = "wfsuite.user",
+    defaultRateProfile = 6,   -- default, may be overridden in onconnect/tasks/rateprofile.lua
+    watchdogParam = 10,
+    msp = {
+        probeProtocol = 1,
+        maxProtocol = 2,
+        allowAutoUpgrade = true,
+        v2MinApiVersion = {22, 0, 0},
+    },
+    mspProtocolVersion = 1,
+    maxModelImageBytes = 350 * 1024 -- 350KB, to prevent OOM crashes on models with very large images
+}
+-- LuaFormatter on
+
+config.ethosVersionString = string.format("ETHOS < V%d.%d.%d", table.unpack(config.ethosVersion))
+
+wfsuite.config = config
+
+local performance = {cpuload = 0, freeram = 0, mainStackKB = 0, ramKB = 0, luaRamKB = 0, luaBitmapsRamKB = 0}
+
+wfsuite.performance = performance
+
+wfsuite.ini = assert(loadfile("lib/ini.lua", "t", _ENV))(config)
+
+local userpref_defaults = {
+    general = {
+        iconsize = 2,
+        shortcuts_mixed_in = true,
+        syncname = false,
+        developer_tools = false,
+        gimbalsupression = 0.85,
+        txbatt_type = 0,
+        hs_loader = 0,
+        theme_loader = 1,  
+        save_confirm = true,   
+        save_dirty_only = true,
+        reload_confirm = true,
+        mspstatusdialog = true,
+        dashboard_startup_log_close = 0,
+        save_armed_warning = true,
+        toolbar_timeout = 10,
+        show_battery_profile_startup = true,
+        show_confirmation_dialog = false,
+        show_esc_tools_warning = true
+    },
+    localizations = {
+        temperature_unit = 0,
+        altitude_unit = 0
+    },
+    dashboard = {
+        theme_preflight = "system/default",
+        theme_inflight = "system/default",
+        theme_postflight = "system/default"
+    },
+    activelook = {
+        offset_x = 0,
+        offset_y = 0,
+        layout_preflight = "stacked_three",
+        layout_inflight = "one_top_two_bottom",
+        layout_postflight = "two_top_two_bottom",
+        preflight_1 = "governor",
+        preflight_2 = "armed",
+        preflight_3 = "flightmode",
+        preflight_4 = "off",
+        inflight_1 = "current",
+        inflight_2 = "voltage",
+        inflight_3 = "fuel",
+        inflight_4 = "timer",
+        postflight_1 = "current",
+        postflight_2 = "voltage",
+        postflight_3 = "fuel",
+        postflight_4 = "timer"
+    },
+    events = {
+        armflags = true,
+        voltage = true,
+        governor = true,
+        pid_profile = true,
+        rate_profile = true,
+        esc_temp = false,
+        escalertvalue = 90,
+        smartfuel = true,
+        smartfuelcallout = 0,
+        smartfuelrepeats = 1,
+        smartfuelhaptic = false,
+        battery_profile = true,
+        adj_v = false,
+        adj_f = false,
+        otherSoundCfg = true,
+        otherModelAnnounce = false
+    },
+    switches = {},
+    developer = {
+        loglevel = "off",
+        logmsp = false,
+        logobjprof = false,
+        logmspQueue = false,
+        logevents = false,
+        memstats = false,
+        logcachestats = false,
+        taskprofiler = false,
+        mspexpbytes = 8,
+        apiversion = 1,
+        tailmode_override = 0,
+        escprotocol_override = 0,
+        overlaystats = false,
+        overlaygrid = false,
+        overlaystatsadmin = false,
+        debugmalloc = false
+    },
+    timer = {
+        timeraudioenable = false,
+        elapsedalertmode = 0,
+        prealerton = false,
+        postalerton = false,
+        prealertinterval = 10,
+        prealertperiod = 30,
+        postalertinterval = 10,
+        postalertperiod = 30
+    },
+    shortcuts = {},
+    menulastselected = {}
+}
+
+local prefs_dir = "SCRIPTS:/" .. wfsuite.config.preferences
+os.mkdir(prefs_dir)
+local userpref_file = prefs_dir .. "/preferences.ini"
+
+local master_ini = wfsuite.ini.load_ini_file(userpref_file) or {}
+local updated_ini = wfsuite.ini.merge_ini_tables(master_ini, userpref_defaults)
+wfsuite.preferences = updated_ini
+
+-- Migrate legacy developer.mspstatusdialog to general.mspstatusdialog if present
+if wfsuite.preferences then
+    local gen = wfsuite.preferences.general
+    local dev = wfsuite.preferences.developer
+    if gen and gen.mspstatusdialog == nil and dev and dev.mspstatusdialog ~= nil then
+        gen.mspstatusdialog = dev.mspstatusdialog
+    end
+    if gen and gen.elrs_sync_mode ~= nil then
+        gen.elrs_sync_mode = nil
+    end
+end
+
+if not wfsuite.ini.ini_tables_equal(master_ini, updated_ini) then wfsuite.ini.save_ini_file(userpref_file, updated_ini) end
+
+if system.getVersion and system.getVersion().simulation then
+    local dev = wfsuite.preferences.developer
+    if dev and simulator and type(simulator.setDebug) == "function" then
+        simulator.setDebug("malloc", dev.debugmalloc == true)
+    end
+end
+
+wfsuite.config.bgTaskName = wfsuite.config.toolName .. " [Background]"
+wfsuite.config.bgTaskKey = "rf2bg"
+
+wfsuite.utils = assert(loadfile("lib/utils.lua"))(wfsuite.config)
+wfsuite.bus = assert(loadfile("lib/message_bus.lua", "t", _ENV))()
+wfsuite.ethos_events = assert(loadfile("lib/ethos_events.lua", "t", _ENV))()
+
+local function createLazyAppProxy()
+    local loadedModule = nil
+
+    local function ensureAppModule()
+        if loadedModule ~= nil then
+            return loadedModule
+        end
+
+        loadedModule = assert(loadfile("app/app.lua"))(wfsuite.config)
+        wfsuite.app = loadedModule
+        return loadedModule
+    end
+
+    local proxy = {}
+    setmetatable(proxy, {
+        __index = function(_, key)
+            local mod = loadedModule
+            if mod then
+                return mod[key]
+            end
+
+            if key == "guiIsRunning" then
+                local t = wfsuite.tasks
+                return (t and t.appRunning) or false
+            end
+            if key == "escPowerCycleLoader" then
+                local t = wfsuite.tasks
+                return (t and t.escPowerCycleLoader) or false
+            end
+            if key == "tasks" or key == "triggers" or key == "ui" then
+                return nil
+            end
+
+            return ensureAppModule()[key]
+        end,
+        __newindex = function(_, key, value)
+            if key == "lastScript" or key == "escPowerCycleLoader" then
+                local t = wfsuite.tasks
+                if t then t[key] = value end
+            end
+            ensureAppModule()[key] = value
+        end
+    })
+
+    local function callAppMethod(method, ...)
+        local mod = ensureAppModule()
+        local fn = mod and mod[method]
+        if type(fn) == "function" then
+            return fn(...)
+        end
+    end
+
+    return proxy, callAppMethod
+end
+
+local callAppMethod
+wfsuite.app, callAppMethod = createLazyAppProxy()
+
+wfsuite.tasks = assert(loadfile("tasks/tasks.lua"))(wfsuite.config)
+
+wfsuite.flightmode = {current = "preflight"}
+wfsuite.utils.session()
+
+wfsuite.simevent = {telemetry_state = true}
+
+wfsuite.sysIndex = {}
+
+function wfsuite.version()
+    local v = wfsuite.config.version
+    return {version = string.format("%d.%d.%d-%s", v.major, v.minor, v.revision, v.suffix), major = v.major, minor = v.minor, revision = v.revision, suffix = v.suffix}
+end
+
+local function unsupported_tool()
+    return {
+        name = wfsuite.config.toolName,
+        icon = wfsuite.config.icon_unsupported,
+        create = function() end,
+        wakeup = function() lcd.invalidate() end,
+        paint = function()
+            local w, h = lcd.getWindowSize()
+            lcd.color(lcd.RGB(255, 255, 255, 1))
+            lcd.font(FONT_STD)
+            local msg = wfsuite.config.ethosVersionString
+            local tw, th = lcd.getTextSize(msg)
+            lcd.drawText((w - tw) / 2, (h - th) / 2, msg)
+        end,
+        close = function() end
+    }
+end
+
+local function unsupported_i18n()
+    return {
+        name = wfsuite.config.toolName,
+        icon = wfsuite.config.icon_unsupported,
+        create = function() end,
+        wakeup = function() lcd.invalidate() end,
+        paint = function()
+            local w, h = lcd.getWindowSize()
+            lcd.color(lcd.RGB(255, 255, 255, 1))
+            lcd.font(FONT_STD)
+            local msg = "i18n not compiled - download a release version"
+            local tw, th = lcd.getTextSize(msg)
+            lcd.drawText((w - tw) / 2, (h - th) / 2, msg)
+        end,
+        close = function() end
+    }
+end
+
+local function register_main_tool()
+    wfsuite.sysIndex['app'] = system.registerSystemTool({
+        name   = wfsuite.config.toolName,
+        icon   = wfsuite.config.icon,
+        event  = function(...) return callAppMethod("event", ...) end,
+        create = function(...) return callAppMethod("create", ...) end,
+        wakeup = function(...) return callAppMethod("wakeup", ...) end,
+        paint  = function(...) return callAppMethod("paint", ...) end,
+        close  = function(...) return callAppMethod("close", ...) end
+    })
+end
+
+local function register_bg_task()
+    wfsuite.sysIndex['task'] = system.registerTask({
+        name  = wfsuite.config.bgTaskName,
+        key   = wfsuite.config.bgTaskKey,
+        wakeup = wfsuite.tasks.wakeup,
+        event = wfsuite.tasks.event,
+        init  = wfsuite.tasks.init,
+        done = wfsuite.tasks.done,
+        read  = wfsuite.tasks.read,
+        write = wfsuite.tasks.write
+    })
+end
+
+local function createLazyWidgetProxy(path)
+    local loadedModule = nil
+    local loadFailed = false
+
+    local function ensureWidgetModule()
+        if loadedModule ~= nil then
+            return loadedModule
+        end
+        if loadFailed then
+            return nil
+        end
+
+        local wchunk, err = loadfile(path)
+        if not wchunk then
+            wfsuite.utils.log("[widgets] failed to load widget: " .. path .. " (" .. tostring(err) .. ")", "info")
+            loadFailed = true
+            return nil
+        end
+
+        local ok, scriptModule = pcall(wchunk, config)
+        if not ok then
+            wfsuite.utils.log("[widgets] widget errored while loading: " .. path .. " (" .. tostring(scriptModule) .. ")", "info")
+            loadFailed = true
+            return nil
+        end
+
+        if type(scriptModule) ~= "table" then
+            wfsuite.utils.log("[widgets] widget did not return a module table: " .. path, "info")
+            loadFailed = true
+            return nil
+        end
+
+        loadedModule = scriptModule
+        return loadedModule
+    end
+
+    local proxy = {}
+    proxy.__isLoaded = function()
+        return loadedModule ~= nil
+    end
+    proxy.__callIfLoaded = function(method, ...)
+        local mod = loadedModule
+        local fn = mod and mod[method]
+        if type(fn) == "function" then
+            return fn(...)
+        end
+    end
+    setmetatable(proxy, {
+        __index = function(_, key)
+            local mod = ensureWidgetModule()
+            if mod then return mod[key] end
+        end,
+        __newindex = function(_, key, value)
+            local mod = ensureWidgetModule()
+            if mod then mod[key] = value end
+        end
+    })
+
+    local function callWidgetMethod(method, ...)
+        local mod = ensureWidgetModule()
+        local fn = mod and mod[method]
+        if type(fn) == "function" then
+            return fn(...)
+        end
+    end
+
+    return proxy, callWidgetMethod
+end
+
+local function register_widgets()
+    local manifestPath = "widgets/manifest.lua"
+    local widgetList = {}
+
+    local chunk = loadfile(manifestPath)
+    if chunk then
+        local res = chunk()
+        if type(res) == "table" then
+            widgetList = res
+        else
+            wfsuite.utils.log("[widgets] manifest did not return a table", "info")
+        end
+    else
+        wfsuite.utils.log("[widgets] manifest not found or load failed", "info")
+    end
+
+    wfsuite.widgets = {}
+    local dupCount = {}
+
+    for _, v in ipairs(widgetList) do
+        if v.script then
+            local path = "widgets/" .. v.folder .. "/" .. v.script
+            local proxy, callWidgetMethod = createLazyWidgetProxy(path)
+            local base = v.varname or v.script:gsub("%.lua$", "")
+            if wfsuite.widgets[base] then
+                dupCount[base] = (dupCount[base] or 0) + 1
+                base = string.format("%s_dup%02d", base, dupCount[base])
+            end
+            wfsuite.widgets[base] = proxy
+
+            if v.type == "glasses" then
+                -- Register a thin proxy so the widget module is only loaded if used.
+                if system.registerGlassesWidget then
+                    wfsuite.sysIndex['widget_' .. v.folder] = system.registerGlassesWidget({
+                        key = v.key,
+                        name = v.name,
+                        create = function(...) return callWidgetMethod("create", ...) or {} end,
+                        build = function(...) return callWidgetMethod("build", ...) end,
+                        wakeup = function(...) return callWidgetMethod("wakeup", ...) end
+                    })
+                end
+            else
+                -- Keep static registration metadata simple and defer loading the module
+                -- until one of its callbacks is actually invoked by Ethos.
+                wfsuite.sysIndex['widget_' .. v.folder] = system.registerWidget({
+                    name = v.name,
+                    key = v.key,
+                    event = function(...) return callWidgetMethod("event", ...) end,
+                    create = function(...) return callWidgetMethod("create", ...) or {} end,
+                    paint = function(...) return callWidgetMethod("paint", ...) end,
+                    wakeup = function(...) return callWidgetMethod("wakeup", ...) end,
+                    build = function(...) return callWidgetMethod("build", ...) end,
+                    close = function(...) return callWidgetMethod("close", ...) end,
+                    configure = function(...) return callWidgetMethod("configure", ...) end,
+                    read = function(...) return callWidgetMethod("read", ...) end,
+                    write = function(...) return callWidgetMethod("write", ...) end,
+                    persistent = false,
+                    menu = function(...) return callWidgetMethod("menu", ...) end,
+                    title = false
+                })
+            end
+        end
+    end
+end
+
+local function init()
+    local cfg = wfsuite.config
+
+    if not wfsuite.utils.ethosVersionAtLeast() then
+        system.registerSystemTool(unsupported_tool())
+        return
+    end
+
+    local isCompiledCheck = "@i18n(iscompiledcheck)@"
+    if isCompiledCheck ~= "true" and isCompiledCheck ~= "eurt" then
+        system.registerSystemTool(unsupported_i18n())
+    else
+        register_main_tool()
+    end
+
+    -- register background task
+    register_bg_task()
+
+    -- register widgets
+    register_widgets()
+end
+
+return {init = init}

@@ -247,13 +247,13 @@ Important files:
 
 | File | Role |
 | --- | --- |
-| `src/rfsuite/tasks/scheduler/sensors/smart.lua` | Creates `[0x5FE1] Smart Fuel` and `[0x5FE0] Smart Consumption`, then routes to firmware or local SmartFuel. |
-| `src/rfsuite/tasks/scheduler/sensors/lib/smartfuelfbl.lua` | Firmware/FBL SmartFuel path. Mirrors the firmware fuel and consumption sensors, then applies the reserve remap to fuel. |
-| `src/rfsuite/tasks/scheduler/sensors/lib/smartfuellocal.lua` | Local/off and legacy `<12.0.9` SmartFuel path. Handles local current, voltage, combined, and virtual consumption. |
-| `src/rfsuite/tasks/scheduler/sensors/lib/smartfuelreserve.lua` | Shared reserve remap used by SmartFuel paths. Maps the configured consumption warning percentage to `0%`. |
-| `src/rfsuite/tasks/scheduler/sensors/lib/smartfuelprefs.lua` | Local SmartFuel source and tuning preferences. |
-| `src/rfsuite/tasks/scheduler/sensors/frsky_sid_lookup.lua` | Maps telemetry slot `5` to `0x5250` and slot `6` to `0x0600` for FBus/S.Port. |
-| `src/rfsuite/tasks/scheduler/sensors/elrs_sid_lookup.lua` | Maps telemetry slot `5` to `0x1013` and slot `6` to `0x1014` for CRSF/ELRS. |
-| `src/rfsuite/tasks/scheduler/telemetry/sources/sensor_table.lua` | Defines telemetry defaults and the public `fuel`, `consumption`, `smartfuel`, and `smartconsumption` source metadata. |
-| `src/rfsuite/tasks/scheduler/events/tasks/telemetry.lua` | Handles SmartFuel callouts and the usable-fuel empty alert. |
-| `src/rfsuite/app/modules/diagnostics/tools/smartfuel.lua` | Diagnostics page for active SmartFuel mode, raw input, virtual output, reserve value, and reserve-adjusted target. |
+| `src/wfsuite/tasks/scheduler/sensors/smart.lua` | Creates `[0x5FE1] Smart Fuel` and `[0x5FE0] Smart Consumption`, then routes to firmware or local SmartFuel. |
+| `src/wfsuite/tasks/scheduler/sensors/lib/smartfuelfbl.lua` | Firmware/FBL SmartFuel path. Mirrors the firmware fuel and consumption sensors, then applies the reserve remap to fuel. |
+| `src/wfsuite/tasks/scheduler/sensors/lib/smartfuellocal.lua` | Local/off and legacy `<12.0.9` SmartFuel path. Handles local current, voltage, combined, and virtual consumption. |
+| `src/wfsuite/tasks/scheduler/sensors/lib/smartfuelreserve.lua` | Shared reserve remap used by SmartFuel paths. Maps the configured consumption warning percentage to `0%`. |
+| `src/wfsuite/tasks/scheduler/sensors/lib/smartfuelprefs.lua` | Local SmartFuel source and tuning preferences. |
+| `src/wfsuite/tasks/scheduler/sensors/frsky_sid_lookup.lua` | Maps telemetry slot `5` to `0x5250` and slot `6` to `0x0600` for FBus/S.Port. |
+| `src/wfsuite/tasks/scheduler/sensors/elrs_sid_lookup.lua` | Maps telemetry slot `5` to `0x1013` and slot `6` to `0x1014` for CRSF/ELRS. |
+| `src/wfsuite/tasks/scheduler/telemetry/sources/sensor_table.lua` | Defines telemetry defaults and the public `fuel`, `consumption`, `smartfuel`, and `smartconsumption` source metadata. |
+| `src/wfsuite/tasks/scheduler/events/tasks/telemetry.lua` | Handles SmartFuel callouts and the usable-fuel empty alert. |
+| `src/wfsuite/app/modules/diagnostics/tools/smartfuel.lua` | Diagnostics page for active SmartFuel mode, raw input, virtual output, reserve value, and reserve-adjusted target. |

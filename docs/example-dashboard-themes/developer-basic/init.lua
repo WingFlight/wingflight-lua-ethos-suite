@@ -14,7 +14,7 @@
  *
  * Note: Some icons have been sourced from https://www.flaticon.com/
 ]]--
- local rfsuite = require("rfsuite")
+ local wfsuite = require("wfsuite")
 -- Theme initialization table
 local init = {
     name        = "Developer Basic",  -- Theme name

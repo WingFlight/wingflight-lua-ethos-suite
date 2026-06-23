@@ -1,4 +1,4 @@
-# MSP API Coverage (Rotorflight Firmware vs RFSuite)
+# MSP API Coverage (Rotorflight Firmware vs WFSuite)
 
 Source: `/mnt/c/GitHub/rotorflight-firmware/src/main/msp/msp_protocol.h` and `msp.c`.
 
@@ -7,7 +7,7 @@ Source: `/mnt/c/GitHub/rotorflight-firmware/src/main/msp/msp_protocol.h` and `ms
 - `PARTIAL`: only one side (read or write) covered.
 - `STUB`: both sides covered only by stub file(s).
 
-| Read ID | Write ID | Read Command | Write Command | Status | RFSuite File(s) |
+| Read ID | Write ID | Read Command | Write Command | Status | WFSuite File(s) |
 |---:|---:|---|---|---|---|
 | 4 | 248 | `MSP_BOARD_INFO` | `MSP_SET_BOARD_INFO` | **FULL** | `BOARD_INFO.lua` |
 | 10 | 11 | `MSP_NAME` | `MSP_SET_NAME` | **FULL** | `NAME.lua` |

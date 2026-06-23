@@ -1,6 +1,6 @@
-# Rotorflight RFSUITE Sensor Updater
+# Rotorflight WFSUITE Sensor Updater
 
-This folder contains the Python GUI script and build tools for generating a standalone Windows executable for updating simulated sensor values used in Rotorflight RFSUITE testing.
+This folder contains the Python GUI script and build tools for generating a standalone Windows executable for updating simulated sensor values used in Rotorflight WFSUITE testing.
 
 ---
 
@@ -29,20 +29,20 @@ src\
 
 Before running the app or building, set the following environment variables:
 
-### `FRSKY_RFSUITE_GIT_SRC`
-- Path to the root of the Rotorflight RFSUITE source repo.
+### `FRSKY_WFSUITE_GIT_SRC`
+- Path to the root of the Rotorflight WFSUITE source repo.
 - Must contain:
-  - `scripts\rfsuite\tasks\telemetry\telemetry.lua`
+  - `scripts\wfsuite\tasks\telemetry\telemetry.lua`
   - `bin\i18n\json\telemetry\en.json`
 
 ### `FRSKY_SIM_SRC`
 - One or more comma-separated paths to the simulated sensor output directories.
 - Each must allow writing Lua scripts to:
-  - `rfsuite\sim\sensors\<sensor>.lua`
+  - `wfsuite\sim\sensors\<sensor>.lua`
 
 **Example:**
 ```bat
-set FRSKY_RFSUITE_GIT_SRC=C:\GitHub\rotorflight-lua-ethos-suite
+set FRSKY_WFSUITE_GIT_SRC=C:\GitHub\rotorflight-lua-ethos-suite
 set FRSKY_SIM_SRC=C:\GitHub\rotorflight-lua-ethos-suite\output
 ```
 
@@ -80,4 +80,4 @@ sensors.exe
 ---
 
 ## 📄 License
-This project is part of Rotorflight RFSUITE. For licensing details, refer to the upstream repository.
+This project is part of Rotorflight WFSUITE. For licensing details, refer to the upstream repository.

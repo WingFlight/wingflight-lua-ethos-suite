@@ -18,7 +18,7 @@ REPO_OWNER = "rotorflight"
 REPO_NAME = "rotorflight-lua-ethos-suite"
 REPO_BRANCH = "master"
 API_BASE = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents"
-DATA_ROOT = Path.home() / ".rfsuite-translation-editor"
+DATA_ROOT = Path.home() / ".wfsuite-translation-editor"
 I18N_REL = Path("bin/i18n/json")
 SOUND_REL = Path("bin/sound-generator/json")
 
@@ -176,8 +176,8 @@ class TranslationEditor(tk.Tk):
 
         columns = ("key", "english", "translation", "needs", "reverse")
         style = ttk.Style()
-        style.configure("RFSuite.Treeview", rowheight=28)
-        self.tree = ttk.Treeview(table_frame, columns=columns, show="headings", style="RFSuite.Treeview")
+        style.configure("WFSuite.Treeview", rowheight=28)
+        self.tree = ttk.Treeview(table_frame, columns=columns, show="headings", style="WFSuite.Treeview")
         self.tree.heading("key", text="Key")
         self.tree.heading("english", text="English")
         self.tree.heading("translation", text="Translation")
@@ -716,7 +716,7 @@ class TranslationEditor(tk.Tk):
             return
 
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-        default_name = f"rfsuite-{self.store.dataset}-{locale}-{ts}.zip"
+        default_name = f"wfsuite-{self.store.dataset}-{locale}-{ts}.zip"
         out_path = filedialog.asksaveasfilename(
             title="Export translations",
             defaultextension=".zip",
@@ -750,7 +750,7 @@ class TranslationEditor(tk.Tk):
             url,
             headers={
                 "Accept": "application/vnd.github+json",
-                "User-Agent": "rfsuite-translation-editor",
+                "User-Agent": "wfsuite-translation-editor",
             },
         )
         try:
@@ -780,7 +780,7 @@ class TranslationEditor(tk.Tk):
             try:
                 file_req = Request(
                     download_url,
-                    headers={"User-Agent": "rfsuite-translation-editor"},
+                    headers={"User-Agent": "wfsuite-translation-editor"},
                 )
                 with _safe_urlopen(file_req) as resp:
                     target.write_bytes(resp.read())

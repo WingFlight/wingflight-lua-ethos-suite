@@ -6,8 +6,8 @@ from pathlib import Path
 # Source root: bin/i18n/json/<locale>.json
 JSON_ROOT = Path(__file__).parent / "json"
 
-# Output root: src/rfsuite/i18n/<locale>.json
-OUT_DIR = (Path(__file__).parent / ".." / ".." / "src" / "rfsuite" / "i18n").resolve()
+# Output root: src/wfsuite/i18n/<locale>.json
+OUT_DIR = (Path(__file__).parent / ".." / ".." / "src" / "wfsuite" / "i18n").resolve()
 
 def discover_locale_files():
     """Yield tuples (locale, file_path) for every i18n/json/<locale>.json."""

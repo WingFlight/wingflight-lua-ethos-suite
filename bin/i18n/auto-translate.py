@@ -53,7 +53,7 @@ NO_TRANSLATE_TERMS = (
     "ESC", "BEC", "MSP", "PID", "RPM", "FrSky", "F.BUS", "ELRS", "GPS", "IMU",
     "FC", "ADC", "DMA", "UART", "PWM", "ACC", "GYRO", "SmartFuel", "SmartPort",
     "SmartAudio", "CRSF", "SBUS", "IBUS", "DSM", "DSMX", "SRXL", "Spektrum",
-    "Futaba", "JR", "LED", "LUA", "Lua", "Ethos", "Rotorflight", "FBL",
+    "Futaba", "JR", "LED", "LUA", "Lua", "Ethos", "WingFlight", "FBL",
 )
 
 SYSTEM_PROMPT = """You are a professional technical translator for radio-controlled (RC) helicopter flight controller software. The software is Rotorflight, a flight controller firmware for RC helicopters, displayed on FrSky Ethos radio transmitters.

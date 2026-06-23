@@ -19,7 +19,7 @@ def main():
     parser.add_argument("--git-src")
     args = parser.parse_args()
 
-    # out_dir will be: simulators/<fw>@<version>/scripts/rfsuite
+    # out_dir will be: simulators/<fw>@<version>/scripts/wfsuite
     out_dir = Path(args.out_dir).resolve()
     debug(f"Given out_dir = {out_dir}")
 

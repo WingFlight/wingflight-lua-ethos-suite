@@ -5421,8 +5421,8 @@
           "max_length": 14
         },
         "rotorflight": {
-          "english": "Rotorflight",
-          "translation": "Rotorflight",
+          "english": "WingFlight",
+          "translation": "WingFlight",
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 11

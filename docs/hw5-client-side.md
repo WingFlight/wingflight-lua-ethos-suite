@@ -8,19 +8,19 @@ It is intended as a maintenance guide for future model additions, table updates,
 
 The HW5 client-side code lives in these files:
 
-- `src/rfsuite/tasks/scheduler/msp/api/ESC_PARAMETERS_HW5.lua`
+- `src/wfsuite/tasks/scheduler/msp/api/ESC_PARAMETERS_HW5.lua`
   - Raw MSP API definition.
   - Parses the firmware-provided HW5 parameter payload.
   - Selects model-specific byte positions.
   - Builds write payloads.
-- `src/rfsuite/app/modules/esc_tools/tools/escmfg/hw5/profile.lua`
+- `src/wfsuite/app/modules/esc_tools/tools/escmfg/hw5/profile.lua`
   - Model-specific UI option tables.
   - Model-specific visible page fields.
   - Runtime profile selection from ESC identity.
-- `src/rfsuite/app/modules/esc_tools/tools/escmfg/hw5/pages/*.lua`
+- `src/wfsuite/app/modules/esc_tools/tools/escmfg/hw5/pages/*.lua`
   - Basic, advanced, and other ESC setup pages.
   - Load the profile helper and apply page-specific filtering.
-- `src/rfsuite/app/lib/ui.lua`
+- `src/wfsuite/app/lib/ui.lua`
   - Generic page read/write binding.
   - Copies parsed MSP values into form fields.
   - Important: zero is a valid field value and must not be treated as missing.
@@ -384,18 +384,18 @@ Syntax checks:
 
 ```bash
 luac -p \
-  src/rfsuite/tasks/scheduler/msp/api/ESC_PARAMETERS_HW5.lua \
-  src/rfsuite/app/modules/esc_tools/tools/escmfg/hw5/profile.lua \
-  src/rfsuite/app/lib/ui.lua
+  src/wfsuite/tasks/scheduler/msp/api/ESC_PARAMETERS_HW5.lua \
+  src/wfsuite/app/modules/esc_tools/tools/escmfg/hw5/profile.lua \
+  src/wfsuite/app/lib/ui.lua
 ```
 
 Whitespace check:
 
 ```bash
 git diff --check -- \
-  src/rfsuite/tasks/scheduler/msp/api/ESC_PARAMETERS_HW5.lua \
-  src/rfsuite/app/modules/esc_tools/tools/escmfg/hw5/profile.lua \
-  src/rfsuite/app/lib/ui.lua
+  src/wfsuite/tasks/scheduler/msp/api/ESC_PARAMETERS_HW5.lua \
+  src/wfsuite/app/modules/esc_tools/tools/escmfg/hw5/profile.lua \
+  src/wfsuite/app/lib/ui.lua
 ```
 
 ## Common Failure Modes

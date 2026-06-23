@@ -4,7 +4,7 @@ Source of truth:
 - `bin/menu/manifest.source.json`
 
 Generated runtime file:
-- `src/rfsuite/app/modules/manifest.lua`
+- `src/wfsuite/app/modules/manifest.lua`
 
 Generator behavior:
 - Adds deterministic `shortcutId` fields to menu pages in generated `manifest.lua`.
@@ -44,4 +44,4 @@ Windows wrapper:
 bin\menu\editor\menu_editor.cmd
 ```
 
-Do not edit `src/rfsuite/app/modules/manifest.lua` directly.
+Do not edit `src/wfsuite/app/modules/manifest.lua` directly.

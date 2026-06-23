@@ -1,4 +1,4 @@
-name: Create rfsuite-lua-ethos ZIP on Push
+name: Create wfsuite-lua-ethos ZIP on Push
 
 on:
   push:

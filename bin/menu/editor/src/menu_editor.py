@@ -22,8 +22,8 @@ from tkinter.scrolledtext import ScrolledText
 APP_TITLE = "RF Suite Menu Editor"
 SOURCE_REL = Path("bin/menu/manifest.source.json")
 GENERATOR_REL = Path("bin/menu/generate.py")
-OUTPUT_REL = Path("src/rfsuite/app/modules/manifest.lua")
-I18N_EN_RELS = (Path("bin/i18n/json/en.json"), Path("src/rfsuite/i18n/en.json"))
+OUTPUT_REL = Path("src/wfsuite/app/modules/manifest.lua")
+I18N_EN_RELS = (Path("bin/i18n/json/en.json"), Path("src/wfsuite/i18n/en.json"))
 I18N_TAG_RE = re.compile(r"^@i18n\(([^)]+)\)@$")
 
 
@@ -207,7 +207,7 @@ class MenuEditorApp(tk.Tk):
 
     def _build_script_menu_targets(self) -> dict[str, str]:
         targets: dict[str, str] = {}
-        modules_root = self.repo_root / "src/rfsuite/app/modules"
+        modules_root = self.repo_root / "src/wfsuite/app/modules"
         pattern = re.compile(r'createFromManifest\("([A-Za-z0-9_]+)"\)')
         if not modules_root.is_dir():
             return targets

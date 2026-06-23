@@ -4,14 +4,14 @@ This document describes the MSP queue used by Rotorflight Suite. It is intended 
 
 The main file is:
 
-- `src/rfsuite/tasks/scheduler/msp/mspQueue.lua`
+- `src/wfsuite/tasks/scheduler/msp/mspQueue.lua`
 
 Related files:
 
-- `src/rfsuite/tasks/scheduler/msp/msp.lua`: creates and configures the singleton queue, calls it from `msp.wakeup()`, and clears it on disconnect/reset.
-- `src/rfsuite/tasks/scheduler/msp/common.lua`: stages and emits the byte-level MSP chunks used by the queue.
-- `src/rfsuite/tasks/scheduler/msp/protocols.lua`: provides protocol-specific queue defaults such as retry count, timeout, and queue depth.
-- `src/rfsuite/tasks/scheduler/msp/api/core.lua`: builds the message tables submitted to the queue.
+- `src/wfsuite/tasks/scheduler/msp/msp.lua`: creates and configures the singleton queue, calls it from `msp.wakeup()`, and clears it on disconnect/reset.
+- `src/wfsuite/tasks/scheduler/msp/common.lua`: stages and emits the byte-level MSP chunks used by the queue.
+- `src/wfsuite/tasks/scheduler/msp/protocols.lua`: provides protocol-specific queue defaults such as retry count, timeout, and queue depth.
+- `src/wfsuite/tasks/scheduler/msp/api/core.lua`: builds the message tables submitted to the queue.
 
 ## Purpose
 
@@ -26,7 +26,7 @@ The MSP queue serializes logical MSP requests so the Suite only works on one com
 - Polling `common.mspPollReply()` for completed replies.
 - Handling retry/backoff/timeout policy.
 - Calling success/error handlers supplied with each message.
-- Updating session/UI status such as `rfsuite.session.mspBusy` and `mspStatusMessage`.
+- Updating session/UI status such as `wfsuite.session.mspBusy` and `mspStatusMessage`.
 
 The queue does not build MSP wire frames. It operates at command level. Framing and chunking are handled below it by `common.lua` and the active transport.
 
@@ -35,7 +35,7 @@ The queue does not build MSP wire frames. It operates at command level. Framing 
 `msp.lua` creates a singleton queue:
 
 ```lua
-mspQueue = assert(loadfile("SCRIPTS:/" .. rfsuite.config.baseDir .. "/tasks/scheduler/msp/mspQueue.lua"))()
+mspQueue = assert(loadfile("SCRIPTS:/" .. wfsuite.config.baseDir .. "/tasks/scheduler/msp/mspQueue.lua"))()
 msp.mspQueue = mspQueue
 ```
 
@@ -169,7 +169,7 @@ Reasons:
 | `queued_busy` | true | Message accepted, but pending count is above the soft warning threshold. |
 | `duplicate` | false | Message key matches the last queued/in-flight key. |
 | `busy` | false | Queue is at hard max depth. |
-| `telemetry_off` | false | `rfsuite.session.telemetryState` is false. |
+| `telemetry_off` | false | `wfsuite.session.telemetryState` is false. |
 | `nil_message` | false | Caller passed nil. |
 
 `pending` includes the in-flight message:
@@ -199,13 +199,13 @@ Clears pending and active queue state.
 
 It:
 
-- Sets `rfsuite.session.mspBusy = false`.
+- Sets `wfsuite.session.mspBusy = false`.
 - Clears `mspBusyStart`.
 - Wipes the FIFO queue in place.
 - Clears `currentMessage`, `currentMessageStartTime`, and `lastTimeCommandSent`.
 - Clears `_nextMessageAt`.
 - Clears duplicate key state.
-- Calls `rfsuite.tasks.msp.common.mspClearTxBuf()` if available.
+- Calls `wfsuite.tasks.msp.common.mspClearTxBuf()` if available.
 
 It does not reset `_qidSeq`, `retryCount`, `maxRetries`, timeout settings, or pressure settings.
 
@@ -279,7 +279,7 @@ Fields added by queue:
 | Field | Meaning |
 | --- | --- |
 | `_qid` | Monotonic queue id assigned during `add()`. Used by protocol logging through `common.lua`. |
-| `_pageScript` | Set to `rfsuite.app.lastScript` if available. Useful for cleanup/removal decisions. |
+| `_pageScript` | Set to `wfsuite.app.lastScript` if available. Useful for cleanup/removal decisions. |
 
 `structure` may appear on custom API messages, but `mspQueue.lua` does not consume it.
 
@@ -362,10 +362,10 @@ Busy status messages are throttled by `busyStatusCooldown` only for the hard-cap
 The queue updates these session fields:
 
 ```lua
-rfsuite.session.mspStatusMessage
-rfsuite.session.mspStatusUpdatedAt
-rfsuite.session.mspStatusLast
-rfsuite.session.mspStatusClearAt
+wfsuite.session.mspStatusMessage
+wfsuite.session.mspStatusUpdatedAt
+wfsuite.session.mspStatusLast
+wfsuite.session.mspStatusClearAt
 ```
 
 `setMspStatus(message)` only updates if the new message differs from the current one.
@@ -828,9 +828,9 @@ No `errorHandler` is called for missing simulator responses.
 
 Developer flags:
 
-- `rfsuite.preferences.developer.logmspQueue`: logs queue depth changes.
-- `rfsuite.preferences.developer.logmsp`: logs MSP payloads via `utils.logMsp()`.
-- `rfsuite.preferences.developer.logmsprw`: logs read/write command lifecycle messages.
+- `wfsuite.preferences.developer.logmspQueue`: logs queue depth changes.
+- `wfsuite.preferences.developer.logmsp`: logs MSP payloads via `utils.logMsp()`.
+- `wfsuite.preferences.developer.logmsprw`: logs read/write command lifecycle messages.
 
 `getRwModeSuffix()` can append:
 
@@ -843,8 +843,8 @@ mode=rebuild
 for API read/write mode diagnostics. It reads from:
 
 ```lua
-rfsuite.tasks.msp.api.apidata._lastReadMode[apiname]
-rfsuite.tasks.msp.api.apidata._lastWriteMode[apiname]
+wfsuite.tasks.msp.api.apidata._lastReadMode[apiname]
+wfsuite.tasks.msp.api.apidata._lastWriteMode[apiname]
 ```
 
 Payload logs are truncated to `MAX_MSP_LOG_BYTES = 96`.

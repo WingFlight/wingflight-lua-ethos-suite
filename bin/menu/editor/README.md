@@ -6,7 +6,7 @@ Source of truth:
 - `bin/menu/manifest.source.json`
 
 Generated runtime file:
-- `src/rfsuite/app/modules/manifest.lua`
+- `src/wfsuite/app/modules/manifest.lua`
 
 ## Run from source
 

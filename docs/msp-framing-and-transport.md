@@ -4,12 +4,12 @@ This document describes how Rotorflight Suite currently turns an MSP API request
 
 The relevant Lua files are:
 
-- `src/rfsuite/tasks/scheduler/msp/msp.lua`: selects the active telemetry transport and wires the MSP queue to it.
-- `src/rfsuite/tasks/scheduler/msp/mspQueue.lua`: schedules logical MSP requests and handles retry/timeout policy.
-- `src/rfsuite/tasks/scheduler/msp/common.lua`: builds logical MSP request buffers, splits them into transport-sized chunks, and reassembles replies.
-- `src/rfsuite/tasks/scheduler/msp/crsf.lua`: wraps/unpacks Suite MSP chunks in CRSF MSP frames.
-- `src/rfsuite/tasks/scheduler/msp/sp.lua`: wraps/unpacks Suite MSP chunks in S.Port/F.Port telemetry frames.
-- `src/rfsuite/tasks/scheduler/msp/protocols.lua`: defines transport-specific limits and timing defaults.
+- `src/wfsuite/tasks/scheduler/msp/msp.lua`: selects the active telemetry transport and wires the MSP queue to it.
+- `src/wfsuite/tasks/scheduler/msp/mspQueue.lua`: schedules logical MSP requests and handles retry/timeout policy.
+- `src/wfsuite/tasks/scheduler/msp/common.lua`: builds logical MSP request buffers, splits them into transport-sized chunks, and reassembles replies.
+- `src/wfsuite/tasks/scheduler/msp/crsf.lua`: wraps/unpacks Suite MSP chunks in CRSF MSP frames.
+- `src/wfsuite/tasks/scheduler/msp/sp.lua`: wraps/unpacks Suite MSP chunks in S.Port/F.Port telemetry frames.
+- `src/wfsuite/tasks/scheduler/msp/protocols.lua`: defines transport-specific limits and timing defaults.
 
 ## High-Level Flow
 
@@ -120,7 +120,7 @@ The Lua code assumes one logical MSP transfer at a time in `common.lua`. `common
 
 ## Protocol Selection
 
-The active telemetry protocol is selected in `protocols.lua` from `rfsuite.session.telemetryType`.
+The active telemetry protocol is selected in `protocols.lua` from `wfsuite.session.telemetryType`.
 
 Current protocol limits:
 

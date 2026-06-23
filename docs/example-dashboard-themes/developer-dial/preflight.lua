@@ -27,7 +27,7 @@ SEE THE TOP OF EACH WIDGET OBJECT FILE.
 -- ACTUAL DASHBOARD CONFIG BELOW (edit/add your widgets here!)
 --------------------------------------------------------------------------------
 ]]
- local rfsuite = require("rfsuite")
+ local wfsuite = require("wfsuite")
 
 local function themeColor(constName, fallback)
     if type(lcd.themeColor) == "function" then
@@ -151,13 +151,13 @@ local boxes = {
         type = "gauge",
         source = "voltage",
         min = function()
-            local cfg = rfsuite.session.batteryConfig
+            local cfg = wfsuite.session.batteryConfig
             local cells = (cfg and cfg.batteryCellCount) or 3
             local minV = (cfg and cfg.vbatmincellvoltage) or 3.0
             return math.max(0, cells * minV)
         end,
         max = function()
-            local cfg = rfsuite.session.batteryConfig
+            local cfg = wfsuite.session.batteryConfig
             local cells = (cfg and cfg.batteryCellCount) or 3
             local maxV = (cfg and cfg.vbatmaxcellvoltage) or 4.2
             return math.max(0, cells * maxV)
@@ -171,7 +171,7 @@ local boxes = {
         thresholds = {
             {
                 value = function()
-                    local cfg = rfsuite.session.batteryConfig
+                    local cfg = wfsuite.session.batteryConfig
                     local cells = (cfg and cfg.batteryCellCount) or 3
                     local minV = (cfg and cfg.vbatmincellvoltage) or 3.0
                     return cells * minV * 1.2
@@ -180,7 +180,7 @@ local boxes = {
             },
             {
                 value = function()
-                    local cfg = rfsuite.session.batteryConfig
+                    local cfg = wfsuite.session.batteryConfig
                     local cells = (cfg and cfg.batteryCellCount) or 3
                     local warnV = (cfg and cfg.vbatwarningcellvoltage) or 3.5
                     return cells * warnV * 1.2
@@ -198,13 +198,13 @@ local boxes = {
         batteryframe = true,
         source = "voltage",
         min = function()
-            local cfg = rfsuite.session.batteryConfig
+            local cfg = wfsuite.session.batteryConfig
             local cells = (cfg and cfg.batteryCellCount) or 3
             local minV = (cfg and cfg.vbatmincellvoltage) or 3.0
             return math.max(0, cells * minV)
         end,
         max = function()
-            local cfg = rfsuite.session.batteryConfig
+            local cfg = wfsuite.session.batteryConfig
             local cells = (cfg and cfg.batteryCellCount) or 3
             local maxV = (cfg and cfg.vbatmaxcellvoltage) or 4.2
             return math.max(0, cells * maxV)
@@ -217,7 +217,7 @@ local boxes = {
         thresholds = {
             {
                 value = function()
-                    local cfg = rfsuite.session.batteryConfig
+                    local cfg = wfsuite.session.batteryConfig
                     local cells = (cfg and cfg.batteryCellCount) or 3
                     local minV = (cfg and cfg.vbatmincellvoltage) or 3.0
                     return cells * minV * 1.2
@@ -226,7 +226,7 @@ local boxes = {
             },
             {
                 value = function()
-                    local cfg = rfsuite.session.batteryConfig
+                    local cfg = wfsuite.session.batteryConfig
                     local cells = (cfg and cfg.batteryCellCount) or 3
                     local warnV = (cfg and cfg.vbatwarningcellvoltage) or 3.5
                     return cells * warnV * 1.2

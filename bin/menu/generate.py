@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate `src/rfsuite/app/modules/manifest.lua` from JSON source.
+Generate `src/wfsuite/app/modules/manifest.lua` from JSON source.
 """
 
 from __future__ import annotations
@@ -377,7 +377,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--output",
-        default="src/rfsuite/app/modules/manifest.lua",
+        default="src/wfsuite/app/modules/manifest.lua",
         help="Output path for generated Lua manifest.",
     )
     parser.add_argument(

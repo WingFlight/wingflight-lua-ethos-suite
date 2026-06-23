@@ -17,7 +17,7 @@ from zipfile import ZIP_DEFLATED, ZipFile
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = REPO_ROOT / "src"
-DEFAULT_PACKAGE_DIR = "rfsuite"
+DEFAULT_PACKAGE_DIR = "wfsuite"
 ETHOS_MANIFEST_FILE = "ethos_lua_manifest.json"
 
 MAIN_VERSION_RE = re.compile(
@@ -47,7 +47,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--artifact-name",
-        help="Output zip filename. Defaults to rotorflight-lua-ethos-suite-<version>-<lang>.zip.",
+        help="Output zip filename. Defaults to wingflight-lua-ethos-suite-<version>-<lang>.zip.",
     )
     parser.add_argument(
         "--manifest-version",
@@ -55,12 +55,12 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--package-name",
-        default="Rotorflight Lua Ethos Suite",
+        default="Wingflight Lua Ethos Suite",
         help="Display name written into ethos_lua_manifest.json.",
     )
     parser.add_argument(
         "--package-key",
-        default="org.rotorflight.ethos-suite",
+        default="org.wingflight.ethos-suite",
         help="Stable package key written into ethos_lua_manifest.json.",
     )
     parser.add_argument(
@@ -200,7 +200,7 @@ def resolve_i18n(stage_scripts_dir: Path, lang: str) -> None:
             sys.executable,
             ".vscode/scripts/resolve_i18n_tags.py",
             "--json",
-            str(stage_scripts_dir / "rfsuite" / "i18n" / f"{lang}.json"),
+            str(stage_scripts_dir / "wfsuite" / "i18n" / f"{lang}.json"),
             "--root",
             str(stage_scripts_dir),
         ]
@@ -218,7 +218,7 @@ def copy_sound_pack(stage_scripts_dir: Path, lang: str) -> None:
         print(f"[package] No sound pack found for {lang}; skipping audio copy")
         return
 
-    dest = stage_scripts_dir / "rfsuite" / "audio" / lang
+    dest = stage_scripts_dir / "wfsuite" / "audio" / lang
     if dest.exists():
         shutil.rmtree(dest)
     dest.parent.mkdir(parents=True, exist_ok=True)
@@ -340,14 +340,14 @@ def main() -> int:
     output_dir.mkdir(parents=True, exist_ok=True)
     artifact_name = (
         args.artifact_name
-        or f"rotorflight-lua-ethos-suite-{args.artifact_version}-{args.lang}.zip"
+        or f"wingflight-lua-ethos-suite-{args.artifact_version}-{args.lang}.zip"
     )
     zip_path = output_dir / artifact_name
 
     using_temp_build_root = args.build_root is None
     if using_temp_build_root:
         build_root = Path(
-            tempfile.mkdtemp(prefix=f"rfsuite-package-{args.lang}-", dir=str(output_dir))
+            tempfile.mkdtemp(prefix=f"wfsuite-package-{args.lang}-", dir=str(output_dir))
         ).resolve()
         lang_root = build_root
     else:
@@ -357,7 +357,7 @@ def main() -> int:
     stage_scripts_dir = lang_root / "scripts"
     package_root = lang_root / "suite"
 
-    base_version = read_base_version(SRC_ROOT / "rfsuite" / "main.lua")
+    base_version = read_base_version(SRC_ROOT / "wfsuite" / "main.lua")
     manifest_version = choose_manifest_version(
         args.manifest_version, args.artifact_version, base_version
     )

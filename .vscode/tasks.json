@@ -11,7 +11,7 @@
       "args": [
         "${workspaceFolder}/.vscode/scripts/deploy.py",
         "--lang",
-        "${config:rfsuite.deploy.language}",
+        "${config:wfsuite.deploy.language}",
         "--step",
         "i18n",
         "--step",
@@ -21,7 +21,7 @@
       ],
       "options": {
         "env": {
-          "RFSUITE_LANG": "${config:rfsuite.deploy.language}"
+          "WFSUITE_LANG": "${config:wfsuite.deploy.language}"
         }
       },
       "problemMatcher": [],
@@ -32,7 +32,7 @@
       }
     },
     {
-      "label": "RFSuite: Set Deployment Language",
+      "label": "WFSuite: Set Deployment Language",
       "type": "shell",
       "command": "node",
       "args": [
@@ -52,7 +52,7 @@
         "${workspaceFolder}/.vscode/scripts/deploy.py",
         "--radio",
         "--lang",
-        "${config:rfsuite.deploy.language}",
+        "${config:wfsuite.deploy.language}",
         "--step",
         "i18n",
         "--step",
@@ -80,7 +80,7 @@
         "fast",
         "--radio",
         "--lang",
-        "${config:rfsuite.deploy.language}",
+        "${config:wfsuite.deploy.language}",
         "--step",
         "i18n",
         "--step",
@@ -105,7 +105,7 @@
         "--radio",
         "--radio-debug",
         "--lang",
-        "${config:rfsuite.deploy.language}",
+        "${config:wfsuite.deploy.language}",
         "--step",
         "i18n",
         "--step",
@@ -132,7 +132,7 @@
         "--radio",
         "--radio-debug",
         "--lang",
-        "${config:rfsuite.deploy.language}",
+        "${config:wfsuite.deploy.language}",
         "--step",
         "i18n",
         "--step",
@@ -157,7 +157,7 @@
         "--radio",
         "--connect-only",
         "--lang",
-        "${config:rfsuite.deploy.language}",
+        "${config:wfsuite.deploy.language}",
         "--step",
         "i18n",
         "--step",
@@ -315,7 +315,7 @@
       "presentation": { "reveal": "always", "panel": "shared", "clear": true }
     },    
     {
-      "label": "Run RFSuite Sensor Tool",
+      "label": "Run WFSuite Sensor Tool",
       "type": "process",
       "command": "${workspaceFolder}/bin/sensors/sensors.exe",
       "osx": {
@@ -323,7 +323,7 @@
       },
       "options": {
         "env": {
-          "RFSUITE_LANG": "${config:rfsuite.deploy.language}"
+          "WFSUITE_LANG": "${config:wfsuite.deploy.language}"
         },
         "cwd": "${workspaceFolder}/bin/sensors"
       },

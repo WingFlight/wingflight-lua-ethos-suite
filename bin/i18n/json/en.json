@@ -4657,10 +4657,10 @@
           "translation": "ELRS Telemetry"
         },
         "rotorflight": {
-          "english": "Rotorflight",
+          "english": "WingFlight",
           "max_length": 11,
           "needs_translation": false,
-          "translation": "Rotorflight"
+          "translation": "WingFlight"
         },
         "status": {
           "english": "Status",

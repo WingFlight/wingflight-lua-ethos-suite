@@ -110,7 +110,7 @@ We have worked hard to make Ethos Suite faster.  The aim being to be less of a r
 
 The system now uses less ram; and less cpu to achieve the same job. It is a massive performance upgrade!
 
-Please note.  The official latest release that aligns with the 2.2.x firmware does not include dashboard.  This snapshot is to the best of our knowledge stable - however bugs may still occur.  If you are not happy to use a snapshot version - please use the official 2.2.x release of rfsuite.
+Please note.  The official latest release that aligns with the 2.2.x firmware does not include dashboard.  This snapshot is to the best of our knowledge stable - however bugs may still occur.  If you are not happy to use a snapshot version - please use the official 2.2.x release of wfsuite.
 
 Updates in this snapshot include:
 
@@ -130,11 +130,11 @@ Updates in this snapshot include:
 
 Snapshot release of the new Ethos Suite dashboard system.
 
-This release is a technology preview release intended to provide end users with a stable version of rfsuite + dashboard.
+This release is a technology preview release intended to provide end users with a stable version of wfsuite + dashboard.
 
 We have worked hard to fix any bugs - and would now like end users/testers to use this stable base for all feedback reporting.  
 
-Please note.  The official latest release that aligns with the 2.2.x firmware does not include dashboard.  This snapshot is to the best of our knowledge stable - however bugs may still occur.  If you are not happy to use a snapshot version - please use the official 2.2.x release of rfsuite.
+Please note.  The official latest release that aligns with the 2.2.x firmware does not include dashboard.  This snapshot is to the best of our knowledge stable - however bugs may still occur.  If you are not happy to use a snapshot version - please use the official 2.2.x release of wfsuite.
 
 Updates in this snapshot include:
 
@@ -305,7 +305,7 @@ The download locations are:
 
 # 2.1.0-RC2
 
-This is the _second Release Candidate_ of the Rotorflight 2.1 RFSUITE LUA Scripts for FrSky Ethos.
+This is the _second Release Candidate_ of the Rotorflight 2.1 WFSUITE LUA Scripts for FrSky Ethos.
 
 - Improved ELRS GPS Sensor Support
 - Add Governor Min Throttle
@@ -316,7 +316,7 @@ This is the _second Release Candidate_ of the Rotorflight 2.1 RFSUITE LUA Script
 
 # 2.1.0-RC1
 
-This is the _first Release Candidate_ of the Rotorflight 2.1 RFSUITE LUA Scripts for FrSky Ethos.
+This is the _first Release Candidate_ of the Rotorflight 2.1 WFSUITE LUA Scripts for FrSky Ethos.
 
 ## Instructions
 
@@ -335,7 +335,7 @@ The download locations are:
 
 ## Notes
 
-RFSUITE is a fully integrated single package install.
+WFSUITE is a fully integrated single package install.
 
 You get:
 

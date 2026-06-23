@@ -27,7 +27,7 @@ SEE THE TOP OF EACH WIDGET OBJECT FILE.
 -- ACTUAL DASHBOARD CONFIG BELOW (edit/add your widgets here!)
 --------------------------------------------------------------------------------
 ]]
- local rfsuite = require("rfsuite")
+ local wfsuite = require("wfsuite")
 
 local function themeColor(constName, fallback)
     if type(lcd.themeColor) == "function" then
@@ -59,19 +59,19 @@ local function customPaintFunction(x, y, w, h)
 end
 
 local function customWakeupFunction()
-   -- rfsuite.utils.log("Custom wakeup function called", "info")
+   -- wfsuite.utils.log("Custom wakeup function called", "info")
 end
 
 -- Example on-press function to save and read a preference
 local function onpressFunctionSave()
     local key = "test"
     local value = "testValue"
-    rfsuite.widgets.dashboard.savePreference(key, value)
-    rfsuite.utils.log("Saving value to model preferences: " .. value, "info")
+    wfsuite.widgets.dashboard.savePreference(key, value)
+    wfsuite.utils.log("Saving value to model preferences: " .. value, "info")
 
-    rfsuite.utils.log("Reading value from model preferences", "info")
-    local readValue = rfsuite.widgets.dashboard.getPreference(key)
-    rfsuite.utils.log("Value read from model preferences: " .. tostring(readValue), "info")
+    wfsuite.utils.log("Reading value from model preferences", "info")
+    local readValue = wfsuite.widgets.dashboard.getPreference(key)
+    wfsuite.utils.log("Value read from model preferences: " .. tostring(readValue), "info")
 end
 
 local layout = {

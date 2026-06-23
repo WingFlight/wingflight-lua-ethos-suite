@@ -102,7 +102,7 @@
       "preLaunchTask": "ethos.OpenTelemetry"
     },
     {
-      "name": "Run RFSuite Sensor Tool",
+      "name": "Run WFSuite Sensor Tool",
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/.vscode/scripts/dummy.py",
@@ -110,7 +110,7 @@
       "subProcess": false,
       "justMyCode": true,
       "stopOnEntry": false,
-      "postDebugTask": "Run RFSuite Sensor Tool"
+      "postDebugTask": "Run WFSuite Sensor Tool"
     },
     {
       "name": "Set Deployment Language",

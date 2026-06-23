@@ -1,5 +1,5 @@
 {
-  "tgt_name": "rfsuite",
+  "tgt_name": "wfsuite",
   "serial_vid": "0483",
   "serial_pid": "5750",
   "serial_baud": 115200,

@@ -1,43 +1,43 @@
-# 3rd Party widget hooks provided by rfsuite
+# 3rd Party widget hooks provided by wfsuite
 
-This document explains the various hooks and APIs provided by **rfsuite** for developing widgets and extensions for Rotorflight. It covers the lifecycle functions you can implement, how to register your widget, and how to leverage the rfsuite session, tasks, telemetry, MSP, and utility APIs.
+This document explains the various hooks and APIs provided by **wfsuite** for developing widgets and extensions for Rotorflight. It covers the lifecycle functions you can implement, how to register your widget, and how to leverage the wfsuite session, tasks, telemetry, MSP, and utility APIs.
 
 ---
 
 ## Table of Contents
 
-1. [rfsuite APIs](#rfsuite-apis)
+1. [wfsuite APIs](#wfsuite-apis)
 2. [Example Widget](#example-widget)
 3. [License](#license)
 
-## rfsuite APIs
+## wfsuite APIs
 
-rfsuite exposes several subsystems under the global `rfsuite` table.
+wfsuite exposes several subsystems under the global `wfsuite` table.
 
 ### Session Data
 
-* **Access**: `rfsuite.session` contains read-only session info.
+* **Access**: `wfsuite.session` contains read-only session info.
 
   * `craftName`, `modelID`, `apiVersion`, etc.
 
 ```lua
-local name = rfsuite.session.craftName or "-"
+local name = wfsuite.session.craftName or "-"
 ```
 
 ### Tasks API
 
-* **Check active**: `rfsuite.tasks.active()` returns `true` when rfsuite is initialized.
+* **Check active**: `wfsuite.tasks.active()` returns `true` when wfsuite is initialized.
 
 ### Telemetry API
 
-* **Get source**: `rfsuite.tasks.telemetry.getSensorSource(id)` returns a source object (if available).
+* **Get source**: `wfsuite.tasks.telemetry.getSensorSource(id)` returns a source object (if available).
 * **Read value**: `source:value()` to fetch the latest reading.
-* **Get value directly**: `rfsuite.tasks.telemetry.getSensor(id)` returns `(value, unit, minor)` and can optionally accept `min/max/thresholds` overrides.
+* **Get value directly**: `wfsuite.tasks.telemetry.getSensor(id)` returns `(value, unit, minor)` and can optionally accept `min/max/thresholds` overrides.
 
 
 ```lua
-local rfsuite = require("rfsuite")
-local rpmSensor = rfsuite.tasks.telemetry.getSensorSource("rpm")
+local wfsuite = require("wfsuite")
+local rpmSensor = wfsuite.tasks.telemetry.getSensorSource("rpm")
 local rpm = rpmSensor and rpmSensor:value()
 ```
 
@@ -46,8 +46,8 @@ local rpm = rpmSensor and rpmSensor:value()
 Use MSP to query the flight controller:
 
 ```lua
-local rfsuite = require("rfsuite")
-local API = rfsuite.tasks.msp.api.load("GOVERNOR_CONFIG")
+local wfsuite = require("wfsuite")
+local API = wfsuite.tasks.msp.api.load("GOVERNOR_CONFIG")
 API.setCompleteHandler(function(self, buf)
   local mode = API.readValue("gov_mode")
   -- process mode
@@ -56,7 +56,7 @@ API.setUUID("550e8400-e29b-41d4-a716-446655440000")
 API.read()
 ```
 
-* **Queue check**: `rfsuite.tasks.msp.mspQueue:isProcessed()` to ensure no backlog.
+* **Queue check**: `wfsuite.tasks.msp.mspQueue:isProcessed()` to ensure no backlog.
 * **Enqueue result**: MSP API `read()` / `write()` return queue status from `mspQueue:add(...)`:
   * `true, "queued", qid, pending`
   * `true, "queued_busy", qid, pending` (advisory pressure signal; request still queued)
@@ -75,7 +75,7 @@ API.read()
 Defaults to disabled when the app GUI is not running. Override per API:
 
 ```lua
-local API = rfsuite.tasks.msp.api.load("STATUS")
+local API = wfsuite.tasks.msp.api.load("STATUS")
 API.enableDeltaCache(false)
 ```
 
@@ -101,11 +101,11 @@ local apidata = {
 
 ### Utilities
 
-* **Logging**: `rfsuite.utils.log(message, level)` where `level` is `"info"`, `"warn"`, or `"error"`.
+* **Logging**: `wfsuite.utils.log(message, level)` where `level` is `"info"`, `"warn"`, or `"error"`.
 
 ```lua
-local rfsuite = require("rfsuite")
-rfsuite.utils.log("Headspeed: " .. rpm, "info")
+local wfsuite = require("wfsuite")
+wfsuite.utils.log("Headspeed: " .. rpm, "info")
 ```
 
 ## Example Widget
@@ -128,7 +128,7 @@ Below is a widget that logs session info and telemetry every 5 seconds, using th
  * This script is a simple widget that shows how you can access various
  * session variables from Rotorflight.
 ]]--
-local rfsuite = require("rfsuite")
+local wfsuite = require("wfsuite")
 
 local environment = system.getVersion()
 local lastPrintTime = 0
@@ -155,36 +155,36 @@ local function wakeup(widget)
     local currentTime = os.clock()
 
     if currentTime - lastPrintTime >= printInterval then
-        if rfsuite and rfsuite.tasks.active() then
+        if wfsuite and wfsuite.tasks.active() then
             -- Log Rotorflight session information
-            rfsuite.utils.log("Craft Name: " .. (rfsuite.session.craftName or "-"), "info")
-            rfsuite.utils.log("API Version: " .. (rfsuite.session.apiVersion or "-"), "info")
+            wfsuite.utils.log("Craft Name: " .. (wfsuite.session.craftName or "-"), "info")
+            wfsuite.utils.log("API Version: " .. (wfsuite.session.apiVersion or "-"), "info")
 
             -- Read telemetry sensors
-            local armflags = rfsuite.tasks.telemetry.getSensorSource("armflags")
-            rfsuite.utils.log("Arm Flags: " .. (armflags:value() or "-"), "info")
+            local armflags = wfsuite.tasks.telemetry.getSensorSource("armflags")
+            wfsuite.utils.log("Arm Flags: " .. (armflags:value() or "-"), "info")
 
-            local rpm = rfsuite.tasks.telemetry.getSensorSource("rpm")
-            rfsuite.utils.log("Headspeed: " .. (rpm:value() or "-"), "info")
+            local rpm = wfsuite.tasks.telemetry.getSensorSource("rpm")
+            wfsuite.utils.log("Headspeed: " .. (rpm:value() or "-"), "info")
 
-            local voltage = rfsuite.tasks.telemetry.getSensorSource("voltage")
-            rfsuite.utils.log("Voltage: " .. (voltage:value() or "-"), "info")
+            local voltage = wfsuite.tasks.telemetry.getSensorSource("voltage")
+            wfsuite.utils.log("Voltage: " .. (voltage:value() or "-"), "info")
 
             -- MSP API - synchronous check example
             if apiValue == nil then
-                local API = rfsuite.tasks.msp.api.load("GOVERNOR_CONFIG")
+                local API = wfsuite.tasks.msp.api.load("GOVERNOR_CONFIG")
                 API.setCompleteHandler(function(self, buf)
                     local governorMode = API.readValue("gov_mode")
-                    rfsuite.utils.log("API Value: " .. governorMode, "info")
+                    wfsuite.utils.log("API Value: " .. governorMode, "info")
                     apiValue = governorMode
                 end)
                 API.setUUID("550e8400-e29b-41d4-a716-446655440000")
                 API.read()
             else
-                rfsuite.utils.log("API Value: " .. (apiValue or "-"), "info")
+                wfsuite.utils.log("API Value: " .. (apiValue or "-"), "info")
             end
         else
-            rfsuite.utils.log("Init...", "info")
+            wfsuite.utils.log("Init...", "info")
         end
 
         lastPrintTime = currentTime

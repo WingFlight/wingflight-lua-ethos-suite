@@ -27,8 +27,8 @@ def main():
     source_json = os.path.join(git_src, "bin", "menu", "manifest.source.json")
     generator = os.path.join(git_src, "bin", "menu", "generate.py")
 
-    if os.path.isdir(os.path.join(out_dir, "rfsuite")):
-        output_lua = os.path.join(out_dir, "rfsuite", "app", "modules", "manifest.lua")
+    if os.path.isdir(os.path.join(out_dir, "wfsuite")):
+        output_lua = os.path.join(out_dir, "wfsuite", "app", "modules", "manifest.lua")
     else:
         output_lua = os.path.join(out_dir, "app", "modules", "manifest.lua")
 

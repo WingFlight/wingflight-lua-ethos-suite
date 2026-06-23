@@ -9,7 +9,7 @@ This document provides a complete technical reference for creating, customizing,
 Rotorflight dashboard themes and objects are organized under:
 
 ```
-<SCRIPTS>/rfsuite/widgets/dashboard/
+<SCRIPTS>/wfsuite/widgets/dashboard/
 ├── objects/           # Reusable widget implementations (dial, gauge, image, etc.)
 │   ├── dial.lua
 │   ├── dial/
@@ -64,8 +64,8 @@ Rotorflight dashboard themes and objects are organized under:
 
 **System vs User Themes**
 
-* **System**: `SCRIPTS:/rfsuite/widgets/dashboard/themes/<themename>/`
-* **User**:   `SCRIPTS:/rfsuite.user/dashboard/<themename>/`
+* **System**: `SCRIPTS:/wfsuite/widgets/dashboard/themes/<themename>/`
+* **User**:   `SCRIPTS:/wfsuite.user/dashboard/<themename>/`
 
 User themes override system themes of the same name and are safe from package updates.
 

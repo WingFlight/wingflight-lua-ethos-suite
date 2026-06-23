@@ -4,7 +4,7 @@ This document highlights the touch points and workflow used to add or update loc
 
 ## Quick Checklist
 1. Add i18n source file under `bin/i18n/json/<locale>.json`.
-2. Build/verify locale JSON into `src/rfsuite/i18n/<locale>.json`.
+2. Build/verify locale JSON into `src/wfsuite/i18n/<locale>.json`.
 3. Add locale to workflow matrices so per-locale ZIPs are built.
 4. Add locale to the updater GUI locale list (in the updater repo).
 5. Add sound pack sources and generated audio (if applicable).
@@ -17,7 +17,7 @@ Single-file locale sources (authoritative inputs):
 
 ### 2) Locale JSON (generated output)
 Build or update:
-- `src/rfsuite/i18n/<locale>.json`
+- `src/wfsuite/i18n/<locale>.json`
 
 Built by (sync/copy):
 - `bin/i18n/build-single-json.py --only <locale>`
@@ -61,7 +61,7 @@ If you want demo links for the new locale:
 ## Suggested Workflow
 1. Add/update translation JSON under `bin/i18n/json/<locale>.json`.
 2. Run `bin/i18n/update-max-lengths.py` to refresh per-key `max_length` in `en.json`.
-3. Run `bin/i18n/build-single-json.py --only <locale>` to rebuild `src/rfsuite/i18n/<locale>.json`.
+3. Run `bin/i18n/build-single-json.py --only <locale>` to rebuild `src/wfsuite/i18n/<locale>.json`.
 3. Add `<locale>` to all workflow matrices.
 4. Add `<locale>` to `AVAILABLE_LOCALES` in the updater GUI.
 5. Add or generate sound packs (if used).

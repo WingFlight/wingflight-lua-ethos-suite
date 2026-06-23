@@ -1,0 +1,174 @@
+--[[
+  Copyright (C) 2026 Rotorflight Project
+  GPLv3 -- https://www.gnu.org/licenses/gpl-3.0.en.html
+]] --
+
+local wfsuite = require("wfsuite")
+
+local prevConnectedState = nil
+local initTime = os.clock()
+local prereqRequested = false
+local prereqReady = false
+local featureConfigReady = false
+local blackboxConfigReady = false
+local dataflashStatusReady = false
+local sdcardStatusReady = false
+local blackboxSupported = false
+local blackboxFocused = false
+local featureBitmap = 0
+local blackboxConfigParsed = {}
+local media = {
+    dataflashSupported = true,
+    sdcardSupported = true
+}
+
+local function copyTable(src)
+    if type(src) ~= "table" then return src end
+    local dst = {}
+    for k, v in pairs(src) do dst[k] = type(v) == "table" and copyTable(v) or v end
+    return dst
+end
+
+local function setButtonsEnabled(enabled)
+    if not wfsuite.app.formFields then return end
+    for i, f in pairs(wfsuite.app.formFields) do
+        if type(i) == "number" and f and f.enable then f:enable(enabled) end
+    end
+end
+
+local function updateMenuAvailability()
+    local connected = (wfsuite.session.isConnected and wfsuite.session.mcu_id) and true or false
+    local canOpen = prereqReady and connected and blackboxSupported
+
+    setButtonsEnabled(canOpen)
+
+    if canOpen and not blackboxFocused then
+        blackboxFocused = true
+        local idx = tonumber(wfsuite.preferences.menulastselected["blackbox"]) or 1
+        local btn = wfsuite.app.formFields and wfsuite.app.formFields[idx] or nil
+        if btn and btn.focus then btn:focus() end
+    end
+end
+
+local function onPrereqDone()
+    prereqReady = featureConfigReady and blackboxConfigReady and dataflashStatusReady and sdcardStatusReady
+    if prereqReady then
+        wfsuite.session.blackbox = {
+            feature = {enabledFeatures = featureBitmap},
+            config = copyTable(blackboxConfigParsed or {}),
+            media = copyTable(media),
+            ready = blackboxSupported
+        }
+        updateMenuAvailability()
+        wfsuite.app.triggers.closeProgressLoader = true
+    end
+end
+
+local function requestBlackboxPrereqs()
+    if prereqRequested then return end
+    prereqRequested = true
+    prereqReady = false
+    featureConfigReady = false
+    blackboxConfigReady = false
+    dataflashStatusReady = false
+    sdcardStatusReady = false
+    blackboxSupported = false
+    featureBitmap = 0
+    blackboxConfigParsed = {}
+    media = {
+        dataflashSupported = true,
+        sdcardSupported = true
+    }
+    blackboxFocused = false
+
+    local FAPI = wfsuite.tasks.msp.api.loadPage("FEATURE_CONFIG")
+    FAPI.setUUID("blackbox-menu-feature")
+    FAPI.setCompleteHandler(function()
+        local d = FAPI.data()
+        local parsed = d and d.parsed or nil
+        featureBitmap = tonumber(parsed and parsed.enabledFeatures or 0) or 0
+        featureConfigReady = true
+        onPrereqDone()
+    end)
+    FAPI.setErrorHandler(function()
+        featureConfigReady = true
+        onPrereqDone()
+    end)
+    FAPI.read()
+
+    local BAPI = wfsuite.tasks.msp.api.loadPage("BLACKBOX_CONFIG")
+    BAPI.setUUID("blackbox-menu-config")
+    BAPI.setCompleteHandler(function()
+        local d = BAPI.data()
+        local parsed = d and d.parsed or nil
+        blackboxConfigParsed = copyTable(parsed or {})
+        blackboxSupported = tonumber(parsed and parsed.blackbox_supported or 0) == 1
+        blackboxConfigReady = true
+        onPrereqDone()
+    end)
+    BAPI.setErrorHandler(function()
+        blackboxConfigParsed = {}
+        blackboxSupported = false
+        blackboxConfigReady = true
+        onPrereqDone()
+    end)
+    BAPI.read()
+
+    local DAPI = wfsuite.tasks.msp.api.loadPage("DATAFLASH_SUMMARY")
+    DAPI.setUUID("blackbox-menu-dataflash")
+    DAPI.setCompleteHandler(function()
+        local parsed = DAPI.data() and DAPI.data().parsed
+        local flags = tonumber(parsed and parsed.flags or 0) or 0
+        media.dataflashSupported = (flags & 2) ~= 0
+        dataflashStatusReady = true
+        onPrereqDone()
+    end)
+    DAPI.setErrorHandler(function()
+        dataflashStatusReady = true
+        onPrereqDone()
+    end)
+    if not DAPI.read() then
+        dataflashStatusReady = true
+    end
+
+    local SAPI = wfsuite.tasks.msp.api.loadPage("SDCARD_SUMMARY")
+    SAPI.setUUID("blackbox-menu-sdcard")
+    SAPI.setCompleteHandler(function()
+        local parsed = SAPI.data() and SAPI.data().parsed
+        local flags = tonumber(parsed and parsed.flags or 0) or 0
+        media.sdcardSupported = (flags & 0x01) ~= 0
+        sdcardStatusReady = true
+        onPrereqDone()
+    end)
+    SAPI.setErrorHandler(function()
+        sdcardStatusReady = true
+        onPrereqDone()
+    end)
+    if not SAPI.read() then
+        sdcardStatusReady = true
+    end
+
+    onPrereqDone()
+end
+
+return {
+    onOpenPost = function()
+        prereqRequested = false
+        setButtonsEnabled(false)
+        requestBlackboxPrereqs()
+    end,
+    onWakeup = function()
+        if os.clock() - initTime < 0.25 then return end
+
+        if not prereqRequested then requestBlackboxPrereqs() end
+        updateMenuAvailability()
+
+        local currState = (wfsuite.session.isConnected and wfsuite.session.mcu_id) and true or false
+        if currState ~= prevConnectedState then
+            if not currState and wfsuite.app.formNavigationFields and wfsuite.app.formNavigationFields["menu"] then
+                wfsuite.app.formNavigationFields["menu"]:focus()
+            end
+            prevConnectedState = currState
+        end
+    end
+}

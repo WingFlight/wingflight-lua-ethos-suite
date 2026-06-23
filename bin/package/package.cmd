@@ -49,6 +49,6 @@ echo.
 echo Examples:
 echo   package.cmd
 echo   package.cmd en 2.3.0
-echo   package.cmd en 2.3.0 --keep-build-root --build-root C:\temp\rfsuite-package
+echo   package.cmd en 2.3.0 --keep-build-root --build-root C:\temp\wfsuite-package
 echo   package.cmd fr 2.3.0-20260208 --release-notes-file C:\temp\Notes.md
 exit /b 0

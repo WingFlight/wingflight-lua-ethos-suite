@@ -17,7 +17,7 @@ Defaults:
 Examples:
   ./package.sh
   ./package.sh en 2.3.0
-  ./package.sh en 2.3.0 --keep-build-root --build-root /tmp/rfsuite-package
+  ./package.sh en 2.3.0 --keep-build-root --build-root /tmp/wfsuite-package
   ./package.sh fr 2.3.0-20260208 --release-notes-file /tmp/Notes.md
 EOF
   exit 0

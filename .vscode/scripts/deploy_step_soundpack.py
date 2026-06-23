@@ -116,7 +116,7 @@ def main():
     parser = argparse.ArgumentParser(
         description="Copy the language-specific soundpack into the output directory."
     )
-    parser.add_argument("--out-dir", required=True, help="Output directory (root of rfsuite).")
+    parser.add_argument("--out-dir", required=True, help="Output directory (root of wfsuite).")
     parser.add_argument("--lang", default="en", help="Language code, e.g. en, fr, de.")
     parser.add_argument(
         "--git-src",

@@ -64,5 +64,5 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: rfsuite-translation-editor-${{ env.OS_NAME }}-${{ env.ARCH_NAME }}-${{ env.SHORT_SHA }}
+          name: wfsuite-translation-editor-${{ env.OS_NAME }}-${{ env.ARCH_NAME }}-${{ env.SHORT_SHA }}
           path: bin/translation-editor/src/dist/translation_editor*
