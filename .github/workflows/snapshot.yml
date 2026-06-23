@@ -49,7 +49,7 @@ jobs:
       - name: Create snapshot ZIP (locale=${{ matrix.lang }})
         shell: bash
         run: |
-          ART="rotorflight-lua-ethos-suite-${{ env.GIT_VER }}-${{ matrix.lang }}.zip"
+          ART="wingflight-lua-ethos-suite-${{ env.GIT_VER }}-${{ matrix.lang }}.zip"
           python bin/package/build_package.py \
             --lang '${{ matrix.lang }}' \
             --artifact-version '${{ env.GIT_VER }}' \
@@ -66,7 +66,7 @@ jobs:
       - name: Upload per-locale artifact
         uses: actions/upload-artifact@v4
         with:
-          name: rotorflight-lua-ethos-suite-${{ env.GIT_VER }}-${{ matrix.lang }}
+          name: wingflight-lua-ethos-suite-${{ env.GIT_VER }}-${{ matrix.lang }}
           path: ${{ env.ARTIFACT }}
           if-no-files-found: error
 

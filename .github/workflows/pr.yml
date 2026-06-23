@@ -32,22 +32,22 @@ jobs:
           PR_NUMBER='${{ github.event.pull_request.number }}'
           echo "GIT_VER=PR-${PR_NUMBER}" >> $GITHUB_ENV
 
-      - name: Create rotorflight-lua-ethos-suite-${{ env.GIT_VER }}-${{ matrix.lang }}.zip
+      - name: Create wingflight-lua-ethos-suite-${{ env.GIT_VER }}-${{ matrix.lang }}.zip
         run: |
           python bin/package/build_package.py \
             --lang '${{ matrix.lang }}' \
             --artifact-version '${{ env.GIT_VER }}' \
-            --artifact-name 'rotorflight-lua-ethos-suite-${{ env.GIT_VER }}-${{ matrix.lang }}.zip' \
+            --artifact-name 'wingflight-lua-ethos-suite-${{ env.GIT_VER }}-${{ matrix.lang }}.zip' \
             --output-dir .
 
       - name: Validate ETHOS package manifest
         run: |
           python bin/package/validate_ethos_manifest_zip.py \
-            'rotorflight-lua-ethos-suite-${{ env.GIT_VER }}-${{ matrix.lang }}.zip'
+            'wingflight-lua-ethos-suite-${{ env.GIT_VER }}-${{ matrix.lang }}.zip'
 
       - name: Upload per-locale ZIP
         uses: actions/upload-artifact@v4
         with:
-          name: rotorflight-lua-ethos-suite-${{ env.GIT_VER }}-${{ matrix.lang }}
-          path: rotorflight-lua-ethos-suite-${{ env.GIT_VER }}-${{ matrix.lang }}.zip
+          name: wingflight-lua-ethos-suite-${{ env.GIT_VER }}-${{ matrix.lang }}
+          path: wingflight-lua-ethos-suite-${{ env.GIT_VER }}-${{ matrix.lang }}.zip
           if-no-files-found: error

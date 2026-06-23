@@ -35,10 +35,10 @@ jobs:
           echo "GIT_VER=commit-${SHORT_SHA}" >> $GITHUB_ENV
           echo "sha7=${SHORT_SHA}" >> $GITHUB_OUTPUT
 
-      - name: Create rotorflight-lua-ethos-suite-<lang>-commit-<sha7>.zip
+      - name: Create wingflight-lua-ethos-suite-<lang>-commit-<sha7>.zip
         shell: bash
         run: |
-          ART="rotorflight-lua-ethos-suite-${{ matrix.lang }}-${{ env.GIT_VER }}.zip"
+          ART="wingflight-lua-ethos-suite-${{ matrix.lang }}-${{ env.GIT_VER }}.zip"
           python bin/package/build_package.py \
             --lang '${{ matrix.lang }}' \
             --artifact-version '${{ env.GIT_VER }}' \
@@ -54,7 +54,7 @@ jobs:
       - name: Upload per-locale artifact
         uses: actions/upload-artifact@v4
         with:
-          name: rotorflight-lua-ethos-suite-${{ matrix.lang }}-${{ env.GIT_VER }}
+          name: wingflight-lua-ethos-suite-${{ matrix.lang }}-${{ env.GIT_VER }}
           path: ${{ env.ARTIFACT }}
           if-no-files-found: error
 
