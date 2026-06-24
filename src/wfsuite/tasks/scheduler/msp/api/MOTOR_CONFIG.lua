@@ -11,7 +11,7 @@ local MSP_API_CMD_READ = 131
 local MSP_API_CMD_WRITE = 222
 
 local pwmProtocol
-if wfsuite.utils.apiVersionCompare(">=", {12, 0, 7}) then
+if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
     pwmProtocol = {"PWM", "ONESHOT125", "ONESHOT42", "MULTISHOT", "BRUSHED", "DSHOT150", "DSHOT300", "DSHOT600", "PROSHOT", "CASTLE", "DISABLED"}
 else
     pwmProtocol = {"PWM", "ONESHOT125", "ONESHOT42", "MULTISHOT", "BRUSHED", "DSHOT150", "DSHOT300", "DSHOT600", "PROSHOT", "DISABLED"}

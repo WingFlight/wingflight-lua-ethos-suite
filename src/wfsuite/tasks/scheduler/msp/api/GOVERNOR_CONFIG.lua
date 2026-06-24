@@ -16,7 +16,7 @@ local MSP_API_CMD_WRITE = 143
 local FIELD_SPEC
 local SIM_RESPONSE
 
-if wfsuite.utils.apiVersionCompare(">=", {12, 0, 9}) then
+if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
     local govModeTable = {
         [0] = "@i18n(api.GOVERNOR_CONFIG.tbl_govmode_off)@",
         [1] = "@i18n(api.GOVERNOR_CONFIG.tbl_govmode_limit)@",
@@ -126,7 +126,7 @@ else
         {"gov_ff_filter", "U8"}
     }
 
-    if wfsuite.utils.apiVersionCompare(">=", {12, 0, 8}) then
+    if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
         FIELD_SPEC[#FIELD_SPEC + 1] = {"gov_spoolup_min_throttle", "U8", 0, 50, 0, "%"}
     end
 

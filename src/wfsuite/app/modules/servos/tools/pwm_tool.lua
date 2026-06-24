@@ -19,7 +19,7 @@ local enableWakeup = false
 local servoTable
 local servoCount
 local configs = {}
-local INDEXED_SERVO_CONFIG_MIN_API = {12, 0, 9}
+local INDEXED_SERVO_CONFIG_MIN_API = {22, 0, 0}
 
 local function useIndexedServoConfig()
     return wfsuite.utils.apiVersionCompare(">=", INDEXED_SERVO_CONFIG_MIN_API)

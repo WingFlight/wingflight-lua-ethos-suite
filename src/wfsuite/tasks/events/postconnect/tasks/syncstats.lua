@@ -61,7 +61,7 @@ function sync.wakeup()
     if not prefs then return end
 
     -- we dont support this feature on older firmwares
-    if wfsuite.utils.apiVersionCompare("<", {12, 0, 9}) then
+    if wfsuite.utils.apiVersionCompare("<", {22, 0, 0}) then
         wfsuite.utils.log("Skip stats sync as your firmware version is below 12.09", "info")
         isComplete = true
         return

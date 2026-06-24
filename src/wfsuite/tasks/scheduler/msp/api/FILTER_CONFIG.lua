@@ -43,7 +43,7 @@ local FIELD_SPEC = {
     {"dyn_notch_max_hz", "U16", 100, 500, nil, "Hz"}
 }
 
-if wfsuite.utils.apiVersionCompare(">=", {12, 0, 8}) then
+if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
     FIELD_SPEC[#FIELD_SPEC + 1] = {"rpm_preset", "U8", nil, nil, nil, nil, nil, nil, nil, nil, TBL_RPM_PRESET, -1}
     FIELD_SPEC[#FIELD_SPEC + 1] = {"rpm_min_hz", "U8", 1, 100, nil, "Hz"}
 end
@@ -72,7 +72,7 @@ return core.createConfigAPI({
     name = API_NAME,
     readCmd = MSP_API_CMD_READ,
     writeCmd = MSP_API_CMD_WRITE,
-    minApiVersion = {12, 0, 7},
+    minApiVersion = {22, 0, 0},
     fields = FIELD_SPEC,
     simulatorResponseRead = SIM_RESPONSE,
     writeUuidFallback = true,

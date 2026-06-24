@@ -17,11 +17,11 @@ local defaultHelp = {
     "@i18n(app.modules.profile_tailrotor.help_p4)@"
 }
 
-if wfsuite.utils.apiVersionCompare("<=", {12, 0, 7}) then
+if wfsuite.utils.apiVersionCompare("<=", {22, 0, 0}) then
     defaultHelp[#defaultHelp + 1] = "@i18n(app.modules.profile_tailrotor.help_p5)@"
 end
 
-if wfsuite.utils.apiVersionCompare(">=", {12, 0, 9}) then
+if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
     defaultHelp[#defaultHelp + 1] = "@i18n(app.modules.profile_governor.help_p6)@"
 end
 

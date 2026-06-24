@@ -37,7 +37,7 @@ return core.createConfigAPI({
     name = API_NAME,
     readCmd = MSP_API_CMD_READ,
     writeCmd = MSP_API_CMD_WRITE,
-    minApiVersion = {12, 0, 7},
+    minApiVersion = {22, 0, 0},
     fields = FIELD_SPEC,
     simulatorResponseRead = SIM_RESPONSE,
     writeUuidFallback = true,

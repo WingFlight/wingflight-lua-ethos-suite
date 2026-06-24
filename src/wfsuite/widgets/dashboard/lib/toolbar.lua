@@ -10,7 +10,7 @@
 -- onClick (function(dashboard)): click handler
 -- isConnected (boolean): require session connected
 -- postConnectComplete (boolean): require postconnect completed
--- apiVersion (table): API version tuple, e.g. {12, 0, 9}
+-- apiVersion (table): API version tuple, e.g. {22, 0, 0}
 -- apiVersionOp (string): comparison op, e.g. ">=", "<=", "=="
 -- enableFunction (function(dashboard, wfsuite)): custom enable check
 -- isArmed (boolean): require armed/disarmed state
@@ -67,7 +67,7 @@ local DEFAULT_TOOLBAR_ITEMS = {
         icon = "widgets/dashboard/gfx/toolbar_battery.png",
         iconSize = 55,
         postConnectComplete = true,
-        apiVersion = {12, 0, 9},
+        apiVersion = {22, 0, 0},
         apiVersionOp = ">=",
         flightModes = {"preflight"},
         onClick = function(dashboard)

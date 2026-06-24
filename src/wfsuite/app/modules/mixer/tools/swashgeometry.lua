@@ -138,7 +138,7 @@ local function adaptLiveIntervalFromQueue(ok, reason, pending)
 end
 
 local function mixerOverrideOnValue()
-    if wfsuite.utils and wfsuite.utils.apiVersionCompare and wfsuite.utils.apiVersionCompare(">=", {12, 0, 8}) then
+    if wfsuite.utils and wfsuite.utils.apiVersionCompare and wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
         return MIXER_OVERRIDE_PASSTHROUGH
     end
     return MIXER_OVERRIDE_ON

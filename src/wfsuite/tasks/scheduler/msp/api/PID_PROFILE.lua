@@ -64,7 +64,7 @@ local FIELD_SPEC = {
     {"bterm_cutoff_2", "U8", 0, 250, 20}
 }
 
-if wfsuite.utils.apiVersionCompare(">=", {12, 0, 8}) then
+if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
     FIELD_SPEC[#FIELD_SPEC + 1] = {"yaw_inertia_precomp_gain", "U8", 0, 250, 0}
     FIELD_SPEC[#FIELD_SPEC + 1] = {"yaw_inertia_precomp_cutoff", "U8", 0, 250, 2.5, "Hz", 1, 10}
 end

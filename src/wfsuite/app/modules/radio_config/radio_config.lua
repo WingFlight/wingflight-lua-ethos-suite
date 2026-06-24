@@ -9,7 +9,7 @@ local apidata
 local enableWakeup = false
 local throttleValidated = false
 
-if wfsuite.utils.apiVersionCompare(">=", {12, 0, 9}) then
+if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
 
     apidata = {
         api = {[1] = "RC_CONFIG"},

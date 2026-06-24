@@ -9,7 +9,7 @@ local pageRuntime = assert(loadfile("app/lib/page_runtime.lua"))()
 local enableWakeup = false
 local onNavMenu
 local lastTuningActive = nil
-local useFirmwareSmartFuel = wfsuite.utils.apiVersionCompare(">=", {12, 0, 9})
+local useFirmwareSmartFuel = wfsuite.utils.apiVersionCompare(">=", {22, 0, 0})
 local TUNING_FIELD_START = useFirmwareSmartFuel and 2 or 1
 local INI_SECTION = "battery"
 

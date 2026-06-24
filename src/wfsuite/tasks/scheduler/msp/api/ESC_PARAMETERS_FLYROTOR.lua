@@ -45,14 +45,14 @@ local FIELD_SPEC = {
     {"gov_i", "U8", 0, 100, 35}
 }
 
-if wfsuite.utils.apiVersionCompare(">=", {12, 0, 8}) then
+if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
     FIELD_SPEC[#FIELD_SPEC + 1] = {"active_freewheel", "U8", 0, 1, nil, nil, nil, nil, nil, nil, {"@i18n(api.ESC_PARAMETERS_FLYROTOR.tbl_disabled)@", "@i18n(api.ESC_PARAMETERS_FLYROTOR.tbl_enabled)@"}, -1}
 end
 
 FIELD_SPEC[#FIELD_SPEC + 1] = {"drive_freq", "U8", 10, 24, 16, "KHz"}
 FIELD_SPEC[#FIELD_SPEC + 1] = {"motor_erpm_max", "U24", 0, 1000000, nil, nil, nil, nil, 100, nil, nil, nil, nil, "big"}
 
-if wfsuite.utils.apiVersionCompare(">=", {12, 0, 8}) then
+if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
     FIELD_SPEC[#FIELD_SPEC + 1] = {"throttle_protocol", "U8", 0, 2, nil, nil, nil, nil, nil, nil, {"PWM", "DShot", "Serial"}, -1}
     FIELD_SPEC[#FIELD_SPEC + 1] = {"telemetry_protocol", "U8", 0, 0, nil, nil, nil, nil, nil, nil, {"FLYROTOR"}, -1}
     FIELD_SPEC[#FIELD_SPEC + 1] = {"led_color_index", "U8", 0, #tblLed - 1, nil, nil, nil, nil, nil, nil, tblLed, -1}
@@ -104,7 +104,7 @@ local SIM_RESPONSE = core.simResponse({
 
 return core.createConfigAPI({
     name = API_NAME,
-    minApiVersion = {12, 0, 7},
+    minApiVersion = {22, 0, 0},
     readCmd = 217,
     writeCmd = 218,
     fields = FIELD_SPEC,

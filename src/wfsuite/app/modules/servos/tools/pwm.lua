@@ -46,7 +46,7 @@ local function buildServoTable()
 
     -- On some targets/API variants servoCount already excludes BUS outputs.
     -- Only subtract BUS offset when the total clearly includes those outputs.
-    if wfsuite.session.servoBusEnabled == true and wfsuite.utils.apiVersionCompare(">=", {12, 0, 9}) and not system.getVersion().simulation and totalServoCount > busServoOffset then
+    if wfsuite.session.servoBusEnabled == true and wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) and not system.getVersion().simulation and totalServoCount > busServoOffset then
         pwmServoCount = totalServoCount - busServoOffset
     end
 
@@ -354,7 +354,7 @@ local function servoCenterFocusAllOn(self)
 
     wfsuite.app.audio.playServoOverideEnable = true
 
-    if wfsuite.utils.apiVersionCompare(">=", {12, 0, 9}) then
+    if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
             queueApiWrite("SERVO_OVERRIDE_ALL", "servo.pwm.override.all.on", {value = 0})
     else
         for i = 0, #servoTable do
@@ -369,7 +369,7 @@ end
 
 local function servoCenterFocusAllOff(self)
 
-    if wfsuite.utils.apiVersionCompare(">=", {12, 0, 9}) then
+    if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
             queueApiWrite("SERVO_OVERRIDE_ALL", "servo.pwm.override.all.off", {value = 2001})
     else
         for i = 0, #servoTable do

@@ -11,7 +11,7 @@ local MSP_API_CMD_READ = 111
 local MSP_API_CMD_WRITE = 204
 
 local TBL_RATE_TABLE
-if wfsuite.utils.apiVersionCompare(">=", {12, 0, 9}) then
+if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
     TBL_RATE_TABLE = {"NONE", "BETAFLIGHT", "RACEFLIGHT", "KISS", "ACTUAL", "QUICK", "ROTORFLIGHT"}
 else
     TBL_RATE_TABLE = {"NONE", "BETAFLIGHT", "RACEFLIGHT", "KISS", "ACTUAL", "QUICK"}
@@ -49,7 +49,7 @@ local FIELD_SPEC = {
     {"accel_limit_4", "U16", 0, 50000, nil, "°/s", nil, nil, 10, 10}
 }
 
-if wfsuite.utils.apiVersionCompare(">=", {12, 0, 8}) then
+if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
     FIELD_SPEC[#FIELD_SPEC + 1] = {"setpoint_boost_gain_1", "U8", 0, 250, 0}
     FIELD_SPEC[#FIELD_SPEC + 1] = {"setpoint_boost_cutoff_1", "U8", 0, 250, 15, "Hz"}
     FIELD_SPEC[#FIELD_SPEC + 1] = {"setpoint_boost_gain_2", "U8", 0, 250, 0}
@@ -63,7 +63,7 @@ if wfsuite.utils.apiVersionCompare(">=", {12, 0, 8}) then
     FIELD_SPEC[#FIELD_SPEC + 1] = {"yaw_dynamic_deadband_filter", "U8", 0, 250, 60, "Hz", 1, 10}
 end
 
-if wfsuite.utils.apiVersionCompare(">=", {12, 0, 9}) then
+if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
     FIELD_SPEC[#FIELD_SPEC + 1] = {"cyclic_ring", "U8", 0, 250, 150, "%"}
     FIELD_SPEC[#FIELD_SPEC + 1] = {"cyclic_polarity", "U8", 0, 1, 0, nil, nil, nil, nil, nil, TBL_OFF_ON, -1}
 end

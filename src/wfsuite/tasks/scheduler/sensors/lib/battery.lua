@@ -34,7 +34,7 @@ local function finalizeBatteryConfig(config)
 end
 
 local function readSmartFuelConfig(config)
-    if not wfsuite.utils.apiVersionCompare(">=", {12, 0, 9}) then
+    if not wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
         finalizeBatteryConfig(config)
         return
     end

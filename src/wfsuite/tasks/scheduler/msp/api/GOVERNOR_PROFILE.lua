@@ -14,7 +14,7 @@ local FIELD_SPEC
 local SIM_RESPONSE
 local GOVERNOR_FLAGS_BITMAP = nil
 
-if wfsuite.utils.apiVersionCompare(">=", {12, 0, 9}) then
+if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
     local tblOffOn = {
         "@i18n(api.GOVERNOR_PROFILE.tbl_off)@",
         "@i18n(api.GOVERNOR_PROFILE.tbl_on)@"

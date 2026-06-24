@@ -28,11 +28,11 @@ local FIELD_SPEC = {
     {"swash_tta_precomp", "U8", 0, 250, 0}
 }
 
-if wfsuite.utils.apiVersionCompare(">=", {12, 0, 7}) then
+if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
     FIELD_SPEC[#FIELD_SPEC + 1] = {"swash_geo_correction", "S8", -250, 250, 0, "%", 1, 5, 2}
 end
 
-if wfsuite.utils.apiVersionCompare(">=", {12, 0, 8}) then
+if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
     FIELD_SPEC[#FIELD_SPEC + 1] = {"collective_tilt_correction_pos", "S8", -100, 100, 0, "°"}
     FIELD_SPEC[#FIELD_SPEC + 1] = {"collective_tilt_correction_neg", "S8", -100, 100, 10, "°"}
 end

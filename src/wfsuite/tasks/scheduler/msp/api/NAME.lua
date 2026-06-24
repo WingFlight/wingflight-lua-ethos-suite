@@ -61,7 +61,7 @@ return core.createConfigAPI({
     name = "NAME",
     readCmd = 10,
     writeCmd = 11,
-    minApiVersion = {12, 0, 6},
+    minApiVersion = {22, 0, 0},
     fields = FIELD_SPEC,
     parseRead = parseRead,
     buildWritePayload = buildWritePayload,

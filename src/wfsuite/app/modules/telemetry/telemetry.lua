@@ -362,7 +362,7 @@ local function openPage(opts)
     clearTable(app.formFields)
     clearTable(app.formLines)
 
-    if wfsuite.utils.apiVersionCompare("<", {12, 0, 8}) then
+    if wfsuite.utils.apiVersionCompare("<", {22, 0, 0}) then
         wfsuite.app.triggers.closeProgressLoader = true
 
         wfsuite.app.formLines[#wfsuite.app.formLines + 1] = form.addLine("@i18n(app.modules.telemetry.invalid_version)@")

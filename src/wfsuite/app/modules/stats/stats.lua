@@ -83,7 +83,7 @@ end
 
 local function postLoad(self)
     enableWakeup = true
-    if wfsuite.utils.apiVersionCompare(">=", {12, 0, 9}) then
+    if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
         --  load updated stats from FC after load
             local API = wfsuite.tasks.msp.api.loadPage("FLIGHT_STATS")
             API.setUUID("stats-postload-read")

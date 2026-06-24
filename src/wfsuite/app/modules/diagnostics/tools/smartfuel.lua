@@ -93,7 +93,7 @@ local function getFirmwareSource()
     end
 
     local bc = session and session.batteryConfig
-    if not (bc and wfsuite.utils.apiVersionCompare(">=", {12, 0, 9})) then return nil end
+    if not (bc and wfsuite.utils.apiVersionCompare(">=", {22, 0, 0})) then return nil end
     return tonumber(bc.smartfuelRemoteSource) or 0
 end
 
@@ -146,7 +146,7 @@ end
 
 local function readFirmwareConfig()
     if firmwareReadStarted then return end
-    if not (wfsuite.utils.apiVersionCompare(">=", {12, 0, 9}) and tasks and tasks.msp and tasks.msp.api) then return end
+    if not (wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) and tasks and tasks.msp and tasks.msp.api) then return end
     firmwareReadStarted = true
 
     local api = tasks.msp.api.loadPage("SMARTFUEL_CONFIG")

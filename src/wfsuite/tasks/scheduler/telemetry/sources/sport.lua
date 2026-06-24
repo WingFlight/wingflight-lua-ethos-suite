@@ -33,12 +33,12 @@ return {
                 {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x0201}
             },
     temp_esc = {
-                {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x0401, mspgt = {12, 0, 8}},
+                {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x0401, mspgt = {22, 0, 0}},
                 {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x0418}
             },
     temp_mcu = {
-                {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x0400, mspgt = {12, 0, 8}},
-                {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x0401, msplt = {12, 0, 7}}
+                {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x0400, mspgt = {22, 0, 0}},
+                {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x0401, msplt = {22, 0, 0}}
             },
     fuel = {
                 { category = CATEGORY_TELEMETRY_SENSOR, appId = 0x0600 }

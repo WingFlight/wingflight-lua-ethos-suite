@@ -92,7 +92,7 @@ return {
             end
         end
 
-        if wfsuite.utils.apiVersionCompare(">=", {12, 0, 9}) then getMixerCompatibilityStatus() end
+        if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then getMixerCompatibilityStatus() end
     end,
     onWakeup = function()
         if os.clock() - initTime < 0.25 then
@@ -114,7 +114,7 @@ return {
         local enable = currState
 
         if wfsuite.app.formFields then
-            if wfsuite.utils.apiVersionCompare(">=", {12, 0, 9}) then
+            if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
                 if MIXER_PITCH_RATE ~= nil and MIXER_PITCH_MIN ~= nil and MIXER_PITCH_MAX ~= nil and
                     MIXER_ROLL_RATE ~= nil and MIXER_ROLL_MIN ~= nil and MIXER_ROLL_MAX ~= nil and
                     MIXER_COLLECTIVE_RATE ~= nil and MIXER_COLLECTIVE_MIN ~= nil and MIXER_COLLECTIVE_MAX ~= nil then

@@ -87,7 +87,7 @@ return {
                 end
             end
 
-            if wfsuite.utils.apiVersionCompare(">", {12, 0, 8}) and
+            if wfsuite.utils.apiVersionCompare(">", {22, 0, 0}) and
                 wfsuite.app.formFields[MENU_ID.BUS] and
                 wfsuite.session.servoBusEnabled == true then
                 wfsuite.app.formFields[MENU_ID.BUS]:enable(true)

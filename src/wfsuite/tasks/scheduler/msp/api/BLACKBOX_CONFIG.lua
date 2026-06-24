@@ -37,13 +37,13 @@ local BLACKBOX_FIELDS_BITMAP = {
     { field = "temps", tableIdxInc = -1, table = TBL_OFF_ON }
 }
 
-if wfsuite.utils.apiVersionCompare(">=", {12, 0, 7}) then
+if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
     BLACKBOX_FIELDS_BITMAP[#BLACKBOX_FIELDS_BITMAP + 1] = { field = "esc", tableIdxInc = -1, table = TBL_OFF_ON }
     BLACKBOX_FIELDS_BITMAP[#BLACKBOX_FIELDS_BITMAP + 1] = { field = "bec", tableIdxInc = -1, table = TBL_OFF_ON }
     BLACKBOX_FIELDS_BITMAP[#BLACKBOX_FIELDS_BITMAP + 1] = { field = "esc2", tableIdxInc = -1, table = TBL_OFF_ON }
 end
 
-if wfsuite.utils.apiVersionCompare(">=", {12, 0, 9}) then
+if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
     BLACKBOX_FIELDS_BITMAP[#BLACKBOX_FIELDS_BITMAP + 1] = { field = "governor", tableIdxInc = -1, table = TBL_OFF_ON }
 end
 

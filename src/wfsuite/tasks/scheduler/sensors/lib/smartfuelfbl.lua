@@ -34,7 +34,7 @@ function fbl.getSource()
         return nil
     end
 
-    if not wfsuite.utils.apiVersionCompare(">=", {12, 0, 9}) then
+    if not wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
         return nil
     end
 

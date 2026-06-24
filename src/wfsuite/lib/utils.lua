@@ -144,7 +144,7 @@ function utils.signalArmedWriteBlocked()
 end
 
 function utils.getArmedSaveBlockedMessage()
-    if utils.apiVersionCompare(">=", {12, 0, 8}) then
+    if utils.apiVersionCompare(">=", {22, 0, 0}) then
         return "@i18n(app.msg_please_disarm_to_save_warning)@"
     end
     return "@i18n(app.msg_please_disarm_to_save)@"
@@ -319,7 +319,7 @@ function utils.getGovernorState(value)
         [101] = "@i18n(widgets.governor.DISARMED):upper()@"
     }
 
-    if wfsuite.session and wfsuite.session.apiVersion and wfsuite.utils.apiVersionCompare(">", {12, 0, 7}) then
+    if wfsuite.session and wfsuite.session.apiVersion and wfsuite.utils.apiVersionCompare(">", {22, 0, 0}) then
         local armflags = wfsuite.tasks.telemetry.getSensor("armflags")
         if utils.armFlagsToIsArmed(armflags) == false then value = 101 end
     end
@@ -714,7 +714,7 @@ local function appendVersionParts(parts, value)
         for _, token in ipairs(value) do arrayValues[#arrayValues + 1] = token end
 
         -- Accept {major, 0, minor} as an explicit form for two-digit minor
-        -- versions, e.g. {12, 0, 9} => 12.09.
+        -- versions, e.g. {22, 0, 0} => 12.09.
         if #arrayValues == 3 then
             local major = tonumber(arrayValues[1])
             local middle = tonumber(arrayValues[2])

@@ -87,9 +87,9 @@ local apidata = {
     formdata = {
         labels = {},
         fields = {
-            [FIELD_CYCLIC_POLAR] = {t = "@i18n(app.modules.rates_advanced.cyclic_polarity)@", mspapi = 1, apikey = "cyclic_polarity", type = 1, apiversiongte = {12, 0, 9}},
-            [FIELD_CYCLIC_RING_ENABLE] = {t = "@i18n(app.modules.rates_advanced.cyclic_ring)@", type = 1, value = 0, table = OFF_ON, tableIdxInc = -1, apiversiongte = {12, 0, 9}, postEdit = handleCyclicRingToggle},
-            [FIELD_CYCLIC_RING_VALUE] = {t = "@i18n(app.modules.rates_advanced.cyclic_ring)@ %", mspapi = 1, apikey = "cyclic_ring", apiversiongte = {12, 0, 9}, postEdit = syncCyclicRingState}
+            [FIELD_CYCLIC_POLAR] = {t = "@i18n(app.modules.rates_advanced.cyclic_polarity)@", mspapi = 1, apikey = "cyclic_polarity", type = 1, apiversiongte = {22, 0, 0}},
+            [FIELD_CYCLIC_RING_ENABLE] = {t = "@i18n(app.modules.rates_advanced.cyclic_ring)@", type = 1, value = 0, table = OFF_ON, tableIdxInc = -1, apiversiongte = {22, 0, 0}, postEdit = handleCyclicRingToggle},
+            [FIELD_CYCLIC_RING_VALUE] = {t = "@i18n(app.modules.rates_advanced.cyclic_ring)@ %", mspapi = 1, apikey = "cyclic_ring", apiversiongte = {22, 0, 0}, postEdit = syncCyclicRingState}
         }
     }
 }

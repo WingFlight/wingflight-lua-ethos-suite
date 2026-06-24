@@ -19,7 +19,7 @@ local FIELD_SPEC = {
     {"enableSensors", "U32"}
 }
 
-if wfsuite.utils.apiVersionCompare(">=", {12, 0, 8}) then
+if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
     FIELD_SPEC[#FIELD_SPEC + 1] = {"pinSwap", "U8"}
     FIELD_SPEC[#FIELD_SPEC + 1] = {"crsf_telemetry_mode", "U8"}
     FIELD_SPEC[#FIELD_SPEC + 1] = {"crsf_telemetry_link_rate", "U16"}

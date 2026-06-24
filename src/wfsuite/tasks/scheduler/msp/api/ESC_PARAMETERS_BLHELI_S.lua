@@ -245,7 +245,7 @@ end
 
 return core.createConfigAPI({
     name = API_NAME,
-    minApiVersion = {12, 0, 9},
+    minApiVersion = {22, 0, 0},
     readCmd = 217,
     writeCmd = 218,
     fields = FIELD_SPEC,

@@ -58,7 +58,7 @@ return core.createConfigAPI({
     name = API_NAME,
     readCmd = 174,
     writeCmd = 171,
-    minApiVersion = {12, 0, 9},
+    minApiVersion = {22, 0, 0},
     initialRebuildOnWrite = true,
     fields = FIELD_SPEC,
     writeFields = WRITE_FIELD_SPEC,

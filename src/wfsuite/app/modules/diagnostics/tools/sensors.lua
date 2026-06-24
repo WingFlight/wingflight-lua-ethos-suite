@@ -248,7 +248,7 @@ local function wakeup()
     end
 
     if app.formNavigationFields['tool'] then
-        if session and session.apiVersion and rfutils.apiVersionCompare("<", {12, 0, 8}) then
+        if session and session.apiVersion and rfutils.apiVersionCompare("<", {22, 0, 0}) then
             app.formNavigationFields['tool']:enable(false)
         else
             app.formNavigationFields['tool']:enable(true)

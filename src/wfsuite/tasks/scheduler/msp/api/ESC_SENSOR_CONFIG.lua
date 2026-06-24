@@ -33,11 +33,11 @@ local FIELD_SPEC = {
     {"hw4_voltage_gain", "U8", 0, 250, 30}
 }
 
-if wfsuite.utils.apiVersionCompare(">=", {12, 0, 7}) then
+if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
     FIELD_SPEC[#FIELD_SPEC + 1] = {"pin_swap", "U8", nil, nil, nil, nil, nil, nil, nil, nil, TBL_OFF_ON, -1}
 end
 
-if wfsuite.utils.apiVersionCompare(">=", {12, 0, 8}) then
+if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
     FIELD_SPEC[#FIELD_SPEC + 1] = {"voltage_correction", "S8", -99, 125, 1, "%", nil, nil, nil, nil, nil, nil, false}
     FIELD_SPEC[#FIELD_SPEC + 1] = {"current_correction", "S8", -99, 125, 1, "%", nil, nil, nil, nil, nil, nil, false}
     FIELD_SPEC[#FIELD_SPEC + 1] = {"consumption_correction", "S8", -99, 125, 1, "%", nil, nil, nil, nil, nil, nil, false}

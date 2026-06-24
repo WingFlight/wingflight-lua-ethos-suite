@@ -33,7 +33,7 @@ local FIELD_SPEC = {
     {"consumptionWarningPercentage", "U8", 0, 50, 35, "%"}
 }
 
-if wfsuite.utils.apiVersionCompare(">=", {12, 0, 9}) then
+if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
     FIELD_SPEC[#FIELD_SPEC + 1] = {"batteryCapacity_0", "U16", 0, 40000, 0, "mAh", nil, nil, 10}
     FIELD_SPEC[#FIELD_SPEC + 1] = {"batteryCapacity_1", "U16", 0, 40000, 0, "mAh", nil, nil, 10}
     FIELD_SPEC[#FIELD_SPEC + 1] = {"batteryCapacity_2", "U16", 0, 40000, 0, "mAh", nil, nil, 10}

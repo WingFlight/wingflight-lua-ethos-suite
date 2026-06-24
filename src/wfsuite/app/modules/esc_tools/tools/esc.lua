@@ -18,7 +18,7 @@ local pages = {}
 local DEFAULT_TOOL_SCRIPT = "esc_tools/tools/esc_tool.lua"
 local FOUR_WAY_TOOL_SCRIPT = "esc_tools/tools/esc_tool_4way.lua"
 local ESC_SENSOR_CONFIG_API = "ESC_SENSOR_CONFIG"
-local ESC_SENSOR_CONFIG_MIN_API_VERSION = {12, 0, 6}
+local ESC_SENSOR_CONFIG_MIN_API_VERSION = {22, 0, 0}
 local ESC_SENSOR_CONFIG_TIMEOUT = 3.0
 local function noop() end
 local pageButtonMeta = {}
@@ -117,16 +117,16 @@ local function shouldQueueEntryWarning(opts)
 end
 
 local MFG_INDEX = {
-    {folder = "am32",  toolName = "AM32",                                         image = "am32.jpg",      apiversion = {12, 0, 9}, script = FOUR_WAY_TOOL_SCRIPT},
-    {folder = "blheli_s", toolName = "BLHeli_S",                                  image = "blheli_s.jpg",  apiversion = {12, 0, 9}, script = FOUR_WAY_TOOL_SCRIPT},
-    {folder = "bluejay", toolName = "@i18n(app.modules.esc_tools.mfg.bluejay.name)@", image = "blheli_s.jpg",  apiversion = {12, 0, 9}, script = FOUR_WAY_TOOL_SCRIPT},
-    {folder = "flrtr", toolName = "@i18n(app.modules.esc_tools.mfg.flrtr.name)@", image = "flrtr.png",     apiversion = {12, 0, 7}},
-    {folder = "hw5",   toolName = "@i18n(app.modules.esc_tools.mfg.hw5.name)@",   image = "hobbywing.png", apiversion = {12, 0, 6}},
-    {folder = "omp",   toolName = "@i18n(app.modules.esc_tools.mfg.omp.name)@",   image = "omp.png",       apiversion = {12, 0, 9}},
-    {folder = "scorp", toolName = "@i18n(app.modules.esc_tools.mfg.scorp.name)@", image = "scorpion.png",  apiversion = {12, 0, 6}},
-    {folder = "xdfly", toolName = "@i18n(app.modules.esc_tools.mfg.xdfly.name)@", image = "xdfly.png",     apiversion = {12, 0, 8}},
-    {folder = "yge",   toolName = "@i18n(app.modules.esc_tools.mfg.yge.name)@",   image = "yge.png",       apiversion = {12, 0, 6}},
-    {folder = "ztw",   toolName = "@i18n(app.modules.esc_tools.mfg.ztw.name)@",   image = "ztw.png",       apiversion = {12, 0, 9}}
+    {folder = "am32",  toolName = "AM32",                                         image = "am32.jpg",      apiversion = {22, 0, 0}, script = FOUR_WAY_TOOL_SCRIPT},
+    {folder = "blheli_s", toolName = "BLHeli_S",                                  image = "blheli_s.jpg",  apiversion = {22, 0, 0}, script = FOUR_WAY_TOOL_SCRIPT},
+    {folder = "bluejay", toolName = "@i18n(app.modules.esc_tools.mfg.bluejay.name)@", image = "blheli_s.jpg",  apiversion = {22, 0, 0}, script = FOUR_WAY_TOOL_SCRIPT},
+    {folder = "flrtr", toolName = "@i18n(app.modules.esc_tools.mfg.flrtr.name)@", image = "flrtr.png",     apiversion = {22, 0, 0}},
+    {folder = "hw5",   toolName = "@i18n(app.modules.esc_tools.mfg.hw5.name)@",   image = "hobbywing.png", apiversion = {22, 0, 0}},
+    {folder = "omp",   toolName = "@i18n(app.modules.esc_tools.mfg.omp.name)@",   image = "omp.png",       apiversion = {22, 0, 0}},
+    {folder = "scorp", toolName = "@i18n(app.modules.esc_tools.mfg.scorp.name)@", image = "scorpion.png",  apiversion = {22, 0, 0}},
+    {folder = "xdfly", toolName = "@i18n(app.modules.esc_tools.mfg.xdfly.name)@", image = "xdfly.png",     apiversion = {22, 0, 0}},
+    {folder = "yge",   toolName = "@i18n(app.modules.esc_tools.mfg.yge.name)@",   image = "yge.png",       apiversion = {22, 0, 0}},
+    {folder = "ztw",   toolName = "@i18n(app.modules.esc_tools.mfg.ztw.name)@",   image = "ztw.png",       apiversion = {22, 0, 0}}
 }
 
 local function resolveModulePath(script)

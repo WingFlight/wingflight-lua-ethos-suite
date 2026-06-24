@@ -341,7 +341,7 @@ local function servoCenterFocusAllOn(self)
 
     wfsuite.app.audio.playServoOverideEnable = true
 
-    if wfsuite.utils.apiVersionCompare(">=", {12, 0, 9}) then
+    if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
             queueApiWrite("SERVO_OVERRIDE_ALL", "servo.bus.override.all.on", {value = 0})
     else
         for i = 0, #servoTable do
@@ -356,7 +356,7 @@ end
 
 local function servoCenterFocusAllOff(self)
 
-    if wfsuite.utils.apiVersionCompare(">=", {12, 0, 9}) then
+    if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
             queueApiWrite("SERVO_OVERRIDE_ALL", "servo.bus.override.all.off", {value = 2001})
     else
         for i = 0, #servoTable do

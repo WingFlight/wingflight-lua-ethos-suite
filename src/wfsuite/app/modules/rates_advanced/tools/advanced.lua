@@ -17,7 +17,7 @@ local HIDDEN_COLUMNS = {
 if wfsuite.session.activeRateTable == nil then wfsuite.session.activeRateTable = wfsuite.config.defaultRateProfile end
 
 local rows
-if wfsuite.utils.apiVersionCompare(">=", {12, 0, 8}) then
+if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
     rows = {
         "@i18n(app.modules.rates_advanced.response_time)@",
         "@i18n(app.modules.rates_advanced.acc_limit)@",
@@ -57,17 +57,17 @@ local apidata = {
             {row = 2, col = 2, mspapi = 1, apikey = "accel_limit_2"},
             {row = 2, col = 3, mspapi = 1, apikey = "accel_limit_3"},
             {row = 2, col = 4, mspapi = 1, apikey = "accel_limit_4"},
-            {row = 3, col = 1, mspapi = 1, apikey = "setpoint_boost_gain_1", apiversiongte = {12, 0, 8}},
-            {row = 3, col = 2, mspapi = 1, apikey = "setpoint_boost_gain_2", apiversiongte = {12, 0, 8}},
-            {row = 3, col = 3, mspapi = 1, apikey = "setpoint_boost_gain_3", apiversiongte = {12, 0, 8}},
-            {row = 3, col = 4, mspapi = 1, apikey = "setpoint_boost_gain_4", apiversiongte = {12, 0, 8}},
-            {row = 4, col = 1, mspapi = 1, apikey = "setpoint_boost_cutoff_1", apiversiongte = {12, 0, 8}},
-            {row = 4, col = 2, mspapi = 1, apikey = "setpoint_boost_cutoff_2", apiversiongte = {12, 0, 8}},
-            {row = 4, col = 3, mspapi = 1, apikey = "setpoint_boost_cutoff_3", apiversiongte = {12, 0, 8}},
-            {row = 4, col = 4, mspapi = 1, apikey = "setpoint_boost_cutoff_4", apiversiongte = {12, 0, 8}},
-            {row = 5, col = 3, mspapi = 1, apikey = "yaw_dynamic_ceiling_gain", apiversiongte = {12, 0, 8}},
-            {row = 6, col = 3, mspapi = 1, apikey = "yaw_dynamic_deadband_gain", apiversiongte = {12, 0, 8}},
-            {row = 7, col = 3, mspapi = 1, apikey = "yaw_dynamic_deadband_filter", apiversiongte = {12, 0, 8}}
+            {row = 3, col = 1, mspapi = 1, apikey = "setpoint_boost_gain_1", apiversiongte = {22, 0, 0}},
+            {row = 3, col = 2, mspapi = 1, apikey = "setpoint_boost_gain_2", apiversiongte = {22, 0, 0}},
+            {row = 3, col = 3, mspapi = 1, apikey = "setpoint_boost_gain_3", apiversiongte = {22, 0, 0}},
+            {row = 3, col = 4, mspapi = 1, apikey = "setpoint_boost_gain_4", apiversiongte = {22, 0, 0}},
+            {row = 4, col = 1, mspapi = 1, apikey = "setpoint_boost_cutoff_1", apiversiongte = {22, 0, 0}},
+            {row = 4, col = 2, mspapi = 1, apikey = "setpoint_boost_cutoff_2", apiversiongte = {22, 0, 0}},
+            {row = 4, col = 3, mspapi = 1, apikey = "setpoint_boost_cutoff_3", apiversiongte = {22, 0, 0}},
+            {row = 4, col = 4, mspapi = 1, apikey = "setpoint_boost_cutoff_4", apiversiongte = {22, 0, 0}},
+            {row = 5, col = 3, mspapi = 1, apikey = "yaw_dynamic_ceiling_gain", apiversiongte = {22, 0, 0}},
+            {row = 6, col = 3, mspapi = 1, apikey = "yaw_dynamic_deadband_gain", apiversiongte = {22, 0, 0}},
+            {row = 7, col = 3, mspapi = 1, apikey = "yaw_dynamic_deadband_filter", apiversiongte = {22, 0, 0}}
         }
     }
 }
