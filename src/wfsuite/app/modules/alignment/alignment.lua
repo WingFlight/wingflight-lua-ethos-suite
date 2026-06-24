@@ -543,80 +543,61 @@ local function drawVisual()
     local cy = gy0 + floor(gh0 * 0.63)
     local scale = max(8, min(gw0, gh0) * 0.2112)
 
-    -- Simplified heli wireframe for clearer orientation cues.
-    local nose = {2.35, 0.0, -0.02}
-    local tail = {-2.65, 0.0, 0.03}
-    local lf = {1.10, -0.62, 0.02}
-    local rf = {1.10, 0.62, 0.02}
-    local lb = {-0.55, -0.46, 0.05}
-    local rb = {-0.55, 0.46, 0.05}
-    local top = {0.05, 0.0, 0.84}
-    local podAftTop = {-0.66, 0.0, 0.56}
-    local podAftBot = {-0.66, 0.0, -0.12}
-    local podAftL = {-0.66, -0.30, 0.14}
-    local podAftR = {-0.66, 0.30, 0.14}
-    local mast = {0.0, 0.0, 1.02}
-    local finU = {-2.25, 0.0, 0.45}
-    local finD = {-2.25, 0.0, -0.18}
-    local boomSL = {-0.88, -0.10, 0.11}
-    local boomSR = {-0.88, 0.10, 0.11}
-    local boomSU = {-0.88, 0.0, 0.18}
-    local boomSD = {-0.88, 0.0, 0.06}
-    local boomEL = {-2.35, -0.06, 0.08}
-    local boomER = {-2.35, 0.06, 0.08}
-    local boomEU = {-2.35, 0.0, 0.12}
-    local boomED = {-2.35, 0.0, 0.05}
-    local stabL = {-2.35, -0.30, 0.10}
-    local stabR = {-2.35, 0.30, 0.10}
+    -- Simplified fixed-wing wireframe for clearer orientation cues.
+    local nose = {2.55, 0.0, 0.02}
+    local top = {0.55, 0.0, 0.62}
+    local lf = {0.95, -0.42, -0.05}
+    local rf = {0.95, 0.42, -0.05}
+    local lb = {-0.55, -0.34, 0.02}
+    local rb = {-0.55, 0.34, 0.02}
 
-    local skidL1 = {1.12, -0.66, -0.69}
-    local skidL2 = {0.76, -0.66, -0.64}
-    local skidL3 = {0.00, -0.66, -0.62}
-    local skidL4 = {-0.96, -0.66, -0.63}
-    local skidL5 = {-1.24, -0.66, -0.67}
-    local skidR1 = {1.12, 0.66, -0.69}
-    local skidR2 = {0.76, 0.66, -0.64}
-    local skidR3 = {0.00, 0.66, -0.62}
-    local skidR4 = {-0.96, 0.66, -0.63}
-    local skidR5 = {-1.24, 0.66, -0.67}
+    local boomSU = {-0.55, 0.0, 0.20}
+    local boomSL = {-0.55, -0.16, -0.05}
+    local boomSR = {-0.55, 0.16, -0.05}
+    local boomSD = {-0.55, 0.0, -0.22}
+    local boomEU = {-2.35, 0.0, 0.10}
+    local boomEL = {-2.35, -0.05, -0.02}
+    local boomER = {-2.35, 0.05, -0.02}
+    local boomED = {-2.35, 0.0, -0.08}
+    local tailTip = {-2.65, 0.0, 0.04}
 
-    local strutLFTop = {0.52, -0.50, -0.12}
-    local strutLFBot = {0.48, -0.66, -0.63}
-    local strutLBTop = {-0.52, -0.44, -0.10}
-    local strutLBBot = {-0.58, -0.66, -0.63}
-    local strutRFTop = {0.52, 0.50, -0.12}
-    local strutRFBot = {0.48, 0.66, -0.63}
-    local strutRBTop = {-0.52, 0.44, -0.10}
-    local strutRBBot = {-0.58, 0.66, -0.63}
+    -- Fin/stab roots sit on the boom spine/sides so they attach with no gap.
+    local finBase = {-1.45, 0.0, 0.15}
+    local finTop = {-1.95, 0.0, 1.00}
+    local stabTipL = {-2.45, -0.95, -0.04}
+    local stabTipR = {-2.45, 0.95, -0.04}
 
-    local rotorA = {0.0, -1.9, 1.02}
-    local rotorB = {0.0, 1.9, 1.02}
-    local rotorC = {-1.9, 0.0, 1.02}
-    local rotorD = {1.9, 0.0, 1.02}
+    -- Wing roots sit on the fuselage shoulder line (lf/lb, rf/rb) so they attach with no gap.
+    local wingRootLF = {0.35, -0.388, -0.022}
+    local wingRootRF = {0.35, 0.388, -0.022}
+    local wingRootLB = {-0.25, -0.356, 0.006}
+    local wingRootRB = {-0.25, 0.356, 0.006}
+    local wingTipLF = {0.10, -1.85, -0.18}
+    local wingTipRF = {0.10, 1.85, -0.18}
+    local wingTipLB = {-0.30, -1.65, -0.18}
+    local wingTipRB = {-0.30, 1.65, -0.18}
+
+    local noseGearTop = {1.30, 0.0, -0.10}
+    local noseGearBot = {1.30, 0.0, -0.85}
+    local mainGearTopL = {0.15, -0.45, -0.15}
+    local mainGearBotL = {0.10, -0.45, -0.85}
+    local mainGearTopR = {0.15, 0.45, -0.15}
+    local mainGearBotR = {0.10, 0.45, -0.85}
+
+    local propHub = {2.62, 0.0, 0.0}
+    local propU = {2.62, 0.0, 0.78}
+    local propD = {2.62, 0.0, -0.78}
+    local propL = {2.62, -0.78, 0.0}
+    local propR = {2.62, 0.78, 0.0}
 
     local fuselage = {}
     collectTriangle3D(fuselage, nose, lf, top, cx, cy, scale, pitchR, yawR, rollR, bodyLight)
     collectTriangle3D(fuselage, nose, top, rf, cx, cy, scale, pitchR, yawR, rollR, bodyLight)
     collectTriangle3D(fuselage, lf, lb, top, cx, cy, scale, pitchR, yawR, rollR, bodyMid)
     collectTriangle3D(fuselage, rf, top, rb, cx, cy, scale, pitchR, yawR, rollR, bodyMid)
-    collectTriangle3D(fuselage, lb, podAftTop, top, cx, cy, scale, pitchR, yawR, rollR, bodyDark)
-    collectTriangle3D(fuselage, rb, top, podAftTop, cx, cy, scale, pitchR, yawR, rollR, bodyDark)
     collectTriangle3D(fuselage, lf, lb, rb, cx, cy, scale, pitchR, yawR, rollR, bodyDark)
     collectTriangle3D(fuselage, lf, rb, rf, cx, cy, scale, pitchR, yawR, rollR, bodyDark)
-    collectTriangle3D(fuselage, lb, podAftL, podAftTop, cx, cy, scale, pitchR, yawR, rollR, bodyDark)
-    collectTriangle3D(fuselage, rb, podAftTop, podAftR, cx, cy, scale, pitchR, yawR, rollR, bodyDark)
-    collectTriangle3D(fuselage, lb, podAftBot, podAftL, cx, cy, scale, pitchR, yawR, rollR, bodyDark)
-    collectTriangle3D(fuselage, rb, podAftR, podAftBot, cx, cy, scale, pitchR, yawR, rollR, bodyDark)
-    if HIGH_DETAIL_MODEL then
-        -- Rounded aft pod
-        collectTriangle3D(fuselage, lb, podAftTop, top, cx, cy, scale, pitchR, yawR, rollR, bodyMid)
-        collectTriangle3D(fuselage, rb, top, podAftTop, cx, cy, scale, pitchR, yawR, rollR, bodyMid)
-        collectTriangle3D(fuselage, lb, podAftL, podAftTop, cx, cy, scale, pitchR, yawR, rollR, bodyDark)
-        collectTriangle3D(fuselage, rb, podAftTop, podAftR, cx, cy, scale, pitchR, yawR, rollR, bodyDark)
-        collectTriangle3D(fuselage, lb, podAftBot, podAftL, cx, cy, scale, pitchR, yawR, rollR, bodyDark)
-        collectTriangle3D(fuselage, rb, podAftR, podAftBot, cx, cy, scale, pitchR, yawR, rollR, bodyDark)
-    end
-    -- Tail boom (low-poly pod-and-boom profile)
+    -- Tail cone (low-poly tapered profile)
     collectTriangle3D(fuselage, boomSU, boomSL, boomEU, cx, cy, scale, pitchR, yawR, rollR, bodyMid)
     collectTriangle3D(fuselage, boomSL, boomEL, boomEU, cx, cy, scale, pitchR, yawR, rollR, bodyMid)
     collectTriangle3D(fuselage, boomSU, boomEU, boomSR, cx, cy, scale, pitchR, yawR, rollR, bodyMid)
@@ -625,19 +606,26 @@ local function drawVisual()
     collectTriangle3D(fuselage, boomSD, boomED, boomEL, cx, cy, scale, pitchR, yawR, rollR, bodyDark)
     collectTriangle3D(fuselage, boomSD, boomSR, boomED, cx, cy, scale, pitchR, yawR, rollR, bodyDark)
     collectTriangle3D(fuselage, boomSR, boomER, boomED, cx, cy, scale, pitchR, yawR, rollR, bodyDark)
-    if HIGH_DETAIL_MODEL then
-        -- Pod to boom shoulder transition
-        collectTriangle3D(fuselage, podAftTop, podAftL, boomSU, cx, cy, scale, pitchR, yawR, rollR, bodyMid)
-        collectTriangle3D(fuselage, podAftTop, boomSU, podAftR, cx, cy, scale, pitchR, yawR, rollR, bodyMid)
-        collectTriangle3D(fuselage, podAftL, podAftBot, boomSD, cx, cy, scale, pitchR, yawR, rollR, bodyDark)
-        collectTriangle3D(fuselage, podAftBot, podAftR, boomSD, cx, cy, scale, pitchR, yawR, rollR, bodyDark)
-    end
+    -- Tail cone cap (tapers the boom to a point instead of an open end)
+    collectTriangle3D(fuselage, boomEU, boomEL, tailTip, cx, cy, scale, pitchR, yawR, rollR, bodyMid)
+    collectTriangle3D(fuselage, boomEU, tailTip, boomER, cx, cy, scale, pitchR, yawR, rollR, bodyMid)
+    collectTriangle3D(fuselage, boomEL, boomED, tailTip, cx, cy, scale, pitchR, yawR, rollR, bodyDark)
+    collectTriangle3D(fuselage, boomED, boomER, tailTip, cx, cy, scale, pitchR, yawR, rollR, bodyDark)
+    -- Vertical fin + horizontal stabilizer (rooted on the boom/tail tip)
+    collectTriangle3D(fuselage, finBase, tailTip, finTop, cx, cy, scale, pitchR, yawR, rollR, accent)
+    collectTriangle3D(fuselage, boomEL, tailTip, stabTipL, cx, cy, scale, pitchR, yawR, rollR, accent)
+    collectTriangle3D(fuselage, boomER, stabTipR, tailTip, cx, cy, scale, pitchR, yawR, rollR, accent)
+    -- Wings
+    collectTriangle3D(fuselage, wingRootLF, wingRootLB, wingTipLB, cx, cy, scale, pitchR, yawR, rollR, bodyMid)
+    collectTriangle3D(fuselage, wingRootLF, wingTipLB, wingTipLF, cx, cy, scale, pitchR, yawR, rollR, bodyMid)
+    collectTriangle3D(fuselage, wingRootRF, wingTipRB, wingRootRB, cx, cy, scale, pitchR, yawR, rollR, bodyMid)
+    collectTriangle3D(fuselage, wingRootRF, wingTipRF, wingTipRB, cx, cy, scale, pitchR, yawR, rollR, bodyMid)
     drawTriangleList(fuselage)
 
-    -- Rotor plane + mast
-    drawLine3D(rotorA, rotorB, cx, cy, scale, pitchR, yawR, rollR, disc)
-    drawLine3D(rotorC, rotorD, cx, cy, scale, pitchR, yawR, rollR, disc)
-    drawLine3D(top, mast, cx, cy, scale, pitchR, yawR, rollR, disc)
+    -- Propeller disc + hub
+    drawLine3D(propU, propD, cx, cy, scale, pitchR, yawR, rollR, disc)
+    drawLine3D(propL, propR, cx, cy, scale, pitchR, yawR, rollR, disc)
+    drawLine3D(nose, propHub, cx, cy, scale, pitchR, yawR, rollR, disc)
 
     -- Fuselage
     drawFilledTriangle3D(nose, lf, rf, cx, cy, scale, pitchR, yawR, rollR, accent)
@@ -650,39 +638,39 @@ local function drawVisual()
     drawLine3D(boomSL, boomEL, cx, cy, scale, pitchR, yawR, rollR, mainColor)
     drawLine3D(boomSR, boomER, cx, cy, scale, pitchR, yawR, rollR, mainColor)
     drawLine3D(boomSD, boomED, cx, cy, scale, pitchR, yawR, rollR, mainColor)
-    -- Shoulder ring helps separate pod from the narrower boom.
+    -- Shoulder ring helps separate fuselage from the narrower tail cone.
     drawLine3D(boomSU, boomSL, cx, cy, scale, pitchR, yawR, rollR, accent)
     drawLine3D(boomSL, boomSD, cx, cy, scale, pitchR, yawR, rollR, accent)
     drawLine3D(boomSD, boomSR, cx, cy, scale, pitchR, yawR, rollR, accent)
     drawLine3D(boomSR, boomSU, cx, cy, scale, pitchR, yawR, rollR, accent)
-    if HIGH_DETAIL_MODEL then
-        drawLine3D(podAftTop, podAftL, cx, cy, scale, pitchR, yawR, rollR, mainColor)
-        drawLine3D(podAftTop, podAftR, cx, cy, scale, pitchR, yawR, rollR, mainColor)
-        drawLine3D(podAftL, podAftBot, cx, cy, scale, pitchR, yawR, rollR, mainColor)
-        drawLine3D(podAftR, podAftBot, cx, cy, scale, pitchR, yawR, rollR, mainColor)
-    end
+    -- Tail cone closure
+    drawLine3D(boomEU, tailTip, cx, cy, scale, pitchR, yawR, rollR, mainColor)
+    drawLine3D(boomEL, tailTip, cx, cy, scale, pitchR, yawR, rollR, mainColor)
+    drawLine3D(boomER, tailTip, cx, cy, scale, pitchR, yawR, rollR, mainColor)
+    drawLine3D(boomED, tailTip, cx, cy, scale, pitchR, yawR, rollR, mainColor)
 
-    -- Tail fin + skids
-    drawLine3D(finU, finD, cx, cy, scale, pitchR, yawR, rollR, accent)
+    -- Tail fin + stabilizer
+    drawLine3D(finBase, finTop, cx, cy, scale, pitchR, yawR, rollR, accent)
+    drawLine3D(finTop, tailTip, cx, cy, scale, pitchR, yawR, rollR, mainColor)
+    drawLine3D(boomEL, stabTipL, cx, cy, scale, pitchR, yawR, rollR, accent)
+    drawLine3D(boomER, stabTipR, cx, cy, scale, pitchR, yawR, rollR, accent)
+    drawLine3D(stabTipL, tailTip, cx, cy, scale, pitchR, yawR, rollR, mainColor)
+    drawLine3D(tailTip, stabTipR, cx, cy, scale, pitchR, yawR, rollR, mainColor)
+
+    -- Wings
+    drawLine3D(wingRootLF, wingTipLF, cx, cy, scale, pitchR, yawR, rollR, accent)
+    drawLine3D(wingRootRF, wingTipRF, cx, cy, scale, pitchR, yawR, rollR, accent)
+    drawLine3D(wingTipLF, wingTipLB, cx, cy, scale, pitchR, yawR, rollR, mainColor)
+    drawLine3D(wingTipRF, wingTipRB, cx, cy, scale, pitchR, yawR, rollR, mainColor)
+    drawLine3D(wingRootLB, wingTipLB, cx, cy, scale, pitchR, yawR, rollR, mainColor)
+    drawLine3D(wingRootRB, wingTipRB, cx, cy, scale, pitchR, yawR, rollR, mainColor)
+
     if HIGH_DETAIL_MODEL then
-        drawLine3D(stabL, stabR, cx, cy, scale, pitchR, yawR, rollR, accent)
+        -- Fixed tricycle landing gear
+        drawLine3D(noseGearTop, noseGearBot, cx, cy, scale, pitchR, yawR, rollR, mainColor)
+        drawLine3D(mainGearTopL, mainGearBotL, cx, cy, scale, pitchR, yawR, rollR, mainColor)
+        drawLine3D(mainGearTopR, mainGearBotR, cx, cy, scale, pitchR, yawR, rollR, mainColor)
     end
-    drawLine3D(skidL1, skidL2, cx, cy, scale, pitchR, yawR, rollR, mainColor)
-    drawLine3D(skidL2, skidL3, cx, cy, scale, pitchR, yawR, rollR, mainColor)
-    drawLine3D(skidL3, skidL4, cx, cy, scale, pitchR, yawR, rollR, mainColor)
-    drawLine3D(skidL4, skidL5, cx, cy, scale, pitchR, yawR, rollR, mainColor)
-    drawLine3D(skidR1, skidR2, cx, cy, scale, pitchR, yawR, rollR, mainColor)
-    drawLine3D(skidR2, skidR3, cx, cy, scale, pitchR, yawR, rollR, mainColor)
-    drawLine3D(skidR3, skidR4, cx, cy, scale, pitchR, yawR, rollR, mainColor)
-    drawLine3D(skidR4, skidR5, cx, cy, scale, pitchR, yawR, rollR, mainColor)
-    drawLine3D(strutLFTop, strutLFBot, cx, cy, scale, pitchR, yawR, rollR, mainColor)
-    drawLine3D(strutLBTop, strutLBBot, cx, cy, scale, pitchR, yawR, rollR, mainColor)
-    drawLine3D(strutRFTop, strutRFBot, cx, cy, scale, pitchR, yawR, rollR, mainColor)
-    drawLine3D(strutRBTop, strutRBBot, cx, cy, scale, pitchR, yawR, rollR, mainColor)
-    drawLine3D(strutLFBot, strutRFBot, cx, cy, scale, pitchR, yawR, rollR, mainColor)
-    drawLine3D(strutLBBot, strutRBBot, cx, cy, scale, pitchR, yawR, rollR, mainColor)
-    drawLine3D(strutLFTop, strutRFTop, cx, cy, scale, pitchR, yawR, rollR, mainColor)
-    drawLine3D(strutLBTop, strutRBTop, cx, cy, scale, pitchR, yawR, rollR, mainColor)
 
 end
 
