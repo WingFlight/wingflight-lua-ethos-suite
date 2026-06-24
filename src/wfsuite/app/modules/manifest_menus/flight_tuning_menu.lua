@@ -31,30 +31,10 @@ return {
             shortcutId = "s_flight_tuning_menu_rates_rates_lua_853c5751ea",
         },
         {
-            image = "profile_governor/governor.png",
-            name = "@i18n(app.modules.profile_governor.name)@",
-            order = 3,
-            script = "profile_governor/governor.lua",
-            script_by_mspversion = {
-                {
-                    op = ">=",
-                    script = "profile_governor/governor.lua",
-                    ver = { 12, 0, 9 },
-                },
-                {
-                    op = "<",
-                    script = "profile_governor/governor_legacy.lua",
-                    ver = { 12, 0, 9 },
-                },
-            },
-            script_default = "profile_governor/governor_legacy.lua",
-            shortcutId = "s_flight_tuning_menu_profile_governor_2361300e05",
-        },
-        {
             image = "app/gfx/advanced.png",
             menuId = "advanced_menu",
             name = "@i18n(app.menu_section_advanced)@",
-            order = 4,
+            order = 3,
             shortcutId = "s_flight_tuning_menu_advanced_menu_2abad2cdec",
         },
     },

@@ -14,6 +14,12 @@ local RANGE_MAX = 2125
 local RANGE_STEP = 5
 local RANGE_SNAP_DELTA_US = 50
 local MODULE_LOADER_SPEED = 0.05
+local HIDDEN_MODE_NAMES = {
+    ["RESCUE"] = true,
+    ["GOVERNOR SUSPEND"] = true,
+    ["GOVERNOR FALLBACK"] = true,
+    ["GOVERNOR BYPASS"] = true
+}
 
 local state = {
     title = "@i18n(app.modules.modes.name)@",
@@ -34,6 +40,10 @@ local state = {
     channelSources = {},
     autoDetectSlots = {}
 }
+
+local function modeVisible(name)
+    return not HIDDEN_MODE_NAMES[string.upper(tostring(name or ""))]
+end
 
 local function clamp(value, minValue, maxValue)
     if value < minValue then return minValue end
@@ -379,12 +389,15 @@ buildModesFromRaw = function()
         local name = state.modeNames[i]
         if not name or name == "" then name = "Mode " .. tostring(id) end
 
-        state.modes[i] = {
-            id = id,
-            name = name,
-            ranges = {}
-        }
-        idToModeIndex[id] = i
+        if modeVisible(name) then
+            local modeIndex = #state.modes + 1
+            state.modes[modeIndex] = {
+                id = id,
+                name = name,
+                ranges = {}
+            }
+            idToModeIndex[id] = modeIndex
+        end
     end
 
     for slot = 1, #state.modeRanges do

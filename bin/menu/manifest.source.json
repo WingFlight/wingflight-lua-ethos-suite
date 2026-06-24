@@ -155,46 +155,10 @@
             0,
             6
           ],
-          "image": "profile_mainrotor/mainrotor.png",
-          "name": "Main Rotor",
-          "order": 5,
-          "script": "profile_mainrotor/mainrotor.lua",
-          "translation": "@i18n(app.modules.profile_mainrotor.name)@"
-        },
-        {
-          "apiversion": [
-            12,
-            0,
-            6
-          ],
-          "image": "profile_tailrotor/tailrotor.png",
-          "name": "Tail Rotor",
-          "order": 6,
-          "script": "profile_tailrotor/tailrotor.lua",
-          "translation": "@i18n(app.modules.profile_tailrotor.name)@"
-        },
-        {
-          "apiversion": [
-            12,
-            0,
-            6
-          ],
-          "image": "profile_rescue/rescue.png",
-          "name": "Rescue",
-          "order": 7,
-          "script": "profile_rescue/rescue.lua",
-          "translation": "@i18n(app.modules.profile_rescue.name)@"
-        },
-        {
-          "apiversion": [
-            12,
-            0,
-            6
-          ],
           "image": "rates_advanced/rates.png",
           "name": "Rates",
-          "order": 8,
-          "script": "rates_advanced/rates_advanced.lua",
+          "order": 5,
+          "script": "rates_advanced/tools/advanced.lua",
           "translation": "@i18n(app.modules.rates_advanced.name)@"
         }
       ],
@@ -464,89 +428,16 @@
           "translation": "@i18n(app.modules.rates.name)@"
         },
         {
-          "image": "profile_governor/governor.png",
-          "name": "Governor",
-          "order": 3,
-          "script": "profile_governor/governor.lua",
-          "script_by_mspversion": [
-            {
-              "op": ">=",
-              "script": "profile_governor/governor.lua",
-              "ver": [
-                12,
-                0,
-                9
-              ]
-            },
-            {
-              "op": "<",
-              "script": "profile_governor/governor_legacy.lua",
-              "ver": [
-                12,
-                0,
-                9
-              ]
-            }
-          ],
-          "script_default": "profile_governor/governor_legacy.lua",
-          "translation": "@i18n(app.modules.profile_governor.name)@"
-        },
-        {
           "image": "app/gfx/advanced.png",
           "menuId": "advanced_menu",
           "name": "Advanced",
-          "order": 4,
+          "order": 3,
           "translation": "@i18n(app.menu_section_advanced)@"
         }
       ],
       "scriptPrefix": "app/modules/",
       "title": "Flight Tuning",
       "translation": "@i18n(app.menu_section_flight_tuning)@"
-    },
-    "governor": {
-      "hooksScript": "app/modules/governor/menu_hooks.lua",
-      "iconPrefix": "app/modules/governor/gfx/",
-      "loaderSpeed": "DEFAULT",
-      "navButtons": {
-        "help": false,
-        "menu": true,
-        "reload": false,
-        "save": false,
-        "tool": false
-      },
-      "navOptions": {
-        "defaultSection": "setup",
-        "showProgress": true
-      },
-      "pages": [
-        {
-          "image": "general.png",
-          "name": "General",
-          "script": "general.lua",
-          "translation": "@i18n(app.modules.governor.menu_general)@"
-        },
-        {
-          "image": "time.png",
-          "name": "Ramp Time",
-          "script": "time.lua",
-          "translation": "@i18n(app.modules.governor.menu_time)@"
-        },
-        {
-          "image": "filters.png",
-          "name": "Filters",
-          "script": "filters.lua",
-          "translation": "@i18n(app.modules.governor.menu_filters)@"
-        },
-        {
-          "image": "curves.png",
-          "name": "Bypass Curve",
-          "script": "curves.lua",
-          "translation": "@i18n(app.modules.governor.menu_curves)@"
-        }
-      ],
-      "scriptPrefix": "governor/tools/",
-      "title": "Governor",
-      "translation": "@i18n(app.modules.governor.name)@"
     },
     "mixer": {
       "hooksScript": "app/modules/mixer/menu_hooks.lua",
@@ -694,77 +585,6 @@
       "scriptPrefix": "power/tools/",
       "title": "Power",
       "translation": "@i18n(app.modules.power.name)@"
-    },
-    "profile_governor": {
-      "hooksScript": "app/modules/profile_governor/menu_hooks.lua",
-      "iconPrefix": "app/modules/governor/gfx/",
-      "loaderSpeed": "DEFAULT",
-      "navButtons": {
-        "help": false,
-        "menu": true,
-        "reload": false,
-        "save": false,
-        "tool": false
-      },
-      "navOptions": {
-        "showProgress": true
-      },
-      "pages": [
-        {
-          "image": "general.png",
-          "name": "General",
-          "script": "general.lua",
-          "translation": "@i18n(app.modules.governor.menu_general)@"
-        },
-        {
-          "image": "flags.png",
-          "name": "Behaviour",
-          "script": "flags.lua",
-          "translation": "@i18n(app.modules.governor.menu_flags)@"
-        }
-      ],
-      "scriptPrefix": "profile_governor/tools/",
-      "title": "Governor",
-      "translation": "@i18n(app.modules.profile_governor.name)@"
-    },
-    "rates_advanced": {
-      "hooksScript": "app/modules/rates_advanced/menu_hooks.lua",
-      "iconPrefix": "app/modules/rates_advanced/gfx/",
-      "loaderSpeed": "DEFAULT",
-      "navButtons": {
-        "help": false,
-        "menu": true,
-        "reload": false,
-        "save": false,
-        "tool": false
-      },
-      "navOptions": {
-        "defaultSection": "flight_tuning",
-        "showProgress": true
-      },
-      "pages": [
-        {
-          "image": "advanced.png",
-          "name": "Advanced",
-          "script": "advanced.lua",
-          "translation": "@i18n(app.modules.rates_advanced.advanced)@"
-        },
-        {
-          "image": "cyclic_behaviour.png",
-          "name": "Cyclic Behaviour",
-          "script": "cyclic_behaviour.lua",
-          "translation": "@i18n(app.modules.rates_advanced.cyclic_behaviour)@"
-        },
-        {
-          "image": "table.png",
-          "name": "Rate Table",
-          "script": "table.lua",
-          "translation": "@i18n(app.modules.rates_advanced.table)@"
-        }
-      ],
-      "scriptPrefix": "rates_advanced/tools/",
-      "title": "Rates",
-      "translation": "@i18n(app.modules.rates_advanced.name)@"
     },
     "safety_menu": {
       "iconPrefix": "app/modules/",
@@ -1054,48 +874,33 @@
           "translation": "@i18n(app.modules.ports.name)@"
         },
         {
-          "image": "mixer/mixer.png",
-          "loaderspeed": 0.08,
-          "menuId": "mixer",
-          "name": "Mixer",
-          "order": 7,
-          "translation": "@i18n(app.modules.mixer.name)@"
-        },
-        {
           "image": "servos/servos.png",
           "loaderspeed": 0.08,
           "menuId": "servos_type",
           "name": "Servos",
-          "order": 8,
+          "order": 7,
           "translation": "@i18n(app.modules.servos.name)@"
         },
         {
           "image": "failsafe/failsafe.png",
           "menuId": "safety_menu",
           "name": "Controls",
-          "order": 9,
+          "order": 8,
           "translation": "@i18n(app.menu_section_controls)@"
         },
         {
           "image": "power/power.png",
           "menuId": "power",
           "name": "Power",
-          "order": 10,
+          "order": 9,
           "translation": "@i18n(app.modules.power.name)@"
         },
         {
           "image": "esc_motors/esc.png",
           "menuId": "esc_motors",
           "name": "ESC & Motors",
-          "order": 11,
+          "order": 10,
           "translation": "@i18n(app.modules.esc_motors.name)@"
-        },
-        {
-          "image": "governor/governor.png",
-          "menuId": "governor",
-          "name": "Governor",
-          "order": 11,
-          "translation": "@i18n(app.modules.governor.name)@"
         }
       ],
       "scriptPrefix": "app/modules/",

@@ -10,6 +10,9 @@ local navHandlers = pageRuntime.createMenuHandlers({defaultSection = "hardware"}
 
 local activateWakeup = false
 local doFullReload = false
+local HIDDEN_COLUMNS = {
+    [4] = true
+}
 
 if wfsuite.session.activeRateTable == nil then wfsuite.session.activeRateTable = wfsuite.config.defaultRateProfile end
 
@@ -68,6 +71,26 @@ local apidata = {
         }
     }
 }
+
+local function buildVisibleColumns(cols)
+    local visible = {}
+
+    if cols ~= nil then
+        for i = 1, #cols do
+            if not HIDDEN_COLUMNS[i] then
+                visible[#visible + 1] = i
+            end
+        end
+    else
+        for i = 1, 4 do
+            if not HIDDEN_COLUMNS[i] then
+                visible[#visible + 1] = i
+            end
+        end
+    end
+
+    return visible
+end
 
 local function getApiEntryName(entry)
     if type(entry) == "table" then return entry.name end
@@ -131,12 +154,9 @@ local function openPage(opts)
     form.clear()
 
     wfsuite.app.ui.fieldHeader(title)
-    local numCols
-    if wfsuite.app.Page.apidata.formdata.cols ~= nil then
-        numCols = #wfsuite.app.Page.apidata.formdata.cols
-    else
-        numCols = 4
-    end
+    local cols = wfsuite.app.Page.apidata.formdata.cols
+    local visibleCols = buildVisibleColumns(cols)
+    local numCols = #visibleCols
     local screenWidth = wfsuite.app.lcdWidth - 10
     local padding = 10
     local paddingTop = wfsuite.app.radio.linePaddingTop
@@ -144,7 +164,6 @@ local function openPage(opts)
     local w = ((screenWidth * 60 / 100) / numCols)
     local paddingRight = 20
     local positions = {}
-    local positions_r = {}
     local pos
 
     local line = form.addLine("")
@@ -155,26 +174,24 @@ local function openPage(opts)
 
     wfsuite.session.colWidth = w - paddingRight
 
-    local c = 1
     while loc > 0 do
-        local colLabel = wfsuite.app.Page.apidata.formdata.cols[loc]
+        local sourceCol = visibleCols[loc]
+        local colLabel = (cols and cols[sourceCol]) or tostring(sourceCol)
 
-        positions[loc] = posX - w
-        positions_r[c] = posX - w
+        positions[sourceCol] = posX - w
 
         lcd.font(FONT_STD)
 
         colLabel = rightAlignText(wfsuite.session.colWidth, colLabel)
 
-        local posTxt = positions_r[c] + paddingRight
+        local posTxt = positions[sourceCol] + paddingRight
 
         pos = {x = posTxt, y = posY, w = w, h = h}
-        wfsuite.app.formFields['col_' .. tostring(c)] = form.addStaticText(line, pos, colLabel)
+        wfsuite.app.formFields['col_' .. tostring(sourceCol)] = form.addStaticText(line, pos, colLabel)
 
         posX = math.floor(posX - w)
 
         loc = loc - 1
-        c = c + 1
     end
 
     local fieldRows = {}
@@ -185,7 +202,7 @@ local function openPage(opts)
 
         local valid = (f.apiversion == nil or wfsuite.utils.apiVersionCompare(">=", f.apiversion)) and (f.apiversionlt == nil or wfsuite.utils.apiVersionCompare("<", f.apiversionlt)) and (f.apiversiongt == nil or wfsuite.utils.apiVersionCompare(">", f.apiversiongt)) and (f.apiversionlte == nil or wfsuite.utils.apiVersionCompare("<=", f.apiversionlte)) and (f.apiversiongte == nil or wfsuite.utils.apiVersionCompare(">=", f.apiversiongte)) and (f.enablefunction == nil or f.enablefunction())
 
-        if f.row and f.col and valid then
+        if f.row and f.col and valid and positions[f.col] ~= nil then
             local l = wfsuite.app.Page.apidata.formdata.labels
             local pageIdx = i
             local currentField = i

@@ -50,7 +50,6 @@ if not TELEMETRY_STATIC_CACHE then
         [11] = {name = "@i18n(telemetry.sensor_pitch_control)@", group = "control"},
         [12] = {name = "@i18n(telemetry.sensor_roll_control)@", group = "control"},
         [13] = {name = "@i18n(telemetry.sensor_yaw_control)@", group = "control"},
-        [14] = {name = "@i18n(telemetry.sensor_coll_control)@", group = "control"},
         [15] = {name = "@i18n(telemetry.sensor_throttle_pct)@", group = "control"},
         [17] = {name = "@i18n(telemetry.sensor_esc1_voltage)@", group = "esc1"},
         [18] = {name = "@i18n(telemetry.sensor_esc1_current)@", group = "esc1"},
@@ -111,8 +110,6 @@ if not TELEMETRY_STATIC_CACHE then
         [89] = {name = "@i18n(telemetry.sensor_flight_mode)@", group = "status"},
         [90] = {name = "@i18n(telemetry.sensor_arming_flags)@", group = "status"},
         [91] = {name = "@i18n(telemetry.sensor_arming_disable)@", group = "status"},
-        [92] = {name = "@i18n(telemetry.sensor_rescue)@", group = "status"},
-        [93] = {name = "@i18n(telemetry.sensor_governor)@", group = "status"},
         [95] = {name = "@i18n(telemetry.sensor_pid_profile)@", group = "profiles"},
         [96] = {name = "@i18n(telemetry.sensor_rate_profile)@", group = "profiles"},
         [97] = {name = "@i18n(telemetry.sensor_battery_profile)@", group = "profiles"},
@@ -185,7 +182,7 @@ if not TELEMETRY_STATIC_CACHE then
         sensorGroups = sensorGroups,
         groupOrder = groupOrder,
         notAtSameTime = {
-            [10] = {11, 12, 13, 14},
+            [10] = {11, 12, 13},
             [64] = {65, 66, 67},
             [68] = {69, 70, 71}
         }
