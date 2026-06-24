@@ -271,7 +271,7 @@ return {
 
     altitude = {
         name = "@i18n(sensors.altitude)@",
-        mandatory = false,
+        mandatory = true,
         stats = true,
         switch_alerts = true,
         unit = UNIT_METER,

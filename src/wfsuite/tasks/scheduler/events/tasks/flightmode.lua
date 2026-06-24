@@ -11,22 +11,28 @@ local flightmode = {}
 local lastFlightMode = nil
 local hasBeenInFlight = false
 local lastArmed = false
+local groundAltitude = nil
 
 local tasks = wfsuite.tasks
 local utils = wfsuite.utils
 
 local throttleThreshold = 35
-
-local function isGovernorActive(value) return type(value) == "number" and value >= 4 and value <= 8 end
+local altitudeGainThreshold = 3 -- meters climbed above the armed/launch baseline
 
 function flightmode.inFlight()
     local telemetry = tasks.telemetry
 
     if not wfsuite.session.isArmed or not telemetry or (telemetry.active and not telemetry.active()) then return false end
 
-    local governor = telemetry.getSensor("governor")
-    if isGovernorActive(governor) then return true end
+    local altSource = telemetry.getSensorSource and telemetry.getSensorSource("altitude")
+    local altitude = altSource and altSource:value()
 
+    if altitude then
+        if groundAltitude == nil then groundAltitude = altitude end
+        return (altitude - groundAltitude) > altitudeGainThreshold
+    end
+
+    -- No altitude sensor available: fall back to throttle stick position.
     local rx = wfsuite.session.rx
     local throttle = rx and rx.values and rx.values.throttle
 
@@ -38,6 +44,7 @@ end
 function flightmode.reset()
     lastFlightMode = nil
     hasBeenInFlight = false
+    groundAltitude = nil
 end
 
 local function determineMode()
@@ -53,6 +60,7 @@ local function determineMode()
 
     if armed and not lastArmed then
         hasBeenInFlight = false
+        groundAltitude = nil
         lastArmed = armed
         return "preflight"
     end
