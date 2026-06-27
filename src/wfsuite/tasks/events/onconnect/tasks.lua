@@ -343,6 +343,18 @@ function tasks.wakeup()
         wfsuite.utils.log("Completed onconnect/" .. task.name, "debug")
 
         if task.name == "apiversion" then
+            if wfsuite.session.apiVersionInvalid then
+                -- Refuse to proceed past an incompatible FC: reset and retry so the
+                -- session never reaches "connected" while stuck on bad firmware.
+                if type(module.reset) == "function" then module.reset() end
+                task.complete = false
+                task.initialized = false
+                task.startTime = nil
+                task.nextEligibleAt = now + RETRY_BACKOFF_SECONDS
+                bumpProgress()
+                return
+            end
+
             wfsuite.flightmode.current = "preflight"
             if wfsuite.tasks and wfsuite.tasks.events and wfsuite.tasks.events.flightmode
                 and type(wfsuite.tasks.events.flightmode.reset) == "function"
