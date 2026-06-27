@@ -19,6 +19,4 @@ return {
     ["pid_0_B"] = "@i18n(api.PID_TUNING.pid_0_B)@",
     ["pid_1_B"] = "@i18n(api.PID_TUNING.pid_1_B)@",
     ["pid_2_B"] = "@i18n(api.PID_TUNING.pid_2_B)@",
-    ["pid_0_O"] = "@i18n(api.PID_TUNING.pid_0_O)@",
-    ["pid_1_O"] = "@i18n(api.PID_TUNING.pid_1_O)@",
 }

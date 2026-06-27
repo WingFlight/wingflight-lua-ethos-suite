@@ -8014,12 +8014,6 @@
           "needs_translation": false,
           "translation": "PIDs"
         },
-        "o": {
-          "english": "O",
-          "max_length": 1,
-          "needs_translation": false,
-          "translation": "O"
-        },
         "p": {
           "english": "P",
           "max_length": 1,
@@ -8671,74 +8665,6 @@
           "translation": "Yaw"
         }
       },
-      "profile_mainrotor": {
-        "collective_pitch_comp": {
-          "english": "Collective Pitch Compensation",
-          "max_length": 29,
-          "needs_translation": false,
-          "translation": "Collective Pitch Compensation"
-        },
-        "collective_pitch_comp_short": {
-          "english": "Col. Pitch Compensation",
-          "max_length": 23,
-          "needs_translation": false,
-          "translation": "Col. Pitch Compensation"
-        },
-        "cutoff": {
-          "english": "Cutoff",
-          "max_length": 6,
-          "needs_translation": false,
-          "translation": "Cutoff"
-        },
-        "cyclic_cross_coupling": {
-          "english": "Cyclic Cross coupling",
-          "max_length": 21,
-          "needs_translation": false,
-          "translation": "Cyclic Cross coupling"
-        },
-        "gain": {
-          "english": "Gain",
-          "max_length": 4,
-          "needs_translation": false,
-          "translation": "Gain"
-        },
-        "help_p1": {
-          "english": "Collective Pitch Compensation: Increasing will compensate for the pitching motion caused by tail drag when climbing.",
-          "max_length": 116,
-          "needs_translation": false,
-          "translation": "Collective Pitch Compensation: Increasing will compensate for the pitching motion caused by tail drag when climbing."
-        },
-        "help_p2": {
-          "english": "Cross Coupling Gain: Removes roll coupling when only elevator is applied.",
-          "max_length": 73,
-          "needs_translation": false,
-          "translation": "Cross Coupling Gain: Removes roll coupling when only elevator is applied."
-        },
-        "help_p3": {
-          "english": "Cross Coupling Ratio: Amount of compensation (pitch vs roll) to apply.",
-          "max_length": 70,
-          "needs_translation": false,
-          "translation": "Cross Coupling Ratio: Amount of compensation (pitch vs roll) to apply."
-        },
-        "help_p4": {
-          "english": "Cross Coupling Freq. Limit: Frequency limit for the compensation, higher value will make the compensation action faster.",
-          "max_length": 120,
-          "needs_translation": false,
-          "translation": "Cross Coupling Freq. Limit: Frequency limit for the compensation, higher value will make the compensation action faster."
-        },
-        "name": {
-          "english": "Main Rotor",
-          "max_length": 10,
-          "needs_translation": false,
-          "translation": "Main Rotor"
-        },
-        "ratio": {
-          "english": "Ratio",
-          "max_length": 5,
-          "needs_translation": false,
-          "translation": "Ratio"
-        }
-      },
       "profile_pidbandwidth": {
         "bterm_cutoff": {
           "english": "B-term cut-off",
@@ -8832,12 +8758,6 @@
           "needs_translation": false,
           "translation": "Error limit: Angle limit for I-term."
         },
-        "help_p3": {
-          "english": "Offset limit: Angle limit for High Speed Integral (O-term).",
-          "max_length": 59,
-          "needs_translation": false,
-          "translation": "Offset limit: Angle limit for High Speed Integral (O-term)."
-        },
         "help_p4": {
           "english": "Error rotation: Allow errors to be shared between all axes.",
           "max_length": 59,
@@ -8850,11 +8770,11 @@
           "needs_translation": false,
           "translation": "I-term relax: Limit accumulation of I-term during fast movements - helps reduce bounce back after fast stick movements. Generally needs to be lower for large helis and can be higher for small helis. Best to only reduce as much as is needed for your flying style."
         },
-        "hsi_offset_limit": {
-          "english": "HSI Offset limit",
-          "max_length": 16,
+        "help_p6": {
+          "english": "Throttle attenuation: reduces P and D gain above the breakpoint throttle, since control surfaces in prop wash become more authoritative as throttle rises.",
+          "max_length": 158,
           "needs_translation": false,
-          "translation": "HSI Offset limit"
+          "translation": "Throttle attenuation: reduces P and D gain above the breakpoint throttle, since control surfaces in prop wash become more authoritative as throttle rises."
         },
         "inflight_error_decay": {
           "english": "Inflight Error Decay",
@@ -8885,6 +8805,24 @@
           "max_length": 1,
           "needs_translation": false,
           "translation": "P"
+        },
+        "fw_tpa": {
+          "english": "Throttle Attenuation",
+          "max_length": 21,
+          "needs_translation": false,
+          "translation": "Throttle Attenuation"
+        },
+        "breakpoint": {
+          "english": "Breakpoint",
+          "max_length": 10,
+          "needs_translation": false,
+          "translation": "Breakpoint"
+        },
+        "rate": {
+          "english": "Rate",
+          "max_length": 4,
+          "needs_translation": false,
+          "translation": "Rate"
         },
         "roll": {
           "english": "R",
@@ -9099,110 +9037,6 @@
           "max_length": 13,
           "needs_translation": false,
           "translation": "Save settings"
-        }
-      },
-      "profile_tailrotor": {
-        "ccw": {
-          "english": "CCW",
-          "max_length": 3,
-          "needs_translation": false,
-          "translation": "CCW"
-        },
-        "collective_ff_gain": {
-          "english": "Collective FF gain",
-          "max_length": 18,
-          "needs_translation": false,
-          "translation": "Collective FF gain"
-        },
-        "collective_impulse_ff": {
-          "english": "Collective Impulse FF",
-          "max_length": 21,
-          "needs_translation": false,
-          "translation": "Collective Impulse FF"
-        },
-        "cutoff": {
-          "english": "Cutoff",
-          "max_length": 6,
-          "needs_translation": false,
-          "translation": "Cutoff"
-        },
-        "cw": {
-          "english": "CW",
-          "max_length": 2,
-          "needs_translation": false,
-          "translation": "CW"
-        },
-        "cyclic_ff_gain": {
-          "english": "Cyclic FF gain",
-          "max_length": 14,
-          "needs_translation": false,
-          "translation": "Cyclic FF gain"
-        },
-        "decay": {
-          "english": "Decay",
-          "max_length": 5,
-          "needs_translation": false,
-          "translation": "Decay"
-        },
-        "gain": {
-          "english": "Gain",
-          "max_length": 4,
-          "needs_translation": false,
-          "translation": "Gain"
-        },
-        "help_p1": {
-          "english": "Yaw Stop Gain: Higher stop gain will make the tail stop more aggressively but may cause oscillations if too high. Adjust CW or CCW to make the yaw stops even.",
-          "max_length": 158,
-          "needs_translation": false,
-          "translation": "Yaw Stop Gain: Higher stop gain will make the tail stop more aggressively but may cause oscillations if too high. Adjust CW or CCW to make the yaw stops even."
-        },
-        "help_p2": {
-          "english": "Precomp Cutoff: Frequency limit for all yaw precompensation actions.",
-          "max_length": 68,
-          "needs_translation": false,
-          "translation": "Precomp Cutoff: Frequency limit for all yaw precompensation actions."
-        },
-        "help_p3": {
-          "english": "Cyclic FF Gain: Tail precompensation for cyclic inputs.",
-          "max_length": 55,
-          "needs_translation": false,
-          "translation": "Cyclic FF Gain: Tail precompensation for cyclic inputs."
-        },
-        "help_p4": {
-          "english": "Collective FF Gain: Tail precompensation for collective inputs.",
-          "max_length": 63,
-          "needs_translation": false,
-          "translation": "Collective FF Gain: Tail precompensation for collective inputs."
-        },
-        "help_p5": {
-          "english": "Collective Impulse FF: Impulse tail precompensation for collective inputs. If you need extra tail precompensation at the beginning of collective input.",
-          "max_length": 151,
-          "needs_translation": false,
-          "translation": "Collective Impulse FF: Impulse tail precompensation for collective inputs. If you need extra tail precompensation at the beginning of collective input."
-        },
-        "inertia_precomp": {
-          "english": "Inertia Precomp",
-          "max_length": 15,
-          "needs_translation": false,
-          "translation": "Inertia Precomp"
-        },
-        "name": {
-          "english": "Tail Rotor",
-          "max_length": 10,
-          "needs_translation": false,
-          "translation": "Tail Rotor"
-        },
-        "precomp_cutoff": {
-          "english": "Precomp Cutoff",
-          "max_length": 14,
-          "needs_translation": false,
-          "translation": "Precomp Cutoff"
-        },
-        "yaw_stop_gain": {
-          "english": "Yaw stop gain",
-          "max_length": 13,
-          "needs_translation": false,
-          "translation": "Yaw stop gain"
         }
       },
       "radio_config": {

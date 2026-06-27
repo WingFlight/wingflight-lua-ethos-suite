@@ -33,8 +33,8 @@ local FIELD_SPEC = {
     {"pid_1_B", "U16", 0, 1000, 0},
     {"pid_2_B", "U16", 0, 1000, 0},
 
-    {"pid_0_O", "U16", 0, 1000, 45},
-    {"pid_1_O", "U16", 0, 1000, 45}
+    {"unused_pid_0_O", "U16"}, -- heli-only HSI offset term, removed
+    {"unused_pid_1_O", "U16"} -- heli-only HSI offset term, removed
 }
 
 local SIM_RESPONSE = core.simResponse({
@@ -57,8 +57,8 @@ local SIM_RESPONSE = core.simResponse({
     0, 0,    -- pid_1_B
     0, 0,    -- pid_2_B
 
-    45, 0,   -- pid_0_O
-    45, 0    -- pid_1_O
+    0, 0,    -- unused_pid_0_O
+    0, 0     -- unused_pid_1_O
 })
 
 return core.createConfigAPI({

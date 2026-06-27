@@ -23,7 +23,6 @@ local apidata = {
             "@i18n(app.modules.pids.i)@",
             "@i18n(app.modules.pids.d)@",
             "@i18n(app.modules.pids.f)@",
-            "@i18n(app.modules.pids.o)@",
             "@i18n(app.modules.pids.b)@"
         },
         fields = {
@@ -39,11 +38,9 @@ local apidata = {
             {row = 1, col = 4, mspapi = 1, apikey = "pid_0_F"},
             {row = 2, col = 4, mspapi = 1, apikey = "pid_1_F"},
             {row = 3, col = 4, mspapi = 1, apikey = "pid_2_F"},
-            {row = 1, col = 5, mspapi = 1, apikey = "pid_0_O"},
-            {row = 2, col = 5, mspapi = 1, apikey = "pid_1_O"},
-            {row = 1, col = 6, mspapi = 1, apikey = "pid_0_B"},
-            {row = 2, col = 6, mspapi = 1, apikey = "pid_1_B"},
-            {row = 3, col = 6, mspapi = 1, apikey = "pid_2_B"}
+            {row = 1, col = 5, mspapi = 1, apikey = "pid_0_B"},
+            {row = 2, col = 5, mspapi = 1, apikey = "pid_1_B"},
+            {row = 3, col = 5, mspapi = 1, apikey = "pid_2_B"}
         }
     }
 }

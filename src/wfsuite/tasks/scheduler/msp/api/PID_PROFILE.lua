@@ -24,9 +24,9 @@ local FIELD_SPEC = {
     {"pid_mode", "U8"},
     {"error_decay_time_ground", "U8", 0, 250, 2.5, "s", 1, 10},
     {"error_decay_time_cyclic", "U8", 0, 250, 25, "s", 1, 10},
-    {"error_decay_time_yaw", "U8"},
+    {"unused_error_decay_time_yaw", "U8"}, -- heli-only, removed
     {"error_decay_limit_cyclic", "U8", 0, 25, 12, "°"},
-    {"error_decay_limit_yaw", "U8"},
+    {"unused_error_decay_limit_yaw", "U8"}, -- heli-only, removed
     {"error_rotation", "U8", 0, 1, nil, nil, nil, nil, nil, nil, TBL_OFF_ON},
     {"error_limit_0", "U8", 0, 180, 45, "°"},
     {"error_limit_1", "U8", 0, 180, 45, "°"},
@@ -41,41 +41,40 @@ local FIELD_SPEC = {
     {"iterm_relax_cutoff_0", "U8", 1, 100, 10},
     {"iterm_relax_cutoff_1", "U8", 1, 100, 10},
     {"iterm_relax_cutoff_2", "U8", 1, 100, 10},
-    {"yaw_cw_stop_gain", "U8", 25, 250, 120},
-    {"yaw_ccw_stop_gain", "U8", 25, 250, 80},
-    {"yaw_precomp_cutoff", "U8", 0, 250, 5, "Hz"},
-    {"yaw_cyclic_ff_gain", "U8", 0, 250, 0},
-    {"yaw_collective_ff_gain", "U8", 0, 250, 30},
-    {"yaw_collective_dynamic_gain", "U8", 0, 125, 0},
-    {"yaw_collective_dynamic_decay", "U8", 0, 250, 25, "s"},
-    {"pitch_collective_ff_gain", "U8", 0, 250, 0},
+    {"unused_yaw_cw_stop_gain", "U8"}, -- heli-only, removed
+    {"unused_yaw_ccw_stop_gain", "U8"}, -- heli-only, removed
+    {"unused_yaw_precomp_cutoff", "U8"}, -- heli-only, removed
+    {"unused_yaw_cyclic_ff_gain", "U8"}, -- heli-only, removed
+    {"unused_yaw_collective_ff_gain", "U8"}, -- heli-only, removed
+    {"unused_yaw_collective_dynamic_gain", "U8"}, -- heli-only, removed
+    {"unused_yaw_collective_dynamic_decay", "U8"}, -- heli-only, removed
+    {"unused_pitch_collective_ff_gain", "U8"}, -- heli-only, removed
     {"angle_level_strength", "U8", 0, 200, 40},
     {"angle_level_limit", "U8", 10, 90, 55, "°"},
     {"horizon_level_strength", "U8", 0, 200, 40},
     {"trainer_gain", "U8", 25, 255, 75},
     {"trainer_angle_limit", "U8", 10, 80, 20, "°"},
-    {"cyclic_cross_coupling_gain", "U8", 0, 250, 50},
-    {"cyclic_cross_coupling_ratio", "U8", 0, 200, 0, "%"},
-    {"cyclic_cross_coupling_cutoff", "U8", 1, 250, 2.5, "Hz", 1, 10},
-    {"offset_limit_0", "U8", 0, 180, 90, "°"},
-    {"offset_limit_1", "U8", 0, 180, 90, "°"},
+    {"unused_cyclic_cross_coupling_gain", "U8"}, -- heli-only, removed
+    {"unused_cyclic_cross_coupling_ratio", "U8"}, -- heli-only, removed
+    {"unused_cyclic_cross_coupling_cutoff", "U8"}, -- heli-only, removed
+    {"unused_offset_limit_0", "U8"}, -- heli-only, removed
+    {"unused_offset_limit_1", "U8"}, -- heli-only, removed
     {"bterm_cutoff_0", "U8", 0, 250, 15},
     {"bterm_cutoff_1", "U8", 0, 250, 15},
-    {"bterm_cutoff_2", "U8", 0, 250, 20}
+    {"bterm_cutoff_2", "U8", 0, 250, 20},
+    {"unused_yaw_inertia_precomp_gain", "U8"}, -- heli-only, removed
+    {"unused_yaw_inertia_precomp_cutoff", "U8"}, -- heli-only, removed
+    {"fw_tpa_breakpoint", "U8", 0, 100, 100, "%"},
+    {"fw_tpa_rate", "U8", 0, 100, 0, "%"}
 }
 
-if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
-    FIELD_SPEC[#FIELD_SPEC + 1] = {"yaw_inertia_precomp_gain", "U8", 0, 250, 0}
-    FIELD_SPEC[#FIELD_SPEC + 1] = {"yaw_inertia_precomp_cutoff", "U8", 0, 250, 2.5, "Hz", 1, 10}
-end
-
 local SIM_RESPONSE = core.simResponse({
-    3,    -- pid_mode
+    1,    -- pid_mode
     25,   -- error_decay_time_ground
     250,  -- error_decay_time_cyclic
-    0,    -- error_decay_time_yaw
+    0,    -- unused_error_decay_time_yaw
     12,   -- error_decay_limit_cyclic
-    0,    -- error_decay_limit_yaw
+    0,    -- unused_error_decay_limit_yaw
     1,    -- error_rotation
     45,   -- error_limit_0
     45,   -- error_limit_1
@@ -90,29 +89,31 @@ local SIM_RESPONSE = core.simResponse({
     10,   -- iterm_relax_cutoff_0
     10,   -- iterm_relax_cutoff_1
     15,   -- iterm_relax_cutoff_2
-    100,  -- yaw_cw_stop_gain
-    100,  -- yaw_ccw_stop_gain
-    6,    -- yaw_precomp_cutoff
-    0,    -- yaw_cyclic_ff_gain
-    30,   -- yaw_collective_ff_gain
-    0,    -- yaw_collective_dynamic_gain
-    0,    -- yaw_collective_dynamic_decay
-    0,    -- pitch_collective_ff_gain
+    0,    -- unused_yaw_cw_stop_gain
+    0,    -- unused_yaw_ccw_stop_gain
+    0,    -- unused_yaw_precomp_cutoff
+    0,    -- unused_yaw_cyclic_ff_gain
+    0,    -- unused_yaw_collective_ff_gain
+    0,    -- unused_yaw_collective_dynamic_gain
+    0,    -- unused_yaw_collective_dynamic_decay
+    0,    -- unused_pitch_collective_ff_gain
     40,   -- angle_level_strength
     55,   -- angle_level_limit
     0,    -- horizon_level_strength
     75,   -- trainer_gain
     20,   -- trainer_angle_limit
-    25,   -- cyclic_cross_coupling_gain
-    0,    -- cyclic_cross_coupling_ratio
-    15,   -- cyclic_cross_coupling_cutoff
-    90,   -- offset_limit_0
-    90,   -- offset_limit_1
+    0,    -- unused_cyclic_cross_coupling_gain
+    0,    -- unused_cyclic_cross_coupling_ratio
+    0,    -- unused_cyclic_cross_coupling_cutoff
+    0,    -- unused_offset_limit_0
+    0,    -- unused_offset_limit_1
     15,   -- bterm_cutoff_0
     15,   -- bterm_cutoff_1
     20,   -- bterm_cutoff_2
-    10,   -- yaw_inertia_precomp_gain
-    20    -- yaw_inertia_precomp_cutoff
+    0,    -- unused_yaw_inertia_precomp_gain
+    0,    -- unused_yaw_inertia_precomp_cutoff
+    100,  -- fw_tpa_breakpoint
+    0     -- fw_tpa_rate
 })
 
 return core.createConfigAPI({
