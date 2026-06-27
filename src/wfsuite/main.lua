@@ -173,7 +173,7 @@ if system.getVersion and system.getVersion().simulation then
 end
 
 wfsuite.config.bgTaskName = wfsuite.config.toolName .. " [Background]"
-wfsuite.config.bgTaskKey = "rf2bg"
+wfsuite.config.bgTaskKey = "wf2bg"
 
 wfsuite.utils = assert(loadfile("lib/utils.lua"))(wfsuite.config)
 wfsuite.bus = assert(loadfile("lib/message_bus.lua", "t", _ENV))()
