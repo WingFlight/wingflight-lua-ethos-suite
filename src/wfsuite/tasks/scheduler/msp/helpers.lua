@@ -11,29 +11,6 @@ local system = system
 local utils = wfsuite.utils
 local helpers = {}
 
-function helpers.governorMode(callback, owner)
-    
-    if (wfsuite.session.governorMode == nil ) then
-        local msp = wfsuite.tasks.msp
-        local API = msp and msp.api.load("GOVERNOR_CONFIG")
-        if API and API.enableDeltaCache then API.enableDeltaCache(false) end
-        if API and owner and API.setOwner then API.setOwner(owner) end
-        API.setCompleteHandler(function(self, buf)
-            local governorMode = API.readValue("gov_mode")
-            if governorMode then
-                utils.log("Governor mode: " .. governorMode, "debug")
-            end
-            wfsuite.session.governorMode = governorMode
-            API = nil
-            if callback then callback(governorMode) end
-        end)
-        API.setUUID(utils.uuid and utils.uuid() or tostring(os.clock()))
-        API.read()
-    else
-        if callback then callback(wfsuite.session.governorMode) end    
-    end
-end
-
 function helpers.servoCount(callback, owner)
     if (wfsuite.session.servoCount == nil) then
         local msp = wfsuite.tasks.msp

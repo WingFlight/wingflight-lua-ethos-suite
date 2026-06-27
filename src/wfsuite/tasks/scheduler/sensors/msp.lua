@@ -58,7 +58,7 @@ local lastInFlight = nil
  * 0x5FFF   - bbl flags
  * 0x5FFE   - bbl size
  * 0x5FFD   - bbl used
- * 0x5FFC   - governor mode
+ * 0x5FFC
  * 0x5FFB
  * 0x5FFA
  * 0x5FF9
@@ -161,20 +161,6 @@ local msp_sensors = {
         fields = {
             name = {
                 sessionname = {"craftName"}
-            }
-        }
-    },
-
-
-    GOVERNOR_CONFIG = {
-        interval_armed = -1,
-        interval_disarmed = 10,
-        fields = {
-            gov_mode ={
-                sessionname = {"governorMode"},
-                sensorname = "Governor Mode",
-                appId = 0x5FFC,
-                unit = UNIT_RAW
             }
         }
     }

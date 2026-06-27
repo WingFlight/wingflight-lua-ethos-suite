@@ -3,7 +3,7 @@
   GPLv3 — https://www.gnu.org/licenses/gpl-3.0.en.html
 
   claude — inflight layout
-  Voltage arc | headspeed rainbow dial (centrepiece) | fuel ring + timer + governor
+  Voltage arc | headspeed rainbow dial (centrepiece) | fuel ring + timer + arm status
 ]] --
 
 local wfsuite = require("wfsuite")
@@ -49,7 +49,7 @@ local last_txbatt_type   = nil
 -- Grid: 20 cols × 10 rows
 --   Left  (1-5):   voltage arc, full height
 --   Centre (6-14): fuel ring (ringbatt), full height — the centrepiece
---   Right (15-20): headspeed rainbow dial (rows 1-6) + timer (7-8) + governor (9-10)
+--   Right (15-20): headspeed rainbow dial (rows 1-6) + timer (7-8) + arm status (9-10)
 local layout = {cols = 20, rows = 10, padding = 2, showstats = false}
 
 local header_layout = utils.standardHeaderLayout(headeropts)
@@ -165,11 +165,11 @@ local function buildBoxes(W)
             bgcolor    = colorMode.panelbg,
         },
 
-        -- ── RIGHT BOTTOM: Governor state ───────────────────────────────
+        -- ── RIGHT BOTTOM: Arm status ───────────────────────────────────
         {
             col = 15, row = 9, colspan = 6, rowspan = 2,
-            type = "text", subtype = "governor",
-            title = "GOVERNOR", titlepos = "top", titlealign = "center",
+            type = "text", subtype = "armflags",
+            title = "ARM STATUS", titlepos = "top", titlealign = "center",
             valuealign = "center",
             font = opts.titlefont, titlefont = opts.titlefont,
             textcolor  = colorMode.textcolor,
@@ -177,12 +177,7 @@ local function buildBoxes(W)
             bgcolor    = colorMode.paneldarkbg,
             thresholds = {
                 {value = "@i18n(widgets.governor.DISARMED)@", textcolor = colorMode.fillcritcolor},
-                {value = "@i18n(widgets.governor.OFF)@",      textcolor = colorMode.fillcritcolor},
-                {value = "@i18n(widgets.governor.IDLE)@",     textcolor = "lightblue"},
-                {value = "@i18n(widgets.governor.SPOOLUP)@",  textcolor = "lightblue"},
-                {value = "@i18n(widgets.governor.RECOVERY)@", textcolor = colorMode.fillwarncolor},
-                {value = "@i18n(widgets.governor.ACTIVE)@",   textcolor = colorMode.fillcolor},
-                {value = "@i18n(widgets.governor.THR-OFF)@",  textcolor = colorMode.fillcritcolor},
+                {value = "@i18n(widgets.governor.ARMED)@",    textcolor = colorMode.fillcolor},
             },
         },
 

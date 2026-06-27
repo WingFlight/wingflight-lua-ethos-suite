@@ -8,7 +8,7 @@ local wfsuite = require("wfsuite")
 local common = {}
 
 common.DEFAULT_LAYOUT = {
-    preflight = {"governor", "armed", "flightmode", "off"},
+    preflight = {"flightmode", "armed", "off", "off"},
     inflight = {"current", "voltage", "fuel", "timer"},
     postflight = {"current", "voltage", "fuel", "timer"}
 }
@@ -17,7 +17,7 @@ common.SENSOR_KEYS = {
     "off",
     "flightmode",
     "timer",
-    "governor",
+    "governor", -- retired (wingflight is fixed-wing only); kept to preserve positional indices
     "armed",
     "temp_esc",
     "temp_mcu",
@@ -46,7 +46,7 @@ common.SENSOR_CHOICES = {
     {"Off", 1},
     {"Flight Mode", 2},
     {"Timer", 3},
-    {"@i18n(sensors.governor)@", 4},
+    {"*Unused*", 4},
     {"Arm Status", 5},
     {"@i18n(sensors.esc_temp)@", 6},
     {"@i18n(sensors.mcu_temp)@", 7},

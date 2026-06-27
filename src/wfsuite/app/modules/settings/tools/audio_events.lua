@@ -47,14 +47,6 @@ local function openPage(opts)
     wfsuite.app.formLineCnt = wfsuite.app.formLineCnt + 1
     wfsuite.app.formFields[formFieldCount] = form.addBooleanField(armLine, nil, function() return config.armflags end, function(val) config.armflags = val end)
 
-    local govEnabled = config.governor == true
-    local govPanel = form.addExpansionPanel("@i18n(app.modules.settings.governor_state)@")
-    govPanel:open(govEnabled)
-    local govLine = govPanel:addLine("@i18n(app.modules.settings.governor_state)@")
-    formFieldCount = formFieldCount + 1
-    wfsuite.app.formLineCnt = wfsuite.app.formLineCnt + 1
-    wfsuite.app.formFields[formFieldCount] = form.addBooleanField(govLine, nil, function() return config.governor end, function(val) config.governor = val end)
-
     local voltEnabled = config.voltage == true
     local voltPanel = form.addExpansionPanel("@i18n(app.modules.settings.voltage)@")
     voltPanel:open(voltEnabled)

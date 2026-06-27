@@ -1865,12 +1865,6 @@
         "needs_translation": false,
         "translation": "Time constant for bleeding off cyclic I-term. Higher will stabilize hover, lower will drift."
       },
-      "error_decay_time_ground": {
-        "english": "Bleeds off the current controller error when the craft is not airborne to stop the craft tipping over.",
-        "max_length": 102,
-        "needs_translation": false,
-        "translation": "Bleeds off the current controller error when the craft is not airborne to stop the craft tipping over."
-      },
       "error_limit_0": {
         "english": "Hard limit for the angle error in the PID loop. The absolute error and thus the I-term will never go above these limits.",
         "max_length": 120,
@@ -2334,104 +2328,6 @@
         "max_length": 53,
         "needs_translation": false,
         "translation": "The maximum gain applied to the yaw dynamic deadband."
-      }
-    },
-    "RESCUE_PROFILE": {
-      "rescue_climb_collective": {
-        "english": "Collective value for rescue climb.",
-        "max_length": 34,
-        "needs_translation": false,
-        "translation": "Collective value for rescue climb."
-      },
-      "rescue_climb_time": {
-        "english": "Length of time the climb collective is applied before switching to hover.",
-        "max_length": 73,
-        "needs_translation": false,
-        "translation": "Length of time the climb collective is applied before switching to hover."
-      },
-      "rescue_exit_time": {
-        "english": "This limits rapid application of negative collective if the helicopter has rolled during rescue.",
-        "max_length": 96,
-        "needs_translation": false,
-        "translation": "This limits rapid application of negative collective if the helicopter has rolled during rescue."
-      },
-      "rescue_flip_gain": {
-        "english": "Determine how aggressively the heli flips during inverted rescue.",
-        "max_length": 65,
-        "needs_translation": false,
-        "translation": "Determine how aggressively the heli flips during inverted rescue."
-      },
-      "rescue_flip_mode": {
-        "english": "If rescue is activated while inverted, flip to upright - or remain inverted.",
-        "max_length": 76,
-        "needs_translation": false,
-        "translation": "If rescue is activated while inverted, flip to upright - or remain inverted."
-      },
-      "rescue_flip_time": {
-        "english": "If the helicopter is in rescue and is trying to flip to upright and does not within this time, rescue will be aborted.",
-        "max_length": 118,
-        "needs_translation": false,
-        "translation": "If the helicopter is in rescue and is trying to flip to upright and does not within this time, rescue will be aborted."
-      },
-      "rescue_hover_collective": {
-        "english": "Collective value for hover.",
-        "max_length": 27,
-        "needs_translation": false,
-        "translation": "Collective value for hover."
-      },
-      "rescue_level_gain": {
-        "english": "Determine how aggressively the heli levels during rescue.",
-        "max_length": 57,
-        "needs_translation": false,
-        "translation": "Determine how aggressively the heli levels during rescue."
-      },
-      "rescue_max_setpoint_accel": {
-        "english": "Limit how fast the helicopter accelerates into a roll/pitch. Larger helicopters may need slower acceleration.",
-        "max_length": 109,
-        "needs_translation": false,
-        "translation": "Limit how fast the helicopter accelerates into a roll/pitch. Larger helicopters may need slower acceleration."
-      },
-      "rescue_max_setpoint_rate": {
-        "english": "Limit rescue roll/pitch rate. Larger helicopters may need slower rotation rates.",
-        "max_length": 80,
-        "needs_translation": false,
-        "translation": "Limit rescue roll/pitch rate. Larger helicopters may need slower rotation rates."
-      },
-      "rescue_pull_up_collective": {
-        "english": "Collective value for pull-up climb.",
-        "max_length": 35,
-        "needs_translation": false,
-        "translation": "Collective value for pull-up climb."
-      },
-      "rescue_pull_up_time": {
-        "english": "When rescue is activated, helicopter will apply pull-up collective for this time period before moving to flip or climb stage.",
-        "max_length": 125,
-        "needs_translation": false,
-        "translation": "When rescue is activated, helicopter will apply pull-up collective for this time period before moving to flip or climb stage."
-      },
-      "tbl_flip": {
-        "english": "FLIP",
-        "max_length": 4,
-        "needs_translation": false,
-        "translation": "FLIP"
-      },
-      "tbl_noflip": {
-        "english": "NO FLIP",
-        "max_length": 7,
-        "needs_translation": false,
-        "translation": "NO FLIP"
-      },
-      "tbl_off": {
-        "english": "OFF",
-        "max_length": 3,
-        "needs_translation": false,
-        "translation": "OFF"
-      },
-      "tbl_on": {
-        "english": "ON",
-        "max_length": 2,
-        "needs_translation": false,
-        "translation": "ON"
       }
     },
     "RXFAIL_CONFIG": {
@@ -8740,18 +8636,6 @@
           "needs_translation": false,
           "translation": "Error rotation"
         },
-        "ground_error_decay": {
-          "english": "Ground Error Decay",
-          "max_length": 18,
-          "needs_translation": false,
-          "translation": "Ground Error Decay"
-        },
-        "help_p1": {
-          "english": "Error decay ground: PID decay to help prevent heli from tipping over when on the ground.",
-          "max_length": 88,
-          "needs_translation": false,
-          "translation": "Error decay ground: PID decay to help prevent heli from tipping over when on the ground."
-        },
         "help_p2": {
           "english": "Error limit: Angle limit for I-term.",
           "max_length": 36,
@@ -8841,140 +8725,6 @@
           "max_length": 1,
           "needs_translation": false,
           "translation": "Y"
-        }
-      },
-      "profile_rescue": {
-        "accel": {
-          "english": "Accel",
-          "max_length": 5,
-          "needs_translation": false,
-          "translation": "Accel"
-        },
-        "climb": {
-          "english": "Climb",
-          "max_length": 5,
-          "needs_translation": false,
-          "translation": "Climb"
-        },
-        "collective": {
-          "english": "Collective",
-          "max_length": 10,
-          "needs_translation": false,
-          "translation": "Collective"
-        },
-        "exit_time": {
-          "english": "Exit time",
-          "max_length": 9,
-          "needs_translation": false,
-          "translation": "Exit time"
-        },
-        "fail_time": {
-          "english": "Fail time",
-          "max_length": 9,
-          "needs_translation": false,
-          "translation": "Fail time"
-        },
-        "flip": {
-          "english": "Flip",
-          "max_length": 4,
-          "needs_translation": false,
-          "translation": "Flip"
-        },
-        "flip_upright": {
-          "english": "Flip to upright",
-          "max_length": 15,
-          "needs_translation": false,
-          "translation": "Flip to upright"
-        },
-        "gains": {
-          "english": "Gains",
-          "max_length": 5,
-          "needs_translation": false,
-          "translation": "Gains"
-        },
-        "help_p1": {
-          "english": "Flip to upright: Flip the heli upright when rescue is activated.",
-          "max_length": 64,
-          "needs_translation": false,
-          "translation": "Flip to upright: Flip the heli upright when rescue is activated."
-        },
-        "help_p2": {
-          "english": "Pull-up: How much collective and for how long to arrest the fall.",
-          "max_length": 65,
-          "needs_translation": false,
-          "translation": "Pull-up: How much collective and for how long to arrest the fall."
-        },
-        "help_p3": {
-          "english": "Climb: How much collective to maintain a steady climb - and how long.",
-          "max_length": 69,
-          "needs_translation": false,
-          "translation": "Climb: How much collective to maintain a steady climb - and how long."
-        },
-        "help_p4": {
-          "english": "Hover: How much collective to maintain a steady hover.",
-          "max_length": 54,
-          "needs_translation": false,
-          "translation": "Hover: How much collective to maintain a steady hover."
-        },
-        "help_p5": {
-          "english": "Flip: How long to wait before aborting because the flip did not work.",
-          "max_length": 69,
-          "needs_translation": false,
-          "translation": "Flip: How long to wait before aborting because the flip did not work."
-        },
-        "help_p6": {
-          "english": "Gains: How hard to fight to keep heli level when engaging rescue mode.",
-          "max_length": 70,
-          "needs_translation": false,
-          "translation": "Gains: How hard to fight to keep heli level when engaging rescue mode."
-        },
-        "help_p7": {
-          "english": "Rate and Accel: Max rotation and acceleration rates when leveling during rescue.",
-          "max_length": 80,
-          "needs_translation": false,
-          "translation": "Rate and Accel: Max rotation and acceleration rates when leveling during rescue."
-        },
-        "hover": {
-          "english": "Hover",
-          "max_length": 5,
-          "needs_translation": false,
-          "translation": "Hover"
-        },
-        "level_gain": {
-          "english": "Level",
-          "max_length": 5,
-          "needs_translation": false,
-          "translation": "Level"
-        },
-        "mode_enable": {
-          "english": "Rescue mode enable",
-          "max_length": 18,
-          "needs_translation": false,
-          "translation": "Rescue mode enable"
-        },
-        "name": {
-          "english": "Rescue",
-          "max_length": 6,
-          "needs_translation": false,
-          "translation": "Rescue"
-        },
-        "pull_up": {
-          "english": "Pull-up",
-          "max_length": 7,
-          "needs_translation": false,
-          "translation": "Pull-up"
-        },
-        "rate": {
-          "english": "Rate",
-          "max_length": 4,
-          "needs_translation": false,
-          "translation": "Rate"
-        },
-        "time": {
-          "english": "Time",
-          "max_length": 4,
-          "needs_translation": false,
-          "translation": "Time"
         }
       },
       "profile_select": {

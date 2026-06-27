@@ -141,20 +141,15 @@ local function buildBoxes(W)
          titlepaddingtop = opts.titlepaddingtop, valuepaddingtop = opts.valuepaddingtop,
          textcolor = colorMode.textcolor, titlecolor = colorMode.titlecolor, bgcolor = colorMode.paneldarkbg},
 
-        -- Governor State (rows 5-7, right half)
-        {col = 17, row = 5, colspan = 4, rowspan = 3, type = "text", subtype = "governor",
-         title = "GOVERNOR STATE", titlepos = "top", titlealign = "center", valuealign = "center",
+        -- Arm status (rows 5-7, right half)
+        {col = 17, row = 5, colspan = 4, rowspan = 3, type = "text", subtype = "armflags",
+         title = "ARM STATUS", titlepos = "top", titlealign = "center", valuealign = "center",
          font = opts.titlefont, titlefont = opts.titlefont,
          titlepaddingtop = opts.titlepaddingtop, valuepaddingtop = opts.valuepaddingtop,
          textcolor = colorMode.textcolor, titlecolor = colorMode.titlecolor, bgcolor = colorMode.paneldarkbg,
          thresholds = {
              {value = "@i18n(widgets.governor.DISARMED)@", textcolor = colorMode.fillcritcolor},
-             {value = "@i18n(widgets.governor.OFF)@",      textcolor = colorMode.fillcritcolor},
-             {value = "@i18n(widgets.governor.IDLE)@",     textcolor = "blue"},
-             {value = "@i18n(widgets.governor.SPOOLUP)@",  textcolor = "blue"},
-             {value = "@i18n(widgets.governor.RECOVERY)@", textcolor = colorMode.fillwarncolor},
-             {value = "@i18n(widgets.governor.ACTIVE)@",   textcolor = colorMode.fillcolor},
-             {value = "@i18n(widgets.governor.THR-OFF)@",  textcolor = colorMode.fillcritcolor},
+             {value = "@i18n(widgets.governor.ARMED)@",    textcolor = colorMode.fillcolor},
          }},
 
         -- Rate (rows 8-10, left half)

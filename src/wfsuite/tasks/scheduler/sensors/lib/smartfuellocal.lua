@@ -67,14 +67,14 @@ local function chargeLevelFromVoltage(cellVoltage, minV, fullV)
 end
 
 -- Stick-load approximation matching firmware formula:
---   stickLoad = collective² + cyclic × 0.2
+--   stickLoad = cyclic × 0.2
+-- (no collective term -- fixed-wing has no collective input)
 -- RX values assumed ±500 normalised range.
 local function getStickLoadFactor()
     local rx = wfsuite.session.rx and wfsuite.session.rx.values
     if not rx then return 0 end
-    local collective = math_min(1.0, math.abs(rx.collective or 0) / 500.0)
-    local cyclic     = math_min(1.0, math_max(math.abs(rx.aileron or 0), math.abs(rx.elevator or 0)) / 500.0)
-    return math_min(1.0, collective * collective + cyclic * 0.2)
+    local cyclic = math_min(1.0, math_max(math.abs(rx.aileron or 0), math.abs(rx.elevator or 0)) / 500.0)
+    return math_min(1.0, cyclic * 0.2)
 end
 
 -- Sag compensation: add sagGain × stickLoad to per-cell voltage, inflight only.

@@ -90,15 +90,15 @@ local function buildBoxes(W)
             row = 10,
             rowspan = 3,
             type = "text",
-            subtype = "governor",
-            title = "@i18n(widgets.dashboard.governor):upper()@",
+            subtype = "armflags",
+            title = "ARM STATUS",
             titlepos = "bottom",
             font = opts.font,
             bgcolor = colorMode.bgcolor,
             titlecolor = colorMode.titlecolor,
             thresholds = {
-                {value = "@i18n(widgets.governor.DISARMED)@", textcolor = colorMode.fillcritcolor}, {value = "@i18n(widgets.governor.OFF)@", textcolor = colorMode.fillcritcolor}, {value = "@i18n(widgets.governor.IDLE)@", textcolor = "blue"}, {value = "@i18n(widgets.governor.SPOOLUP)@", textcolor = "blue"}, {value = "@i18n(widgets.governor.RECOVERY)@", textcolor = colorMode.fillwarncolor}, {value = "@i18n(widgets.governor.ACTIVE)@", textcolor = colorMode.fillcolor},
-                {value = "@i18n(widgets.governor.THR-OFF)@", textcolor = colorMode.fillcritcolor}
+                {value = "@i18n(widgets.governor.DISARMED)@", textcolor = colorMode.fillcritcolor},
+                {value = "@i18n(widgets.governor.ARMED)@", textcolor = colorMode.fillcolor}
             }
         }, {col = 3, row = 1, colspan = 3, rowspan = 9, type = "image", subtype = "model", bgcolor = colorMode.bgcolor},
         {col = 3, row = 10, rowspan = 3, type = "text", subtype = "telemetry", source = "rate_profile", title = "@i18n(widgets.dashboard.rates):upper()@", titlepos = "bottom", font = opts.font, transform = "floor", bgcolor = colorMode.bgcolor, titlecolor = colorMode.titlecolor, thresholds = {{value = 1.5, textcolor = "blue"}, {value = 2.5, textcolor = colorMode.fillwarncolor}, {value = 6, textcolor = colorMode.fillcolor}}},

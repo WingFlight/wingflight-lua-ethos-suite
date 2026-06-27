@@ -22,7 +22,7 @@ local TBL_ITERM_RELAX = {
 --   decimals, scale, step, mult, table, tableIdxInc, mandatory, byteorder, tableEthos
 local FIELD_SPEC = {
     {"pid_mode", "U8"},
-    {"error_decay_time_ground", "U8", 0, 250, 2.5, "s", 1, 10},
+    {"unused_error_decay_time_ground", "U8"}, -- heli-only, removed
     {"error_decay_time_cyclic", "U8", 0, 250, 25, "s", 1, 10},
     {"unused_error_decay_time_yaw", "U8"}, -- heli-only, removed
     {"error_decay_limit_cyclic", "U8", 0, 25, 12, "°"},
@@ -70,7 +70,7 @@ local FIELD_SPEC = {
 
 local SIM_RESPONSE = core.simResponse({
     1,    -- pid_mode
-    25,   -- error_decay_time_ground
+    0,    -- unused_error_decay_time_ground
     250,  -- error_decay_time_cyclic
     0,    -- unused_error_decay_time_yaw
     12,   -- error_decay_limit_cyclic

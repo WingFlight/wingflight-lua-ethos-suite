@@ -17,7 +17,6 @@ local wasActive = false
 local taskExecutionPercent = 50
 local taskEntries = {
     {name = "armflags", path = "tasks/scheduler/toolbox/tasks/armflags.lua"},
-    {name = "governor", path = "tasks/scheduler/toolbox/tasks/governor.lua"},
     {name = "craftname", path = "tasks/scheduler/toolbox/tasks/craftname.lua"},
     {name = "bbl", path = "tasks/scheduler/toolbox/tasks/bbl.lua"},
     {name = "craftimage", path = "tasks/scheduler/toolbox/tasks/craftimage.lua"},

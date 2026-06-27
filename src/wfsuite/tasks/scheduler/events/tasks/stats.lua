@@ -20,10 +20,6 @@ local math_abs = math.abs
 
 local rpmStatsReady = false
 
-local function isGovernorAtHeadspeed(value)
-    return type(value) == "number" and math_floor(value) == 4
-end
-
 local function roundSigned(value)
     if value >= 0 then return math_floor(value + 0.5) end
     return -math_floor(-value + 0.5)
@@ -93,8 +89,7 @@ function stats.wakeup()
         telemetry.sensorStats = statsTable
     end
 
-    local governorValue = telemetry.getSensor("governor")
-    if not rpmStatsReady and isGovernorAtHeadspeed(governorValue) then
+    if not rpmStatsReady and wfsuite.session and wfsuite.session.isArmed then
         if filteredSensors["rpm"] then statsTable["rpm"] = nil end
         rpmStatsReady = true
     end
@@ -105,7 +100,7 @@ function stats.wakeup()
 
     local rpmValue = nil
     for sensorKey, _ in pairs(filteredSensors) do
-        local val = sensorKey == "governor" and governorValue or telemetry.getSensor(sensorKey)
+        local val = telemetry.getSensor(sensorKey)
         if sensorKey == "rpm" then rpmValue = val end
 
         if val and type(val) == "number" and (sensorKey ~= "rpm" or rpmStatsReady) then

@@ -5,7 +5,6 @@
 
 return {
     ["pid_mode"] = "@i18n(api.PID_PROFILE.pid_mode)@",
-    ["error_decay_time_ground"] = "@i18n(api.PID_PROFILE.error_decay_time_ground)@",
     ["error_decay_time_cyclic"] = "@i18n(api.PID_PROFILE.error_decay_time_cyclic)@",
     ["error_decay_limit_cyclic"] = "@i18n(api.PID_PROFILE.error_decay_limit_cyclic)@",
     ["error_rotation"] = "@i18n(api.PID_PROFILE.error_rotation)@",
