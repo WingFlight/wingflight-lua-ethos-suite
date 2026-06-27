@@ -32,7 +32,6 @@ return {
     smartfuel = {{category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5FE1}},
     smartconsumption = {{category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5FE0}},
     consumption = {{uid = 0x5008, unit = UNIT_MILLIAMPERE_HOUR, dec = 0, value = function() return simSensors('consumption') end, min = 0, max = 5000}},
-    governor = {{uid = 0x5009, unit = nil, dec = 0, value = function() return simSensors('governor') end, min = 0, max = 200}},
     adj_f = {{uid = 0x5010, unit = nil, dec = 0, value = function() return simSensors('adj_f') end, min = 0, max = 10}},
     adj_v = {{uid = 0x5011, unit = nil, dec = 0, value = function() return simSensors('adj_v') end, min = 0, max = 2000}},
     pid_profile = {{uid = 0x5012, unit = nil, dec = 0, value = function() return simSensors('pid_profile') end, min = 0, max = 6}},

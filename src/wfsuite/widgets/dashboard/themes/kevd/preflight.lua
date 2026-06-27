@@ -362,8 +362,8 @@ local function buildBoxes(W)
             offsetx = -5,
             offsety = -10,
             type = "text",
-            subtype = "governor",
-            title = "GOVERNOR",
+            subtype = "armflags",
+            title = "ARM STATUS",
             titlepos = "bottom",
             font = opts.govfont,
             titlefont = opts.titlefont,
@@ -374,8 +374,8 @@ local function buildBoxes(W)
             bgcolor = statusTileRightEdgeBg,
             titlecolor = colorMode.titlecolor,
             thresholds = {
-                {value = "DISARMED", textcolor = colorMode.fillcritcolor}, {value = "OFF", textcolor = colorMode.fillcritcolor}, {value = "IDLE", textcolor = colorMode.accentcolor}, {value = "SPOOLUP", textcolor = colorMode.accentcolor}, {value = "RECOVERY", textcolor = lcd.RGB(0xE3, 0xA3, 0x00)}, {value = "ACTIVE", textcolor = colorMode.fillcolor},
-                {value = "@i18n(widgets.governor.THR-OFF)@", textcolor = colorMode.fillcritcolor}
+                {value = "@i18n(widgets.governor.DISARMED)@", textcolor = colorMode.fillcritcolor},
+                {value = "@i18n(widgets.governor.ARMED)@", textcolor = colorMode.fillcolor}
             }
         }
     }

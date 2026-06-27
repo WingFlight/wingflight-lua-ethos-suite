@@ -31,7 +31,6 @@ function utils.session()
         tailMode = nil,
         swashMode = nil,
         rateProfile = nil,
-        governorMode = nil,
 
         activeProfile = nil,
         activeRateProfile = nil,
@@ -298,46 +297,6 @@ function utils.armingDisableFlagsToString(flags)
     if #names == 0 then return "@i18n(app.modules.fblstatus.ok):upper()@" end
 
     return table.concat(names, ", ")
-end
-
-function utils.getGovernorState(value)
-    local returnvalue
-
-    if not wfsuite.tasks.telemetry then return "@i18n(widgets.governor.UNKNOWN)@" end
-
-    local map = {
-        [0] = "@i18n(widgets.governor.OFF):upper()@",
-        [1] = "@i18n(widgets.governor.IDLE):upper()@",
-        [2] = "@i18n(widgets.governor.SPOOLUP):upper()@",
-        [3] = "@i18n(widgets.governor.RECOVERY):upper()@",
-        [4] = "@i18n(widgets.governor.ACTIVE):upper()@",
-        [5] = "@i18n(widgets.governor.THROFF):upper()@",
-        [6] = "@i18n(widgets.governor.LOSTHS):upper()@",
-        [7] = "@i18n(widgets.governor.AUTOROT):upper()@",
-        [8] = "@i18n(widgets.governor.BAILOUT):upper()@",
-        [100] = "@i18n(widgets.governor.DISABLED):upper()@",
-        [101] = "@i18n(widgets.governor.DISARMED):upper()@"
-    }
-
-    if wfsuite.session and wfsuite.session.apiVersion and wfsuite.utils.apiVersionCompare(">", {22, 0, 0}) then
-        local armflags = wfsuite.tasks.telemetry.getSensor("armflags")
-        if utils.armFlagsToIsArmed(armflags) == false then value = 101 end
-    end
-
-    if map[value] then
-        returnvalue = map[value]
-    else
-        returnvalue = "@i18n(widgets.governor.UNKNOWN):upper()@"
-    end
-
-    local armdisableflags = wfsuite.tasks.telemetry.getSensor("armdisableflags")
-    if armdisableflags ~= nil then
-        armdisableflags = math.floor(armdisableflags)
-        local armstring = utils.armingDisableFlagsToString(armdisableflags)
-        if armstring ~= "OK" then returnvalue = armstring end
-    end
-
-    return returnvalue
 end
 
 local directoryExistenceCache = {}

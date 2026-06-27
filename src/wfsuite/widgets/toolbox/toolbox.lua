@@ -14,7 +14,10 @@ local LCD_W, LCD_H
 local BUSY_WAKEUP_RUN_NUM = 2
 local BUSY_WAKEUP_RUN_DEN = 3
 
-local toolBoxList = {[1] = {object = "armflags", name = "@i18n(widgets.armflags.name)@"}, [2] = {object = "bbl", name = "@i18n(widgets.bbl.name)@"}, [3] = {object = "craftname", name = "@i18n(widgets.craftname.name)@"}, [4] = {object = "governor", name = "@i18n(widgets.governor.name)@"}, [5] = {object = "craftimage", name = "@i18n(widgets.craftimage.name)@"}, [6] = {object = "timer", name = "@i18n(widgets.dashboard.flight_time)@"}}
+-- NOTE: indices are persisted in widget storage (see toolbox.read/write below); do not reorder or
+-- remove entries. Index 4 ("governor") is retired (wingflight is fixed-wing only) and kept as an
+-- unused placeholder so existing saved widget configs referencing indices 5/6 are not remapped.
+local toolBoxList = {[1] = {object = "armflags", name = "@i18n(widgets.armflags.name)@"}, [2] = {object = "bbl", name = "@i18n(widgets.bbl.name)@"}, [3] = {object = "craftname", name = "@i18n(widgets.craftname.name)@"}, [4] = {object = "unused", name = "*Unused*"}, [5] = {object = "craftimage", name = "@i18n(widgets.craftimage.name)@"}, [6] = {object = "timer", name = "@i18n(widgets.dashboard.flight_time)@"}}
 local themeColorCache = {usesThemeColors = nil, primary = nil, secondary = nil, colors = nil, legacyDark = nil, legacyColors = nil}
 
 local function rgb(r, g, b, a) return lcd.RGB(r, g, b, a or 1) end

@@ -42,7 +42,7 @@ local FEATURES_BITMAP = {
     { field = "unused_23", tableIdxInc = -1, table = TBL_OFF_ON },
     { field = "unused_24", tableIdxInc = -1, table = TBL_OFF_ON },
     { field = "rx_spi", tableIdxInc = -1, table = TBL_OFF_ON },
-    { field = "governor", tableIdxInc = -1, table = TBL_OFF_ON },
+    { field = "unused_26", tableIdxInc = -1, table = TBL_OFF_ON },
     { field = "esc_sensor", tableIdxInc = -1, table = TBL_OFF_ON },
     { field = "freq_sensor", tableIdxInc = -1, table = TBL_OFF_ON },
     { field = "dyn_notch", tableIdxInc = -1, table = TBL_OFF_ON },

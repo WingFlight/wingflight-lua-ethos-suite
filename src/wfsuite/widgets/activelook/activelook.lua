@@ -43,7 +43,7 @@ local function clamp(val, min, max)
 end
 
 local DEFAULT_LAYOUT = {
-    preflight = {"governor", "armed", "flightmode", "off"},
+    preflight = {"flightmode", "armed", "off", "off"},
     inflight = {"current", "voltage", "fuel", "timer"},
     postflight = {"current", "voltage", "fuel", "timer"}
 }
@@ -80,14 +80,6 @@ local SENSOR_DEFS = {
         icon = {small = 8, large = 40}, -- chrono
         value = function(context)
             return context.lastFlightSecondsText or "00:00"
-        end
-    },
-    governor = {
-        label = "Governor",
-        value = function()
-            local raw = getSensorValue("governor")
-            if raw ~= nil and type(raw) == "number" then raw = floor(raw) end
-            return wfsuite.utils.getGovernorState(raw)
         end
     },
     armed = {
