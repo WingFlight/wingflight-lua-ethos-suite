@@ -21,7 +21,6 @@ local frsky_legacy = {}
 frsky_legacy.name = "frsky_legacy"
 
 local createSensorList = {}
-createSensorList[0x5450] = {name = "Governor Flags", unit = UNIT_RAW}
 createSensorList[0x5110] = {name = "Adj. Source", unit = UNIT_RAW}
 createSensorList[0x5111] = {name = "Adj. Value", unit = UNIT_RAW}
 createSensorList[0x5460] = {name = "Model ID", unit = UNIT_RAW}

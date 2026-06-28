@@ -133,11 +133,14 @@ local function rightStackWakeup(box, telemetry)
     c.cellStr = formatCellVoltageAndCount(voltage)
     c.consumedStr = formatConsumedMah(consumed)
 
-    local govRaw = getSensor and getSensor("governor")
-    if govRaw == nil then
+    local armRaw = getSensor and getSensor("armflags")
+    local isArmed = wfsuite.utils.armFlagsToIsArmed(armRaw)
+    if isArmed == nil then
         c.governorText = utils.getPulsingDots(box, "_govDots")
+    elseif isArmed then
+        c.governorText = "@i18n(widgets.governor.ARMED)@"
     else
-        c.governorText = wfsuite.utils.getGovernorState(govRaw)
+        c.governorText = "@i18n(widgets.governor.DISARMED)@"
     end
     c.governorColor = utils.resolveThresholdColor(c.governorText, box, "textcolor", "textcolor", box.rs_govthresholds)
 
@@ -189,7 +192,7 @@ local function rightStackPaint(x, y, w, h, box, c)
     utils.drawBoxBackground(x, govBgY, w, govBgH, box.rs_govbgstyle)
 
     utils.box(x, govY + box.rs_govoffsety, w, govBgH,
-        "GOVERNOR", "bottom", "center", box.rs_govfont, box.rs_govtitlespacing, box.rs_titlecolor,
+        "ARM STATUS", "bottom", "center", box.rs_govfont, box.rs_govtitlespacing, box.rs_titlecolor,
         nil, nil, nil, nil, box.rs_govtitlepaddingbottom,
         c.governorText, nil, box.rs_govfont, "center", c.governorColor,
         nil, nil, nil, nil, box.rs_govvaluepaddingbottom,
@@ -413,13 +416,8 @@ local function buildBoxes(W)
             rs_govtitlepaddingbottom = governorTitlePaddingBottom,
             rs_govvaluepaddingbottom = governorValuePaddingBottom,
             rs_govthresholds = {
-                {value = "DISARMED", textcolor = colorMode.fillcritcolor},
-                {value = "OFF", textcolor = colorMode.fillcritcolor},
-                {value = "IDLE", textcolor = colorMode.accentcolor},
-                {value = "SPOOLUP", textcolor = colorMode.accentcolor},
-                {value = "RECOVERY", textcolor = colorMode.fillwarncolor},
-                {value = "ACTIVE", textcolor = colorMode.fillcolor},
-                {value = "@i18n(widgets.governor.THR-OFF)@", textcolor = colorMode.fillcritcolor}
+                {value = "@i18n(widgets.governor.DISARMED)@", textcolor = colorMode.fillcritcolor},
+                {value = "@i18n(widgets.governor.ARMED)@", textcolor = colorMode.fillcolor}
             }
         },
         {

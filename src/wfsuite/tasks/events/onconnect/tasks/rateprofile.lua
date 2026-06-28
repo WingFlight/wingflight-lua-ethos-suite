@@ -14,9 +14,9 @@ function rateprofile.wakeup()
     if wfsuite.session.apiVersion == nil then return end
 
     if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
-      -- we use rotorflight rates for 12.09 and above
-      wfsuite.config.defaultRateProfile = 6
-      wfsuite.utils.log("Default Rate Profile: ROTORFLIGHT", "console")
+      -- wingflight only has one rate curve now
+      wfsuite.config.defaultRateProfile = 0
+      wfsuite.utils.log("Default Rate Profile: WINGFLIGHT", "console")
     else
       -- we use actual rates for below 12.09
       wfsuite.config.defaultRateProfile = 4 

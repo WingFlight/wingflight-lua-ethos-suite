@@ -219,13 +219,6 @@ return {
         unit_string = "mAh",
     },
 
-    governor = {
-        name = "@i18n(sensors.governor)@",
-        mandatory = true,
-        stats = false,
-        set_telemetry_sensors = 93,
-    },
-
     adj_f = {
         name = "@i18n(sensors.adj_func)@",
         mandatory = true,

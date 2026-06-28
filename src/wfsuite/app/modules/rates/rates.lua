@@ -7,15 +7,7 @@ local wfsuite = require("wfsuite")
 local lcd = lcd
 local rfutils = wfsuite.utils
 
-local RATE_TABLES = {
-    [0] = "app/modules/rates/ratetables/none.lua",
-    [1] = "app/modules/rates/ratetables/betaflight.lua",
-    [2] = "app/modules/rates/ratetables/raceflight.lua",
-    [3] = "app/modules/rates/ratetables/kiss.lua",
-    [4] = "app/modules/rates/ratetables/actual.lua",
-    [5] = "app/modules/rates/ratetables/quick.lua",
-    [6] = "app/modules/rates/ratetables/rotorflight.lua"
-}
+local RATE_TABLE_PATH = "app/modules/rates/ratetables/wingflight.lua"
 
 local page = {
     title = "@i18n(app.modules.rates.name)@",
@@ -35,20 +27,6 @@ local state = {
 }
 
 local activateWakeup = false
-
-local function cachePolarState(polarEnabled)
-    local session = wfsuite.session
-    local activeRateProfile = session and session.activeRateProfile
-    if activeRateProfile == nil or polarEnabled == nil then return end
-
-    local cache = session.rateProfilePolarState
-    if not cache then
-        cache = {}
-        session.rateProfilePolarState = cache
-    end
-
-    cache[activeRateProfile] = (polarEnabled == true)
-end
 
 local function rightAlignText(width, text)
     local textWidth, _ = lcd.getTextSize(text)
@@ -105,25 +83,11 @@ local function cacheApiData(apiName, api, enableDeltaCache)
     shared.other[apiName] = data.other or {}
 end
 
-local function loadRateTable(tableId, polarEnabled)
-    local tablePath = RATE_TABLES[tableId]
-    if not tablePath then
-        tableId = wfsuite.config.defaultRateProfile
-        tablePath = RATE_TABLES[tableId]
-    end
+local function loadRateTable()
+    wfsuite.utils.log("Loading Rate Table: " .. RATE_TABLE_PATH, "debug")
 
-    wfsuite.utils.log("Loading Rate Table: " .. tostring(tablePath), "debug")
-
-    local session = wfsuite.session
-    session.activeRateTable = tableId
-    session.applyPolarRateLayout = true
-    session.pendingPolarRateLayout = (polarEnabled == true)
-
-    local chunk = assert(loadfile(tablePath))
+    local chunk = assert(loadfile(RATE_TABLE_PATH))
     local ok, loadedTable = pcall(chunk)
-
-    session.applyPolarRateLayout = false
-    session.pendingPolarRateLayout = nil
 
     assert(ok, loadedTable)
     return loadedTable
@@ -276,13 +240,9 @@ local function startLoad()
     api.setCompleteHandler(function()
         if token ~= state.loadToken then return end
 
-        local rateType = tonumber(api.readValue("rates_type") or wfsuite.config.defaultRateProfile) or wfsuite.config.defaultRateProfile
-        local polarEnabled = tonumber(api.readValue("cyclic_polarity") or 0) == 1
-
-        cachePolarState(polarEnabled)
         cacheApiData("RC_TUNING", api, false)
 
-        page.apidata = loadRateTable(rateType, polarEnabled)
+        page.apidata = loadRateTable()
         page.apidata.apiState = page.apidata.apiState or {isProcessing = false}
         applyFieldValues(page.apidata.formdata, api)
 
@@ -363,9 +323,8 @@ end
 local function onHelpMenu()
     local helpPath = "app/modules/rates/help.lua"
     local help = assert(loadfile(helpPath))()
-    local activeRateTable = wfsuite.session and wfsuite.session.activeRateTable
-    if activeRateTable ~= nil and help.help and help.help.table and help.help.table[activeRateTable] then
-        wfsuite.app.ui.openPageHelp(help.help.table[activeRateTable])
+    if help.help and help.help.table and help.help.table[0] then
+        wfsuite.app.ui.openPageHelp(help.help.table[0])
     end
 end
 

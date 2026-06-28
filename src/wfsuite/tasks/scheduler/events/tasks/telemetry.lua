@@ -54,19 +54,6 @@ local PROFILE_HASH_BASE = 131
 local SMARTFUEL_RESYNC_GAP_S = 3.0
 
 local armMap = {[0] = "disarmed.wav", [1] = "armed.wav", [2] = "disarmed.wav", [3] = "armed.wav"}
-local governorMap = {
-    [0] = "off.wav",
-    [1] = "idle.wav",
-    [2] = "spoolup.wav",
-    [3] = "recovery.wav",
-    [4] = "active.wav",
-    [5] = "thr-off.wav",
-    [6] = "lost-hs.wav",
-    [7] = "autorot.wav",
-    [8] = "bailout.wav",
-    [100] = "disabled.wav",
-    [101] = "disarmed.wav"
-}
 
 local lastSmartfuelSel = nil
 local cachedSmartfuelThresholds = nil
@@ -477,16 +464,6 @@ local eventTable = {
             end
         end
     }, {sensor = "smartfuel", event = function(value) smartfuelCallout(value, now) end}, {
-        sensor = "governor",
-        event = function(value)
-            local key = "governor"
-            if value == lastValues[key] then return end
-            local session = wfsuite.session
-            if not session.isArmed or session.governorMode == 0 then return end
-            local filename = governorMap[math_floor(value)]
-            if filename then utils.playFile("events", "gov/" .. filename) end
-        end
-    }, {
         sensor = "pid_profile",
         debounce = 0.25,
         event = function(value)
@@ -522,15 +499,6 @@ local eventTable = {
 }
 
 function telemetry.wakeup()
-
-    -- we need governor mode for some events
-    if wfsuite.session.governorMode == nil then
-        if wfsuite.tasks and wfsuite.tasks.msp and wfsuite.tasks.msp.helpers then
-            wfsuite.tasks.msp.helpers.governorMode(function(governorMode)
-                utils.log("Telemetry event Received governor mode: " .. tostring(governorMode), "info")
-            end)
-        end
-    end
 
     now = os_clock()
     local eventPrefs = wfsuite.preferences.events or {}

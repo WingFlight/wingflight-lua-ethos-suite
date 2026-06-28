@@ -50,7 +50,6 @@ return {
                 {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5FE0}
             },
     consumption = {{category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5250}},
-    governor = {{category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5125}, {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5450}},
     adj_f = {{category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5110}},
     adj_v = {{category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5111}},
     pid_profile = {{category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5130}, {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5471}},

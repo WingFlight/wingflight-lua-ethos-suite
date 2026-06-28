@@ -44,7 +44,6 @@ return {
     -- Motor/Rotor
     rpm = {{category = CATEGORY_TELEMETRY_SENSOR, appId = 0x10C0}},
     tailspeed = {{category = CATEGORY_TELEMETRY_SENSOR, appId = 0x10C1}},
-    governor = {{category = CATEGORY_TELEMETRY_SENSOR, appId = 0x1205}},
 
     -- Adjustments & Profiles
     adj_f = {{category = CATEGORY_TELEMETRY_SENSOR, appId = 0x1221}},

@@ -72,13 +72,6 @@ local function getMSPBattery()
     API.read()
 end
 
-local function getMSPGovernor()
-    local API = tasks.msp.api.loadPage("GOVERNOR_CONFIG")
-    API.setCompleteHandler(function(self, buf) doNextMsp = true end)
-    API.setUUID("mspspeed-governor")
-    API.read()
-end
-
 local function getMSPMixer()
     local API = tasks.msp.api.loadPage("MIXER_CONFIG")
     API.setCompleteHandler(function(self, buf) doNextMsp = true end)
@@ -91,9 +84,6 @@ local function getMSP()
     if getMSPCount == 0 then
         getMSPBattery()
         getMSPCount = 1
-    elseif getMSPCount == 1 then
-        getMSPGovernor()
-        getMSPCount = 2
     else
         getMSPMixer()
         getMSPCount = 0

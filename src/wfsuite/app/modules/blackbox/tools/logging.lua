@@ -12,7 +12,6 @@ local tasks = wfsuite.tasks
 
 local FEATURE_BITS = {
     gps = 7,
-    governor = 26,
     esc_sensor = 27
 }
 
@@ -61,8 +60,7 @@ local FIELD_DEFS = {
     {label = "@i18n(app.modules.blackbox.log_temps)@", bit = 18},
     {label = "@i18n(app.modules.blackbox.log_esc)@", bit = 19, apiversiongte = {22, 0, 0}, featureBit = FEATURE_BITS.esc_sensor},
     {label = "@i18n(app.modules.blackbox.log_bec)@", bit = 20, apiversiongte = {22, 0, 0}, featureBit = FEATURE_BITS.esc_sensor},
-    {label = "@i18n(app.modules.blackbox.log_esc2)@", bit = 21, apiversiongte = {22, 0, 0}, featureBit = FEATURE_BITS.esc_sensor},
-    {label = "@i18n(app.modules.blackbox.log_governor)@", bit = 22, apiversiongte = {22, 0, 0}, featureBit = FEATURE_BITS.governor}
+    {label = "@i18n(app.modules.blackbox.log_esc2)@", bit = 21, apiversiongte = {22, 0, 0}, featureBit = FEATURE_BITS.esc_sensor}
 }
 
 local function copyTable(src)

@@ -181,8 +181,8 @@ local function buildBoxes(W)
             colspan = 4,
             rowspan = 3,
             type = "text",
-            subtype = "governor",
-            title = "GOVERNOR",
+            subtype = "armflags",
+            title = "ARM STATUS",
             titlepos = "top",
             titlealign = "center",
             titlefont = opts.titlefont,
@@ -191,6 +191,10 @@ local function buildBoxes(W)
             titlecolor = colorMode.titlecolor,
             titlepaddingtop = opts.titlepaddingtop,
             bgcolor = "olive",
+            thresholds = {
+                {value = "@i18n(widgets.governor.DISARMED)@", textcolor = colorMode.fillcritcolor},
+                {value = "@i18n(widgets.governor.ARMED)@", textcolor = colorMode.fillcolor}
+            },
         },
         {
             col = 1,

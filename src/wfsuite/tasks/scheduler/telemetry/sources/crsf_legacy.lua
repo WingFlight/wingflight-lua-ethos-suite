@@ -29,7 +29,6 @@ return {
     smartfuel = nil,
     smartconsumption = nil,
     consumption = {"Rx Cons"},
-    governor = {"Flight mode"},
     adj_f = {nil},
     adj_v = {nil},
     pid_profile = {nil},

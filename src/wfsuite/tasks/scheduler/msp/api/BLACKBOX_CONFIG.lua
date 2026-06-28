@@ -43,10 +43,6 @@ if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
     BLACKBOX_FIELDS_BITMAP[#BLACKBOX_FIELDS_BITMAP + 1] = { field = "esc2", tableIdxInc = -1, table = TBL_OFF_ON }
 end
 
-if wfsuite.utils.apiVersionCompare(">=", {22, 0, 0}) then
-    BLACKBOX_FIELDS_BITMAP[#BLACKBOX_FIELDS_BITMAP + 1] = { field = "governor", tableIdxInc = -1, table = TBL_OFF_ON }
-end
-
 -- Tuple layout:
 --   field, type, min, max, default, unit,
 --   decimals, scale, step, mult, table, tableIdxInc, mandatory, byteorder, tableEthos
