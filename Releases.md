@@ -1,7 +1,3 @@
-# 0.0.2
-
-Adjust default pids
-
 # 0.0.1
 
 First snapshot release of the Wingflight Lua Suite for FrSky Ethos.
