@@ -15,17 +15,17 @@ local MSP_API_CMD_WRITE = 202
 --   decimals, scale, step, mult, table, tableIdxInc, mandatory, byteorder, tableEthos
 local FIELD_SPEC = {
     {"pid_0_P", "U16", 0, 1000, 50},
-    {"pid_0_I", "U16", 0, 1000, 10},
+    {"pid_0_I", "U16", 0, 1000, 16},
     {"pid_0_D", "U16", 0, 1000, 0},
     {"pid_0_F", "U16", 0, 1000, 100},
 
     {"pid_1_P", "U16", 0, 1000, 50},
-    {"pid_1_I", "U16", 0, 1000, 10},
+    {"pid_1_I", "U16", 0, 1000, 16},
     {"pid_1_D", "U16", 0, 1000, 0},
     {"pid_1_F", "U16", 0, 1000, 100},
 
     {"pid_2_P", "U16", 0, 1000, 80},
-    {"pid_2_I", "U16", 0, 1000, 15},
+    {"pid_2_I", "U16", 0, 1000, 20},
     {"pid_2_D", "U16", 0, 1000, 0},
     {"pid_2_F", "U16", 0, 1000, 100},
 
@@ -39,17 +39,17 @@ local FIELD_SPEC = {
 
 local SIM_RESPONSE = core.simResponse({
     50, 0,   -- pid_0_P
-    10, 0,   -- pid_0_I
+    16, 0,   -- pid_0_I
     0, 0,    -- pid_0_D
     100, 0,  -- pid_0_F
 
     50, 0,   -- pid_1_P
-    10, 0,   -- pid_1_I
+    16, 0,   -- pid_1_I
     0, 0,    -- pid_1_D
     100, 0,  -- pid_1_F
 
     80, 0,   -- pid_2_P
-    15, 0,   -- pid_2_I
+    20, 0,   -- pid_2_I
     0, 0,    -- pid_2_D
     100, 0,  -- pid_2_F
 
