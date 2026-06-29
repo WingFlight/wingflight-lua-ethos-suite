@@ -5,8 +5,8 @@
 
 return {
     ["pid_mode"] = "@i18n(api.PID_PROFILE.pid_mode)@",
-    ["error_decay_time_cyclic"] = "@i18n(api.PID_PROFILE.error_decay_time_cyclic)@",
-    ["error_decay_limit_cyclic"] = "@i18n(api.PID_PROFILE.error_decay_limit_cyclic)@",
+    ["iterm_decay_time"] = "@i18n(api.PID_PROFILE.iterm_decay_time)@",
+    ["iterm_decay_limit"] = "@i18n(api.PID_PROFILE.iterm_decay_limit)@",
     ["error_rotation"] = "@i18n(api.PID_PROFILE.error_rotation)@",
     ["error_limit_0"] = "@i18n(api.PID_PROFILE.error_limit_0)@",
     ["error_limit_1"] = "@i18n(api.PID_PROFILE.error_limit_1)@",

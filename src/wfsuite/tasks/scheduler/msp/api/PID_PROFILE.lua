@@ -23,9 +23,9 @@ local TBL_ITERM_RELAX = {
 local FIELD_SPEC = {
     {"pid_mode", "U8"},
     {"unused_error_decay_time_ground", "U8"}, -- heli-only, removed
-    {"error_decay_time_cyclic", "U8", 0, 250, 1.5, "s", 1, 10},
+    {"iterm_decay_time", "U8", 0, 250, 1.5, "s", 1, 10},
     {"unused_error_decay_time_yaw", "U8"}, -- heli-only, removed
-    {"error_decay_limit_cyclic", "U8", 0, 25, 12, "°"},
+    {"iterm_decay_limit", "U8", 0, 25, 12, "°"},
     {"unused_error_decay_limit_yaw", "U8"}, -- heli-only, removed
     {"error_rotation", "U8", 0, 1, nil, nil, nil, nil, nil, nil, TBL_OFF_ON},
     {"error_limit_0", "U8", 0, 180, 45, "°"},
@@ -71,9 +71,9 @@ local FIELD_SPEC = {
 local SIM_RESPONSE = core.simResponse({
     1,    -- pid_mode
     0,    -- unused_error_decay_time_ground
-    15,   -- error_decay_time_cyclic
+    15,   -- iterm_decay_time
     0,    -- unused_error_decay_time_yaw
-    12,   -- error_decay_limit_cyclic
+    12,   -- iterm_decay_limit
     0,    -- unused_error_decay_limit_yaw
     1,    -- error_rotation
     45,   -- error_limit_0

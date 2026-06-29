@@ -1853,17 +1853,19 @@
         "needs_translation": false,
         "translation": "D-term cutoff in Hz."
       },
-      "error_decay_limit_cyclic": {
-        "english": "Maximum bleed-off speed for cyclic I-term.",
-        "max_length": 42,
+      "iterm_decay_limit": {
+        "english": "Maximum bleed-off speed for I-term error.",
+        "max_length": 64,
         "needs_translation": false,
-        "translation": "Maximum bleed-off speed for cyclic I-term."
+        "reverse_text": false,
+        "translation": "Maximum bleed-off speed for I-term error."
       },
-      "error_decay_time_cyclic": {
-        "english": "Time constant for bleeding off cyclic I-term. Higher will stabilize hover, lower will drift.",
-        "max_length": 92,
+      "iterm_decay_time": {
+        "english": "Time constant for bleeding off I-term error. Longer improves hold; shorter returns faster during aggressive maneuvers.",
+        "max_length": 120,
         "needs_translation": false,
-        "translation": "Time constant for bleeding off cyclic I-term. Higher will stabilize hover, lower will drift."
+        "reverse_text": false,
+        "translation": "Time constant for bleeding off I-term error. Longer improves hold; shorter returns faster during aggressive maneuvers."
       },
       "error_limit_0": {
         "english": "Hard limit for the angle error in the PID loop. The absolute error and thus the I-term will never go above these limits.",
