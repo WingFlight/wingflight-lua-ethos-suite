@@ -57,8 +57,8 @@ local FIELD_SPEC = {
     {"unused_cyclic_cross_coupling_gain", "U8"}, -- heli-only, removed
     {"unused_cyclic_cross_coupling_ratio", "U8"}, -- heli-only, removed
     {"unused_cyclic_cross_coupling_cutoff", "U8"}, -- heli-only, removed
-    {"unused_offset_limit_0", "U8"}, -- heli-only, removed
-    {"unused_offset_limit_1", "U8"}, -- heli-only, removed
+    {"atthold_gain", "U8", 0, 200, 40},
+    {"atthold_deadband", "U8", 0, 100, 5, "%"},
     {"bterm_cutoff_0", "U8", 0, 250, 15},
     {"bterm_cutoff_1", "U8", 0, 250, 15},
     {"bterm_cutoff_2", "U8", 0, 250, 20},
@@ -105,8 +105,8 @@ local SIM_RESPONSE = core.simResponse({
     0,    -- unused_cyclic_cross_coupling_gain
     0,    -- unused_cyclic_cross_coupling_ratio
     0,    -- unused_cyclic_cross_coupling_cutoff
-    0,    -- unused_offset_limit_0
-    0,    -- unused_offset_limit_1
+    40,   -- atthold_gain
+    5,    -- atthold_deadband
     15,   -- bterm_cutoff_0
     15,   -- bterm_cutoff_1
     20,   -- bterm_cutoff_2

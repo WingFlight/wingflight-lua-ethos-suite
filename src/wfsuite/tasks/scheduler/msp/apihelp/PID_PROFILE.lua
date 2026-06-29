@@ -26,6 +26,8 @@ return {
     ["horizon_level_strength"] = "@i18n(api.PID_PROFILE.horizon_level_strength)@",
     ["trainer_gain"] = "@i18n(api.PID_PROFILE.trainer_gain)@",
     ["trainer_angle_limit"] = "@i18n(api.PID_PROFILE.trainer_angle_limit)@",
+    ["atthold_gain"] = "@i18n(api.PID_PROFILE.atthold_gain)@",
+    ["atthold_deadband"] = "@i18n(api.PID_PROFILE.atthold_deadband)@",
     ["bterm_cutoff_0"] = "@i18n(api.PID_PROFILE.bterm_cutoff_0)@",
     ["bterm_cutoff_1"] = "@i18n(api.PID_PROFILE.bterm_cutoff_1)@",
     ["bterm_cutoff_2"] = "@i18n(api.PID_PROFILE.bterm_cutoff_2)@",
