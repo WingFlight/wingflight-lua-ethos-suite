@@ -2,6 +2,7 @@
 
 Add in ability to set master gains on RPY via lua
 Added in support for flight modes sensor
+Ensure flight mode sensor is enabled by default
 
 # 0.0.1
 
