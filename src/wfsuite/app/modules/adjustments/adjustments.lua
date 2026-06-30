@@ -113,7 +113,9 @@ local ADJUST_FUNCTIONS = {
     {id = 81, name = "@i18n(app.modules.adjustments.fn_gov_yaw_ff)@", min = 0, max = 250, minApi = {22, 0, 0}, hide = true},
     {id = 82, name = "@i18n(app.modules.adjustments.fn_battery_profile)@", min = 1, max = 6},
     {id = 83, name = "@i18n(app.modules.adjustments.fn_atthold_gain)@", min = 0, max = 200},
-    {id = 84, name = "@i18n(app.modules.adjustments.fn_master_gain)@", min = 25, max = 200},
+    {id = 84, name = "@i18n(app.modules.adjustments.fn_master_gain_pitch)@", min = 25, max = 200},
+    {id = 85, name = "@i18n(app.modules.adjustments.fn_master_gain_roll)@", min = 25, max = 200},
+    {id = 86, name = "@i18n(app.modules.adjustments.fn_master_gain_yaw)@", min = 25, max = 200},
 }
 
 local state = {

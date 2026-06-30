@@ -66,7 +66,9 @@ local FIELD_SPEC = {
     {"unused_yaw_inertia_precomp_cutoff", "U8"}, -- heli-only, removed
     {"fw_tpa_breakpoint", "U8", 0, 100, 100, "%"},
     {"fw_tpa_rate", "U8", 0, 100, 0, "%"},
-    {"master_gain", "U8", 25, 200, 100, "%"}
+    {"master_gain_0", "U8", 25, 200, 100, "%"},
+    {"master_gain_1", "U8", 25, 200, 100, "%"},
+    {"master_gain_2", "U8", 25, 200, 100, "%"}
 }
 
 local SIM_RESPONSE = core.simResponse({
@@ -115,7 +117,9 @@ local SIM_RESPONSE = core.simResponse({
     0,    -- unused_yaw_inertia_precomp_cutoff
     100,  -- fw_tpa_breakpoint
     0,    -- fw_tpa_rate
-    100   -- master_gain
+    100,  -- master_gain_0
+    100,  -- master_gain_1
+    100   -- master_gain_2
 })
 
 return core.createConfigAPI({
