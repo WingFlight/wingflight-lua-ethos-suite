@@ -95,6 +95,7 @@ local userpref_defaults = {
     },
     events = {
         armflags = true,
+        flight_mode = true,
         voltage = true,
         pid_profile = true,
         rate_profile = true,
