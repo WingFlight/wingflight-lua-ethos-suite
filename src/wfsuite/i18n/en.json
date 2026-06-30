@@ -2806,6 +2806,12 @@
           "needs_translation": false,
           "translation": "Attitude Hold Gain"
         },
+        "fn_master_gain": {
+          "english": "Master Gain",
+          "max_length": 11,
+          "needs_translation": false,
+          "translation": "Master Gain"
+        },
         "fn_battery_profile": {
           "english": "Battery Profile",
           "max_length": 15,

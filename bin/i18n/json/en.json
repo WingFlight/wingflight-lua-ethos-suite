@@ -3262,6 +3262,12 @@
           "needs_translation": false,
           "translation": "Attitude Hold Gain"
         },
+        "fn_master_gain": {
+          "english": "Master Gain",
+          "max_length": 11,
+          "needs_translation": false,
+          "translation": "Master Gain"
+        },
         "fn_governor_gain": {
           "english": "Governor Gain",
           "max_length": 13,
