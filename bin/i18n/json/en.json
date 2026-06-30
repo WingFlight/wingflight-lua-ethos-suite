@@ -6612,6 +6612,12 @@
           "needs_translation": false,
           "translation": "AUX 13"
         },
+        "aux14": {
+          "english": "AUX 14",
+          "max_length": 6,
+          "needs_translation": false,
+          "translation": "AUX 14"
+        },
         "aux2": {
           "english": "AUX 2",
           "max_length": 5,

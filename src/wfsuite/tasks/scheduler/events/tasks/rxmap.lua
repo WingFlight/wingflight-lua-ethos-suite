@@ -9,7 +9,7 @@ local arg = {...}
 
 local rxmap = {}
 
-local channelNames = {"aileron", "elevator", "collective", "rudder", "throttle", "aux1", "aux2", "aux3"}
+local channelNames = {"aileron", "elevator", "rudder", "throttle", "aux1", "aux2", "aux3", "aux4"}
 
 local channelSources = {}
 local initialized = false

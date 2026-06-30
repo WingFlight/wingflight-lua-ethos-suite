@@ -14,7 +14,6 @@ local channelLabels = {
     "@i18n(app.modules.failsafe.roll)@",
     "@i18n(app.modules.failsafe.pitch)@",
     "@i18n(app.modules.failsafe.yaw)@",
-    "@i18n(app.modules.failsafe.collective)@",
     "@i18n(app.modules.failsafe.throttle)@",
     "@i18n(app.modules.failsafe.aux1)@",
     "@i18n(app.modules.failsafe.aux2)@",
@@ -28,7 +27,8 @@ local channelLabels = {
     "@i18n(app.modules.failsafe.aux10)@",
     "@i18n(app.modules.failsafe.aux11)@",
     "@i18n(app.modules.failsafe.aux12)@",
-    "@i18n(app.modules.failsafe.aux13)@"
+    "@i18n(app.modules.failsafe.aux13)@",
+    "@i18n(app.modules.failsafe.aux14)@"
 }
 
 local fields = {}

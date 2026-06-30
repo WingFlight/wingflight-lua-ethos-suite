@@ -105,7 +105,7 @@ function utils.session()
 end
 
 function utils.rxmapReady()
-    if wfsuite.session.rx and wfsuite.session.rx.map and (wfsuite.session.rx.map.collective or wfsuite.session.rx.map.elevator or wfsuite.session.rx.map.throttle or wfsuite.session.rx.map.rudder) then return true end
+    if wfsuite.session.rx and wfsuite.session.rx.map and (wfsuite.session.rx.map.aileron or wfsuite.session.rx.map.elevator or wfsuite.session.rx.map.throttle or wfsuite.session.rx.map.rudder) then return true end
     return false
 end
 
