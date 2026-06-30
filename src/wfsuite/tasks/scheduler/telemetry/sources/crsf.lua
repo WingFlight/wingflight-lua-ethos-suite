@@ -7,6 +7,7 @@ return {
     -- Flags
     armflags = {{category = CATEGORY_TELEMETRY_SENSOR, appId = 0x1202}},
     armdisableflags = {{category = CATEGORY_TELEMETRY_SENSOR, appId = 0x1203}},
+    flight_mode = {{category = CATEGORY_TELEMETRY_SENSOR, appId = 0x1201}},
 
     -- Power
     voltage = {

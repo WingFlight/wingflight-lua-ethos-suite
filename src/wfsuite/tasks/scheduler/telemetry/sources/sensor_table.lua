@@ -76,6 +76,13 @@ return {
         end
     },
 
+    flight_mode = {
+        name = "@i18n(sensors.flight_mode)@",
+        mandatory = true,
+        stats = false,
+        set_telemetry_sensors = 89,
+    },
+
     voltage = {
         name = "@i18n(sensors.voltage)@",
         mandatory = true,

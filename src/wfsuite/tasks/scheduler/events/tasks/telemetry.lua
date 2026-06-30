@@ -55,6 +55,37 @@ local SMARTFUEL_RESYNC_GAP_S = 3.0
 
 local armMap = {[0] = "disarmed.wav", [1] = "armed.wav", [2] = "disarmed.wav", [3] = "armed.wav"}
 
+-- flight_mode is the raw flightModeFlags_e bitmask (fc/runtime_config.h) - bit
+-- indices below must stay in sync with flightModeBits_e there. Listed in the
+-- same decreasing-importance order firmware uses for its own CRSF flight mode
+-- text sensor (telemetry/crsf.c, crsfFlightModeInfo()), so the spoken callout
+-- always matches whatever a glance at the radio's telemetry screen would say.
+local FLIGHT_MODE_PRIORITY = {
+    {bit = 0, file = "failsafe.wav"},     -- FAILSAFE_MODE_BIT
+    {bit = 6, file = "gpsrescue.wav"},    -- GPS_RESCUE_MODE_BIT
+    {bit = 7, file = "passthrough.wav"},  -- PASSTHROUGH_MODE_BIT
+    {bit = 2, file = "horizon.wav"},      -- HORIZON_MODE_BIT
+    {bit = 1, file = "angle.wav"},        -- ANGLE_MODE_BIT
+    {bit = 3, file = "trainer.wav"},      -- TRAINER_MODE_BIT
+    {bit = 5, file = "attitude.wav"},     -- ATTHOLD_MODE_BIT
+    {bit = 4, file = "althold.wav"},      -- ALTHOLD_MODE_BIT
+}
+
+-- Avoids the native bitwise operators (not available in every Lua runtime
+-- this suite targets) - division+modulo works identically for the small
+-- non-negative integers flightModeFlags actually holds.
+local function flightModeHasBit(value, bitIndex)
+    return (math_floor(value / (2 ^ bitIndex)) % 2) == 1
+end
+
+local function flightModeFile(value)
+    value = math_floor(value or 0)
+    for _, m in ipairs(FLIGHT_MODE_PRIORITY) do
+        if flightModeHasBit(value, m.bit) then return m.file end
+    end
+    return "normal.wav"
+end
+
 local lastSmartfuelSel = nil
 local cachedSmartfuelThresholds = nil
 
@@ -371,6 +402,14 @@ local eventTable = {
             if value == lastValues[key] then return end
             local filename = armMap[math_floor(value)]
             if filename then utils.playFile("events", "alerts/" .. filename) end
+        end
+    }, {
+        sensor = "flight_mode",
+        debounce = 0.25,
+        event = function(value)
+            local key = "flight_mode"
+            if value == lastValues[key] then return end
+            utils.playFile("events", "mode/" .. flightModeFile(value))
         end
     }, {
         sensor = "voltage",

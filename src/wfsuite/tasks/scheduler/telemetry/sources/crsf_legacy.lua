@@ -18,6 +18,7 @@ return {
     link = {{crsfId = 0x14, subIdStart = 0, subIdEnd = 1}, "RSSI 1", "RSSI 2"},
     vfr = {{crsfId = 0x14, subIdStart = 0, subIdEnd = 1}},
     armflags = {nil},
+    flight_mode = {nil},
     voltage = {"Rx Batt"},
     cell_voltage = {nil},
     rpm = {"GPS Alt"},

@@ -2156,19 +2156,19 @@
         "translation": "חיתוך D-term ב-Hz.",
         "reverse_text": true
       },
-      "error_decay_limit_cyclic": {
-        "english": "Maximum bleed-off speed for cyclic I-term.",
-        "max_length": 42,
-        "needs_translation": false,
-        "translation": "מהירות ניפוק מרבית ל-I-term מחזורי.",
-        "reverse_text": true
+      "iterm_decay_limit": {
+        "english": "Maximum bleed-off speed for I-term error.",
+        "translation": "Maximum bleed-off speed for I-term error.",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 41
       },
-      "error_decay_time_cyclic": {
-        "english": "Time constant for bleeding off cyclic I-term. Higher will stabilize hover, lower will drift.",
-        "max_length": 92,
-        "needs_translation": false,
-        "translation": "קבוע זמן לניפוק I-term מחזורי. גבוה מייצב ריחוף, נמוך יגרום לסטייה.",
-        "reverse_text": true
+      "iterm_decay_time": {
+        "english": "Time constant for bleeding off I-term error. Longer improves hold; shorter returns faster during aggressive maneuvers.",
+        "translation": "Time constant for bleeding off I-term error. Longer improves hold; shorter returns faster during aggressive maneuvers.",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 118
       },
       "error_decay_time_ground": {
         "english": "Bleeds off the current controller error when the craft is not airborne to stop the craft tipping over.",
@@ -3786,6 +3786,13 @@
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 17
+        },
+        "fn_atthold_gain": {
+          "english": "Attitude Hold Gain",
+          "translation": "Attitude Hold Gain",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 18
         },
         "fn_governor_gain": {
           "english": "Governor Gain",
@@ -5425,7 +5432,7 @@
           "translation": "WingFlight",
           "needs_translation": false,
           "reverse_text": false,
-          "max_length": 11
+          "max_length": 10
         },
         "status": {
           "english": "Status",
@@ -11710,6 +11717,13 @@
           "reverse_text": true,
           "max_length": 7
         },
+        "flight_mode_event": {
+          "english": "Flight Mode",
+          "translation": "Flight Mode",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 11
+        },
         "celcius": {
           "english": "Celsius",
           "max_length": 7,
@@ -12985,6 +12999,13 @@
       "needs_translation": false,
       "translation": "דגלי ארמינג",
       "reverse_text": true
+    },
+    "flight_mode": {
+      "english": "Flight Mode",
+      "translation": "Flight Mode",
+      "needs_translation": true,
+      "reverse_text": false,
+      "max_length": 11
     },
     "attpitch": {
       "english": "P.angle",

@@ -2156,20 +2156,6 @@
         "reverse_text": false,
         "translation": "Frequence de coupure du D-term en Hz."
       },
-      "iterm_decay_limit": {
-        "english": "Maximum bleed-off speed for I-term error.",
-        "max_length": 64,
-        "needs_translation": false,
-        "reverse_text": false,
-        "translation": "Maximum bleed-off speed for I-term error."
-      },
-      "iterm_decay_time": {
-        "english": "Time constant for bleeding off I-term error. Longer improves hold; shorter returns faster during aggressive maneuvers.",
-        "max_length": 120,
-        "needs_translation": false,
-        "reverse_text": false,
-        "translation": "Time constant for bleeding off I-term error. Longer improves hold; shorter returns faster during aggressive maneuvers."
-      },
       "error_decay_time_ground": {
         "english": "Bleeds off the current controller error when the craft is not airborne to stop the craft tipping over.",
         "max_length": 102,
@@ -2232,6 +2218,20 @@
         "needs_translation": false,
         "reverse_text": false,
         "translation": "Determine l'agressivite avec laquelle l'helicoptere s'incline pour revenir a l'horizontale en mode Horizon."
+      },
+      "iterm_decay_limit": {
+        "english": "Maximum bleed-off speed for I-term error.",
+        "max_length": 41,
+        "needs_translation": true,
+        "reverse_text": false,
+        "translation": "Maximum bleed-off speed for I-term error."
+      },
+      "iterm_decay_time": {
+        "english": "Time constant for bleeding off I-term error. Longer improves hold; shorter returns faster during aggressive maneuvers.",
+        "max_length": 118,
+        "needs_translation": true,
+        "reverse_text": false,
+        "translation": "Time constant for bleeding off I-term error. Longer improves hold; shorter returns faster during aggressive maneuvers."
       },
       "iterm_relax_cutoff_0": {
         "english": "Helps reduce bounce back after fast stick movements. Can cause inconsistency in small stick movements if too low.",
@@ -3254,6 +3254,13 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Angle Level Gain"
+        },
+        "fn_atthold_gain": {
+          "english": "Attitude Hold Gain",
+          "max_length": 18,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Attitude Hold Gain"
         },
         "fn_battery_profile": {
           "english": "Battery Profile",
@@ -5438,7 +5445,7 @@
         },
         "rotorflight": {
           "english": "WingFlight",
-          "max_length": 11,
+          "max_length": 10,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "WingFlight"
@@ -11838,6 +11845,13 @@
           "reverse_text": false,
           "translation": "Pieds"
         },
+        "flight_mode_event": {
+          "english": "Flight Mode",
+          "max_length": 11,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Flight Mode"
+        },
         "fuel": {
           "english": "Fuel",
           "max_length": 4,
@@ -13048,6 +13062,13 @@
       "needs_translation": false,
       "reverse_text": false,
       "translation": "Temperature ESC"
+    },
+    "flight_mode": {
+      "english": "Flight Mode",
+      "max_length": 11,
+      "needs_translation": true,
+      "reverse_text": false,
+      "translation": "Flight Mode"
     },
     "fuel": {
       "english": "Fuel",
