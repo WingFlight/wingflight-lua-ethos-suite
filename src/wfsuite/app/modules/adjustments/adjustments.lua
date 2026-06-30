@@ -112,6 +112,7 @@ local ADJUST_FUNCTIONS = {
     {id = 80, name = "@i18n(app.modules.adjustments.fn_gov_headspeed)@", min = 0, max = 10000, minApi = {22, 0, 0}, hide = true},
     {id = 81, name = "@i18n(app.modules.adjustments.fn_gov_yaw_ff)@", min = 0, max = 250, minApi = {22, 0, 0}, hide = true},
     {id = 82, name = "@i18n(app.modules.adjustments.fn_battery_profile)@", min = 1, max = 6},
+    {id = 83, name = "@i18n(app.modules.adjustments.fn_atthold_gain)@", min = 0, max = 200},
 }
 
 local state = {
