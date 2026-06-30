@@ -33,4 +33,5 @@ return {
     ["bterm_cutoff_2"] = "@i18n(api.PID_PROFILE.bterm_cutoff_2)@",
     ["fw_tpa_breakpoint"] = "@i18n(api.PID_PROFILE.fw_tpa_breakpoint)@",
     ["fw_tpa_rate"] = "@i18n(api.PID_PROFILE.fw_tpa_rate)@",
+    ["master_gain"] = "@i18n(api.PID_PROFILE.master_gain)@",
 }

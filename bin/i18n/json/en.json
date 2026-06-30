@@ -3262,6 +3262,12 @@
           "needs_translation": false,
           "translation": "Attitude Hold Gain"
         },
+        "fn_master_gain": {
+          "english": "Master Gain",
+          "max_length": 11,
+          "needs_translation": false,
+          "translation": "Master Gain"
+        },
         "fn_governor_gain": {
           "english": "Governor Gain",
           "max_length": 13,
@@ -8790,6 +8796,12 @@
         }
       },
       "profile_pidcontroller": {
+        "breakpoint": {
+          "english": "Breakpoint",
+          "max_length": 10,
+          "needs_translation": false,
+          "translation": "Breakpoint"
+        },
         "cutoff_point": {
           "english": "Cut-off point",
           "max_length": 13,
@@ -8807,6 +8819,18 @@
           "max_length": 14,
           "needs_translation": false,
           "translation": "Error rotation"
+        },
+        "fw_tpa": {
+          "english": "Throttle Attenuation",
+          "max_length": 21,
+          "needs_translation": false,
+          "translation": "Throttle Attenuation"
+        },
+        "gain": {
+          "english": "Gain",
+          "max_length": 4,
+          "needs_translation": false,
+          "translation": "Gain"
         },
         "ground_error_decay": {
           "english": "Ground Error Decay",
@@ -8851,10 +8875,10 @@
           "translation": "HSI Offset limit"
         },
         "inflight_error_decay": {
-          "english": "Inflight Error Decay",
-          "max_length": 20,
+          "english": "Error Decay",
+          "max_length": 11,
           "needs_translation": false,
-          "translation": "Inflight Error Decay"
+          "translation": "Error Decay"
         },
         "iterm_relax": {
           "english": "I-term relax",
@@ -8868,6 +8892,12 @@
           "needs_translation": false,
           "translation": "Limit"
         },
+        "master_gain": {
+          "english": "Master Gain",
+          "max_length": 11,
+          "needs_translation": false,
+          "translation": "Master Gain"
+        },
         "name": {
           "english": "PID Controller",
           "max_length": 14,
@@ -8879,6 +8909,12 @@
           "max_length": 1,
           "needs_translation": false,
           "translation": "P"
+        },
+        "rate": {
+          "english": "Rate",
+          "max_length": 4,
+          "needs_translation": false,
+          "translation": "Rate"
         },
         "roll": {
           "english": "R",
