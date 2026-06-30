@@ -1,3 +1,8 @@
+# 0.0.2
+
+Add in ability to set master gains on RPY via lua
+Added in support for flight modes sensor
+
 # 0.0.1
 
 First snapshot release of the Wingflight Lua Suite for FrSky Ethos.
