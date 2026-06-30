@@ -3794,6 +3794,27 @@
           "reverse_text": false,
           "max_length": 18
         },
+        "fn_master_gain_pitch": {
+          "english": "Master Gain Pitch",
+          "translation": "Master Gain Pitch",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 17
+        },
+        "fn_master_gain_roll": {
+          "english": "Master Gain Roll",
+          "translation": "Master Gain Roll",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 16
+        },
+        "fn_master_gain_yaw": {
+          "english": "Master Gain Yaw",
+          "translation": "Master Gain Yaw",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 15
+        },
         "fn_governor_gain": {
           "english": "Governor Gain",
           "translation": "מושל גינס",
@@ -10229,6 +10250,13 @@
         }
       },
       "profile_pidcontroller": {
+        "breakpoint": {
+          "english": "Breakpoint",
+          "translation": "Breakpoint",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 10
+        },
         "cutoff_point": {
           "english": "Cut-off point",
           "max_length": 13,
@@ -10249,6 +10277,20 @@
           "needs_translation": false,
           "translation": "סיבוב שגיאה",
           "reverse_text": true
+        },
+        "fw_tpa": {
+          "english": "Throttle Attenuation",
+          "translation": "Throttle Attenuation",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 20
+        },
+        "gain": {
+          "english": "Gain",
+          "translation": "Gain",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 4
         },
         "ground_error_decay": {
           "english": "Ground Error Decay",
@@ -10300,8 +10342,8 @@
           "reverse_text": true
         },
         "inflight_error_decay": {
-          "english": "Inflight Error Decay",
-          "max_length": 20,
+          "english": "Error Decay",
+          "max_length": 11,
           "needs_translation": false,
           "translation": "דעיכת שגיאה בטיסה",
           "reverse_text": true
@@ -10320,6 +10362,13 @@
           "translation": "מגבלה",
           "reverse_text": true
         },
+        "master_gain": {
+          "english": "Master Gain",
+          "translation": "Master Gain",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 11
+        },
         "name": {
           "english": "PID Controller",
           "max_length": 14,
@@ -10333,6 +10382,13 @@
           "needs_translation": false,
           "translation": "פ",
           "reverse_text": true
+        },
+        "rate": {
+          "english": "Rate",
+          "translation": "Rate",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 4
         },
         "roll": {
           "english": "R",

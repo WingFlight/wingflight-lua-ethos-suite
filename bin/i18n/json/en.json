@@ -3262,11 +3262,23 @@
           "needs_translation": false,
           "translation": "Attitude Hold Gain"
         },
-        "fn_master_gain": {
-          "english": "Master Gain",
-          "max_length": 11,
+        "fn_master_gain_pitch": {
+          "english": "Master Gain Pitch",
+          "max_length": 17,
           "needs_translation": false,
-          "translation": "Master Gain"
+          "translation": "Master Gain Pitch"
+        },
+        "fn_master_gain_roll": {
+          "english": "Master Gain Roll",
+          "max_length": 16,
+          "needs_translation": false,
+          "translation": "Master Gain Roll"
+        },
+        "fn_master_gain_yaw": {
+          "english": "Master Gain Yaw",
+          "max_length": 15,
+          "needs_translation": false,
+          "translation": "Master Gain Yaw"
         },
         "fn_governor_gain": {
           "english": "Governor Gain",
@@ -8822,7 +8834,7 @@
         },
         "fw_tpa": {
           "english": "Throttle Attenuation",
-          "max_length": 21,
+          "max_length": 20,
           "needs_translation": false,
           "translation": "Throttle Attenuation"
         },
