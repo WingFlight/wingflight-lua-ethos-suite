@@ -21,6 +21,7 @@ return {
     link = {{appId = 0xF101, subId = 0}},
     vfr = {{appId = 0xF010, subId = 0}},
     armflags = {{uid = 0x5001, unit = nil, dec = nil, value = function() return simSensors('armflags') end, min = 0, max = 2}},
+    flight_mode = {{uid = 0x5028, unit = nil, dec = nil, value = function() return simSensors('flight_mode') end, min = 0, max = 255}},
     voltage = {{uid = 0x5002, unit = UNIT_VOLT, dec = 2, value = function() return simSensors('voltage') end, min = 0, max = 3000}},
     cell_voltage = {nil},
     rpm = {{uid = 0x5003, unit = UNIT_RPM, dec = nil, value = function() return simSensors('rpm') end, min = 0, max = 2000}},

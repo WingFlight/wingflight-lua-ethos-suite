@@ -18,6 +18,7 @@ return {
     link = {{appId = 0xF101, subId = 0}, "RSSI"},
     vfr = {{appId = 0xF010, subId = 0}},
     armflags = {{category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5122}, {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5462}},
+    flight_mode = {{category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5121}},
     voltage = {
                 {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x0210},
                 {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x0211},

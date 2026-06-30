@@ -39,13 +39,17 @@ local function openPage(opts)
 
     local escFields, becFields, fuelFields = {}, {}, {}
 
-    local armEnabled = config.armflags == true
-    local armPanel = form.addExpansionPanel("@i18n(app.modules.settings.arming_flags)@")
-    armPanel:open(armEnabled)
-    local armLine = armPanel:addLine("@i18n(app.modules.settings.arming_flags)@")
+    local statusEnabled = (config.armflags == true) or (config.flight_mode == true)
+    local statusPanel = form.addExpansionPanel("@i18n(telemetry.group_status)@")
+    statusPanel:open(statusEnabled)
+    local armLine = statusPanel:addLine("@i18n(app.modules.settings.arming_flags)@")
     formFieldCount = formFieldCount + 1
     wfsuite.app.formLineCnt = wfsuite.app.formLineCnt + 1
     wfsuite.app.formFields[formFieldCount] = form.addBooleanField(armLine, nil, function() return config.armflags end, function(val) config.armflags = val end)
+    local flightModeLine = statusPanel:addLine("@i18n(app.modules.settings.flight_mode_event)@")
+    formFieldCount = formFieldCount + 1
+    wfsuite.app.formLineCnt = wfsuite.app.formLineCnt + 1
+    wfsuite.app.formFields[formFieldCount] = form.addBooleanField(flightModeLine, nil, function() return config.flight_mode end, function(val) config.flight_mode = val end)
 
     local voltEnabled = config.voltage == true
     local voltPanel = form.addExpansionPanel("@i18n(app.modules.settings.voltage)@")

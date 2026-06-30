@@ -2156,19 +2156,19 @@
         "max_length": 20,
         "reverse_text": false
       },
-      "error_decay_limit_cyclic": {
-        "english": "Maximum bleed-off speed for cyclic I-term.",
-        "translation": "Velocita' massima di spurgo per I-term ciclico.",
-        "needs_translation": false,
-        "max_length": 42,
-        "reverse_text": false
+      "iterm_decay_limit": {
+        "english": "Maximum bleed-off speed for I-term error.",
+        "translation": "Maximum bleed-off speed for I-term error.",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 41
       },
-      "error_decay_time_cyclic": {
-        "english": "Time constant for bleeding off cyclic I-term. Higher will stabilize hover, lower will drift.",
-        "translation": "Costante di tempo per lo spurgo dell' I-term ciclico. Piu' alto stabilizzera' il volo stazionario, piu' basso lo fara' andare alla deriva.",
-        "needs_translation": false,
-        "max_length": 92,
-        "reverse_text": false
+      "iterm_decay_time": {
+        "english": "Time constant for bleeding off I-term error. Longer improves hold; shorter returns faster during aggressive maneuvers.",
+        "translation": "Time constant for bleeding off I-term error. Longer improves hold; shorter returns faster during aggressive maneuvers.",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 118
       },
       "error_decay_time_ground": {
         "english": "Bleeds off the current controller error when the craft is not airborne to stop the craft tipping over.",
@@ -3786,6 +3786,13 @@
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 17
+        },
+        "fn_atthold_gain": {
+          "english": "Attitude Hold Gain",
+          "translation": "Attitude Hold Gain",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 18
         },
         "fn_governor_gain": {
           "english": "Governor Gain",
@@ -5425,7 +5432,7 @@
           "translation": "WingFlight",
           "needs_translation": false,
           "reverse_text": false,
-          "max_length": 11
+          "max_length": 10
         },
         "status": {
           "english": "Status",
@@ -11710,6 +11717,13 @@
           "reverse_text": false,
           "max_length": 7
         },
+        "flight_mode_event": {
+          "english": "Flight Mode",
+          "translation": "Flight Mode",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 11
+        },
         "celcius": {
           "english": "Celsius",
           "translation": "Celsius",
@@ -12985,6 +12999,13 @@
       "needs_translation": false,
       "max_length": 12,
       "reverse_text": false
+    },
+    "flight_mode": {
+      "english": "Flight Mode",
+      "translation": "Flight Mode",
+      "needs_translation": true,
+      "reverse_text": false,
+      "max_length": 11
     },
     "attpitch": {
       "english": "P.angle",

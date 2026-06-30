@@ -1853,19 +1853,11 @@
         "needs_translation": false,
         "translation": "D-term cutoff in Hz."
       },
-      "iterm_decay_limit": {
-        "english": "Maximum bleed-off speed for I-term error.",
-        "max_length": 64,
+      "error_decay_time_ground": {
+        "english": "Bleeds off the current controller error when the craft is not airborne to stop the craft tipping over.",
+        "max_length": 102,
         "needs_translation": false,
-        "reverse_text": false,
-        "translation": "Maximum bleed-off speed for I-term error."
-      },
-      "iterm_decay_time": {
-        "english": "Time constant for bleeding off I-term error. Longer improves hold; shorter returns faster during aggressive maneuvers.",
-        "max_length": 120,
-        "needs_translation": false,
-        "reverse_text": false,
-        "translation": "Time constant for bleeding off I-term error. Longer improves hold; shorter returns faster during aggressive maneuvers."
+        "translation": "Bleeds off the current controller error when the craft is not airborne to stop the craft tipping over."
       },
       "error_limit_0": {
         "english": "Hard limit for the angle error in the PID loop. The absolute error and thus the I-term will never go above these limits.",
@@ -1914,6 +1906,20 @@
         "max_length": 85,
         "needs_translation": false,
         "translation": "Determines how aggressively the helicopter tilts back to level while in Horizon Mode."
+      },
+      "iterm_decay_limit": {
+        "english": "Maximum bleed-off speed for I-term error.",
+        "max_length": 41,
+        "needs_translation": false,
+        "reverse_text": false,
+        "translation": "Maximum bleed-off speed for I-term error."
+      },
+      "iterm_decay_time": {
+        "english": "Time constant for bleeding off I-term error. Longer improves hold; shorter returns faster during aggressive maneuvers.",
+        "max_length": 118,
+        "needs_translation": false,
+        "reverse_text": false,
+        "translation": "Time constant for bleeding off I-term error. Longer improves hold; shorter returns faster during aggressive maneuvers."
       },
       "iterm_relax_cutoff_0": {
         "english": "Helps reduce bounce back after fast stick movements. Can cause inconsistency in small stick movements if too low.",
@@ -1992,18 +1998,6 @@
         "max_length": 116,
         "needs_translation": false,
         "translation": "Determines how aggressively the helicopter tilts back to the maximum angle (if exceeded) while in Acro Trainer Mode."
-      },
-      "atthold_gain": {
-        "english": "Correction strength back to the held attitude while in Attitude Hold Mode.",
-        "max_length": 80,
-        "needs_translation": false,
-        "translation": "Correction strength back to the held attitude while in Attitude Hold Mode."
-      },
-      "atthold_deadband": {
-        "english": "Stick deflection, as a percentage of full travel, below which an axis locks onto its held attitude in Attitude Hold Mode.",
-        "max_length": 130,
-        "needs_translation": false,
-        "translation": "Stick deflection, as a percentage of full travel, below which an axis locks onto its held attitude in Attitude Hold Mode."
       },
       "yaw_ccw_stop_gain": {
         "english": "Stop gain (PD) for counter-clockwise rotation.",
@@ -2342,6 +2336,104 @@
         "max_length": 53,
         "needs_translation": false,
         "translation": "The maximum gain applied to the yaw dynamic deadband."
+      }
+    },
+    "RESCUE_PROFILE": {
+      "rescue_climb_collective": {
+        "english": "Collective value for rescue climb.",
+        "max_length": 34,
+        "needs_translation": false,
+        "translation": "Collective value for rescue climb."
+      },
+      "rescue_climb_time": {
+        "english": "Length of time the climb collective is applied before switching to hover.",
+        "max_length": 73,
+        "needs_translation": false,
+        "translation": "Length of time the climb collective is applied before switching to hover."
+      },
+      "rescue_exit_time": {
+        "english": "This limits rapid application of negative collective if the helicopter has rolled during rescue.",
+        "max_length": 96,
+        "needs_translation": false,
+        "translation": "This limits rapid application of negative collective if the helicopter has rolled during rescue."
+      },
+      "rescue_flip_gain": {
+        "english": "Determine how aggressively the heli flips during inverted rescue.",
+        "max_length": 65,
+        "needs_translation": false,
+        "translation": "Determine how aggressively the heli flips during inverted rescue."
+      },
+      "rescue_flip_mode": {
+        "english": "If rescue is activated while inverted, flip to upright - or remain inverted.",
+        "max_length": 76,
+        "needs_translation": false,
+        "translation": "If rescue is activated while inverted, flip to upright - or remain inverted."
+      },
+      "rescue_flip_time": {
+        "english": "If the helicopter is in rescue and is trying to flip to upright and does not within this time, rescue will be aborted.",
+        "max_length": 118,
+        "needs_translation": false,
+        "translation": "If the helicopter is in rescue and is trying to flip to upright and does not within this time, rescue will be aborted."
+      },
+      "rescue_hover_collective": {
+        "english": "Collective value for hover.",
+        "max_length": 27,
+        "needs_translation": false,
+        "translation": "Collective value for hover."
+      },
+      "rescue_level_gain": {
+        "english": "Determine how aggressively the heli levels during rescue.",
+        "max_length": 57,
+        "needs_translation": false,
+        "translation": "Determine how aggressively the heli levels during rescue."
+      },
+      "rescue_max_setpoint_accel": {
+        "english": "Limit how fast the helicopter accelerates into a roll/pitch. Larger helicopters may need slower acceleration.",
+        "max_length": 109,
+        "needs_translation": false,
+        "translation": "Limit how fast the helicopter accelerates into a roll/pitch. Larger helicopters may need slower acceleration."
+      },
+      "rescue_max_setpoint_rate": {
+        "english": "Limit rescue roll/pitch rate. Larger helicopters may need slower rotation rates.",
+        "max_length": 80,
+        "needs_translation": false,
+        "translation": "Limit rescue roll/pitch rate. Larger helicopters may need slower rotation rates."
+      },
+      "rescue_pull_up_collective": {
+        "english": "Collective value for pull-up climb.",
+        "max_length": 35,
+        "needs_translation": false,
+        "translation": "Collective value for pull-up climb."
+      },
+      "rescue_pull_up_time": {
+        "english": "When rescue is activated, helicopter will apply pull-up collective for this time period before moving to flip or climb stage.",
+        "max_length": 125,
+        "needs_translation": false,
+        "translation": "When rescue is activated, helicopter will apply pull-up collective for this time period before moving to flip or climb stage."
+      },
+      "tbl_flip": {
+        "english": "FLIP",
+        "max_length": 4,
+        "needs_translation": false,
+        "translation": "FLIP"
+      },
+      "tbl_noflip": {
+        "english": "NO FLIP",
+        "max_length": 7,
+        "needs_translation": false,
+        "translation": "NO FLIP"
+      },
+      "tbl_off": {
+        "english": "OFF",
+        "max_length": 3,
+        "needs_translation": false,
+        "translation": "OFF"
+      },
+      "tbl_on": {
+        "english": "ON",
+        "max_length": 2,
+        "needs_translation": false,
+        "translation": "ON"
       }
     },
     "RXFAIL_CONFIG": {
@@ -2710,7 +2802,7 @@
         },
         "fn_atthold_gain": {
           "english": "Attitude Hold Gain",
-          "max_length": 19,
+          "max_length": 18,
           "needs_translation": false,
           "translation": "Attitude Hold Gain"
         },
@@ -4588,7 +4680,7 @@
         },
         "rotorflight": {
           "english": "WingFlight",
-          "max_length": 11,
+          "max_length": 10,
           "needs_translation": false,
           "translation": "WingFlight"
         },
@@ -7930,6 +8022,12 @@
           "needs_translation": false,
           "translation": "PIDs"
         },
+        "o": {
+          "english": "O",
+          "max_length": 1,
+          "needs_translation": false,
+          "translation": "O"
+        },
         "p": {
           "english": "P",
           "max_length": 1,
@@ -8374,29 +8472,11 @@
           "needs_translation": false,
           "translation": "Horizon Mode: How aggressively the heli tilts back to level when flying in Horizon Mode."
         },
-        "help_p4": {
-          "english": "Attitude Hold Mode: How aggressively the aircraft corrects back to its attitude when the sticks are centered, and how much stick deflection releases the hold.",
-          "max_length": 165,
-          "needs_translation": false,
-          "translation": "Attitude Hold Mode: How aggressively the aircraft corrects back to its attitude when the sticks are centered, and how much stick deflection releases the hold."
-        },
         "horizon_mode": {
           "english": "Horizon mode",
           "max_length": 12,
           "needs_translation": false,
           "translation": "Horizon mode"
-        },
-        "atthold_mode": {
-          "english": "Attitude Hold mode",
-          "max_length": 19,
-          "needs_translation": false,
-          "translation": "Attitude Hold mode"
-        },
-        "deadband": {
-          "english": "Deadband",
-          "max_length": 8,
-          "needs_translation": false,
-          "translation": "Deadband"
         },
         "max": {
           "english": "Max",
@@ -8599,6 +8679,74 @@
           "translation": "Yaw"
         }
       },
+      "profile_mainrotor": {
+        "collective_pitch_comp": {
+          "english": "Collective Pitch Compensation",
+          "max_length": 29,
+          "needs_translation": false,
+          "translation": "Collective Pitch Compensation"
+        },
+        "collective_pitch_comp_short": {
+          "english": "Col. Pitch Compensation",
+          "max_length": 23,
+          "needs_translation": false,
+          "translation": "Col. Pitch Compensation"
+        },
+        "cutoff": {
+          "english": "Cutoff",
+          "max_length": 6,
+          "needs_translation": false,
+          "translation": "Cutoff"
+        },
+        "cyclic_cross_coupling": {
+          "english": "Cyclic Cross coupling",
+          "max_length": 21,
+          "needs_translation": false,
+          "translation": "Cyclic Cross coupling"
+        },
+        "gain": {
+          "english": "Gain",
+          "max_length": 4,
+          "needs_translation": false,
+          "translation": "Gain"
+        },
+        "help_p1": {
+          "english": "Collective Pitch Compensation: Increasing will compensate for the pitching motion caused by tail drag when climbing.",
+          "max_length": 116,
+          "needs_translation": false,
+          "translation": "Collective Pitch Compensation: Increasing will compensate for the pitching motion caused by tail drag when climbing."
+        },
+        "help_p2": {
+          "english": "Cross Coupling Gain: Removes roll coupling when only elevator is applied.",
+          "max_length": 73,
+          "needs_translation": false,
+          "translation": "Cross Coupling Gain: Removes roll coupling when only elevator is applied."
+        },
+        "help_p3": {
+          "english": "Cross Coupling Ratio: Amount of compensation (pitch vs roll) to apply.",
+          "max_length": 70,
+          "needs_translation": false,
+          "translation": "Cross Coupling Ratio: Amount of compensation (pitch vs roll) to apply."
+        },
+        "help_p4": {
+          "english": "Cross Coupling Freq. Limit: Frequency limit for the compensation, higher value will make the compensation action faster.",
+          "max_length": 120,
+          "needs_translation": false,
+          "translation": "Cross Coupling Freq. Limit: Frequency limit for the compensation, higher value will make the compensation action faster."
+        },
+        "name": {
+          "english": "Main Rotor",
+          "max_length": 10,
+          "needs_translation": false,
+          "translation": "Main Rotor"
+        },
+        "ratio": {
+          "english": "Ratio",
+          "max_length": 5,
+          "needs_translation": false,
+          "translation": "Ratio"
+        }
+      },
       "profile_pidbandwidth": {
         "bterm_cutoff": {
           "english": "B-term cut-off",
@@ -8674,11 +8822,29 @@
           "needs_translation": false,
           "translation": "Error rotation"
         },
+        "ground_error_decay": {
+          "english": "Ground Error Decay",
+          "max_length": 18,
+          "needs_translation": false,
+          "translation": "Ground Error Decay"
+        },
+        "help_p1": {
+          "english": "Error decay ground: PID decay to help prevent heli from tipping over when on the ground.",
+          "max_length": 88,
+          "needs_translation": false,
+          "translation": "Error decay ground: PID decay to help prevent heli from tipping over when on the ground."
+        },
         "help_p2": {
           "english": "Error limit: Angle limit for I-term.",
           "max_length": 36,
           "needs_translation": false,
           "translation": "Error limit: Angle limit for I-term."
+        },
+        "help_p3": {
+          "english": "Offset limit: Angle limit for High Speed Integral (O-term).",
+          "max_length": 59,
+          "needs_translation": false,
+          "translation": "Offset limit: Angle limit for High Speed Integral (O-term)."
         },
         "help_p4": {
           "english": "Error rotation: Allow errors to be shared between all axes.",
@@ -8692,11 +8858,11 @@
           "needs_translation": false,
           "translation": "I-term relax: Limit accumulation of I-term during fast movements - helps reduce bounce back after fast stick movements. Generally needs to be lower for large helis and can be higher for small helis. Best to only reduce as much as is needed for your flying style."
         },
-        "help_p6": {
-          "english": "Throttle attenuation: reduces P and D gain above the breakpoint throttle, since control surfaces in prop wash become more authoritative as throttle rises.",
-          "max_length": 158,
+        "hsi_offset_limit": {
+          "english": "HSI Offset limit",
+          "max_length": 16,
           "needs_translation": false,
-          "translation": "Throttle attenuation: reduces P and D gain above the breakpoint throttle, since control surfaces in prop wash become more authoritative as throttle rises."
+          "translation": "HSI Offset limit"
         },
         "inflight_error_decay": {
           "english": "Inflight Error Decay",
@@ -8728,24 +8894,6 @@
           "needs_translation": false,
           "translation": "P"
         },
-        "fw_tpa": {
-          "english": "Throttle Attenuation",
-          "max_length": 21,
-          "needs_translation": false,
-          "translation": "Throttle Attenuation"
-        },
-        "breakpoint": {
-          "english": "Breakpoint",
-          "max_length": 10,
-          "needs_translation": false,
-          "translation": "Breakpoint"
-        },
-        "rate": {
-          "english": "Rate",
-          "max_length": 4,
-          "needs_translation": false,
-          "translation": "Rate"
-        },
         "roll": {
           "english": "R",
           "max_length": 1,
@@ -8763,6 +8911,140 @@
           "max_length": 1,
           "needs_translation": false,
           "translation": "Y"
+        }
+      },
+      "profile_rescue": {
+        "accel": {
+          "english": "Accel",
+          "max_length": 5,
+          "needs_translation": false,
+          "translation": "Accel"
+        },
+        "climb": {
+          "english": "Climb",
+          "max_length": 5,
+          "needs_translation": false,
+          "translation": "Climb"
+        },
+        "collective": {
+          "english": "Collective",
+          "max_length": 10,
+          "needs_translation": false,
+          "translation": "Collective"
+        },
+        "exit_time": {
+          "english": "Exit time",
+          "max_length": 9,
+          "needs_translation": false,
+          "translation": "Exit time"
+        },
+        "fail_time": {
+          "english": "Fail time",
+          "max_length": 9,
+          "needs_translation": false,
+          "translation": "Fail time"
+        },
+        "flip": {
+          "english": "Flip",
+          "max_length": 4,
+          "needs_translation": false,
+          "translation": "Flip"
+        },
+        "flip_upright": {
+          "english": "Flip to upright",
+          "max_length": 15,
+          "needs_translation": false,
+          "translation": "Flip to upright"
+        },
+        "gains": {
+          "english": "Gains",
+          "max_length": 5,
+          "needs_translation": false,
+          "translation": "Gains"
+        },
+        "help_p1": {
+          "english": "Flip to upright: Flip the heli upright when rescue is activated.",
+          "max_length": 64,
+          "needs_translation": false,
+          "translation": "Flip to upright: Flip the heli upright when rescue is activated."
+        },
+        "help_p2": {
+          "english": "Pull-up: How much collective and for how long to arrest the fall.",
+          "max_length": 65,
+          "needs_translation": false,
+          "translation": "Pull-up: How much collective and for how long to arrest the fall."
+        },
+        "help_p3": {
+          "english": "Climb: How much collective to maintain a steady climb - and how long.",
+          "max_length": 69,
+          "needs_translation": false,
+          "translation": "Climb: How much collective to maintain a steady climb - and how long."
+        },
+        "help_p4": {
+          "english": "Hover: How much collective to maintain a steady hover.",
+          "max_length": 54,
+          "needs_translation": false,
+          "translation": "Hover: How much collective to maintain a steady hover."
+        },
+        "help_p5": {
+          "english": "Flip: How long to wait before aborting because the flip did not work.",
+          "max_length": 69,
+          "needs_translation": false,
+          "translation": "Flip: How long to wait before aborting because the flip did not work."
+        },
+        "help_p6": {
+          "english": "Gains: How hard to fight to keep heli level when engaging rescue mode.",
+          "max_length": 70,
+          "needs_translation": false,
+          "translation": "Gains: How hard to fight to keep heli level when engaging rescue mode."
+        },
+        "help_p7": {
+          "english": "Rate and Accel: Max rotation and acceleration rates when leveling during rescue.",
+          "max_length": 80,
+          "needs_translation": false,
+          "translation": "Rate and Accel: Max rotation and acceleration rates when leveling during rescue."
+        },
+        "hover": {
+          "english": "Hover",
+          "max_length": 5,
+          "needs_translation": false,
+          "translation": "Hover"
+        },
+        "level_gain": {
+          "english": "Level",
+          "max_length": 5,
+          "needs_translation": false,
+          "translation": "Level"
+        },
+        "mode_enable": {
+          "english": "Rescue mode enable",
+          "max_length": 18,
+          "needs_translation": false,
+          "translation": "Rescue mode enable"
+        },
+        "name": {
+          "english": "Rescue",
+          "max_length": 6,
+          "needs_translation": false,
+          "translation": "Rescue"
+        },
+        "pull_up": {
+          "english": "Pull-up",
+          "max_length": 7,
+          "needs_translation": false,
+          "translation": "Pull-up"
+        },
+        "rate": {
+          "english": "Rate",
+          "max_length": 4,
+          "needs_translation": false,
+          "translation": "Rate"
+        },
+        "time": {
+          "english": "Time",
+          "max_length": 4,
+          "needs_translation": false,
+          "translation": "Time"
         }
       },
       "profile_select": {
@@ -8825,6 +9107,110 @@
           "max_length": 13,
           "needs_translation": false,
           "translation": "Save settings"
+        }
+      },
+      "profile_tailrotor": {
+        "ccw": {
+          "english": "CCW",
+          "max_length": 3,
+          "needs_translation": false,
+          "translation": "CCW"
+        },
+        "collective_ff_gain": {
+          "english": "Collective FF gain",
+          "max_length": 18,
+          "needs_translation": false,
+          "translation": "Collective FF gain"
+        },
+        "collective_impulse_ff": {
+          "english": "Collective Impulse FF",
+          "max_length": 21,
+          "needs_translation": false,
+          "translation": "Collective Impulse FF"
+        },
+        "cutoff": {
+          "english": "Cutoff",
+          "max_length": 6,
+          "needs_translation": false,
+          "translation": "Cutoff"
+        },
+        "cw": {
+          "english": "CW",
+          "max_length": 2,
+          "needs_translation": false,
+          "translation": "CW"
+        },
+        "cyclic_ff_gain": {
+          "english": "Cyclic FF gain",
+          "max_length": 14,
+          "needs_translation": false,
+          "translation": "Cyclic FF gain"
+        },
+        "decay": {
+          "english": "Decay",
+          "max_length": 5,
+          "needs_translation": false,
+          "translation": "Decay"
+        },
+        "gain": {
+          "english": "Gain",
+          "max_length": 4,
+          "needs_translation": false,
+          "translation": "Gain"
+        },
+        "help_p1": {
+          "english": "Yaw Stop Gain: Higher stop gain will make the tail stop more aggressively but may cause oscillations if too high. Adjust CW or CCW to make the yaw stops even.",
+          "max_length": 158,
+          "needs_translation": false,
+          "translation": "Yaw Stop Gain: Higher stop gain will make the tail stop more aggressively but may cause oscillations if too high. Adjust CW or CCW to make the yaw stops even."
+        },
+        "help_p2": {
+          "english": "Precomp Cutoff: Frequency limit for all yaw precompensation actions.",
+          "max_length": 68,
+          "needs_translation": false,
+          "translation": "Precomp Cutoff: Frequency limit for all yaw precompensation actions."
+        },
+        "help_p3": {
+          "english": "Cyclic FF Gain: Tail precompensation for cyclic inputs.",
+          "max_length": 55,
+          "needs_translation": false,
+          "translation": "Cyclic FF Gain: Tail precompensation for cyclic inputs."
+        },
+        "help_p4": {
+          "english": "Collective FF Gain: Tail precompensation for collective inputs.",
+          "max_length": 63,
+          "needs_translation": false,
+          "translation": "Collective FF Gain: Tail precompensation for collective inputs."
+        },
+        "help_p5": {
+          "english": "Collective Impulse FF: Impulse tail precompensation for collective inputs. If you need extra tail precompensation at the beginning of collective input.",
+          "max_length": 151,
+          "needs_translation": false,
+          "translation": "Collective Impulse FF: Impulse tail precompensation for collective inputs. If you need extra tail precompensation at the beginning of collective input."
+        },
+        "inertia_precomp": {
+          "english": "Inertia Precomp",
+          "max_length": 15,
+          "needs_translation": false,
+          "translation": "Inertia Precomp"
+        },
+        "name": {
+          "english": "Tail Rotor",
+          "max_length": 10,
+          "needs_translation": false,
+          "translation": "Tail Rotor"
+        },
+        "precomp_cutoff": {
+          "english": "Precomp Cutoff",
+          "max_length": 14,
+          "needs_translation": false,
+          "translation": "Precomp Cutoff"
+        },
+        "yaw_stop_gain": {
+          "english": "Yaw stop gain",
+          "max_length": 13,
+          "needs_translation": false,
+          "translation": "Yaw stop gain"
         }
       },
       "radio_config": {
@@ -9791,6 +10177,12 @@
           "max_length": 4,
           "needs_translation": false,
           "translation": "Feet"
+        },
+        "flight_mode_event": {
+          "english": "Flight Mode",
+          "max_length": 11,
+          "needs_translation": false,
+          "translation": "Flight Mode"
         },
         "fuel": {
           "english": "Fuel",
@@ -10831,6 +11223,12 @@
       "max_length": 15,
       "needs_translation": false,
       "translation": "ESC Temperature"
+    },
+    "flight_mode": {
+      "english": "Flight Mode",
+      "max_length": 11,
+      "needs_translation": false,
+      "translation": "Flight Mode"
     },
     "fuel": {
       "english": "Fuel",
