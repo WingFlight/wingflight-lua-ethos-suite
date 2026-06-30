@@ -1,4 +1,4 @@
-{
+﻿{
   "api": {
     "ACC_TRIM": {
       "pitch": {
@@ -7711,6 +7711,12 @@
           "reverse_text": false,
           "translation": "AUX 13"
         },
+        "aux14": {
+          "english": "AUX 14",
+          "max_length": 6,
+          "needs_translation": false,
+          "translation": "AUX 14"
+        },
         "aux2": {
           "english": "AUX 2",
           "max_length": 5,
@@ -7766,13 +7772,6 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "AUX 9"
-        },
-        "collective": {
-          "english": "Collective",
-          "max_length": 10,
-          "needs_translation": false,
-          "reverse_text": false,
-          "translation": "总螺距"
         },
         "help_p1": {
           "english": "Configure the failsafe settings for loss of RC signal.",

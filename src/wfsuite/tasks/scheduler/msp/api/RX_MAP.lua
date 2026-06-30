@@ -17,22 +17,22 @@ local FIELD_SPEC = {
     {"aileron", "U8"},
     {"elevator", "U8"},
     {"rudder", "U8"},
-    {"collective", "U8"},
     {"throttle", "U8"},
     {"aux1", "U8"},
     {"aux2", "U8"},
-    {"aux3", "U8"}
+    {"aux3", "U8"},
+    {"aux4", "U8"}
 }
 
 local SIM_RESPONSE = core.simResponse({
-    0, -- aileron
+    0, -- aileron  (AETR1234 default)
     1, -- elevator
-    2, -- rudder
-    3, -- collective
-    4, -- throttle
-    5, -- aux1
-    6, -- aux2
-    7  -- aux3
+    3, -- rudder
+    2, -- throttle
+    4, -- aux1
+    5, -- aux2
+    6, -- aux3
+    7  -- aux4
 })
 
 return core.createConfigAPI({
