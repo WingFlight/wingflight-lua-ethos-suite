@@ -1,5 +1,7 @@
 # 0.0.2
 
+Board Alignment
+Remove collective from channel maps
 Add in ability to set master gains on RPY via lua
 Added in support for flight modes sensor
 Ensure flight mode sensor is enabled by default
