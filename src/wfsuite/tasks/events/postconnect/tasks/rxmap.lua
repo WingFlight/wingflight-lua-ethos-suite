@@ -32,23 +32,23 @@ function rxmap.wakeup()
             local aileron = API.readValue("aileron")
             local elevator = API.readValue("elevator")
             local rudder = API.readValue("rudder")
-            local collective = API.readValue("collective")
             local throttle = API.readValue("throttle")
             local aux1 = API.readValue("aux1")
             local aux2 = API.readValue("aux2")
             local aux3 = API.readValue("aux3")
+            local aux4 = API.readValue("aux4")
 
             wfsuite.session.rx.map.aileron = aileron
             wfsuite.session.rx.map.elevator = elevator
             wfsuite.session.rx.map.rudder = rudder
-            wfsuite.session.rx.map.collective = collective
             wfsuite.session.rx.map.throttle = throttle
             wfsuite.session.rx.map.aux1 = aux1
             wfsuite.session.rx.map.aux2 = aux2
             wfsuite.session.rx.map.aux3 = aux3
+            wfsuite.session.rx.map.aux4 = aux4
 
-            wfsuite.utils.log("RX Map: Aileron: " .. aileron .. ", Elevator: " .. elevator .. ", Rudder: " .. rudder .. ", Collective: " .. collective .. ", Throttle: " .. throttle .. ", Aux1: " .. aux1 .. ", Aux2: " .. aux2 .. ", Aux3: " .. aux3, "info")
-            wfsuite.utils.log("RX Map: Ail: " .. aileron .. ", Elev: " .. elevator .. ", Rud: " .. rudder .. ", Col: " .. collective .. ", Thr: " .. throttle , "connect")
+            wfsuite.utils.log("RX Map: Aileron: " .. aileron .. ", Elevator: " .. elevator .. ", Rudder: " .. rudder .. ", Throttle: " .. throttle .. ", Aux1: " .. aux1 .. ", Aux2: " .. aux2 .. ", Aux3: " .. aux3 .. ", Aux4: " .. aux4, "info")
+            wfsuite.utils.log("RX Map: Ail: " .. aileron .. ", Elev: " .. elevator .. ", Rud: " .. rudder .. ", Thr: " .. throttle, "connect")
 
             clearApiEntry()
         end)
@@ -61,7 +61,7 @@ end
 
 function rxmap.reset()
     clearApiEntry()
-    if wfsuite.session.rx and wfsuite.session.rx.map then for _, key in ipairs({"aileron", "elevator", "rudder", "collective", "throttle", "aux1", "aux2", "aux3"}) do wfsuite.session.rx.map[key] = nil end end
+    if wfsuite.session.rx and wfsuite.session.rx.map then for _, key in ipairs({"aileron", "elevator", "rudder", "throttle", "aux1", "aux2", "aux3", "aux4"}) do wfsuite.session.rx.map[key] = nil end end
     wfsuite.session.rxmap = {}
     wfsuite.session.rxvalues = {}
     mspCallMade = false

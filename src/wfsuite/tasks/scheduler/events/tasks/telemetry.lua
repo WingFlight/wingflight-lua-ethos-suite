@@ -430,13 +430,12 @@ local eventTable = {
 
             local avgVoltage = updateRollingAverage("voltage", cellVoltage, window)
 
-            local collective = session.rx.values['collective'] or 0
             local aileron = session.rx.values['aileron'] or 0
             local elevator = session.rx.values['elevator'] or 0
             local rudder = session.rx.values['rudder'] or 0
 
             local suppression = (wfsuite.preferences.general.gimbalsupression or 0.95) * 1024
-            if math_abs(collective) > suppression or math_abs(aileron) > suppression or math_abs(elevator) > suppression or math_abs(rudder) > suppression then return end
+            if math_abs(aileron) > suppression or math_abs(elevator) > suppression or math_abs(rudder) > suppression then return end
 
             local key = "voltage"
             if avgVoltage < warnVoltage and shouldAlert(key, interval, now) then

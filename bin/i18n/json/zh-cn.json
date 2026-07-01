@@ -7695,6 +7695,13 @@
           "reverse_text": false,
           "max_length": 6
         },
+        "aux14": {
+          "english": "AUX 14",
+          "translation": "AUX 14",
+          "needs_translation": false,
+          "reverse_text": false,
+          "max_length": 6
+        },
         "aux2": {
           "english": "AUX 2",
           "translation": "AUX 2",
@@ -7750,13 +7757,6 @@
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 5
-        },
-        "collective": {
-          "english": "Collective",
-          "translation": "总螺距",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 10
         },
         "help_p1": {
           "english": "Configure the failsafe settings for loss of RC signal.",
