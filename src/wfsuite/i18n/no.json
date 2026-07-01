@@ -1,4 +1,4 @@
-﻿{
+{
   "api": {
     "ACC_TRIM": {
       "pitch": {
@@ -7715,6 +7715,7 @@
           "english": "AUX 14",
           "max_length": 6,
           "needs_translation": false,
+          "reverse_text": false,
           "translation": "AUX 14"
         },
         "aux2": {
