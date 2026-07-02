@@ -352,6 +352,12 @@ return {
                     shortcutId = "s_esc_motors_rpm_lua_19b6337da0",
                 },
                 {
+                    image = "governor.png",
+                    name = "@i18n(app.modules.esc_motors.idle_governor)@",
+                    script = "idle_governor.lua",
+                    shortcutId = "s_esc_motors_idle_governor_lua_3104111cb9",
+                },
+                {
                     image = "app/modules/esc_tools/esc.png",
                     loaderspeed = false,
                     name = "@i18n(app.modules.esc_tools.name)@",
