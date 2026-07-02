@@ -393,6 +393,12 @@
           "translation": "@i18n(app.modules.esc_motors.rpm)@"
         },
         {
+          "image": "governor.png",
+          "name": "Idle Governor",
+          "script": "idle_governor.lua",
+          "translation": "@i18n(app.modules.esc_motors.idle_governor)@"
+        },
+        {
           "image": "app/modules/esc_tools/esc.png",
           "loaderspeed": false,
           "name": "ESC Tools",
