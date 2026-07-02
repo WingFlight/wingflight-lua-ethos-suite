@@ -110,7 +110,7 @@ local function openPage(opts)
     wfsuite.app.formLines[wfsuite.app.formLineCnt] = form.addLine("@i18n(app.modules.settings.txt_memusage)@")
     wfsuite.app.formFields[formFieldCount] = form.addBooleanField(wfsuite.app.formLines[wfsuite.app.formLineCnt], nil, function() if wfsuite.preferences and wfsuite.preferences.developer then return settings['memstats'] end end, function(newValue) if wfsuite.preferences and wfsuite.preferences.developer then settings.memstats = newValue end end)
 
-   if system.getVersion().simulation and type(simulator.setDebug) == "function" then
+    if system.getVersion().simulation and simulator and type(simulator.setDebug) == "function" then
         formFieldCount = formFieldCount + 1
         wfsuite.app.formLineCnt = wfsuite.app.formLineCnt + 1
         wfsuite.app.formLines[wfsuite.app.formLineCnt] = form.addLine("@i18n(app.modules.settings.txt_debugmalloc)@")
