@@ -18,7 +18,7 @@ local config = {
     icon_unsupported = lcd.loadMask("app/gfx/unsupported.png"),
     version = {major = 2, minor = 3, revision = 0, suffix = "20251111"},
     ethosVersion = {1, 6, 2},
-    supportedMspApiVersion = {"22.00"},
+    supportedMspApiVersion = {"22.00","22.01"},
     baseDir = "wfsuite",
     preferences = "wfsuite.user",
     defaultRateProfile = 6,   -- default, may be overridden in onconnect/tasks/rateprofile.lua
