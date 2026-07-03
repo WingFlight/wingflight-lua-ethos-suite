@@ -89,8 +89,8 @@ local log = wfsuite.utils.log
 local dropSensorList = {}
 
 local renameSensorList = {}
-renameSensorList[0x0500] = {name = "Headspeed", onlyifname = "RPM"}
-renameSensorList[0x0501] = {name = "Tailspeed", onlyifname = "RPM"}
+renameSensorList[0x0500] = {name = "RPM #1", onlyifname = "RPM"}
+renameSensorList[0x0501] = {name = "RPM #2", onlyifname = "RPM"}
 
 renameSensorList[0x0210] = {name = "Voltage", onlyifname = "VFAS"}
 

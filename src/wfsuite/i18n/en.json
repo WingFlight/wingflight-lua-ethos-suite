@@ -11365,10 +11365,10 @@
       "translation": "Ground Speed"
     },
     "headspeed": {
-      "english": "Headspeed",
-      "max_length": 9,
+      "english": "RPM",
+      "max_length": 3,
       "needs_translation": false,
-      "translation": "Headspeed"
+      "translation": "RPM"
     },
     "link": {
       "english": "Link Quality",
@@ -11919,10 +11919,10 @@
       "translation": "Heading"
     },
     "sensor_headspeed": {
-      "english": "Headspeed",
-      "max_length": 9,
+      "english": "RPM",
+      "max_length": 3,
       "needs_translation": false,
-      "translation": "Headspeed"
+      "translation": "RPM"
     },
     "sensor_heartbeat": {
       "english": "Heartbeat",
@@ -12226,10 +12226,10 @@
         "translation": "Governor"
       },
       "headspeed": {
-        "english": "Headspeed",
-        "max_length": 9,
+        "english": "RPM",
+        "max_length": 3,
         "needs_translation": false,
-        "translation": "Headspeed"
+        "translation": "RPM"
       },
       "link_max": {
         "english": "Link Max",

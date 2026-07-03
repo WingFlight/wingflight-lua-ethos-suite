@@ -53,6 +53,7 @@ function utils.session()
         isConnected = false,
         postConnectComplete = false,
         isArmed = false,
+        isInFlight = false,
 
         telemetryState = nil,
         telemetryType = nil,

@@ -35,8 +35,8 @@ dropSensorList[0x0400] = {name = "Temp1"}
 dropSensorList[0x0410] = {name = "Temp1"}
 
 local renameSensorList = {}
-renameSensorList[0x0500] = {name = "Headspeed", onlyifname = "RPM"}
-renameSensorList[0x0501] = {name = "Tailspeed", onlyifname = "RPM"}
+renameSensorList[0x0500] = {name = "RPM #1", onlyifname = "RPM"}
+renameSensorList[0x0501] = {name = "RPM #2", onlyifname = "RPM"}
 
 renameSensorList[0x0210] = {name = "Voltage", onlyifname = "VFAS"}
 renameSensorList[0x0200] = {name = "Current", onlyifname = "Current"}

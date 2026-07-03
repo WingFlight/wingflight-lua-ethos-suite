@@ -81,6 +81,15 @@ return {
         mandatory = true,
         stats = false,
         set_telemetry_sensors = 89,
+        -- Bit 8 (value 256) is INFLIGHT_MODE (see flightModeFlags_e in firmware runtime_config.h)
+        -- -- a firmware-latched "are we actually flying" signal (IDLE UP engagement or a throttle
+        -- threshold, held until disarm), not something worth re-deriving from raw throttle/altitude
+        -- here.
+        onchange = function(value)
+            if type(value) == "number" then
+                wfsuite.session.isInFlight = (value & 256) ~= 0
+            end
+        end
     },
 
     voltage = {

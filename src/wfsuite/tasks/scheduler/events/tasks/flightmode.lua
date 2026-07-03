@@ -11,40 +11,19 @@ local flightmode = {}
 local lastFlightMode = nil
 local hasBeenInFlight = false
 local lastArmed = false
-local groundAltitude = nil
 
-local tasks = wfsuite.tasks
 local utils = wfsuite.utils
 
-local throttleThreshold = 35
-local altitudeGainThreshold = 3 -- meters climbed above the armed/launch baseline
-
+-- "Are we actually flying" is decided by firmware and delivered as the INFLIGHT_MODE bit on the
+-- flight_mode sensor (see sensor_table.lua's onchange handler, which sets session.isInFlight).
+-- Firmware already latches this while armed, so no throttle/altitude re-derivation is needed here.
 function flightmode.inFlight()
-    local telemetry = tasks.telemetry
-
-    if not wfsuite.session.isArmed or not telemetry or (telemetry.active and not telemetry.active()) then return false end
-
-    local altSource = telemetry.getSensorSource and telemetry.getSensorSource("altitude")
-    local altitude = altSource and altSource:value()
-
-    if altitude then
-        if groundAltitude == nil then groundAltitude = altitude end
-        return (altitude - groundAltitude) > altitudeGainThreshold
-    end
-
-    -- No altitude sensor available: fall back to throttle stick position.
-    local rx = wfsuite.session.rx
-    local throttle = rx and rx.values and rx.values.throttle
-
-    if throttle and throttle > throttleThreshold then return true end
-
-    return false
+    return wfsuite.session.isInFlight == true
 end
 
 function flightmode.reset()
     lastFlightMode = nil
     hasBeenInFlight = false
-    groundAltitude = nil
 end
 
 local function determineMode()
@@ -60,7 +39,6 @@ local function determineMode()
 
     if armed and not lastArmed then
         hasBeenInFlight = false
-        groundAltitude = nil
         lastArmed = armed
         return "preflight"
     end
@@ -71,14 +49,11 @@ local function determineMode()
         return "inflight"
     end
 
-    -- Hold inflight while the model remains armed after flight has started.
-    -- This avoids transient sensor/telemetry gaps flipping to postflight mid-flight,
-    -- which can reset dashboard/runtime state and Smart Fuel tracking.
-    if armed and hasBeenInFlight then
-        lastArmed = armed
-        return "inflight"
-    end
-
+    -- Firmware already latches INFLIGHT_MODE through momentary throttle/mode dips (and now also
+    -- clears it early -- while still armed -- when idle up was used this flight and gets switched
+    -- off with throttle back at idle, read as "landed"). So flightmode.inFlight() going false here
+    -- while still armed is a real transition, not sensor noise -- no Lua-side "hold while armed"
+    -- override needed (or wanted: it would block that early postflight transition).
     lastArmed = armed
     return hasBeenInFlight and "postflight" or "preflight"
 end
