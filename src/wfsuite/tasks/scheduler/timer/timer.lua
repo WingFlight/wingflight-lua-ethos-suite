@@ -162,11 +162,6 @@ function timer.wakeup()
     local prefs = session.modelPreferences
     local flightMode = wfsuite.flightmode.current
     local flightActive = flightMode == "inflight"
-    local flightmodeTask = tasks and tasks.events and tasks.events.flightmode
-
-    if flightmodeTask and type(flightmodeTask.inFlight) == "function" then
-        flightActive = flightmodeTask.inFlight()
-    end
 
     lastFlightMode = flightMode
 
