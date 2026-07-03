@@ -7,10 +7,13 @@ local wfsuite = require("wfsuite")
 local pageRuntime = assert(loadfile("app/lib/page_runtime.lua"))()
 
 local FIELDS = {
-    RPM = 1,
-    GAIN = 2,
-    HANDOVER = 3,
-    CEILING = 4
+    MODE = 1,
+    RPM = 2,
+    GAIN = 3,
+    I_GAIN = 4,
+    THROTTLE = 5,
+    HANDOVER = 6,
+    CEILING = 7
 }
 
 local apidata = {
@@ -20,8 +23,11 @@ local apidata = {
     formdata = {
         labels = {},
         fields = {
+            [FIELDS.MODE] = {t = "@i18n(app.modules.esc_motors.idle_governor_mode)@", api = "IDLE_GOVERNOR_CONFIG:idle_governor_mode"},
             [FIELDS.RPM] = {t = "@i18n(app.modules.esc_motors.idle_governor_rpm)@", api = "IDLE_GOVERNOR_CONFIG:idle_governor_rpm"},
             [FIELDS.GAIN] = {t = "@i18n(app.modules.esc_motors.idle_governor_gain)@", api = "IDLE_GOVERNOR_CONFIG:idle_governor_gain"},
+            [FIELDS.I_GAIN] = {t = "@i18n(app.modules.esc_motors.idle_governor_i_gain)@", api = "IDLE_GOVERNOR_CONFIG:idle_governor_i_gain"},
+            [FIELDS.THROTTLE] = {t = "@i18n(app.modules.esc_motors.idle_governor_throttle)@", api = "IDLE_GOVERNOR_CONFIG:idle_governor_throttle"},
             [FIELDS.HANDOVER] = {t = "@i18n(app.modules.esc_motors.idle_governor_handover)@", api = "IDLE_GOVERNOR_CONFIG:idle_governor_handover"},
             [FIELDS.CEILING] = {t = "@i18n(app.modules.esc_motors.idle_governor_ceiling)@", api = "IDLE_GOVERNOR_CONFIG:idle_governor_ceiling"},
         }
