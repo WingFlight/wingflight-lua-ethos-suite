@@ -5716,6 +5716,41 @@
           "translation": "הגדר את תכונות המנוע ובקר המהירות.",
           "reverse_text": true
         },
+        "idle_governor": {
+          "english": "Idle Governor",
+          "translation": "Idle Governor",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 13
+        },
+        "idle_governor_ceiling": {
+          "english": "Idle Governor Ceiling",
+          "translation": "Idle Governor Ceiling",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 21
+        },
+        "idle_governor_gain": {
+          "english": "Idle Governor Gain",
+          "translation": "Idle Governor Gain",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 18
+        },
+        "idle_governor_handover": {
+          "english": "Idle Governor Handover",
+          "translation": "Idle Governor Handover",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 22
+        },
+        "idle_governor_rpm": {
+          "english": "Idle Governor RPM",
+          "translation": "Idle Governor RPM",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 17
+        },
         "main": {
           "english": "Main",
           "max_length": 4,
@@ -12989,7 +13024,7 @@
     "english": "true",
     "max_length": 4,
     "needs_translation": false,
-    "translation": "נָכוֹן",
+    "translation": "true",
     "reverse_text": true
   },
   "reload": {

@@ -1600,26 +1600,6 @@
         "translation": "ON"
       }
     },
-    "IDLE_GOVERNOR_CONFIG": {
-      "tbl_mode_off": {
-        "english": "OFF",
-        "max_length": 3,
-        "needs_translation": false,
-        "translation": "OFF"
-      },
-      "tbl_mode_rpm": {
-        "english": "RPM",
-        "max_length": 3,
-        "needs_translation": false,
-        "translation": "RPM"
-      },
-      "tbl_mode_throttle": {
-        "english": "THROTTLE",
-        "max_length": 8,
-        "needs_translation": false,
-        "translation": "THROTTLE"
-      }
-    },
     "MIXER_CONFIG": {
       "collective_tilt_correction_neg": {
         "english": "Adjust the collective tilt correction scaling for negative collective pitch.",
@@ -4959,10 +4939,10 @@
           "translation": "Idle Governor Ceiling"
         },
         "idle_governor_gain": {
-          "english": "Idle Governor P Gain",
-          "max_length": 20,
+          "english": "Idle Governor Gain",
+          "max_length": 18,
           "needs_translation": false,
-          "translation": "Idle Governor P Gain"
+          "translation": "Idle Governor Gain"
         },
         "idle_governor_handover": {
           "english": "Idle Governor Handover",
@@ -4975,24 +4955,6 @@
           "max_length": 17,
           "needs_translation": false,
           "translation": "Idle Governor RPM"
-        },
-        "idle_governor_mode": {
-          "english": "Idle Governor Mode",
-          "max_length": 18,
-          "needs_translation": false,
-          "translation": "Idle Governor Mode"
-        },
-        "idle_governor_throttle": {
-          "english": "Idle Governor Throttle",
-          "max_length": 22,
-          "needs_translation": false,
-          "translation": "Idle Governor Throttle"
-        },
-        "idle_governor_i_gain": {
-          "english": "Idle Governor I Gain",
-          "max_length": 20,
-          "needs_translation": false,
-          "translation": "Idle Governor I Gain"
         },
         "main": {
           "english": "Main",
@@ -11365,10 +11327,10 @@
       "translation": "Ground Speed"
     },
     "headspeed": {
-      "english": "RPM",
-      "max_length": 3,
+      "english": "Headspeed",
+      "max_length": 9,
       "needs_translation": false,
-      "translation": "RPM"
+      "translation": "Headspeed"
     },
     "link": {
       "english": "Link Quality",
@@ -11919,10 +11881,10 @@
       "translation": "Heading"
     },
     "sensor_headspeed": {
-      "english": "RPM",
-      "max_length": 3,
+      "english": "Headspeed",
+      "max_length": 9,
       "needs_translation": false,
-      "translation": "RPM"
+      "translation": "Headspeed"
     },
     "sensor_heartbeat": {
       "english": "Heartbeat",
@@ -12226,10 +12188,10 @@
         "translation": "Governor"
       },
       "headspeed": {
-        "english": "RPM",
-        "max_length": 3,
+        "english": "Headspeed",
+        "max_length": 9,
         "needs_translation": false,
-        "translation": "RPM"
+        "translation": "Headspeed"
       },
       "link_max": {
         "english": "Link Max",
