@@ -27,6 +27,7 @@
       - menuId `servos_type`: Servos
         - PWM Output (script `pwm.lua`)
         - BUS Output (script `bus.lua`)
+    - Mixer (script `mixer/mixer.lua`)
     - Controls (menuId `safety_menu`)
       - menuId `safety_menu`: Controls
         - Modes (script `modes/modes.lua`)

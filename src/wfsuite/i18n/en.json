@@ -7528,6 +7528,12 @@
           "needs_translation": false,
           "translation": "Aileron Direction"
         },
+        "axis_gain_help": {
+          "english": "Scales every rule reading a stabilized axis by a single percentage, and Invert flips that axis's direction for every rule reading it at once -- handy when setting up a new model without editing each mixer rule individually.",
+          "max_length": 223,
+          "needs_translation": false,
+          "translation": "Scales every rule reading a stabilized axis by a single percentage, and Invert flips that axis's direction for every rule reading it at once -- handy when setting up a new model without editing each mixer rule individually."
+        },
         "collective_calibration": {
           "english": "Collective Calibration",
           "max_length": 22,
@@ -7600,6 +7606,12 @@
           "needs_translation": false,
           "translation": "Enable passthrough mixer override so you can move the sticks while adjusting swash geometry. \r\n\r\nLive changes from this page are sent to the flight controller."
         },
+        "gain": {
+          "english": "Gain",
+          "max_length": 4,
+          "needs_translation": false,
+          "translation": "Gain"
+        },
         "geo_correction": {
           "english": "Geo Correction",
           "max_length": 14,
@@ -7618,6 +7630,18 @@
           "needs_translation": false,
           "translation": "Adust swash plate geometry, phase angles, and limits."
         },
+        "invert": {
+          "english": "Invert",
+          "max_length": 6,
+          "needs_translation": false,
+          "translation": "Invert"
+        },
+        "inverted": {
+          "english": "Inverted",
+          "max_length": 8,
+          "needs_translation": false,
+          "translation": "Inverted"
+        },
         "main_rotor_dir": {
           "english": "Rotor Direction",
           "max_length": 15,
@@ -7629,6 +7653,24 @@
           "max_length": 5,
           "needs_translation": false,
           "translation": "Mixer"
+        },
+        "normal": {
+          "english": "Normal",
+          "max_length": 6,
+          "needs_translation": false,
+          "translation": "Normal"
+        },
+        "pitch": {
+          "english": "Pitch",
+          "max_length": 5,
+          "needs_translation": false,
+          "translation": "Pitch"
+        },
+        "roll": {
+          "english": "Roll",
+          "max_length": 4,
+          "needs_translation": false,
+          "translation": "Roll"
         },
         "swash": {
           "english": "Swash",
@@ -7707,6 +7749,12 @@
           "max_length": 5,
           "needs_translation": false,
           "translation": "Trims"
+        },
+        "yaw": {
+          "english": "Yaw",
+          "max_length": 3,
+          "needs_translation": false,
+          "translation": "Yaw"
         },
         "yaw_calibration": {
           "english": "Yaw Calibration",

@@ -8760,6 +8760,13 @@
           "reverse_text": false,
           "translation": "Aileron Direction"
         },
+        "axis_gain_help": {
+          "english": "Scales every rule reading a stabilized axis by a single percentage, and Invert flips that axis's direction for every rule reading it at once -- handy when setting up a new model without editing each mixer rule individually.",
+          "max_length": 223,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Scales every rule reading a stabilized axis by a single percentage, and Invert flips that axis's direction for every rule reading it at once -- handy when setting up a new model without editing each mixer rule individually."
+        },
         "collective_calibration": {
           "english": "Collective Calibration",
           "max_length": 22,
@@ -8844,6 +8851,13 @@
           "reverse_text": false,
           "translation": "Activer bypass du mixer pour bouger les sticks lors du réglage plateau. Les modif. de cette page sont envoyées au contrôleur de vol."
         },
+        "gain": {
+          "english": "Gain",
+          "max_length": 4,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Gain"
+        },
         "geo_correction": {
           "english": "Geo Correction",
           "max_length": 14,
@@ -8865,6 +8879,20 @@
           "reverse_text": false,
           "translation": "Ajustez la geometrie du plateau cyclique, les angles de phase et les limites. TTA : Precompensation pour l'aide a l'anticouple"
         },
+        "invert": {
+          "english": "Invert",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Invert"
+        },
+        "inverted": {
+          "english": "Inverted",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Inverted"
+        },
         "main_rotor_dir": {
           "english": "Rotor Direction",
           "max_length": 15,
@@ -8878,6 +8906,27 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Mixeur"
+        },
+        "normal": {
+          "english": "Normal",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Normal"
+        },
+        "pitch": {
+          "english": "Pitch",
+          "max_length": 5,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Pitch"
+        },
+        "roll": {
+          "english": "Roll",
+          "max_length": 4,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Roll"
         },
         "swash": {
           "english": "Swash",
@@ -8969,6 +9018,13 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Trims"
+        },
+        "yaw": {
+          "english": "Yaw",
+          "max_length": 3,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Yaw"
         },
         "yaw_calibration": {
           "english": "Yaw Calibration",

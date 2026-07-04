@@ -8807,6 +8807,13 @@
           "reverse_text": false,
           "max_length": 75
         },
+        "axis_gain_help": {
+          "english": "Scales every rule reading a stabilized axis by a single percentage, and Invert flips that axis's direction for every rule reading it at once -- handy when setting up a new model without editing each mixer rule individually.",
+          "translation": "Scales every rule reading a stabilized axis by a single percentage, and Invert flips that axis's direction for every rule reading it at once -- handy when setting up a new model without editing each mixer rule individually.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 223
+        },
         "elevator_direction": {
           "english": "Elevator Direction",
           "translation": "Kierunek windy",
@@ -8827,6 +8834,13 @@
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 159
+        },
+        "gain": {
+          "english": "Gain",
+          "translation": "Gain",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 4
         },
         "geo_correction": {
           "english": "Geo Correction",
@@ -8849,6 +8863,20 @@
           "max_length": 53,
           "reverse_text": false
         },
+        "invert": {
+          "english": "Invert",
+          "translation": "Invert",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 6
+        },
+        "inverted": {
+          "english": "Inverted",
+          "translation": "Inverted",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 8
+        },
         "main_rotor_dir": {
           "english": "Rotor Direction",
           "translation": "Kierunek wirnika",
@@ -8862,6 +8890,27 @@
           "needs_translation": false,
           "max_length": 5,
           "reverse_text": false
+        },
+        "normal": {
+          "english": "Normal",
+          "translation": "Normal",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 6
+        },
+        "pitch": {
+          "english": "Pitch",
+          "translation": "Pitch",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 5
+        },
+        "roll": {
+          "english": "Roll",
+          "translation": "Roll",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 4
         },
         "swash": {
           "english": "Swash",
@@ -8953,6 +9002,13 @@
           "needs_translation": false,
           "max_length": 5,
           "reverse_text": false
+        },
+        "yaw": {
+          "english": "Yaw",
+          "translation": "Yaw",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 3
         },
         "yaw_calibration": {
           "english": "Yaw Calibration",
