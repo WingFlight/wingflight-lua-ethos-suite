@@ -1999,6 +1999,24 @@
         "needs_translation": false,
         "translation": "Determines how aggressively the helicopter tilts back to the maximum angle (if exceeded) while in Acro Trainer Mode."
       },
+      "autohover_gain": {
+        "english": "Correction strength back to the held vertical (prop-hang) attitude and heading in Auto Hover mode.",
+        "max_length": 100,
+        "needs_translation": false,
+        "translation": "Correction strength back to the held vertical (prop-hang) attitude and heading in Auto Hover mode."
+      },
+      "autohover_max_angle": {
+        "english": "Maximum degrees the sticks may deflect the held attitude away from vertical/heading in Auto Hover mode.",
+        "max_length": 107,
+        "needs_translation": false,
+        "translation": "Maximum degrees the sticks may deflect the held attitude away from vertical/heading in Auto Hover mode."
+      },
+      "autohover_max_rate": {
+        "english": "Safety clamp (deg/s) on how fast Auto Hover may rotate the aircraft toward the held attitude. Manual throttle only -- has no awareness of airspeed or thrust sufficiency.",
+        "max_length": 160,
+        "needs_translation": false,
+        "translation": "Safety clamp (deg/s) on how fast Auto Hover may rotate the aircraft toward the held attitude. Manual throttle only -- has no awareness of airspeed or thrust sufficiency."
+      },
       "yaw_ccw_stop_gain": {
         "english": "Stop gain (PD) for counter-clockwise rotation.",
         "max_length": 46,
@@ -2799,6 +2817,12 @@
           "max_length": 16,
           "needs_translation": false,
           "translation": "Angle Level Gain"
+        },
+        "fn_atthold_gain": {
+          "english": "Attitude Hold Gain",
+          "max_length": 18,
+          "needs_translation": false,
+          "translation": "Attitude Hold Gain"
         },
         "fn_battery_profile": {
           "english": "Battery Profile",
@@ -8538,6 +8562,12 @@
           "needs_translation": false,
           "translation": "Angle mode"
         },
+        "auto_hover": {
+          "english": "Auto Hover",
+          "max_length": 10,
+          "needs_translation": false,
+          "translation": "Auto Hover"
+        },
         "gain": {
           "english": "Gain",
           "max_length": 4,
@@ -8579,6 +8609,12 @@
           "max_length": 9,
           "needs_translation": false,
           "translation": "Autolevel"
+        },
+        "rate": {
+          "english": "Rate",
+          "max_length": 4,
+          "needs_translation": false,
+          "translation": "Rate"
         }
       },
       "profile_governor": {

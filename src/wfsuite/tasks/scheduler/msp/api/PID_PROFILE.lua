@@ -68,7 +68,10 @@ local FIELD_SPEC = {
     {"fw_tpa_rate", "U8", 0, 100, 0, "%"},
     {"master_gain_0", "U8", 25, 200, 100, "%"},
     {"master_gain_1", "U8", 25, 200, 100, "%"},
-    {"master_gain_2", "U8", 25, 200, 100, "%"}
+    {"master_gain_2", "U8", 25, 200, 100, "%"},
+    {"autohover_gain", "U8", 0, 250, 50},
+    {"autohover_max_angle", "U8", 0, 90, 30, "°"},
+    {"autohover_max_rate", "U16", 0, 1800, 300, "°/s"}
 }
 
 local SIM_RESPONSE = core.simResponse({
@@ -119,7 +122,10 @@ local SIM_RESPONSE = core.simResponse({
     0,    -- fw_tpa_rate
     100,  -- master_gain_0
     100,  -- master_gain_1
-    100   -- master_gain_2
+    100,  -- master_gain_2
+    50,   -- autohover_gain
+    30,   -- autohover_max_angle
+    44, 1 -- autohover_max_rate (U16 LE: 300 = 0x012C -> 44, 1)
 })
 
 return core.createConfigAPI({
