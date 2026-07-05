@@ -2818,6 +2818,12 @@
           "needs_translation": false,
           "translation": "Angle Level Gain"
         },
+        "fn_atthold_gain": {
+          "english": "Attitude Hold Gain",
+          "max_length": 18,
+          "needs_translation": false,
+          "translation": "Attitude Hold Gain"
+        },
         "fn_battery_profile": {
           "english": "Battery Profile",
           "max_length": 15,
@@ -8598,17 +8604,17 @@
           "needs_translation": false,
           "translation": "Max"
         },
-        "max_rate": {
-          "english": "Max Rate",
-          "max_length": 8,
-          "needs_translation": false,
-          "translation": "Max Rate"
-        },
         "name": {
           "english": "Autolevel",
           "max_length": 9,
           "needs_translation": false,
           "translation": "Autolevel"
+        },
+        "rate": {
+          "english": "Rate",
+          "max_length": 4,
+          "needs_translation": false,
+          "translation": "Rate"
         }
       },
       "profile_governor": {
