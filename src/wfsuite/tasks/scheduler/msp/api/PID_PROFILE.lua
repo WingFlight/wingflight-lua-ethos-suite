@@ -9,6 +9,7 @@ local core = wfsuite.tasks.msp.getApiCore()
 local API_NAME = "PID_PROFILE"
 local MSP_API_CMD_READ = 94
 local MSP_API_CMD_WRITE = 95
+local OPTIONAL = false
 
 local TBL_OFF_ON = {[0] = "@i18n(api.PID_PROFILE.tbl_off)@", "@i18n(api.PID_PROFILE.tbl_on)@"}
 local TBL_ITERM_RELAX = {
@@ -71,7 +72,11 @@ local FIELD_SPEC = {
     {"master_gain_2", "U8", 25, 200, 100, "%"},
     {"autohover_gain", "U8", 0, 250, 50},
     {"autohover_max_angle", "U8", 0, 90, 30, "°"},
-    {"autohover_max_rate", "U16", 0, 1800, 300, "°/s"}
+    {"autohover_max_rate", "U16", 0, 1800, 300, "°/s"},
+    {"cross_axis_relax_strength", "U8", 0, 100, 0, "%", nil, nil, nil, nil, nil, nil, OPTIONAL},
+    {"cross_axis_relax_level", "U8", 10, 250, 100, nil, nil, nil, nil, nil, nil, nil, OPTIONAL},
+    {"cross_axis_relax_cutoff", "U8", 1, 100, 10, "Hz", nil, nil, nil, nil, nil, nil, OPTIONAL},
+    {"cross_axis_relax_pitch_strength", "U8", 0, 100, 0, "%", nil, nil, nil, nil, nil, nil, OPTIONAL}
 }
 
 local SIM_RESPONSE = core.simResponse({
@@ -125,7 +130,11 @@ local SIM_RESPONSE = core.simResponse({
     100,  -- master_gain_2
     50,   -- autohover_gain
     30,   -- autohover_max_angle
-    44, 1 -- autohover_max_rate (U16 LE: 300 = 0x012C -> 44, 1)
+    44, 1, -- autohover_max_rate (U16 LE: 300 = 0x012C -> 44, 1)
+    0,    -- cross_axis_relax_strength
+    100,  -- cross_axis_relax_level
+    10,   -- cross_axis_relax_cutoff
+    0     -- cross_axis_relax_pitch_strength
 })
 
 return core.createConfigAPI({

@@ -37,4 +37,8 @@ return {
     ["autohover_gain"] = "@i18n(api.PID_PROFILE.autohover_gain)@",
     ["autohover_max_angle"] = "@i18n(api.PID_PROFILE.autohover_max_angle)@",
     ["autohover_max_rate"] = "@i18n(api.PID_PROFILE.autohover_max_rate)@",
+    ["cross_axis_relax_strength"] = "@i18n(api.PID_PROFILE.cross_axis_relax_strength)@",
+    ["cross_axis_relax_level"] = "@i18n(api.PID_PROFILE.cross_axis_relax_level)@",
+    ["cross_axis_relax_cutoff"] = "@i18n(api.PID_PROFILE.cross_axis_relax_cutoff)@",
+    ["cross_axis_relax_pitch_strength"] = "@i18n(api.PID_PROFILE.cross_axis_relax_pitch_strength)@",
 }

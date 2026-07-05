@@ -21,7 +21,9 @@ local apidata = {
             {t = "@i18n(app.modules.profile_pidcontroller.iterm_relax)@", label = 6, inline_size = 40.15},
             {t = "@i18n(app.modules.profile_pidcontroller.cutoff_point)@", label = 15, inline_size = 8.15},
             {t = "@i18n(app.modules.profile_pidcontroller.fw_tpa)@", label = 20, inline_size = 13.6},
-            {t = "@i18n(app.modules.profile_pidcontroller.master_gain)@", label = 25, inline_size = 10.15}
+            {t = "@i18n(app.modules.profile_pidcontroller.master_gain)@", label = 25, inline_size = 10.15},
+            {t = "@i18n(app.modules.profile_pidcontroller.cross_axis_relax)@", label = 30, inline_size = 10.15},
+            {t = "", label = 31, inline_size = 10.15}
         },
         fields = {
             {t = "@i18n(app.modules.profile_pidcontroller.time)@", label = 2, inline = 1, mspapi = 1, apikey = "iterm_decay_time"}, {t = "@i18n(app.modules.profile_pidcontroller.limit)@", inline = 2, label = 2, mspapi = 1, apikey = "iterm_decay_limit"},
@@ -29,7 +31,9 @@ local apidata = {
             {t = "@i18n(app.modules.profile_pidcontroller.error_rotation)@", mspapi = 1, apikey = "error_rotation", type = 1, apiversionlte = {22, 0, 0}}, {t = "", inline = 1, label = 6, mspapi = 1, apikey = "iterm_relax_type", type = 1}, {t = "@i18n(app.modules.profile_pidcontroller.roll)@", inline = 3, label = 15, mspapi = 1, apikey = "iterm_relax_cutoff_0"},
             {t = "@i18n(app.modules.profile_pidcontroller.pitch)@", inline = 2, label = 15, mspapi = 1, apikey = "iterm_relax_cutoff_1"}, {t = "@i18n(app.modules.profile_pidcontroller.yaw)@", inline = 1, label = 15, mspapi = 1, apikey = "iterm_relax_cutoff_2"},
             {t = "@i18n(app.modules.profile_pidcontroller.breakpoint)@", inline = 2, label = 20, mspapi = 1, apikey = "fw_tpa_breakpoint"}, {t = "@i18n(app.modules.profile_pidcontroller.rate)@", inline = 1, label = 20, mspapi = 1, apikey = "fw_tpa_rate"},
-            {t = "@i18n(app.modules.profile_pidcontroller.roll)@", inline = 3, label = 25, mspapi = 1, apikey = "master_gain_0"}, {t = "@i18n(app.modules.profile_pidcontroller.pitch)@", inline = 2, label = 25, mspapi = 1, apikey = "master_gain_1"}, {t = "@i18n(app.modules.profile_pidcontroller.yaw)@", inline = 1, label = 25, mspapi = 1, apikey = "master_gain_2"}
+            {t = "@i18n(app.modules.profile_pidcontroller.roll)@", inline = 3, label = 25, mspapi = 1, apikey = "master_gain_0"}, {t = "@i18n(app.modules.profile_pidcontroller.pitch)@", inline = 2, label = 25, mspapi = 1, apikey = "master_gain_1"}, {t = "@i18n(app.modules.profile_pidcontroller.yaw)@", inline = 1, label = 25, mspapi = 1, apikey = "master_gain_2"},
+            {t = "@i18n(app.modules.profile_pidcontroller.roll)@", inline = 2, label = 30, mspapi = 1, apikey = "cross_axis_relax_strength"}, {t = "@i18n(app.modules.profile_pidcontroller.pitch)@", inline = 1, label = 30, mspapi = 1, apikey = "cross_axis_relax_pitch_strength"},
+            {t = "@i18n(app.modules.profile_pidcontroller.level)@", inline = 2, label = 31, mspapi = 1, apikey = "cross_axis_relax_level"}, {t = "@i18n(app.modules.profile_pidcontroller.cutoff)@", inline = 1, label = 31, mspapi = 1, apikey = "cross_axis_relax_cutoff"}
         }
     }
 }
