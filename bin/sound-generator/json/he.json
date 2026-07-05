@@ -204,6 +204,12 @@
     "needs_translation": false
   },
   {
+    "file": "events/mode/autohover.wav",
+    "english": "Auto Hover",
+    "translation": "Auto Hover",
+    "needs_translation": false
+  },
+  {
     "file": "events/mode/trainer.wav",
     "english": "Trainer",
     "translation": "Trainer",

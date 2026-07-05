@@ -64,6 +64,7 @@ local FLIGHT_MODE_PRIORITY = {
     {bit = 0, file = "failsafe.wav"},     -- FAILSAFE_MODE_BIT
     {bit = 6, file = "gpsrescue.wav"},    -- GPS_RESCUE_MODE_BIT
     {bit = 7, file = "passthrough.wav"},  -- PASSTHROUGH_MODE_BIT
+    {bit = 9, file = "autohover.wav"},    -- AUTOHOVER_MODE_BIT
     {bit = 2, file = "horizon.wav"},      -- HORIZON_MODE_BIT
     {bit = 1, file = "angle.wav"},        -- ANGLE_MODE_BIT
     {bit = 3, file = "trainer.wav"},      -- TRAINER_MODE_BIT
