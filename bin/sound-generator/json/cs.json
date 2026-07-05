@@ -222,9 +222,9 @@
     "needs_translation": false
   },
   {
-    "file": "events/mode/passthrough.wav",
-    "english": "Passthrough",
-    "translation": "Passthrough",
+    "file": "events/mode/manual.wav",
+    "english": "Manual",
+    "translation": "Manual",
     "needs_translation": false
   },
   {
