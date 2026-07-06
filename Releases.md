@@ -1,3 +1,12 @@
+# 0.0.4
+
+Add distinct manual and passthrough modes.
+Add cross-axis relax controls.
+Add auto-hover flight mode support.
+Remove atthold mode.
+Update mixer configuration support.
+Refresh translations.
+
 # 0.0.3
 
 ESC Programing
