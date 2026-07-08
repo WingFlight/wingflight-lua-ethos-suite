@@ -9971,6 +9971,13 @@
           "reverse_text": false,
           "translation": "Vinkel mode"
         },
+        "auto_hover": {
+          "english": "Auto hover",
+          "max_length": 10,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Auto hover"
+        },
         "gain": {
           "english": "Gain",
           "max_length": 4,
@@ -9999,6 +10006,13 @@
           "reverse_text": false,
           "translation": "Horizon Mode: How aggressively the heli tilts Tilbake to level when flying in Horizon Mode."
         },
+        "help_p4": {
+          "english": "Auto Hover: How strongly the aircraft corrects back to vertical and holds heading during 3D hover.",
+          "max_length": 98,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Auto Hover: How strongly the aircraft corrects back to vertical and holds heading during 3D hover."
+        },
         "horizon_mode": {
           "english": "Horizon mode",
           "max_length": 12,
@@ -10019,6 +10033,13 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Autonivå"
+        },
+        "rate": {
+          "english": "Rate",
+          "max_length": 4,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Rate"
         }
       },
       "profile_governor": {

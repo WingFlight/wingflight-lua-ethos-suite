@@ -9955,6 +9955,13 @@
           "reverse_text": false,
           "max_length": 10
         },
+        "auto_hover": {
+          "english": "Auto hover",
+          "translation": "Auto hover",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 10
+        },
         "gain": {
           "english": "Gain",
           "translation": "Ganho",
@@ -9983,6 +9990,13 @@
           "reverse_text": false,
           "max_length": 88
         },
+        "help_p4": {
+          "english": "Auto Hover: How strongly the aircraft corrects back to vertical and holds heading during 3D hover.",
+          "translation": "Auto Hover: How strongly the aircraft corrects back to vertical and holds heading during 3D hover.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 98
+        },
         "horizon_mode": {
           "english": "Horizon mode",
           "translation": "Modo Horizon",
@@ -10003,6 +10017,13 @@
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 9
+        },
+        "rate": {
+          "english": "Rate",
+          "translation": "Rate",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 4
         }
       },
       "profile_governor": {
