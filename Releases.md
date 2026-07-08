@@ -1,3 +1,7 @@
+# 0.0.5
+
+Version bump for release alignment; no suite-relevant changes this cycle.
+
 # 0.0.4
 
 Add distinct manual and passthrough modes.
