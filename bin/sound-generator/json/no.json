@@ -210,6 +210,12 @@
     "needs_translation": false
   },
   {
+    "file": "events/mode/autotrim.wav",
+    "english": "Auto Trim",
+    "translation": "Auto Trim",
+    "needs_translation": false
+  },
+  {
     "file": "events/mode/trainer.wav",
     "english": "Trainer",
     "translation": "Trainer",

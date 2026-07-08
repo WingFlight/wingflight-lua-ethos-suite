@@ -66,6 +66,7 @@ local FLIGHT_MODE_PRIORITY = {
     {bit = 7, file = "passthrough.wav"},  -- PASSTHROUGH_MODE_BIT
     {bit = 10, file = "manual.wav"},      -- MANUAL_MODE_BIT
     {bit = 9, file = "autohover.wav"},    -- AUTOHOVER_MODE_BIT
+    {bit = 11, file = "autotrim.wav"},    -- AUTOTRIM_MODE_BIT
     {bit = 2, file = "horizon.wav"},      -- HORIZON_MODE_BIT
     {bit = 1, file = "angle.wav"},        -- ANGLE_MODE_BIT
     {bit = 3, file = "trainer.wav"},      -- TRAINER_MODE_BIT
