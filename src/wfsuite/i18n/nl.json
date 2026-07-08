@@ -2114,6 +2114,34 @@
         "reverse_text": false,
         "translation": "B-term afsnijding in Hz."
       },
+      "cross_axis_relax_cutoff": {
+        "english": "Smoothing cutoff frequency for the yaw setpoint detector used by cross-axis relax.",
+        "max_length": 82,
+        "needs_translation": true,
+        "reverse_text": false,
+        "translation": "Smoothing cutoff frequency for the yaw setpoint detector used by cross-axis relax."
+      },
+      "cross_axis_relax_level": {
+        "english": "Yaw setpoint level that reaches the configured maximum cross-axis relax strength.",
+        "max_length": 81,
+        "needs_translation": true,
+        "reverse_text": false,
+        "translation": "Yaw setpoint level that reaches the configured maximum cross-axis relax strength."
+      },
+      "cross_axis_relax_pitch_strength": {
+        "english": "Maximum pitch feedback reduction applied during yaw/rudder stick activity.",
+        "max_length": 74,
+        "needs_translation": true,
+        "reverse_text": false,
+        "translation": "Maximum pitch feedback reduction applied during yaw/rudder stick activity."
+      },
+      "cross_axis_relax_strength": {
+        "english": "Maximum roll feedback reduction applied during yaw/rudder stick activity.",
+        "max_length": 73,
+        "needs_translation": true,
+        "reverse_text": false,
+        "translation": "Maximum roll feedback reduction applied during yaw/rudder stick activity."
+      },
       "cyclic_cross_coupling_cutoff": {
         "english": "Frequency limit for the compensation. Higher value will make the compensation action faster.",
         "max_length": 92,
@@ -10364,6 +10392,20 @@
           "reverse_text": false,
           "translation": "Breakpoint"
         },
+        "cross_axis_relax": {
+          "english": "Cross-axis Relax",
+          "max_length": 16,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Cross-axis Relax"
+        },
+        "cutoff": {
+          "english": "Cutoff",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Cutoff"
+        },
         "cutoff_point": {
           "english": "Cut-off point",
           "max_length": 13,
@@ -10462,6 +10504,13 @@
           "reverse_text": false,
           "translation": "Ik-term ontspannen"
         },
+        "level": {
+          "english": "Level",
+          "max_length": 5,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Level"
+        },
         "limit": {
           "english": "Limit",
           "max_length": 5,
@@ -10503,6 +10552,13 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "R"
+        },
+        "strength": {
+          "english": "Strength",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Strength"
         },
         "time": {
           "english": "Time",

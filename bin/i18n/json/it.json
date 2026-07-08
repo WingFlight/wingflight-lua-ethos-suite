@@ -2205,6 +2205,34 @@
         "max_length": 125,
         "reverse_text": false
       },
+      "cross_axis_relax_cutoff": {
+        "english": "Smoothing cutoff frequency for the yaw setpoint detector used by cross-axis relax.",
+        "translation": "Smoothing cutoff frequency for the yaw setpoint detector used by cross-axis relax.",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 82
+      },
+      "cross_axis_relax_level": {
+        "english": "Yaw setpoint level that reaches the configured maximum cross-axis relax strength.",
+        "translation": "Yaw setpoint level that reaches the configured maximum cross-axis relax strength.",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 81
+      },
+      "cross_axis_relax_strength": {
+        "english": "Maximum roll feedback reduction applied during yaw/rudder stick activity.",
+        "translation": "Maximum roll feedback reduction applied during yaw/rudder stick activity.",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 73
+      },
+      "cross_axis_relax_pitch_strength": {
+        "english": "Maximum pitch feedback reduction applied during yaw/rudder stick activity.",
+        "translation": "Maximum pitch feedback reduction applied during yaw/rudder stick activity.",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 74
+      },
       "gyro_cutoff_0": {
         "english": "PID loop overall bandwidth in Hz.",
         "translation": "Loop PID larghezza di banda complessiva in Hz.”",
@@ -10369,6 +10397,20 @@
           "max_length": 14,
           "reverse_text": false
         },
+        "cross_axis_relax": {
+          "english": "Cross-axis Relax",
+          "translation": "Cross-axis Relax",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 16
+        },
+        "cutoff": {
+          "english": "Cutoff",
+          "translation": "Cutoff",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 6
+        },
         "fw_tpa": {
           "english": "Throttle Attenuation",
           "translation": "Throttle Attenuation",
@@ -10453,6 +10495,13 @@
           "max_length": 5,
           "reverse_text": false
         },
+        "level": {
+          "english": "Level",
+          "translation": "Level",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 5
+        },
         "master_gain": {
           "english": "Master Gain",
           "translation": "Master Gain",
@@ -10487,6 +10536,13 @@
           "needs_translation": false,
           "max_length": 1,
           "reverse_text": false
+        },
+        "strength": {
+          "english": "Strength",
+          "translation": "Strength",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 8
         },
         "time": {
           "english": "Time",

@@ -1817,6 +1817,30 @@
         "needs_translation": false,
         "translation": "B-term cutoff in Hz."
       },
+      "cross_axis_relax_cutoff": {
+        "english": "Smoothing cutoff frequency for the yaw setpoint detector used by cross-axis relax.",
+        "max_length": 82,
+        "needs_translation": false,
+        "translation": "Smoothing cutoff frequency for the yaw setpoint detector used by cross-axis relax."
+      },
+      "cross_axis_relax_level": {
+        "english": "Yaw setpoint level that reaches the configured maximum cross-axis relax strength.",
+        "max_length": 81,
+        "needs_translation": false,
+        "translation": "Yaw setpoint level that reaches the configured maximum cross-axis relax strength."
+      },
+      "cross_axis_relax_pitch_strength": {
+        "english": "Maximum pitch feedback reduction applied during yaw/rudder stick activity.",
+        "max_length": 74,
+        "needs_translation": false,
+        "translation": "Maximum pitch feedback reduction applied during yaw/rudder stick activity."
+      },
+      "cross_axis_relax_strength": {
+        "english": "Maximum roll feedback reduction applied during yaw/rudder stick activity.",
+        "max_length": 73,
+        "needs_translation": false,
+        "translation": "Maximum roll feedback reduction applied during yaw/rudder stick activity."
+      },
       "cyclic_cross_coupling_cutoff": {
         "english": "Frequency limit for the compensation. Higher value will make the compensation action faster.",
         "max_length": 92,
@@ -1882,30 +1906,6 @@
         "max_length": 125,
         "needs_translation": false,
         "translation": "Rotates the current roll and pitch error terms around yaw when the craft rotates. This is sometimes called Piro Compensation."
-      },
-      "cross_axis_relax_cutoff": {
-        "english": "Smoothing cutoff frequency for the yaw setpoint detector used by cross-axis relax.",
-        "max_length": 81,
-        "needs_translation": false,
-        "translation": "Smoothing cutoff frequency for the yaw setpoint detector used by cross-axis relax."
-      },
-      "cross_axis_relax_level": {
-        "english": "Yaw setpoint level that reaches the configured maximum cross-axis relax strength.",
-        "max_length": 76,
-        "needs_translation": false,
-        "translation": "Yaw setpoint level that reaches the configured maximum cross-axis relax strength."
-      },
-      "cross_axis_relax_strength": {
-        "english": "Maximum roll feedback reduction applied during yaw/rudder stick activity.",
-        "max_length": 70,
-        "needs_translation": false,
-        "translation": "Maximum roll feedback reduction applied during yaw/rudder stick activity."
-      },
-      "cross_axis_relax_pitch_strength": {
-        "english": "Maximum pitch feedback reduction applied during yaw/rudder stick activity.",
-        "max_length": 72,
-        "needs_translation": false,
-        "translation": "Maximum pitch feedback reduction applied during yaw/rudder stick activity."
       },
       "gyro_cutoff_0": {
         "english": "PID loop overall bandwidth in Hz.",
@@ -2022,24 +2022,6 @@
         "max_length": 116,
         "needs_translation": false,
         "translation": "Determines how aggressively the helicopter tilts back to the maximum angle (if exceeded) while in Acro Trainer Mode."
-      },
-      "autohover_gain": {
-        "english": "Correction strength back to the held vertical (prop-hang) attitude and heading in Auto Hover mode.",
-        "max_length": 100,
-        "needs_translation": false,
-        "translation": "Correction strength back to the held vertical (prop-hang) attitude and heading in Auto Hover mode."
-      },
-      "autohover_max_angle": {
-        "english": "Maximum degrees the sticks may deflect the held attitude away from vertical/heading in Auto Hover mode.",
-        "max_length": 107,
-        "needs_translation": false,
-        "translation": "Maximum degrees the sticks may deflect the held attitude away from vertical/heading in Auto Hover mode."
-      },
-      "autohover_max_rate": {
-        "english": "Safety clamp (deg/s) on how fast Auto Hover may rotate the aircraft toward the held attitude. Manual throttle only -- has no awareness of airspeed or thrust sufficiency.",
-        "max_length": 160,
-        "needs_translation": false,
-        "translation": "Safety clamp (deg/s) on how fast Auto Hover may rotate the aircraft toward the held attitude. Manual throttle only -- has no awareness of airspeed or thrust sufficiency."
       },
       "yaw_ccw_stop_gain": {
         "english": "Stop gain (PD) for counter-clockwise rotation.",
@@ -8586,12 +8568,6 @@
           "needs_translation": false,
           "translation": "Angle mode"
         },
-        "auto_hover": {
-          "english": "Auto Hover",
-          "max_length": 10,
-          "needs_translation": false,
-          "translation": "Auto Hover"
-        },
         "gain": {
           "english": "Gain",
           "max_length": 4,
@@ -8633,12 +8609,6 @@
           "max_length": 9,
           "needs_translation": false,
           "translation": "Autolevel"
-        },
-        "rate": {
-          "english": "Rate",
-          "max_length": 4,
-          "needs_translation": false,
-          "translation": "Rate"
         }
       },
       "profile_governor": {
@@ -8960,6 +8930,18 @@
           "needs_translation": false,
           "translation": "Breakpoint"
         },
+        "cross_axis_relax": {
+          "english": "Cross-axis Relax",
+          "max_length": 16,
+          "needs_translation": false,
+          "translation": "Cross-axis Relax"
+        },
+        "cutoff": {
+          "english": "Cutoff",
+          "max_length": 6,
+          "needs_translation": false,
+          "translation": "Cutoff"
+        },
         "cutoff_point": {
           "english": "Cut-off point",
           "max_length": 13,
@@ -8977,18 +8959,6 @@
           "max_length": 14,
           "needs_translation": false,
           "translation": "Error rotation"
-        },
-        "cross_axis_relax": {
-          "english": "Cross-axis Relax",
-          "max_length": 16,
-          "needs_translation": false,
-          "translation": "Cross-axis Relax"
-        },
-        "cutoff": {
-          "english": "Cutoff",
-          "max_length": 6,
-          "needs_translation": false,
-          "translation": "Cutoff"
         },
         "fw_tpa": {
           "english": "Throttle Attenuation",
@@ -9056,17 +9026,17 @@
           "needs_translation": false,
           "translation": "I-term relax"
         },
-        "limit": {
-          "english": "Limit",
-          "max_length": 5,
-          "needs_translation": false,
-          "translation": "Limit"
-        },
         "level": {
           "english": "Level",
           "max_length": 5,
           "needs_translation": false,
           "translation": "Level"
+        },
+        "limit": {
+          "english": "Limit",
+          "max_length": 5,
+          "needs_translation": false,
+          "translation": "Limit"
         },
         "master_gain": {
           "english": "Master Gain",

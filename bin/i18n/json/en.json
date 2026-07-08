@@ -1899,25 +1899,25 @@
       },
       "cross_axis_relax_cutoff": {
         "english": "Smoothing cutoff frequency for the yaw setpoint detector used by cross-axis relax.",
-        "max_length": 81,
+        "max_length": 82,
         "needs_translation": false,
         "translation": "Smoothing cutoff frequency for the yaw setpoint detector used by cross-axis relax."
       },
       "cross_axis_relax_level": {
         "english": "Yaw setpoint level that reaches the configured maximum cross-axis relax strength.",
-        "max_length": 76,
+        "max_length": 81,
         "needs_translation": false,
         "translation": "Yaw setpoint level that reaches the configured maximum cross-axis relax strength."
       },
       "cross_axis_relax_strength": {
         "english": "Maximum roll feedback reduction applied during yaw/rudder stick activity.",
-        "max_length": 70,
+        "max_length": 73,
         "needs_translation": false,
         "translation": "Maximum roll feedback reduction applied during yaw/rudder stick activity."
       },
       "cross_axis_relax_pitch_strength": {
         "english": "Maximum pitch feedback reduction applied during yaw/rudder stick activity.",
-        "max_length": 72,
+        "max_length": 74,
         "needs_translation": false,
         "translation": "Maximum pitch feedback reduction applied during yaw/rudder stick activity."
       },
