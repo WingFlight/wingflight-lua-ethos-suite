@@ -58,8 +58,8 @@ local FIELD_SPEC = {
     {"unused_cyclic_cross_coupling_gain", "U8"}, -- heli-only, removed
     {"unused_cyclic_cross_coupling_ratio", "U8"}, -- heli-only, removed
     {"unused_cyclic_cross_coupling_cutoff", "U8"}, -- heli-only, removed
-    {"unused_atthold_gain", "U8"}, -- removed
-    {"unused_atthold_deadband", "U8"}, -- removed
+    {"atthold_gain", "U8", 0, 250, 40},
+    {"atthold_deadband", "U8", 0, 100, 5, "%"},
     {"bterm_cutoff_0", "U8", 0, 250, 15},
     {"bterm_cutoff_1", "U8", 0, 250, 15},
     {"bterm_cutoff_2", "U8", 0, 250, 20},
@@ -76,7 +76,14 @@ local FIELD_SPEC = {
     {"cross_axis_relax_strength", "U8", 0, 100, 0, "%", nil, nil, nil, nil, nil, nil, OPTIONAL},
     {"cross_axis_relax_level", "U8", 10, 250, 100, nil, nil, nil, nil, nil, nil, nil, OPTIONAL},
     {"cross_axis_relax_cutoff", "U8", 1, 100, 10, "Hz", nil, nil, nil, nil, nil, nil, OPTIONAL},
-    {"cross_axis_relax_pitch_strength", "U8", 0, 100, 0, "%", nil, nil, nil, nil, nil, nil, OPTIONAL}
+    {"cross_axis_relax_pitch_strength", "U8", 0, 100, 0, "%", nil, nil, nil, nil, nil, nil, OPTIONAL},
+    -- Index into gainCurves (0 = none/disabled), scales master_gain by |stick deflection|. Added to
+    -- the firmware wire format after cross_axis_relax but was missing here -- backfilled now since
+    -- atthold_max_rate below needs to land at its correct tail position.
+    {"gain_curve_0", "U8", 0, 8, 0, nil, nil, nil, nil, nil, nil, nil, OPTIONAL},
+    {"gain_curve_1", "U8", 0, 8, 0, nil, nil, nil, nil, nil, nil, nil, OPTIONAL},
+    {"gain_curve_2", "U8", 0, 8, 0, nil, nil, nil, nil, nil, nil, nil, OPTIONAL},
+    {"atthold_max_rate", "U16", 0, 1800, 300, "°/s", nil, nil, nil, nil, nil, nil, OPTIONAL}
 }
 
 local SIM_RESPONSE = core.simResponse({
@@ -116,8 +123,8 @@ local SIM_RESPONSE = core.simResponse({
     0,    -- unused_cyclic_cross_coupling_gain
     0,    -- unused_cyclic_cross_coupling_ratio
     0,    -- unused_cyclic_cross_coupling_cutoff
-    0,    -- unused_atthold_gain
-    0,    -- unused_atthold_deadband
+    40,   -- atthold_gain
+    5,    -- atthold_deadband
     15,   -- bterm_cutoff_0
     15,   -- bterm_cutoff_1
     20,   -- bterm_cutoff_2
@@ -134,7 +141,11 @@ local SIM_RESPONSE = core.simResponse({
     0,    -- cross_axis_relax_strength
     100,  -- cross_axis_relax_level
     10,   -- cross_axis_relax_cutoff
-    0     -- cross_axis_relax_pitch_strength
+    0,    -- cross_axis_relax_pitch_strength
+    0,    -- gain_curve_0
+    0,    -- gain_curve_1
+    0,    -- gain_curve_2
+    44, 1 -- atthold_max_rate (U16 LE: 300 = 0x012C -> 44, 1)
 })
 
 return core.createConfigAPI({

@@ -41,4 +41,7 @@ return {
     ["cross_axis_relax_level"] = "@i18n(api.PID_PROFILE.cross_axis_relax_level)@",
     ["cross_axis_relax_cutoff"] = "@i18n(api.PID_PROFILE.cross_axis_relax_cutoff)@",
     ["cross_axis_relax_pitch_strength"] = "@i18n(api.PID_PROFILE.cross_axis_relax_pitch_strength)@",
+    ["atthold_gain"] = "@i18n(api.PID_PROFILE.atthold_gain)@",
+    ["atthold_deadband"] = "@i18n(api.PID_PROFILE.atthold_deadband)@",
+    ["atthold_max_rate"] = "@i18n(api.PID_PROFILE.atthold_max_rate)@",
 }

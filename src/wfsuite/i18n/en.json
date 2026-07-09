@@ -1799,6 +1799,24 @@
         "needs_translation": false,
         "translation": "Determines how aggressively the helicopter tilts back to level while in Angle Mode."
       },
+      "atthold_deadband": {
+        "english": "Percent stick deflection, on any of roll/pitch/yaw, above which Att Hold gives full stick authority and keeps re-capturing its held attitude; below this on all three sticks, the target freezes and the aircraft is corrected back to it.",
+        "max_length": 234,
+        "needs_translation": false,
+        "translation": "Percent stick deflection, on any of roll/pitch/yaw, above which Att Hold gives full stick authority and keeps re-capturing its held attitude; below this on all three sticks, the target freezes and the aircraft is corrected back to it."
+      },
+      "atthold_gain": {
+        "english": "Correction strength back to the held attitude once the sticks are centred and Att Hold has frozen its target.",
+        "max_length": 109,
+        "needs_translation": false,
+        "translation": "Correction strength back to the held attitude once the sticks are centred and Att Hold has frozen its target."
+      },
+      "atthold_max_rate": {
+        "english": "Safety clamp (deg/s) on how fast Att Hold may rotate the aircraft back toward the frozen attitude.",
+        "max_length": 98,
+        "needs_translation": false,
+        "translation": "Safety clamp (deg/s) on how fast Att Hold may rotate the aircraft back toward the frozen attitude."
+      },
       "bterm_cutoff_0": {
         "english": "B-term cutoff in Hz.",
         "max_length": 20,
@@ -8568,11 +8586,23 @@
           "needs_translation": false,
           "translation": "Angle mode"
         },
+        "att_hold": {
+          "english": "Att hold",
+          "max_length": 8,
+          "needs_translation": false,
+          "translation": "Att hold"
+        },
         "auto_hover": {
           "english": "Auto hover",
           "max_length": 10,
           "needs_translation": false,
           "translation": "Auto hover"
+        },
+        "deadband": {
+          "english": "Deadband",
+          "max_length": 8,
+          "needs_translation": false,
+          "translation": "Deadband"
         },
         "gain": {
           "english": "Gain",
@@ -8603,6 +8633,12 @@
           "max_length": 98,
           "needs_translation": false,
           "translation": "Auto Hover: How strongly the aircraft corrects back to vertical and holds heading during 3D hover."
+        },
+        "help_p5": {
+          "english": "Att Hold: Holds whatever attitude the aircraft was in once every stick returns inside the deadband. Full stick authority otherwise.",
+          "max_length": 131,
+          "needs_translation": false,
+          "translation": "Att Hold: Holds whatever attitude the aircraft was in once every stick returns inside the deadband. Full stick authority otherwise."
         },
         "horizon_mode": {
           "english": "Horizon mode",

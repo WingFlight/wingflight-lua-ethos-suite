@@ -16,7 +16,8 @@ local apidata = {
             { t = "@i18n(app.modules.profile_autolevel.acro_trainer)@", inline_size = 13.6, label = 1 },
             { t = "@i18n(app.modules.profile_autolevel.angle_mode)@", inline_size = 13.6, label = 2 },
             { t = "@i18n(app.modules.profile_autolevel.horizon_mode)@", inline_size = 13.6, label = 3 },
-            { t = "@i18n(app.modules.profile_autolevel.auto_hover)@", inline_size = 10.15, label = 4 }
+            { t = "@i18n(app.modules.profile_autolevel.auto_hover)@", inline_size = 10.15, label = 4 },
+            { t = "@i18n(app.modules.profile_autolevel.att_hold)@", inline_size = 10.15, label = 5 }
         },
         fields = {
             { t = "@i18n(app.modules.profile_autolevel.gain)@", inline = 2, label = 1, mspapi = 1, apikey = "trainer_gain" },
@@ -26,7 +27,10 @@ local apidata = {
             { t = "@i18n(app.modules.profile_autolevel.gain)@", inline = 2, label = 3, mspapi = 1, apikey = "horizon_level_strength" },
             { t = "@i18n(app.modules.profile_autolevel.gain)@", inline = 3, label = 4, mspapi = 1, apikey = "autohover_gain" },
             { t = "@i18n(app.modules.profile_autolevel.max)@", inline = 2, label = 4, mspapi = 1, apikey = "autohover_max_angle" },
-            { t = "@i18n(app.modules.profile_autolevel.rate)@", inline = 1, label = 4, mspapi = 1, apikey = "autohover_max_rate" }
+            { t = "@i18n(app.modules.profile_autolevel.rate)@", inline = 1, label = 4, mspapi = 1, apikey = "autohover_max_rate" },
+            { t = "@i18n(app.modules.profile_autolevel.gain)@", inline = 3, label = 5, mspapi = 1, apikey = "atthold_gain" },
+            { t = "@i18n(app.modules.profile_autolevel.deadband)@", inline = 2, label = 5, mspapi = 1, apikey = "atthold_deadband" },
+            { t = "@i18n(app.modules.profile_autolevel.rate)@", inline = 1, label = 5, mspapi = 1, apikey = "atthold_max_rate" }
         }
     }
 }

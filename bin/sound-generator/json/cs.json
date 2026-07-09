@@ -210,6 +210,12 @@
     "needs_translation": false
   },
   {
+    "file": "events/mode/atthold.wav",
+    "english": "Att Hold",
+    "translation": "Att Hold",
+    "needs_translation": false
+  },
+  {
     "file": "events/mode/autotrim.wav",
     "english": "Auto Trim",
     "translation": "Auto Trim",
