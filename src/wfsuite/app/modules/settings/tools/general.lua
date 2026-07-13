@@ -150,7 +150,7 @@ local function onSaveMenu()
         wfsuite.app.ui.progressDisplaySave(msg:gsub("%?$", "."))
         for key, value in pairs(config) do wfsuite.preferences.general[key] = value end
         wfsuite.ini.save_ini_file("SCRIPTS:/" .. wfsuite.config.preferences .. "/preferences.ini", wfsuite.preferences)
-        wfsuite.app.reloadMainMenu()
+        wfsuite.app.MainMenu = assert(loadfile("app/modules/init.lua"))()
         wfsuite.app.triggers.closeSave = true
         return true
     end
