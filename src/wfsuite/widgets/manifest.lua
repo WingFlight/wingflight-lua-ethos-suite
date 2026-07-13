@@ -10,6 +10,7 @@ return {
     varname = "dashboard",
     key = "wfsdh",
     folder = "dashboard",
+    feature = "dashboard",
     type = "widget",
   },
   [2] = {
@@ -18,6 +19,7 @@ return {
     varname = "wftlbx",
     key = "wftlbx",
     folder = "toolbox",
+    feature = "toolbox",
     type = "widget",    
   },
   [3] = {
@@ -26,6 +28,7 @@ return {
     varname = "wfactivelook",
     key = "wfalk",
     folder = "activelook",
+    feature = "activelook",
     type = "glasses",    
   },
 }

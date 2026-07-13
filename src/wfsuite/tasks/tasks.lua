@@ -1202,6 +1202,7 @@ optionalTaskWanted = function(name)
     end
 
     if name == "toolbox" then
+        if wfsuite.features and not wfsuite.features.isEnabled("toolbox", prefs) then return false end
         local session = wfsuite.session
         return session and session.toolbox ~= nil or false
     end

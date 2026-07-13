@@ -12155,6 +12155,34 @@
           "reverse_text": false,
           "translation": "Fahrenheit"
         },
+        "feature_activelook": {
+          "english": "WingFlight ActiveLook",
+          "max_length": 21,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "WingFlight ActiveLook"
+        },
+        "feature_dashboard": {
+          "english": "WingFlight Dashboard",
+          "max_length": 20,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "WingFlight Dashboard"
+        },
+        "feature_toolbox": {
+          "english": "WingFlight Toolbox",
+          "max_length": 18,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "WingFlight Toolbox"
+        },
+        "features": {
+          "english": "Features",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Features"
+        },
         "feet": {
           "english": "Feet",
           "max_length": 4,

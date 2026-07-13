@@ -631,7 +631,15 @@
           "translation": "@i18n(app.modules.settings.shortcuts)@"
         },
         {
+          "image": "features.png",
+          "name": "Features",
+          "offline": true,
+          "script": "tools/features.lua",
+          "translation": "@i18n(app.modules.settings.features)@"
+        },
+        {
           "bgtask": true,
+          "feature": "dashboard",
           "image": "dashboard.png",
           "name": "Dashboard",
           "offline": true,
@@ -644,6 +652,7 @@
             7,
             0
           ],
+          "feature": "activelook",
           "image": "activelook.png",
           "name": "ActiveLook",
           "offline": true,

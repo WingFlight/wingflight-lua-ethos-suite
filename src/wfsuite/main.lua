@@ -63,7 +63,10 @@ local userpref_defaults = {
         toolbar_timeout = 10,
         show_battery_profile_startup = true,
         show_confirmation_dialog = false,
-        show_esc_tools_warning = true
+        show_esc_tools_warning = true,
+        feature_dashboard = true,
+        feature_toolbox = false,
+        feature_activelook = false
     },
     localizations = {
         temperature_unit = 0,
@@ -177,6 +180,7 @@ wfsuite.config.bgTaskName = wfsuite.config.toolName .. " [Background]"
 wfsuite.config.bgTaskKey = "wf2bg"
 
 wfsuite.utils = assert(loadfile("lib/utils.lua"))(wfsuite.config)
+wfsuite.features = assert(loadfile("lib/features.lua"))()
 wfsuite.bus = assert(loadfile("lib/message_bus.lua", "t", _ENV))()
 wfsuite.ethos_events = assert(loadfile("lib/ethos_events.lua", "t", _ENV))()
 
@@ -402,7 +406,7 @@ local function register_widgets()
     local dupCount = {}
 
     for _, v in ipairs(widgetList) do
-        if v.script then
+        if v.script and (not v.feature or wfsuite.features.isEnabled(v.feature, wfsuite.preferences)) then
             local path = "widgets/" .. v.folder .. "/" .. v.script
             local proxy, callWidgetMethod = createLazyWidgetProxy(path)
             local base = v.varname or v.script:gsub("%.lua$", "")
