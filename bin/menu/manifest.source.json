@@ -394,9 +394,9 @@
         },
         {
           "image": "governor.png",
-          "name": "Idle Governor",
-          "script": "idle_governor.lua",
-          "translation": "@i18n(app.modules.esc_motors.idle_governor)@"
+          "name": "Governor",
+          "script": "governor.lua",
+          "translation": "@i18n(app.modules.esc_motors.governor)@"
         },
         {
           "image": "app/modules/esc_tools/esc.png",

@@ -45,9 +45,9 @@ return {
         },
         {
             image = "governor.png",
-            name = "@i18n(app.modules.esc_motors.idle_governor)@",
-            script = "idle_governor.lua",
-            shortcutId = "s_esc_motors_idle_governor_lua_3104111cb9",
+            name = "@i18n(app.modules.esc_motors.governor)@",
+            script = "governor.lua",
+            shortcutId = "s_esc_motors_governor_lua_5569424c21",
         },
         {
             image = "app/modules/esc_tools/esc.png",
