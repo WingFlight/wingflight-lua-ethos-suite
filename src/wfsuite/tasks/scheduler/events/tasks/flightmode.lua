@@ -50,8 +50,8 @@ local function determineMode()
     end
 
     -- Firmware already latches INFLIGHT_MODE through momentary throttle/mode dips (and now also
-    -- clears it early -- while still armed -- when idle up was used this flight and gets switched
-    -- off with throttle back at idle, read as "landed"). So flightmode.inFlight() going false here
+    -- clears it early -- while still armed -- when the governor switch was used this flight and
+    -- gets switched off with throttle back at idle, read as "landed"). So flightmode.inFlight() going false here
     -- while still armed is a real transition, not sensor noise -- no Lua-side "hold while armed"
     -- override needed (or wanted: it would block that early postflight transition).
     lastArmed = armed

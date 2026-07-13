@@ -2975,6 +2975,36 @@
         "reverse_text": false,
         "max_length": 113
       }
+    },
+    "WING_GOVERNOR_CONFIG": {
+      "tbl_mode_off": {
+        "english": "Off",
+        "translation": "Off",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 3
+      },
+      "tbl_mode_rpm": {
+        "english": "Idle RPM",
+        "translation": "Idle RPM",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 8
+      },
+      "tbl_mode_rpm_range": {
+        "english": "RPM Range",
+        "translation": "RPM Range",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 9
+      },
+      "tbl_mode_throttle": {
+        "english": "Idle Throttle",
+        "translation": "Idle Throttle",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 13
+      }
     }
   },
   "app": {
@@ -5758,6 +5788,76 @@
           "max_length": 5,
           "reverse_text": false
         },
+        "governor": {
+          "english": "Governor",
+          "translation": "Governor",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 8
+        },
+        "governor_ceiling": {
+          "english": "Throttle Ceiling",
+          "translation": "Throttle Ceiling",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 16
+        },
+        "governor_gain": {
+          "english": "P Gain",
+          "translation": "P Gain",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 6
+        },
+        "governor_handover": {
+          "english": "Handover Throttle",
+          "translation": "Handover Throttle",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 17
+        },
+        "governor_i_gain": {
+          "english": "I Gain",
+          "translation": "I Gain",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 6
+        },
+        "governor_mode": {
+          "english": "Mode",
+          "translation": "Mode",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 4
+        },
+        "governor_rpm": {
+          "english": "Idle RPM",
+          "translation": "Idle RPM",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 8
+        },
+        "governor_rpm_max": {
+          "english": "Max RPM",
+          "translation": "Max RPM",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 7
+        },
+        "governor_rpm_min": {
+          "english": "Min RPM",
+          "translation": "Min RPM",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 7
+        },
+        "governor_throttle": {
+          "english": "Idle Throttle",
+          "translation": "Idle Throttle",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 13
+        },
         "half_duplex": {
           "english": "Half Duplex",
           "translation": "Medio Duplex",
@@ -5771,41 +5871,6 @@
           "needs_translation": false,
           "max_length": 50,
           "reverse_text": false
-        },
-        "idle_governor": {
-          "english": "Idle Governor",
-          "translation": "Idle Governor",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 13
-        },
-        "idle_governor_ceiling": {
-          "english": "Idle Governor Ceiling",
-          "translation": "Idle Governor Ceiling",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 21
-        },
-        "idle_governor_gain": {
-          "english": "Idle Governor Gain",
-          "translation": "Idle Governor Gain",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 18
-        },
-        "idle_governor_handover": {
-          "english": "Idle Governor Handover",
-          "translation": "Idle Governor Handover",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 22
-        },
-        "idle_governor_rpm": {
-          "english": "Idle Governor RPM",
-          "translation": "Idle Governor RPM",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 17
         },
         "main": {
           "english": "Main",

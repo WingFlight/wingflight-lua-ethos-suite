@@ -2975,6 +2975,36 @@
         "reverse_text": true,
         "translation": "מגביל כמה מהר המתח המסונן עשוי ליפול במצב מתח כדי להפחית קוצים קצרים של צניחה בעומס המשפיעים על SmartFuel."
       }
+    },
+    "WING_GOVERNOR_CONFIG": {
+      "tbl_mode_off": {
+        "english": "Off",
+        "max_length": 3,
+        "needs_translation": true,
+        "reverse_text": false,
+        "translation": "Off"
+      },
+      "tbl_mode_rpm": {
+        "english": "Idle RPM",
+        "max_length": 8,
+        "needs_translation": true,
+        "reverse_text": false,
+        "translation": "Idle RPM"
+      },
+      "tbl_mode_rpm_range": {
+        "english": "RPM Range",
+        "max_length": 9,
+        "needs_translation": true,
+        "reverse_text": false,
+        "translation": "RPM Range"
+      },
+      "tbl_mode_throttle": {
+        "english": "Idle Throttle",
+        "max_length": 13,
+        "needs_translation": true,
+        "reverse_text": false,
+        "translation": "Idle Throttle"
+      }
     }
   },
   "app": {
@@ -5774,6 +5804,76 @@
           "reverse_text": true,
           "translation": "קדמי"
         },
+        "governor": {
+          "english": "Governor",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Governor"
+        },
+        "governor_ceiling": {
+          "english": "Throttle Ceiling",
+          "max_length": 16,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Throttle Ceiling"
+        },
+        "governor_gain": {
+          "english": "P Gain",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "P Gain"
+        },
+        "governor_handover": {
+          "english": "Handover Throttle",
+          "max_length": 17,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Handover Throttle"
+        },
+        "governor_i_gain": {
+          "english": "I Gain",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "I Gain"
+        },
+        "governor_mode": {
+          "english": "Mode",
+          "max_length": 4,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Mode"
+        },
+        "governor_rpm": {
+          "english": "Idle RPM",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Idle RPM"
+        },
+        "governor_rpm_max": {
+          "english": "Max RPM",
+          "max_length": 7,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Max RPM"
+        },
+        "governor_rpm_min": {
+          "english": "Min RPM",
+          "max_length": 7,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Min RPM"
+        },
+        "governor_throttle": {
+          "english": "Idle Throttle",
+          "max_length": 13,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Idle Throttle"
+        },
         "half_duplex": {
           "english": "Half Duplex",
           "max_length": 11,
@@ -5787,41 +5887,6 @@
           "needs_translation": false,
           "reverse_text": true,
           "translation": "הגדר את תכונות המנוע ובקר המהירות."
-        },
-        "idle_governor": {
-          "english": "Idle Governor",
-          "max_length": 13,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "Idle Governor"
-        },
-        "idle_governor_ceiling": {
-          "english": "Idle Governor Ceiling",
-          "max_length": 21,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "Idle Governor Ceiling"
-        },
-        "idle_governor_gain": {
-          "english": "Idle Governor Gain",
-          "max_length": 18,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "Idle Governor Gain"
-        },
-        "idle_governor_handover": {
-          "english": "Idle Governor Handover",
-          "max_length": 22,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "Idle Governor Handover"
-        },
-        "idle_governor_rpm": {
-          "english": "Idle Governor RPM",
-          "max_length": 17,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "Idle Governor RPM"
         },
         "main": {
           "english": "Main",

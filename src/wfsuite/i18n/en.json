@@ -1799,24 +1799,6 @@
         "needs_translation": false,
         "translation": "Determines how aggressively the helicopter tilts back to level while in Angle Mode."
       },
-      "atthold_deadband": {
-        "english": "Percent stick deflection, on any of roll/pitch/yaw, above which Att Hold gives full stick authority and keeps re-capturing its held attitude; below this on all three sticks, the target freezes and the aircraft is corrected back to it.",
-        "max_length": 234,
-        "needs_translation": false,
-        "translation": "Percent stick deflection, on any of roll/pitch/yaw, above which Att Hold gives full stick authority and keeps re-capturing its held attitude; below this on all three sticks, the target freezes and the aircraft is corrected back to it."
-      },
-      "atthold_gain": {
-        "english": "Correction strength back to the held attitude once the sticks are centred and Att Hold has frozen its target.",
-        "max_length": 109,
-        "needs_translation": false,
-        "translation": "Correction strength back to the held attitude once the sticks are centred and Att Hold has frozen its target."
-      },
-      "atthold_max_rate": {
-        "english": "Safety clamp (deg/s) on how fast Att Hold may rotate the aircraft back toward the frozen attitude.",
-        "max_length": 98,
-        "needs_translation": false,
-        "translation": "Safety clamp (deg/s) on how fast Att Hold may rotate the aircraft back toward the frozen attitude."
-      },
       "bterm_cutoff_0": {
         "english": "B-term cutoff in Hz.",
         "max_length": 20,
@@ -2576,6 +2558,32 @@
         "max_length": 113,
         "needs_translation": false,
         "translation": "Limits how quickly filtered voltage may fall in voltage mode to reduce brief load-sag spikes affecting SmartFuel."
+      }
+    },
+    "WING_GOVERNOR_CONFIG": {
+      "tbl_mode_off": {
+        "english": "Off",
+        "max_length": 3,
+        "needs_translation": false,
+        "translation": "Off"
+      },
+      "tbl_mode_rpm": {
+        "english": "Idle RPM",
+        "max_length": 8,
+        "needs_translation": false,
+        "translation": "Idle RPM"
+      },
+      "tbl_mode_rpm_range": {
+        "english": "RPM Range",
+        "max_length": 9,
+        "needs_translation": false,
+        "translation": "RPM Range"
+      },
+      "tbl_mode_throttle": {
+        "english": "Idle Throttle",
+        "max_length": 13,
+        "needs_translation": false,
+        "translation": "Idle Throttle"
       }
     }
   },
@@ -4980,6 +4988,66 @@
           "needs_translation": false,
           "translation": "Front"
         },
+        "governor": {
+          "english": "Governor",
+          "max_length": 8,
+          "needs_translation": false,
+          "translation": "Governor"
+        },
+        "governor_ceiling": {
+          "english": "Throttle Ceiling",
+          "max_length": 16,
+          "needs_translation": false,
+          "translation": "Throttle Ceiling"
+        },
+        "governor_gain": {
+          "english": "P Gain",
+          "max_length": 6,
+          "needs_translation": false,
+          "translation": "P Gain"
+        },
+        "governor_handover": {
+          "english": "Handover Throttle",
+          "max_length": 17,
+          "needs_translation": false,
+          "translation": "Handover Throttle"
+        },
+        "governor_i_gain": {
+          "english": "I Gain",
+          "max_length": 6,
+          "needs_translation": false,
+          "translation": "I Gain"
+        },
+        "governor_mode": {
+          "english": "Mode",
+          "max_length": 4,
+          "needs_translation": false,
+          "translation": "Mode"
+        },
+        "governor_rpm": {
+          "english": "Idle RPM",
+          "max_length": 8,
+          "needs_translation": false,
+          "translation": "Idle RPM"
+        },
+        "governor_rpm_max": {
+          "english": "Max RPM",
+          "max_length": 7,
+          "needs_translation": false,
+          "translation": "Max RPM"
+        },
+        "governor_rpm_min": {
+          "english": "Min RPM",
+          "max_length": 7,
+          "needs_translation": false,
+          "translation": "Min RPM"
+        },
+        "governor_throttle": {
+          "english": "Idle Throttle",
+          "max_length": 13,
+          "needs_translation": false,
+          "translation": "Idle Throttle"
+        },
         "half_duplex": {
           "english": "Half Duplex",
           "max_length": 11,
@@ -4991,36 +5059,6 @@
           "max_length": 50,
           "needs_translation": false,
           "translation": "Configure the motor and speed controller features."
-        },
-        "idle_governor": {
-          "english": "Idle Governor",
-          "max_length": 13,
-          "needs_translation": false,
-          "translation": "Idle Governor"
-        },
-        "idle_governor_ceiling": {
-          "english": "Idle Governor Ceiling",
-          "max_length": 21,
-          "needs_translation": false,
-          "translation": "Idle Governor Ceiling"
-        },
-        "idle_governor_gain": {
-          "english": "Idle Governor Gain",
-          "max_length": 18,
-          "needs_translation": false,
-          "translation": "Idle Governor Gain"
-        },
-        "idle_governor_handover": {
-          "english": "Idle Governor Handover",
-          "max_length": 22,
-          "needs_translation": false,
-          "translation": "Idle Governor Handover"
-        },
-        "idle_governor_rpm": {
-          "english": "Idle Governor RPM",
-          "max_length": 17,
-          "needs_translation": false,
-          "translation": "Idle Governor RPM"
         },
         "main": {
           "english": "Main",
@@ -8610,23 +8648,11 @@
           "needs_translation": false,
           "translation": "Angle mode"
         },
-        "att_hold": {
-          "english": "Att hold",
-          "max_length": 8,
-          "needs_translation": false,
-          "translation": "Att hold"
-        },
         "auto_hover": {
           "english": "Auto hover",
           "max_length": 10,
           "needs_translation": false,
           "translation": "Auto hover"
-        },
-        "deadband": {
-          "english": "Deadband",
-          "max_length": 8,
-          "needs_translation": false,
-          "translation": "Deadband"
         },
         "gain": {
           "english": "Gain",
@@ -8657,12 +8683,6 @@
           "max_length": 98,
           "needs_translation": false,
           "translation": "Auto Hover: How strongly the aircraft corrects back to vertical and holds heading during 3D hover."
-        },
-        "help_p5": {
-          "english": "Att Hold: Holds whatever attitude the aircraft was in once every stick returns inside the deadband. Full stick authority otherwise.",
-          "max_length": 131,
-          "needs_translation": false,
-          "translation": "Att Hold: Holds whatever attitude the aircraft was in once every stick returns inside the deadband. Full stick authority otherwise."
         },
         "horizon_mode": {
           "english": "Horizon mode",
