@@ -5120,6 +5120,27 @@
           "reverse_text": false,
           "translation": "Escrit. ADV_CONFIG fallida"
         },
+        "error_arming_api_unavailable": {
+          "english": "ARMING_CONFIG API unavailable",
+          "max_length": 29,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "ARMING_CONFIG API unavailable"
+        },
+        "error_arming_read_failed": {
+          "english": "ARMING_CONFIG read failed",
+          "max_length": 25,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "ARMING_CONFIG read failed"
+        },
+        "error_arming_write_failed": {
+          "english": "ARMING_CONFIG write failed",
+          "max_length": 26,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "ARMING_CONFIG write failed"
+        },
         "error_eeprom_api_unavailable": {
           "english": "EEPROM_WRITE API unavailable",
           "max_length": 28,
@@ -5203,6 +5224,13 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "LED_STRIP"
+        },
+        "feature_wiggle_ready": {
+          "english": "Ready wiggle",
+          "max_length": 12,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Ready wiggle"
         },
         "features": {
           "english": "Features",

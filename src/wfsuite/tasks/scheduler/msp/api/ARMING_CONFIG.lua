@@ -14,11 +14,12 @@ local MSP_API_CMD_WRITE = 62
 --   field, type, min, max, default, unit,
 --   decimals, scale, step, mult, table, tableIdxInc, mandatory, byteorder, tableEthos
 local FIELD_SPEC = {
-    {"auto_disarm_delay", "U8"}
+    {"auto_disarm_delay", "U8"},
+    {"wiggle_flags", "U32"}
 }
 
 local SIM_RESPONSE = core.simResponse({
-    5 -- auto_disarm_delay
+    5, 2, 0, 0, 0 -- auto_disarm_delay, wiggle_flags (WIGGLE_READY set)
 })
 
 return core.createConfigAPI({

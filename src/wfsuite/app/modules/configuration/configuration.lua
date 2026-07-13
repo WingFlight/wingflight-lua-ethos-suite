@@ -11,6 +11,8 @@ local FEATURE_BIT_GPS = 7
 local FEATURE_BIT_LED_STRIP = 16
 local FEATURE_BIT_CMS = 19
 
+local WIGGLE_BIT_READY = 1
+
 local PID_LOOP_DENOMS = {1, 2, 3, 4}
 local LOAD_STALL_TIMEOUT_SECONDS = 5.5
 local LOAD_MAX_RETRIES = 1
@@ -33,6 +35,8 @@ local state = {
     currentName = "",
     currentPidLoop = 1,
     currentFeatures = 0,
+    currentAutoDisarmDelay = 5,
+    currentWiggleFlags = 0,
     gyroDeltaUs = 250,
     pidBaseHz = 0
 }
@@ -191,6 +195,18 @@ local function render()
             if state.currentFeatures ~= oldValue then markDirty() end
         end
     )
+
+    local lineWiggle = form.addLine("@i18n(app.modules.configuration.feature_wiggle_ready)@")
+    form.addBooleanField(
+        lineWiggle,
+        {x = boolX, y = lineY, w = boolW, h = fieldH},
+        function() return bitIsSet(state.currentWiggleFlags, WIGGLE_BIT_READY) end,
+        function(newValue)
+            local oldValue = state.currentWiggleFlags
+            state.currentWiggleFlags = setBit(state.currentWiggleFlags, WIGGLE_BIT_READY, toBool(newValue))
+            if state.currentWiggleFlags ~= oldValue then markDirty() end
+        end
+    )
 end
 
 local function onReadDone()
@@ -258,7 +274,7 @@ local function startLoad()
     local generation = state.loadGeneration
     state.loading = true
     state.loaded = false
-    state.pendingReads = 4
+    state.pendingReads = 5
     state.loadStartedAt = os.clock()
     state.loadProgressAt = state.loadStartedAt
     state.loadError = nil
@@ -268,6 +284,8 @@ local function startLoad()
     state.currentName = ""
     state.currentPidLoop = 1
     state.currentFeatures = 0
+    state.currentAutoDisarmDelay = 5
+    state.currentWiggleFlags = 0
     state.gyroDeltaUs = 250
     state.pidBaseHz = 0
     state.needsRender = true
@@ -298,6 +316,16 @@ local function startLoad()
         onComplete = function(api)
             local parsed = api.data() and api.data().parsed or nil
             state.currentFeatures = tonumber(parsed and parsed.enabledFeatures or 0) or 0
+        end
+    }, generation)
+
+    startRead(wfsuite.tasks.msp.api.loadPage("ARMING_CONFIG"), {
+        apiUnavailableError = "@i18n(app.modules.configuration.error_arming_api_unavailable)@",
+        readError = "@i18n(app.modules.configuration.error_arming_read_failed)@",
+        onComplete = function(api)
+            local parsed = api.data() and api.data().parsed or nil
+            state.currentAutoDisarmDelay = tonumber(parsed and parsed.auto_disarm_delay or 5) or 5
+            state.currentWiggleFlags = tonumber(parsed and parsed.wiggle_flags or 0) or 0
         end
     }, generation)
 
@@ -375,6 +403,12 @@ local function performSave()
         return
     end
 
+    local armingApi = wfsuite.tasks.msp.api.loadPage("ARMING_CONFIG")
+    if not armingApi then
+        saveFailed("@i18n(app.modules.configuration.error_arming_api_unavailable)@")
+        return
+    end
+
     local eepromApi = wfsuite.tasks.msp.api.loadPage("EEPROM_WRITE")
     if not eepromApi then
         saveFailed("@i18n(app.modules.configuration.error_eeprom_api_unavailable)@")
@@ -384,8 +418,17 @@ local function performSave()
     eepromApi.setCompleteHandler(function() saveDone() end)
     eepromApi.setErrorHandler(function() saveFailed("@i18n(app.modules.configuration.error_eeprom_write_failed)@") end)
 
-    featureApi.setCompleteHandler(function()
+    armingApi.setCompleteHandler(function()
         eepromApi.write()
+    end)
+    armingApi.setErrorHandler(function()
+        saveFailed("@i18n(app.modules.configuration.error_arming_write_failed)@")
+    end)
+
+    featureApi.setCompleteHandler(function()
+        armingApi.setValue("auto_disarm_delay", state.currentAutoDisarmDelay)
+        armingApi.setValue("wiggle_flags", state.currentWiggleFlags)
+        armingApi.write()
     end)
     featureApi.setErrorHandler(function()
         saveFailed("@i18n(app.modules.configuration.error_feature_write_failed)@")
