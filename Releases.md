@@ -1,3 +1,12 @@
+# 0.0.6
+
+Add throttle range governor support.
+Add ready-to-arm surface wiggle support.
+Add ATTHOLD mode support.
+Add auto-trim flight mode sensor bit.
+Add feature flags to reduce RAM usage.
+Fix missing translations in the Auto Level module.
+
 # 0.0.5
 
 Version bump for release alignment; no suite-relevant changes this cycle.
