@@ -1,3 +1,7 @@
+# 0.0.7
+
+Version bump for release alignment; no suite-relevant changes this cycle.
+
 # 0.0.6
 
 Add throttle range governor support.
