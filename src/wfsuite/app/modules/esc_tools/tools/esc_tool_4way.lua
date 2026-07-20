@@ -13,6 +13,25 @@ local function loadMask(path)
     return lcd.loadMask(path)
 end
 
+-- Caches the compiled chunk for each manufacturer's escmfg/<folder>/
+-- init.lua and pages.lua -- callers still CALL the cached chunk fresh
+-- every time, so ESC/ESC.pages are still built brand new on every open;
+-- only the disk-read+parse+compile step is skipped on repeat visits to
+-- the same ESC folder. Reuses app/lib/ui.lua's own ui._pageChunkCache,
+-- same as app/modules/esc_tools/tools/esc_tool.lua's own loadEscChunk().
+local function loadEscChunk(modulePath)
+    local ui = wfsuite.app and wfsuite.app.ui
+    local cache = ui and ui._pageChunkCache
+    if not cache then
+        return loadfile(modulePath)
+    end
+    local chunk = cache[modulePath]
+    if chunk then return chunk end
+    local loaded, err = loadfile(modulePath)
+    if loaded then cache[modulePath] = loaded end
+    return loaded, err
+end
+
 local mspSignature
 local mspBytes
 local simulatorResponse
@@ -854,7 +873,7 @@ end
 
 local function loadEscConfig(folder)
     local initPath = escInitPathForFolder(folder)
-    local chunk, err = loadfile(initPath)
+    local chunk, err = loadEscChunk(initPath)
     if not chunk then
         if wfsuite.utils and wfsuite.utils.log then
             wfsuite.utils.log("ESC config load failed: " .. tostring(initPath) .. " (" .. tostring(err) .. ")", "info")
@@ -930,7 +949,7 @@ renderToolPage = function(opts)
     end
     wfsuite.app.ui.fieldHeader(headerTitle)
 
-    ESC.pages = assert(loadfile("app/modules/esc_tools/tools/escmfg/" .. folder .. "/pages.lua"))()
+    ESC.pages = assert(loadEscChunk("app/modules/esc_tools/tools/escmfg/" .. folder .. "/pages.lua"))()
 
     modelLine = form.addLine("")
     modelText = form.addStaticText(modelLine, modelTextPos, "")
