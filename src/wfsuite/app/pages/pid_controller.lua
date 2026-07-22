@@ -76,8 +76,8 @@ local function open(opts)
   })
 
   fieldLayout.buildGroup(runtime, "@i18n(app.modules.pid_controller.fw_tpa)@", {
-    {title = "@i18n(app.modules.pid_controller.breakpoint)@", spec = {key = "fw_tpa_breakpoint"}},
-    {title = "@i18n(app.modules.pid_controller.rate)@", spec = {key = "fw_tpa_rate"}},
+    {title = "@i18n(app.modules.pid_controller.gain)@", spec = {key = "fw_tpa_gain"}},
+    {title = "@i18n(app.modules.pid_controller.curve)@", spec = {key = "fw_tpa_curve"}},
   })
 
   fieldLayout.buildGroup(runtime, "@i18n(app.modules.pid_controller.master_gain)@", {

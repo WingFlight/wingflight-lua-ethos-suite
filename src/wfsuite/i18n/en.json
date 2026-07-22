@@ -4587,6 +4587,18 @@
           "max_length": 1,
           "needs_translation": false,
           "translation": "Y"
+        },
+        "gain": {
+          "english": "Gain",
+          "translation": "Gain",
+          "needs_translation": false,
+          "max_length": 4
+        },
+        "curve": {
+          "english": "Curve",
+          "translation": "Curve",
+          "needs_translation": false,
+          "max_length": 5
         }
       },
       "pids": {

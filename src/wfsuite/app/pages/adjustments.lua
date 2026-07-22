@@ -118,6 +118,14 @@ local ADJUST_FUNCTIONS = {
   {id = 80, name = "Governor Headspeed", min = 0, max = 10000},
   {id = 81, name = "Governor Yaw FF", min = 0, max = 250},
   {id = 82, name = "Battery Profile", min = 1, max = 6},
+  {id = 84, name = "Master Gain Pitch", min = 25, max = 1000},
+  {id = 85, name = "Master Gain Roll", min = 25, max = 1000},
+  {id = 86, name = "Master Gain Yaw", min = 25, max = 1000},
+  {id = 87, name = "Autohover Gain", min = 0, max = 250},
+  {id = 88, name = "Att Hold Gain", min = 0, max = 250},
+  {id = 89, name = "Servo Trim Roll", min = -200, max = 200},
+  {id = 90, name = "Servo Trim Pitch", min = -200, max = 200},
+  {id = 91, name = "Servo Trim Yaw", min = -200, max = 200},
 }
 
 local FUNCTION_OPTIONS = {}

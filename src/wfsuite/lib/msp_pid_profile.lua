@@ -35,7 +35,7 @@
 --   * wingflight-firmware's struct also carries fields the rotorflight-
 --     based guess never knew about, present here now at their correct
 --     wire position: `atthold_gain`/`atthold_deadband` (right after the
---     dead cyclic-cross-coupling trio), `fw_tpa_breakpoint`/`fw_tpa_rate`
+--     dead cyclic-cross-coupling trio), `fw_tpa_gain`/`fw_tpa_curve`
 --     (right after the dead inertia-precomp pair), `master_gain_0/1/2`
 --     (U16 each), `autohover_gain`/`autohover_max_angle`/
 --     `autohover_max_rate` (U16), `cross_axis_relax_strength/level/
@@ -104,8 +104,8 @@ local FIELDS = {
   {"bterm_cutoff_0", "U8"}, {"bterm_cutoff_1", "U8"}, {"bterm_cutoff_2", "U8"},
   {"yaw_inertia_precomp_gain", "U8"}, -- dead: heli-only, FC ignores
   {"yaw_inertia_precomp_cutoff", "U8"}, -- dead: heli-only, FC ignores
-  {"fw_tpa_breakpoint", "U8"},
-  {"fw_tpa_rate", "U8"},
+  {"fw_tpa_gain", "U8"},
+  {"fw_tpa_curve", "U8"},
   {"master_gain_0", "U16"}, {"master_gain_1", "U16"}, {"master_gain_2", "U16"}, -- roll, pitch, yaw
   {"autohover_gain", "U8"},
   {"autohover_max_angle", "U8"},
@@ -156,8 +156,8 @@ local SIMULATOR_RESPONSE = {
   15, 15, 20,   -- bterm_cutoff_0/1/2
   0,    -- yaw_inertia_precomp_gain (dead)
   0,    -- yaw_inertia_precomp_cutoff (dead)
-  100,  -- fw_tpa_breakpoint
-  0,    -- fw_tpa_rate
+  100,  -- fw_tpa_gain
+  0,    -- fw_tpa_curve
   100, 0, 100, 0, 100, 0, -- master_gain_0/1/2 (U16 LE: 100 -> 100, 0)
   50,   -- autohover_gain
   30,   -- autohover_max_angle
@@ -211,11 +211,11 @@ local FIELD_META = {
   bterm_cutoff_0 = {min = 0, max = 250, default = 15},
   bterm_cutoff_1 = {min = 0, max = 250, default = 15},
   bterm_cutoff_2 = {min = 0, max = 250, default = 20},
-  fw_tpa_breakpoint = {min = 0, max = 100, default = 100, suffix = "%"},
-  fw_tpa_rate = {min = 0, max = 100, default = 0, suffix = "%"},
-  master_gain_0 = {min = 25, max = 200, default = 100, suffix = "%"},
-  master_gain_1 = {min = 25, max = 200, default = 100, suffix = "%"},
-  master_gain_2 = {min = 25, max = 200, default = 100, suffix = "%"},
+  fw_tpa_gain = {min = 25, max = 200, default = 100, suffix = "%"},
+  fw_tpa_curve = {min = 0, max = 8, default = 0},
+  master_gain_0 = {min = 25, max = 1000, default = 100, suffix = "%"},
+  master_gain_1 = {min = 25, max = 1000, default = 100, suffix = "%"},
+  master_gain_2 = {min = 25, max = 1000, default = 100, suffix = "%"},
   autohover_gain = {min = 0, max = 250, default = 50},
   autohover_max_angle = {min = 0, max = 90, default = 30, suffix = "°"},
   autohover_max_rate = {min = 0, max = 1800, default = 300, suffix = "°/s"},

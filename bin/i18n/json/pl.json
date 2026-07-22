@@ -346,6 +346,18 @@
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 3
+        },
+        "gain": {
+          "english": "Gain",
+          "translation": "Gain",
+          "needs_translation": true,
+          "max_length": 4
+        },
+        "curve": {
+          "english": "Curve",
+          "translation": "Curve",
+          "needs_translation": true,
+          "max_length": 5
         }
       },
       "tail_rotor": {
