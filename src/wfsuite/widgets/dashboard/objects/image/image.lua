@@ -28,7 +28,7 @@
     imagealign          : string   -- (Optional) Image alignment ("center", "left", "right", "top", "bottom")
 ]]
 
-local wfsuite = require("wfsuite")
+local wfsuite = assert(loadfile("widgets/dashboard/context.lua"))()
 
 local render = {}
 

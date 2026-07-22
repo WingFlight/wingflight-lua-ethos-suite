@@ -47,7 +47,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--artifact-name",
-        help="Output zip filename. Defaults to wingflight-lua-ethos-suite-<version>-<lang>.zip.",
+        help="Output zip filename. Defaults to rotorflight-lua-ethos-suite-<version>-<lang>.zip.",
     )
     parser.add_argument(
         "--manifest-version",
@@ -60,7 +60,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--package-key",
-        default="org.wingflight.ethos-suite",
+        default="org.rotorflight.ethos-suite",
         help="Stable package key written into ethos_lua_manifest.json.",
     )
     parser.add_argument(
@@ -162,6 +162,18 @@ def update_staged_main_version(main_lua_path: Path, artifact_version: str) -> No
     if count != 1:
         raise ValueError(f"Could not update version suffix in {main_lua_path}")
     main_lua_path.write_text(updated, encoding="utf-8")
+
+
+def update_staged_build_info_version(build_info_path: Path, artifact_version: str) -> None:
+    content = build_info_path.read_text(encoding="utf-8")
+    updated, count = MAIN_SUFFIX_RE.subn(
+        lambda match: f"{match.group(1)}{artifact_version}{match.group(3)}",
+        content,
+        count=1,
+    )
+    if count != 1:
+        raise ValueError(f"Could not update version suffix in {build_info_path}")
+    build_info_path.write_text(updated, encoding="utf-8")
 
 
 def remove_tree(path: Path) -> None:
@@ -340,7 +352,7 @@ def main() -> int:
     output_dir.mkdir(parents=True, exist_ok=True)
     artifact_name = (
         args.artifact_name
-        or f"wingflight-lua-ethos-suite-{args.artifact_version}-{args.lang}.zip"
+        or f"rotorflight-lua-ethos-suite-{args.artifact_version}-{args.lang}.zip"
     )
     zip_path = output_dir / artifact_name
 
@@ -369,6 +381,10 @@ def main() -> int:
         copy_sound_pack(stage_scripts_dir, args.lang)
         update_staged_main_version(
             stage_scripts_dir / args.package_dir / "main.lua", args.artifact_version
+        )
+        update_staged_build_info_version(
+            stage_scripts_dir / args.package_dir / "lib" / "build_info.lua",
+            args.artifact_version,
         )
         build_package_root(stage_scripts_dir, package_root, args.package_dir, args.folder)
 

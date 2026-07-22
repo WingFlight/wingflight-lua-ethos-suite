@@ -3,7 +3,7 @@
   GPLv3 — https://www.gnu.org/licenses/gpl-3.0.en.html
 ]] --
 
-local wfsuite = require("wfsuite")
+local wfsuite = assert(loadfile("widgets/dashboard/context.lua"))()
 local lcd = lcd
 
 local max = math.max
@@ -85,15 +85,15 @@ local function buildBoxes(W)
             row = 4,
             colspan = 2,
             type = "text",
-            subtype = "armflags",
+            subtype = "governor",
             nosource = "-",
-            title = "ARM STATUS",
+            title = "@i18n(widgets.dashboard.governor):upper()@",
             titlepos = "bottom",
             titlecolor = colorMode.textcolor,
             textcolor = colorMode.textcolor,
             thresholds = {
-                {value = "@i18n(widgets.governor.DISARMED)@", textcolor = colorMode.fillcritcolor},
-                {value = "@i18n(widgets.governor.ARMED)@", textcolor = colorMode.fillcolor}
+                {value = "@i18n(widgets.governor.DISARMED)@", textcolor = colorMode.fillcritcolor}, {value = "@i18n(widgets.governor.OFF)@", textcolor = colorMode.fillcritcolor}, {value = "@i18n(widgets.governor.IDLE)@", textcolor = "blue"}, {value = "@i18n(widgets.governor.SPOOLUP)@", textcolor = "blue"}, {value = "@i18n(widgets.governor.RECOVERY)@", textcolor = colorMode.fillwarncolor}, {value = "@i18n(widgets.governor.ACTIVE)@", textcolor = colorMode.fillcolor},
+                {value = "@i18n(widgets.governor.THROFF)@", textcolor = colorMode.fillcritcolor}
             }
         }, {
             col = 3,

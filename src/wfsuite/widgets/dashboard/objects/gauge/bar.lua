@@ -83,7 +83,7 @@ Subtext
     subtextpaddingbottom : number   -- (Optional) Padding above bottom of bar (default: 0)
 ]]
 
-local wfsuite = require("wfsuite")
+local wfsuite = assert(loadfile("widgets/dashboard/context.lua"))()
 local lcd = lcd
 local system = system
 

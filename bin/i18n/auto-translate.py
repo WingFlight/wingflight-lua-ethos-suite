@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Auto-translate Rotorflight i18n JSON files using the Claude API.
+Auto-translate Wingflight i18n JSON files using the Claude API.
 
 Finds all entries with needs_translation=True across all non-English locale files
 and translates them in batches, respecting max_length constraints.
@@ -53,10 +53,10 @@ NO_TRANSLATE_TERMS = (
     "ESC", "BEC", "MSP", "PID", "RPM", "FrSky", "F.BUS", "ELRS", "GPS", "IMU",
     "FC", "ADC", "DMA", "UART", "PWM", "ACC", "GYRO", "SmartFuel", "SmartPort",
     "SmartAudio", "CRSF", "SBUS", "IBUS", "DSM", "DSMX", "SRXL", "Spektrum",
-    "Futaba", "JR", "LED", "LUA", "Lua", "Ethos", "WingFlight", "FBL",
+    "Futaba", "JR", "LED", "LUA", "Lua", "Ethos", "Wingflight", "FBL",
 )
 
-SYSTEM_PROMPT = """You are a professional technical translator for radio-controlled (RC) helicopter flight controller software. The software is Rotorflight, a flight controller firmware for RC helicopters, displayed on FrSky Ethos radio transmitters.
+SYSTEM_PROMPT = """You are a professional technical translator for radio-controlled (RC) helicopter flight controller software. The software is Wingflight, a flight controller firmware for RC helicopters, displayed on FrSky Ethos radio transmitters.
 
 Your task: translate English strings to {language}.
 
@@ -242,7 +242,7 @@ def process_language(
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(
-        description="Auto-translate Rotorflight i18n JSON files via Claude API",
+        description="Auto-translate Wingflight i18n JSON files via Claude API",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
@@ -281,7 +281,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     mode = "DRY RUN — " if args.dry_run else ""
-    print(f"\n{mode}Rotorflight i18n auto-translator  (model: {MODEL})")
+    print(f"\n{mode}Wingflight i18n auto-translator  (model: {MODEL})")
     print(f"Processing {len(lang_files)} locale(s):\n")
 
     total_translated = 0

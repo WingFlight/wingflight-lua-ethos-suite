@@ -3,7 +3,11 @@
   GPLv3 — https://www.gnu.org/licenses/gpl-3.0.en.html
 ]] --
 
-local wfsuite = require("wfsuite")
+if package.loaded["wfsuite.widgets.dashboard.wrapper_factory"] then
+    return package.loaded["wfsuite.widgets.dashboard.wrapper_factory"]
+end
+
+local wfsuite = assert(loadfile("widgets/dashboard/context.lua"))()
 
 local clock = os.clock
 local utils = wfsuite.widgets.dashboard.utils
@@ -17,7 +21,7 @@ function factory.createObjectWrapper(objectType, defaultSubtype)
     local wrapper = {}
 
     local renders = wfsuite.widgets.dashboard.renders
-    local folder = "SCRIPTS:/" .. wfsuite.config.baseDir .. "/widgets/dashboard/objects/" .. objectType .. "/"
+    local folder = "widgets/dashboard/objects/" .. objectType .. "/"
 
     function wrapper.paint(x, y, w, h, box)
         local subtype = box.subtype or defaultSubtype
@@ -67,4 +71,5 @@ function factory.createObjectWrapper(objectType, defaultSubtype)
     return wrapper
 end
 
+package.loaded["wfsuite.widgets.dashboard.wrapper_factory"] = factory
 return factory

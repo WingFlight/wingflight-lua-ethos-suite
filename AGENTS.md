@@ -9,18 +9,28 @@ Keep behavior correct while minimizing runtime memory churn and CPU load on Etho
 
 ## 2) Architecture Quick Map
 
-- Entry point: `src/wfsuite/main.lua`
-- App/UI: `src/wfsuite/app/`
-- Background scheduler/tasks/MSP: `src/wfsuite/tasks/`
+- Entry point: `src/wfsuite/main.lua` (thin: loads and initialises three
+  independent subsystems -- app/tool.lua, widgets/dashboard.lua +
+  widgets/activelook.lua, tasks/background.lua -- eagerly, not lazily; see
+  its own header comment and Section 11 below before assuming lazy-loading
+  or feature gating is available/wanted here)
+- App/UI: `src/wfsuite/app/` -- pages live flat in `app/pages/*.lua`, menu
+  structure is a static Lua table (`MENUS` in `app/tool.lua`), not a
+  generated file. There is no `app/modules/` any more.
+- Background scheduler/tasks/MSP transport: `src/wfsuite/tasks/`
+  (`tasks/scheduler.lua`, `tasks/session.lua`, `tasks/msp/*` for the
+  transport/queue layer)
+- MSP command codecs: `src/wfsuite/lib/msp_*.lua` -- one flat
+  self-contained file per MSP command (schema + decode/encode +
+  message-builders together), not a factory/`api/` pattern. There is no
+  `tasks/scheduler/msp/` path any more.
 - Dashboard widgets/objects: `src/wfsuite/widgets/`
 - Shared utilities: `src/wfsuite/lib/`
-- Menu source and generator: `bin/menu/`
-- i18n sources and generators: `bin/i18n/`
-
-Reference docs:
-- `docs/system-architecture.md`
-- `docs/menu-structure.md`
-- `docs/i18n-locales.md`
+- i18n sources and generators: `bin/i18n/` -- see Section 11's warning
+  before running `build-single-json.py`.
+- `bin/menu/` -- wingflight-only tooling with no equivalent in the
+  current architecture; see Section 11, do not use it expecting it to do
+  anything for the current menu system.
 
 ## 3) Non-Negotiables For Agent Changes
 
@@ -65,20 +75,20 @@ When clearing collections:
 
 ## 6) Menu System Rules
 
-Menu source of truth:
-- `bin/menu/manifest.source.json`
-
-Generated runtime manifest:
-- `src/wfsuite/app/modules/manifest.lua`
-
-Commands:
-- `python bin/menu/generate.py`
-- `python bin/menu/generate.py --check`
+No generator: the menu is a static Lua table (`MENUS`) hand-written
+directly in `src/wfsuite/app/tool.lua`. Each entry is either
+`{title=, icon=, script="app/pages/<page>.lua"}` (leaf page) or
+`{title=, icon=, menuId="<other MENUS key>"}` (submenu). There is no
+`app/modules/manifest.lua`, no `bin/menu/manifest.source.json`, and no
+generate step for this any more -- `bin/menu/` is stale leftover tooling
+from the pre-rewrite architecture (see Section 11).
 
 Rules:
-- Do not manually edit `src/wfsuite/app/modules/manifest.lua`.
-- If menu structure changes, update source JSON and regenerate.
-- Keep `docs/menu-structure.md` aligned with structural changes.
+- Edit `app/tool.lua`'s `MENUS` table directly.
+- Don't leave a single-entry submenu: link straight to the page instead
+  (see `advanced_menu`'s "Rates Advanced" entry for the pattern).
+- `docs/menu-structure.md` is stale (describes the old generator); do not
+  treat it as authoritative.
 
 ## 7) i18n Rules
 
@@ -99,7 +109,26 @@ Rules:
 
 ## 8) MSP/API/Scheduler Notes
 
-- Prefer API/task integration patterns already used in `tasks/scheduler/msp/`.
+- Prefer the codec pattern already used in `lib/msp_*.lua` (schema +
+  decode/encode + buildReadMessage/buildWriteMessage together in one
+  file, self-caching via `package.loaded`) -- not the old
+  `tasks/scheduler/msp/api/` factory pattern, which no longer exists.
+- **Wire schemas must be verified against wingflight-firmware's actual
+  `src/main/msp/msp.c` serializer, not assumed from a rotorflight-based
+  guess or a field's old name.** wingflight-firmware has hardcoded,
+  zeroed, or entirely removed a substantial number of heli-only fields
+  and commands (MSP_GOVERNOR_CONFIG/PROFILE and MSP_RESCUE_PROFILE are
+  gone outright; MSP_PID_PROFILE/MSP_PID_TUNING/MSP_RC_TUNING/
+  MSP_MIXER_CONFIG keep their wire position but zero/ignore several
+  fields) while adding others (master_gain, autohover, cross_axis_relax,
+  gain_curve on MSP_PID_PROFILE) that a rotorflight-only cross-check
+  would never surface. See `lib/msp_pid_profile.lua`'s and
+  `lib/msp_rc_tuning.lua`'s own header comments for the full pattern and
+  worked examples. Removing/adding a field from the *middle* of a fixed
+  wire struct without confirming the firmware did the same shifts every
+  field after it -- this already happened once in this migration (the
+  rewrite's own `offset_limit_0/1` guess) and would have silently
+  corrupted PID data on save.
 - Be careful with queue behavior and duplicate suppression semantics.
 - Avoid adding logging/diagnostics in hot paths unless guarded by explicit debug preferences.
 
@@ -116,4 +145,64 @@ Before finishing:
 If the repository is already dirty:
 - Do not modify unrelated files.
 - Touch only files needed for the requested task.
+
+## 11) Wingflight Migration Notes
+
+`src/wfsuite/` was rebuilt wholesale from `rotorflight-lua-ethos-suite`'s
+`rfsuite-full-rewrite` branch (a from-scratch architectural rewrite of
+that project), then rebranded and re-aligned for wingflight (fixed-wing
+firmware) rather than rotorflight (helicopter firmware). Status:
+
+- **Done**: base replacement + full rebrand; heli-only pages/gfx/MSP
+  files removed (governor, rescue, swashplate mixer, main/tail rotor
+  PID, rates_type/cyclic/collective-axis UI); `lib/msp_pid_profile.lua`/
+  `lib/msp_rc_tuning.lua`/`lib/rate_curve_scale.lua` rebuilt against
+  wingflight-firmware's actual wire format (see Section 8).
+- **Not ported: the pre-rewrite `lib/features.lua` "Feature Flags" RAM
+  system** (a user-preference toggle to skip registering the dashboard/
+  toolbox/ActiveLook widgets, added to save RAM on constrained radios).
+  Deliberately not carried forward: `main.lua`'s own header comment
+  documents that this rewrite already tried lazy/conditional widget
+  loading more broadly and reverted to eager loading for all three
+  subsystems after on-device testing showed lazy loading caused *worse*
+  retained-RAM growth, not better -- porting a feature built on the
+  premise that conditional loading helps RAM would fight the rewrite's
+  own measured design decision. The `toolbox` widget this system used to
+  gate no longer exists in this architecture at all. ActiveLook already
+  has an arguably better gate: `main.lua` only loads it when
+  `system.registerGlassesWidget` exists (an automatic hardware/firmware
+  capability check), not a manual preference.
+- **Known trap -- do not run `bin/i18n/build-single-json.py` without
+  checking its diff first.** `bin/i18n/json/` (this file's nominal
+  i18n source of truth, Section 7) is itself stale/incomplete relative
+  to `src/wfsuite/i18n/`, inherited from the upstream rewrite -- running
+  the regeneration deletes real content (confirmed: it strips help text
+  like `api.ACC_TRIM.pitch/roll` and several `api.BATTERY_CONFIG.*`
+  entries that exist in `src/wfsuite/i18n/` but not in `bin/i18n/json/`).
+  Until someone reconciles the two, treat `src/wfsuite/i18n/*.json` as
+  the practical source of truth and hand-edit it directly when needed
+  (matching what every locale-file edit in this migration has done),
+  and separately mirror any *new keys* into `bin/i18n/json/` too so
+  they're not lost if/when the drift does eventually get fixed.
+- **`bin/menu/` is stale**, not just unused: it still generates a
+  manifest for the old `app/modules/manifest.lua` structure, which this
+  architecture doesn't have (see Section 6). Running it does not error,
+  but its output is dead weight.
+- **`docs/system-architecture.md`, `docs/menu-structure.md`,
+  `docs/i18n-locales.md` are all stale**, describing the pre-rewrite
+  architecture (`wfsuite.*` global table, `app/modules/`,
+  `tasks/scheduler/`). Not yet rewritten for the new architecture.
+- **Still to port**: Mixer Config (wing control-surface mixing, roll/
+  pitch/yaw via `MSP_MIXER_INPUTS`/`MSP_GET_MIXER_INPUT`), Cross Axis
+  Relax, Arm Ready Wiggle, Auto Trim/Atthold, Auto Hover, manual/
+  passthrough mode split, default rate-curve tuning, Throttle Range
+  Governor (`MSP2_WING_GOVERNOR_CONFIG`), master-gain adjusters. The
+  underlying `MSP_PID_PROFILE` wire fields for several of these
+  (`master_gain_0/1/2`, `autohover_*`, `cross_axis_relax_*`,
+  `atthold_gain/deadband/max_rate`) are already decoded correctly by
+  `lib/msp_pid_profile.lua` -- they just have no page/UI built for them
+  yet.
+- **Not yet audited against wingflight-firmware**: every other
+  `lib/msp_*.lua` file besides the ones listed above as "done". Treat
+  any of them as unverified until checked the same way (see Section 8).
 

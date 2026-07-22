@@ -4,7 +4,7 @@
 ]] --
 
 
-local wfsuite = require("wfsuite")
+local wfsuite = assert(loadfile("widgets/dashboard/context.lua"))()
 local lcd = lcd
 
 local tonumber = tonumber
@@ -99,7 +99,7 @@ end
 
 
 -- wakeup for the consolidated right-hand info stack: flight time, smart fuel
--- gauge + battery overlay text, and arm status. Replaces what used to
+-- gauge + battery overlay text, and governor status. Replaces what used to
 -- be 8 separately-offset overlapping boxes with one coordinated panel.
 local function rightStackWakeup(box, telemetry)
     local c = box._cache or {}
@@ -138,14 +138,11 @@ local function rightStackWakeup(box, telemetry)
     c.cellStr = formatCellVoltageAndCount(voltage)
     c.consumedStr = formatConsumedMah(consumed)
 
-    local armRaw = getSensor and getSensor("armflags")
-    local isArmed = wfsuite.utils.armFlagsToIsArmed(armRaw)
-    if isArmed == nil then
+    local govRaw = getSensor and getSensor("governor")
+    if govRaw == nil then
         c.governorText = utils.getPulsingDots(box, "_govDots")
-    elseif isArmed then
-        c.governorText = "@i18n(widgets.governor.ARMED)@"
     else
-        c.governorText = "@i18n(widgets.governor.DISARMED)@"
+        c.governorText = wfsuite.utils.getGovernorState(govRaw)
     end
     c.governorColor = utils.resolveThresholdColor(c.governorText, box, "textcolor", "textcolor", box.rs_govthresholds)
 
@@ -197,7 +194,7 @@ local function rightStackPaint(x, y, w, h, box, c)
     utils.box(x, fuelY + box.rs_consumedoffsety, w, rowH, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil,
         c.consumedStr, nil, box.rs_overlayfont, "right", box.rs_textcolor, nil, nil, nil, nil, nil, nil)
 
-    -- ARM STATUS (rows 7.5-10)
+    -- GOVERNOR status (rows 7.5-10)
     -- govY/govH are derived from fuelY/fuelH and the panel's integer height
     -- (h) so that govY+govH lands exactly on y+h. This keeps govBgH's bottom
     -- edge pixel-aligned with rs_bgstyle's border, so both tiles' rounded
@@ -213,7 +210,7 @@ local function rightStackPaint(x, y, w, h, box, c)
     utils.drawBoxBackground(x, govBgY, w, govBgH, box.rs_govbgstyle)
 
     utils.box(x, govY + box.rs_govoffsety, w, govBgH,
-        "ARM STATUS", "bottom", "center", box.rs_govfont, box.rs_govtitlespacing, box.rs_titlecolor,
+        "GOVERNOR", "bottom", "center", box.rs_govfont, box.rs_govtitlespacing, box.rs_titlecolor,
         nil, nil, nil, nil, box.rs_govtitlepaddingbottom,
         c.governorText, nil, box.rs_govfont, "center", c.governorColor,
         nil, nil, nil, nil, box.rs_govvaluepaddingbottom,
@@ -449,8 +446,13 @@ local function buildBoxes(W)
             rs_govtitlepaddingbottom = governorTitlePaddingBottom,
             rs_govvaluepaddingbottom = governorValuePaddingBottom,
             rs_govthresholds = {
-                {value = "@i18n(widgets.governor.DISARMED)@", textcolor = colorMode.fillcritcolor},
-                {value = "@i18n(widgets.governor.ARMED)@", textcolor = colorMode.fillcolor}
+                {value = "DISARMED", textcolor = colorMode.fillcritcolor},
+                {value = "OFF", textcolor = colorMode.fillcritcolor},
+                {value = "IDLE", textcolor = colorMode.accentcolor},
+                {value = "SPOOLUP", textcolor = colorMode.accentcolor},
+                {value = "RECOVERY", textcolor = colorMode.fillwarncolor},
+                {value = "ACTIVE", textcolor = colorMode.fillcolor},
+                {value = "@i18n(widgets.governor.THROFF)@", textcolor = colorMode.fillcritcolor}
             }
         },
 

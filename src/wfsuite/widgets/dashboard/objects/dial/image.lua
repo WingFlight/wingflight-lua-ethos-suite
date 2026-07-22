@@ -44,7 +44,7 @@ dial image & needle styling
     bgcolor                 : color    -- Widget background color (default: theme fallback)
 ]]
 
-local wfsuite = require("wfsuite")
+local wfsuite = assert(loadfile("widgets/dashboard/context.lua"))()
 local lcd = lcd
 
 local format = string.format

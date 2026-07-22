@@ -38,7 +38,7 @@ thresholds = {
 }
 ]]--
 
-local wfsuite = require("wfsuite")
+local wfsuite = assert(loadfile("widgets/dashboard/context.lua"))()
 
 local floor = math.floor
 

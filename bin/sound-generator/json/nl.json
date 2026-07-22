@@ -186,84 +186,6 @@
     "needs_translation": false
   },
   {
-    "file": "events/mode/angle.wav",
-    "english": "Angle",
-    "translation": "Angle",
-    "needs_translation": false
-  },
-  {
-    "file": "events/mode/horizon.wav",
-    "english": "Horizon",
-    "translation": "Horizon",
-    "needs_translation": false
-  },
-  {
-    "file": "events/mode/attitude.wav",
-    "english": "Attitude",
-    "translation": "Attitude",
-    "needs_translation": false
-  },
-  {
-    "file": "events/mode/autohover.wav",
-    "english": "Auto Hover",
-    "translation": "Auto Hover",
-    "needs_translation": false
-  },
-  {
-    "file": "events/mode/atthold.wav",
-    "english": "Att Hold",
-    "translation": "Att Hold",
-    "needs_translation": false
-  },
-  {
-    "file": "events/mode/autotrim.wav",
-    "english": "Auto Trim",
-    "translation": "Auto Trim",
-    "needs_translation": false
-  },
-  {
-    "file": "events/mode/trainer.wav",
-    "english": "Trainer",
-    "translation": "Trainer",
-    "needs_translation": false
-  },
-  {
-    "file": "events/mode/althold.wav",
-    "english": "Altitude Hold",
-    "translation": "Altitude Hold",
-    "needs_translation": false
-  },
-  {
-    "file": "events/mode/passthrough.wav",
-    "english": "Passthrough",
-    "translation": "Passthrough",
-    "needs_translation": false
-  },
-  {
-    "file": "events/mode/manual.wav",
-    "english": "Manual",
-    "translation": "Manual",
-    "needs_translation": false
-  },
-  {
-    "file": "events/mode/gpsrescue.wav",
-    "english": "GPS Rescue",
-    "translation": "GPS Rescue",
-    "needs_translation": false
-  },
-  {
-    "file": "events/mode/failsafe.wav",
-    "english": "Failsafe",
-    "translation": "Failsafe",
-    "needs_translation": false
-  },
-  {
-    "file": "events/mode/normal.wav",
-    "english": "Normal",
-    "translation": "Normal",
-    "needs_translation": false
-  },
-  {
     "file": "adjfunctions/pitch.wav",
     "english": "Pitch",
     "translation": "Pitch",
@@ -580,5 +502,83 @@
     "english": "Battery Empty",
     "translation": null,
     "needs_translation": true
+  },
+  {
+    "file": "events/mode/angle.wav",
+    "english": "Angle",
+    "translation": "Angle",
+    "needs_translation": false
+  },
+  {
+    "file": "events/mode/horizon.wav",
+    "english": "Horizon",
+    "translation": "Horizon",
+    "needs_translation": false
+  },
+  {
+    "file": "events/mode/attitude.wav",
+    "english": "Attitude",
+    "translation": "Attitude",
+    "needs_translation": false
+  },
+  {
+    "file": "events/mode/autohover.wav",
+    "english": "Auto Hover",
+    "translation": "Auto Hover",
+    "needs_translation": false
+  },
+  {
+    "file": "events/mode/atthold.wav",
+    "english": "Att Hold",
+    "translation": "Att Hold",
+    "needs_translation": false
+  },
+  {
+    "file": "events/mode/autotrim.wav",
+    "english": "Auto Trim",
+    "translation": "Auto Trim",
+    "needs_translation": false
+  },
+  {
+    "file": "events/mode/trainer.wav",
+    "english": "Trainer",
+    "translation": "Trainer",
+    "needs_translation": false
+  },
+  {
+    "file": "events/mode/althold.wav",
+    "english": "Altitude Hold",
+    "translation": "Altitude Hold",
+    "needs_translation": false
+  },
+  {
+    "file": "events/mode/passthrough.wav",
+    "english": "Passthrough",
+    "translation": "Passthrough",
+    "needs_translation": false
+  },
+  {
+    "file": "events/mode/manual.wav",
+    "english": "Manual",
+    "translation": "Manual",
+    "needs_translation": false
+  },
+  {
+    "file": "events/mode/gpsrescue.wav",
+    "english": "GPS Rescue",
+    "translation": "GPS Rescue",
+    "needs_translation": false
+  },
+  {
+    "file": "events/mode/failsafe.wav",
+    "english": "Failsafe",
+    "translation": "Failsafe",
+    "needs_translation": false
+  },
+  {
+    "file": "events/mode/normal.wav",
+    "english": "Normal",
+    "translation": "Normal",
+    "needs_translation": false
   }
 ]

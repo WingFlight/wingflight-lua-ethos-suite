@@ -33,7 +33,7 @@
     bgcolor             : color                     -- (Optional) Widget background color (theme fallback if nil)
     ]] --
 
-local wfsuite = require("wfsuite")
+local wfsuite = assert(loadfile("widgets/dashboard/context.lua"))()
 
 local format = string.format
 

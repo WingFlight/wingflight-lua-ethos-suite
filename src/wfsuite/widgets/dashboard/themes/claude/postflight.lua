@@ -7,7 +7,7 @@
   Six-column stat grid — same proven approach as gismo's postflight.
 ]] --
 
-local wfsuite = require("wfsuite")
+local wfsuite = assert(loadfile("widgets/dashboard/context.lua"))()
 local lcd     = lcd
 
 local utils      = wfsuite.widgets.dashboard.utils

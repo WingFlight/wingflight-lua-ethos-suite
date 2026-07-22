@@ -3,7 +3,7 @@
   GPLv3 — https://www.gnu.org/licenses/gpl-3.0.en.html
 ]] --
 
-local wfsuite = require("wfsuite")
+local wfsuite = assert(loadfile("widgets/dashboard/context.lua"))()
 local lcd = lcd
 
 local max = math.max
@@ -181,8 +181,8 @@ local function buildBoxes(W)
             colspan = 4,
             rowspan = 3,
             type = "text",
-            subtype = "armflags",
-            title = "ARM STATUS",
+            subtype = "governor",
+            title = "GOVERNOR",
             titlepos = "top",
             titlealign = "center",
             titlefont = opts.titlefont,
@@ -191,10 +191,6 @@ local function buildBoxes(W)
             titlecolor = colorMode.titlecolor,
             titlepaddingtop = opts.titlepaddingtop,
             bgcolor = "olive",
-            thresholds = {
-                {value = "@i18n(widgets.governor.DISARMED)@", textcolor = colorMode.fillcritcolor},
-                {value = "@i18n(widgets.governor.ARMED)@", textcolor = colorMode.fillcolor}
-            },
         },
         {
             col = 1,

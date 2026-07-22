@@ -6,7 +6,7 @@
   Readiness check: confirm charged pack, correct profiles, arming clear.
 ]] --
 
-local wfsuite = require("wfsuite")
+local wfsuite = assert(loadfile("widgets/dashboard/context.lua"))()
 local lcd     = lcd
 
 local max      = math.max
@@ -48,7 +48,7 @@ local last_txbatt_type   = nil
 -- Grid: 20 cols × 10 rows
 --   Left  (1-5):   voltage arc, full height
 --   Centre (6-14): SmartFuel ring (ringbatt) — full ring = 100% charged, go fly
---   Right (15-20): PID + rate profile (1-3) | BEC voltage (4-7) | arm status (8-10)
+--   Right (15-20): PID + rate profile (1-3) | BEC voltage (4-7) | governor (8-10)
 local layout = {cols = 20, rows = 10, padding = 2, showstats = false}
 
 local header_layout = utils.standardHeaderLayout(headeropts)
@@ -168,11 +168,11 @@ local function buildBoxes(W)
             bgcolor    = colorMode.panelbg,
         },
 
-        -- ── RIGHT BOTTOM (rows 8-10): Arm status ──────────────────────
+        -- ── RIGHT BOTTOM (rows 8-10): Governor / arming state ─────────
         {
             col = 15, row = 8, colspan = 6, rowspan = 3,
-            type = "text", subtype = "armflags",
-            title = "ARM STATUS", titlepos = "top", titlealign = "center",
+            type = "text", subtype = "governor",
+            title = "GOVERNOR", titlepos = "top", titlealign = "center",
             valuealign = "center",
             font = opts.titlefont, titlefont = opts.titlefont,
             textcolor  = colorMode.textcolor,
@@ -180,7 +180,12 @@ local function buildBoxes(W)
             bgcolor    = colorMode.paneldarkbg,
             thresholds = {
                 {value = "@i18n(widgets.governor.DISARMED)@", textcolor = colorMode.fillcritcolor},
-                {value = "@i18n(widgets.governor.ARMED)@",    textcolor = colorMode.fillcolor},
+                {value = "@i18n(widgets.governor.OFF)@",      textcolor = colorMode.fillcritcolor},
+                {value = "@i18n(widgets.governor.IDLE)@",     textcolor = "lightblue"},
+                {value = "@i18n(widgets.governor.SPOOLUP)@",  textcolor = "lightblue"},
+                {value = "@i18n(widgets.governor.RECOVERY)@", textcolor = colorMode.fillwarncolor},
+                {value = "@i18n(widgets.governor.ACTIVE)@",   textcolor = colorMode.fillcolor},
+                {value = "@i18n(widgets.governor.THROFF)@",  textcolor = colorMode.fillcritcolor},
             },
         },
 
