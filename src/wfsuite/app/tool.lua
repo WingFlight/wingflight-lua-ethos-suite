@@ -97,12 +97,7 @@ local MENUS = {
       {title = "@i18n(app.modules.accelerometer.name)@", icon = lcd.loadMask("app/gfx/accelerometer.png"), script = "app/pages/accelerometer.lua"},
       {title = "@i18n(app.modules.alignment.name)@", icon = lcd.loadMask("app/gfx/alignment.png"), script = "app/pages/alignment.lua"},
       {title = "@i18n(app.modules.ports.name)@", icon = lcd.loadMask("app/gfx/ports.png"), script = "app/pages/ports.lua"},
-      -- Governor tile removed here: the heli engine governor
-      -- (setup_governor_menu: general/time/filters/curves) has no
-      -- wingflight equivalent -- MSP_GOVERNOR_CONFIG is gone entirely
-      -- from wingflight-firmware. Wingflight's own Throttle Range
-      -- Governor page gets added here once ported (see AGENTS.md's
-      -- migration notes).
+      {title = "@i18n(app.modules.governor.name)@", icon = lcd.loadMask("app/gfx/governor.png"), script = "app/pages/governor.lua"},
       {title = "@i18n(app.modules.mixer.name)@", icon = lcd.loadMask("app/gfx/mixer_config.png"), script = "app/pages/mixer_config.lua"},
       {title = "@i18n(app.modules.servos.name)@", icon = lcd.loadMask("app/gfx/servos.png"), menuId = "servos_menu"},
       {title = "@i18n(app.menu_section_controls)@", icon = lcd.loadMask("app/gfx/controls.png"), menuId = "controls_menu"},

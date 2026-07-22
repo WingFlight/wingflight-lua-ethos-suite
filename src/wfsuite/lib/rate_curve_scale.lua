@@ -51,6 +51,19 @@ local DECIMALS = {
   expo = {main = 0, col = 0},
 }
 
+-- Default raw wire bytes per axis (1 = roll, 2 = pitch, 3 = yaw), carried
+-- over from the pre-rewrite project's own ratetables/wingflight.lua
+-- defaults (see `git show 0a94e6f7` in this repo's history) -- RC Rate
+-- runs yaw hotter than roll/pitch; Shape and RC Expo are the same raw
+-- value on all three axes. Only "main" axes have an entry: no row is
+-- ever built for the wire-present-but-dead collective axis (see this
+-- file's own header and app/pages/rates.lua).
+local DEFAULT_RAW = {
+  rcRate = {50, 50, 70},
+  srate = {5, 5, 5},
+  expo = {30, 30, 30},
+}
+
 local rate_curve_scale = {}
 
 -- role: "rcRate" | "srate" | "expo". axisClass: "main" | "col".
@@ -93,6 +106,13 @@ end
 -- it can never drift out of sync with it.
 function rate_curve_scale.displayBounds(role, axisClass)
   return 0, rate_curve_scale.toDisplayInt(255, role, axisClass), decimalsFor(role, axisClass)
+end
+
+-- role: "rcRate" | "srate" | "expo". axis: 1 (roll) | 2 (pitch) | 3 (yaw).
+-- Same displayInt domain as toDisplayInt() above, so callers can pass
+-- this straight to a number field's field:default().
+function rate_curve_scale.defaultDisplayInt(role, axis, axisClass)
+  return rate_curve_scale.toDisplayInt(DEFAULT_RAW[role][axis], role, axisClass)
 end
 
 package.loaded["wfsuite.lib.rate_curve_scale"] = rate_curve_scale

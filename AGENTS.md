@@ -192,17 +192,26 @@ firmware) rather than rotorflight (helicopter firmware). Status:
   `docs/i18n-locales.md` are all stale**, describing the pre-rewrite
   architecture (`wfsuite.*` global table, `app/modules/`,
   `tasks/scheduler/`). Not yet rewritten for the new architecture.
-- **Still to port**: Mixer Config (wing control-surface mixing, roll/
-  pitch/yaw via `MSP_MIXER_INPUTS`/`MSP_GET_MIXER_INPUT`), Cross Axis
-  Relax, Arm Ready Wiggle, Auto Trim/Atthold, Auto Hover, manual/
-  passthrough mode split, default rate-curve tuning, Throttle Range
-  Governor (`MSP2_WING_GOVERNOR_CONFIG`), master-gain adjusters. The
-  underlying `MSP_PID_PROFILE` wire fields for several of these
-  (`master_gain_0/1/2`, `autohover_*`, `cross_axis_relax_*`,
-  `atthold_gain/deadband/max_rate`) are already decoded correctly by
-  `lib/msp_pid_profile.lua` -- they just have no page/UI built for them
-  yet.
-- **Not yet audited against wingflight-firmware**: every other
-  `lib/msp_*.lua` file besides the ones listed above as "done". Treat
-  any of them as unverified until checked the same way (see Section 8).
+- **Ported since this section was first written**: Mixer Config
+  (`app/pages/mixer_config.lua`), Cross Axis Relax/Master Gain/FW TPA
+  (`app/pages/pid_controller.lua`), Arm Ready Wiggle codec
+  (`lib/msp_arming_config.lua`, built but not yet wired to a page --
+  see HANDOVER.md), Auto Trim/Att Hold/Auto Hover
+  (`app/pages/autolevel.lua`), and default rate-curve tuning
+  (`app/pages/rates.lua`/`lib/rate_curve_scale.lua`'s `DEFAULT_RAW`).
+  See `HANDOVER.md`'s "Done" list for what each actually covers.
+- **Still to port**: Throttle Range Governor
+  (`MSP2_WING_GOVERNOR_CONFIG`) -- see HANDOVER.md for current priority
+  order. (`lib/msp_mixer_override.lua`, inherited from the rewrite base,
+  is wire-verified correct against `MSP_SET_MIXER_OVERRIDE` but still
+  wired to no page -- not confirmed relevant to wingflight's own
+  manual/passthrough concept, or worth building a page for, until
+  someone actually needs it.)
+- **Phase 3 MSP audit: complete.** Every `lib/msp_*.lua` file has now
+  been checked field-by-field against wingflight-firmware's `msp.c` --
+  zero wire-format bugs found (see HANDOVER.md's "Done" list, item 11,
+  for the two harmless pre-existing quirks noted and the ESC-vendor
+  passthrough files' out-of-scope caveat). Treat any *new* `msp_*.lua`
+  file added after this point as unverified until checked the same way
+  (see Section 8).
 

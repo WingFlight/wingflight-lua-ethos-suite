@@ -136,6 +136,13 @@ local function open(opts)
           dataRef.data[key] = rateCurveScale.fromDisplayInt(value, column.role, row.axisClass)
         end)
       field:decimals(decimals)
+      -- Ethos's own "reset to default" long-press gesture resets to
+      -- whatever :default() was last given -- see app/pages/pids.lua's
+      -- own comment on the same call. Values are wingflight-firmware's
+      -- recommended rate-curve defaults (see lib/rate_curve_scale.lua's
+      -- own DEFAULT_RAW comment for provenance), converted through the
+      -- same toDisplayInt() domain the get()/set() closures above use.
+      field:default(rateCurveScale.defaultDisplayInt(column.role, row.axis, row.axisClass))
       runtime:registerField(key, field)
     end
   end

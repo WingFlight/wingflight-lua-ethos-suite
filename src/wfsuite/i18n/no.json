@@ -4316,6 +4316,90 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Jepp"
+        },
+        "mode_off": {
+          "english": "Off",
+          "translation": "Off",
+          "needs_translation": true,
+          "max_length": 3
+        },
+        "mode_rpm": {
+          "english": "RPM",
+          "translation": "RPM",
+          "needs_translation": true,
+          "max_length": 3
+        },
+        "mode_throttle": {
+          "english": "Throttle",
+          "translation": "Throttle",
+          "needs_translation": true,
+          "max_length": 8
+        },
+        "mode_rpm_range": {
+          "english": "RPM Range",
+          "translation": "RPM Range",
+          "needs_translation": true,
+          "max_length": 9
+        },
+        "rpm_group": {
+          "english": "RPM",
+          "translation": "RPM",
+          "needs_translation": true,
+          "max_length": 3
+        },
+        "rpm": {
+          "english": "Target RPM",
+          "translation": "Target RPM",
+          "needs_translation": true,
+          "max_length": 10
+        },
+        "rpm_min": {
+          "english": "Min RPM",
+          "translation": "Min RPM",
+          "needs_translation": true,
+          "max_length": 7
+        },
+        "rpm_max": {
+          "english": "Max RPM",
+          "translation": "Max RPM",
+          "needs_translation": true,
+          "max_length": 7
+        },
+        "response_group": {
+          "english": "Response",
+          "translation": "Response",
+          "needs_translation": true,
+          "max_length": 8
+        },
+        "i_gain": {
+          "english": "I Gain",
+          "translation": "I Gain",
+          "needs_translation": true,
+          "max_length": 6
+        },
+        "throttle_group": {
+          "english": "Throttle",
+          "translation": "Throttle",
+          "needs_translation": true,
+          "max_length": 8
+        },
+        "throttle": {
+          "english": "Throttle",
+          "translation": "Throttle",
+          "needs_translation": true,
+          "max_length": 8
+        },
+        "handover": {
+          "english": "Handover",
+          "translation": "Handover",
+          "needs_translation": true,
+          "max_length": 8
+        },
+        "ceiling": {
+          "english": "Ceiling",
+          "translation": "Ceiling",
+          "needs_translation": true,
+          "max_length": 7
         }
       },
       "hardware_setup": {
