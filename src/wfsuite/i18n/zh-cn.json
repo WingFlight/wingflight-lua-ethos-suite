@@ -5466,6 +5466,13 @@
         }
       },
       "pid_controller": {
+        "cross_axis_relax": {
+          "english": "Cross Axis Relax",
+          "max_length": 16,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Cross Axis Relax"
+        },
         "curve": {
           "english": "Curve",
           "max_length": 5,
@@ -5473,12 +5480,26 @@
           "reverse_text": false,
           "translation": "Curve"
         },
+        "cutoff": {
+          "english": "Cutoff",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Cutoff"
+        },
         "error_limit": {
           "english": "Error Limit",
           "max_length": 11,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "误差限制"
+        },
+        "fw_tpa": {
+          "english": "Throttle Attenuation",
+          "max_length": 20,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Throttle Attenuation"
         },
         "gain": {
           "english": "Gain",
@@ -5522,12 +5543,26 @@
           "reverse_text": false,
           "translation": "Iterm Relax:类型"
         },
+        "level": {
+          "english": "Level",
+          "max_length": 5,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Level"
+        },
         "limit": {
           "english": "Limit",
           "max_length": 5,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "限制"
+        },
+        "master_gain": {
+          "english": "Master Gain",
+          "max_length": 11,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Master Gain"
         },
         "name": {
           "english": "PID Controller",
