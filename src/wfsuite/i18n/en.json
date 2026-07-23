@@ -656,12 +656,6 @@
           "needs_translation": false,
           "translation": "Deadband"
         },
-        "rate": {
-          "english": "Rate",
-          "max_length": 4,
-          "needs_translation": false,
-          "translation": "Rate"
-        },
         "gain": {
           "english": "Gain",
           "max_length": 4,
@@ -685,6 +679,12 @@
           "max_length": 9,
           "needs_translation": false,
           "translation": "Autolevel"
+        },
+        "rate": {
+          "english": "Rate",
+          "max_length": 4,
+          "needs_translation": false,
+          "translation": "Rate"
         }
       },
       "beepers": {
@@ -1293,6 +1293,248 @@
           "max_length": 6,
           "needs_translation": false,
           "translation": "Servos"
+        }
+      },
+      "elrs_telemetry": {
+        "action": {
+          "english": "Action",
+          "max_length": 6,
+          "needs_translation": false,
+          "translation": "Action"
+        },
+        "action_elrs_to_wf": {
+          "english": "ELRS -> WF",
+          "max_length": 10,
+          "needs_translation": false,
+          "translation": "ELRS -> WF"
+        },
+        "action_probe": {
+          "english": "Probe",
+          "max_length": 5,
+          "needs_translation": false,
+          "translation": "Probe"
+        },
+        "action_probe_only": {
+          "english": "Probe only",
+          "max_length": 10,
+          "needs_translation": false,
+          "translation": "Probe only"
+        },
+        "action_wf_to_elrs": {
+          "english": "WF -> ELRS",
+          "max_length": 10,
+          "needs_translation": false,
+          "translation": "WF -> ELRS"
+        },
+        "elrs_module": {
+          "english": "ELRS Module",
+          "max_length": 11,
+          "needs_translation": false,
+          "translation": "ELRS Module"
+        },
+        "mode_custom": {
+          "english": "custom",
+          "max_length": 6,
+          "needs_translation": false,
+          "translation": "custom"
+        },
+        "mode_native": {
+          "english": "native",
+          "max_length": 6,
+          "needs_translation": false,
+          "translation": "native"
+        },
+        "name": {
+          "english": "ELRS Telemetry",
+          "max_length": 14,
+          "needs_translation": false,
+          "translation": "ELRS Telemetry"
+        },
+        "status": {
+          "english": "Status",
+          "max_length": 6,
+          "needs_translation": false,
+          "translation": "Status"
+        },
+        "status_connect_first": {
+          "english": "Connect to a model first",
+          "max_length": 24,
+          "needs_translation": false,
+          "translation": "Connect to a model first"
+        },
+        "status_elrs_matches_wf": {
+          "english": "ELRS module already matches Wingflight",
+          "max_length": 38,
+          "needs_translation": false,
+          "translation": "ELRS module already matches Wingflight"
+        },
+        "status_elrs_probe_complete": {
+          "english": "ELRS module probe complete",
+          "max_length": 26,
+          "needs_translation": false,
+          "translation": "ELRS module probe complete"
+        },
+        "status_elrs_updated": {
+          "english": "ELRS module updated from Wingflight",
+          "max_length": 35,
+          "needs_translation": false,
+          "translation": "ELRS module updated from Wingflight"
+        },
+        "status_idle": {
+          "english": "Idle",
+          "max_length": 4,
+          "needs_translation": false,
+          "translation": "Idle"
+        },
+        "status_no_module": {
+          "english": "No ELRS TX module responded",
+          "max_length": 27,
+          "needs_translation": false,
+          "translation": "No ELRS TX module responded"
+        },
+        "status_not_probed": {
+          "english": "Not probed yet",
+          "max_length": 14,
+          "needs_translation": false,
+          "translation": "Not probed yet"
+        },
+        "status_pinging_module": {
+          "english": "Pinging ELRS module",
+          "max_length": 19,
+          "needs_translation": false,
+          "translation": "Pinging ELRS module"
+        },
+        "status_probe_complete": {
+          "english": "Probe complete",
+          "max_length": 14,
+          "needs_translation": false,
+          "translation": "Probe complete"
+        },
+        "status_probe_requested": {
+          "english": "Probe requested",
+          "max_length": 15,
+          "needs_translation": false,
+          "translation": "Probe requested"
+        },
+        "status_read_timeout": {
+          "english": "ELRS module read timed out",
+          "max_length": 26,
+          "needs_translation": false,
+          "translation": "ELRS module read timed out"
+        },
+        "status_reading_module": {
+          "english": "Reading ELRS module parameters",
+          "max_length": 30,
+          "needs_translation": false,
+          "translation": "Reading ELRS module parameters"
+        },
+        "status_requires_active_link": {
+          "english": "This tool requires an active CRSF link",
+          "max_length": 38,
+          "needs_translation": false,
+          "translation": "This tool requires an active CRSF link"
+        },
+        "status_requires_crsf": {
+          "english": "This tool requires CRSF telemetry",
+          "max_length": 33,
+          "needs_translation": false,
+          "translation": "This tool requires CRSF telemetry"
+        },
+        "status_saving_wf": {
+          "english": "Saving Wingflight telemetry",
+          "max_length": 27,
+          "needs_translation": false,
+          "translation": "Saving Wingflight telemetry"
+        },
+        "status_sensor_unavailable": {
+          "english": "CRSF sensor unavailable",
+          "max_length": 23,
+          "needs_translation": false,
+          "translation": "CRSF sensor unavailable"
+        },
+        "status_sync_requested": {
+          "english": "Sync requested: ",
+          "max_length": 16,
+          "needs_translation": false,
+          "translation": "Sync requested: "
+        },
+        "status_unavailable_armed": {
+          "english": "Unavailable while armed",
+          "max_length": 23,
+          "needs_translation": false,
+          "translation": "Unavailable while armed"
+        },
+        "status_unavailable_simulation": {
+          "english": "Unavailable in simulation",
+          "max_length": 25,
+          "needs_translation": false,
+          "translation": "Unavailable in simulation"
+        },
+        "status_waiting_telemetry_config": {
+          "english": "Waiting for telemetry config",
+          "max_length": 28,
+          "needs_translation": false,
+          "translation": "Waiting for telemetry config"
+        },
+        "status_waiting_wf_config": {
+          "english": "Waiting for Wingflight telemetry config",
+          "max_length": 39,
+          "needs_translation": false,
+          "translation": "Waiting for Wingflight telemetry config"
+        },
+        "status_wf_config_not_ready": {
+          "english": "Wingflight telemetry config was not ready",
+          "max_length": 41,
+          "needs_translation": false,
+          "translation": "Wingflight telemetry config was not ready"
+        },
+        "status_wf_matches_elrs": {
+          "english": "Wingflight already matches ELRS",
+          "max_length": 31,
+          "needs_translation": false,
+          "translation": "Wingflight already matches ELRS"
+        },
+        "status_wf_save_failed": {
+          "english": "Wingflight sync failed while saving",
+          "max_length": 35,
+          "needs_translation": false,
+          "translation": "Wingflight sync failed while saving"
+        },
+        "status_wf_updated": {
+          "english": "Wingflight updated from ELRS",
+          "max_length": 28,
+          "needs_translation": false,
+          "translation": "Wingflight updated from ELRS"
+        },
+        "status_wf_write_failed": {
+          "english": "Wingflight sync write failed",
+          "max_length": 28,
+          "needs_translation": false,
+          "translation": "Wingflight sync write failed"
+        },
+        "status_writing_elrs": {
+          "english": "Writing ELRS module settings",
+          "max_length": 28,
+          "needs_translation": false,
+          "translation": "Writing ELRS module settings"
+        },
+        "status_writing_prefix": {
+          "english": "Writing ",
+          "max_length": 8,
+          "needs_translation": false,
+          "translation": "Writing "
+        },
+        "status_writing_wf": {
+          "english": "Writing Wingflight telemetry settings",
+          "max_length": 37,
+          "needs_translation": false,
+          "translation": "Writing Wingflight telemetry settings"
+        },
+        "wingflight": {
+          "english": "Wingflight",
+          "max_length": 10,
+          "needs_translation": false,
+          "translation": "Wingflight"
         }
       },
       "esc_motors": {
@@ -3470,6 +3712,12 @@
           "needs_translation": false,
           "translation": "Autorotation Timeout"
         },
+        "ceiling": {
+          "english": "Ceiling",
+          "max_length": 7,
+          "needs_translation": false,
+          "translation": "Ceiling"
+        },
         "col": {
           "english": "Col",
           "max_length": 3,
@@ -3554,6 +3802,12 @@
           "needs_translation": false,
           "translation": "TTA Bandwidth"
         },
+        "handover": {
+          "english": "Handover",
+          "max_length": 8,
+          "needs_translation": false,
+          "translation": "Handover"
+        },
         "handover_throttle": {
           "english": "Handover throttle%",
           "max_length": 18,
@@ -3565,6 +3819,12 @@
           "max_length": 1,
           "needs_translation": false,
           "translation": "I"
+        },
+        "i_gain": {
+          "english": "I Gain",
+          "max_length": 6,
+          "needs_translation": false,
+          "translation": "I Gain"
         },
         "max_throttle": {
           "english": "Max Throttle",
@@ -3620,6 +3880,30 @@
           "needs_translation": false,
           "translation": "Mode"
         },
+        "mode_off": {
+          "english": "Off",
+          "max_length": 3,
+          "needs_translation": false,
+          "translation": "Off"
+        },
+        "mode_rpm": {
+          "english": "RPM",
+          "max_length": 3,
+          "needs_translation": false,
+          "translation": "RPM"
+        },
+        "mode_rpm_range": {
+          "english": "RPM Range",
+          "max_length": 9,
+          "needs_translation": false,
+          "translation": "RPM Range"
+        },
+        "mode_throttle": {
+          "english": "Throttle",
+          "max_length": 8,
+          "needs_translation": false,
+          "translation": "Throttle"
+        },
         "name": {
           "english": "Governor",
           "max_length": 8,
@@ -3649,6 +3933,36 @@
           "max_length": 13,
           "needs_translation": false,
           "translation": "Recovery time"
+        },
+        "response_group": {
+          "english": "Response",
+          "max_length": 8,
+          "needs_translation": false,
+          "translation": "Response"
+        },
+        "rpm": {
+          "english": "Target RPM",
+          "max_length": 10,
+          "needs_translation": false,
+          "translation": "Target RPM"
+        },
+        "rpm_group": {
+          "english": "RPM",
+          "max_length": 3,
+          "needs_translation": false,
+          "translation": "RPM"
+        },
+        "rpm_max": {
+          "english": "Max RPM",
+          "max_length": 7,
+          "needs_translation": false,
+          "translation": "Max RPM"
+        },
+        "rpm_min": {
+          "english": "Min RPM",
+          "max_length": 7,
+          "needs_translation": false,
+          "translation": "Min RPM"
         },
         "spooldown_time": {
           "english": "Spooldown time",
@@ -3680,6 +3994,18 @@
           "needs_translation": false,
           "translation": "On"
         },
+        "throttle": {
+          "english": "Throttle",
+          "max_length": 8,
+          "needs_translation": false,
+          "translation": "Throttle"
+        },
+        "throttle_group": {
+          "english": "Throttle",
+          "max_length": 8,
+          "needs_translation": false,
+          "translation": "Throttle"
+        },
         "throttle_hold_timeout": {
           "english": "Throttle hold timeout",
           "max_length": 21,
@@ -3709,90 +4035,6 @@
           "max_length": 3,
           "needs_translation": false,
           "translation": "Yaw"
-        },
-        "mode_off": {
-          "english": "Off",
-          "translation": "Off",
-          "needs_translation": false,
-          "max_length": 3
-        },
-        "mode_rpm": {
-          "english": "RPM",
-          "translation": "RPM",
-          "needs_translation": false,
-          "max_length": 3
-        },
-        "mode_throttle": {
-          "english": "Throttle",
-          "translation": "Throttle",
-          "needs_translation": false,
-          "max_length": 8
-        },
-        "mode_rpm_range": {
-          "english": "RPM Range",
-          "translation": "RPM Range",
-          "needs_translation": false,
-          "max_length": 9
-        },
-        "rpm_group": {
-          "english": "RPM",
-          "translation": "RPM",
-          "needs_translation": false,
-          "max_length": 3
-        },
-        "rpm": {
-          "english": "Target RPM",
-          "translation": "Target RPM",
-          "needs_translation": false,
-          "max_length": 10
-        },
-        "rpm_min": {
-          "english": "Min RPM",
-          "translation": "Min RPM",
-          "needs_translation": false,
-          "max_length": 7
-        },
-        "rpm_max": {
-          "english": "Max RPM",
-          "translation": "Max RPM",
-          "needs_translation": false,
-          "max_length": 7
-        },
-        "response_group": {
-          "english": "Response",
-          "translation": "Response",
-          "needs_translation": false,
-          "max_length": 8
-        },
-        "i_gain": {
-          "english": "I Gain",
-          "translation": "I Gain",
-          "needs_translation": false,
-          "max_length": 6
-        },
-        "throttle_group": {
-          "english": "Throttle",
-          "translation": "Throttle",
-          "needs_translation": false,
-          "max_length": 8
-        },
-        "throttle": {
-          "english": "Throttle",
-          "translation": "Throttle",
-          "needs_translation": false,
-          "max_length": 8
-        },
-        "handover": {
-          "english": "Handover",
-          "translation": "Handover",
-          "needs_translation": false,
-          "max_length": 8
-        },
-        "ceiling": {
-          "english": "Ceiling",
-          "translation": "Ceiling",
-          "needs_translation": false,
-          "max_length": 7
         }
       },
       "hardware_setup": {
@@ -3836,7 +4078,7 @@
         },
         "rf_version": {
           "english": "Wingflight Version",
-          "max_length": 19,
+          "max_length": 18,
           "needs_translation": false,
           "translation": "Wingflight Version"
         },
@@ -4456,23 +4698,11 @@
         }
       },
       "pid_controller": {
-        "breakpoint": {
-          "english": "Breakpoint",
-          "max_length": 10,
+        "curve": {
+          "english": "Curve",
+          "max_length": 5,
           "needs_translation": false,
-          "translation": "Breakpoint"
-        },
-        "cross_axis_relax": {
-          "english": "Cross-axis Relax",
-          "max_length": 16,
-          "needs_translation": false,
-          "translation": "Cross-axis Relax"
-        },
-        "cutoff": {
-          "english": "Cutoff",
-          "max_length": 6,
-          "needs_translation": false,
-          "translation": "Cutoff"
+          "translation": "Curve"
         },
         "error_limit": {
           "english": "Error Limit",
@@ -4480,11 +4710,11 @@
           "needs_translation": false,
           "translation": "Error Limit"
         },
-        "fw_tpa": {
-          "english": "Throttle Attenuation",
-          "max_length": 20,
+        "gain": {
+          "english": "Gain",
+          "max_length": 4,
           "needs_translation": false,
-          "translation": "Throttle Attenuation"
+          "translation": "Gain"
         },
         "ground_error_decay": {
           "english": "Ground Error Decay",
@@ -4516,23 +4746,11 @@
           "needs_translation": false,
           "translation": "Iterm Relax: Type"
         },
-        "level": {
-          "english": "Level",
-          "max_length": 5,
-          "needs_translation": false,
-          "translation": "Level"
-        },
         "limit": {
           "english": "Limit",
           "max_length": 5,
           "needs_translation": false,
           "translation": "Limit"
-        },
-        "master_gain": {
-          "english": "Master Gain",
-          "max_length": 11,
-          "needs_translation": false,
-          "translation": "Master Gain"
         },
         "name": {
           "english": "PID Controller",
@@ -4545,12 +4763,6 @@
           "max_length": 1,
           "needs_translation": false,
           "translation": "P"
-        },
-        "rate": {
-          "english": "Rate",
-          "max_length": 4,
-          "needs_translation": false,
-          "translation": "Rate"
         },
         "roll": {
           "english": "R",
@@ -4587,18 +4799,6 @@
           "max_length": 1,
           "needs_translation": false,
           "translation": "Y"
-        },
-        "gain": {
-          "english": "Gain",
-          "translation": "Gain",
-          "needs_translation": false,
-          "max_length": 4
-        },
-        "curve": {
-          "english": "Curve",
-          "translation": "Curve",
-          "needs_translation": false,
-          "max_length": 5
         }
       },
       "pids": {
@@ -5118,7 +5318,7 @@
         },
         "tbl_rotorflight": {
           "english": "Wingflight",
-          "max_length": 11,
+          "max_length": 10,
           "needs_translation": false,
           "translation": "Wingflight"
         },
@@ -5806,9 +6006,15 @@
         },
         "feature_activelook": {
           "english": "Wingflight ActiveLook",
-          "max_length": 22,
+          "max_length": 21,
           "needs_translation": false,
           "translation": "Wingflight ActiveLook"
+        },
+        "flight_mode_state": {
+          "english": "Flight mode state",
+          "max_length": 17,
+          "needs_translation": false,
+          "translation": "Flight mode state"
         },
         "fuel": {
           "english": "Fuel",
@@ -5869,12 +6075,6 @@
           "max_length": 16,
           "needs_translation": false,
           "translation": "Low fuel repeats"
-        },
-        "flight_mode_state": {
-          "english": "Flight mode state",
-          "max_length": 18,
-          "needs_translation": false,
-          "translation": "Flight mode state"
         },
         "governor_state": {
           "english": "Governor state",
@@ -6236,7 +6436,7 @@
     },
     "msg_background_task_missing_body": {
       "english": "Wingflight background task is not running. Enable it before opening menus.",
-      "max_length": 75,
+      "max_length": 74,
       "needs_translation": false,
       "translation": "Wingflight background task is not running. Enable it before opening menus."
     },
@@ -7241,7 +7441,7 @@
       },
       "startup_waiting_task_detail": {
         "english": "Waiting for Wingflight task.",
-        "max_length": 29,
+        "max_length": 28,
         "needs_translation": false,
         "translation": "Waiting for Wingflight task."
       },

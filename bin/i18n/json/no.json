@@ -131,7 +131,7 @@
       "translation": "Wingflight bakgrunnsoppgave kjører ikke. Aktiver det før du åpner menyer.",
       "needs_translation": false,
       "reverse_text": false,
-      "max_length": 75
+      "max_length": 74
     },
     "menu_section_flight_tuning": {
       "english": "Flight Tuning",
@@ -351,13 +351,15 @@
           "english": "Gain",
           "translation": "Gain",
           "needs_translation": true,
-          "max_length": 4
+          "max_length": 4,
+          "reverse_text": false
         },
         "curve": {
           "english": "Curve",
           "translation": "Curve",
           "needs_translation": true,
-          "max_length": 5
+          "max_length": 5,
+          "reverse_text": false
         }
       },
       "tail_rotor": {
@@ -738,85 +740,99 @@
           "english": "Off",
           "translation": "Off",
           "needs_translation": true,
-          "max_length": 3
+          "max_length": 3,
+          "reverse_text": false
         },
         "mode_rpm": {
           "english": "RPM",
           "translation": "RPM",
           "needs_translation": true,
-          "max_length": 3
+          "max_length": 3,
+          "reverse_text": false
         },
         "mode_throttle": {
           "english": "Throttle",
           "translation": "Throttle",
           "needs_translation": true,
-          "max_length": 8
+          "max_length": 8,
+          "reverse_text": false
         },
         "mode_rpm_range": {
           "english": "RPM Range",
           "translation": "RPM Range",
           "needs_translation": true,
-          "max_length": 9
+          "max_length": 9,
+          "reverse_text": false
         },
         "rpm_group": {
           "english": "RPM",
           "translation": "RPM",
           "needs_translation": true,
-          "max_length": 3
+          "max_length": 3,
+          "reverse_text": false
         },
         "rpm": {
           "english": "Target RPM",
           "translation": "Target RPM",
           "needs_translation": true,
-          "max_length": 10
+          "max_length": 10,
+          "reverse_text": false
         },
         "rpm_min": {
           "english": "Min RPM",
           "translation": "Min RPM",
           "needs_translation": true,
-          "max_length": 7
+          "max_length": 7,
+          "reverse_text": false
         },
         "rpm_max": {
           "english": "Max RPM",
           "translation": "Max RPM",
           "needs_translation": true,
-          "max_length": 7
+          "max_length": 7,
+          "reverse_text": false
         },
         "response_group": {
           "english": "Response",
           "translation": "Response",
           "needs_translation": true,
-          "max_length": 8
+          "max_length": 8,
+          "reverse_text": false
         },
         "i_gain": {
           "english": "I Gain",
           "translation": "I Gain",
           "needs_translation": true,
-          "max_length": 6
+          "max_length": 6,
+          "reverse_text": false
         },
         "throttle_group": {
           "english": "Throttle",
           "translation": "Throttle",
           "needs_translation": true,
-          "max_length": 8
+          "max_length": 8,
+          "reverse_text": false
         },
         "throttle": {
           "english": "Throttle",
           "translation": "Throttle",
           "needs_translation": true,
-          "max_length": 8
+          "max_length": 8,
+          "reverse_text": false
         },
         "handover": {
           "english": "Handover",
           "translation": "Handover",
           "needs_translation": true,
-          "max_length": 8
+          "max_length": 8,
+          "reverse_text": false
         },
         "ceiling": {
           "english": "Ceiling",
           "translation": "Ceiling",
           "needs_translation": true,
-          "max_length": 7
+          "max_length": 7,
+          "reverse_text": false
         }
       },
       "main_rotor": {
@@ -1267,7 +1283,7 @@
           "translation": "Wingflight",
           "needs_translation": false,
           "reverse_text": false,
-          "max_length": 11
+          "max_length": 10
         }
       },
       "rates_advanced": {
@@ -1976,7 +1992,7 @@
           "translation": "Wingflight ActiveLook",
           "needs_translation": false,
           "reverse_text": false,
-          "max_length": 22
+          "max_length": 21
         },
         "dashboard_theme_panel_global": {
           "english": "Default theme for all models",
@@ -2116,7 +2132,7 @@
           "translation": "Flight mode state",
           "needs_translation": true,
           "reverse_text": false,
-          "max_length": 18
+          "max_length": 17
         },
         "governor_state": {
           "english": "Governor state",
@@ -4781,7 +4797,7 @@
           "english": "Wingflight Version",
           "translation": "Wingflight Versjon",
           "needs_translation": false,
-          "max_length": 19,
+          "max_length": 18,
           "reverse_text": false
         },
         "fc_version": {
@@ -5116,6 +5132,288 @@
           "needs_translation": false,
           "max_length": 11,
           "reverse_text": false
+        }
+      },
+      "elrs_telemetry": {
+        "action": {
+          "english": "Action",
+          "translation": "Action",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 6
+        },
+        "action_elrs_to_wf": {
+          "english": "ELRS -> WF",
+          "translation": "ELRS -> WF",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 10
+        },
+        "action_probe": {
+          "english": "Probe",
+          "translation": "Probe",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 5
+        },
+        "action_probe_only": {
+          "english": "Probe only",
+          "translation": "Probe only",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 10
+        },
+        "action_wf_to_elrs": {
+          "english": "WF -> ELRS",
+          "translation": "WF -> ELRS",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 10
+        },
+        "elrs_module": {
+          "english": "ELRS Module",
+          "translation": "ELRS Module",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 11
+        },
+        "mode_custom": {
+          "english": "custom",
+          "translation": "custom",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 6
+        },
+        "mode_native": {
+          "english": "native",
+          "translation": "native",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 6
+        },
+        "name": {
+          "english": "ELRS Telemetry",
+          "translation": "ELRS Telemetry",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 14
+        },
+        "wingflight": {
+          "english": "Wingflight",
+          "translation": "Wingflight",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 10
+        },
+        "status": {
+          "english": "Status",
+          "translation": "Status",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 6
+        },
+        "status_connect_first": {
+          "english": "Connect to a model first",
+          "translation": "Connect to a model first",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 24
+        },
+        "status_elrs_matches_wf": {
+          "english": "ELRS module already matches Wingflight",
+          "translation": "ELRS module already matches Wingflight",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 38
+        },
+        "status_elrs_probe_complete": {
+          "english": "ELRS module probe complete",
+          "translation": "ELRS module probe complete",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 26
+        },
+        "status_elrs_updated": {
+          "english": "ELRS module updated from Wingflight",
+          "translation": "ELRS module updated from Wingflight",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 35
+        },
+        "status_idle": {
+          "english": "Idle",
+          "translation": "Idle",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 4
+        },
+        "status_no_module": {
+          "english": "No ELRS TX module responded",
+          "translation": "No ELRS TX module responded",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 27
+        },
+        "status_not_probed": {
+          "english": "Not probed yet",
+          "translation": "Not probed yet",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 14
+        },
+        "status_pinging_module": {
+          "english": "Pinging ELRS module",
+          "translation": "Pinging ELRS module",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 19
+        },
+        "status_probe_complete": {
+          "english": "Probe complete",
+          "translation": "Probe complete",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 14
+        },
+        "status_probe_requested": {
+          "english": "Probe requested",
+          "translation": "Probe requested",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 15
+        },
+        "status_read_timeout": {
+          "english": "ELRS module read timed out",
+          "translation": "ELRS module read timed out",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 26
+        },
+        "status_reading_module": {
+          "english": "Reading ELRS module parameters",
+          "translation": "Reading ELRS module parameters",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 30
+        },
+        "status_requires_active_link": {
+          "english": "This tool requires an active CRSF link",
+          "translation": "This tool requires an active CRSF link",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 38
+        },
+        "status_requires_crsf": {
+          "english": "This tool requires CRSF telemetry",
+          "translation": "This tool requires CRSF telemetry",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 33
+        },
+        "status_sensor_unavailable": {
+          "english": "CRSF sensor unavailable",
+          "translation": "CRSF sensor unavailable",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 23
+        },
+        "status_sync_requested": {
+          "english": "Sync requested: ",
+          "translation": "Sync requested: ",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 16
+        },
+        "status_unavailable_armed": {
+          "english": "Unavailable while armed",
+          "translation": "Unavailable while armed",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 23
+        },
+        "status_unavailable_simulation": {
+          "english": "Unavailable in simulation",
+          "translation": "Unavailable in simulation",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 25
+        },
+        "status_waiting_telemetry_config": {
+          "english": "Waiting for telemetry config",
+          "translation": "Waiting for telemetry config",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 28
+        },
+        "status_waiting_wf_config": {
+          "english": "Waiting for Wingflight telemetry config",
+          "translation": "Waiting for Wingflight telemetry config",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 39
+        },
+        "status_wf_config_not_ready": {
+          "english": "Wingflight telemetry config was not ready",
+          "translation": "Wingflight telemetry config was not ready",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 41
+        },
+        "status_wf_matches_elrs": {
+          "english": "Wingflight already matches ELRS",
+          "translation": "Wingflight already matches ELRS",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 31
+        },
+        "status_wf_save_failed": {
+          "english": "Wingflight sync failed while saving",
+          "translation": "Wingflight sync failed while saving",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 35
+        },
+        "status_wf_updated": {
+          "english": "Wingflight updated from ELRS",
+          "translation": "Wingflight updated from ELRS",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 28
+        },
+        "status_wf_write_failed": {
+          "english": "Wingflight sync write failed",
+          "translation": "Wingflight sync write failed",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 28
+        },
+        "status_writing_elrs": {
+          "english": "Writing ELRS module settings",
+          "translation": "Writing ELRS module settings",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 28
+        },
+        "status_writing_prefix": {
+          "english": "Writing ",
+          "translation": "Writing ",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 8
+        },
+        "status_writing_wf": {
+          "english": "Writing Wingflight telemetry settings",
+          "translation": "Writing Wingflight telemetry settings",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 37
+        },
+        "status_saving_wf": {
+          "english": "Saving Wingflight telemetry",
+          "translation": "Saving Wingflight telemetry",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 27
         }
       },
       "esc_tools": {
@@ -8231,7 +8529,7 @@
         "translation": "Venter på Wingflight-oppgave.",
         "needs_translation": false,
         "reverse_text": false,
-        "max_length": 29
+        "max_length": 28
       },
       "startup_waiting_telemetry": {
         "english": "Link established",
