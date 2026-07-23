@@ -38,6 +38,7 @@ local pageRuntime = assert(loadfile("app/page_runtime.lua"))()
 local progressDialog = assert(loadfile("app/progress_dialog.lua"))()
 local curvesVisual = assert(loadfile("app/curves_visual.lua"))()
 local curveSlotLabels = assert(loadfile("app/curve_slot_labels.lua"))()
+local curvePoints = assert(loadfile("lib/curve_points.lua"))()
 local mixerCurves = assert(loadfile("lib/msp_mixer_curves.lua"))()
 local gainCurves = assert(loadfile("lib/msp_gain_curves.lua"))()
 
@@ -217,12 +218,48 @@ local function openEditor(opts, category, listState, index)
   local function syncPointRowEnablement(rt)
     local currentCount = math.floor(tonumber(rt.data.count) or 2)
     if currentCount == lastAppliedCount then return end
+
+    -- Growing/shrinking the count needs a real point inserted or removed
+    -- (see lib/curve_points.lua's own header on insertAtLargestGap()/
+    -- removeLeastSignificant() for why a bare "count" field can't safely
+    -- just reveal/drop a slot in place). Skipped on the very first sync
+    -- after a (re)load (lastAppliedCount == nil) -- that's the initial
+    -- data arriving, not a user-driven count change.
+    if lastAppliedCount then
+      local curve = unflatten(rt.data, pointCount)
+      curve.count = lastAppliedCount
+      if currentCount > lastAppliedCount then
+        for _ = lastAppliedCount + 1, currentCount do
+          curve = curvePoints.insertAtLargestGap(curve, pointCount)
+        end
+      else
+        for _ = currentCount + 1, lastAppliedCount do
+          curve = curvePoints.removeLeastSignificant(curve, pointCount)
+        end
+      end
+      local flat = flatten(curve, pointCount)
+      for i = 1, pointCount do
+        local xKey, yKey = "point_" .. i .. "_x", "point_" .. i .. "_y"
+        rt.data[xKey] = flat[xKey]
+        rt.data[yKey] = flat[yKey]
+        local xField, yField = rt.fields[xKey], rt.fields[yKey]
+        if xField and xField.value then xField:value(flat[xKey]) end
+        if yField and yField.value then yField:value(flat[yKey]) end
+      end
+    end
+
     lastAppliedCount = currentCount
     for i = 1, pointCount do
       local active = i <= currentCount
+      -- The first and (currently) last active point define the curve's
+      -- domain extent -- only their Y is user-editable, X stays pinned
+      -- to xRange.min/xRange.max. Which column counts as "last" moves
+      -- with currentCount, so this is re-evaluated on every count change,
+      -- not fixed to pointCount's own final column.
+      local xLocked = (i == 1) or (i == currentCount)
       local xField = rt.fields["point_" .. i .. "_x"]
       local yField = rt.fields["point_" .. i .. "_y"]
-      if xField then xField:enable(active) end
+      if xField then xField:enable(active and not xLocked) end
       if yField then yField:enable(active) end
     end
   end
@@ -485,7 +522,7 @@ local function openCategory(opts, category)
   end))
 end
 
-local function openCategoryMenu(opts)
+openCategoryMenu = function(opts)
   form.clear()
   local headerHandle = header.build(PAGE_TITLE, {onBack = opts.onBack})
 
