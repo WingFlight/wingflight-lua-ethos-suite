@@ -3,10 +3,11 @@
 -- -- see lib/msp_mixer_curves.lua/lib/msp_gain_curves.lua for the wire
 -- format and its firmware-verification caveat).
 --
--- app/pages/pid_controller.lua's fw_tpa_curve/gain_curve_0/1/2 fields only
--- pick WHICH of these 8 slots is assigned to a PID-profile field (a plain
--- index, matching wingflight-configurator's own Profiles-tab convention);
--- this page is where a slot's actual point-list SHAPE gets edited.
+-- app/pages/master_gains.lua's gain_curve_0/1/2/fw_tpa_curve fields only
+-- pick WHICH of the Gain pool's 8 slots is assigned to an axis (a plain
+-- index, matching wingflight-configurator's own Master Gains table
+-- convention); this page is where a slot's actual point-list SHAPE gets
+-- edited.
 --
 -- Three screens, mirroring app/pages/servos_pwm.lua's list->editor shape
 -- with one extra level on top:
@@ -45,9 +46,61 @@ local MSG_LOADING_TITLE = "@i18n(app.msg_loading)@"
 local MSG_LOADING_BODY = "@i18n(app.msg_loading_from_fbl)@"
 local MSG_LOAD_ERROR = "@i18n(app.modules.ports.load_error_prefix)@"
 
+-- Mixer's category tile and its 8 slot tiles use the generic curve icon
+-- (also app/tool.lua's own Curves menu entry); Gain's use
+-- master_gains.png instead -- the same icon app/pages/master_gains.lua's
+-- own menu entry uses -- so a Gain curve slot visually ties back to the
+-- Master Gains table that references it, distinct from a Mixer curve
+-- slot. Loaded once here rather than per-tile inside the grid-building
+-- loops, since those loops rerun on every visit to these screens.
+local MIXER_ICON = lcd.loadMask("app/gfx/curves.png")
+local GAIN_ICON = lcd.loadMask("app/gfx/master_gains.png")
+
 local TILE_MIN_SIZE = 112
 local TILE_PADDING = 10
 local TILE_MAX_COLUMNS = 6
+
+-- Point-field row layout (openEditor). COL_GAP/SIDE_MARGIN/GUTTER_W are
+-- pixel constants in the same spirit as TILE_MIN_SIZE/TILE_PADDING above
+-- (this rebuild has no per-radio layout-constant table, unlike
+-- rotorflight-lua-ethos-suite's own radio.buttonPadding/
+-- radio.navbuttonHeight). ROW_GAP_FRACTION/TOOLBAR_MARGIN_ROWS scale off
+-- a MEASURED real field row's height (see openEditor) rather than being
+-- pixel constants themselves -- two earlier approaches broke on real
+-- hardware: computing the graph/field-row split from screen-height minus
+-- fixed pixel margins put the field rows mid-screen instead of pinned to
+-- the bottom and left the graph's rect negative-height (silently didn't
+-- paint); padding with blank form.addLine("") rows to reserve graph space
+-- instead made the graph consume nearly the whole screen from a single
+-- blank line, pushing the field rows below the fold -- blank/empty-title
+-- lines behave as an expanding filler, not a small fixed-height row, on
+-- this device. Measuring one REAL field row's own height (the "Points"
+-- count field, which unambiguously has normal fixed sizing) and using
+-- that as the unit for both the field rows' own height and their gap
+-- avoids guessing at either extreme.
+local COL_GAP = 4
+local SIDE_MARGIN = 4
+local GUTTER_W = 28
+-- The graph's own rect used SIDE_MARGIN on both edges, but the field
+-- rows/header buttons above it apparently stop a few px further in on
+-- the right than that -- confirmed live: the graph's right edge visibly
+-- overshot past the "Points" field/button column's own right edge.
+local GRAPH_RIGHT_INSET = 5
+local ROW_GAP_FRACTION = 0.15
+-- The confirmed-visible "< n > - +" strip in earlier testing appeared
+-- only while a field was actively being edited -- a transient overlay,
+-- not a permanently reserved region -- so this only needs to be a small
+-- safety buffer, not a whole extra row's worth of permanently dead space
+-- (confirmed live: 1.25 left a large unused gap at the screen bottom
+-- with nothing drawn in it).
+local TOOLBAR_MARGIN_ROWS = 0.3
+-- The dense 9-column X/Y rows don't need the full measured row height --
+-- that includes touch-target padding sized for a single full-width
+-- field, which looked oversized reused verbatim for a compact row.
+local POINT_ROW_HEIGHT_FRACTION = 0.65
+-- Extra breathing room between the count field and the graph, beyond
+-- form.height()'s own line spacing.
+local GRAPH_TOP_GAP_FRACTION = 0.3
 
 local function gridMetrics(windowWidth)
   local numPerRow = math.max(1, math.floor((windowWidth - TILE_PADDING) / (TILE_MIN_SIZE + TILE_PADDING)))
@@ -69,6 +122,7 @@ local CATEGORIES = {
     pointCount = mixerCurves.POINT_COUNT,
     curveCount = mixerCurves.CURVE_COUNT,
     title = "@i18n(app.modules.curves.category_mixer)@",
+    icon = MIXER_ICON,
     xRange = rangeOf(mixerCurves.FIELD_META.x),
     yRange = rangeOf(mixerCurves.FIELD_META.y),
     unloadKey = "wfsuite.lib.msp_mixer_curves",
@@ -79,6 +133,7 @@ local CATEGORIES = {
     pointCount = gainCurves.POINT_COUNT,
     curveCount = gainCurves.CURVE_COUNT,
     title = "@i18n(app.modules.curves.category_gain)@",
+    icon = GAIN_ICON,
     xRange = rangeOf(gainCurves.FIELD_META.x),
     yRange = rangeOf(gainCurves.FIELD_META.y),
     unloadKey = "wfsuite.lib.msp_gain_curves",
@@ -144,13 +199,20 @@ local function signatureOf(data, pointCount)
 end
 
 local openSlotList
+local openCategoryMenu
 
 local function openEditor(opts, category, listState, index)
   local pointCount = category.pointCount
   local lastAppliedCount = nil
   local lastSignature = nil
   local lastSyncCheckAt = 0
+  local activeIndex = nil
   local runtime
+  -- Assigned once, after the graph's reserved space is measured out below
+  -- -- declared here so onPaint's closure (built before that happens)
+  -- captures the same upvalues and sees their real values by the time
+  -- painting actually starts.
+  local graphTop, graphBottom
 
   local function syncPointRowEnablement(rt)
     local currentCount = math.floor(tonumber(rt.data.count) or 2)
@@ -200,47 +262,115 @@ local function openEditor(opts, category, listState, index)
       end
     end,
     onPaint = function(rt)
+      if not graphTop then return end
       local points = {}
       for i = 1, pointCount do
         points[i] = {x = rt.data["point_" .. i .. "_x"] or 0, y = rt.data["point_" .. i .. "_y"] or 0}
       end
-      curvesVisual.draw(points, math.floor(tonumber(rt.data.count) or 0), category.xRange, category.yRange)
+      local winW = ({lcd.getWindowSize()})[1]
+      local graphRect = {
+        x = SIDE_MARGIN,
+        y = graphTop,
+        w = winW - SIDE_MARGIN - GRAPH_RIGHT_INSET,
+        h = graphBottom - graphTop,
+      }
+      curvesVisual.draw(points, math.floor(tonumber(rt.data.count) or 0), category.xRange, category.yRange, activeIndex, graphRect)
     end,
   })
 
   form.clear()
   runtime:buildChrome()
 
+  local preCountHeight = form.height()
   fieldLayout.buildSingle(runtime, "@i18n(app.modules.curves.point_count)@", {key = "count"})
+  -- Real, measured height of one normal field row on this device -- not
+  -- a guessed pixel constant (see this file's constants comment for why
+  -- two earlier guesses each broke on real hardware). The dense 9-column
+  -- X/Y rows use a smaller fraction of it (POINT_ROW_HEIGHT_FRACTION):
+  -- the "Points" row's own height includes padding sized for a single
+  -- full-width touch target, which looks oversized reused verbatim for a
+  -- compact multi-column row.
+  local rowHeight = math.max(20, math.floor(form.height() - preCountHeight))
+  local pointRowHeight = math.max(20, math.floor(rowHeight * POINT_ROW_HEIGHT_FRACTION))
+  local rowGap = math.max(2, math.floor(pointRowHeight * ROW_GAP_FRACTION))
 
-  for i = 1, pointCount do
-    fieldLayout.buildGroup(runtime, string.format("@i18n(app.modules.curves.point_row_fmt)@", i), {
-      {title = "@i18n(app.modules.curves.point_x)@", spec = {
-        key = "point_" .. i .. "_x",
-        min = category.codec.FIELD_META.x.min,
-        max = category.codec.FIELD_META.x.max,
-        default = category.codec.FIELD_META.x.default,
-      }},
-      {title = "@i18n(app.modules.curves.point_y)@", spec = {
-        key = "point_" .. i .. "_y",
-        min = category.codec.FIELD_META.y.min,
-        max = category.codec.FIELD_META.y.max,
-        default = category.codec.FIELD_META.y.default,
-      }},
-    })
+  graphTop = math.floor(form.height() + (rowHeight * GRAPH_TOP_GAP_FRACTION))
+
+  -- Compact per-point X/Y rows, one narrow column per point, styled after
+  -- rotorflight-lua-ethos-suite's own governor curve tool
+  -- (app/modules/governor/tools/curves.lua): a graph dominating the
+  -- screen with a dense field row directly tied to it, rather than a
+  -- scrolling list of labelled group rows. That page has a single Y-only
+  -- row (fixed, evenly-spaced X); this one needs a second row since both
+  -- X and Y are editable per point here.
+  --
+  -- Pinned to explicit pixel rects near the screen bottom (line=nil,
+  -- matching that reference page's own form.addNumberField(nil, {x=,y=,
+  -- w=,h=}, ...) calls -- a confirmed-working pattern for absolute field
+  -- placement) so the graph above can claim the entire gap between the
+  -- count field and this block, all in units of the measured rowHeight
+  -- rather than screen-height pixel math. Each column's x/w is also
+  -- computed by hand rather than trusting form.getFieldSlots() to split
+  -- one line into pointCount all-flex (`0`) hints: app/field_layout.lua's
+  -- own header already flags that combination as "not yet confirmed
+  -- live" even for two columns, and a 9-wide version of it is very likely
+  -- why an earlier version of this row rendered every column but the
+  -- first far too narrow to show a full value.
+  local winW, screenH = lcd.getWindowSize()
+  local usableW = winW - (SIDE_MARGIN * 2) - GUTTER_W - COL_GAP
+  local colW = math.floor((usableW - (COL_GAP * (pointCount - 1))) / pointCount)
+  local colStartX = SIDE_MARGIN + GUTTER_W + COL_GAP
+
+  local function buildPointRow(rowTop, axis, rowLabel)
+    form.addStaticText(nil, {x = SIDE_MARGIN, y = rowTop, w = GUTTER_W, h = pointRowHeight}, rowLabel, LEFT)
+    for i = 1, pointCount do
+      local key = "point_" .. i .. "_" .. axis
+      local colX = colStartX + (i - 1) * (colW + COL_GAP)
+      fieldLayout.buildField(runtime, nil, {x = colX, y = rowTop, w = colW, h = pointRowHeight}, {
+        key = key,
+        min = category.codec.FIELD_META[axis].min,
+        max = category.codec.FIELD_META[axis].max,
+        default = category.codec.FIELD_META[axis].default,
+      })
+      local field = runtime.fields[key]
+      if field and field.onFocus then
+        field:onFocus(function(state)
+          if state then
+            activeIndex = i
+            if lcd.invalidate then lcd.invalidate() end
+          end
+        end)
+      end
+    end
   end
+
+  -- Bottom margin reserves room for Ethos's own persistent focused-field
+  -- edit toolbar (the "< n > - +" strip), sized off the full rowHeight
+  -- (the toolbar's real size doesn't shrink just because these rows use a
+  -- smaller pointRowHeight) rather than a guessed pixel constant.
+  local toolbarMargin = math.floor(rowHeight * TOOLBAR_MARGIN_ROWS)
+  local xRowTop = screenH - toolbarMargin - (2 * pointRowHeight) - rowGap
+  local yRowTop = xRowTop + pointRowHeight + rowGap
+  graphBottom = xRowTop - rowGap
+
+  buildPointRow(xRowTop, "x", "@i18n(app.modules.curves.point_x)@")
+  buildPointRow(yRowTop, "y", "@i18n(app.modules.curves.point_y)@")
 
   runtime:loadInitial()
 end
 
 openSlotList = function(opts, category, listState)
+  local function backToCategoryMenu()
+    openCategoryMenu(opts)
+  end
+
   form.clear()
-  local headerHandle = header.build(PAGE_TITLE .. " / " .. category.title, {onBack = opts.onBack})
+  local headerHandle = header.build(PAGE_TITLE .. " / " .. category.title, {onBack = backToCategoryMenu})
 
   if opts.setEventHandler then
     opts.setEventHandler(function(evtCategory, value)
       if closeKey.shouldHandleClose(evtCategory, value) then
-        opts.onBack()
+        backToCategoryMenu()
         return true
       end
       return false
@@ -259,6 +389,7 @@ openSlotList = function(opts, category, listState)
   for i = 1, category.curveCount do
     buttons[i] = form.addButton(nil, {x = x, y = y, w = tileSize, h = tileSize}, {
       text = curveSlotLabels.slotTitle(i),
+      icon = category.icon,
       options = FONT_S,
       press = function()
         listState.selected = i
@@ -299,7 +430,7 @@ local function openCategory(opts, category)
   local function goBack()
     disposed = true
     closeDialog(true)
-    opts.onBack()
+    openCategoryMenu(opts)
   end
 
   form.clear()
@@ -381,6 +512,7 @@ local function openCategoryMenu(opts)
     local category = CATEGORIES[catKey]
     buttons[i] = form.addButton(nil, {x = x, y = y, w = tileSize, h = tileSize}, {
       text = category.title,
+      icon = category.icon,
       options = FONT_S,
       press = function() openCategory(opts, category) end,
     })

@@ -1469,13 +1469,6 @@
           "reverse_text": false,
           "translation": "Points"
         },
-        "point_row_fmt": {
-          "english": "Point %d",
-          "max_length": 10,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "Point %d"
-        },
         "point_x": {
           "english": "X",
           "max_length": 3,
@@ -4890,6 +4883,57 @@
           "translation": "Główny Rotor"
         }
       },
+      "master_gains": {
+        "axis_pitch": {
+          "english": "Pitch",
+          "max_length": 7,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Pitch"
+        },
+        "axis_roll": {
+          "english": "Roll",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Roll"
+        },
+        "axis_throttle": {
+          "english": "Throttle",
+          "max_length": 10,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Throttle"
+        },
+        "axis_yaw": {
+          "english": "Yaw",
+          "max_length": 5,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Yaw"
+        },
+        "curve": {
+          "english": "Curve",
+          "max_length": 5,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Curve"
+        },
+        "gain": {
+          "english": "Gain",
+          "max_length": 4,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Gain"
+        },
+        "name": {
+          "english": "Master Gains",
+          "max_length": 13,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Master Gains"
+        }
+      },
       "mixer": {
         "aileron_direction": {
           "english": "Aileron Direction",
@@ -5524,27 +5568,6 @@
           "reverse_text": false,
           "translation": "Cross Axis Relax"
         },
-        "curve": {
-          "english": "Curve",
-          "max_length": 5,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "Curve"
-        },
-        "curve_none": {
-          "english": "None",
-          "max_length": 6,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "None"
-        },
-        "curve_slot_fmt": {
-          "english": "Curve %d",
-          "max_length": 10,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "Curve %d"
-        },
         "cutoff": {
           "english": "Cutoff",
           "max_length": 6,
@@ -5558,20 +5581,6 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Limit błędu"
-        },
-        "fw_tpa": {
-          "english": "Throttle Attenuation",
-          "max_length": 20,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "Throttle Attenuation"
-        },
-        "gain": {
-          "english": "Gain",
-          "max_length": 4,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "Gain"
         },
         "ground_error_decay": {
           "english": "Ground Error Decay",
@@ -5621,20 +5630,6 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Limit"
-        },
-        "master_gain": {
-          "english": "Master Gain",
-          "max_length": 11,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "Master Gain"
-        },
-        "master_gain_curve": {
-          "english": "Master Gain Curve",
-          "max_length": 20,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "Master Gain Curve"
         },
         "name": {
           "english": "PID Controller",
@@ -7690,6 +7685,18 @@
       "needs_translation": false,
       "reverse_text": false,
       "translation": "Hz"
+    },
+    "curve_none": {
+      "english": "None",
+      "max_length": 6,
+      "needs_translation": true,
+      "translation": "None"
+    },
+    "curve_slot_fmt": {
+      "english": "Curve %d",
+      "max_length": 10,
+      "needs_translation": true,
+      "translation": "Curve %d"
     }
   },
   "reload": {

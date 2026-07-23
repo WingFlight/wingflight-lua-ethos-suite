@@ -99,6 +99,12 @@ local MENUS = {
       {title = "@i18n(app.modules.ports.name)@", icon = lcd.loadMask("app/gfx/ports.png"), script = "app/pages/ports.lua"},
       {title = "@i18n(app.modules.governor.name)@", icon = lcd.loadMask("app/gfx/governor.png"), script = "app/pages/governor.lua"},
       {title = "@i18n(app.modules.mixer.name)@", icon = lcd.loadMask("app/gfx/mixer_config.png"), script = "app/pages/mixer_config.lua"},
+      -- Covers both the Mixer and Gain curve pools (MSP_MIXER_CURVES /
+      -- MSP_GAIN_CURVES) -- sits beside Mixer rather than under Advanced
+      -- since it's shape-editing for a mixer-adjacent concept, not a PID
+      -- tuning field itself (PID Controller only picks WHICH slot is
+      -- assigned; this is where the slot's shape gets edited).
+      {title = "@i18n(app.modules.curves.name)@", icon = lcd.loadMask("app/gfx/curves.png"), script = "app/pages/curves.lua"},
       {title = "@i18n(app.modules.servos.name)@", icon = lcd.loadMask("app/gfx/servos.png"), menuId = "servos_menu"},
       {title = "@i18n(app.menu_section_controls)@", icon = lcd.loadMask("app/gfx/controls.png"), menuId = "controls_menu"},
       {title = "@i18n(app.modules.power.name)@", icon = lcd.loadMask("app/gfx/power.png"), menuId = "power_menu"},
@@ -261,10 +267,11 @@ local MENUS = {
     entries = {
       {title = "@i18n(app.modules.filters.name)@", icon = lcd.loadMask("app/gfx/filters.png"), script = "app/pages/filters.lua"},
       {title = "@i18n(app.modules.pid_controller.name)@", icon = lcd.loadMask("app/gfx/pid_controller.png"), script = "app/pages/pid_controller.lua"},
-      -- No dedicated icon exists yet -- reusing pid_bandwidth.png (closest
-      -- existing graph-shaped icon) as a placeholder; commissioning real
-      -- artwork for this tile is a separate follow-up.
-      {title = "@i18n(app.modules.curves.name)@", icon = lcd.loadMask("app/gfx/pid_bandwidth.png"), script = "app/pages/curves.lua"},
+      -- Split out of PID Controller: master_gain_0-2/gain_curve_0-2/
+      -- fw_tpa_gain/fw_tpa_curve share that page's MSP_PID_PROFILE codec
+      -- but form one coherent "Master Gains" table (see
+      -- app/pages/master_gains.lua's own header) -- sits right beside it.
+      {title = "@i18n(app.modules.master_gains.name)@", icon = lcd.loadMask("app/gfx/master_gains.png"), script = "app/pages/master_gains.lua"},
       {title = "@i18n(app.modules.pid_bandwidth.name)@", icon = lcd.loadMask("app/gfx/pid_bandwidth.png"), script = "app/pages/pid_bandwidth.lua"},
       {title = "@i18n(app.modules.autolevel.name)@", icon = lcd.loadMask("app/gfx/autolevel.png"), script = "app/pages/autolevel.lua"},
       -- Links straight to the page now, not a submenu: Cyclic Behaviour

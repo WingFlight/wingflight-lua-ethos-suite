@@ -1,8 +1,10 @@
--- Shared "Curve N" slot-label text, used by both app/pages/pid_controller.lua
--- (fw_tpa_curve/gain_curve_0/1/2 choice fields -- "which curve slot is
+-- Shared "Curve N" slot-label text, used by app/pages/master_gains.lua
+-- (gain_curve_0/1/2/fw_tpa_curve choice fields -- "which curve slot is
 -- assigned here") and app/pages/curves.lua (the slot-tile grid -- "which
 -- shape am I editing"), so both places render identical text from one
--- source rather than duplicating the numbering scheme in two files.
+-- source rather than duplicating the numbering scheme in two files. Top-
+-- level app.* i18n keys, not app.modules.*, since this isn't owned by
+-- either module (same convention as app.btn_ok/app.msg_loading etc.).
 --
 -- i18n tags resolve via build-time text substitution (see
 -- .vscode/scripts/resolve_i18n_tags.py); the resolved translation string
@@ -19,7 +21,7 @@ local curve_slot_labels = {}
 -- page's own slot grid, which only ever lists real slots to open (no
 -- "None" tile there).
 function curve_slot_labels.slotTitle(n)
-  return string.format("@i18n(app.modules.pid_controller.curve_slot_fmt)@", n)
+  return string.format("@i18n(app.curve_slot_fmt)@", n)
 end
 
 -- Builds a {label, wireValue} choice table for a fw_tpa_curve/gain_curve_*
@@ -27,7 +29,7 @@ end
 -- curve at pool index n-1 (i.e. what app/pages/curves.lua's slot grid
 -- shows as "Curve n").
 function curve_slot_labels.optionsTable(curveCount)
-  local options = {{"@i18n(app.modules.pid_controller.curve_none)@", 0}}
+  local options = {{"@i18n(app.curve_none)@", 0}}
   for n = 1, curveCount do
     options[#options + 1] = {curve_slot_labels.slotTitle(n), n}
   end

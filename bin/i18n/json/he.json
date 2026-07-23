@@ -347,32 +347,6 @@
           "reverse_text": false,
           "max_length": 3
         },
-        "gain": {
-          "english": "Gain",
-          "translation": "Gain",
-          "needs_translation": true,
-          "max_length": 4,
-          "reverse_text": false
-        },
-        "curve": {
-          "english": "Curve",
-          "translation": "Curve",
-          "needs_translation": true,
-          "max_length": 5,
-          "reverse_text": false
-        },
-        "fw_tpa": {
-          "english": "Throttle Attenuation",
-          "translation": "Throttle Attenuation",
-          "needs_translation": true,
-          "max_length": 20
-        },
-        "master_gain": {
-          "english": "Master Gain",
-          "translation": "Master Gain",
-          "needs_translation": true,
-          "max_length": 11
-        },
         "cross_axis_relax": {
           "english": "Cross Axis Relax",
           "translation": "Cross Axis Relax",
@@ -390,24 +364,6 @@
           "translation": "Cutoff",
           "needs_translation": true,
           "max_length": 6
-        },
-        "curve_none": {
-          "english": "None",
-          "translation": "None",
-          "needs_translation": true,
-          "max_length": 6
-        },
-        "curve_slot_fmt": {
-          "english": "Curve %d",
-          "translation": "Curve %d",
-          "needs_translation": true,
-          "max_length": 10
-        },
-        "master_gain_curve": {
-          "english": "Master Gain Curve",
-          "translation": "Master Gain Curve",
-          "needs_translation": true,
-          "max_length": 20
         }
       },
       "tail_rotor": {
@@ -7432,10 +7388,48 @@
           "translation": "Y",
           "needs_translation": true,
           "max_length": 3
+        }
+      },
+      "master_gains": {
+        "name": {
+          "english": "Master Gains",
+          "translation": "Master Gains",
+          "needs_translation": true,
+          "max_length": 13
         },
-        "point_row_fmt": {
-          "english": "Point %d",
-          "translation": "Point %d",
+        "gain": {
+          "english": "Gain",
+          "translation": "Gain",
+          "needs_translation": true,
+          "max_length": 4
+        },
+        "curve": {
+          "english": "Curve",
+          "translation": "Curve",
+          "needs_translation": true,
+          "max_length": 5
+        },
+        "axis_roll": {
+          "english": "Roll",
+          "translation": "Roll",
+          "needs_translation": true,
+          "max_length": 6
+        },
+        "axis_pitch": {
+          "english": "Pitch",
+          "translation": "Pitch",
+          "needs_translation": true,
+          "max_length": 7
+        },
+        "axis_yaw": {
+          "english": "Yaw",
+          "translation": "Yaw",
+          "needs_translation": true,
+          "max_length": 5
+        },
+        "axis_throttle": {
+          "english": "Throttle",
+          "translation": "Throttle",
           "needs_translation": true,
           "max_length": 10
         }
@@ -7447,6 +7441,18 @@
       "needs_translation": false,
       "reverse_text": true,
       "max_length": 8
+    },
+    "curve_none": {
+      "english": "None",
+      "translation": "None",
+      "needs_translation": true,
+      "max_length": 6
+    },
+    "curve_slot_fmt": {
+      "english": "Curve %d",
+      "translation": "Curve %d",
+      "needs_translation": true,
+      "max_length": 10
     }
   },
   "telemetry": {
