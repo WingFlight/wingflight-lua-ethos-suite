@@ -7433,6 +7433,266 @@
           "needs_translation": true,
           "max_length": 10
         }
+      },
+      "mixer_rules": {
+        "name": {
+          "english": "Mixer Rules",
+          "translation": "Mixer Rules",
+          "needs_translation": true,
+          "max_length": 14
+        },
+        "rule_actions_title": {
+          "english": "Rule Actions",
+          "translation": "Rule Actions",
+          "needs_translation": true,
+          "max_length": 16
+        },
+        "move_up": {
+          "english": "Move Up",
+          "translation": "Move Up",
+          "needs_translation": true,
+          "max_length": 10
+        },
+        "move_down": {
+          "english": "Move Down",
+          "translation": "Move Down",
+          "needs_translation": true,
+          "max_length": 12
+        },
+        "delete_rule": {
+          "english": "Delete Rule",
+          "translation": "Delete Rule",
+          "needs_translation": true,
+          "max_length": 14
+        },
+        "tile_rule_fmt": {
+          "english": "Rule %d",
+          "translation": "Rule %d",
+          "needs_translation": true,
+          "max_length": 10
+        },
+        "operation": {
+          "english": "Operation",
+          "translation": "Operation",
+          "needs_translation": true,
+          "max_length": 12
+        },
+        "oper_none": {
+          "english": "None",
+          "translation": "None",
+          "needs_translation": true,
+          "max_length": 6
+        },
+        "oper_set": {
+          "english": "Set",
+          "translation": "Set",
+          "needs_translation": true,
+          "max_length": 6
+        },
+        "oper_add": {
+          "english": "Add",
+          "translation": "Add",
+          "needs_translation": true,
+          "max_length": 6
+        },
+        "oper_mul": {
+          "english": "Multiply",
+          "translation": "Multiply",
+          "needs_translation": true,
+          "max_length": 11
+        },
+        "input": {
+          "english": "Input",
+          "translation": "Input",
+          "needs_translation": true,
+          "max_length": 8
+        },
+        "input_none": {
+          "english": "None",
+          "translation": "None",
+          "needs_translation": true,
+          "max_length": 6
+        },
+        "input_stab_roll": {
+          "english": "Stabilized Roll",
+          "translation": "Stabilized Roll",
+          "needs_translation": true,
+          "max_length": 19
+        },
+        "input_stab_pitch": {
+          "english": "Stabilized Pitch",
+          "translation": "Stabilized Pitch",
+          "needs_translation": true,
+          "max_length": 20
+        },
+        "input_stab_yaw": {
+          "english": "Stabilized Yaw",
+          "translation": "Stabilized Yaw",
+          "needs_translation": true,
+          "max_length": 18
+        },
+        "input_stab_throttle": {
+          "english": "Stabilized Throttle",
+          "translation": "Stabilized Throttle",
+          "needs_translation": true,
+          "max_length": 23
+        },
+        "input_rccmd_roll": {
+          "english": "RC Command Roll",
+          "translation": "RC Command Roll",
+          "needs_translation": true,
+          "max_length": 19
+        },
+        "input_rccmd_pitch": {
+          "english": "RC Command Pitch",
+          "translation": "RC Command Pitch",
+          "needs_translation": true,
+          "max_length": 20
+        },
+        "input_rccmd_yaw": {
+          "english": "RC Command Yaw",
+          "translation": "RC Command Yaw",
+          "needs_translation": true,
+          "max_length": 18
+        },
+        "input_rccmd_throttle": {
+          "english": "RC Command Throttle",
+          "translation": "RC Command Throttle",
+          "needs_translation": true,
+          "max_length": 24
+        },
+        "input_rcch_roll": {
+          "english": "RC Channel Roll",
+          "translation": "RC Channel Roll",
+          "needs_translation": true,
+          "max_length": 19
+        },
+        "input_rcch_pitch": {
+          "english": "RC Channel Pitch",
+          "translation": "RC Channel Pitch",
+          "needs_translation": true,
+          "max_length": 20
+        },
+        "input_rcch_yaw": {
+          "english": "RC Channel Yaw",
+          "translation": "RC Channel Yaw",
+          "needs_translation": true,
+          "max_length": 18
+        },
+        "input_rcch_throttle": {
+          "english": "RC Channel Throttle",
+          "translation": "RC Channel Throttle",
+          "needs_translation": true,
+          "max_length": 24
+        },
+        "input_rcch_aux1": {
+          "english": "RC Channel Aux 1",
+          "translation": "RC Channel Aux 1",
+          "needs_translation": true,
+          "max_length": 20
+        },
+        "input_rcch_aux2": {
+          "english": "RC Channel Aux 2",
+          "translation": "RC Channel Aux 2",
+          "needs_translation": true,
+          "max_length": 20
+        },
+        "input_rcch_aux3": {
+          "english": "RC Channel Aux 3",
+          "translation": "RC Channel Aux 3",
+          "needs_translation": true,
+          "max_length": 20
+        },
+        "input_rcch_fmt": {
+          "english": "RC Channel %d",
+          "translation": "RC Channel %d",
+          "needs_translation": true,
+          "max_length": 17
+        },
+        "output": {
+          "english": "Output",
+          "translation": "Output",
+          "needs_translation": true,
+          "max_length": 9
+        },
+        "output_none": {
+          "english": "None",
+          "translation": "None",
+          "needs_translation": true,
+          "max_length": 6
+        },
+        "output_pwm_servo_fmt": {
+          "english": "PWM Servo %d",
+          "translation": "PWM Servo %d",
+          "needs_translation": true,
+          "max_length": 15
+        },
+        "output_bus_servo_fmt": {
+          "english": "Bus Servo %d",
+          "translation": "Bus Servo %d",
+          "needs_translation": true,
+          "max_length": 16
+        },
+        "output_motor_fmt": {
+          "english": "Motor %d",
+          "translation": "Motor %d",
+          "needs_translation": true,
+          "max_length": 10
+        },
+        "offset": {
+          "english": "Offset",
+          "translation": "Offset",
+          "needs_translation": true,
+          "max_length": 9
+        },
+        "weight": {
+          "english": "Weight",
+          "translation": "Weight",
+          "needs_translation": true,
+          "max_length": 9
+        },
+        "weight_neg": {
+          "english": "Weight (-)",
+          "translation": "Weight (-)",
+          "needs_translation": true,
+          "max_length": 13
+        },
+        "speed": {
+          "english": "Speed",
+          "translation": "Speed",
+          "needs_translation": true,
+          "max_length": 8
+        },
+        "curve": {
+          "english": "Curve",
+          "translation": "Curve",
+          "needs_translation": true,
+          "max_length": 8
+        },
+        "condition": {
+          "english": "Condition",
+          "translation": "Condition",
+          "needs_translation": true,
+          "max_length": 12
+        },
+        "condition_none": {
+          "english": "None",
+          "translation": "None",
+          "needs_translation": true,
+          "max_length": 6
+        },
+        "condition_slot_fmt": {
+          "english": "Condition %d",
+          "translation": "Condition %d",
+          "needs_translation": true,
+          "max_length": 16
+        },
+        "tile_empty": {
+          "english": "Empty",
+          "translation": "Empty",
+          "needs_translation": true,
+          "max_length": 8
+        }
       }
     },
     "menu_section_controls": {

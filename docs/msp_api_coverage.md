@@ -2,7 +2,7 @@
 
 Source: `/mnt/c/GitHub/rotorflight-firmware/src/main/msp/msp_protocol.h` and `msp.c`.
 
-- Pair summary: 59 full, 0 partial, 0 stub, 0 missing.
+- Pair summary: 60 full, 0 partial, 0 stub, 0 missing.
 - `FULL`: both read/write IDs covered by at least one non-stub API file.
 - `PARTIAL`: only one side (read or write) covered.
 - `STUB`: both sides covered only by stub file(s).
@@ -58,6 +58,7 @@ Source: `/mnt/c/GitHub/rotorflight-firmware/src/main/msp/msp_protocol.h` and `ms
 | 152 | 153 | `MSP_BUS_SERVO_CONFIG` | `MSP_SET_BUS_SERVO_CONFIG` | **FULL** | `BUS_SERVO_CONFIG.lua` |
 | 154 | 155 | `MSP_RPM_FILTER_V2` | `MSP_SET_RPM_FILTER_V2` | **FULL** | `RPM_FILTER_V2.lua` |
 | 158 | 159 | `MSP_EXPERIMENTAL` | `MSP_SET_EXPERIMENTAL` | **FULL** | `EXPERIMENTAL.lua` |
+| 172 | 173 | `MSP_MIXER_RULES` | `MSP_SET_MIXER_RULE` | **FULL** | `MIXER_RULES.lua` |
 | 177 | 178 | `MSP_MIXER_CURVES` | `MSP_SET_MIXER_CURVE` | **FULL** | `MIXER_CURVES.lua` |
 | 184 | 185 | `MSP_BEEPER_CONFIG` | `MSP_SET_BEEPER_CONFIG` | **FULL** | `BEEPER_CONFIG.lua` |
 | 187 | 186 | `MSP_TX_INFO` | `MSP_SET_TX_INFO` | **FULL** | `TX_INFO.lua` |

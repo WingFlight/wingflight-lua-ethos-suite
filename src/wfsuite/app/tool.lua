@@ -99,6 +99,11 @@ local MENUS = {
       {title = "@i18n(app.modules.ports.name)@", icon = lcd.loadMask("app/gfx/ports.png"), script = "app/pages/ports.lua"},
       {title = "@i18n(app.modules.governor.name)@", icon = lcd.loadMask("app/gfx/governor.png"), script = "app/pages/governor.lua"},
       {title = "@i18n(app.modules.mixer.name)@", icon = lcd.loadMask("app/gfx/mixer_config.png"), script = "app/pages/mixer_config.lua"},
+      -- The actual mixer rule table (MSP_MIXER_RULES/MSP_SET_MIXER_RULE)
+      -- -- distinct from Mixer above (MSP_MIXER_INPUT, per-axis gain
+      -- scaling only). Sits right before Curves since a rule's own Curve
+      -- field references that page's Mixer-category pool.
+      {title = "@i18n(app.modules.mixer_rules.name)@", icon = lcd.loadMask("app/gfx/mixer_rules.png"), script = "app/pages/mixer_rules.lua"},
       -- Covers both the Mixer and Gain curve pools (MSP_MIXER_CURVES /
       -- MSP_GAIN_CURVES) -- sits beside Mixer rather than under Advanced
       -- since it's shape-editing for a mixer-adjacent concept, not a PID
