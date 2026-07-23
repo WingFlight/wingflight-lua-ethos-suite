@@ -261,6 +261,10 @@ local MENUS = {
     entries = {
       {title = "@i18n(app.modules.filters.name)@", icon = lcd.loadMask("app/gfx/filters.png"), script = "app/pages/filters.lua"},
       {title = "@i18n(app.modules.pid_controller.name)@", icon = lcd.loadMask("app/gfx/pid_controller.png"), script = "app/pages/pid_controller.lua"},
+      -- No dedicated icon exists yet -- reusing pid_bandwidth.png (closest
+      -- existing graph-shaped icon) as a placeholder; commissioning real
+      -- artwork for this tile is a separate follow-up.
+      {title = "@i18n(app.modules.curves.name)@", icon = lcd.loadMask("app/gfx/pid_bandwidth.png"), script = "app/pages/curves.lua"},
       {title = "@i18n(app.modules.pid_bandwidth.name)@", icon = lcd.loadMask("app/gfx/pid_bandwidth.png"), script = "app/pages/pid_bandwidth.lua"},
       {title = "@i18n(app.modules.autolevel.name)@", icon = lcd.loadMask("app/gfx/autolevel.png"), script = "app/pages/autolevel.lua"},
       -- Links straight to the page now, not a submenu: Cyclic Behaviour

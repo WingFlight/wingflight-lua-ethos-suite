@@ -339,6 +339,24 @@
           "translation": "Cutoff",
           "needs_translation": false,
           "max_length": 6
+        },
+        "curve_none": {
+          "english": "None",
+          "translation": "None",
+          "needs_translation": false,
+          "max_length": 6
+        },
+        "curve_slot_fmt": {
+          "english": "Curve %d",
+          "translation": "Curve %d",
+          "needs_translation": false,
+          "max_length": 10
+        },
+        "master_gain_curve": {
+          "english": "Master Gain Curve",
+          "translation": "Master Gain Curve",
+          "needs_translation": false,
+          "max_length": 20
         }
       },
       "tail_rotor": {
@@ -6341,6 +6359,50 @@
           "max_length": 13,
           "needs_translation": false,
           "translation": "Total queries"
+        }
+      },
+      "curves": {
+        "name": {
+          "english": "Curves",
+          "translation": "Curves",
+          "needs_translation": false,
+          "max_length": 6
+        },
+        "category_mixer": {
+          "english": "Mixer",
+          "translation": "Mixer",
+          "needs_translation": false,
+          "max_length": 8
+        },
+        "category_gain": {
+          "english": "Gain",
+          "translation": "Gain",
+          "needs_translation": false,
+          "max_length": 8
+        },
+        "point_count": {
+          "english": "Points",
+          "translation": "Points",
+          "needs_translation": false,
+          "max_length": 8
+        },
+        "point_x": {
+          "english": "X",
+          "translation": "X",
+          "needs_translation": false,
+          "max_length": 3
+        },
+        "point_y": {
+          "english": "Y",
+          "translation": "Y",
+          "needs_translation": false,
+          "max_length": 3
+        },
+        "point_row_fmt": {
+          "english": "Point %d",
+          "translation": "Point %d",
+          "needs_translation": false,
+          "max_length": 10
         }
       }
     },

@@ -31,6 +31,7 @@
 local pageRuntime = assert(loadfile("app/page_runtime.lua"))()
 local fieldLayout = assert(loadfile("app/field_layout.lua"))()
 local pidProfile = assert(loadfile("lib/msp_pid_profile.lua"))()
+local curveSlotLabels = assert(loadfile("app/curve_slot_labels.lua"))()
 
 local PAGE_TITLE = "@i18n(app.modules.pid_controller.name)@"
 
@@ -39,6 +40,13 @@ local ITERM_RELAX_OPTIONS = {
   {"@i18n(app.modules.pid_controller.tbl_rp)@", 1},
   {"@i18n(app.modules.pid_controller.tbl_rpy)@", 2},
 }
+
+-- "None"/"Curve 1".."Curve 8" -- fw_tpa_curve/gain_curve_0/1/2 only pick
+-- WHICH of app/pages/curves.lua's 8 pool slots is assigned here (both
+-- pools are 8 slots wide); shape editing lives on that page, not here --
+-- see app/curve_slot_labels.lua's own header for why both places share
+-- this one options table rather than each hand-listing "Curve N" text.
+local CURVE_SLOT_OPTIONS = curveSlotLabels.optionsTable(8)
 
 -- opts.onBack: called to return to the menu (the header's Menu button or
 -- the physical Back key -- see app/page_runtime.lua's buildChrome()).
@@ -77,13 +85,19 @@ local function open(opts)
 
   fieldLayout.buildGroup(runtime, "@i18n(app.modules.pid_controller.fw_tpa)@", {
     {title = "@i18n(app.modules.pid_controller.gain)@", spec = {key = "fw_tpa_gain"}},
-    {title = "@i18n(app.modules.pid_controller.curve)@", spec = {key = "fw_tpa_curve"}},
+    {title = "@i18n(app.modules.pid_controller.curve)@", spec = {key = "fw_tpa_curve", choices = CURVE_SLOT_OPTIONS}},
   })
 
   fieldLayout.buildGroup(runtime, "@i18n(app.modules.pid_controller.master_gain)@", {
     {title = "@i18n(app.modules.pid_controller.roll)@", spec = {key = "master_gain_0"}},
     {title = "@i18n(app.modules.pid_controller.pitch)@", spec = {key = "master_gain_1"}},
     {title = "@i18n(app.modules.pid_controller.yaw)@", spec = {key = "master_gain_2"}},
+  })
+
+  fieldLayout.buildGroup(runtime, "@i18n(app.modules.pid_controller.master_gain_curve)@", {
+    {title = "@i18n(app.modules.pid_controller.roll)@", spec = {key = "gain_curve_0", choices = CURVE_SLOT_OPTIONS}},
+    {title = "@i18n(app.modules.pid_controller.pitch)@", spec = {key = "gain_curve_1", choices = CURVE_SLOT_OPTIONS}},
+    {title = "@i18n(app.modules.pid_controller.yaw)@", spec = {key = "gain_curve_2", choices = CURVE_SLOT_OPTIONS}},
   })
 
   fieldLayout.buildGroup(runtime, "@i18n(app.modules.pid_controller.cross_axis_relax)@", {

@@ -1239,6 +1239,50 @@
           "translation": "On"
         }
       },
+      "curves": {
+        "category_gain": {
+          "english": "Gain",
+          "max_length": 8,
+          "needs_translation": false,
+          "translation": "Gain"
+        },
+        "category_mixer": {
+          "english": "Mixer",
+          "max_length": 8,
+          "needs_translation": false,
+          "translation": "Mixer"
+        },
+        "name": {
+          "english": "Curves",
+          "max_length": 6,
+          "needs_translation": false,
+          "translation": "Curves"
+        },
+        "point_count": {
+          "english": "Points",
+          "max_length": 8,
+          "needs_translation": false,
+          "translation": "Points"
+        },
+        "point_row_fmt": {
+          "english": "Point %d",
+          "max_length": 10,
+          "needs_translation": false,
+          "translation": "Point %d"
+        },
+        "point_x": {
+          "english": "X",
+          "max_length": 3,
+          "needs_translation": false,
+          "translation": "X"
+        },
+        "point_y": {
+          "english": "Y",
+          "max_length": 3,
+          "needs_translation": false,
+          "translation": "Y"
+        }
+      },
       "diagnostics": {
         "configuration_state": {
           "english": "Configuration State",
@@ -4710,6 +4754,18 @@
           "needs_translation": false,
           "translation": "Curve"
         },
+        "curve_none": {
+          "english": "None",
+          "max_length": 6,
+          "needs_translation": false,
+          "translation": "None"
+        },
+        "curve_slot_fmt": {
+          "english": "Curve %d",
+          "max_length": 10,
+          "needs_translation": false,
+          "translation": "Curve %d"
+        },
         "cutoff": {
           "english": "Cutoff",
           "max_length": 6,
@@ -4781,6 +4837,12 @@
           "max_length": 11,
           "needs_translation": false,
           "translation": "Master Gain"
+        },
+        "master_gain_curve": {
+          "english": "Master Gain Curve",
+          "max_length": 20,
+          "needs_translation": false,
+          "translation": "Master Gain Curve"
         },
         "name": {
           "english": "PID Controller",
