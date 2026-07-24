@@ -151,6 +151,21 @@ local function ruleTitle(n)
   return string.format("@i18n(app.modules.mixer_rules.tile_rule_fmt)@", n)
 end
 
+local function cloneRule(rule)
+  if not rule then return mixerRules.defaultRule() end
+  return {
+    oper = rule.oper or 0,
+    input = rule.input or 0,
+    output = rule.output or 0,
+    offset = rule.offset or 0,
+    weight = rule.weight or 0,
+    weightNeg = rule.weightNeg or 0,
+    speed = rule.speed or 0,
+    curve = rule.curve or 0,
+    condition = rule.condition or 0,
+  }
+end
+
 -- Looks up the already-i18n-resolved display label for a wire value out
 -- of one of the *_OPTIONS tables above -- "@i18n(KEY)" + "@" tags (split
 -- here so this comment itself doesn't get matched and flagged unresolved
@@ -187,7 +202,7 @@ local function openEditor(opts, listState, index)
     pageTitle = PAGE_TITLE .. " / " .. ruleTitle(index + 1),
     logTag = "mixer_rules_editor",
     mspModule = mixerRules.forSlot(index),
-    initialData = listState.pool[index + 1],
+    initialData = cloneRule(listState.pool[index + 1]),
     opts = {
       onBack = function() openList(opts, listState) end,
       setEventHandler = opts.setEventHandler,
@@ -197,6 +212,9 @@ local function openEditor(opts, listState, index)
     },
     profileField = "none",
     unloadPackageKeys = {"wfsuite.lib.msp_mixer_rules"},
+    beforeSave = function(rt)
+      listState.pool[index + 1] = cloneRule(rt.data)
+    end,
     onTool = function(focusFn)
       form.openDialog({
         title = "@i18n(app.modules.mixer_rules.rule_actions_title)@",
