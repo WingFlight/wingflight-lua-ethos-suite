@@ -7644,10 +7644,10 @@
         "translation": "Governor"
       },
       "headspeed": {
-        "english": "Headspeed",
+        "english": "RPM",
         "max_length": 9,
         "needs_translation": false,
-        "translation": "Headspeed"
+        "translation": "RPM"
       },
       "link_max": {
         "english": "Link Max",
