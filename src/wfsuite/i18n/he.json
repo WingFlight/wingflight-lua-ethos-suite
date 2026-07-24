@@ -8893,11 +8893,11 @@
         "translation": "מושל"
       },
       "headspeed": {
-        "english": "Headspeed",
+        "english": "RPM",
         "max_length": 9,
         "needs_translation": false,
-        "reverse_text": true,
-        "translation": "מהירות ראש"
+        "reverse_text": false,
+        "translation": "RPM"
       },
       "link_max": {
         "english": "Link Max",

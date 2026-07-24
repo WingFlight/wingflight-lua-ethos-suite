@@ -8834,8 +8834,8 @@
         "max_length": 8
       },
       "headspeed": {
-        "english": "Headspeed",
-        "translation": "主旋翼转速",
+        "english": "RPM",
+        "translation": "RPM",
         "needs_translation": false,
         "reverse_text": false,
         "max_length": 9

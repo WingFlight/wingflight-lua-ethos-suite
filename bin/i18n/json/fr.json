@@ -8834,8 +8834,8 @@
         "reverse_text": false
       },
       "headspeed": {
-        "english": "Headspeed",
-        "translation": "Vitesse Rotor",
+        "english": "RPM",
+        "translation": "RPM",
         "needs_translation": false,
         "max_length": 9,
         "reverse_text": false

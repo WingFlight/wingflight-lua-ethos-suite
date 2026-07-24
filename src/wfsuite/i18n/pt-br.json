@@ -8893,11 +8893,11 @@
         "translation": "Governador"
       },
       "headspeed": {
-        "english": "Headspeed",
+        "english": "RPM",
         "max_length": 9,
         "needs_translation": false,
         "reverse_text": false,
-        "translation": "Vel.Cabeça"
+        "translation": "RPM"
       },
       "link_max": {
         "english": "Link Max",

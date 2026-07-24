@@ -8893,11 +8893,11 @@
         "translation": "Gobernador"
       },
       "headspeed": {
-        "english": "Headspeed",
+        "english": "RPM",
         "max_length": 9,
         "needs_translation": false,
         "reverse_text": false,
-        "translation": "Velocidad Rotor"
+        "translation": "RPM"
       },
       "link_max": {
         "english": "Link Max",
