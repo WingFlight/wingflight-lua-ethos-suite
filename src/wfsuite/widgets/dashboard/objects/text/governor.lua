@@ -100,8 +100,11 @@ function render.wakeup(box)
     local raw = telemetry and telemetry.getSensor("governor")
     local displayValue = wfsuite.utils.getGovernorState(raw)
 
-    -- Loading dots
-    if raw == nil then
+    -- Loading dots: only while there is no telemetry data at all to derive a
+    -- state from (getGovernorState already falls back to arm state via
+    -- armflags when the governor sensor itself is unavailable, e.g. governor
+    -- feature disabled/unsupported on this craft).
+    if raw == nil and displayValue == "UNKNOWN" then
         displayValue = getPulsingDots(box)
 
         -- reset CSV state

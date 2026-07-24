@@ -134,10 +134,9 @@ local function rightStackWakeup(box, telemetry)
     c.consumedStr = formatConsumedMah(consumed)
 
     local govRaw = getSensor and getSensor("governor")
-    if govRaw == nil then
+    c.governorText = wfsuite.utils.getGovernorState(govRaw)
+    if govRaw == nil and c.governorText == "UNKNOWN" then
         c.governorText = utils.getPulsingDots(box, "_govDots")
-    else
-        c.governorText = wfsuite.utils.getGovernorState(govRaw)
     end
     c.governorColor = utils.resolveThresholdColor(c.governorText, box, "textcolor", "textcolor", box.rs_govthresholds)
 

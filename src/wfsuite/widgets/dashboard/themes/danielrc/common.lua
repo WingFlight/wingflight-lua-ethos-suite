@@ -340,9 +340,9 @@ end
 
 local function readGovernor(telemetry)
     local raw = telemetry and telemetry.getSensor and telemetry.getSensor("governor")
-    if raw == nil then return nil end
-
     local display = wfsuite.utils.getGovernorState(raw)
+    if raw == nil and display == "UNKNOWN" then return nil end
+
     if type(display) == "string" and display:find(",", 1, true) then
         display = trim(display:match("([^,]+)")) or display
     end
