@@ -24,18 +24,16 @@
 --     own page-local flatten/unflatten) this page needs no extra glue
 --     between the codec and app/field_layout.lua.
 --
--- Move Up/Move Down/Delete Rule live behind the header's Tool button
--- (matching app/pages/servos_pwm.lua's own onTool dialog convention)
--- rather than extra list-screen UI. Rule evaluation ORDER matters (a Set
--- rule establishes a base value; later Add/Mul rules for the same output
--- compound on it in array order -- see lib/msp_mixer_rules.lua's header),
--- so Move Up/Down swap this rule's data with the adjacent slot's and
--- write both back, mirroring wingflight-configurator's own
+-- Move Up/Move Down/Delete Rule are exposed directly on configured list
+-- rows, where the slot order is visible. Rule evaluation ORDER matters
+-- (a Set rule establishes a base value; later Add/Mul rules for the same
+-- output compound on it in array order -- see lib/msp_mixer_rules.lua's
+-- header), so Move Up/Down swap this rule's data with the adjacent
+-- slot's and write both back, mirroring wingflight-configurator's own
 -- Mixer.swapRules; Delete clears this slot to lib/msp_mixer_rules.lua's
--- defaultRule() (oper=0, matching the firmware's own "unused" gate).
--- All three write directly (plus an EEPROM commit) rather than going
--- through the page's own pending-edit Save flow, since by the time any
--- of them run the editor screen has already been left behind.
+-- defaultRule() (oper=0, matching the firmware's own "unused" gate). All
+-- three write directly (plus an EEPROM commit) rather than going through
+-- the editor's pending-edit Save flow.
 --
 -- `condition` is exposed as a bare "None"/"Condition 1".."Condition 16"
 -- index -- Logic Conditions (LOGIC_CONDITION_COUNT=16) has no port in
@@ -62,6 +60,7 @@ local PAGE_TITLE = "@i18n(app.modules.mixer_rules.name)@"
 local MSG_LOADING_TITLE = "@i18n(app.msg_loading)@"
 local MSG_LOADING_BODY = "@i18n(app.msg_loading_from_fbl)@"
 local MSG_LOAD_ERROR = "@i18n(app.modules.ports.load_error_prefix)@"
+local BTN_OK = "@i18n(app.btn_ok)@"
 local BTN_CANCEL = "@i18n(app.btn_cancel)@"
 
 -- oper: 0=None(unused)/1=Set/2=Add/3=Mul -- matches lib/msp_mixer_rules.lua's
@@ -196,6 +195,54 @@ end
 
 local openList
 
+local function writeRule(index, rule)
+  bus.publish("msp.request", mixerRules.buildWriteMessage(index, rule))
+end
+
+local function commitRuleActions()
+  bus.publish("msp.request", eeprom.buildWriteMessage())
+end
+
+local function moveRule(opts, listState, index, delta)
+  local other = index + delta
+  if other < 0 or other > mixerRules.RULE_COUNT - 1 then return end
+
+  local mine = listState.pool[index + 1]
+  local theirs = listState.pool[other + 1]
+  listState.pool[index + 1], listState.pool[other + 1] = theirs, mine
+  listState.selected = other + 1
+  writeRule(other, mine)
+  writeRule(index, theirs)
+  commitRuleActions()
+  openList(opts, listState)
+end
+
+local function deleteRule(opts, listState, index)
+  local cleared = mixerRules.defaultRule()
+  listState.pool[index + 1] = cleared
+  listState.selected = index + 1
+  writeRule(index, cleared)
+  commitRuleActions()
+  openList(opts, listState)
+end
+
+local function confirmDeleteRule(opts, listState, index)
+  form.openDialog({
+    title = "@i18n(app.modules.mixer_rules.delete_rule)@",
+    message = summaryFor(index + 1, listState.pool[index + 1]),
+    buttons = {
+      {label = BTN_OK, action = function()
+        deleteRule(opts, listState, index)
+        return true
+      end},
+      {label = BTN_CANCEL, action = function() return true end},
+    },
+    wakeup = function() end,
+    paint = function() end,
+    options = TEXT_LEFT,
+  })
+end
+
 local function openEditor(opts, listState, index)
   local runtime
   runtime = pageRuntime.new({
@@ -214,53 +261,6 @@ local function openEditor(opts, listState, index)
     unloadPackageKeys = {"wfsuite.lib.msp_mixer_rules"},
     beforeSave = function(rt)
       listState.pool[index + 1] = cloneRule(rt.data)
-    end,
-    onTool = function(focusFn)
-      form.openDialog({
-        title = "@i18n(app.modules.mixer_rules.rule_actions_title)@",
-        message = "",
-        buttons = {
-          {label = "@i18n(app.modules.mixer_rules.move_up)@", action = function()
-            local other = index - 1
-            if other >= 0 then
-              local mine, theirs = listState.pool[index + 1], listState.pool[other + 1]
-              listState.pool[index + 1], listState.pool[other + 1] = theirs, mine
-              bus.publish("msp.request", mixerRules.buildWriteMessage(other, mine))
-              bus.publish("msp.request", mixerRules.buildWriteMessage(index, theirs))
-              bus.publish("msp.request", eeprom.buildWriteMessage())
-            end
-            openList(opts, listState)
-            return true
-          end},
-          {label = "@i18n(app.modules.mixer_rules.move_down)@", action = function()
-            local other = index + 1
-            if other <= mixerRules.RULE_COUNT - 1 then
-              local mine, theirs = listState.pool[index + 1], listState.pool[other + 1]
-              listState.pool[index + 1], listState.pool[other + 1] = theirs, mine
-              bus.publish("msp.request", mixerRules.buildWriteMessage(other, mine))
-              bus.publish("msp.request", mixerRules.buildWriteMessage(index, theirs))
-              bus.publish("msp.request", eeprom.buildWriteMessage())
-            end
-            openList(opts, listState)
-            return true
-          end},
-          {label = "@i18n(app.modules.mixer_rules.delete_rule)@", action = function()
-            local cleared = mixerRules.defaultRule()
-            listState.pool[index + 1] = cleared
-            bus.publish("msp.request", mixerRules.buildWriteMessage(index, cleared))
-            bus.publish("msp.request", eeprom.buildWriteMessage())
-            openList(opts, listState)
-            return true
-          end},
-          {label = BTN_CANCEL, action = function()
-            if focusFn then focusFn() end
-            return true
-          end},
-        },
-        wakeup = function() end,
-        paint = function() end,
-        options = TEXT_LEFT,
-      })
     end,
   })
 
@@ -321,19 +321,46 @@ openList = function(opts, listState)
   local rowLeftMargin = 4
   local rowRightMargin = 12
   local rowX, rowW = rowLeftMargin, winW - rowLeftMargin - rowRightMargin
+  local buttonGap = 4
+  local actionW = math.max(30, math.floor(winW * 0.07))
+  local actionTotalW = (actionW * 3) + (buttonGap * 3)
 
   local buttons = {}
   for i = 1, mixerRules.RULE_COUNT do
+    local rule = listState.pool[i]
+    local active = not mixerRules.isEmpty(rule)
     local line = form.addLine("")
     local slot = form.getFieldSlots(line, {0})[1]
-    buttons[i] = form.addButton(line, {x = rowX, y = slot.y, w = rowW, h = slot.h}, {
-      text = summaryFor(i, listState.pool[i]),
+    local mainW = active and (rowW - actionTotalW) or rowW
+    buttons[i] = form.addButton(line, {x = rowX, y = slot.y, w = mainW, h = slot.h}, {
+      text = summaryFor(i, rule),
       options = FONT_S + LEFT,
       press = function()
         listState.selected = i
         openEditor(opts, listState, i - 1)
       end,
     })
+
+    if active then
+      local x = rowX + mainW + buttonGap
+      form.addButton(line, {x = x, y = slot.y, w = actionW, h = slot.h}, {
+        text = "Up",
+        options = FONT_S + CENTERED,
+        press = function() moveRule(opts, listState, i - 1, -1) end,
+      })
+      x = x + actionW + buttonGap
+      form.addButton(line, {x = x, y = slot.y, w = actionW, h = slot.h}, {
+        text = "Dn",
+        options = FONT_S + CENTERED,
+        press = function() moveRule(opts, listState, i - 1, 1) end,
+      })
+      x = x + actionW + buttonGap
+      form.addButton(line, {x = x, y = slot.y, w = actionW, h = slot.h}, {
+        text = "X",
+        options = FONT_S + CENTERED,
+        press = function() confirmDeleteRule(opts, listState, i - 1) end,
+      })
+    end
   end
 
   if buttons[listState.selected] then
