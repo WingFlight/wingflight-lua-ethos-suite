@@ -58,17 +58,27 @@ local function open(opts)
   fieldLayout.buildSingle(runtime, "@i18n(app.modules.autolevel.horizon_mode)@",
     {key = "horizon_level_strength"})
 
+  -- Auto Hover and Att Hold each have 3 fields -- one more than Acro
+  -- Trainer/Angle Mode above. A live screenshot showed all 3 crammed onto
+  -- one buildGroup() line leaves every field box too small to comfortably
+  -- show its value+suffix (each field's flex width is the line's
+  -- remaining space divided by the column count, so a 3-column line gives
+  -- each field noticeably less room than a 2-column one). Splitting Rate
+  -- onto its own buildSingle() line -- the same full-width shape Horizon
+  -- Mode already uses successfully just above -- keeps Gain/Max and
+  -- Gain/Deadband as comfortable 2-column lines and gives Rate the whole
+  -- line to itself instead of a third cramped slot.
   fieldLayout.buildGroup(runtime, "@i18n(app.modules.autolevel.auto_hover)@", {
     {title = "@i18n(app.modules.autolevel.gain)@", spec = {key = "autohover_gain"}},
     {title = "@i18n(app.modules.autolevel.max)@", spec = {key = "autohover_max_angle"}},
-    {title = "@i18n(app.modules.autolevel.rate)@", spec = {key = "autohover_max_rate"}},
   })
+  fieldLayout.buildSingle(runtime, "@i18n(app.modules.autolevel.rate)@", {key = "autohover_max_rate"})
 
   fieldLayout.buildGroup(runtime, "@i18n(app.modules.autolevel.att_hold)@", {
     {title = "@i18n(app.modules.autolevel.gain)@", spec = {key = "atthold_gain"}},
     {title = "@i18n(app.modules.autolevel.deadband)@", spec = {key = "atthold_deadband"}},
-    {title = "@i18n(app.modules.autolevel.rate)@", spec = {key = "atthold_max_rate"}},
   })
+  fieldLayout.buildSingle(runtime, "@i18n(app.modules.autolevel.rate)@", {key = "atthold_max_rate"})
 
   runtime:loadInitial()
 end
