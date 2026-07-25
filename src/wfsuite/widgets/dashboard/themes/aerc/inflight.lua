@@ -134,7 +134,7 @@ local function buildBoxes(W)
             subtype = "arc",
             source = "rpm",
             arcmax = true,
-            title = "@i18n(widgets.dashboard.headspeed):upper()@",
+            title = "@i18n(widgets.dashboard.rpm):upper()@",
             titlepos = "bottom",
             min = 0,
             max = getThemeValue("rpm_max"),

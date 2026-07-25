@@ -34,7 +34,7 @@ local function configure()
         config[k] = val or v
     end
 
-    local rpm_panel = form.addExpansionPanel("@i18n(widgets.dashboard.headspeed)@")
+    local rpm_panel = form.addExpansionPanel("@i18n(widgets.dashboard.rpm)@")
     rpm_panel:open(false)
     local rpm_min_line = rpm_panel:addLine("@i18n(widgets.dashboard.max)@")
     formFields[#formFields + 1] = form.addNumberField(rpm_min_line, nil, 0, 20000, function() return config.rpm_min end, function(val) config.rpm_min = clamp(tonumber(val) or THEME_DEFAULTS.rpm_min, 0, config.rpm_max - 1) end, 1)

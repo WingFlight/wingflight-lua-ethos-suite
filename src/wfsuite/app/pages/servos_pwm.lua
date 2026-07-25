@@ -6,11 +6,10 @@
 -- other fields are locked, matching the original suite's safety shape
 -- without its global session table.
 --
--- Does not query MSP_MIXER_CONFIG: its only remaining field on
--- wingflight-firmware's wire is `tail_rotor_mode`, a heli motorized-tail
--- concept (see mixerMotorizedTail() in the firmware's flight/mixer.h) with
--- no wingflight meaning, so there is nothing here to relabel servos by --
--- every servo just gets its plain index title.
+-- Does not query MSP_MIXER_CONFIG: its only field is `model_type`, a
+-- descriptive-only named airframe type used by the configurator's mixer
+-- view, with nothing here to relabel servos by -- every servo just gets
+-- its plain index title.
 
 local bus = assert(loadfile("lib/bus.lua"))()
 local closeKey = assert(loadfile("app/close_key.lua"))()

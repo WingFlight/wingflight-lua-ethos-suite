@@ -84,8 +84,8 @@ local CREATE_LIST = {
 -- itself; that looks like leftover/dead logic in the original rather than
 -- something intentional.
 local RENAME_LIST = {
-  [0x0500] = {name = "Headspeed", onlyIfName = "RPM"},
-  [0x0501] = {name = "Tailspeed", onlyIfName = "RPM"},
+  [0x0500] = {name = "Motor1Speed", onlyIfName = "RPM"},
+  [0x0501] = {name = "Motor2Speed", onlyIfName = "RPM"},
   [0x0210] = {name = "Voltage", onlyIfName = "VFAS"},
   [0x0600] = {name = "Charge Level", onlyIfName = "Fuel"},
   [0x0910] = {name = "Cell Voltage", onlyIfName = "ADC4"},

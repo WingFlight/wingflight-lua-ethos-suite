@@ -86,7 +86,7 @@ local function buildBoxes(W)
          textcolor = colorMode.textcolor, titlecolor = colorMode.titlecolor, bgcolor = colorMode.panelbg},
 
         {col = 1, row = 3,  colspan = 7, rowspan = 2, type = "text", subtype = "telemetry", source = "rpm",
-         title = "HEADSPEED", titlepos = "top", titlealign = "left", valuealign = "right",
+         title = "RPM", titlepos = "top", titlealign = "left", valuealign = "right",
          font = opts.font, titlefont = opts.titlefont, unit = "", transform = "floor",
          titlepaddingtop = opts.titlepaddingtop, valuepaddingtop = opts.valuepaddingtop,
          textcolor = colorMode.textcolor, titlecolor = colorMode.titlecolor, bgcolor = colorMode.paneldarkbg},

@@ -3,7 +3,7 @@
   GPLv3 — https://www.gnu.org/licenses/gpl-3.0.en.html
 
   claude — inflight layout
-  Voltage arc | headspeed rainbow dial (centrepiece) | fuel ring + timer + governor
+  Voltage arc | RPM rainbow dial (centrepiece) | fuel ring + timer + governor
 ]] --
 
 local wfsuite = assert(loadfile("widgets/dashboard/context.lua"))()
@@ -49,7 +49,7 @@ local last_txbatt_type   = nil
 -- Grid: 20 cols × 10 rows
 --   Left  (1-5):   voltage arc, full height
 --   Centre (6-14): fuel ring (ringbatt), full height — the centrepiece
---   Right (15-20): headspeed rainbow dial (rows 1-6) + timer (7-8) + governor (9-10)
+--   Right (15-20): RPM rainbow dial (rows 1-6) + timer (7-8) + governor (9-10)
 local layout = {cols = 20, rows = 10, padding = 2, showstats = false}
 
 local header_layout = utils.standardHeaderLayout(headeropts)
@@ -132,14 +132,14 @@ local function buildBoxes(W)
             },
         },
 
-        -- ── RIGHT TOP: Headspeed rainbow dial ────────────────────────
+        -- ── RIGHT TOP: RPM rainbow dial ────────────────────────
         -- Three-band arc: muted idle / fill cruise / crit overspeed.
         -- Band labels suppressed (spaces) — colours tell the story.
         {
             col = 15, row = 1, colspan = 6, rowspan = 6,
             type = "dial", subtype = "rainbow",
             source = "rpm",
-            title = "HEADSPEED",
+            title = "RPM",
             font = opts.fontl, titlefont = opts.titlefont,
             unit = "", transform = "floor",
             min = 0, max = getThemeValue("rpm_max"),

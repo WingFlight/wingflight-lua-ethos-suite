@@ -95,7 +95,7 @@ local function sensor(widget, name)
   if not widget then return nil end
   if name == "voltage" then return widget.voltage end
   if name == "current" then return widget.current end
-  if name == "rpm" or name == "headspeed" then return widget.rpm end
+  if name == "rpm" then return widget.rpm end
   if name == "temp_esc" then return widget.tempEsc end
   if name == "temp_mcu" then return widget.tempMcu end
   if name == "link" then return widget.linkQuality end
@@ -133,7 +133,7 @@ local SENSOR_DEFS = {
   current = {label = "Current", value = function(widget) return sensor(widget, "current") end, decimals = 1, suffix = "A"},
   voltage = {label = "Voltage", value = function(widget) return sensor(widget, "voltage") end, decimals = 1, suffix = "V"},
   cell_voltage = {label = "Cell Voltage", value = function(widget) return sensor(widget, "cell_voltage") end, decimals = 2, suffix = "V"},
-  headspeed = {label = "Headspeed", value = function(widget) return sensor(widget, "rpm") end, decimals = 0, suffix = ""},
+  rpm = {label = "RPM", value = function(widget) return sensor(widget, "rpm") end, decimals = 0, suffix = ""},
   temp_esc = {label = "ESC Temp", value = function(widget) return sensor(widget, "temp_esc") end, decimals = 0, suffix = "deg"},
   temp_mcu = {label = "MCU Temp", value = function(widget) return sensor(widget, "temp_mcu") end, decimals = 0, suffix = "deg"},
   link = {label = "Link", value = function(widget) return sensor(widget, "link") end, decimals = 0, suffix = "dB"},
@@ -143,8 +143,8 @@ local SENSOR_DEFS = {
   current_max = {label = "Max Current", value = function(widget) return stat(widget, "current", "max") end, decimals = 0, suffix = "A"},
   voltage_min = {label = "Min Voltage", value = function(widget) return stat(widget, "voltage", "min") end, decimals = 1, suffix = "V"},
   voltage_max = {label = "Max Voltage", value = function(widget) return stat(widget, "voltage", "max") end, decimals = 1, suffix = "V"},
-  headspeed_min = {label = "Min Headspeed", value = function(widget) return stat(widget, "rpm", "min") end, decimals = 0, suffix = ""},
-  headspeed_max = {label = "Max Headspeed", value = function(widget) return stat(widget, "rpm", "max") end, decimals = 0, suffix = ""},
+  rpm_min = {label = "Min RPM", value = function(widget) return stat(widget, "rpm", "min") end, decimals = 0, suffix = ""},
+  rpm_max = {label = "Max RPM", value = function(widget) return stat(widget, "rpm", "max") end, decimals = 0, suffix = ""},
   temp_esc_max = {label = "Max ESC Temp", value = function(widget) return stat(widget, "temp_esc", "max") end, decimals = 0, suffix = "deg"},
   temp_mcu_max = {label = "Max MCU Temp", value = function(widget) return stat(widget, "temp_mcu", "max") end, decimals = 0, suffix = "deg"},
   link_min = {label = "Min Link", value = function(widget) return stat(widget, "link", "min") end, decimals = 0, suffix = "dB"},

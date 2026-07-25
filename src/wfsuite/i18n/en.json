@@ -7410,11 +7410,11 @@
       "needs_translation": false,
       "translation": "Heading"
     },
-    "sensor_headspeed": {
-      "english": "Headspeed",
-      "max_length": 9,
+    "sensor_motor1speed": {
+      "english": "Motor1Speed",
+      "max_length": 11,
       "needs_translation": false,
-      "translation": "Headspeed"
+      "translation": "Motor1Speed"
     },
     "sensor_heartbeat": {
       "english": "Heartbeat",
@@ -7506,11 +7506,11 @@
       "needs_translation": false,
       "translation": "SYS Load"
     },
-    "sensor_tailspeed": {
-      "english": "Tailspeed",
-      "max_length": 9,
+    "sensor_motor2speed": {
+      "english": "Motor2Speed",
+      "max_length": 11,
       "needs_translation": false,
-      "translation": "Tailspeed"
+      "translation": "Motor2Speed"
     },
     "sensor_throttle_pct": {
       "english": "Throttle %",
@@ -7672,12 +7672,6 @@
         "max_length": 8,
         "needs_translation": false,
         "translation": "Governor"
-      },
-      "headspeed": {
-        "english": "RPM",
-        "max_length": 3,
-        "needs_translation": false,
-        "translation": "RPM"
       },
       "link_max": {
         "english": "Link Max",

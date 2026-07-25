@@ -41,7 +41,7 @@ config.SENSOR_KEYS = {
   "current",
   "voltage",
   "cell_voltage",
-  "headspeed",
+  "rpm",
   "consumption",
   "temp_esc_max",
   "temp_mcu_max",
@@ -53,8 +53,8 @@ config.SENSOR_KEYS = {
   "current_max",
   "voltage_min",
   "voltage_max",
-  "headspeed_min",
-  "headspeed_max",
+  "rpm_min",
+  "rpm_max",
 }
 
 config.SENSOR_CHOICES = {
@@ -70,7 +70,7 @@ config.SENSOR_CHOICES = {
   {"@i18n(telemetry.sensor_current)@", 10},
   {"@i18n(telemetry.sensor_voltage)@", 11},
   {"Cell Voltage", 12},
-  {"@i18n(telemetry.sensor_headspeed)@", 13},
+  {"@i18n(telemetry.sensor_motor1speed)@", 13},
   {"@i18n(widgets.dashboard.consumed_mah)@", 14},
   {"Max ESC Temp", 15},
   {"Max MCU Temp", 16},
@@ -82,8 +82,8 @@ config.SENSOR_CHOICES = {
   {"Max Current", 22},
   {"Min Voltage", 23},
   {"Max Voltage", 24},
-  {"Min Headspeed", 25},
-  {"Max Headspeed", 26},
+  {"Min RPM", 25},
+  {"Max RPM", 26},
 }
 
 config.LAYOUT_KEYS = {

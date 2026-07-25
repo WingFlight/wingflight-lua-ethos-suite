@@ -44,7 +44,7 @@ local DiySensor = assert(loadfile("lib/diy_sensor.lua"))()
 local SENSORS = {
   armflags         = {uid = 0x5001, name = "Arm Flags",        unit = nil,               dec = nil, min = 0,     max = 2},
   voltage          = {uid = 0x5002, name = "Voltage",          unit = UNIT_VOLT,          dec = 2,   min = 0,     max = 3000},
-  rpm              = {uid = 0x5003, name = "Headspeed",        unit = UNIT_RPM,           dec = nil, min = 0,     max = 2000},
+  rpm              = {uid = 0x5003, name = "RPM",              unit = UNIT_RPM,           dec = nil, min = 0,     max = 2000},
   current          = {uid = 0x5004, name = "Current",          unit = UNIT_AMPERE,        dec = 0,   min = 0,     max = 300},
   temp_esc         = {uid = 0x5005, name = "ESC Temp",         unit = UNIT_DEGREE,        dec = 0,   min = 0,     max = 100},
   temp_mcu         = {uid = 0x5006, name = "MCU Temp",         unit = UNIT_DEGREE,        dec = 0,   min = 0,     max = 100},
@@ -68,7 +68,7 @@ local SENSORS = {
   attpitch         = {uid = 0x5024, name = "Pitch Attitude",   unit = UNIT_DEGREE,        dec = 1,   min = -1800, max = 3600},
   groundspeed      = {uid = 0x5025, name = "Ground Speed",     unit = UNIT_KNOT,          dec = 1,   min = -1800, max = 3600},
   battery_profile  = {uid = 0x5026, name = "Battery Profile",  unit = nil,                dec = 0,   min = 0,     max = 6},
-  tailspeed        = {uid = 0x5027, name = "Tail Speed",       unit = UNIT_RPM,           dec = nil, min = 0,     max = 65535},
+  motor2speed      = {uid = 0x5027, name = "Motor 2 Speed",    unit = UNIT_RPM,           dec = nil, min = 0,     max = 65535},
   flight_mode      = {uid = 0x5028, name = "Flight Mode",      unit = nil,                dec = 0,   min = 0,     max = 65536},
 }
 

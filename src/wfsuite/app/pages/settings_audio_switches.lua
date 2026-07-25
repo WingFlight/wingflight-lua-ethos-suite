@@ -16,7 +16,7 @@ local SWITCH_SENSORS = {
   {key = "consumption", name = "@i18n(telemetry.sensor_consumption)@"},
   {key = "current", name = "@i18n(telemetry.sensor_current)@"},
   {key = "temp_esc", name = "@i18n(telemetry.sensor_esc_temp)@"},
-  {key = "rpm", name = "@i18n(telemetry.sensor_headspeed)@"},
+  {key = "rpm", name = "@i18n(telemetry.sensor_motor1speed)@"},
   {key = "smartfuel", name = "@i18n(sensors.smartfuel)@"},
   {key = "throttle_percent", name = "@i18n(telemetry.sensor_throttle_pct)@"},
   {key = "voltage", name = "@i18n(telemetry.sensor_voltage)@"},

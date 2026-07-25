@@ -416,7 +416,7 @@ local function applyResetFlight(widget)
     widget.flightmode:reset()
   end
   widget.flightmodeState = "preflight"
-  widget.headspeedVariancePct = nil
+  widget.rpmVariancePct = nil
   clearDashboardStats(widget.dashboardStats)
   widget.timerLive = 0
   widget.timerSession = 0
@@ -808,7 +808,7 @@ local function create()
     bblFlags = nil,
     bblSize = nil,
     bblUsed = nil,
-    headspeedVariancePct = nil,
+    rpmVariancePct = nil,
     dashboardStats = {},
     dashboardSettings = nil,
     modelDashboard = nil,
@@ -873,7 +873,7 @@ local function recordDashboardStats(widget, state)
   recordStat(stats, "rpm", widget.rpm)
   local rpmStats = stats.rpm
   if rpmStats and rpmStats.avg and rpmStats.avg > 0 and tonumber(widget.rpm) then
-    widget.headspeedVariancePct = roundSigned((math.abs(tonumber(widget.rpm) - rpmStats.avg) / rpmStats.avg) * 100)
+    widget.rpmVariancePct = roundSigned((math.abs(tonumber(widget.rpm) - rpmStats.avg) / rpmStats.avg) * 100)
   end
   updateMinMax(stats, "minLink", "maxLink", widget.linkQuality)
   recordStat(stats, "link", widget.linkQuality)
@@ -941,7 +941,7 @@ local function update(widget, snapshot)
       if widget.flightmode and type(widget.flightmode.reset) == "function" then
         widget.flightmode:reset()
       end
-      widget.headspeedVariancePct = nil
+      widget.rpmVariancePct = nil
       clearDashboardStats(widget.dashboardStats)
       widget.timerLive = 0
       widget.timerSession = 0
@@ -959,7 +959,7 @@ local function update(widget, snapshot)
 
   if previousConnected == false and widget.connected == true then
     clearDashboardStats(widget.dashboardStats)
-    widget.headspeedVariancePct = nil
+    widget.rpmVariancePct = nil
   elseif previousConnected == true and widget.connected ~= true then
     markStartupUnderlayDirty(widget)
   end
@@ -967,7 +967,7 @@ local function update(widget, snapshot)
   widget.flightmodeState = widget.flightmode:update(widget)
   if widget.flightmodeState == "inflight" and previousState ~= "inflight" then
     clearDashboardStats(widget.dashboardStats)
-    widget.headspeedVariancePct = nil
+    widget.rpmVariancePct = nil
   end
   recordDashboardStats(widget, widget.flightmodeState)
 end
