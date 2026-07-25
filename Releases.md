@@ -1,3 +1,16 @@
+# 0.0.9
+
+Rebuild the suite on rotorflight-lua-ethos-suite's latest base, realigned to wingflight-firmware.
+Add Mixer Rules and Curves (Mixer/Gain curve shape) editors.
+Add ELRS link probe/sync tool to Diagnostics.
+Fix dashboard voltage/telemetry sensor mis-detection, MSP/S.Port sensor dropouts, and high CPU with no telemetry link.
+Fix save-write dialog silently closing on failure.
+Reset dashboard to preflight when reconnecting to a different aircraft.
+
+# 0.0.8
+
+Version bump for release alignment; no suite-relevant changes this cycle.
+
 # 0.0.7
 
 Version bump for release alignment; no suite-relevant changes this cycle.
