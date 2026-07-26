@@ -1,3 +1,10 @@
+# 0.0.10
+
+Rename headspeed/tailspeed RPM naming to rpm/motor2speed, matching firmware's motor1/motor2 rename.
+Force crsf_telemetry_mode to CUSTOM when saving custom telemetry sensors, so the FC actually transmits the picked sensors.
+Show a disarm notice instead of a save error when EEPROM_WRITE is armed-blocked.
+Force dashboard widget title off via registerWidget to avoid a duplicate title bar.
+
 # 0.0.9
 
 Rebuild the suite on rotorflight-lua-ethos-suite's latest base, realigned to wingflight-firmware.
