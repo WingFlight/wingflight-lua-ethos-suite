@@ -5,7 +5,7 @@
 -- lib/telemetry_sensors_sport.lua/lib/telemetry_sensors_crsf.lua get an
 -- entry here; sim sensors with no real-hardware counterpart (fuel,
 -- altitude, cell_count, accx/y/z, attpitch/roll/yaw, groundspeed,
--- armdisableflags, tailspeed) are still created and visible to
+-- armdisableflags, motor2speed) are still created and visible to
 -- dashboards/telemetry pages via Ethos's own sensor picker, just not looked
 -- up through this table -- nothing here needs them yet.
 --

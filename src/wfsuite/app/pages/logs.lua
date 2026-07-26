@@ -22,7 +22,7 @@ local yellow = COLOR_YELLOW or lcd.RGB(180, 160, 0)
 local LOG_COLUMNS = {
   {name = "voltage", keyindex = 1, keyname = "Voltage", keyunit = "v", keyminmax = 1, color = COLOR_RED, pen = SOLID, graph = true},
   {name = "current", keyindex = 2, keyname = "Current", keyunit = "A", keyminmax = 1, color = orange, pen = SOLID, graph = true},
-  {name = "rpm", keyindex = 3, keyname = "Headspeed", keyunit = "rpm", keyminmax = 1, keyfloor = true, color = COLOR_GREEN, pen = SOLID, graph = true},
+  {name = "rpm", keyindex = 3, keyname = "Motor1Speed", keyunit = "rpm", keyminmax = 1, keyfloor = true, color = COLOR_GREEN, pen = SOLID, graph = true},
   {name = "temp_esc", keyindex = 4, keyname = "Esc. Temperature", keyunit = "deg", keyminmax = 1, color = cyan, pen = SOLID, graph = true},
   {name = "throttle_percent", keyindex = 5, keyname = "Throttle %", keyunit = "%", keyminmax = 1, color = yellow, pen = SOLID, graph = true},
 }

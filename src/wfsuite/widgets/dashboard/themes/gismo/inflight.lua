@@ -62,10 +62,10 @@ local function buildBoxes(W)
 
     return {
 
-        -- ── LEFT: big headspeed, cell voltage below ──
+        -- ── LEFT: big RPM, cell voltage below ──
 
         {col = 1, row = 1, colspan = 7, rowspan = 7, type = "text", subtype = "telemetry", source = "rpm",
-         title = "HEADSPEED", titlepos = "bottom", titlealign = "center",
+         title = "RPM", titlepos = "bottom", titlealign = "center",
          font = opts.font, titlefont = opts.titlefont, unit = "", transform = "floor",
          valuepaddingtop = opts.valuepaddingtop,
          textcolor = colorMode.textcolor, titlecolor = colorMode.titlecolor, bgcolor = colorMode.panelbg},

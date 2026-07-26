@@ -65,12 +65,12 @@ local function open(opts)
     choices = motorConfig.ON_OFF_CHOICES,
   })
   fieldLayout.buildGroup(runtime, "@i18n(app.modules.esc_motors.main_motor_ratio)@", {
-    {title = "@i18n(app.modules.esc_motors.pinion)@", spec = {source = "motor", key = "main_rotor_gear_ratio_0"}},
-    {title = "@i18n(app.modules.esc_motors.main)@", spec = {source = "motor", key = "main_rotor_gear_ratio_1"}},
+    {title = "@i18n(app.modules.esc_motors.pinion)@", spec = {source = "motor", key = "motor1_gear_ratio_0"}},
+    {title = "@i18n(app.modules.esc_motors.main)@", spec = {source = "motor", key = "motor1_gear_ratio_1"}},
   })
   fieldLayout.buildGroup(runtime, "@i18n(app.modules.esc_motors.tail_motor_ratio)@", {
-    {title = "@i18n(app.modules.esc_motors.rear)@", spec = {source = "motor", key = "tail_rotor_gear_ratio_0"}},
-    {title = "@i18n(app.modules.esc_motors.front)@", spec = {source = "motor", key = "tail_rotor_gear_ratio_1"}},
+    {title = "@i18n(app.modules.esc_motors.rear)@", spec = {source = "motor", key = "motor2_gear_ratio_0"}},
+    {title = "@i18n(app.modules.esc_motors.front)@", spec = {source = "motor", key = "motor2_gear_ratio_1"}},
   })
   fieldLayout.buildSingle(runtime, "@i18n(app.modules.esc_motors.motor_pole_count)@", {
     source = "motor",

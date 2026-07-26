@@ -46,10 +46,10 @@ local READ_FIELDS = {
   {"motor_rpm_lpf_1", "U8"},
   {"motor_rpm_lpf_2", "U8"},
   {"motor_rpm_lpf_3", "U8"},
-  {"main_rotor_gear_ratio_0", "U16"},
-  {"main_rotor_gear_ratio_1", "U16"},
-  {"tail_rotor_gear_ratio_0", "U16"},
-  {"tail_rotor_gear_ratio_1", "U16"},
+  {"motor1_gear_ratio_0", "U16"},
+  {"motor1_gear_ratio_1", "U16"},
+  {"motor2_gear_ratio_0", "U16"},
+  {"motor2_gear_ratio_1", "U16"},
 }
 
 local WRITE_FIELDS = {
@@ -69,10 +69,10 @@ local WRITE_FIELDS = {
   {"motor_rpm_lpf_1", "U8"},
   {"motor_rpm_lpf_2", "U8"},
   {"motor_rpm_lpf_3", "U8"},
-  {"main_rotor_gear_ratio_0", "U16"},
-  {"main_rotor_gear_ratio_1", "U16"},
-  {"tail_rotor_gear_ratio_0", "U16"},
-  {"tail_rotor_gear_ratio_1", "U16"},
+  {"motor1_gear_ratio_0", "U16"},
+  {"motor1_gear_ratio_1", "U16"},
+  {"motor2_gear_ratio_0", "U16"},
+  {"motor2_gear_ratio_1", "U16"},
 }
 
 local FIELD_META = {
@@ -84,10 +84,10 @@ local FIELD_META = {
   motor_pwm_rate = {min = 50, max = 8000, default = 250, suffix = "Hz"},
   use_unsynced_pwm = {choices = ON_OFF_CHOICES},
   motor_pole_count_0 = {min = 2, max = 256, default = 10},
-  main_rotor_gear_ratio_0 = {min = 1, max = 50000, default = 1},
-  main_rotor_gear_ratio_1 = {min = 1, max = 50000, default = 1},
-  tail_rotor_gear_ratio_0 = {min = 1, max = 50000, default = 1},
-  tail_rotor_gear_ratio_1 = {min = 1, max = 50000, default = 1},
+  motor1_gear_ratio_0 = {min = 1, max = 50000, default = 1},
+  motor1_gear_ratio_1 = {min = 1, max = 50000, default = 1},
+  motor2_gear_ratio_0 = {min = 1, max = 50000, default = 1},
+  motor2_gear_ratio_1 = {min = 1, max = 50000, default = 1},
 }
 
 local SIMULATOR_RESPONSE = {

@@ -3,7 +3,7 @@
   GPLv3 — https://www.gnu.org/licenses/gpl-3.0.en.html
 
   claude — theme configuration
-  Pilots can set their helicopter's max headspeed and override the voltage range.
+  Pilots can set their model's max RPM and override the voltage range.
 ]] --
 
 local wfsuite = assert(loadfile("widgets/dashboard/context.lua"))()
@@ -32,8 +32,8 @@ local function configure()
         config[k] = val or v
     end
 
-    -- ── Headspeed ──────────────────────────────────────────────────────
-    local hs_panel = form.addExpansionPanel("Headspeed")
+    -- ── RPM ──────────────────────────────────────────────────────
+    local hs_panel = form.addExpansionPanel("RPM")
     hs_panel:open(true)
 
     local rpm_max_line = hs_panel:addLine("Max RPM")

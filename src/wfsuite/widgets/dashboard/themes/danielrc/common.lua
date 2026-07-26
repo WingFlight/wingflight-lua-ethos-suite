@@ -990,11 +990,11 @@ function common.buildCockpitBoxes()
         linealign = "left",
         linecolor = p.line
     }))
-    add(out, sectionBox(W, H, centerColumnX, 0.08, centerColumnW, 0.09, "HEADSPEED", opts.headingfont, p.line, "center", {
+    add(out, sectionBox(W, H, centerColumnX, 0.08, centerColumnW, 0.09, "RPM", opts.headingfont, p.line, "center", {
         lineheight = lineH,
         linewidth = 0.18 / centerColumnW
     }))
-    add(out, sectionBox(W, H, rightColumnX, 0.08, rightColumnW, 0.09, "TAIL SYSTEM", opts.headingfont, p.line, "center", {
+    add(out, sectionBox(W, H, rightColumnX, 0.08, rightColumnW, 0.09, "MOTOR 2", opts.headingfont, p.line, "center", {
         lineheight = lineH,
         linewidth = 0.14 / rightColumnW
     }))
@@ -1092,15 +1092,15 @@ function common.buildCockpitBoxes()
         row1textcolor = p.yellow,
         row2label = "ERR",
         row2kind = "session",
-        row2sessionkey = "headspeedVariancePct",
+        row2sessionkey = "rpmVariancePct",
         row2transform = "round",
         row2unit = "%",
         row2novalue = "--",
         row2textcolor = p.yellow
     }))
 
-    add(out, titledValueBox(W, H, 0.79, 0.26, 0.14, 0.15, "text", "telemetry", "TAIL RPM", opts.biglabelfont, opts.rightvaluefont, p.line, p.white, {
-        source = "tailspeed",
+    add(out, titledValueBox(W, H, 0.79, 0.26, 0.14, 0.15, "text", "telemetry", "MOTOR 2 RPM", opts.biglabelfont, opts.rightvaluefont, p.line, p.white, {
+        source = "motor2speed",
         transform = "floor",
         unit = "",
         valuealign = "center",
@@ -1183,7 +1183,7 @@ function common.buildInflightBoxes()
         linealign = "left",
         linecolor = p.line
     }))
-    add(out, sectionBox(W, H, 0.34, 0.06, 0.32, 0.11, "HEADSPEED", opts.headingfont, p.line, "center", {
+    add(out, sectionBox(W, H, 0.34, 0.06, 0.32, 0.11, "RPM", opts.headingfont, p.line, "center", {
         lineheight = lineH,
         linewidth = 0.22 / 0.32
     }))
@@ -1271,7 +1271,7 @@ function common.buildInflightBoxes()
         row1textcolor = p.yellow,
         row2label = "ERR",
         row2kind = "session",
-        row2sessionkey = "headspeedVariancePct",
+        row2sessionkey = "rpmVariancePct",
         row2transform = "round",
         row2unit = "%",
         row2novalue = "--",

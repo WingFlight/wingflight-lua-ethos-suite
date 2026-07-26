@@ -266,7 +266,7 @@ local function readLiveSensor(telemetry, source)
         value, _, unit = telemetry.getSensor("voltage_cell")
         if value ~= nil then return value, unit end
     elseif source == "rpm" then
-        value, _, unit = telemetry.getSensor("headspeed")
+        value, _, unit = telemetry.getSensor("rpm")
         if value ~= nil then return value, unit end
         value, _, unit = telemetry.getSensor("erpm")
         if value ~= nil then return value, unit end
@@ -393,7 +393,7 @@ function render.wakeup(box)
 
             -- Some telemetry tables use rpm aliases. Keep source="rpm" compatible.
             if value == nil and source == "rpm" then
-                value, dynamicUnit = getAliasStatsValue(telemetry, cfg.stattype, "headspeed", "erpm")
+                value, dynamicUnit = getAliasStatsValue(telemetry, cfg.stattype, "rpm", "erpm")
             end
 
             -- Direct per-cell voltage aliases. This uses telemetry values/stats directly,

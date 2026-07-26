@@ -119,7 +119,7 @@ local LIVE_SENSOR_CANDIDATES = {
     rpm = {
       {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x0500},
     },
-    tailspeed = {
+    motor2speed = {
       {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x0501},
     },
     link = {
@@ -173,7 +173,7 @@ local LIVE_SENSOR_CANDIDATES = {
     rpm = {
       {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x10C0},
     },
-    tailspeed = {
+    motor2speed = {
       {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x10C1},
     },
     link = {
@@ -520,11 +520,6 @@ local GOVERNOR_LABELS = {
   [101] = "DISARMED",
 }
 
-local function normalizeLiveSensorName(name)
-  if name == "headspeed" then return "rpm" end
-  return name
-end
-
 local function liveProtocol()
   local protocol = currentWidget and currentWidget.mspTransport
   if protocol == "sport" or protocol == "crsf" then return protocol end
@@ -533,7 +528,6 @@ end
 
 local function liveSensorSource(protocol, name)
   protocol = protocol or liveProtocol()
-  name = normalizeLiveSensorName(name)
   if not protocol or not name then return nil end
 
   local byProtocol = liveSourceCache[protocol]
@@ -598,8 +592,7 @@ local STAT_SUFFIXES = {
   current = "Current",
   throttle_percent = "ThrottlePercent",
   rpm = "Rpm",
-  headspeed = "Rpm",
-  tailspeed = "Tailspeed",
+  motor2speed = "Motor2Speed",
   smartfuel = "FuelPercent",
   fuel = "FuelPercent",
   temp_mcu = "TempMcu",
@@ -610,7 +603,6 @@ local STAT_SUFFIXES = {
 }
 
 local STAT_ALIASES = {
-  headspeed = "rpm",
   smartconsumption = "consumption",
   fuel = "smartfuel",
 }
@@ -623,8 +615,7 @@ local PRESENTATION_STAT_SOURCES = {
   "smartconsumption",
   "throttle_percent",
   "rpm",
-  "headspeed",
-  "tailspeed",
+  "motor2speed",
   "link",
   "rssi",
   "vfr",
@@ -662,9 +653,9 @@ local function recordSensorStat(name, value)
 
   if key == "rpm" then
     if entry.avg and entry.avg > 0 then
-      widget.headspeedVariancePct = roundSigned((math.abs(value - entry.avg) / entry.avg) * 100)
+      widget.rpmVariancePct = roundSigned((math.abs(value - entry.avg) / entry.avg) * 100)
     else
-      widget.headspeedVariancePct = nil
+      widget.rpmVariancePct = nil
     end
   end
 
@@ -685,8 +676,8 @@ local function sensorValue(name)
   if name == "consumption" or name == "smartconsumption" then return widget.consumption or liveSensorValue("consumption"), "mAh" end
   if name == "current" then return widget.current or liveSensorValue(name), "A" end
   if name == "throttle_percent" then return widget.throttlePercent or liveSensorValue(name), "%" end
-  if name == "rpm" or name == "headspeed" then return widget.rpm or liveSensorValue(name), "rpm" end
-  if name == "tailspeed" then return liveSensorValue(name), "rpm" end
+  if name == "rpm" then return widget.rpm or liveSensorValue(name), "rpm" end
+  if name == "motor2speed" then return liveSensorValue(name), "rpm" end
   if name == "link" then return widget.linkQuality or liveSensorValue(name), "dB" end
   if name == "rssi" or name == "vfr" then return liveSensorValue(name), "%" end
   if name == "smartfuel" or name == "fuel" then return widget.fuelPercent or liveSensorValue("smartfuel"), "%" end
@@ -731,8 +722,7 @@ context.tasks.telemetry.sensorTable = {
   current = {unit_string = "A"},
   throttle_percent = {unit_string = "%"},
   rpm = {unit_string = "rpm"},
-  headspeed = {unit_string = "rpm"},
-  tailspeed = {unit_string = "rpm"},
+  motor2speed = {unit_string = "rpm"},
   smartfuel = {unit_string = "%"},
   fuel = {unit_string = "%"},
   temp_mcu = {unit_string = "C"},
@@ -762,11 +752,10 @@ function context.tasks.telemetry.getSensorStats(name)
     current = "Current",
     throttle_percent = "ThrottlePercent",
     rpm = "Rpm",
-    headspeed = "Rpm",
     link = "Link",
     rssi = "Link",
     vfr = "Vfr",
-    tailspeed = "Tailspeed",
+    motor2speed = "Motor2Speed",
     smartfuel = "FuelPercent",
     fuel = "FuelPercent",
     temp_mcu = "TempMcu",
@@ -1806,7 +1795,7 @@ function context.setWidget(widget)
   context.session.bblFlags = widget and widget.bblFlags
   context.session.bblSize = widget and widget.bblSize
   context.session.bblUsed = widget and widget.bblUsed
-  context.session.headspeedVariancePct = widget and widget.headspeedVariancePct
+  context.session.rpmVariancePct = widget and widget.rpmVariancePct
   context.session.modelPreferences = {
     general = {
       flightcount = widget and widget.modelStats and widget.modelStats.flightcount or 0,

@@ -83,7 +83,7 @@ local function buildBoxes(W)
     return {
 
         {col = 1, colspan = 2, row = 1, rowspan = 3, type = "text", subtype = "telemetry", source = "throttle_percent", title = "@i18n(widgets.dashboard.throttle):upper()@", titlepos = "bottom", font = opts.font, transform = "floor", bgcolor = colorMode.bgcolor, titlecolor = colorMode.titlecolor, textcolor = colorMode.textcolor, thresholds = {{value = 20, textcolor = colorMode.textcolor}, {value = 80, textcolor = colorMode.fillwarncolor}, {value = 100, textcolor = colorMode.fillcritcolor}}},
-        {col = 1, colspan = 2, row = 4, rowspan = 3, type = "text", subtype = "telemetry", source = "rpm", title = "@i18n(widgets.dashboard.headspeed):upper()@", titlepos = "bottom", font = opts.font, unit = " rpm", transform = "floor", bgcolor = colorMode.bgcolor, titlecolor = colorMode.titlecolor, textcolor = colorMode.textcolor},
+        {col = 1, colspan = 2, row = 4, rowspan = 3, type = "text", subtype = "telemetry", source = "rpm", title = "@i18n(widgets.dashboard.rpm):upper()@", titlepos = "bottom", font = opts.font, unit = " rpm", transform = "floor", bgcolor = colorMode.bgcolor, titlecolor = colorMode.titlecolor, textcolor = colorMode.textcolor},
         {col = 1, colspan = 2, row = 7, rowspan = 3, type = "text", subtype = "blackbox", title = "@i18n(widgets.dashboard.blackbox):upper()@", titlepos = "bottom", font = opts.font, decimals = 0, bgcolor = colorMode.bgcolor, titlecolor = colorMode.titlecolor, textcolor = colorMode.textcolor, transform = "floor", thresholds = {{value = 80, textcolor = colorMode.textcolor}, {value = 90, textcolor = colorMode.fillwarncolor}, {value = 100, textcolor = colorMode.fillcritcolor}}}, {
             col = 1,
             colspan = 2,

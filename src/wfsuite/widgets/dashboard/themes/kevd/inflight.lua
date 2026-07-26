@@ -467,7 +467,7 @@ local function buildBoxes(W)
             subtype = "arc",
             source = "rpm",
             arcmax = true,
-            title = "HEADSPEED",
+            title = "RPM",
             titlepos = "bottom",
             titlefont = arcTitleFont,
             titlepaddingbottom = -15,
