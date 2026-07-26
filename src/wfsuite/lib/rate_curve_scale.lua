@@ -108,6 +108,11 @@ function rate_curve_scale.displayBounds(role, axisClass)
   return 0, rate_curve_scale.toDisplayInt(255, role, axisClass), decimalsFor(role, axisClass)
 end
 
+function rate_curve_scale.displayStep(role, axisClass)
+  local step = rate_curve_scale.toDisplayInt(1, role, axisClass)
+  return step > 0 and step or 1
+end
+
 -- role: "rcRate" | "srate" | "expo". axis: 1 (roll) | 2 (pitch) | 3 (yaw).
 -- Same displayInt domain as toDisplayInt() above, so callers can pass
 -- this straight to a number field's field:default().

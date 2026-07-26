@@ -136,6 +136,7 @@ local function open(opts)
           dataRef.data[key] = rateCurveScale.fromDisplayInt(value, column.role, row.axisClass)
         end)
       field:decimals(decimals)
+      if field.step then field:step(rateCurveScale.displayStep(column.role, row.axisClass)) end
       -- Ethos's own "reset to default" long-press gesture resets to
       -- whatever :default() was last given -- see app/pages/pids.lua's
       -- own comment on the same call. Values are wingflight-firmware's
