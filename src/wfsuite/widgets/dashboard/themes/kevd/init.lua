@@ -13,7 +13,6 @@ local init = {
     configure = "configure.lua",
     standalone = false,
     minResolution = {x = 784, y = 294},
-    logo = {dark = "gfx/wfsuite-dark.png", light = "gfx/wfsuite-light.png"}
 }
 
 return init
