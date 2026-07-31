@@ -88,6 +88,7 @@ local function open(opts)
         return gainFromRate(data[axis.rateKey])
       end,
       function(value)
+        runtime:markDirty()
         local invert = invertFromRate(data[axis.rateKey])
         local rate = (tonumber(value) or 0) * 10
         if invert == 1 then rate = -rate end
@@ -101,6 +102,7 @@ local function open(opts)
         return invertFromRate(data[axis.rateKey])
       end,
       function(value)
+        runtime:markDirty()
         local gain = gainFromRate(data[axis.rateKey])
         local rate = gain * 10
         if (tonumber(value) or 0) ~= 0 then rate = -rate end

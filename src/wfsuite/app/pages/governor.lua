@@ -81,6 +81,7 @@ local function open(opts)
   local modeField = form.addChoiceField(line, nil, governorConfig.MODE_CHOICES,
     currentMode,
     function(value)
+      runtime:markDirty()
       runtime.data.governor_mode = tonumber(value) or MODE_OFF
       applyMode()
     end)

@@ -232,6 +232,7 @@ local function open(opts)
         return craftName and craftName.name or ""
       end,
       function(value)
+        runtime:markDirty()
         local craftName = dataRef.data.craftName
         if craftName then craftName.name = value or "" end
       end)
@@ -255,6 +256,7 @@ local function open(opts)
         return adv and adv.pid_process_denom
       end,
       function(value)
+        runtime:markDirty()
         local adv = dataRef.data.advancedConfig
         if adv then adv.pid_process_denom = value end
       end)
