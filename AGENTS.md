@@ -32,6 +32,12 @@ Keep behavior correct while minimizing runtime memory churn and CPU load on Etho
   current architecture; see Section 11, do not use it expecting it to do
   anything for the current menu system.
 
+Reference docs:
+- `docs/memory-and-module-lifecycle.md` -- loadfile() caching, why eager
+  subsystem registration beats lazy proxies, subscription cleanup, and
+  why not to reach for collectgarbage(). Current and accurate (unlike the
+  docs listed as stale in Section 11).
+
 ## 3) Non-Negotiables For Agent Changes
 
 - Do not regress memory behavior in wakeup/render paths.
