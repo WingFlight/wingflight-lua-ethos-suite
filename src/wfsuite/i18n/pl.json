@@ -7610,13 +7610,6 @@
           "reverse_text": false,
           "translation": "Na tym urządzeniu nie zainstalowano żadnych konfigurowalnych motywów"
         },
-        "panel_coming_soon": {
-          "english": "Coming soon",
-          "max_length": 11,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "Coming soon"
-        },
         "panel_integration": {
           "english": "Integration",
           "max_length": 11,

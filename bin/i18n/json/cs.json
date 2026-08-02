@@ -2610,13 +2610,6 @@
           "reverse_text": false,
           "max_length": 15
         },
-        "panel_coming_soon": {
-          "english": "Coming soon",
-          "translation": "Coming soon",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 11
-        },
         "temperature_unit": {
           "english": "Temperature Unit",
           "translation": "Temperature Unit",

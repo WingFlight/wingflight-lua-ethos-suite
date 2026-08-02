@@ -7610,13 +7610,6 @@
           "reverse_text": true,
           "translation": "אין ערכות נושא ניתנות להגדרה מותקנות במכשיר זה"
         },
-        "panel_coming_soon": {
-          "english": "Coming soon",
-          "max_length": 11,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "Coming soon"
-        },
         "panel_integration": {
           "english": "Integration",
           "max_length": 11,

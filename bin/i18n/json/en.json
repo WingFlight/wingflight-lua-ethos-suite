@@ -2242,12 +2242,6 @@
           "needs_translation": false,
           "translation": "Sync model name"
         },
-        "panel_coming_soon": {
-          "english": "Coming soon",
-          "max_length": 11,
-          "needs_translation": false,
-          "translation": "Coming soon"
-        },
         "temperature_unit": {
           "english": "Temperature Unit",
           "max_length": 16,

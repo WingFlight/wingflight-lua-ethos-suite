@@ -6540,12 +6540,6 @@
           "needs_translation": false,
           "translation": "No configurable themes installed on this device"
         },
-        "panel_coming_soon": {
-          "english": "Coming soon",
-          "max_length": 11,
-          "needs_translation": false,
-          "translation": "Coming soon"
-        },
         "panel_integration": {
           "english": "Integration",
           "max_length": 11,
