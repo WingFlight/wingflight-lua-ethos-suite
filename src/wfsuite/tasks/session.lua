@@ -122,6 +122,11 @@ local session = {
   -- only safety gate on that command (firmware's own MSP_REBOOT handler
   -- has none).
   isArmed = nil,
+  -- Why-can't-arm bitmask, read from the FC's own "armdisableflags"
+  -- telemetry sensor -- see widgets/dashboard/context.lua's
+  -- armingDisableFlagsToString() for how the dashboard's governor/armflags
+  -- objects turn this into a human-readable reason list.
+  armDisableFlags = nil,
 }
 
 local localSmartFuel = SmartFuel.new()
@@ -269,6 +274,7 @@ local function publish()
     bblSize = session.bblSize,
     bblUsed = session.bblUsed,
     isArmed = session.isArmed,
+    armDisableFlags = session.armDisableFlags,
   })
 end
 
@@ -577,6 +583,7 @@ local function setConnected(value, mspQueue, protocol)
     pendingStatsSyncAt = nil
     flightTimer.reset()
     session.isArmed = nil
+    session.armDisableFlags = nil
     localSmartFuel:reset()
     smartfuelSensor:reset()
     if telemetrySensors then telemetrySensors.reset() end
@@ -677,6 +684,12 @@ local function updateProfiles(protocol)
   end
   if isArmed ~= nil and isArmed ~= session.isArmed then
     session.isArmed = isArmed
+    publish()
+  end
+
+  local armDisableFlags = telemetrySensors.getValue(protocol, "armdisableflags")
+  if armDisableFlags ~= nil and armDisableFlags ~= session.armDisableFlags then
+    session.armDisableFlags = armDisableFlags
     publish()
   end
 end
