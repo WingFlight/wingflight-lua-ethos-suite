@@ -793,6 +793,7 @@ local function sensorValue(name)
     if widget.isArmed == true then return 1 end
     if widget.isArmed == false then return 0 end
   end
+  if name == "armdisableflags" then return widget.armDisableFlags end
   return nil
 end
 
@@ -1894,9 +1895,13 @@ function context.utils.armingDisableFlagsToString(flags)
   flags = tonumber(flags)
   if flags == nil or flags == 0 then return "OK" end
 
+  -- Arithmetic bit test, not native `&`/`<<` -- same portability
+  -- convention as lib/mspcodec.lua and app/field_layout.lua's getBit():
+  -- works unmodified regardless of the Ethos Lua runtime's bitwise-
+  -- operator support.
   local names = {}
   for i = 0, 25 do
-    if (flags & (1 << i)) ~= 0 then
+    if math.floor(flags / (2 ^ i)) % 2 == 1 then
       local name = ARMING_DISABLE_FLAG_TAG[i]
       if name and name ~= "" then names[#names + 1] = name end
     end
