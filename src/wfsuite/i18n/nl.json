@@ -1454,6 +1454,78 @@
           "translation": "On"
         }
       },
+      "copyprofiles": {
+        "dest_profile": {
+          "english": "Dest. Profile",
+          "max_length": 13,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Dest. Profile"
+        },
+        "help_p1": {
+          "english": "Copy PID profile or Rate profile from Source to Destination.",
+          "max_length": 60,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Copy PID profile or Rate profile from Source to Destination."
+        },
+        "help_p2": {
+          "english": "Choose the source and destinations and save to copy the profile.",
+          "max_length": 64,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Choose the source and destinations and save to copy the profile."
+        },
+        "msgbox_msg": {
+          "english": "Save current page to flight controller?",
+          "max_length": 39,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Save current page to flight controller?"
+        },
+        "msgbox_save": {
+          "english": "Save settings",
+          "max_length": 13,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Save settings"
+        },
+        "name": {
+          "english": "Copy Profiles",
+          "max_length": 13,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Copy Profiles"
+        },
+        "profile_type": {
+          "english": "Profile Type",
+          "max_length": 12,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Profile Type"
+        },
+        "profile_type_pid": {
+          "english": "PID",
+          "max_length": 3,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "PID"
+        },
+        "profile_type_rate": {
+          "english": "Rate",
+          "max_length": 4,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Rate"
+        },
+        "source_profile": {
+          "english": "Source Profile",
+          "max_length": 14,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Source Profile"
+        }
+      },
       "curves": {
         "category_gain": {
           "english": "Gain",
@@ -1496,78 +1568,6 @@
           "needs_translation": true,
           "reverse_text": false,
           "translation": "Y"
-        }
-      },
-      "copyprofiles": {
-        "dest_profile": {
-          "english": "Dest. Profile",
-          "max_length": 13,
-          "needs_translation": true,
-          "translation": "Dest. Profile",
-          "reverse_text": false
-        },
-        "help_p1": {
-          "english": "Copy PID profile or Rate profile from Source to Destination.",
-          "max_length": 60,
-          "needs_translation": true,
-          "translation": "Copy PID profile or Rate profile from Source to Destination.",
-          "reverse_text": false
-        },
-        "help_p2": {
-          "english": "Choose the source and destinations and save to copy the profile.",
-          "max_length": 64,
-          "needs_translation": true,
-          "translation": "Choose the source and destinations and save to copy the profile.",
-          "reverse_text": false
-        },
-        "msgbox_msg": {
-          "english": "Save current page to flight controller?",
-          "max_length": 39,
-          "needs_translation": true,
-          "translation": "Save current page to flight controller?",
-          "reverse_text": false
-        },
-        "msgbox_save": {
-          "english": "Save settings",
-          "max_length": 13,
-          "needs_translation": true,
-          "translation": "Save settings",
-          "reverse_text": false
-        },
-        "name": {
-          "english": "Copy Profiles",
-          "max_length": 13,
-          "needs_translation": true,
-          "translation": "Copy Profiles",
-          "reverse_text": false
-        },
-        "profile_type": {
-          "english": "Profile Type",
-          "max_length": 12,
-          "needs_translation": true,
-          "translation": "Profile Type",
-          "reverse_text": false
-        },
-        "profile_type_pid": {
-          "english": "PID",
-          "max_length": 3,
-          "needs_translation": true,
-          "translation": "PID",
-          "reverse_text": false
-        },
-        "profile_type_rate": {
-          "english": "Rate",
-          "max_length": 4,
-          "needs_translation": true,
-          "translation": "Rate",
-          "reverse_text": false
-        },
-        "source_profile": {
-          "english": "Source Profile",
-          "max_length": 14,
-          "needs_translation": true,
-          "translation": "Source Profile",
-          "reverse_text": false
         }
       },
       "diagnostics": {
@@ -6304,13 +6304,6 @@
           "reverse_text": false,
           "translation": "[RX]"
         },
-        "save_armed": {
-          "english": "Settings will only be saved to eeprom on disarm",
-          "max_length": 49,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "Settings will only be saved to eeprom on disarm"
-        },
         "save_error_prefix": {
           "english": "Save error:",
           "max_length": 11,
@@ -7302,6 +7295,13 @@
           "reverse_text": false,
           "translation": "Dashboard"
         },
+        "dashboard_display_panel": {
+          "english": "Display",
+          "max_length": 7,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Display"
+        },
         "dashboard_settings": {
           "english": "Settings",
           "max_length": 8,
@@ -7596,13 +7596,6 @@
           "reverse_text": false,
           "translation": "Geheugenlogboeken"
         },
-        "model_announcement": {
-          "english": "Model announcement",
-          "max_length": 18,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "Model announcement"
-        },
         "name": {
           "english": "Settings",
           "max_length": 8,
@@ -7616,6 +7609,27 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Geen themes beschikbaar om in te stellen"
+        },
+        "panel_coming_soon": {
+          "english": "Coming soon",
+          "max_length": 11,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Coming soon"
+        },
+        "panel_integration": {
+          "english": "Integration",
+          "max_length": 11,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Integration"
+        },
+        "panel_safety_prompts": {
+          "english": "Safety Prompts",
+          "max_length": 14,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Safety Prompts"
         },
         "pid_profile": {
           "english": "PID profile",
@@ -7644,6 +7658,27 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "RX-drempel"
+        },
+        "simulated_api_version": {
+          "english": "Simulated API version",
+          "max_length": 21,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Simulated API version"
+        },
+        "simulated_api_version_invalid": {
+          "english": "Invalid",
+          "max_length": 7,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Invalid"
+        },
+        "temperature_unit": {
+          "english": "Temperature Unit",
+          "max_length": 16,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Temperature Unit"
         },
         "timer_alert_interval": {
           "english": "Alert interval",
@@ -7736,6 +7771,34 @@
           "reverse_text": false,
           "translation": "Voor-timer waarschuwing opties"
         },
+        "tx_battery_default": {
+          "english": "Default",
+          "max_length": 7,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Default"
+        },
+        "tx_battery_digital": {
+          "english": "Digital",
+          "max_length": 7,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Digital"
+        },
+        "tx_battery_options": {
+          "english": "Tx Battery Options",
+          "max_length": 18,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Tx Battery Options"
+        },
+        "tx_battery_text": {
+          "english": "Text",
+          "max_length": 4,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Text"
+        },
         "txt_audio_events": {
           "english": "Events",
           "max_length": 6,
@@ -7764,42 +7827,19 @@
           "reverse_text": false,
           "translation": "Ontwikkelaar"
         },
+        "txt_general": {
+          "english": "General",
+          "max_length": 7,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "General"
+        },
         "voltage": {
           "english": "Voltage",
           "max_length": 7,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Spanning"
-        },
-        "tx_battery_options": {
-          "english": "Tx Battery Options",
-          "max_length": 18,
-          "needs_translation": false,
-          "translation": "Tx Battery Options"
-        },
-        "tx_battery_default": {
-          "english": "Default",
-          "max_length": 7,
-          "needs_translation": false,
-          "translation": "Default"
-        },
-        "tx_battery_text": {
-          "english": "Text",
-          "max_length": 4,
-          "needs_translation": false,
-          "translation": "Text"
-        },
-        "tx_battery_digital": {
-          "english": "Digital",
-          "max_length": 7,
-          "needs_translation": false,
-          "translation": "Digital"
-        },
-        "dashboard_display_panel": {
-          "english": "Display",
-          "max_length": 7,
-          "needs_translation": false,
-          "translation": "Display"
         }
       },
       "stats": {
@@ -8049,13 +8089,6 @@
       "reverse_text": false,
       "translation": "Laden data van vliegcontroller..."
     },
-    "msg_please_disarm_to_save_warning": {
-      "english": "Settings will only be saved to eeprom on disarm",
-      "max_length": 49,
-      "needs_translation": true,
-      "reverse_text": false,
-      "translation": "Settings will only be saved to eeprom on disarm"
-    },
     "msg_reload_settings": {
       "english": "Reload data from flight controller?",
       "max_length": 35,
@@ -8083,13 +8116,6 @@
       "needs_translation": true,
       "reverse_text": false,
       "translation": "Save failed"
-    },
-    "msg_save_not_commited": {
-      "english": "Save not committed to EEPROM",
-      "max_length": 29,
-      "needs_translation": true,
-      "reverse_text": false,
-      "translation": "Save not committed to EEPROM"
     },
     "msg_save_settings": {
       "english": "Save settings",
@@ -8732,7 +8758,7 @@
       "reverse_text": false,
       "translation": "Rubriek"
     },
-    "sensor_motor1speed": {
+    "sensor_headspeed": {
       "english": "Headspeed",
       "max_length": 9,
       "needs_translation": false,
@@ -8844,7 +8870,7 @@
       "reverse_text": false,
       "translation": "SYS-belasting"
     },
-    "sensor_motor2speed": {
+    "sensor_tailspeed": {
       "english": "Tailspeed",
       "max_length": 9,
       "needs_translation": false,
@@ -9038,6 +9064,13 @@
         "reverse_text": false,
         "translation": "Gouverneur"
       },
+      "headspeed": {
+        "english": "RPM",
+        "max_length": 3,
+        "needs_translation": false,
+        "reverse_text": false,
+        "translation": "RPM"
+      },
       "link_max": {
         "english": "Link Max",
         "max_length": 8,
@@ -9205,6 +9238,20 @@
         "needs_translation": false,
         "reverse_text": false,
         "translation": "ROTORVLUCHT"
+      },
+      "startup_unsupported_version": {
+        "english": "Unsupported firmware",
+        "max_length": 20,
+        "needs_translation": true,
+        "reverse_text": false,
+        "translation": "Unsupported firmware"
+      },
+      "startup_unsupported_version_detail": {
+        "english": "MSP API version not supported:",
+        "max_length": 30,
+        "needs_translation": true,
+        "reverse_text": false,
+        "translation": "MSP API version not supported:"
       },
       "startup_waiting_task": {
         "english": "Starting background task",
