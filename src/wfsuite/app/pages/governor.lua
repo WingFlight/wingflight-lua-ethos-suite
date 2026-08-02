@@ -30,10 +30,29 @@ end
 
 local function open(opts)
   local runtime
+  -- Forward-declared, assigned right after buildChrome() below (once
+  -- runtime.dataRef/runtime.controlRef exist) -- currentMode()/applyMode()
+  -- are built before pageRuntime.new() returns (onLoaded needs applyMode
+  -- as a value already) but only ever *called* later, so capturing these
+  -- small indirection tables instead of `runtime` itself here works the
+  -- same way app/pages/pids.lua's own dataRef convention does (see its
+  -- comment): Ethos retains some form callback closures past this page's
+  -- own lifetime -- modeField's setter below calls applyMode(), and is
+  -- handed straight to Ethos -- and dataRef.data/controlRef.runtime both
+  -- get cleared on dispose (app/page_runtime.lua's own
+  -- PageRuntime:dispose()), so whatever gets retained stays small instead
+  -- of pinning the whole disposed PageRuntime.
+  local dataRef
+  local controlRef
   local panels = {}
 
+  local function markDirty()
+    local rt = controlRef and controlRef.runtime
+    if rt then rt:markDirty() end
+  end
+
   local function currentMode()
-    return tonumber(runtime.data and runtime.data.governor_mode) or MODE_OFF
+    return tonumber(dataRef and dataRef.data and dataRef.data.governor_mode) or MODE_OFF
   end
 
   local function openPanel(panel, open)
@@ -41,8 +60,10 @@ local function open(opts)
   end
 
   local function applyMode()
+    local rt = controlRef and controlRef.runtime
+    if not rt then return end
     local mode = currentMode()
-    local loaded = runtime.loaded == true
+    local loaded = rt.loaded == true
     local rpmMode = mode == MODE_RPM
     local throttleMode = mode == MODE_THROTTLE
     local rpmRangeMode = mode == MODE_RPM_RANGE
@@ -53,14 +74,14 @@ local function open(opts)
     openPanel(panels.response, rpmControlMode)
     openPanel(panels.throttle, activeMode)
 
-    setFieldActive(runtime.fields.governor_rpm, rpmMode, loaded)
-    setFieldActive(runtime.fields.governor_rpm_min, rpmRangeMode, loaded)
-    setFieldActive(runtime.fields.governor_rpm_max, rpmRangeMode, loaded)
-    setFieldActive(runtime.fields.governor_gain, rpmControlMode, loaded)
-    setFieldActive(runtime.fields.governor_i_gain, rpmControlMode, loaded)
-    setFieldActive(runtime.fields.governor_throttle, throttleMode, loaded)
-    setFieldActive(runtime.fields.governor_handover, rpmMode or throttleMode, loaded)
-    setFieldActive(runtime.fields.governor_ceiling, activeMode, loaded)
+    setFieldActive(rt.fields.governor_rpm, rpmMode, loaded)
+    setFieldActive(rt.fields.governor_rpm_min, rpmRangeMode, loaded)
+    setFieldActive(rt.fields.governor_rpm_max, rpmRangeMode, loaded)
+    setFieldActive(rt.fields.governor_gain, rpmControlMode, loaded)
+    setFieldActive(rt.fields.governor_i_gain, rpmControlMode, loaded)
+    setFieldActive(rt.fields.governor_throttle, throttleMode, loaded)
+    setFieldActive(rt.fields.governor_handover, rpmMode or throttleMode, loaded)
+    setFieldActive(rt.fields.governor_ceiling, activeMode, loaded)
   end
 
   runtime = pageRuntime.new({
@@ -76,13 +97,15 @@ local function open(opts)
 
   form.clear()
   runtime:buildChrome()
+  dataRef = runtime.dataRef
+  controlRef = runtime.controlRef
 
   local line = form.addLine("@i18n(app.modules.governor.mode)@")
   local modeField = form.addChoiceField(line, nil, governorConfig.MODE_CHOICES,
     currentMode,
     function(value)
-      runtime:markDirty()
-      runtime.data.governor_mode = tonumber(value) or MODE_OFF
+      markDirty()
+      dataRef.data.governor_mode = tonumber(value) or MODE_OFF
       applyMode()
     end)
   runtime:registerField("governor_mode", modeField)
