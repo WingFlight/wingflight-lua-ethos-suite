@@ -54,6 +54,7 @@ local DEFAULTS = {
     rxalertvalue = 7.4,
     adj_f = false,
     adj_v = false,
+    craft_name = false,
   },
   timer = {
     timeraudioenable = false,
@@ -193,6 +194,7 @@ local function normalizeEvents(values)
   events.rxalertvalue = clampNumber(events.rxalertvalue, DEFAULTS.events.rxalertvalue, 3.0, 15.0)
   events.adj_f = coerceBool(events.adj_f, DEFAULTS.events.adj_f)
   events.adj_v = coerceBool(events.adj_v, DEFAULTS.events.adj_v)
+  events.craft_name = coerceBool(events.craft_name, DEFAULTS.events.craft_name)
   return events
 end
 
