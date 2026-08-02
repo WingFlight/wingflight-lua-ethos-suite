@@ -111,12 +111,12 @@ local session = {
   bblFlags = nil,
   bblSize = nil,
   bblUsed = nil,
-  -- Arm state, read from the FC's own "armflags" telemetry sensor --
-  -- matches the original suite's own app/lib/utils.lua
-  -- armFlagsToIsArmed(): raw value 1 or 3 means armed, 0 or 2 disarmed
-  -- (bit 0 of the arm-status flags), anything else (nil -- sensor not
-  -- broadcasting yet) leaves isArmed at its last known value rather than
-  -- guessing. The one current consumer is app/pages/configuration.lua's
+  -- Arm state, read from the FC's own "armflags" telemetry sensor -- bit
+  -- 0 (ARMED, firmware src/main/fc/runtime_config.h) is the only bit that
+  -- reflects current arm state, since bits 1/2 accumulate over a session
+  -- (e.g. PREARM users see 5, then 7 -- both still armed). Nil (sensor
+  -- not broadcasting yet) leaves isArmed at its last known value rather
+  -- than guessing. The one current consumer is app/pages/configuration.lua's
   -- save flow, which must not trigger MSP_REBOOT while the aircraft could
   -- be armed -- see lib/msp_reboot.lua's own comment for why this is the
   -- only safety gate on that command (firmware's own MSP_REBOOT handler
@@ -669,18 +669,19 @@ local function updateProfiles(protocol)
     publish()
   end
 
-  -- Matches the original's own armFlagsToIsArmed(): raw value 1 or 3
-  -- means armed, 0 or 2 disarmed (bit 0 of the flags), anything else
-  -- (including the sensor not broadcasting yet, nil) is left alone --
-  -- session.isArmed keeps its last known value rather than guessing at
-  -- one, same "don't overwrite a real reading with a guess" reasoning
+  -- Bit 0 (ARMED, firmware src/main/fc/runtime_config.h) is the only bit
+  -- that reflects current arm state -- bits 1 (WAS_EVER_ARMED) and 2
+  -- (WAS_ARMED_WITH_PREARM) are historical and accumulate over a session,
+  -- so a whole-byte whitelist (armFlags == 1 or 3) stops matching once
+  -- either has been set (e.g. PREARM users see 5, then 7 -- both still
+  -- armed). When the sensor hasn't reported yet (nil), session.isArmed
+  -- keeps its last known value rather than guessing at one, same "don't
+  -- overwrite a real reading with a guess" reasoning
   -- lib/telemetry_sensors.lua's own miss-retry cache already uses.
   local armFlags = telemetrySensors.getValue(protocol, "armflags")
   local isArmed
-  if armFlags == 1 or armFlags == 3 then
-    isArmed = true
-  elseif armFlags == 0 or armFlags == 2 then
-    isArmed = false
+  if armFlags ~= nil then
+    isArmed = (math.floor(armFlags) & 1) == 1
   end
   if isArmed ~= nil and isArmed ~= session.isArmed then
     session.isArmed = isArmed
