@@ -605,7 +605,6 @@ end
 
 local function updateRfStatusTelemetry(protocol)
   if not telemetrySensors then return end
-  if protocol == "crsf" then return end
 
   local changed = false
 
