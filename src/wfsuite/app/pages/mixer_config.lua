@@ -72,6 +72,18 @@ local function open(opts)
 
   form.clear()
   runtime:buildChrome()
+  -- Captured instead of closing over `runtime` directly in each field
+  -- setter below -- matching app/pages/pids.lua's own dataRef convention
+  -- (see its comment): Ethos retains some form callback closures past
+  -- this page's own lifetime, and controlRef.runtime gets nilled on
+  -- dispose (app/page_runtime.lua's own PageRuntime:dispose()), so
+  -- whatever gets retained here stays small instead of pinning the whole
+  -- disposed PageRuntime.
+  local controlRef = runtime.controlRef
+  local function markDirty()
+    local rt = controlRef.runtime
+    if rt then rt:markDirty() end
+  end
 
   local headerLine = form.addLine(" ")
   local headerSlots = form.getFieldSlots(headerLine, {0, 0})
@@ -88,7 +100,7 @@ local function open(opts)
         return gainFromRate(data[axis.rateKey])
       end,
       function(value)
-        runtime:markDirty()
+        markDirty()
         local invert = invertFromRate(data[axis.rateKey])
         local rate = (tonumber(value) or 0) * 10
         if invert == 1 then rate = -rate end
@@ -102,7 +114,7 @@ local function open(opts)
         return invertFromRate(data[axis.rateKey])
       end,
       function(value)
-        runtime:markDirty()
+        markDirty()
         local gain = gainFromRate(data[axis.rateKey])
         local rate = gain * 10
         if (tonumber(value) or 0) ~= 0 then rate = -rate end

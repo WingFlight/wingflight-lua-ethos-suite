@@ -91,6 +91,14 @@ local function open(opts)
   -- dataRef -- unlike the full runtime -- gets its contents cleared on
   -- dispose, so whatever Ethos keeps alive stays small).
   local dataRef = runtime.dataRef
+  -- Same reasoning, for markDirty(): controlRef.runtime gets nilled on
+  -- dispose, so a retained closure here only pins this tiny table, never
+  -- the disposed PageRuntime itself.
+  local controlRef = runtime.controlRef
+  local function markDirty()
+    local rt = controlRef.runtime
+    if rt then rt:markDirty() end
+  end
 
   -- Column header line, matching app/pages/pids.lua's own P/I/D/F/O/B
   -- header convention: a blank-but-non-empty label (" ", not "") so this
@@ -133,7 +141,7 @@ local function open(opts)
           return rateCurveScale.toDisplayInt(dataRef.data[key], column.role, row.axisClass)
         end,
         function(value)
-          runtime:markDirty()
+          markDirty()
           dataRef.data[key] = rateCurveScale.fromDisplayInt(value, column.role, row.axisClass)
         end)
       field:decimals(decimals)
