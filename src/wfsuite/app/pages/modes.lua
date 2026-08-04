@@ -58,6 +58,8 @@ local MODE_NAME_BY_ID = {
   [55] = "GOVERNOR FALLBACK",
   [56] = "GOVERNOR SUSPEND",
   [57] = "GOVERNOR BYPASS",
+  [61] = "GPS LOITER",
+  [62] = "GPS RTH",
 }
 local AUX_CHANNEL_COUNT = 20
 local RANGE_MIN = 875
