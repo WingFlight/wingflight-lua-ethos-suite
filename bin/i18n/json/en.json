@@ -298,6 +298,12 @@
           "needs_translation": false,
           "max_length": 3
         },
+        "tbl_on": {
+          "english": "On",
+          "translation": "On",
+          "needs_translation": false,
+          "max_length": 2
+        },
         "tbl_rp": {
           "english": "RP",
           "translation": "RP",
@@ -327,6 +333,48 @@
           "translation": "Cutoff",
           "needs_translation": false,
           "max_length": 6
+        },
+        "engage": {
+          "english": "Engage",
+          "translation": "Engage",
+          "needs_translation": false,
+          "max_length": 6
+        },
+        "floor": {
+          "english": "Floor",
+          "translation": "Floor",
+          "needs_translation": false,
+          "max_length": 5
+        },
+        "min": {
+          "english": "Min",
+          "translation": "Min",
+          "needs_translation": false,
+          "max_length": 3
+        },
+        "max": {
+          "english": "Max",
+          "translation": "Max",
+          "needs_translation": false,
+          "max_length": 3
+        },
+        "osc_limiter": {
+          "english": "Oscillation Limiter",
+          "translation": "Oscillation Limiter",
+          "needs_translation": false,
+          "max_length": 19
+        },
+        "osc_limiter_band": {
+          "english": "Oscillation Band",
+          "translation": "Oscillation Band",
+          "needs_translation": false,
+          "max_length": 16
+        },
+        "threshold": {
+          "english": "Threshold",
+          "translation": "Threshold",
+          "needs_translation": false,
+          "max_length": 9
         }
       },
       "tail_rotor": {
@@ -7397,6 +7445,12 @@
       "max_length": 6,
       "needs_translation": false,
       "translation": "Rescue"
+    },
+    "sensor_osc_limiter": {
+      "english": "Oscillation Limiter",
+      "max_length": 19,
+      "needs_translation": false,
+      "translation": "Oscillation Limiter"
     },
     "sensor_roll_attitude": {
       "english": "Roll Attitude",

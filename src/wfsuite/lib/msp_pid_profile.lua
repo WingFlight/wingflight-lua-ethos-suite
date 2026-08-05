@@ -39,8 +39,8 @@
 --     (right after the dead inertia-precomp pair), `master_gain_0/1/2`
 --     (U16 each), `autohover_gain`/`autohover_max_angle`/
 --     `autohover_max_rate` (U16), `cross_axis_relax_strength/level/
---     cutoff/pitch_strength`, `gain_curve_0/1/2`, and a trailing
---     `atthold_max_rate` (U16). Matches this project's own last-known-good
+--     cutoff/pitch_strength`, `gain_curve_0/1/2`, trailing
+--     `atthold_max_rate` (U16), and `osc_limiter_*`. Matches this project's own last-known-good
 --     schema (tasks/scheduler/msp/api/PID_PROFILE.lua as it stood at the
 --     pre-rewrite HEAD) field-for-field, including field names and
 --     min/max/default values -- that schema was itself already verified
@@ -116,6 +116,12 @@ local FIELDS = {
   {"cross_axis_relax_pitch_strength", "U8"},
   {"gain_curve_0", "U8"}, {"gain_curve_1", "U8"}, {"gain_curve_2", "U8"}, -- roll, pitch, yaw
   {"atthold_max_rate", "U16"},
+  {"osc_limiter", "U8"},
+  {"osc_limiter_min_hz", "U8"},
+  {"osc_limiter_max_hz", "U8"},
+  {"osc_limiter_threshold", "U8"},
+  {"osc_limiter_floor", "U8"},
+  {"osc_limiter_engage_ms", "U16"},
 }
 
 -- Fixture reply used automatically when running in the Ethos simulator
@@ -168,6 +174,12 @@ local SIMULATOR_RESPONSE = {
   0,    -- cross_axis_relax_pitch_strength
   0, 0, 0, -- gain_curve_0/1/2
   44, 1, -- atthold_max_rate (U16 LE: 300 = 0x012C -> 44, 1)
+  0,    -- osc_limiter
+  4,    -- osc_limiter_min_hz
+  20,   -- osc_limiter_max_hz
+  30,   -- osc_limiter_threshold
+  50,   -- osc_limiter_floor
+  250, 0, -- osc_limiter_engage_ms (U16 LE: 250 = 0x00FA -> 250, 0)
 }
 
 -- Per-field {min, max, default, decimals, suffix}, sourced from this
@@ -227,6 +239,11 @@ local FIELD_META = {
   gain_curve_1 = {min = 0, max = 8, default = 0},
   gain_curve_2 = {min = 0, max = 8, default = 0},
   atthold_max_rate = {min = 0, max = 1800, default = 300, suffix = "°/s"},
+  osc_limiter_min_hz = {min = 1, max = 50, default = 4, suffix = "Hz"},
+  osc_limiter_max_hz = {min = 2, max = 100, default = 20, suffix = "Hz"},
+  osc_limiter_threshold = {min = 1, max = 250, default = 30, suffix = "°/s"},
+  osc_limiter_floor = {min = 10, max = 100, default = 50, suffix = "%"},
+  osc_limiter_engage_ms = {min = 50, max = 2000, default = 250, suffix = "ms"},
 }
 
 local msp_pid_profile = {

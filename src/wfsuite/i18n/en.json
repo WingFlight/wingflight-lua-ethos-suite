@@ -5126,11 +5126,23 @@
           "needs_translation": false,
           "translation": "Cutoff"
         },
+        "engage": {
+          "english": "Engage",
+          "max_length": 6,
+          "needs_translation": false,
+          "translation": "Engage"
+        },
         "error_limit": {
           "english": "Error Limit",
           "max_length": 11,
           "needs_translation": false,
           "translation": "Error Limit"
+        },
+        "floor": {
+          "english": "Floor",
+          "max_length": 5,
+          "needs_translation": false,
+          "translation": "Floor"
         },
         "ground_error_decay": {
           "english": "Ground Error Decay",
@@ -5174,11 +5186,35 @@
           "needs_translation": false,
           "translation": "Limit"
         },
+        "max": {
+          "english": "Max",
+          "max_length": 3,
+          "needs_translation": false,
+          "translation": "Max"
+        },
+        "min": {
+          "english": "Min",
+          "max_length": 3,
+          "needs_translation": false,
+          "translation": "Min"
+        },
         "name": {
           "english": "PID Controller",
           "max_length": 14,
           "needs_translation": false,
           "translation": "PID Controller"
+        },
+        "osc_limiter": {
+          "english": "Oscillation Limiter",
+          "max_length": 19,
+          "needs_translation": false,
+          "translation": "Oscillation Limiter"
+        },
+        "osc_limiter_band": {
+          "english": "Oscillation Band",
+          "max_length": 16,
+          "needs_translation": false,
+          "translation": "Oscillation Band"
         },
         "pitch": {
           "english": "P",
@@ -5198,6 +5234,12 @@
           "needs_translation": false,
           "translation": "Off"
         },
+        "tbl_on": {
+          "english": "On",
+          "max_length": 2,
+          "needs_translation": false,
+          "translation": "On"
+        },
         "tbl_rp": {
           "english": "RP",
           "max_length": 2,
@@ -5209,6 +5251,12 @@
           "max_length": 3,
           "needs_translation": false,
           "translation": "RPY"
+        },
+        "threshold": {
+          "english": "Threshold",
+          "max_length": 9,
+          "needs_translation": false,
+          "translation": "Threshold"
         },
         "time": {
           "english": "Time",
@@ -7615,6 +7663,12 @@
       "max_length": 6,
       "needs_translation": false,
       "translation": "Rescue"
+    },
+    "sensor_osc_limiter": {
+      "english": "Oscillation Limiter",
+      "max_length": 19,
+      "needs_translation": false,
+      "translation": "Oscillation Limiter"
     },
     "sensor_roll_attitude": {
       "english": "Roll Attitude",
