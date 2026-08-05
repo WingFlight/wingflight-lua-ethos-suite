@@ -1813,13 +1813,6 @@
           "reverse_text": false,
           "max_length": 9
         },
-        "feature_cms": {
-          "english": "CMS",
-          "translation": "CMS",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 3
-        },
         "tbl_off": {
           "english": "Off",
           "translation": "Apagado",
