@@ -6,7 +6,7 @@
 --
 -- Matches the original suite's own app/modules/configuration/
 -- configuration.lua field selection: craft name, PID loop speed, and
--- three feature toggles (GPS, LED Strip, CMS) -- a small slice of a
+-- two feature toggles (GPS, LED Strip) -- a small slice of a
 -- 4-MSP-command page (NAME, ADVANCED_CONFIG, FEATURE_CONFIG, STATUS),
 -- matching that suite's own openPage()/startLoad(), which reads exactly
 -- those same four.
@@ -72,8 +72,8 @@
 -- entirely, for exactly this reason: its render() (building every field,
 -- including its own addTextField call) never runs until state.loaded is
 -- true, called from the tool's own wakeup() -- nothing is built at all
--- while state.loading. This page now does the same: all 5 fields (name,
--- PID loop speed, GPS, LED Strip, CMS) are built together from a single
+-- while state.loading. This page now does the same: all 4 fields (name,
+-- PID loop speed, GPS, LED Strip) are built together from a single
 -- buildFields(), wired through onLoaded (guarded so a later manual
 -- Reload firing onLoaded again doesn't try to build a second copy of
 -- everything on top of the first) -- which itself is safely deferred to
@@ -97,13 +97,13 @@
 -- essentially never changes mid-session, so this is an accepted,
 -- extremely unlikely edge case, not a real gap.
 --
--- GPS/LED Strip/CMS reuse app/field_layout.lua's existing `bit` spec
+-- GPS/LED Strip reuse app/field_layout.lua's existing `bit` spec
 -- (app/pages/governor_flags.lua's own convention, promoted there for
 -- exactly this kind of reuse) against `featureConfig.enabledFeatures`,
--- a packed U32 -- bit positions (7/16/19) confirmed against
+-- a packed U32 -- bit positions (7/16) confirmed against
 -- rotorflight-lua-ethos-suite's own FEATURE_CONFIG.lua FEATURES_BITMAP.
 -- fieldLayout.buildSingle() doesn't return the field it builds, so
--- re-enabling all 5 fields after this deferred build (loadData()'s own
+-- re-enabling all 4 fields after this deferred build (loadData()'s own
 -- "enable every registered field" loop already ran once, before any of
 -- these existed) iterates `runtime.fields` directly rather than
 -- threading each field reference back out -- see buildFields()'s own
@@ -276,13 +276,10 @@ local function open(opts)
     fieldLayout.buildSingle(runtime, "@i18n(app.modules.configuration.feature_led_strip)@",
       {key = "enabledFeatures", source = "featureConfig", bit = featureConfig.FEATURE_BIT_LED_STRIP, choices = OFF_ON_OPTIONS})
 
-    fieldLayout.buildSingle(runtime, "@i18n(app.modules.configuration.feature_cms)@",
-      {key = "enabledFeatures", source = "featureConfig", bit = featureConfig.FEATURE_BIT_CMS, choices = OFF_ON_OPTIONS})
-
     -- registerField() disables every field by default (see its own
     -- comment: normally loadData()'s own "enable every registered field"
     -- loop, run right before onLoaded fires, is what turns it back on)
-    -- -- but that loop already ran before any of these 5 fields existed,
+    -- -- but that loop already ran before any of these 4 fields existed,
     -- so they have to be enabled explicitly here instead. Iterates
     -- runtime.fields directly since fieldLayout.buildSingle() doesn't
     -- return the fields it builds (see this file's own header comment).

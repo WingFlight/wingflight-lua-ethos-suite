@@ -1376,13 +1376,6 @@
           "reverse_text": true,
           "translation": "שם מלאכה"
         },
-        "feature_cms": {
-          "english": "CMS",
-          "max_length": 3,
-          "needs_translation": false,
-          "reverse_text": false,
-          "translation": "CMS"
-        },
         "feature_gps": {
           "english": "GPS",
           "max_length": 3,
