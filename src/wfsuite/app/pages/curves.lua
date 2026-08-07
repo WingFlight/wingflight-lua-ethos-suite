@@ -35,6 +35,7 @@ local closeKey = assert(loadfile("app/close_key.lua"))()
 local fieldLayout = assert(loadfile("app/field_layout.lua"))()
 local header = assert(loadfile("app/header.lua"))()
 local pageRuntime = assert(loadfile("app/page_runtime.lua"))()
+local tileGrid = assert(loadfile("app/tile_grid.lua"))()
 local progressDialog = assert(loadfile("app/progress_dialog.lua"))()
 local curvesVisual = assert(loadfile("app/curves_visual.lua"))()
 local curveSlotLabels = assert(loadfile("app/curve_slot_labels.lua"))()
@@ -57,15 +58,10 @@ local MSG_LOAD_ERROR = "@i18n(app.modules.ports.load_error_prefix)@"
 local MIXER_ICON = lcd.loadMask("app/gfx/curves.png")
 local GAIN_ICON = lcd.loadMask("app/gfx/master_gains.png")
 
-local TILE_MIN_SIZE = 112
-local TILE_PADDING = 10
-local TILE_MAX_COLUMNS = 6
-
 -- Point-field row layout (openEditor). COL_GAP/SIDE_MARGIN/GUTTER_W are
--- pixel constants in the same spirit as TILE_MIN_SIZE/TILE_PADDING above
--- (this rebuild has no per-radio layout-constant table, unlike
--- rotorflight-lua-ethos-suite's own radio.buttonPadding/
--- radio.navbuttonHeight). ROW_GAP_FRACTION/TOOLBAR_MARGIN_ROWS scale off
+-- pixel constants for the dense point editor, separate from the shared
+-- tile grid used by the category/slot chooser screens.
+-- ROW_GAP_FRACTION/TOOLBAR_MARGIN_ROWS scale off
 -- a MEASURED real field row's height (see openEditor) rather than being
 -- pixel constants themselves -- two earlier approaches broke on real
 -- hardware: computing the graph/field-row split from screen-height minus
@@ -102,14 +98,6 @@ local POINT_ROW_HEIGHT_FRACTION = 0.65
 -- Extra breathing room between the count field and the graph, beyond
 -- form.height()'s own line spacing.
 local GRAPH_TOP_GAP_FRACTION = 0.3
-
-local function gridMetrics(windowWidth)
-  local numPerRow = math.max(1, math.floor((windowWidth - TILE_PADDING) / (TILE_MIN_SIZE + TILE_PADDING)))
-  if numPerRow > TILE_MAX_COLUMNS then numPerRow = TILE_MAX_COLUMNS end
-  local tileSize = math.floor((windowWidth - (TILE_PADDING * (numPerRow + 1))) / numPerRow)
-  if tileSize < TILE_MIN_SIZE then tileSize = TILE_MIN_SIZE end
-  return numPerRow, tileSize
-end
 
 local function rangeOf(meta)
   return {min = meta.min, max = meta.max}
@@ -417,17 +405,17 @@ openSlotList = function(opts, category, listState)
   if opts.setPaintHandler then opts.setPaintHandler(nil) end
   if opts.setCleanupHandler then opts.setCleanupHandler(nil) end
 
-  local windowWidth = ({lcd.getWindowSize()})[1]
-  local numPerRow, tileSize = gridMetrics(windowWidth)
-  local x, y = TILE_PADDING, form.height() + TILE_PADDING
+  local windowWidth, windowHeight = lcd.getWindowSize()
+  local numPerRow, tileW, tileH, tilePadding, tileFont = tileGrid.metrics(windowWidth, windowHeight)
+  local x, y = 0, form.height() + tilePadding
   local col = 0
   local buttons = {}
 
   for i = 1, category.curveCount do
-    buttons[i] = form.addButton(nil, {x = x, y = y, w = tileSize, h = tileSize}, {
+    buttons[i] = form.addButton(nil, {x = x, y = y, w = tileW, h = tileH}, {
       text = curveSlotLabels.slotTitle(i),
       icon = category.icon,
-      options = FONT_S,
+      options = tileFont,
       press = function()
         listState.selected = i
         openEditor(opts, category, listState, i - 1)
@@ -436,10 +424,10 @@ openSlotList = function(opts, category, listState)
     col = col + 1
     if col >= numPerRow then
       col = 0
-      x = TILE_PADDING
-      y = y + tileSize + TILE_PADDING
+      x = 0
+      y = y + tileH + tilePadding
     else
-      x = x + tileSize + TILE_PADDING
+      x = x + tileW + tilePadding
     end
   end
 
@@ -539,27 +527,27 @@ openCategoryMenu = function(opts)
   if opts.setPaintHandler then opts.setPaintHandler(nil) end
   if opts.setCleanupHandler then opts.setCleanupHandler(nil) end
 
-  local windowWidth = ({lcd.getWindowSize()})[1]
-  local numPerRow, tileSize = gridMetrics(windowWidth)
-  local x, y = TILE_PADDING, form.height() + TILE_PADDING
+  local windowWidth, windowHeight = lcd.getWindowSize()
+  local numPerRow, tileW, tileH, tilePadding, tileFont = tileGrid.metrics(windowWidth, windowHeight)
+  local x, y = 0, form.height() + tilePadding
   local col = 0
   local buttons = {}
 
   for i, catKey in ipairs(CATEGORY_ORDER) do
     local category = CATEGORIES[catKey]
-    buttons[i] = form.addButton(nil, {x = x, y = y, w = tileSize, h = tileSize}, {
+    buttons[i] = form.addButton(nil, {x = x, y = y, w = tileW, h = tileH}, {
       text = category.title,
       icon = category.icon,
-      options = FONT_S,
+      options = tileFont,
       press = function() openCategory(opts, category) end,
     })
     col = col + 1
     if col >= numPerRow then
       col = 0
-      x = TILE_PADDING
-      y = y + tileSize + TILE_PADDING
+      x = 0
+      y = y + tileH + tilePadding
     else
-      x = x + tileSize + TILE_PADDING
+      x = x + tileW + tilePadding
     end
   end
 
