@@ -31,6 +31,7 @@
 ]]
 
 local wfsuite = assert(loadfile("widgets/dashboard/context.lua"))()
+local model = model
 
 local render = {}
 
@@ -92,7 +93,18 @@ function render.wakeup(box)
     elseif box._lastValidCraftName then
         displayValue = box._lastValidCraftName
     else
-        displayValue = getPulsingDots(box)
+        -- MSP has never reported a craft name (the FC-side name field is
+        -- simply left blank, not merely slow to arrive) -- fall back to the
+        -- Ethos model's own name rather than leaving this box pinned on
+        -- pulsing dots for the whole session. Ported from
+        -- rotorflight-lua-ethos-suite, which already used this same
+        -- fallback in its danielrc/helihud themes' own craftname handling.
+        local modelName = model and model.name and model.name()
+        if modelName and type(modelName) == "string" and modelName:match("^%s*$") == nil then
+            displayValue = modelName
+        else
+            displayValue = getPulsingDots(box)
+        end
     end
 
     box._currentDisplayValue = displayValue
