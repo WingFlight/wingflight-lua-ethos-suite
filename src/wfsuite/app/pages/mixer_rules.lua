@@ -41,10 +41,14 @@
 -- slots got before app/pages/curves.lua existed. `weight`/`weightNeg` are
 -- exposed raw (two plain signed fields) rather than reconstructed into
 -- wingflight-configurator's derived Weight/Differential%/Reverse
--- presentation -- that conversion is documented in that project's own
--- src/tabs/mixer/util.js as lossy for asymmetric hand-edited values, and
--- both raw fields are independently meaningful (gain applied when input
--- is positive vs. negative) without it.
+-- presentation -- both raw fields are independently meaningful (gain
+-- applied when input is positive vs. negative) without it, so this page
+-- doesn't need to duplicate that conversion logic at all. That conversion
+-- (src/tabs/mixer/util.js in that project) round-trips normal Reverse +
+-- Differential rules correctly as of its 2026-08-10 fix, but stays
+-- documented there as lossy for out-of-range/mismatched-sign values from
+-- hand-editing via CLI -- another reason to keep this page on the raw
+-- fields rather than inherit that edge case here too.
 
 local bus = assert(loadfile("lib/bus.lua"))()
 local closeKey = assert(loadfile("app/close_key.lua"))()
