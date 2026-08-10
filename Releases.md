@@ -1,3 +1,11 @@
+# 0.0.11
+
+Improve dashboard startup, wakeup, theme reload, and low-resolution layout stability under Ethos instruction and paint budgets.
+Fix CRSF/ELRS telemetry updates, RSSI/VFR header display, unsupported MSP API handling, and repeated reboot resend behavior.
+Add Settings > General, integration name sync, copy-profile tools, and model/altitude audio callouts.
+Improve save-dirty tracking, confirmation dialogs, battery/smartfuel profile handling, and translations.
+Fall back to the transmitter model name when the MSP craft name is unset.
+
 # 0.0.10
 
 Rename headspeed/tailspeed RPM naming to rpm/motor2speed, matching firmware's motor1/motor2 rename.
