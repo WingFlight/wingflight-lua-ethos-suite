@@ -4101,16 +4101,16 @@
           "translation": "On"
         },
         "throttle": {
-          "english": "Throttle",
-          "max_length": 8,
+          "english": "Idle floor",
+          "max_length": 10,
           "needs_translation": false,
-          "translation": "Throttle"
+          "translation": "Idle floor"
         },
         "throttle_group": {
-          "english": "Throttle",
-          "max_length": 8,
+          "english": "Idle",
+          "max_length": 4,
           "needs_translation": false,
-          "translation": "Throttle"
+          "translation": "Idle"
         },
         "throttle_hold_timeout": {
           "english": "Throttle hold timeout",

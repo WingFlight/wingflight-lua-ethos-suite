@@ -79,7 +79,7 @@ local function open(opts)
     setFieldActive(rt.fields.governor_rpm_max, rpmRangeMode, loaded)
     setFieldActive(rt.fields.governor_gain, rpmControlMode, loaded)
     setFieldActive(rt.fields.governor_i_gain, rpmControlMode, loaded)
-    setFieldActive(rt.fields.governor_throttle, throttleMode, loaded)
+    setFieldActive(rt.fields.governor_throttle, rpmMode or throttleMode, loaded)
     setFieldActive(rt.fields.governor_handover, rpmMode or throttleMode, loaded)
     setFieldActive(rt.fields.governor_ceiling, activeMode, loaded)
   end

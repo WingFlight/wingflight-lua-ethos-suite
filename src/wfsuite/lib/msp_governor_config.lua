@@ -63,6 +63,8 @@ local FIELDS = {
 
 -- min/max: settings.c's own governor_* CLI var .config.minmaxUnsigned.
 -- default: pg/governor.c's PG_RESET_TEMPLATE(governorConfig_t, ...).
+-- governor_throttle is the powered idle floor for RPM idle hold and the
+-- fixed idle output for Throttle mode.
 local FIELD_META = {
   governor_mode = {choices = MODE_CHOICES, default = 0},
   governor_rpm = {min = 0, max = 50000, default = 0, suffix = "RPM"},

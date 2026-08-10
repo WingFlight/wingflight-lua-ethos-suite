@@ -711,16 +711,16 @@
           "max_length": 6
         },
         "throttle_group": {
-          "english": "Throttle",
-          "translation": "Throttle",
+          "english": "Idle",
+          "translation": "Idle",
           "needs_translation": false,
-          "max_length": 8
+          "max_length": 4
         },
         "throttle": {
-          "english": "Throttle",
-          "translation": "Throttle",
+          "english": "Idle floor",
+          "translation": "Idle floor",
           "needs_translation": false,
-          "max_length": 8
+          "max_length": 10
         },
         "handover": {
           "english": "Handover",
