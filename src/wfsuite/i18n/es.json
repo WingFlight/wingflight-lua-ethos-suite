@@ -7841,6 +7841,13 @@
           "reverse_text": false,
           "translation": "Save confirm"
         },
+        "txt_show_battery_profile_connect": {
+          "english": "Show battery profile on connect",
+          "max_length": 31,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Show battery profile on connect"
+        },
         "txt_syncname": {
           "english": "Sync model name",
           "max_length": 15,
