@@ -182,6 +182,15 @@ end
 
 local telemetrySensors = nil
 
+-- Mirrors widgets/dashboard.lua's own "app.state" subscription (see its
+-- appRunning comment there): true while app/tool.lua's full-screen
+-- page/menu system owns the display, false back at the plain dashboard.
+-- Used below to skip the recurring blackbox-summary poll while a page
+-- (e.g. the alignment page) is actively contending for the same
+-- single-in-flight mspQueue -- see updateBlackboxSummary()'s own comment.
+local appRunning = false
+bus.subscribe("app.state", function(state) appRunning = state and state.running == true end)
+
 local lastBeepAt = 0
 local nextScheduledAt = {}
 local statsReadInFlight = false
