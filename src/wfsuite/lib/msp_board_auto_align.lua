@@ -10,7 +10,8 @@ if package.loaded["wfsuite.lib.msp_board_auto_align"] then
   return package.loaded["wfsuite.lib.msp_board_auto_align"]
 end
 
-local mspcodec = assert(loadfile("lib/mspcodec.lua"))()
+local requireModule = assert(loadfile("lib/require.lua"))()
+local mspcodec = requireModule("lib/mspcodec.lua")
 
 local COMMAND = 0x5F00
 local ACTION_START = 1

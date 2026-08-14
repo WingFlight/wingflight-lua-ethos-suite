@@ -88,6 +88,8 @@ local bus, settingsStore, debugLog, mspCommon, mspTransportSelect, Scheduler,
       telemetrySensors, mspQueue, session, logging, audioEvents, audioSwitches,
       scheduler
 
+local requireModule = assert(loadfile("lib/require.lua"))()
+
 local TASK_STATUS_INTERVAL = 0.5
 local MEMORY_LOG_INTERVAL = 5
 -- Cheap: a couple of model.getModule()/:enable() field reads, no loadfile
@@ -247,7 +249,7 @@ local function runDeferredInit()
   -- Only ever loadfile'd/scheduled here, behind this one check -- see
   -- tasks/sim_sensors.lua's own header for why it costs nothing otherwise.
   if system.getVersion().simulation == true then
-    simSensors = simSensors or assert(loadfile("tasks/sim_sensors.lua"))()
+    simSensors = simSensors or requireModule("tasks/sim_sensors.lua")
     scheduler:add("sim_sensors", 2, function()
       simSensors.wakeup()
     end)
@@ -269,28 +271,38 @@ end
 -- loadfile() of the same small shared module was paying real disk-open/
 -- compile cost on device even though the module itself self-caches via
 -- package.loaded.
+-- Only the plain, no-argument loadfile() calls below go through
+-- requireModule() (lib/require.lua) -- debugLog/session/logging/
+-- audioEvents/audioSwitches instead take this file's own already-loaded
+-- bus/settingsStore/debugLog instances as chunk arguments
+-- (`loadfile(path)(bus, settingsStore, ...)`), exactly the dependency-
+-- injection this header comment already describes. requireModule() caches
+-- by path alone, so routing a parameterized call through it would
+-- silently return the *first* call's result on any later call with
+-- different arguments -- left on plain loadfile() (each only ever called
+-- once here regardless).
 local loadSteps = {
   function()
-    settingsStore = assert(loadfile("lib/settings_store.lua"))()
+    settingsStore = requireModule("lib/settings_store.lua")
   end,
   function()
     debugLog = assert(loadfile("lib/debug_log.lua"))(bus, settingsStore)
   end,
   function()
-    mspCommon = assert(loadfile("tasks/msp/common.lua"))()
+    mspCommon = requireModule("tasks/msp/common.lua")
   end,
   function()
-    mspTransportSelect = assert(loadfile("tasks/msp/transport_select.lua"))()
+    mspTransportSelect = requireModule("tasks/msp/transport_select.lua")
   end,
   function()
-    Scheduler = assert(loadfile("tasks/scheduler.lua"))()
+    Scheduler = requireModule("tasks/scheduler.lua")
     scheduler = Scheduler.new()
   end,
   function()
-    telemetrySensors = assert(loadfile("lib/telemetry_sensors.lua"))()
+    telemetrySensors = requireModule("lib/telemetry_sensors.lua")
   end,
   function()
-    mspQueue = assert(loadfile("tasks/msp/queue.lua"))().new(mspCommon, debugLog)
+    mspQueue = requireModule("tasks/msp/queue.lua").new(mspCommon, debugLog)
   end,
   function()
     session = assert(loadfile("tasks/session.lua"))(bus, settingsStore, debugLog)
@@ -342,7 +354,7 @@ local function taskInit()
   -- blocking BOOT_DEFER_S is otherwise there to avoid.
   mspRequestsReady = false
   pendingMspRequests = {}
-  bus = assert(loadfile("lib/bus.lua"))()
+  bus = requireModule("lib/bus.lua")
   bus.subscribe("msp.request", onMspRequestReceived)
 end
 

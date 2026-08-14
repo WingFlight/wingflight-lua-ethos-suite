@@ -50,15 +50,16 @@
 -- hand-editing via CLI -- another reason to keep this page on the raw
 -- fields rather than inherit that edge case here too.
 
-local bus = assert(loadfile("lib/bus.lua"))()
-local closeKey = assert(loadfile("app/close_key.lua"))()
-local fieldLayout = assert(loadfile("app/field_layout.lua"))()
-local header = assert(loadfile("app/header.lua"))()
-local pageRuntime = assert(loadfile("app/page_runtime.lua"))()
-local progressDialog = assert(loadfile("app/progress_dialog.lua"))()
-local curveSlotLabels = assert(loadfile("app/curve_slot_labels.lua"))()
-local eeprom = assert(loadfile("lib/msp_eeprom.lua"))()
-local mixerRules = assert(loadfile("lib/msp_mixer_rules.lua"))()
+local requireModule = assert(loadfile("lib/require.lua"))()
+local bus = requireModule("lib/bus.lua")
+local closeKey = requireModule("app/close_key.lua")
+local fieldLayout = requireModule("app/field_layout.lua")
+local header = requireModule("app/header.lua")
+local pageRuntime = requireModule("app/page_runtime.lua")
+local progressDialog = requireModule("app/progress_dialog.lua")
+local curveSlotLabels = requireModule("app/curve_slot_labels.lua")
+local eeprom = requireModule("lib/msp_eeprom.lua")
+local mixerRules = requireModule("lib/msp_mixer_rules.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.mixer_rules.name)@"
 local MSG_LOADING_TITLE = "@i18n(app.msg_loading)@"

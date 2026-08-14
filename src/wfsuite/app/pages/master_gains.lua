@@ -22,10 +22,11 @@
 -- fields' fw_tpa_gain/fw_tpa_curve/master_gain_*/gain_curve_* now that
 -- they've moved here.
 
-local pageRuntime = assert(loadfile("app/page_runtime.lua"))()
-local fieldLayout = assert(loadfile("app/field_layout.lua"))()
-local pidProfile = assert(loadfile("lib/msp_pid_profile.lua"))()
-local curveSlotLabels = assert(loadfile("app/curve_slot_labels.lua"))()
+local requireModule = assert(loadfile("lib/require.lua"))()
+local pageRuntime = requireModule("app/page_runtime.lua")
+local fieldLayout = requireModule("app/field_layout.lua")
+local pidProfile = requireModule("lib/msp_pid_profile.lua")
+local curveSlotLabels = requireModule("app/curve_slot_labels.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.master_gains.name)@"
 

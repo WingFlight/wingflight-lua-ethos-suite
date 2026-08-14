@@ -31,7 +31,8 @@ if package.loaded["wfsuite.lib.msp_mixer_rules"] then
   return package.loaded["wfsuite.lib.msp_mixer_rules"]
 end
 
-local mspcodec = assert(loadfile("lib/mspcodec.lua"))()
+local requireModule = assert(loadfile("lib/require.lua"))()
+local mspcodec = requireModule("lib/mspcodec.lua")
 
 local READ_COMMAND = 172
 local WRITE_COMMAND = 173

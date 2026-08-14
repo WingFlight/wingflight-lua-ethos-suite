@@ -31,18 +31,19 @@
 -- task manifests. There is no idle MSP heartbeat.
 
 local bus, settingsStore, debugLog = ...
-local handshake = assert(loadfile("lib/msp_handshake.lua"))()
-local mspApiVersion = assert(loadfile("lib/msp_api_version.lua"))()
-local mspBattery = assert(loadfile("lib/msp_battery.lua"))()
-local dataflashSummary = assert(loadfile("lib/msp_dataflash_summary.lua"))()
-local modelPreferences = assert(loadfile("lib/model_preferences.lua"))()
-local flightStats = assert(loadfile("lib/msp_flight_stats.lua"))()
-local eeprom = assert(loadfile("lib/msp_eeprom.lua"))()
-local smartfuelReserve = assert(loadfile("lib/smartfuel_reserve.lua"))()
-local SmartFuel = assert(loadfile("lib/smartfuel_calc.lua"))()
-local DiySensor = assert(loadfile("lib/diy_sensor.lua"))()
-local telemetryConfig = assert(loadfile("lib/msp_telemetry_config.lua"))()
-local flightTimer = assert(loadfile("tasks/flight_timer.lua"))()
+local requireModule = assert(loadfile("lib/require.lua"))()
+local handshake = requireModule("lib/msp_handshake.lua")
+local mspApiVersion = requireModule("lib/msp_api_version.lua")
+local mspBattery = requireModule("lib/msp_battery.lua")
+local dataflashSummary = requireModule("lib/msp_dataflash_summary.lua")
+local modelPreferences = requireModule("lib/model_preferences.lua")
+local flightStats = requireModule("lib/msp_flight_stats.lua")
+local eeprom = requireModule("lib/msp_eeprom.lua")
+local smartfuelReserve = requireModule("lib/smartfuel_reserve.lua")
+local SmartFuel = requireModule("lib/smartfuel_calc.lua")
+local DiySensor = requireModule("lib/diy_sensor.lua")
+local telemetryConfig = requireModule("lib/msp_telemetry_config.lua")
+local flightTimer = requireModule("tasks/flight_timer.lua")
 
 local TELEMETRY_VALUE_INTERVAL = 0.5
 local PROFILE_INTERVAL = 0.5
@@ -167,7 +168,7 @@ local elrsSensors = nil
 
 local function ensureFrskySensors()
   if not frskySensors then
-    local FrskySensors = assert(loadfile("lib/frsky_sensors.lua"))()
+    local FrskySensors = requireModule("lib/frsky_sensors.lua")
     frskySensors = FrskySensors.new()
   end
   return frskySensors
@@ -175,7 +176,7 @@ end
 
 local function ensureElrsSensors()
   if not elrsSensors then
-    elrsSensors = assert(loadfile("tasks/elrs_sensors.lua"))()
+    elrsSensors = requireModule("tasks/elrs_sensors.lua")
   end
   return elrsSensors
 end

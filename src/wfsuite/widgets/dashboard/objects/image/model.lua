@@ -31,7 +31,8 @@
     imagealign          : string                    -- (Optional) Image alignment ("center", "left", "right", "top", "bottom")
 ]]
 
-local wfsuite = assert(loadfile("widgets/dashboard/context.lua"))()
+local requireModule = assert(loadfile("lib/require.lua"))()
+local wfsuite = requireModule("widgets/dashboard/context.lua")
 local model = model
 
 local render = {}

@@ -30,18 +30,19 @@
 -- app/pages/alignment.lua uses app/alignment_visual.lua) is read-only
 -- feedback, never the editing surface itself.
 
-local bus = assert(loadfile("lib/bus.lua"))()
-local closeKey = assert(loadfile("app/close_key.lua"))()
-local fieldLayout = assert(loadfile("app/field_layout.lua"))()
-local header = assert(loadfile("app/header.lua"))()
-local pageRuntime = assert(loadfile("app/page_runtime.lua"))()
-local tileGrid = assert(loadfile("app/tile_grid.lua"))()
-local progressDialog = assert(loadfile("app/progress_dialog.lua"))()
-local curvesVisual = assert(loadfile("app/curves_visual.lua"))()
-local curveSlotLabels = assert(loadfile("app/curve_slot_labels.lua"))()
-local curvePoints = assert(loadfile("lib/curve_points.lua"))()
-local mixerCurves = assert(loadfile("lib/msp_mixer_curves.lua"))()
-local gainCurves = assert(loadfile("lib/msp_gain_curves.lua"))()
+local requireModule = assert(loadfile("lib/require.lua"))()
+local bus = requireModule("lib/bus.lua")
+local closeKey = requireModule("app/close_key.lua")
+local fieldLayout = requireModule("app/field_layout.lua")
+local header = requireModule("app/header.lua")
+local pageRuntime = requireModule("app/page_runtime.lua")
+local tileGrid = requireModule("app/tile_grid.lua")
+local progressDialog = requireModule("app/progress_dialog.lua")
+local curvesVisual = requireModule("app/curves_visual.lua")
+local curveSlotLabels = requireModule("app/curve_slot_labels.lua")
+local curvePoints = requireModule("lib/curve_points.lua")
+local mixerCurves = requireModule("lib/msp_mixer_curves.lua")
+local gainCurves = requireModule("lib/msp_gain_curves.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.curves.name)@"
 local MSG_LOADING_TITLE = "@i18n(app.msg_loading)@"

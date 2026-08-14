@@ -37,7 +37,8 @@ thresholds = {
 }
 ]]
 
-local wfsuite = assert(loadfile("widgets/dashboard/context.lua"))()
+local requireModule = assert(loadfile("lib/require.lua"))()
+local wfsuite = requireModule("widgets/dashboard/context.lua")
 
 local gmatch = string.gmatch
 local clock = os.clock
