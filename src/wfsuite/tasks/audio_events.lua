@@ -3,6 +3,8 @@
 -- bus/settingsStore are the instances tasks/background.lua already loaded
 -- for itself, passed in as this chunk's args rather than loadfile()'d again
 -- here -- see the equivalent note atop tasks/session.lua for why.
+local requireModule = assert(loadfile("lib/require.lua"))()
+
 local bus, settingsStore = ...
 
 local audio_events = {}
@@ -354,7 +356,7 @@ local function announceFlightMode()
 end
 
 local function ensureAdjWavs()
-  if not adjWavs then adjWavs = assert(loadfile("tasks/adjfunctions/wavs.lua"))() end
+  if not adjWavs then adjWavs = requireModule("tasks/adjfunctions/wavs.lua") end
   return adjWavs
 end
 

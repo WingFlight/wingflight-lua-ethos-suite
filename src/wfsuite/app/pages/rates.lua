@@ -34,9 +34,10 @@
 -- and auto-reload-on-profile-switch app/pages/pids.lua gets, just keyed
 -- off the other profile slot.
 
-local pageRuntime = assert(loadfile("app/page_runtime.lua"))()
-local rcTuning = assert(loadfile("lib/msp_rc_tuning.lua"))()
-local rateCurveScale = assert(loadfile("lib/rate_curve_scale.lua"))()
+local requireModule = assert(loadfile("lib/require.lua"))()
+local pageRuntime = requireModule("app/page_runtime.lua")
+local rcTuning = requireModule("lib/msp_rc_tuning.lua")
+local rateCurveScale = requireModule("lib/rate_curve_scale.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.rates.name)@"
 

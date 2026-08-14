@@ -25,8 +25,9 @@
 -- geometry setting, not something that varies by PID/rate profile,
 -- same reasoning as app/pages/alignment.lua's own board-alignment data.
 
-local pageRuntime = assert(loadfile("app/page_runtime.lua"))()
-local mixerInput = assert(loadfile("lib/msp_mixer_input.lua"))()
+local requireModule = assert(loadfile("lib/require.lua"))()
+local pageRuntime = requireModule("app/page_runtime.lua")
+local mixerInput = requireModule("lib/msp_mixer_input.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.mixer.name)@"
 local GAIN_MAX = 200

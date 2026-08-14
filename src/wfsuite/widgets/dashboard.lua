@@ -3,9 +3,10 @@
 -- Lite keeps the old dashboard's preflight/inflight/postflight theme shape,
 -- while loading only the selected theme and current state page.
 
-local bus = assert(loadfile("lib/bus.lua"))()
-local settingsStore = assert(loadfile("lib/settings_store.lua"))()
-local flightmode = assert(loadfile("widgets/dashboard/flightmode.lua"))()
+local requireModule = assert(loadfile("lib/require.lua"))()
+local bus = requireModule("lib/bus.lua")
+local settingsStore = requireModule("lib/settings_store.lua")
+local flightmode = requireModule("widgets/dashboard/flightmode.lua")
 
 -- dataflashErase/dataflashSummary/batteryProfileMsp are loadfile()'d lazily,
 -- on first actual need (matching ensureDashboardContext()/
@@ -24,21 +25,21 @@ local batteryProfileMsp = nil
 
 local function ensureDataflashErase()
   if not dataflashErase then
-    dataflashErase = assert(loadfile("lib/msp_dataflash_erase.lua"))()
+    dataflashErase = requireModule("lib/msp_dataflash_erase.lua")
   end
   return dataflashErase
 end
 
 local function ensureDataflashSummary()
   if not dataflashSummary then
-    dataflashSummary = assert(loadfile("lib/msp_dataflash_summary.lua"))()
+    dataflashSummary = requireModule("lib/msp_dataflash_summary.lua")
   end
   return dataflashSummary
 end
 
 local function ensureBatteryProfileMsp()
   if not batteryProfileMsp then
-    batteryProfileMsp = assert(loadfile("lib/msp_battery_profile.lua"))()
+    batteryProfileMsp = requireModule("lib/msp_battery_profile.lua")
   end
   return batteryProfileMsp
 end
@@ -51,7 +52,7 @@ local mspApiVersion = nil
 
 local function ensureMspApiVersion()
   if not mspApiVersion then
-    mspApiVersion = assert(loadfile("lib/msp_api_version.lua"))()
+    mspApiVersion = requireModule("lib/msp_api_version.lua")
   end
   return mspApiVersion
 end
@@ -71,14 +72,14 @@ local ethosVersion = nil
 
 local function ensureModelPreferences()
   if not modelPreferences then
-    modelPreferences = assert(loadfile("lib/model_preferences.lua"))()
+    modelPreferences = requireModule("lib/model_preferences.lua")
   end
   return modelPreferences
 end
 
 local function ensureEthosVersion()
   if not ethosVersion then
-    ethosVersion = assert(loadfile("lib/ethos_version.lua"))()
+    ethosVersion = requireModule("lib/ethos_version.lua")
   end
   return ethosVersion
 end
@@ -189,7 +190,7 @@ end
 
 local function ensureDashboardContext()
   if not dashboardContext then
-    dashboardContext = assert(loadfile("widgets/dashboard/context.lua"))()
+    dashboardContext = requireModule("widgets/dashboard/context.lua")
   end
   return dashboardContext
 end
@@ -205,7 +206,7 @@ end
 
 local function ensureDashboardEngine()
   if not dashboardEngine then
-    dashboardEngine = assert(loadfile("widgets/dashboard/engine.lua"))()
+    dashboardEngine = requireModule("widgets/dashboard/engine.lua")
   end
   return dashboardEngine
 end

@@ -53,7 +53,8 @@ Arc Geometry/Advanced
     gaugepaddingbottom  : number    -- (Optional) Extra space added below arc region, pushing arc upward (vertical only)
 ]]--
 
-local wfsuite = assert(loadfile("widgets/dashboard/context.lua"))()
+local requireModule = assert(loadfile("lib/require.lua"))()
+local wfsuite = requireModule("widgets/dashboard/context.lua")
 local lcd = lcd
 
 local tostring = tostring

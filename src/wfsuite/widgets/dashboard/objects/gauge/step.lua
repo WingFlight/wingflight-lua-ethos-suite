@@ -48,7 +48,8 @@ Bar padding parameters
     barpaddingbottom    : number    -- (Optional) Bottom padding for bar
 ]]
 
-local wfsuite = assert(loadfile("widgets/dashboard/context.lua"))()
+local requireModule = assert(loadfile("lib/require.lua"))()
+local wfsuite = requireModule("widgets/dashboard/context.lua")
 local lcd = lcd
 
 local floor = math.floor

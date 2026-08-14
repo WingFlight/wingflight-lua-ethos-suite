@@ -12,7 +12,8 @@ if package.loaded["wfsuite.lib.msp_board_mount_trim"] then
   return package.loaded["wfsuite.lib.msp_board_mount_trim"]
 end
 
-local mspcodec = assert(loadfile("lib/mspcodec.lua"))()
+local requireModule = assert(loadfile("lib/require.lua"))()
+local mspcodec = requireModule("lib/mspcodec.lua")
 
 local READ_COMMAND = 0x5F03
 local WRITE_COMMAND = 0x5F04

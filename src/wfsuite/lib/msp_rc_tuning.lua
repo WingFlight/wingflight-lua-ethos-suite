@@ -46,7 +46,8 @@ if package.loaded["wfsuite.lib.msp_rc_tuning"] then
   return package.loaded["wfsuite.lib.msp_rc_tuning"]
 end
 
-local mspcodec = assert(loadfile("lib/mspcodec.lua"))()
+local requireModule = assert(loadfile("lib/require.lua"))()
+local mspcodec = requireModule("lib/mspcodec.lua")
 
 local READ_COMMAND = 111
 local WRITE_COMMAND = 204

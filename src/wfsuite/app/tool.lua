@@ -34,7 +34,8 @@
 -- app/header.lua, a second lib/memstats.lua load, app/tile_grid.lua) to
 -- that same first-open moment instead of paying all of it at boot for
 -- pilots who may never open this tool in a given session.
-local bus = assert(loadfile("lib/bus.lua"))()
+local requireModule = assert(loadfile("lib/require.lua"))()
+local bus = requireModule("lib/bus.lua")
 
 local navigation = nil
 local menuContainer = nil
@@ -45,42 +46,42 @@ local settingsStore = nil
 
 local function ensureNavigation()
   if not navigation then
-    navigation = assert(loadfile("app/navigation.lua"))()
+    navigation = requireModule("app/navigation.lua")
   end
   return navigation
 end
 
 local function ensureMenuContainer()
   if not menuContainer then
-    menuContainer = assert(loadfile("app/menu_container.lua"))()
+    menuContainer = requireModule("app/menu_container.lua")
   end
   return menuContainer
 end
 
 local function ensureMemstats()
   if not memstats then
-    memstats = assert(loadfile("lib/memstats.lua"))()
+    memstats = requireModule("lib/memstats.lua")
   end
   return memstats
 end
 
 local function ensureEscProtocolGuard()
   if not escProtocolGuard then
-    escProtocolGuard = assert(loadfile("app/esc_protocol_guard.lua"))()
+    escProtocolGuard = requireModule("app/esc_protocol_guard.lua")
   end
   return escProtocolGuard
 end
 
 local function ensureServoBusGuard()
   if not servoBusGuard then
-    servoBusGuard = assert(loadfile("app/servo_bus_guard.lua"))()
+    servoBusGuard = requireModule("app/servo_bus_guard.lua")
   end
   return servoBusGuard
 end
 
 local function ensureSettingsStore()
   if not settingsStore then
-    settingsStore = assert(loadfile("lib/settings_store.lua"))()
+    settingsStore = requireModule("lib/settings_store.lua")
   end
   return settingsStore
 end

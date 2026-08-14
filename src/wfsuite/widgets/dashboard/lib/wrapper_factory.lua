@@ -7,7 +7,8 @@ if package.loaded["wfsuite.widgets.dashboard.wrapper_factory"] then
     return package.loaded["wfsuite.widgets.dashboard.wrapper_factory"]
 end
 
-local wfsuite = assert(loadfile("widgets/dashboard/context.lua"))()
+local requireModule = assert(loadfile("lib/require.lua"))()
+local wfsuite = requireModule("widgets/dashboard/context.lua")
 
 local clock = os.clock
 local utils = wfsuite.widgets.dashboard.utils
