@@ -31,7 +31,7 @@
 -- task manifests. There is no idle MSP heartbeat.
 
 local bus, settingsStore, debugLog = ...
-local requireModule = assert(loadfile("lib/require.lua"))()
+local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local handshake = requireModule("lib/msp_handshake.lua")
 local mspApiVersion = requireModule("lib/msp_api_version.lua")
 local mspBattery = requireModule("lib/msp_battery.lua")

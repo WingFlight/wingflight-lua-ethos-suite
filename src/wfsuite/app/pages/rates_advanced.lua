@@ -50,7 +50,7 @@
 -- save, profile-switch-reload -- comes from app/page_runtime.lua, shared
 -- with every page.
 
-local requireModule = assert(loadfile("lib/require.lua"))()
+local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local pageRuntime = requireModule("app/page_runtime.lua")
 local fieldLayout = requireModule("app/field_layout.lua")
 local rcTuning = requireModule("lib/msp_rc_tuning.lua")

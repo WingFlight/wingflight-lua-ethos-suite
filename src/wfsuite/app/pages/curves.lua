@@ -30,7 +30,7 @@
 -- app/pages/alignment.lua uses app/alignment_visual.lua) is read-only
 -- feedback, never the editing surface itself.
 
-local requireModule = assert(loadfile("lib/require.lua"))()
+local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local bus = requireModule("lib/bus.lua")
 local closeKey = requireModule("app/close_key.lua")
 local fieldLayout = requireModule("app/field_layout.lua")

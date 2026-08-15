@@ -13,7 +13,7 @@ if package.loaded["wfsuite.lib.debug_log"] then
   return package.loaded["wfsuite.lib.debug_log"]
 end
 
-local requireModule = assert(loadfile("lib/require.lua"))()
+local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 
 local bus, settingsStore = ...
 bus = bus or requireModule("lib/bus.lua")

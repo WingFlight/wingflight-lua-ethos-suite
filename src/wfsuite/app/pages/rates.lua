@@ -34,7 +34,7 @@
 -- and auto-reload-on-profile-switch app/pages/pids.lua gets, just keyed
 -- off the other profile slot.
 
-local requireModule = assert(loadfile("lib/require.lua"))()
+local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local pageRuntime = requireModule("app/page_runtime.lua")
 local rcTuning = requireModule("lib/msp_rc_tuning.lua")
 local rateCurveScale = requireModule("lib/rate_curve_scale.lua")

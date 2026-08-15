@@ -28,7 +28,7 @@
     imagealign          : string   -- (Optional) Image alignment ("center", "left", "right", "top", "bottom")
 ]]
 
-local requireModule = assert(loadfile("lib/require.lua"))()
+local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local wfsuite = requireModule("widgets/dashboard/context.lua")
 
 local render = {}

@@ -34,7 +34,7 @@
 -- app/header.lua, a second lib/memstats.lua load, app/tile_grid.lua) to
 -- that same first-open moment instead of paying all of it at boot for
 -- pilots who may never open this tool in a given session.
-local requireModule = assert(loadfile("lib/require.lua"))()
+local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local bus = requireModule("lib/bus.lua")
 
 local navigation = nil
