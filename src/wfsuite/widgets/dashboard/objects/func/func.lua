@@ -10,7 +10,7 @@
 Note: This widget does not process colors, layout, or padding. All rendering and caching logic must be handled in the user's custom functions.
 ]] --
 
-local requireModule = assert(loadfile("lib/require.lua"))()
+local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local wfsuite = requireModule("widgets/dashboard/context.lua")
 
 local render = {}

@@ -3,7 +3,7 @@
 -- bus/settingsStore are the instances tasks/background.lua already loaded
 -- for itself, passed in as this chunk's args rather than loadfile()'d again
 -- here -- see the equivalent note atop tasks/session.lua for why.
-local requireModule = assert(loadfile("lib/require.lua"))()
+local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 
 local bus, settingsStore = ...
 

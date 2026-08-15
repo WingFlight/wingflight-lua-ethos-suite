@@ -22,7 +22,7 @@
 -- fields' fw_tpa_gain/fw_tpa_curve/master_gain_*/gain_curve_* now that
 -- they've moved here.
 
-local requireModule = assert(loadfile("lib/require.lua"))()
+local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local pageRuntime = requireModule("app/page_runtime.lua")
 local fieldLayout = requireModule("app/field_layout.lua")
 local pidProfile = requireModule("lib/msp_pid_profile.lua")

@@ -22,7 +22,7 @@ if package.loaded["wfsuite.lib.msp_gain_curves"] then
   return package.loaded["wfsuite.lib.msp_gain_curves"]
 end
 
-local requireModule = assert(loadfile("lib/require.lua"))()
+local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local mspcodec = requireModule("lib/mspcodec.lua")
 local curvePoints = requireModule("lib/curve_points.lua")
 

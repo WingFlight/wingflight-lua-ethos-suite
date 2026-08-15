@@ -25,7 +25,7 @@
 -- geometry setting, not something that varies by PID/rate profile,
 -- same reasoning as app/pages/alignment.lua's own board-alignment data.
 
-local requireModule = assert(loadfile("lib/require.lua"))()
+local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local pageRuntime = requireModule("app/page_runtime.lua")
 local mixerInput = requireModule("lib/msp_mixer_input.lua")
 

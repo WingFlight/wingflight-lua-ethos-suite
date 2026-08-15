@@ -88,7 +88,7 @@ local bus, settingsStore, debugLog, mspCommon, mspTransportSelect, Scheduler,
       telemetrySensors, mspQueue, session, logging, audioEvents, audioSwitches,
       scheduler
 
-local requireModule = assert(loadfile("lib/require.lua"))()
+local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 
 local TASK_STATUS_INTERVAL = 0.5
 local MEMORY_LOG_INTERVAL = 5

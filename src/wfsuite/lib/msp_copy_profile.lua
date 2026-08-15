@@ -4,7 +4,7 @@ if package.loaded["wfsuite.lib.msp_copy_profile"] then
   return package.loaded["wfsuite.lib.msp_copy_profile"]
 end
 
-local requireModule = assert(loadfile("lib/require.lua"))()
+local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local mspcodec = requireModule("lib/mspcodec.lua")
 
 local WRITE_COMMAND = 183

@@ -5,7 +5,7 @@ if package.loaded["wfsuite.lib.msp_sensor_alignment"] then
   return package.loaded["wfsuite.lib.msp_sensor_alignment"]
 end
 
-local requireModule = assert(loadfile("lib/require.lua"))()
+local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local mspcodec = requireModule("lib/mspcodec.lua")
 
 local READ_COMMAND = 126
