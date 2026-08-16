@@ -570,6 +570,18 @@
     "needs_translation": false
   },
   {
+    "file": "events/mode/rth.wav",
+    "english": "RTH",
+    "translation": null,
+    "needs_translation": true
+  },
+  {
+    "file": "events/mode/gpsloiter.wav",
+    "english": "GPS Loiter",
+    "translation": null,
+    "needs_translation": true
+  },
+  {
     "file": "events/mode/failsafe.wav",
     "english": "Failsafe",
     "translation": "Failsafe",
