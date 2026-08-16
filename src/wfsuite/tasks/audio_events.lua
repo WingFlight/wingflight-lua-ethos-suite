@@ -56,6 +56,8 @@ local GOVERNOR_FILES = {
 local FLIGHT_MODE_PRIORITY = {
   {bit = 0, file = "failsafe.wav"},     -- FAILSAFE_MODE_BIT
   {bit = 6, file = "gpsrescue.wav"},    -- GPS_RESCUE_MODE_BIT
+  {bit = 13, file = "rth.wav"},         -- RTH_MODE_BIT
+  {bit = 12, file = "gpsloiter.wav"},   -- LOITER_MODE_BIT
   {bit = 7, file = "passthrough.wav"},  -- PASSTHROUGH_MODE_BIT
   {bit = 10, file = "manual.wav"},      -- MANUAL_MODE_BIT
   {bit = 9, file = "autohover.wav"},    -- AUTOHOVER_MODE_BIT
