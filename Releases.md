@@ -1,3 +1,11 @@
+# 0.0.12
+
+Align GPS Loiter/RTH flight modes with firmware.
+Reduce boot/dashboard startup overhead via lazy module loading, load memoization, and reduced loadfile duplication.
+Fix dashboard telemetry refresh on link loss and invalid MSP version overlay handling.
+Fix alignment orientation and retry S.Port telemetry sensor setup.
+Persist disabled model dashboard theme; update i18n and deploy script retry handling.
+
 # 0.0.11
 
 Improve dashboard startup, wakeup, theme reload, and low-resolution layout stability under Ethos instruction and paint budgets.
