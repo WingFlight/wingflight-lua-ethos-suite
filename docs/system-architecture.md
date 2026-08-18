@@ -19,7 +19,7 @@ This section provides a high-level view of the Rotorflight Lua Ethos Suite (`wfs
 
    * **Tasks**: Handle MSP interactions, scheduling, parsing, telemetry, and callbacks. Exposed via `wfsuite.tasks.msp.api` and `wfsuite.tasks.callback`.
    * **App**: Manages pages and user interaction. Loads modules from `app/modules`, builds menus, and invokes MSP operations through the API loader.
-3. **Widgets**: Modules and pages incorporate widgets for consistent UI elements. Widgets are loaded from `widgets/dashboard/objects` and can be configured via module parameters.
+3. **Widgets**: Modules and pages incorporate widgets for consistent UI elements. The dashboard widget's own box renderers (gauge/text/dial/image/navigation/time) now live in the shared `dashboard` package (`SCRIPTS:/dashboard/widgets/dashboard/objects`, a required companion install) rather than in this repo -- `widgets/dashboard/context.lua`/`engine.lua` here are thin shims onto it (see `widgets/dashboard.lua`'s own `init()` for the hard-dependency check). Themes (`widgets/dashboard/themes/**`) still live in this repo and can be configured via module parameters.
 4. **Session & Preferences**:
 
 * **Preferences**: Stored in `SCRIPTS:/wfsuite.user/preferences.ini`, merged with defaults on startup.
