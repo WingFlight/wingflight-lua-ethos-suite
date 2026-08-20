@@ -100,6 +100,7 @@ local SENSOR_LIST = {
   [105] = {name = "@i18n(telemetry.sensor_dbg5)@", group = "debug"},
   [106] = {name = "@i18n(telemetry.sensor_dbg6)@", group = "debug"},
   [107] = {name = "@i18n(telemetry.sensor_dbg7)@", group = "debug"},
+  [118] = {name = "@i18n(telemetry.sensor_osc_limiter)@", group = "status"},
 }
 
 local GROUP_TITLE = {

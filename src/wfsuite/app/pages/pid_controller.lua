@@ -44,6 +44,11 @@ local ITERM_RELAX_OPTIONS = {
   {"@i18n(app.modules.pid_controller.tbl_rpy)@", 2},
 }
 
+local OFF_ON_OPTIONS = {
+  {"@i18n(app.modules.pid_controller.tbl_off)@", 0},
+  {"@i18n(app.modules.pid_controller.tbl_on)@", 1},
+}
+
 -- opts.onBack: called to return to the menu (the header's Menu button or
 -- the physical Back key -- see app/page_runtime.lua's buildChrome()).
 -- opts.setEventHandler/opts.setWakeupHandler: see app/menu_container.lua
@@ -87,6 +92,19 @@ local function open(opts)
   fieldLayout.buildGroup(runtime, "", {
     {title = "@i18n(app.modules.pid_controller.level)@", spec = {key = "cross_axis_relax_level"}},
     {title = "@i18n(app.modules.pid_controller.cutoff)@", spec = {key = "cross_axis_relax_cutoff"}},
+  })
+
+  fieldLayout.buildSingle(runtime, "@i18n(app.modules.pid_controller.osc_limiter)@", {key = "osc_limiter", choices = OFF_ON_OPTIONS})
+
+  fieldLayout.buildGroup(runtime, "@i18n(app.modules.pid_controller.osc_limiter_band)@", {
+    {title = "@i18n(app.modules.pid_controller.min)@", spec = {key = "osc_limiter_min_hz"}},
+    {title = "@i18n(app.modules.pid_controller.max)@", spec = {key = "osc_limiter_max_hz"}},
+  })
+
+  fieldLayout.buildGroup(runtime, "", {
+    {title = "@i18n(app.modules.pid_controller.threshold)@", spec = {key = "osc_limiter_threshold"}},
+    {title = "@i18n(app.modules.pid_controller.floor)@", spec = {key = "osc_limiter_floor"}},
+    {title = "@i18n(app.modules.pid_controller.engage)@", spec = {key = "osc_limiter_engage_ms"}},
   })
 
   runtime:loadInitial()
