@@ -8110,6 +8110,13 @@
       "reverse_text": false,
       "translation": "Chargement des donnees du controleur de vol..."
     },
+    "msg_please_disarm_to_save_warning": {
+      "english": "The flight controller rejected the save while armed. Your changes are safe and will be written to flash when you disarm.",
+      "max_length": 120,
+      "needs_translation": false,
+      "reverse_text": false,
+      "translation": "Le contrôleur de vol a refusé l'enregistrement car il est armé. Vos modifications sont conservées et seront écrites en mémoire flash au désarmement."
+    },
     "msg_reload_settings": {
       "english": "Reload data from flight controller?",
       "max_length": 35,
@@ -8137,6 +8144,13 @@
       "needs_translation": true,
       "reverse_text": false,
       "translation": "Save failed"
+    },
+    "msg_save_not_commited": {
+      "english": "Save not committed",
+      "max_length": 18,
+      "needs_translation": false,
+      "reverse_text": false,
+      "translation": "Non enregistré"
     },
     "msg_save_settings": {
       "english": "Save settings",
