@@ -1,3 +1,10 @@
+# 0.0.13
+
+Fix dashboard boxes flashing empty on cold-start repaint.
+Fix dashboard stuck on postflight after rearm (throttle detection).
+Fix broken armed-save dialog missing i18n keys.
+Fix dashboard widgets starving for updates on the post-wake render pass.
+
 # 0.0.12
 
 Align GPS Loiter/RTH flight modes with firmware.
