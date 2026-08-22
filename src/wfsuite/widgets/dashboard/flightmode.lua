@@ -58,6 +58,16 @@ end
 -- valid across reconnects to the *same* channel index, so it's fine to
 -- reuse. Returns nil (not 0) whenever the channel can't be read yet, so
 -- callers can tell "no data" apart from "stick at low end".
+--
+-- Channel Sources report on Ethos's raw -1024..1024 scale (same range
+-- app/pages/modes.lua's channelRawToUs() converts from), not the 0-100
+-- percent scale THROTTLE_THRESHOLD is tuned against -- comparing the two
+-- directly meant the threshold sat just above center-stick instead of at
+-- 35% up from low, so any hand position at arm time on a spring-centered
+-- throttle gimbal could cross it immediately (self-caught: dashboard
+-- flipped to "inflight" the instant the craft armed, before any throttle
+-- input). Normalized to the same 0-100 basis here so both signals mean the
+-- same thing to THROTTLE_THRESHOLD.
 local function resolveThrottleChannelValue(widget)
   local rxMap = widget.rxMap
   local member = rxMap and rxMap.throttle
@@ -76,7 +86,7 @@ local function resolveThrottleChannelValue(widget)
   if not source then return nil end
   local value = source:value()
   if type(value) ~= "number" then return nil end
-  return value
+  return (value + 1024) / 2048 * 100
 end
 
 local function inFlight(widget)
