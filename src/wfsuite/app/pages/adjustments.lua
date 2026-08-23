@@ -1,8 +1,7 @@
 -- Controls -> Adjustments.
 --
--- Custom editor for ADJUSTMENT_RANGES. The original page has additional
--- per-slot prefetch paths; this lite port keeps the same editable surface
--- on top of the bulk read and changed-slot writes to minimize moving parts.
+-- Custom editor for ADJUSTMENT_RANGES. Reads use the firmware's indexed
+-- range command so page load avoids one large MSP reply over telemetry.
 
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local bus = requireModule("lib/bus.lua")
@@ -342,6 +341,35 @@ local function open(opts)
     headerHandle.setReloadEnabled(not busy)
   end
 
+  local function loadRanges(onData, onError)
+    local loadedRanges = {}
+    local slot = 1
+
+    local function fail(reason)
+      if onError then onError(reason) end
+    end
+
+    local function readNext()
+      if disposed then return end
+      if slot > adjustmentsMsp.RANGE_COUNT then
+        onData({ranges = loadedRanges})
+        return
+      end
+
+      local current = slot
+      bus.publish("msp.request", adjustmentsMsp.buildReadSlotMessage(current, function(range)
+        if disposed then return end
+        loadedRanges[current] = cloneRange(range)
+        slot = current + 1
+        readNext()
+      end, function(reason)
+        fail(reason or ("MSP_GET_ADJUSTMENT_RANGE failed at slot " .. tostring(current)))
+      end))
+    end
+
+    readNext()
+  end
+
   local function markDirty(slot)
     slot = slot or selected
     dirtySlots[slot] = not sameRange(ranges[slot], original[slot])
@@ -573,7 +601,7 @@ local function open(opts)
               dirtySlots = {}
               updateButtons()
               showProgress("@i18n(app.modules.adjustments.loading_ranges)@")
-              bus.publish("msp.request", adjustmentsMsp.buildReadMessage(function(data)
+              loadRanges(function(data)
                 if disposed then return end
                 ranges = cloneRanges(data.ranges)
                 original = data.ranges or {}
@@ -587,7 +615,7 @@ local function open(opts)
                 busy = false
                 closeDialog(headerHandle and headerHandle.focusReload)
                 updateButtons()
-              end))
+              end)
               return true
             end},
             {label = BTN_CANCEL, action = function() return true end},
@@ -814,7 +842,7 @@ local function open(opts)
   form.clear()
   render()
   showProgress("@i18n(app.modules.adjustments.loading_ranges)@")
-  bus.publish("msp.request", adjustmentsMsp.buildReadMessage(function(data)
+  loadRanges(function(data)
     if disposed then return end
     ranges = cloneRanges(data.ranges)
     original = data.ranges or {}
@@ -828,7 +856,7 @@ local function open(opts)
     busy = false
     closeDialog()
     updateButtons()
-  end))
+  end)
 end
 
 return {open = open}
