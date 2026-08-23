@@ -1,3 +1,11 @@
+# 0.0.14
+
+Clarify ARM_WIGGLE configuration label.
+Make adjustment range loading reliable.
+Add thrust vector adjustment functions.
+Fix mixer setup and add configuration feature toggles.
+Fix dirty state tracking for servo edits.
+
 # 0.0.13
 
 Fix dashboard boxes flashing empty on cold-start repaint.
