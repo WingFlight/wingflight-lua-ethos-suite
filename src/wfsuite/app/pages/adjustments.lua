@@ -127,6 +127,26 @@ local ADJUST_FUNCTIONS = {
   {id = 89, name = "Servo Trim Roll", min = -200, max = 200},
   {id = 90, name = "Servo Trim Pitch", min = -200, max = 200},
   {id = 91, name = "Servo Trim Yaw", min = -200, max = 200},
+  -- Thrust Vector adjustment IDs/ranges verified against
+  -- wingflight-firmware src/main/fc/rc_adjustments.h/.c.
+  {id = 92, name = "TV Master Gain Roll", min = 25, max = 1000},
+  {id = 93, name = "TV Master Gain Pitch", min = 25, max = 1000},
+  {id = 94, name = "TV Master Gain Yaw", min = 25, max = 1000},
+  {id = 95, name = "TV Roll P", min = 0, max = 1000},
+  {id = 96, name = "TV Roll I", min = 0, max = 1000},
+  {id = 97, name = "TV Roll D", min = 0, max = 1000},
+  {id = 98, name = "TV Roll F", min = 0, max = 1000},
+  {id = 99, name = "TV Roll B", min = 0, max = 1000},
+  {id = 100, name = "TV Pitch P", min = 0, max = 1000},
+  {id = 101, name = "TV Pitch I", min = 0, max = 1000},
+  {id = 102, name = "TV Pitch D", min = 0, max = 1000},
+  {id = 103, name = "TV Pitch F", min = 0, max = 1000},
+  {id = 104, name = "TV Pitch B", min = 0, max = 1000},
+  {id = 105, name = "TV Yaw P", min = 0, max = 1000},
+  {id = 106, name = "TV Yaw I", min = 0, max = 1000},
+  {id = 107, name = "TV Yaw D", min = 0, max = 1000},
+  {id = 108, name = "TV Yaw F", min = 0, max = 1000},
+  {id = 109, name = "TV Yaw B", min = 0, max = 1000},
 }
 
 local FUNCTION_OPTIONS = {}
