@@ -6,20 +6,21 @@
 --
 -- Matches the original suite's own app/modules/configuration/
 -- configuration.lua field selection: craft name, PID loop speed, and
--- two feature toggles (GPS, LED Strip) -- a small slice of a
--- 4-MSP-command page (NAME, ADVANCED_CONFIG, FEATURE_CONFIG, STATUS),
--- matching that suite's own openPage()/startLoad(), which reads exactly
--- those same four.
+-- feature toggles (GPS, LED Strip, Thrust Vector) plus a servo wiggle
+-- toggle -- a small slice of a 5-MSP-command page (NAME,
+-- ADVANCED_CONFIG, FEATURE_CONFIG, ARMING_CONFIG, STATUS),
+-- following the same multi-source load/save pattern as that suite's own
+-- openPage()/startLoad().
 --
--- Arm-ready/armed/error/fatal wiggle config (MSP_ARMING_CONFIG,
--- wingflight-native -- see lib/msp_arming_config.lua's own header) has a
--- working codec but deliberately no widget on this page -- pulled after
--- an initial attempt, kept off this form by request. Wire the source
--- back in (see git history / lib/msp_arming_config.lua's own comment)
--- whenever it lands on its own page instead.
+-- ARM_WIGGLE config is not part of
+-- FEATURE_CONFIG; it lives in MSP_ARMING_CONFIG's `wiggle_flags` U32.
+-- This page exposes only the normal ready-wiggle bit beside the feature
+-- toggles and leaves the firmware's more specific armed/error/fatal
+-- bits untouched if they already exist. The codec already preserves
+-- ARMING_CONFIG's unrelated `auto_disarm_delay` field on save.
 --
 -- Multi-source (app/page_runtime.lua's `sources`, not `mspModule`) --
--- four independent commands combined onto one page, same precedent as
+-- independent commands combined onto one page, same precedent as
 -- app/pages/tail_rotor.lua. `status` is genuinely **read-only**
 -- (MSP_STATUS has no MSP_SET_STATUS in firmware at all -- confirmed
 -- against rotorflight-firmware's own src/main/msp/msp.c) -- its
@@ -72,8 +73,8 @@
 -- entirely, for exactly this reason: its render() (building every field,
 -- including its own addTextField call) never runs until state.loaded is
 -- true, called from the tool's own wakeup() -- nothing is built at all
--- while state.loading. This page now does the same: all 4 fields (name,
--- PID loop speed, GPS, LED Strip) are built together from a single
+-- while state.loading. This page now does the same: all fields are built
+-- together from a single
 -- buildFields(), wired through onLoaded (guarded so a later manual
 -- Reload firing onLoaded again doesn't try to build a second copy of
 -- everything on top of the first) -- which itself is safely deferred to
@@ -97,13 +98,13 @@
 -- essentially never changes mid-session, so this is an accepted,
 -- extremely unlikely edge case, not a real gap.
 --
--- GPS/LED Strip reuse app/field_layout.lua's existing `bit` spec
+-- Feature toggles reuse app/field_layout.lua's existing `bit` spec
 -- (app/pages/governor_flags.lua's own convention, promoted there for
 -- exactly this kind of reuse) against `featureConfig.enabledFeatures`,
--- a packed U32 -- bit positions (7/16) confirmed against
--- rotorflight-lua-ethos-suite's own FEATURE_CONFIG.lua FEATURES_BITMAP.
+-- a packed U32 -- bit positions confirmed against wingflight-firmware's
+-- config/feature.h and wingflight-configurator's Features.GROUPS.OTHER.
 -- fieldLayout.buildSingle() doesn't return the field it builds, so
--- re-enabling all 4 fields after this deferred build (loadData()'s own
+-- re-enabling every field after this deferred build (loadData()'s own
 -- "enable every registered field" loop already ran once, before any of
 -- these existed) iterates `runtime.fields` directly rather than
 -- threading each field reference back out -- see buildFields()'s own
@@ -118,6 +119,7 @@ local fieldLayout = requireModule("app/field_layout.lua")
 local mspName = requireModule("lib/msp_name.lua")
 local advancedConfig = requireModule("lib/msp_advanced_config.lua")
 local featureConfig = requireModule("lib/msp_feature_config.lua")
+local armingConfig = requireModule("lib/msp_arming_config.lua")
 local mspStatus = requireModule("lib/msp_status.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.configuration.name)@"
@@ -184,6 +186,7 @@ local function open(opts)
       {key = "craftName", mspModule = mspName},
       {key = "advancedConfig", mspModule = advancedConfig},
       {key = "featureConfig", mspModule = featureConfig},
+      {key = "armingConfig", mspModule = armingConfig},
       {key = "status", mspModule = mspStatus},
     },
     opts = opts,
@@ -195,6 +198,7 @@ local function open(opts)
       "wfsuite.lib.msp_name",
       "wfsuite.lib.msp_advanced_config",
       "wfsuite.lib.msp_feature_config",
+      "wfsuite.lib.msp_arming_config",
       "wfsuite.lib.msp_status",
     },
     onLoaded = function()
@@ -277,10 +281,16 @@ local function open(opts)
     fieldLayout.buildSingle(runtime, "@i18n(app.modules.configuration.feature_led_strip)@",
       {key = "enabledFeatures", source = "featureConfig", bit = featureConfig.FEATURE_BIT_LED_STRIP, choices = OFF_ON_OPTIONS})
 
+    fieldLayout.buildSingle(runtime, "@i18n(app.modules.configuration.feature_thrust_vector)@",
+      {key = "enabledFeatures", source = "featureConfig", bit = featureConfig.FEATURE_BIT_THRUST_VECTOR, choices = OFF_ON_OPTIONS})
+
+    fieldLayout.buildSingle(runtime, "@i18n(app.modules.configuration.feature_servo_wiggle)@",
+      {key = "wiggle_flags", source = "armingConfig", bit = armingConfig.WIGGLE_BIT_READY, choices = OFF_ON_OPTIONS})
+
     -- registerField() disables every field by default (see its own
     -- comment: normally loadData()'s own "enable every registered field"
     -- loop, run right before onLoaded fires, is what turns it back on)
-    -- -- but that loop already ran before any of these 4 fields existed,
+    -- -- but that loop already ran before any of these fields existed,
     -- so they have to be enabled explicitly here instead. Iterates
     -- runtime.fields directly since fieldLayout.buildSingle() doesn't
     -- return the fields it builds (see this file's own header comment).

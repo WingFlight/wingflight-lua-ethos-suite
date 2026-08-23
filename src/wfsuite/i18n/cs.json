@@ -1390,6 +1390,20 @@
           "reverse_text": false,
           "translation": "LED_PRUH"
         },
+        "feature_thrust_vector": {
+          "english": "THRUST_VECTORING",
+          "max_length": 16,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "THRUST_VECTORING"
+        },
+        "feature_servo_wiggle": {
+          "english": "ARM_WIGGLE",
+          "max_length": 12,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "ARM_WIGGLE"
+        },
         "feature_wiggle_armed": {
           "english": "Armed wiggle",
           "max_length": 12,

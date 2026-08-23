@@ -1,6 +1,6 @@
 -- Schema + message-builders for the MSP_FEATURE_CONFIG /
 -- MSP_SET_FEATURE_CONFIG command pair (cmd 36 read / 37 write) --
--- app/pages/configuration.lua's GPS/LED Strip feature toggles.
+-- app/pages/configuration.lua's GPS/LED Strip/Thrust Vector feature toggles.
 --
 -- Confirmed directly against rotorflight-firmware's own wire handlers
 -- (src/main/msp/msp.c): both directions are a single U32
@@ -8,8 +8,8 @@
 -- read/write, no partial-write asymmetry the way lib/msp_advanced_config.lua
 -- has. Cross-checked against rotorflight-lua-ethos-suite's own
 -- tasks/scheduler/msp/api/FEATURE_CONFIG.lua, whose own FEATURES_BITMAP
--- lists every bit position -- only the 2 this rebuild's Configuration
--- page actually exposes are named here (GPS, LED Strip); the rest
+-- lists every bit position -- only the features this rebuild's pages
+-- actually expose are named here; the rest
 -- of that ~30-bit table isn't ported speculatively, same "only what's
 -- actually used" convention as lib/telemetry_sensors.lua's own header
 -- comment.
@@ -40,11 +40,13 @@ local WRITE_COMMAND = 37
 
 -- Bit positions within `enabledFeatures`, matching rotorflight-lua-ethos-
 -- suite's own FEATURE_CONFIG.lua FEATURES_BITMAP (gps=7, telemetry=10,
--- led_strip=16, freq_sensor=28) -- standard
--- Betaflight/Wingflight feature-flag layout.
+-- led_strip=16, thrust_vector=24, freq_sensor=28) -- standard
+-- Betaflight/Wingflight feature-flag layout, with Thrust Vector confirmed
+-- against wingflight-firmware's config/feature.h.
 local FEATURE_BIT_GPS = 7
 local FEATURE_BIT_TELEMETRY = 10
 local FEATURE_BIT_LED_STRIP = 16
+local FEATURE_BIT_THRUST_VECTOR = 24
 local FEATURE_BIT_FREQ_SENSOR = 28
 
 local function getBit(value, bit)
@@ -71,6 +73,7 @@ local msp_feature_config = {
   FEATURE_BIT_GPS = FEATURE_BIT_GPS,
   FEATURE_BIT_TELEMETRY = FEATURE_BIT_TELEMETRY,
   FEATURE_BIT_LED_STRIP = FEATURE_BIT_LED_STRIP,
+  FEATURE_BIT_THRUST_VECTOR = FEATURE_BIT_THRUST_VECTOR,
   FEATURE_BIT_FREQ_SENSOR = FEATURE_BIT_FREQ_SENSOR,
   getBit = getBit,
   setBit = setBit,

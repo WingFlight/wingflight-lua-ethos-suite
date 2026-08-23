@@ -31,6 +31,7 @@ local mixerInput = requireModule("lib/msp_mixer_input.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.mixer.name)@"
 local GAIN_MAX = 200
+local GAIN_STEP = 5
 
 local INVERT_OPTIONS = {
   {"@i18n(app.modules.mixer.normal)@", 0},
@@ -85,6 +86,10 @@ local function open(opts)
     local rt = controlRef.runtime
     if rt then rt:markDirty() end
   end
+  local function axisData(axisKey)
+    local rt = controlRef.runtime
+    return rt and rt.data and rt.data[axisKey] or nil
+  end
 
   local headerLine = form.addLine(" ")
   local headerSlots = form.getFieldSlots(headerLine, {0, 0})
@@ -94,13 +99,15 @@ local function open(opts)
   for _, axis in ipairs(AXES) do
     local line = form.addLine(axis.label)
     local slots = form.getFieldSlots(line, {0, 0})
-    local data = runtime.data[axis.key]
 
     local gainField = form.addNumberField(line, slots[1], 0, GAIN_MAX,
       function()
-        return gainFromRate(data[axis.rateKey])
+        local data = axisData(axis.key)
+        return gainFromRate(data and data[axis.rateKey])
       end,
       function(value)
+        local data = axisData(axis.key)
+        if not data then return end
         markDirty()
         local invert = invertFromRate(data[axis.rateKey])
         local rate = (tonumber(value) or 0) * 10
@@ -108,13 +115,17 @@ local function open(opts)
         data[axis.rateKey] = rate
       end)
     gainField:suffix("%")
+    if gainField.step then gainField:step(GAIN_STEP) end
     runtime:registerField(axis.key .. "_gain", gainField)
 
     local invertField = form.addChoiceField(line, slots[2], INVERT_OPTIONS,
       function()
-        return invertFromRate(data[axis.rateKey])
+        local data = axisData(axis.key)
+        return invertFromRate(data and data[axis.rateKey])
       end,
       function(value)
+        local data = axisData(axis.key)
+        if not data then return end
         markDirty()
         local gain = gainFromRate(data[axis.rateKey])
         local rate = gain * 10

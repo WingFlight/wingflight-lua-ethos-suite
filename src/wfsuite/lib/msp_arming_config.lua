@@ -13,9 +13,10 @@
 -- WIGGLE_ARMED=2, WIGGLE_ERROR=3, WIGGLE_FATAL=4, each a bit position in
 -- `wiggle_flags` (src/main/cli/settings.c's wiggle_enable_* CLI vars
 -- confirm the bit-per-trigger mapping; src/main/pg/arming.c's own default
--- is BIT(WIGGLE_READY) only, matching this file's own SIMULATOR_RESPONSE)
--- -- app/pages/configuration.lua exposes all four now, not just the one
--- the pre-rewrite suite did.
+-- is BIT(WIGGLE_READY) only, matching this file's own SIMULATOR_RESPONSE).
+-- app/pages/configuration.lua intentionally exposes only WIGGLE_READY as
+-- the simple user-facing "enable servo wiggle" switch; the other bit
+-- constants stay named here for completeness and future advanced UI.
 --
 -- Self-caches via package.loaded (same mechanism lib/bus.lua uses) --
 -- app/pages/configuration.lua reloads fresh via loadfile() on every open.
