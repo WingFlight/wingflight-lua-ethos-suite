@@ -1764,37 +1764,9 @@
         }
       },
       "configuration": {
-        "feature_servo_wiggle": {
+        "arm_wiggle": {
           "english": "ARM_WIGGLE",
           "translation": "ARM_WIGGLE",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 12
-        },
-        "feature_wiggle_armed": {
-          "english": "Armed wiggle",
-          "translation": "解锁摆动",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 12
-        },
-        "feature_wiggle_error": {
-          "english": "Error wiggle",
-          "translation": "错误摆动",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 12
-        },
-        "feature_wiggle_fatal": {
-          "english": "Fatal wiggle",
-          "translation": "致命摆动",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 12
-        },
-        "feature_wiggle_ready": {
-          "english": "Ready wiggle",
-          "translation": "就绪摆动",
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 12

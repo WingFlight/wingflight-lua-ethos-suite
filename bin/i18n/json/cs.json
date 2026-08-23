@@ -1764,37 +1764,9 @@
         }
       },
       "configuration": {
-        "feature_servo_wiggle": {
+        "arm_wiggle": {
           "english": "ARM_WIGGLE",
           "translation": "ARM_WIGGLE",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 12
-        },
-        "feature_wiggle_armed": {
-          "english": "Armed wiggle",
-          "translation": "Chvění armed",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 12
-        },
-        "feature_wiggle_error": {
-          "english": "Error wiggle",
-          "translation": "Chvění chyba",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 12
-        },
-        "feature_wiggle_fatal": {
-          "english": "Fatal wiggle",
-          "translation": "Chvění fatál",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 12
-        },
-        "feature_wiggle_ready": {
-          "english": "Ready wiggle",
-          "translation": "Chvění ready",
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 12

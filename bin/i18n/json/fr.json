@@ -1764,37 +1764,9 @@
         }
       },
       "configuration": {
-        "feature_servo_wiggle": {
+        "arm_wiggle": {
           "english": "ARM_WIGGLE",
           "translation": "ARM_WIGGLE",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 12
-        },
-        "feature_wiggle_armed": {
-          "english": "Armed wiggle",
-          "translation": "Wiggle armé",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 12
-        },
-        "feature_wiggle_error": {
-          "english": "Error wiggle",
-          "translation": "Wiggle erreu",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 12
-        },
-        "feature_wiggle_fatal": {
-          "english": "Fatal wiggle",
-          "translation": "Wiggle fatal",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 12
-        },
-        "feature_wiggle_ready": {
-          "english": "Ready wiggle",
-          "translation": "Wiggle prêt",
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 12

@@ -5,9 +5,9 @@
 -- comment on ROOT_ENTRIES).
 --
 -- Matches the original suite's own app/modules/configuration/
--- configuration.lua field selection: craft name, PID loop speed, and
--- feature toggles (GPS, LED Strip, Thrust Vector) plus a servo wiggle
--- toggle -- a small slice of a 5-MSP-command page (NAME,
+-- configuration.lua field selection: craft name, PID loop speed, feature
+-- toggles (GPS, LED Strip, Thrust Vector), and ARM_WIGGLE -- a small
+-- slice of a 5-MSP-command page (NAME,
 -- ADVANCED_CONFIG, FEATURE_CONFIG, ARMING_CONFIG, STATUS),
 -- following the same multi-source load/save pattern as that suite's own
 -- openPage()/startLoad().
@@ -284,7 +284,7 @@ local function open(opts)
     fieldLayout.buildSingle(runtime, "@i18n(app.modules.configuration.feature_thrust_vector)@",
       {key = "enabledFeatures", source = "featureConfig", bit = featureConfig.FEATURE_BIT_THRUST_VECTOR, choices = OFF_ON_OPTIONS})
 
-    fieldLayout.buildSingle(runtime, "@i18n(app.modules.configuration.feature_servo_wiggle)@",
+    fieldLayout.buildSingle(runtime, "@i18n(app.modules.configuration.arm_wiggle)@",
       {key = "wiggle_flags", source = "armingConfig", bit = armingConfig.WIGGLE_BIT_READY, choices = OFF_ON_OPTIONS})
 
     -- registerField() disables every field by default (see its own
