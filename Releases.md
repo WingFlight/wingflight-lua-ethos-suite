@@ -1,3 +1,7 @@
+# 0.0.15
+
+Add support for Spektrum SRXL2 ESC.
+
 # 0.0.14
 
 Clarify ARM_WIGGLE configuration label.
