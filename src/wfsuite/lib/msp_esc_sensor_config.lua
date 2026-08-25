@@ -25,7 +25,8 @@ local PROTOCOL_CHOICES = {
   {"GRAUPNER", 11},
   {"XDFLY", 12},
   {"FrSky F.BUS", 13},
-  {"RECORD", 14},
+  {"SRXL2", 14},
+  {"RECORD", 15},
 }
 
 local ON_OFF_CHOICES = {
