@@ -5328,6 +5328,12 @@
           "needs_translation": false,
           "translation": "S.PORT Master"
         },
+        "function_srxl2_esc": {
+          "english": "SRXL2 ESC",
+          "max_length": 9,
+          "needs_translation": false,
+          "translation": "SRXL2 ESC"
+        },
         "function_telem_frsky": {
           "english": "Telemetry FrSky",
           "max_length": 15,

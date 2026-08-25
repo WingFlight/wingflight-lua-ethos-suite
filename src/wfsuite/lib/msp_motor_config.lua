@@ -21,7 +21,8 @@ local PROTOCOL_CHOICES = {
   {"DSHOT600", 7},
   {"PROSHOT", 8},
   {"CASTLE", 9},
-  {"DISABLED", 10},
+  {"SRXL2", 10},
+  {"DISABLED", 11},
 }
 
 local ON_OFF_CHOICES = {
