@@ -1,3 +1,7 @@
+# 0.0.16
+
+Version bump for release alignment; no suite-relevant changes this cycle.
+
 # 0.0.15
 
 Add support for Spektrum SRXL2 ESC.
