@@ -3691,10 +3691,10 @@
           "translation": "Up"
         },
         "name": {
-          "english": "SBUS-In Status",
-          "max_length": 14,
+          "english": "SBUS Input",
+          "max_length": 10,
           "needs_translation": false,
-          "translation": "SBUS-In Status"
+          "translation": "SBUS Input"
         },
         "not_configured": {
           "english": "No port is assigned the SBUS-In Fallback function.",
@@ -5391,10 +5391,10 @@
           "translation": "SRXL2 ESC"
         },
         "function_sbus_input": {
-          "english": "SBUS-In Fallback",
-          "max_length": 16,
+          "english": "SBUS Input (Satellite Rx)",
+          "max_length": 25,
           "needs_translation": false,
-          "translation": "SBUS-In Fallback"
+          "translation": "SBUS Input (Satellite Rx)"
         },
         "function_telem_frsky": {
           "english": "Telemetry FrSky",

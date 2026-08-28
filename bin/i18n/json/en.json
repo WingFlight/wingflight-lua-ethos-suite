@@ -2521,10 +2521,10 @@
           "max_length": 9
         },
         "function_sbus_input": {
-          "english": "SBUS-In Fallback",
-          "translation": "SBUS-In Fallback",
+          "english": "SBUS Input (Satellite Rx)",
+          "translation": "SBUS Input (Satellite Rx)",
           "needs_translation": false,
-          "max_length": 16
+          "max_length": 25
         },
         "function_telem_frsky": {
           "english": "Telemetry FrSky",
@@ -4637,10 +4637,10 @@
           "max_length": 2
         },
         "name": {
-          "english": "SBUS-In Status",
-          "translation": "SBUS-In Status",
+          "english": "SBUS Input",
+          "translation": "SBUS Input",
           "needs_translation": false,
-          "max_length": 14
+          "max_length": 10
         },
         "not_configured": {
           "english": "No port is assigned the SBUS-In Fallback function.",
