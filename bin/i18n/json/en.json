@@ -2496,6 +2496,18 @@
           "needs_translation": false,
           "max_length": 8
         },
+        "function_fc_link_master": {
+          "english": "FC Link (Master)",
+          "translation": "FC Link (Master)",
+          "needs_translation": false,
+          "max_length": 16
+        },
+        "function_fc_link_slave": {
+          "english": "FC Link (Slave)",
+          "translation": "FC Link (Slave)",
+          "needs_translation": false,
+          "max_length": 15
+        },
         "function_rx_serial": {
           "english": "RX Serial",
           "translation": "RX Serial",

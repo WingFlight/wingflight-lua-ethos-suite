@@ -55,6 +55,8 @@ local PORT_FUNCTIONS = {
   {id = 524288, excl = 524288, name = "@i18n(app.modules.ports.function_fbus_out)@", type = PORT_TYPE_AUTO},
   {id = 1048576, excl = 1048576, name = "@i18n(app.modules.ports.function_sport_input)@", type = PORT_TYPE_AUTO},
   {id = 2097152, excl = 2097152, name = "@i18n(app.modules.ports.function_srxl2_esc)@", type = PORT_TYPE_AUTO},
+  {id = 4194304, excl = 4194304, name = "@i18n(app.modules.ports.function_fc_link_master)@", type = PORT_TYPE_AUTO},
+  {id = 8388608, excl = 8388608, name = "@i18n(app.modules.ports.function_fc_link_slave)@", type = PORT_TYPE_AUTO},
   {id = 4, excl = 4668, name = "@i18n(app.modules.ports.function_telem_frsky)@", type = PORT_TYPE_TELEM},
   {id = 32, excl = 4668, name = "@i18n(app.modules.ports.function_telem_smartport)@", type = PORT_TYPE_TELEM},
   {id = 4096, excl = 4668, name = "@i18n(app.modules.ports.function_telem_ibus)@", type = PORT_TYPE_TELEM},

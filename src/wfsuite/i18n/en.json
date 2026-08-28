@@ -5310,6 +5310,18 @@
           "needs_translation": false,
           "translation": "FBus Out"
         },
+        "function_fc_link_master": {
+          "english": "FC Link (Master)",
+          "max_length": 16,
+          "needs_translation": false,
+          "translation": "FC Link (Master)"
+        },
+        "function_fc_link_slave": {
+          "english": "FC Link (Slave)",
+          "max_length": 15,
+          "needs_translation": false,
+          "translation": "FC Link (Slave)"
+        },
         "function_rx_serial": {
           "english": "RX Serial",
           "max_length": 9,
