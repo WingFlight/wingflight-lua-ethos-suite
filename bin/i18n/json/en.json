@@ -2520,6 +2520,12 @@
           "needs_translation": false,
           "max_length": 9
         },
+        "function_sbus_input": {
+          "english": "Serial Rx (Backup, SBUS)",
+          "translation": "Serial Rx (Backup, SBUS)",
+          "needs_translation": false,
+          "max_length": 24
+        },
         "function_telem_frsky": {
           "english": "Telemetry FrSky",
           "translation": "Telemetry FrSky",
@@ -4585,6 +4591,62 @@
           "translation": "Unsupported",
           "needs_translation": false,
           "max_length": 11
+        }
+      },
+      "sbus_input_status": {
+        "active_fallback": {
+          "english": "Active: SBUS-In",
+          "translation": "Active: SBUS-In",
+          "needs_translation": false,
+          "max_length": 16
+        },
+        "active_main": {
+          "english": "Active: Main RX",
+          "translation": "Active: Main RX",
+          "needs_translation": false,
+          "max_length": 15
+        },
+        "active_source": {
+          "english": "Active Source",
+          "translation": "Active Source",
+          "needs_translation": false,
+          "max_length": 13
+        },
+        "channel": {
+          "english": "CH",
+          "translation": "CH",
+          "needs_translation": false,
+          "max_length": 2
+        },
+        "link": {
+          "english": "Link",
+          "translation": "Link",
+          "needs_translation": false,
+          "max_length": 4
+        },
+        "link_down": {
+          "english": "Down",
+          "translation": "Down",
+          "needs_translation": false,
+          "max_length": 4
+        },
+        "link_up": {
+          "english": "Up",
+          "translation": "Up",
+          "needs_translation": false,
+          "max_length": 2
+        },
+        "name": {
+          "english": "Serial Rx (Backup)",
+          "translation": "Serial Rx (Backup)",
+          "needs_translation": false,
+          "max_length": 19
+        },
+        "not_configured": {
+          "english": "No port is assigned the SBUS-In Fallback function.",
+          "translation": "No port is assigned the SBUS-In Fallback function.",
+          "needs_translation": false,
+          "max_length": 51
         }
       },
       "elrs_telemetry": {
