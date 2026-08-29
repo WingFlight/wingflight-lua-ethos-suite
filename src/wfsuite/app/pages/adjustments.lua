@@ -146,6 +146,7 @@ local ADJUST_FUNCTIONS = {
   {id = 107, name = "TV Yaw D", min = 0, max = 1000},
   {id = 108, name = "TV Yaw F", min = 0, max = 1000},
   {id = 109, name = "TV Yaw B", min = 0, max = 1000},
+  {id = 110, name = "TV Attitude Hold Gain", min = 0, max = 250},
 }
 
 local FUNCTION_OPTIONS = {}
