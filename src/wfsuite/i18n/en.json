@@ -6945,6 +6945,44 @@
           "translation": "No more than 40 sensors can be enabled at once"
         }
       },
+      "thrust_vector": {
+        "bterm_cutoff": {
+          "english": "B-term Cutoff",
+          "max_length": 13,
+          "needs_translation": false,
+          "translation": "B-term Cutoff"
+        },
+        "dterm_cutoff": {
+          "english": "D-term Cutoff",
+          "max_length": 13,
+          "needs_translation": false,
+          "translation": "D-term Cutoff"
+        },
+        "gyro_cutoff": {
+          "english": "Gyro Cutoff",
+          "max_length": 11,
+          "needs_translation": false,
+          "translation": "Gyro Cutoff"
+        },
+        "hold": {
+          "english": "Attitude / Heading Hold",
+          "max_length": 24,
+          "needs_translation": false,
+          "translation": "Attitude / Heading Hold"
+        },
+        "iterm_relax_level": {
+          "english": "Iterm Relax Level",
+          "max_length": 18,
+          "needs_translation": false,
+          "translation": "Iterm Relax Level"
+        },
+        "name": {
+          "english": "Thrust Vector",
+          "max_length": 13,
+          "needs_translation": false,
+          "translation": "Thrust Vector"
+        }
+      },
       "trim": {
         "collective_trim": {
           "english": "Col. trim %",

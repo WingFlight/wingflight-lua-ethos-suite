@@ -343,6 +343,13 @@ local MENUS = {
       -- but form one coherent "Master Gains" table (see
       -- app/pages/master_gains.lua's own header) -- sits right beside it.
       {title = "@i18n(app.modules.master_gains.name)@", icon = lcd.loadMask("app/gfx/master_gains.png"), script = "app/pages/master_gains.lua"},
+      -- FEATURE_THRUST_VECTOR (see app/pages/configuration.lua) is opt-in
+      -- and off by default, but this entry is unconditional -- same
+      -- convention every other Advanced entry already follows regardless
+      -- of whether its own mode/feature is currently active (e.g.
+      -- Autolevel is always reachable even when neither Auto Hover nor
+      -- Att Hold is the engaged flight mode).
+      {title = "@i18n(app.modules.thrust_vector.name)@", icon = lcd.loadMask("app/gfx/thrust_vector.png"), script = "app/pages/thrust_vector.lua"},
       {title = "@i18n(app.modules.pid_bandwidth.name)@", icon = lcd.loadMask("app/gfx/pid_bandwidth.png"), script = "app/pages/pid_bandwidth.lua"},
       {title = "@i18n(app.modules.autolevel.name)@", icon = lcd.loadMask("app/gfx/autolevel.png"), script = "app/pages/autolevel.lua"},
       -- Links straight to the page now, not a submenu: Cyclic Behaviour

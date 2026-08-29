@@ -66,6 +66,7 @@ local MODE_NAME_BY_ID = {
   [61] = "GPS LOITER",
   [62] = "GPS RTH",
   [63] = "THRUST VECTOR",
+  [64] = "THRUST VECTOR ATTITUDE HOLD",
 }
 local AUX_CHANNEL_COUNT = 20
 local RANGE_MIN = 875
