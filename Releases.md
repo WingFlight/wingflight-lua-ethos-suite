@@ -1,3 +1,9 @@
+# 0.0.17
+
+Add Thrust Vector page and Attitude Hold support.
+Add Serial Rx (Backup, SBUS) port option and diagnostics page.
+Restore dashboard power type preference.
+
 # 0.0.16
 
 Version bump for release alignment; no suite-relevant changes this cycle.
