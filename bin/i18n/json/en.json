@@ -2520,11 +2520,11 @@
           "needs_translation": false,
           "max_length": 9
         },
-        "function_sbus_input": {
-          "english": "Serial Rx (Backup, SBUS)",
-          "translation": "Serial Rx (Backup, SBUS)",
+        "function_rx_input_backup": {
+          "english": "Serial Rx (Backup)",
+          "translation": "Serial Rx (Backup)",
           "needs_translation": false,
-          "max_length": 24
+          "max_length": 19
         },
         "function_telem_frsky": {
           "english": "Telemetry FrSky",
@@ -4599,12 +4599,12 @@
           "max_length": 11
         }
       },
-      "sbus_input_status": {
-        "active_fallback": {
-          "english": "Active: SBUS-In",
-          "translation": "Active: SBUS-In",
+      "rx_input_backup_status": {
+        "active_backup": {
+          "english": "Active: Backup RX",
+          "translation": "Active: Backup RX",
           "needs_translation": false,
-          "max_length": 16
+          "max_length": 17
         },
         "active_main": {
           "english": "Active: Main RX",
@@ -4649,10 +4649,16 @@
           "max_length": 19
         },
         "not_configured": {
-          "english": "No port is assigned the SBUS-In Fallback function.",
-          "translation": "No port is assigned the SBUS-In Fallback function.",
+          "english": "No port is assigned the backup RX function.",
+          "translation": "No port is assigned the backup RX function.",
           "needs_translation": false,
-          "max_length": 51
+          "max_length": 45
+        },
+        "protocol": {
+          "english": "Protocol",
+          "translation": "Protocol",
+          "needs_translation": false,
+          "max_length": 8
         }
       },
       "elrs_telemetry": {

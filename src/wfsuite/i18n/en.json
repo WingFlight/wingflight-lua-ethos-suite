@@ -3665,12 +3665,12 @@
           "translation": "Unsupported"
         }
       },
-      "sbus_input_status": {
-        "active_fallback": {
-          "english": "Active: SBUS-In",
-          "max_length": 16,
+      "rx_input_backup_status": {
+        "active_backup": {
+          "english": "Active: Backup RX",
+          "max_length": 17,
           "needs_translation": false,
-          "translation": "Active: SBUS-In"
+          "translation": "Active: Backup RX"
         },
         "active_main": {
           "english": "Active: Main RX",
@@ -3715,10 +3715,16 @@
           "translation": "Serial Rx (Backup)"
         },
         "not_configured": {
-          "english": "No port is assigned the SBUS-In Fallback function.",
-          "max_length": 51,
+          "english": "No port is assigned the backup RX function.",
+          "max_length": 45,
           "needs_translation": false,
-          "translation": "No port is assigned the SBUS-In Fallback function."
+          "translation": "No port is assigned the backup RX function."
+        },
+        "protocol": {
+          "english": "Protocol",
+          "max_length": 8,
+          "needs_translation": false,
+          "translation": "Protocol"
         }
       },
       "filters": {
@@ -5408,11 +5414,11 @@
           "needs_translation": false,
           "translation": "SRXL2 ESC"
         },
-        "function_sbus_input": {
-          "english": "Serial Rx (Backup, SBUS)",
-          "max_length": 24,
+        "function_rx_input_backup": {
+          "english": "Serial Rx (Backup)",
+          "max_length": 19,
           "needs_translation": false,
-          "translation": "Serial Rx (Backup, SBUS)"
+          "translation": "Serial Rx (Backup)"
         },
         "function_telem_frsky": {
           "english": "Telemetry FrSky",
