@@ -35,7 +35,7 @@ local T = {
 
 -- Keep in sync with wingflight-firmware's cli/settings.c
 -- lookupTableRxInputBackupProvider[] (same order) - only SBUS exists today.
-local PROVIDER_NAMES = { [0] = "SBUS" }
+local PROVIDER_NAMES = { [0] = "NONE", [1] = "SBUS", [2] = "FBUS", [3] = "FPORT", [4] = "FPORT2" }
 
 local REFRESH_INTERVAL_SECONDS = 0.3
 
