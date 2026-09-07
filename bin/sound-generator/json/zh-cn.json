@@ -90,6 +90,12 @@
     "needs_translation": false
   },
   {
+    "file": "events/alerts/tv.wav",
+    "english": "Thrust Vector",
+    "translation": null,
+    "needs_translation": true
+  },
+  {
     "file": "events/alerts/elapsed.wav",
     "english": "Timer Elapsed",
     "translation": "计时器到时",
