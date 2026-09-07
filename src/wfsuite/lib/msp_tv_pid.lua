@@ -2,13 +2,20 @@
 -- pair (cmd 0x5F0B read / 0x5F0C write) -- the independent Thrust Vector PID
 -- loop's config (FEATURE_THRUST_VECTOR), a completely separate MSP command
 -- from MSP_PID_PROFILE/MSP_PID_TUNING (lib/msp_pid_profile.lua/
--- lib/msp_pid_tuning.lua): tvPidProfile_t is a single master config, not
--- scoped to the active PID profile, and is deliberately a trimmed-down
+-- lib/msp_pid_tuning.lua): tvPidProfile_t is deliberately a trimmed-down
 -- sibling of pidProfile_t (see wingflight-firmware's pg/tv_pid.h) -- no
 -- pid_mode, gain_curve, fw_tpa, leveling/trainer/autohover sub-modes, or
 -- cross-axis relax. The one exception is `hold`: an independent attitude/
 -- heading hold for this loop only (BOXTVHOLD / "THRUST VECTOR ATTITUDE
 -- HOLD"), tacked on at the tail of the wire struct.
+--
+-- One of PID_PROFILE_COUNT independently-switchable profiles (mirrors
+-- pidProfile_t) -- see lib/msp_select_tv_profile.lua for switching the
+-- active one. The read reply always describes "currently active" and leads
+-- with a U8 profile index (decode() below returns it as `tv_profile_index`,
+-- alongside the named FIELDS); the write payload is unchanged (still just
+-- FIELDS, no index) since it always targets "currently active", same
+-- convention as MSP_PID_PROFILE/MSP_SET_PID_PROFILE.
 --
 -- Field order/types verified against wingflight-firmware's actual wire
 -- serializer (src/main/msp/msp.c, MSP2_WING_TV_PID_CONFIG/
@@ -59,6 +66,7 @@ local FIELDS = {
 -- as two little-endian bytes), using each field's firmware default (pg/
 -- tv_pid.c's PG_RESET_TEMPLATE).
 local SIMULATOR_RESPONSE = {
+  0,    -- tv_profile_index (profile 0)
   50, 0,  16, 0,  0, 0,  100, 0,  0, 0,   -- roll_p/i/d/f/b
   50, 0,  16, 0,  0, 0,  100, 0,  0, 0,   -- pitch_p/i/d/f/b
   80, 0,  20, 0,  0, 0,  100, 0,  0, 0,   -- yaw_p/i/d/f/b
@@ -141,6 +149,7 @@ function msp_tv_pid.decode(buf)
   -- on -- same defensive reset lib/msp_pid_profile.lua's decode() uses.
   buf.offset = 1
   local data = {}
+  data.tv_profile_index = mspcodec.readU8(buf)
   for i = 1, #FIELDS do
     local name, wireType = FIELDS[i][1], FIELDS[i][2]
     if wireType == "U16" then

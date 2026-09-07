@@ -2,8 +2,11 @@
 --
 -- Edits the independent Thrust Vector PID loop's config (FEATURE_THRUST_
 -- VECTOR) via MSP2_WING_TV_PID_CONFIG / SET (cmd 0x5F0B/0x5F0C, see
--- lib/msp_tv_pid.lua) -- a single master config, not scoped to the active
--- PID profile (see that file's own header for the full wire story).
+-- lib/msp_tv_pid.lua) -- one of PID_PROFILE_COUNT independently-switchable
+-- profiles (see that file's own header for the full wire story), switched
+-- via Tools -> Select Profile (app/pages/profile_select.lua) or its own
+-- Adjustments channel (ADJUSTMENT_TV_PROFILE), not tied to the active PID
+-- profile.
 -- Matches wingflight-configurator's ThrustVector.svelte tab, full parity:
 -- PID Gains, Master Gain, PID Settings (iterm decay/relax, error limit,
 -- gyro/dterm/bterm cutoffs), and Attitude / Heading Hold, all on this one
@@ -13,12 +16,9 @@
 --
 -- Everything else -- dialog/busy/save/reload/confirm state, long-press-
 -- save -- comes from app/page_runtime.lua, shared with every page. This
--- page passes no `profileField` override and so inherits the default
--- ("pidProfile") reload trigger even though tvPidProfile_t is NOT
--- profile-scoped -- a switch of the active PID profile has no bearing on
--- these values at all, so that reload is a harmless no-op re-read, not a
--- real requirement; not worth a special-cased profileField just to
--- suppress one extra round-trip.
+-- page overrides `profileField` to "tvProfile" (see tasks/session.lua) so
+-- it auto-reloads when the active Thrust Vector profile changes, the same
+-- way app/pages/pids.lua reloads on "pidProfile".
 --
 -- The PID Gains grid (Roll/Pitch/Yaw x P/I/D/F/B) is a near-verbatim copy
 -- of app/pages/pids.lua's own pidColumnSlots()/lineMetrics()/
@@ -129,6 +129,7 @@ local function open(opts)
     mspModule = tvPid,
     opts = opts,
     unloadPackageKeys = {"wfsuite.lib.msp_tv_pid"},
+    profileField = "tvProfile",
   })
 
   form.clear()

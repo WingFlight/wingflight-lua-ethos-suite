@@ -112,6 +112,7 @@ return function(decoders)
     [0x1212] = {name = "Rate Profile", unit = UNIT_RAW, prec = 0, min = 1, max = 6, dec = decU8},
     [0x1213] = {name = "LED Profile", unit = UNIT_RAW, prec = 0, min = 1, max = 6, dec = decU8},
     [0x1214] = {name = "Battery Profile", unit = UNIT_RAW, prec = 0, min = 1, max = 6, dec = decU8},
+    [0x1215] = {name = "TV Profile", unit = UNIT_RAW, prec = 0, min = 1, max = 6, dec = decU8},
     [0x1220] = {name = "ADJ", unit = UNIT_RAW, prec = 0, dec = decAdjFunc},
     [0xDB00] = {name = "Debug 0", unit = UNIT_RAW, prec = 0, dec = decS32},
     [0xDB01] = {name = "Debug 1", unit = UNIT_RAW, prec = 0, dec = decS32},

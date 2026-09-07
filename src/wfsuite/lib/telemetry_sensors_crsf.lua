@@ -56,6 +56,10 @@ return {
   battery_profile = {
     {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x1214},
   },
+  -- Same appId tasks/elrs_sensors.lua's DIY sensor uses (SID 0x1215).
+  tv_profile = {
+    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x1215},
+  },
   governor = {
     {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x1205},
   },

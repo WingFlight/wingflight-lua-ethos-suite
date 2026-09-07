@@ -5669,6 +5669,12 @@
           "max_length": 12,
           "needs_translation": false,
           "translation": "Rate Profile"
+        },
+        "tv_profile": {
+          "english": "TV Profile",
+          "max_length": 10,
+          "needs_translation": false,
+          "translation": "TV Profile"
         }
       },
       "radio_config": {
@@ -6758,6 +6764,12 @@
           "needs_translation": false,
           "translation": "Pre-timer Alert Options"
         },
+        "tv_profile": {
+          "english": "Thrust Vector",
+          "max_length": 13,
+          "needs_translation": false,
+          "translation": "Thrust Vector"
+        },
         "tx_battery_default": {
           "english": "Default",
           "max_length": 7,
@@ -7787,6 +7799,12 @@
       "max_length": 10,
       "needs_translation": false,
       "translation": "Throttle %"
+    },
+    "sensor_tv_profile": {
+      "english": "TV Profile",
+      "max_length": 10,
+      "needs_translation": false,
+      "translation": "TV Profile"
     },
     "sensor_voltage": {
       "english": "Voltage",

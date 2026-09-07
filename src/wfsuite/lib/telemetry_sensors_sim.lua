@@ -51,6 +51,9 @@ return {
   battery_profile = {
     {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5026},
   },
+  tv_profile = {
+    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5029},
+  },
   governor = {
     {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5009},
   },
