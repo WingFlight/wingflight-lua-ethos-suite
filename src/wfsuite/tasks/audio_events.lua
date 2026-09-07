@@ -100,6 +100,7 @@ local AUDIO_SESSION_KEYS = {
   "isArmed",
   "pidProfile",
   "rateProfile",
+  "tvProfile",
   "batteryProfile",
   "governorMode",
   "governorState",
@@ -649,6 +650,7 @@ local function rememberCurrent()
   previous.isArmed = session.isArmed
   previous.pidProfile = session.pidProfile
   previous.rateProfile = session.rateProfile
+  previous.tvProfile = session.tvProfile
   previous.batteryProfile = session.batteryProfile
   previous.governorState = session.governorState
   previous.flightModeFlags = session.flightModeFlags
@@ -685,6 +687,10 @@ function audio_events.wakeup()
   announceArmed()
   announceProfile("pidProfile", events.pid_profile, "profile.wav")
   announceProfile("rateProfile", events.rate_profile, "rates.wav")
+  -- events/alerts/tv.wav is not generated yet -- add it to
+  -- bin/sound-generator/json/*.json and run the generator (see that
+  -- directory's own tooling) before enabling events.tv_profile.
+  announceProfile("tvProfile", events.tv_profile, "tv.wav")
   announceBatteryProfile()
   announceGovernor()
   announceFlightMode()

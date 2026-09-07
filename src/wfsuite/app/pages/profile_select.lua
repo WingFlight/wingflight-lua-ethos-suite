@@ -7,6 +7,8 @@ local header = requireModule("app/header.lua")
 local progressDialog = requireModule("app/progress_dialog.lua")
 local statusMsp = requireModule("lib/msp_status.lua")
 local selectProfile = requireModule("lib/msp_select_profile.lua")
+local tvPidMsp = requireModule("lib/msp_tv_pid.lua")
+local selectTvProfile = requireModule("lib/msp_select_tv_profile.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.profile_select.name)@"
 local BTN_OK = "@i18n(app.btn_ok_long)@"
@@ -53,8 +55,11 @@ local function open(opts)
   local busy = false
   local needsRender = false
   local status = {pid_profile_count = 6, control_rate_profile_count = 6}
-  local current = {pid = 0, rate = 0}
-  local original = {pid = 0, rate = 0}
+  -- Thrust Vector profile count always equals pid_profile_count on the
+  -- firmware side (same PID_PROFILE_COUNT constant, see pg/tv_pid.h) -- no
+  -- separate count to read.
+  local current = {pid = 0, rate = 0, tv = 0}
+  local original = {pid = 0, rate = 0, tv = 0}
   local fields = {}
 
   local function closeDialog(focusFn)
@@ -77,7 +82,7 @@ local function open(opts)
   end
 
   local function isDirty()
-    return current.pid ~= original.pid or current.rate ~= original.rate
+    return current.pid ~= original.pid or current.rate ~= original.rate or current.tv ~= original.tv
   end
 
   local function updateEnabled()
@@ -114,10 +119,28 @@ local function open(opts)
       current.rate = clampIndex(status.current_control_rate_profile_index, status.control_rate_profile_count)
       original.pid = current.pid
       original.rate = current.rate
-      loaded = true
-      busy = false
-      needsRender = true
-      closeDialog(focusFn)
+
+      -- Thrust Vector's active profile index isn't part of MSP_STATUS -- it
+      -- leads the MSP2_WING_TV_PID_CONFIG read reply instead (see
+      -- lib/msp_tv_pid.lua). Fetched as a second step rather than blocking
+      -- the PID/rate pickers on it.
+      bus.publish("msp.request", tvPidMsp.buildReadMessage(function(tvData)
+        if disposed then return end
+        current.tv = clampIndex(tvData and tvData.tv_profile_index, status.pid_profile_count)
+        original.tv = current.tv
+        loaded = true
+        busy = false
+        needsRender = true
+        closeDialog(focusFn)
+      end, function()
+        if disposed then return end
+        -- Thrust Vector may not be supported/enabled -- fall back to profile 0
+        -- rather than blocking the PID/rate pickers on it.
+        loaded = true
+        busy = false
+        needsRender = true
+        closeDialog(focusFn)
+      end))
     end, function()
       if disposed then return end
       busy = false
@@ -135,11 +158,20 @@ local function open(opts)
       if disposed then return end
       bus.publish("msp.request", selectProfile.buildWriteMessage(current.pid, function()
         if disposed then return end
-        original.pid = current.pid
-        original.rate = current.rate
-        busy = false
-        closeDialog(focusFn)
-        updateEnabled()
+        bus.publish("msp.request", selectTvProfile.buildSelectMessage(current.tv, function()
+          if disposed then return end
+          original.pid = current.pid
+          original.rate = current.rate
+          original.tv = current.tv
+          busy = false
+          closeDialog(focusFn)
+          updateEnabled()
+        end, function()
+          if disposed then return end
+          busy = false
+          closeDialog(focusFn)
+          updateEnabled()
+        end))
       end, function()
         if disposed then return end
         busy = false
@@ -194,6 +226,17 @@ local function open(opts)
         updateEnabled()
       end)
     fields[#fields + 1] = rateField
+
+    -- Thrust Vector profile count mirrors pid_profile_count -- see the
+    -- comment on `current`/`original` above.
+    line = form.addLine("@i18n(app.modules.profile_select.tv_profile)@")
+    local tvField = form.addChoiceField(line, nil, profileChoices(status.pid_profile_count),
+      function() return current.tv end,
+      function(value)
+        current.tv = clampIndex(value, status.pid_profile_count)
+        updateEnabled()
+      end)
+    fields[#fields + 1] = tvField
 
     updateEnabled()
     if focusFn then focusFn() end

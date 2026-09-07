@@ -72,6 +72,7 @@ local CREATE_LIST = {
   [0x5131] = {name = "Rates Profile", unit = UNIT_RAW},
   [0x5132] = {name = "LED Profile", unit = UNIT_RAW},
   [0x5133] = {name = "Battery Profile", unit = UNIT_RAW},
+  [0x5134] = {name = "TV Profile", unit = UNIT_RAW},
   [0x5110] = {name = "Adj Function", unit = UNIT_RAW},
   [0x5111] = {name = "Adj Value", unit = UNIT_RAW},
   [0x5210] = {name = "Heading", unit = UNIT_DEGREE, decimals = 1},

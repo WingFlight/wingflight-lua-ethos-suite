@@ -109,6 +109,7 @@ local session = {
   telemetrySlots = nil, -- 40-entry S.Port sensor-slot array, see lib/msp_telemetry_config.lua
   pidProfile = nil,
   rateProfile = nil,
+  tvProfile = nil,
   batteryProfile = nil,
   adjFunction = nil,
   adjValue = nil,
@@ -329,6 +330,7 @@ local function flush()
     mspTransport = session.mspTransport,
     pidProfile = session.pidProfile,
     rateProfile = session.rateProfile,
+    tvProfile = session.tvProfile,
     batteryProfile = session.batteryProfile,
     adjFunction = session.adjFunction,
     adjValue = session.adjValue,
@@ -693,6 +695,7 @@ local function setConnected(value, mspQueue, protocol)
     session.telemetrySlots = nil
     session.pidProfile = nil
     session.rateProfile = nil
+    session.tvProfile = nil
     session.batteryProfile = nil
     session.adjFunction = nil
     session.adjValue = nil
@@ -792,6 +795,12 @@ local function updateProfiles(protocol)
   local rateProfile = telemetrySensors.getValue(protocol, "rate_profile")
   if rateProfile ~= session.rateProfile then
     session.rateProfile = rateProfile
+    publish()
+  end
+
+  local tvProfile = telemetrySensors.getValue(protocol, "tv_profile")
+  if tvProfile ~= session.tvProfile then
+    session.tvProfile = tvProfile
     publish()
   end
 

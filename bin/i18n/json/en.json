@@ -1876,6 +1876,12 @@
           "needs_translation": false,
           "max_length": 12
         },
+        "tv_profile": {
+          "english": "Thrust Vector",
+          "translation": "Thrust Vector",
+          "needs_translation": false,
+          "max_length": 13
+        },
         "battery_profile_event": {
           "english": "Battery profile",
           "translation": "Battery profile",
@@ -4235,6 +4241,12 @@
           "max_length": 12,
           "needs_translation": false,
           "translation": "Rate Profile"
+        },
+        "tv_profile": {
+          "english": "TV Profile",
+          "max_length": 10,
+          "needs_translation": false,
+          "translation": "TV Profile"
         }
       },
       "diagnostics": {
@@ -7519,6 +7531,12 @@
       "max_length": 10,
       "needs_translation": false,
       "translation": "Throttle %"
+    },
+    "sensor_tv_profile": {
+      "english": "TV Profile",
+      "max_length": 10,
+      "needs_translation": false,
+      "translation": "TV Profile"
     },
     "sensor_voltage": {
       "english": "Voltage",
