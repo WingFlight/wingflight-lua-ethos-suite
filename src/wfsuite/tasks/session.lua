@@ -141,6 +141,12 @@ local session = {
   -- armingDisableFlagsToString() for how the dashboard's governor/armflags
   -- objects turn this into a human-readable reason list.
   armDisableFlags = nil,
+  -- Live telemetry sensor value ("osc_limiter"), a packed reading: bits 0-2
+  -- are a per-axis active-and-latched mask (roll/pitch/yaw), bits 8-15 are
+  -- the worst-case (lowest) gain-scale percent across all axes, 100 = no
+  -- cut. See wingflight-firmware's TELEM_OSC_LIMITER (telemetry/sensors.h)
+  -- and tasks/audio_events.lua's announceOscLimiter() for the consumer.
+  oscLimiter = nil,
   -- Physical RX channel index for each logical control (MSP_RX_MAP, cmd
   -- 64), read once per connect same as the rest of runHandshake(). Lets
   -- widgets/dashboard/flightmode.lua resolve the radio's own throttle
@@ -327,6 +333,7 @@ local function flush()
     governorMode = session.governorMode,
     governorState = session.governorState,
     flightModeFlags = session.flightModeFlags,
+    oscLimiter = session.oscLimiter,
     mspTransport = session.mspTransport,
     pidProfile = session.pidProfile,
     rateProfile = session.rateProfile,
@@ -692,6 +699,7 @@ local function setConnected(value, mspQueue, protocol)
     session.governorState = nil
     session.rxMap = nil
     session.flightModeFlags = nil
+    session.oscLimiter = nil
     session.telemetrySlots = nil
     session.pidProfile = nil
     session.rateProfile = nil
@@ -902,6 +910,15 @@ local function updateFlightMode(protocol)
   local flightModeFlags = telemetrySensors.getValue(protocol, "flight_mode")
   if flightModeFlags ~= session.flightModeFlags then
     session.flightModeFlags = flightModeFlags
+    publish()
+  end
+end
+
+local function updateOscLimiter(protocol)
+  if not telemetrySensors then return end
+  local oscLimiter = telemetrySensors.getValue(protocol, "osc_limiter")
+  if oscLimiter ~= session.oscLimiter then
+    session.oscLimiter = oscLimiter
     publish()
   end
 end
@@ -1128,6 +1145,7 @@ local function wakeup(mspQueue, protocol, transport, simSensors)
       updateProfiles(sensorProtocol)
       updateGovernor(sensorProtocol)
       updateFlightMode(sensorProtocol)
+      updateOscLimiter(sensorProtocol)
     end
 
     if shouldRunScheduled("adjustment", ADJUSTMENT_INTERVAL, now) then

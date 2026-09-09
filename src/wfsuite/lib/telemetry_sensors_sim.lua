@@ -74,4 +74,9 @@ return {
   armdisableflags = {
     {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5015},
   },
+  -- Fabricated by tasks/sim_sensors.lua's own SENSORS.osc_limiter entry,
+  -- same uid.
+  osc_limiter = {
+    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5030},
+  },
 }

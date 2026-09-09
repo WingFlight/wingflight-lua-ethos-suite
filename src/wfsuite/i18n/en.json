@@ -6632,6 +6632,12 @@
           "needs_translation": false,
           "translation": "No configurable themes installed on this device"
         },
+        "osc_limiter_alert": {
+          "english": "Oscillation limiter alert",
+          "max_length": 25,
+          "needs_translation": false,
+          "translation": "Oscillation limiter alert"
+        },
         "panel_integration": {
           "english": "Integration",
           "max_length": 11,
@@ -7733,6 +7739,12 @@
       "max_length": 8,
       "needs_translation": false,
       "translation": "Model ID"
+    },
+    "sensor_osc_limiter": {
+      "english": "Osc Limiter",
+      "max_length": 11,
+      "needs_translation": false,
+      "translation": "Osc Limiter"
     },
     "sensor_pid_profile": {
       "english": "PID Profile",

@@ -105,6 +105,7 @@ local AUDIO_SESSION_KEYS = {
   "governorMode",
   "governorState",
   "flightModeFlags",
+  "oscLimiter",
   "voltage",
   "batteryConfig",
   "tempEsc",
@@ -413,6 +414,34 @@ local function announceVoltage(now)
   playAlert("lowvoltage.wav")
 end
 
+-- Bits 0-2 of the packed "osc_limiter" sensor value are the per-axis
+-- active-and-latched mask (roll/pitch/yaw) -- see tasks/session.lua's own
+-- comment on session.oscLimiter for the full encoding.
+local function oscLimiterActiveMask(value)
+  if value == nil then return 0 end
+  return math.floor(value) % 8
+end
+
+-- A gain cut in progress is a safety-relevant condition, so this repeats
+-- (like announceEscTemp()/announceBecRxVoltage()) rather than firing once
+-- on the rising edge -- a pilot who missed the first callout should still
+-- hear about it while it's still happening.
+local function announceOscLimiter(now)
+  if not events.osc_limiter then return end
+  if session.connected ~= true then return end
+
+  if oscLimiterActiveMask(session.oscLimiter) == 0 then
+    lastAlertAt.osc_limiter = nil
+    return
+  end
+
+  local repeatInterval = tonumber(events.osc_limiter_repeat_interval) or 15
+  if lastAlertAt.osc_limiter and (now - lastAlertAt.osc_limiter) < repeatInterval then return end
+  lastAlertAt.osc_limiter = now
+  playAlert("oscillation.wav")
+  haptic()
+end
+
 local function announceEscTemp(now)
   if not events.temp_esc then return end
   if session.connected ~= true then return end
@@ -697,6 +726,7 @@ function audio_events.wakeup()
   announceVoltage(now)
   announceEscTemp(now)
   announceBecRxVoltage(now)
+  announceOscLimiter(now)
   announceSmartfuel(now)
   announceTimer()
   announceAdjustment(now)

@@ -94,4 +94,11 @@ return {
   armdisableflags = {
     {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5123},
   },
+  -- Oscillation limiter status: bits 0-2 are the per-axis active-and-latched
+  -- mask, bits 8-15 are the worst-case (lowest) gain-scale percent across all
+  -- axes. See wingflight-firmware's TELEM_OSC_LIMITER (sensors.h) and
+  -- docs/development/Oscillation Detection.md there for the full encoding.
+  osc_limiter = {
+    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5124},
+  },
 }
