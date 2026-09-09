@@ -1,3 +1,8 @@
+# 0.0.18
+
+Add Thrust Vector profile support.
+Generalize the backup RX display from SBUS-only into a provider-selectable input, recognizing FBUS, FPort, FPort2, Jeti EX Bus, and CRSF.
+
 # 0.0.17
 
 Add Thrust Vector page and Attitude Hold support.
