@@ -1,3 +1,7 @@
+# 0.0.19
+
+Version bump for release alignment; no suite-relevant changes this cycle.
+
 # 0.0.18
 
 Add Thrust Vector profile support.
