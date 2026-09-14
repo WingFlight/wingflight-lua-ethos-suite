@@ -96,6 +96,12 @@
     "needs_translation": false
   },
   {
+    "file": "events/alerts/oscillation.wav",
+    "english": "Oscillation Limiter",
+    "translation": "Oscillation Limiter",
+    "needs_translation": false
+  },
+  {
     "file": "events/alerts/elapsed.wav",
     "english": "Timer Elapsed",
     "translation": "Timer Elapsed",

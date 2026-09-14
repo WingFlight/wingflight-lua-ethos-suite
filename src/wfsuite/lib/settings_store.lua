@@ -74,6 +74,13 @@ local DEFAULTS = {
     adj_f = false,
     adj_v = false,
     craft_name = false,
+    -- Default on, like governor/flight_mode: a state announcement, not a
+    -- per-craft-tunable threshold (unlike temp_esc/bec_voltage/rx_voltage,
+    -- which default off until the pilot sets a sane alert value for their
+    -- setup). Inert regardless until the pilot also enables wingflight-
+    -- firmware's own osc_limiter (off by default there).
+    osc_limiter = true,
+    osc_limiter_repeat_interval = 15,
   },
   timer = {
     timeraudioenable = false,
@@ -197,6 +204,8 @@ local function normalizeEvents(values)
   events.adj_f = coerceBool(events.adj_f, DEFAULTS.events.adj_f)
   events.adj_v = coerceBool(events.adj_v, DEFAULTS.events.adj_v)
   events.craft_name = coerceBool(events.craft_name, DEFAULTS.events.craft_name)
+  events.osc_limiter = coerceBool(events.osc_limiter, DEFAULTS.events.osc_limiter)
+  events.osc_limiter_repeat_interval = clampNumber(events.osc_limiter_repeat_interval, DEFAULTS.events.osc_limiter_repeat_interval, 5, 60)
   return events
 end
 

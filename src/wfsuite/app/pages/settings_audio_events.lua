@@ -53,6 +53,11 @@ local function open(opts)
     setEnabled(eventFields.voltageRepeat, enabled)
   end
 
+  local function updateOscLimiterFields()
+    local enabled = settings and settings.events and settings.events.osc_limiter == true
+    setEnabled(eventFields.oscLimiterRepeat, enabled)
+  end
+
   local function updateEscFields()
     local enabled = settings and settings.events and settings.events.temp_esc == true
     setEnabled(eventFields.escTempThreshold, enabled)
@@ -203,6 +208,21 @@ local function open(opts)
     end)
   if eventFields.voltageRepeat and eventFields.voltageRepeat.suffix then eventFields.voltageRepeat:suffix("s") end
 
+  local oscLimiterPanel = form.addExpansionPanel("@i18n(app.modules.settings.osc_limiter_alert)@")
+  oscLimiterPanel:open(settings.events.osc_limiter == true)
+  addBool(oscLimiterPanel, "@i18n(app.modules.settings.osc_limiter_alert)@", "osc_limiter", updateOscLimiterFields)
+  line = oscLimiterPanel:addLine("@i18n(app.modules.settings.alert_repeat_interval)@")
+  eventFields.oscLimiterRepeat = form.addNumberField(line, nil, 5, 60,
+    function()
+      return settings and settings.events and settings.events.osc_limiter_repeat_interval or 15
+    end,
+    function(value)
+      if not settings then return end
+      settings.events.osc_limiter_repeat_interval = value or 15
+      updateSaveEnabled()
+    end)
+  if eventFields.oscLimiterRepeat and eventFields.oscLimiterRepeat.suffix then eventFields.oscLimiterRepeat:suffix("s") end
+
   local fuelPanel = form.addExpansionPanel("@i18n(app.modules.settings.fuel)@")
   fuelPanel:open(settings.events.smartfuel == true)
   addBool(fuelPanel, "@i18n(app.modules.settings.fuel)@", "smartfuel", updateFuelFields)
@@ -237,6 +257,7 @@ local function open(opts)
   addBool(otherPanel, "@i18n(app.modules.settings.model_announcement)@", "craft_name")
 
   updateVoltageFields()
+  updateOscLimiterFields()
   updateEscFields()
   updateBecRxFields()
   updateFuelFields()

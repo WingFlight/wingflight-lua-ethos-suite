@@ -101,6 +101,7 @@ local SENSOR_LIST = {
   [106] = {name = "@i18n(telemetry.sensor_dbg6)@", group = "debug"},
   [107] = {name = "@i18n(telemetry.sensor_dbg7)@", group = "debug"},
   [118] = {name = "@i18n(telemetry.sensor_tv_profile)@", group = "profiles"},
+  [119] = {name = "@i18n(telemetry.sensor_osc_limiter)@", group = "status"},
 }
 
 local GROUP_TITLE = {
@@ -153,7 +154,9 @@ local catalog = {
     [64] = {65, 66, 67},
     [68] = {69, 70, 71},
   },
-  DEFAULT_IDS = {90, 3, 60, 4, 23, 5, 93, 99, 95, 96, 15, 91, 43, 97, 6},
+  -- 119 (osc_limiter) is default-on: an active gain cut is a safety-relevant
+  -- condition the pilot should see without opting in to it manually.
+  DEFAULT_IDS = {90, 3, 60, 4, 23, 5, 93, 99, 95, 96, 15, 91, 43, 97, 6, 119},
 }
 
 package.loaded["wfsuite.lib.telemetry_sensor_catalog"] = catalog
