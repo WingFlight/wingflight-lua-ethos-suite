@@ -415,22 +415,45 @@ local function announceVoltage(now)
 end
 
 -- Bits 0-2 of the packed "osc_limiter" sensor value are the per-axis
--- active-and-latched mask (roll/pitch/yaw) -- see tasks/session.lua's own
--- comment on session.oscLimiter for the full encoding.
+-- active-and-latched mask -- see tasks/session.lua's own comment on
+-- session.oscLimiter for the full encoding. Bit index matches
+-- wingflight-firmware's own axis order exactly (common/axis.h:
+-- FD_ROLL=0, FD_PITCH=1, FD_YAW=2), confirmed directly against that
+-- header rather than assumed, since getting this wrong would announce
+-- the wrong axis.
+local OSC_LIMITER_AXIS_WORDS = {
+  [0] = "roll",
+  [1] = "pitch",
+  [2] = "yaw",
+}
+
 local function oscLimiterActiveMask(value)
   if value == nil then return 0 end
   return math.floor(value) % 8
+end
+
+local function oscLimiterAxisActive(mask, bit)
+  return (math.floor(mask / (2 ^ bit)) % 2) == 1
 end
 
 -- A gain cut in progress is a safety-relevant condition, so this repeats
 -- (like announceEscTemp()/announceBecRxVoltage()) rather than firing once
 -- on the rising edge -- a pilot who missed the first callout should still
 -- hear about it while it's still happening.
+--
+-- Speaks which axis (or axes) were cut after the alert tone -- e.g.
+-- "Oscillation Limiter... Roll" -- rather than just a generic tone, so a
+-- pilot knows what to go tune without having to pull the blackbox log
+-- after landing. Reuses the "roll"/"pitch"/"yaw" word clips
+-- tasks/adjfunctions/wavs.lua already ships (every locale already has
+-- these -- no new audio files needed) rather than recording three new
+-- axis-specific alert tones.
 local function announceOscLimiter(now)
   if not events.osc_limiter then return end
   if session.connected ~= true then return end
 
-  if oscLimiterActiveMask(session.oscLimiter) == 0 then
+  local mask = oscLimiterActiveMask(session.oscLimiter)
+  if mask == 0 then
     lastAlertAt.osc_limiter = nil
     return
   end
@@ -439,6 +462,11 @@ local function announceOscLimiter(now)
   if lastAlertAt.osc_limiter and (now - lastAlertAt.osc_limiter) < repeatInterval then return end
   lastAlertAt.osc_limiter = now
   playAlert("oscillation.wav")
+  for bit = 0, 2 do
+    if oscLimiterAxisActive(mask, bit) then
+      playAdjFunctionToken(OSC_LIMITER_AXIS_WORDS[bit] .. ".wav")
+    end
+  end
   haptic()
 end
 
