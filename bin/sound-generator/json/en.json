@@ -552,6 +552,12 @@
     "needs_translation": false
   },
   {
+    "file": "events/mode/traditional.wav",
+    "english": "Traditional",
+    "translation": "Traditional",
+    "needs_translation": false
+  },
+  {
     "file": "events/mode/althold.wav",
     "english": "Altitude Hold",
     "translation": "Altitude Hold",
