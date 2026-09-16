@@ -191,7 +191,6 @@ local function openEditor(opts, listState, row)
   fieldLayout.buildSingle(runtime, "@i18n(app.modules.servos.rate)@", {key = "rate"})
   fieldLayout.buildSingle(runtime, "@i18n(app.modules.servos.speed)@", {key = "speed"})
   fieldLayout.buildSingle(runtime, "@i18n(app.modules.servos.reverse)@", {key = "reverse", choices = YES_NO})
-  fieldLayout.buildSingle(runtime, "@i18n(app.modules.servos.geometry)@", {key = "geometry", choices = YES_NO})
   runtime:loadInitial()
 end
 
