@@ -66,6 +66,7 @@ local FLIGHT_MODE_PRIORITY = {
   {bit = 2, file = "horizon.wav"},      -- HORIZON_MODE_BIT
   {bit = 1, file = "angle.wav"},        -- ANGLE_MODE_BIT
   {bit = 3, file = "trainer.wav"},      -- TRAINER_MODE_BIT
+  {bit = 14, file = "traditional.wav"}, -- TRADITIONAL_MODE_BIT
   {bit = 4, file = "althold.wav"},      -- ALTHOLD_MODE_BIT
 }
 
