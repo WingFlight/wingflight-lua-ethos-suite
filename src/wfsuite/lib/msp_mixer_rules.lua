@@ -16,16 +16,21 @@
 -- Same asymmetric GET-whole-pool/SET-one-rule shape as the curve pools:
 -- GET returns all MIXER_RULE_COUNT rules back to back, no index/count
 -- prefix; SET writes exactly one rule, index-prefixed. Unlike a curve, a
--- rule has no point-array substructure -- it's 9 flat scalar fields, so
+-- rule has no point-array substructure -- it's 10 flat scalar fields, so
 -- (unlike lib/msp_mixer_curves.lua's page-local flatten/unflatten) this
 -- codec's decoded rule shape is already what app/field_layout.lua's flat
 -- runtime.data[key] indexing needs, and forSlot() can hand it over as-is.
 --
 -- Per rule, in wire order: oper:U8, input:U8, output:U8, offset:S16,
--- weight:S16, weightNeg:S16, speed:U16, curve:U8, condition:U8 -- 13 bytes.
--- `oper` 0 means the slot is unused (matches wingflight-firmware's own
--- runtime evaluator, which gates purely on `if (rule->oper)` -- see
+-- weight:S16, weightNeg:S16, speed:U16, curve:U8, condition:U8, purpose:U8
+-- -- 14 bytes. `oper` 0 means the slot is unused (matches wingflight-firmware's
+-- own runtime evaluator, which gates purely on `if (rule->oper)` -- see
 -- flight/mixer.c); an active rule always has oper 1(Set)/2(Add)/3(Mul).
+-- `purpose` is a descriptive tag only (mixerRulePurpose_e in pg/mixer.h) --
+-- the mixer evaluator never reads it. It exists so tooling (this suite, the
+-- configurator, a future RC adjustment range) can find "the" rule serving a
+-- given role (e.g. flap-to-elevator compensation) regardless of array
+-- position -- see app/pages/mixer_rules.lua's PURPOSE_OPTIONS.
 
 if package.loaded["wfsuite.lib.msp_mixer_rules"] then
   return package.loaded["wfsuite.lib.msp_mixer_rules"]
@@ -51,6 +56,8 @@ local RULE_COUNT = 32
 -- app/pages/mixer_rules.lua). `input`/`output` min/max are enum bounds
 -- (27 and 31 entries respectively, 0-based) -- see that page's own
 -- INPUT_OPTIONS/OUTPUT_OPTIONS for the human-readable choice tables.
+-- `purpose` max is mixerRulePurpose_e's MIXER_RULE_PURPOSE_COUNT-1
+-- (pg/mixer.h) -- 0=None, 1=Flap Compensation, 2=Differential Thrust Yaw.
 local FIELD_META = {
   oper = {min = 0, max = 3, default = 0},
   input = {min = 0, max = 26, default = 0},
@@ -61,19 +68,20 @@ local FIELD_META = {
   speed = {min = 0, max = 60000, default = 0},
   curve = {min = 0, max = 8, default = 0},
   condition = {min = 0, max = 16, default = 0},
+  purpose = {min = 0, max = 2, default = 0},
 }
 
 local function defaultRule()
   return {
     oper = 0, input = 0, output = 0, offset = 0,
-    weight = 0, weightNeg = 0, speed = 0, curve = 0, condition = 0,
+    weight = 0, weightNeg = 0, speed = 0, curve = 0, condition = 0, purpose = 0,
   }
 end
 
 -- All RULE_COUNT slots unused (all-zero, matching defaultRule()) -- the
--- simulator's whole-pool fixture, 32 * 13 = 416 zero bytes.
+-- simulator's whole-pool fixture, 32 * 14 = 448 zero bytes.
 local SIMULATOR_RESPONSE_POOL = {}
-for _ = 1, RULE_COUNT * 13 do
+for _ = 1, RULE_COUNT * 14 do
   SIMULATOR_RESPONSE_POOL[#SIMULATOR_RESPONSE_POOL + 1] = 0
 end
 
@@ -110,12 +118,13 @@ function msp_mixer_rules.decodePool(buf)
       speed = mspcodec.readU16(buf),
       curve = mspcodec.readU8(buf),
       condition = mspcodec.readU8(buf),
+      purpose = mspcodec.readU8(buf),
     }
   end
   return pool
 end
 
--- Encodes ONE rule for MSP_SET_MIXER_RULE: index:U8 then the 13-byte body.
+-- Encodes ONE rule for MSP_SET_MIXER_RULE: index:U8 then the 14-byte body.
 function msp_mixer_rules.encodeRule(index, rule)
   rule = rule or defaultRule()
   local payload = {}
@@ -129,6 +138,7 @@ function msp_mixer_rules.encodeRule(index, rule)
   mspcodec.writeU16(payload, rule.speed or 0)
   mspcodec.writeU8(payload, rule.curve or 0)
   mspcodec.writeU8(payload, rule.condition or 0)
+  mspcodec.writeU8(payload, rule.purpose or 0)
   return payload
 end
 
