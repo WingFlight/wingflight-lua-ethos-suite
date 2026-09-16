@@ -220,9 +220,6 @@ local function openEditor(opts, listState, row)
   fieldLayout.buildSingle(runtime, "@i18n(app.modules.servos.scale_positive)@", {key = "rpos"})
   fieldLayout.buildSingle(runtime, "@i18n(app.modules.servos.speed)@", {key = "speed"})
   fieldLayout.buildSingle(runtime, "@i18n(app.modules.servos.reverse)@", {key = "reverse", choices = YES_NO})
-  if uiIndex <= 7 then
-    fieldLayout.buildSingle(runtime, "@i18n(app.modules.servos.geometry)@", {key = "geometry", choices = YES_NO})
-  end
   runtime:loadInitial()
 end
 
