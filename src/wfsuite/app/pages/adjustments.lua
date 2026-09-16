@@ -148,6 +148,12 @@ local ADJUST_FUNCTIONS = {
   {id = 109, name = "TV Yaw B", min = 0, max = 1000},
   {id = 110, name = "TV Attitude Hold Gain", min = 0, max = 250},
   {id = 111, name = "TV Profile", min = 1, max = 6},
+  -- Scales the weight of whichever mixer rule is tagged FLAP_COMPENSATION
+  -- (mixerRulePurpose_e, pg/mixer.h) -- found by tag at runtime
+  -- (flight/mixer.c's findRuleByPurpose()), not a fixed rule index. Range
+  -- matches rc_adjustments.c's ADJ_ENTRY, well inside the field's own
+  -- +-10000 (MIXER_WEIGHT_MIN/MAX).
+  {id = 112, name = "Flap Compensation Gain", min = -1000, max = 1000},
 }
 
 local FUNCTION_OPTIONS = {}
