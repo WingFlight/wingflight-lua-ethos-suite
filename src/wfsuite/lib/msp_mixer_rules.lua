@@ -22,15 +22,15 @@
 -- runtime.data[key] indexing needs, and forSlot() can hand it over as-is.
 --
 -- Per rule, in wire order: oper:U8, input:U8, output:U8, offset:S16,
--- weight:S16, weightNeg:S16, speed:U16, curve:U8, condition:U8, purpose:U8
+-- weight:S16, weightNeg:S16, speed:U16, curve:U8, condition:U8, role:U8
 -- -- 14 bytes. `oper` 0 means the slot is unused (matches wingflight-firmware's
 -- own runtime evaluator, which gates purely on `if (rule->oper)` -- see
 -- flight/mixer.c); an active rule always has oper 1(Set)/2(Add)/3(Mul).
--- `purpose` is a descriptive tag only (mixerRulePurpose_e in pg/mixer.h) --
+-- `role` is a descriptive tag only (mixerRuleRole_e in pg/mixer.h) --
 -- the mixer evaluator never reads it. It exists so tooling (this suite, the
--- configurator, a future RC adjustment range) can find "the" rule serving a
+-- configurator, an RC adjustment range) can find "the" rule serving a
 -- given role (e.g. flap-to-elevator compensation) regardless of array
--- position -- see app/pages/mixer_rules.lua's PURPOSE_OPTIONS.
+-- position -- see app/pages/mixer_rules.lua's ROLE_OPTIONS.
 
 if package.loaded["wfsuite.lib.msp_mixer_rules"] then
   return package.loaded["wfsuite.lib.msp_mixer_rules"]
@@ -56,7 +56,7 @@ local RULE_COUNT = 32
 -- app/pages/mixer_rules.lua). `input`/`output` min/max are enum bounds
 -- (27 and 31 entries respectively, 0-based) -- see that page's own
 -- INPUT_OPTIONS/OUTPUT_OPTIONS for the human-readable choice tables.
--- `purpose` max is mixerRulePurpose_e's MIXER_RULE_PURPOSE_COUNT-1
+-- `role` max is mixerRuleRole_e's MIXER_RULE_ROLE_COUNT-1
 -- (pg/mixer.h) -- 0=None, 1=Flap Compensation, 2=Differential Thrust Yaw.
 local FIELD_META = {
   oper = {min = 0, max = 3, default = 0},
@@ -68,13 +68,13 @@ local FIELD_META = {
   speed = {min = 0, max = 60000, default = 0},
   curve = {min = 0, max = 8, default = 0},
   condition = {min = 0, max = 16, default = 0},
-  purpose = {min = 0, max = 2, default = 0},
+  role = {min = 0, max = 2, default = 0},
 }
 
 local function defaultRule()
   return {
     oper = 0, input = 0, output = 0, offset = 0,
-    weight = 0, weightNeg = 0, speed = 0, curve = 0, condition = 0, purpose = 0,
+    weight = 0, weightNeg = 0, speed = 0, curve = 0, condition = 0, role = 0,
   }
 end
 
@@ -118,7 +118,7 @@ function msp_mixer_rules.decodePool(buf)
       speed = mspcodec.readU16(buf),
       curve = mspcodec.readU8(buf),
       condition = mspcodec.readU8(buf),
-      purpose = mspcodec.readU8(buf),
+      role = mspcodec.readU8(buf),
     }
   end
   return pool
@@ -138,7 +138,7 @@ function msp_mixer_rules.encodeRule(index, rule)
   mspcodec.writeU16(payload, rule.speed or 0)
   mspcodec.writeU8(payload, rule.curve or 0)
   mspcodec.writeU8(payload, rule.condition or 0)
-  mspcodec.writeU8(payload, rule.purpose or 0)
+  mspcodec.writeU8(payload, rule.role or 0)
   return payload
 end
 

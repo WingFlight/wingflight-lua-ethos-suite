@@ -149,8 +149,8 @@ local ADJUST_FUNCTIONS = {
   {id = 110, name = "TV Attitude Hold Gain", min = 0, max = 250},
   {id = 111, name = "TV Profile", min = 1, max = 6},
   -- Scales the weight of every mixer rule tagged with a given
-  -- mixerRulePurpose_e (pg/mixer.h) -- found by tag at runtime
-  -- (flight/mixer.c's applyPurposeWeight()), not a fixed rule index.
+  -- mixerRuleRole_e (pg/mixer.h) -- found by tag at runtime
+  -- (flight/mixer.c's applyRoleWeight()), not a fixed rule index.
   -- Differential Thrust Yaw Gain drives both motors' rules from one
   -- scalar, each keeping its own sign relative to the other (so it stays
   -- a differential, not a common-mode push) -- see that function's own

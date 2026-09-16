@@ -4842,25 +4842,25 @@
           "needs_translation": false,
           "translation": "PWM Servo %d"
         },
-        "purpose": {
-          "english": "Purpose",
-          "max_length": 7,
+        "role": {
+          "english": "Role",
+          "max_length": 4,
           "needs_translation": false,
-          "translation": "Purpose"
+          "translation": "Role"
         },
-        "purpose_differential_thrust_yaw": {
+        "role_differential_thrust_yaw": {
           "english": "Differential Thrust Yaw",
           "max_length": 24,
           "needs_translation": false,
           "translation": "Differential Thrust Yaw"
         },
-        "purpose_flap_compensation": {
+        "role_flap_compensation": {
           "english": "Flap Compensation",
           "max_length": 18,
           "needs_translation": false,
           "translation": "Flap Compensation"
         },
-        "purpose_none": {
+        "role_none": {
           "english": "None",
           "max_length": 4,
           "needs_translation": false,
