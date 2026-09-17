@@ -1,3 +1,11 @@
+# 0.0.22
+
+Add rule role tags and compensation gains to the Mixer Rules and Adjustments pages.
+Add the TRADITIONAL flight mode name and an audio callout for it.
+Surface the new BACKUP_RX arming disable flag; fix a stale bit-25 label.
+Add an Auto Hover roll deadband field to the Autolevel page.
+Hide the servo geometry correction field on PWM/bus servo pages.
+
 # 0.0.21
 
 Version bump for release alignment; no suite-relevant changes this cycle.
