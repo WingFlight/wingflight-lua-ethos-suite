@@ -151,6 +151,16 @@ end
 -- gain-curve pickers.
 local CURVE_OPTIONS = curveSlotLabels.optionsTable(8)
 
+-- role: descriptive tag only (mixerRuleRole_e, pg/mixer.h) -- the
+-- mixer evaluator never reads it. Lets a pilot (or this suite) recognize
+-- "the" rule serving a known role, e.g. flap-to-elevator compensation,
+-- regardless of which slot it lives in.
+local ROLE_OPTIONS = {
+  {"@i18n(app.modules.mixer_rules.role_none)@", 0},
+  {"@i18n(app.modules.mixer_rules.role_flap_compensation)@", 1},
+  {"@i18n(app.modules.mixer_rules.role_differential_thrust_yaw)@", 2},
+}
+
 local function ruleTitle(n)
   return string.format("@i18n(app.modules.mixer_rules.tile_rule_fmt)@", n)
 end
@@ -167,6 +177,7 @@ local function cloneRule(rule)
     speed = rule.speed or 0,
     curve = rule.curve or 0,
     condition = rule.condition or 0,
+    role = rule.role or 0,
   }
 end
 
@@ -281,6 +292,7 @@ local function openEditor(opts, listState, index)
   fieldLayout.buildSingle(runtime, "@i18n(app.modules.mixer_rules.speed)@", {key = "speed"})
   fieldLayout.buildSingle(runtime, "@i18n(app.modules.mixer_rules.curve)@", {key = "curve", choices = CURVE_OPTIONS})
   fieldLayout.buildSingle(runtime, "@i18n(app.modules.mixer_rules.condition)@", {key = "condition", choices = CONDITION_OPTIONS})
+  fieldLayout.buildSingle(runtime, "@i18n(app.modules.mixer_rules.role)@", {key = "role", choices = ROLE_OPTIONS})
 
   runtime:loadInitial()
 end
