@@ -46,6 +46,15 @@
 --     min/max/default values -- that schema was itself already verified
 --     against wingflight-firmware, so it is the authoritative source here,
 --     not a fresh derivation.
+--   * `autohover_roll_deadband` (U8) was appended after `atthold_max_rate`
+--     by wingflight-firmware's PG_PID_PROFILE v9->v10 (see pg/pid.c): Auto
+--     Hover previously left roll as a bare pass-through the whole time
+--     (torque roll and other disturbances went uncorrected even with the
+--     stick centered); now it holds roll once the stick is inside this
+--     deadband, same track/freeze idea atthold_deadband already used.
+--     Unconditionally in FIELDS like everything else here (see this file's
+--     no-version-branching floor above) -- talking to firmware older than
+--     v10 isn't a case this codec handles.
 --
 -- Unlike lib/msp_pid_tuning.lua's MSP_PID_TUNING (all U16), this command
 -- mixes U8 and U16 fields -- FIELDS entries are {name, wireType} pairs, not
@@ -117,6 +126,7 @@ local FIELDS = {
   {"cross_axis_relax_pitch_strength", "U8"},
   {"gain_curve_0", "U8"}, {"gain_curve_1", "U8"}, {"gain_curve_2", "U8"}, -- roll, pitch, yaw
   {"atthold_max_rate", "U16"},
+  {"autohover_roll_deadband", "U8"},
 }
 
 -- Fixture reply used automatically when running in the Ethos simulator
@@ -169,6 +179,7 @@ local SIMULATOR_RESPONSE = {
   0,    -- cross_axis_relax_pitch_strength
   0, 0, 0, -- gain_curve_0/1/2
   44, 1, -- atthold_max_rate (U16 LE: 300 = 0x012C -> 44, 1)
+  5,    -- autohover_roll_deadband
 }
 
 -- Per-field {min, max, default, decimals, suffix}, sourced from this
@@ -228,6 +239,7 @@ local FIELD_META = {
   gain_curve_1 = {min = 0, max = 8, default = 0},
   gain_curve_2 = {min = 0, max = 8, default = 0},
   atthold_max_rate = {min = 0, max = 1800, default = 300, suffix = "°/s"},
+  autohover_roll_deadband = {min = 0, max = 100, default = 5, suffix = "%"},
 }
 
 local msp_pid_profile = {
