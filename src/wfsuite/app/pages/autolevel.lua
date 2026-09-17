@@ -1,13 +1,17 @@
 -- Autolevel profile editor page. Loaded on demand (plain loadfile) only when the user opens Flight Tuning -> Advanced ->
 -- Autolevel -- see app/tool.lua.
 --
--- Edits eleven MSP_PID_PROFILE fields (cmd 94/95, see
+-- Edits twelve MSP_PID_PROFILE fields (cmd 94/95, see
 -- lib/msp_pid_profile.lua): acro trainer gain/limit, angle mode gain/
--- limit, horizon mode gain, Auto Hover gain/max angle/max rate, and Att
--- Hold gain/deadband/max rate. Matches this project's own last-known-good
--- app/modules/profile_autolevel/autolevel.lua exactly, including Horizon
--- Mode being a single-field group (no "Max" counterpart -- the firmware
--- struct has no `horizon_level_limit`, only `horizon_level_strength`).
+-- limit, horizon mode gain, Auto Hover gain/max angle/max rate/roll
+-- deadband, and Att Hold gain/deadband/max rate. Eleven of these match
+-- this project's own last-known-good app/modules/profile_autolevel/
+-- autolevel.lua exactly, including Horizon Mode being a single-field
+-- group (no "Max" counterpart -- the firmware struct has no
+-- `horizon_level_limit`, only `horizon_level_strength`); the twelfth,
+-- Auto Hover's roll deadband, is newer than that reference (added by
+-- wingflight-firmware's PG_PID_PROFILE v9->v10, see lib/msp_pid_profile.lua)
+-- and has no equivalent there.
 --
 -- Auto Hover and Att Hold are both wingflight-native (not part of the
 -- rotorflight-based rewrite this base came from -- see AGENTS.md's
@@ -59,21 +63,24 @@ local function open(opts)
   fieldLayout.buildSingle(runtime, "@i18n(app.modules.autolevel.horizon_mode)@",
     {key = "horizon_level_strength"})
 
-  -- Auto Hover and Att Hold each have 3 fields -- one more than Acro
-  -- Trainer/Angle Mode above. A live screenshot showed all 3 crammed onto
-  -- one buildGroup() line leaves every field box too small to comfortably
+  -- Auto Hover and Att Hold each have several fields -- more than Acro
+  -- Trainer/Angle Mode above. A live screenshot showed 3 crammed onto one
+  -- buildGroup() line leaves every field box too small to comfortably
   -- show its value+suffix (each field's flex width is the line's
   -- remaining space divided by the column count, so a 3-column line gives
   -- each field noticeably less room than a 2-column one). Splitting Rate
   -- onto its own buildSingle() line -- the same full-width shape Horizon
   -- Mode already uses successfully just above -- keeps Gain/Max and
   -- Gain/Deadband as comfortable 2-column lines and gives Rate the whole
-  -- line to itself instead of a third cramped slot.
+  -- line to itself instead of a third cramped slot. Auto Hover's roll
+  -- deadband (see lib/msp_pid_profile.lua's v9->v10 note) gets the same
+  -- treatment -- its own line, rather than cramming it in beside Rate.
   fieldLayout.buildGroup(runtime, "@i18n(app.modules.autolevel.auto_hover)@", {
     {title = "@i18n(app.modules.autolevel.gain)@", spec = {key = "autohover_gain"}},
     {title = "@i18n(app.modules.autolevel.max)@", spec = {key = "autohover_max_angle"}},
   })
   fieldLayout.buildSingle(runtime, "@i18n(app.modules.autolevel.rate)@", {key = "autohover_max_rate"})
+  fieldLayout.buildSingle(runtime, "@i18n(app.modules.autolevel.deadband)@", {key = "autohover_roll_deadband"})
 
   fieldLayout.buildGroup(runtime, "@i18n(app.modules.autolevel.att_hold)@", {
     {title = "@i18n(app.modules.autolevel.gain)@", spec = {key = "atthold_gain"}},
