@@ -1,17 +1,18 @@
 -- Autolevel profile editor page. Loaded on demand (plain loadfile) only when the user opens Flight Tuning -> Advanced ->
 -- Autolevel -- see app/tool.lua.
 --
--- Edits twelve MSP_PID_PROFILE fields (cmd 94/95, see
+-- Edits fifteen MSP_PID_PROFILE fields (cmd 94/95, see
 -- lib/msp_pid_profile.lua): acro trainer gain/limit, angle mode gain/
 -- limit, horizon mode gain, Auto Hover gain/max angle/max rate/roll
--- deadband, and Att Hold gain/deadband/max rate. Eleven of these match
--- this project's own last-known-good app/modules/profile_autolevel/
--- autolevel.lua exactly, including Horizon Mode being a single-field
--- group (no "Max" counterpart -- the firmware struct has no
--- `horizon_level_limit`, only `horizon_level_strength`); the twelfth,
--- Auto Hover's roll deadband, is newer than that reference (added by
--- wingflight-firmware's PG_PID_PROFILE v9->v10, see lib/msp_pid_profile.lua)
--- and has no equivalent there.
+-- deadband/throttle assist gain/max/trigger time, and Att Hold gain/
+-- deadband/max rate. Eleven of these match this project's own
+-- last-known-good app/modules/profile_autolevel/autolevel.lua exactly,
+-- including Horizon Mode being a single-field group (no "Max" counterpart
+-- -- the firmware struct has no `horizon_level_limit`, only
+-- `horizon_level_strength`); Auto Hover's roll deadband and its three
+-- throttle assist fields are newer than that reference (added by
+-- wingflight-firmware's PG_PID_PROFILE v9->v10 and v10->v11 respectively,
+-- see lib/msp_pid_profile.lua) and have no equivalent there.
 --
 -- Auto Hover and Att Hold are both wingflight-native (not part of the
 -- rotorflight-based rewrite this base came from -- see AGENTS.md's
@@ -81,6 +82,15 @@ local function open(opts)
   })
   fieldLayout.buildSingle(runtime, "@i18n(app.modules.autolevel.rate)@", {key = "autohover_max_rate"})
   fieldLayout.buildSingle(runtime, "@i18n(app.modules.autolevel.deadband)@", {key = "autohover_roll_deadband"})
+
+  -- Throttle assist (opt-in, 0 gain = disabled/default -- see lib/msp_pid_profile.lua's
+  -- v10->v11 note): its own sub-group rather than folded into Auto Hover's group above,
+  -- same 2-column-then-own-line reasoning as the comment above this block already explains.
+  fieldLayout.buildGroup(runtime, "@i18n(app.modules.autolevel.throttle_assist)@", {
+    {title = "@i18n(app.modules.autolevel.gain)@", spec = {key = "autohover_throttle_assist_gain"}},
+    {title = "@i18n(app.modules.autolevel.max)@", spec = {key = "autohover_throttle_assist_max"}},
+  })
+  fieldLayout.buildSingle(runtime, "@i18n(app.modules.autolevel.time)@", {key = "autohover_throttle_assist_trigger_ms"})
 
   fieldLayout.buildGroup(runtime, "@i18n(app.modules.autolevel.att_hold)@", {
     {title = "@i18n(app.modules.autolevel.gain)@", spec = {key = "atthold_gain"}},

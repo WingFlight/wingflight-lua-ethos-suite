@@ -55,6 +55,13 @@
 --     Unconditionally in FIELDS like everything else here (see this file's
 --     no-version-branching floor above) -- talking to firmware older than
 --     v10 isn't a case this codec handles.
+--   * `autohover_throttle_assist_gain`/`_max` (U8) and
+--     `_trigger_ms` (U16) were appended after `autohover_roll_deadband` by
+--     wingflight-firmware's PG_PID_PROFILE v10->v11 (see pg/pid.c): an
+--     optional, opt-in nudge (0 gain = disabled/default) that adds throttle,
+--     capped hard at `_max` percent and ramped in over `_trigger_ms`, only
+--     while Auto Hover's pitch correction stays pinned at max_rate. Same
+--     no-version-branching treatment as every other field in this file.
 --
 -- Unlike lib/msp_pid_tuning.lua's MSP_PID_TUNING (all U16), this command
 -- mixes U8 and U16 fields -- FIELDS entries are {name, wireType} pairs, not
@@ -127,6 +134,9 @@ local FIELDS = {
   {"gain_curve_0", "U8"}, {"gain_curve_1", "U8"}, {"gain_curve_2", "U8"}, -- roll, pitch, yaw
   {"atthold_max_rate", "U16"},
   {"autohover_roll_deadband", "U8"},
+  {"autohover_throttle_assist_gain", "U8"},
+  {"autohover_throttle_assist_max", "U8"},
+  {"autohover_throttle_assist_trigger_ms", "U16"},
 }
 
 -- Fixture reply used automatically when running in the Ethos simulator
@@ -180,6 +190,9 @@ local SIMULATOR_RESPONSE = {
   0, 0, 0, -- gain_curve_0/1/2
   44, 1, -- atthold_max_rate (U16 LE: 300 = 0x012C -> 44, 1)
   5,    -- autohover_roll_deadband
+  0,    -- autohover_throttle_assist_gain (disabled by default)
+  15,   -- autohover_throttle_assist_max
+  44, 1, -- autohover_throttle_assist_trigger_ms (U16 LE: 300 = 0x012C -> 44, 1)
 }
 
 -- Per-field {min, max, default, decimals, suffix}, sourced from this
@@ -240,6 +253,9 @@ local FIELD_META = {
   gain_curve_2 = {min = 0, max = 8, default = 0},
   atthold_max_rate = {min = 0, max = 1800, default = 300, suffix = "°/s"},
   autohover_roll_deadband = {min = 0, max = 100, default = 5, suffix = "%"},
+  autohover_throttle_assist_gain = {min = 0, max = 100, default = 0, suffix = "%/s"},
+  autohover_throttle_assist_max = {min = 0, max = 50, default = 15, suffix = "%"},
+  autohover_throttle_assist_trigger_ms = {min = 0, max = 2000, default = 300, suffix = "ms"},
 }
 
 local msp_pid_profile = {
