@@ -715,6 +715,18 @@
           "max_length": 4,
           "needs_translation": false,
           "translation": "Rate"
+        },
+        "throttle_assist": {
+          "english": "Throttle Assist",
+          "max_length": 16,
+          "needs_translation": false,
+          "translation": "Throttle Assist"
+        },
+        "time": {
+          "english": "Time",
+          "max_length": 4,
+          "needs_translation": false,
+          "translation": "Time"
         }
       },
       "beepers": {

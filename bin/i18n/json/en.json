@@ -860,6 +860,12 @@
           "needs_translation": false,
           "max_length": 10
         },
+        "throttle_assist": {
+          "english": "Throttle Assist",
+          "translation": "Throttle Assist",
+          "needs_translation": false,
+          "max_length": 16
+        },
         "deadband": {
           "english": "Deadband",
           "translation": "Deadband",
@@ -883,6 +889,12 @@
           "translation": "Max",
           "needs_translation": false,
           "max_length": 3
+        },
+        "time": {
+          "english": "Time",
+          "translation": "Time",
+          "needs_translation": false,
+          "max_length": 4
         }
       },
       "filters": {
