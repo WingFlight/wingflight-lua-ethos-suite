@@ -1,3 +1,8 @@
+# 0.0.23
+
+Add AUTOHOVER throttle assist fields to the Autolevel page.
+Unify RC channel naming to CH #N in the Mixer Rules, Adjustments, and Modes pages, and resolve the Roll/Pitch/Yaw/Throttle bypass inputs to the pilot's actual mapped channel instead of a fixed order.
+
 # 0.0.22
 
 Add rule role tags and compensation gains to the Mixer Rules and Adjustments pages.
