@@ -224,7 +224,7 @@ local function buildAuxOptions(includeAuto, includeAlways)
   if includeAuto then options[#options + 1] = {"AUTO", 1} end
   if includeAlways then options[#options + 1] = {"Always", #options + 1} end
   for i = 1, AUX_CHANNEL_COUNT do
-    options[#options + 1] = {"AUX " .. tostring(i), #options + 1}
+    options[#options + 1] = {"CH #" .. tostring(i + 4), #options + 1}
   end
   return options
 end
