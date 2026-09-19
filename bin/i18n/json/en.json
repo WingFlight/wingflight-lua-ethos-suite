@@ -6623,6 +6623,18 @@
           "translation": "Y",
           "needs_translation": false,
           "max_length": 1
+        },
+        "category_servo": {
+          "english": "Servo",
+          "translation": "Servo",
+          "needs_translation": false,
+          "max_length": 5
+        },
+        "no_servos": {
+          "english": "No servos configured",
+          "translation": "No servos configured",
+          "needs_translation": false,
+          "max_length": 20
         }
       },
       "master_gains": {
