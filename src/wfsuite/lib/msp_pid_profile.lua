@@ -62,6 +62,17 @@
 --     capped hard at `_max` percent and ramped in over `_trigger_ms`, only
 --     while Auto Hover's pitch correction stays pinned at max_rate. Same
 --     no-version-branching treatment as every other field in this file.
+--   * `osc_limiter` (U8, 0=off/1=on), `osc_limiter_min_hz`/`_max_hz`/
+--     `_threshold`/`_floor` (U8) and `osc_limiter_engage_ms` (U16) were
+--     appended after `autohover_throttle_assist_trigger_ms` by
+--     wingflight-firmware's PG_PID_PROFILE v11->v12 (see pg/pid.c and
+--     docs/development/Oscillation Detection.md there): a per-profile
+--     detector that eases an axis's gain back when it sees a sustained
+--     gain-induced oscillation, off by default. The firmware's SET only
+--     applies these when all 7 trailing bytes are present, which this
+--     codec always sends. Same no-version-branching treatment as every
+--     other field in this file -- firmware older than v12 doesn't send
+--     these bytes and isn't a case this codec handles.
 --
 -- Unlike lib/msp_pid_tuning.lua's MSP_PID_TUNING (all U16), this command
 -- mixes U8 and U16 fields -- FIELDS entries are {name, wireType} pairs, not
@@ -137,6 +148,12 @@ local FIELDS = {
   {"autohover_throttle_assist_gain", "U8"},
   {"autohover_throttle_assist_max", "U8"},
   {"autohover_throttle_assist_trigger_ms", "U16"},
+  {"osc_limiter", "U8"},
+  {"osc_limiter_min_hz", "U8"},
+  {"osc_limiter_max_hz", "U8"},
+  {"osc_limiter_threshold", "U8"},
+  {"osc_limiter_floor", "U8"},
+  {"osc_limiter_engage_ms", "U16"},
 }
 
 -- Fixture reply used automatically when running in the Ethos simulator
@@ -193,6 +210,12 @@ local SIMULATOR_RESPONSE = {
   0,    -- autohover_throttle_assist_gain (disabled by default)
   15,   -- autohover_throttle_assist_max
   44, 1, -- autohover_throttle_assist_trigger_ms (U16 LE: 300 = 0x012C -> 44, 1)
+  0,    -- osc_limiter (off by default)
+  4,    -- osc_limiter_min_hz
+  20,   -- osc_limiter_max_hz
+  30,   -- osc_limiter_threshold
+  50,   -- osc_limiter_floor
+  250, 0, -- osc_limiter_engage_ms (U16 LE: 250 = 0x00FA -> 250, 0)
 }
 
 -- Per-field {min, max, default, decimals, suffix}, sourced from this
@@ -256,6 +279,13 @@ local FIELD_META = {
   autohover_throttle_assist_gain = {min = 0, max = 100, default = 0, suffix = "%/s"},
   autohover_throttle_assist_max = {min = 0, max = 50, default = 15, suffix = "%"},
   autohover_throttle_assist_trigger_ms = {min = 0, max = 2000, default = 300, suffix = "ms"},
+  -- osc_limiter itself is an Off/On choice field (no FIELD_META entry, like
+  -- iterm_relax_type). Ranges are the firmware CLI's own (cli/settings.c).
+  osc_limiter_min_hz = {min = 1, max = 50, default = 4, suffix = "Hz"},
+  osc_limiter_max_hz = {min = 2, max = 100, default = 20, suffix = "Hz"},
+  osc_limiter_threshold = {min = 1, max = 250, default = 30, suffix = "°/s"},
+  osc_limiter_floor = {min = 10, max = 100, default = 50, suffix = "%"},
+  osc_limiter_engage_ms = {min = 50, max = 2000, default = 250, suffix = "ms"},
 }
 
 local msp_pid_profile = {

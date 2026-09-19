@@ -5912,6 +5912,71 @@
           "translation": "Razem queries"
         }
       },
+      "osc_limiter": {
+        "detection_band": {
+          "english": "Detection Band",
+          "max_length": 14,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Detection Band"
+        },
+        "engage_time": {
+          "english": "Engage Time",
+          "max_length": 11,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Engage Time"
+        },
+        "gain_floor": {
+          "english": "Gain Floor",
+          "max_length": 10,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Gain Floor"
+        },
+        "max": {
+          "english": "Max",
+          "max_length": 3,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Max"
+        },
+        "min": {
+          "english": "Min",
+          "max_length": 3,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Min"
+        },
+        "name": {
+          "english": "Osc Limiter",
+          "max_length": 11,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Osc Limiter"
+        },
+        "tbl_off": {
+          "english": "Off",
+          "max_length": 3,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Off"
+        },
+        "tbl_on": {
+          "english": "On",
+          "max_length": 2,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "On"
+        },
+        "threshold": {
+          "english": "Threshold",
+          "max_length": 9,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Threshold"
+        }
+      },
       "pid_bandwidth": {
         "bterm_cutoff": {
           "english": "B-term Cutoff",

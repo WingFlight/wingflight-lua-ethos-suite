@@ -352,6 +352,10 @@ local MENUS = {
       {title = "@i18n(app.modules.thrust_vector.name)@", icon = lcd.loadMask("app/gfx/thrust_vector.png"), script = "app/pages/thrust_vector.lua"},
       {title = "@i18n(app.modules.pid_bandwidth.name)@", icon = lcd.loadMask("app/gfx/pid_bandwidth.png"), script = "app/pages/pid_bandwidth.lua"},
       {title = "@i18n(app.modules.autolevel.name)@", icon = lcd.loadMask("app/gfx/autolevel.png"), script = "app/pages/autolevel.lua"},
+      -- Off/On + tuning for the per-profile oscillation limiter (same
+      -- MSP_PID_PROFILE codec as PID Controller/Autolevel; the live
+      -- "currently cutting gain" status is a telemetry sensor, not this page).
+      {title = "@i18n(app.modules.osc_limiter.name)@", icon = lcd.loadMask("app/gfx/osc_limiter.png"), script = "app/pages/osc_limiter.lua"},
       -- Links straight to the page now, not a submenu: Cyclic Behaviour
       -- (cyclic_ring/cyclic_polarity) and Rate Table (rates_type) were
       -- both wire-present-but-dead heli-only concepts on wingflight-

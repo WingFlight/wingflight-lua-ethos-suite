@@ -3695,6 +3695,62 @@
           "translation": "Unsupported"
         }
       },
+      "osc_limiter": {
+        "detection_band": {
+          "english": "Detection Band",
+          "max_length": 14,
+          "needs_translation": false,
+          "translation": "Detection Band"
+        },
+        "engage_time": {
+          "english": "Engage Time",
+          "max_length": 11,
+          "needs_translation": false,
+          "translation": "Engage Time"
+        },
+        "gain_floor": {
+          "english": "Gain Floor",
+          "max_length": 10,
+          "needs_translation": false,
+          "translation": "Gain Floor"
+        },
+        "max": {
+          "english": "Max",
+          "max_length": 3,
+          "needs_translation": false,
+          "translation": "Max"
+        },
+        "min": {
+          "english": "Min",
+          "max_length": 3,
+          "needs_translation": false,
+          "translation": "Min"
+        },
+        "name": {
+          "english": "Osc Limiter",
+          "max_length": 11,
+          "needs_translation": false,
+          "translation": "Osc Limiter"
+        },
+        "tbl_off": {
+          "english": "Off",
+          "max_length": 3,
+          "needs_translation": false,
+          "translation": "Off"
+        },
+        "tbl_on": {
+          "english": "On",
+          "max_length": 2,
+          "needs_translation": false,
+          "translation": "On"
+        },
+        "threshold": {
+          "english": "Threshold",
+          "max_length": 9,
+          "needs_translation": false,
+          "translation": "Threshold"
+        }
+      },
       "rx_input_backup_status": {
         "active_backup": {
           "english": "Active: Backup RX",

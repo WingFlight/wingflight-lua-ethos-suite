@@ -7964,6 +7964,71 @@
           "max_length": 5,
           "reverse_text": false
         }
+      },
+      "osc_limiter": {
+        "detection_band": {
+          "english": "Detection Band",
+          "translation": "Detection Band",
+          "needs_translation": true,
+          "max_length": 14,
+          "reverse_text": false
+        },
+        "engage_time": {
+          "english": "Engage Time",
+          "translation": "Engage Time",
+          "needs_translation": true,
+          "max_length": 11,
+          "reverse_text": false
+        },
+        "gain_floor": {
+          "english": "Gain Floor",
+          "translation": "Gain Floor",
+          "needs_translation": true,
+          "max_length": 10,
+          "reverse_text": false
+        },
+        "max": {
+          "english": "Max",
+          "translation": "Max",
+          "needs_translation": true,
+          "max_length": 3,
+          "reverse_text": false
+        },
+        "min": {
+          "english": "Min",
+          "translation": "Min",
+          "needs_translation": true,
+          "max_length": 3,
+          "reverse_text": false
+        },
+        "name": {
+          "english": "Osc Limiter",
+          "translation": "Osc Limiter",
+          "needs_translation": true,
+          "max_length": 11,
+          "reverse_text": false
+        },
+        "tbl_off": {
+          "english": "Off",
+          "translation": "Off",
+          "needs_translation": true,
+          "max_length": 3,
+          "reverse_text": false
+        },
+        "tbl_on": {
+          "english": "On",
+          "translation": "On",
+          "needs_translation": true,
+          "max_length": 2,
+          "reverse_text": false
+        },
+        "threshold": {
+          "english": "Threshold",
+          "translation": "Threshold",
+          "needs_translation": true,
+          "max_length": 9,
+          "reverse_text": false
+        }
       }
     },
     "menu_section_controls": {
