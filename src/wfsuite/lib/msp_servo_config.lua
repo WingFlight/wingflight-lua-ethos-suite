@@ -25,6 +25,7 @@ local SIMULATOR_RESPONSE = {
   100, 0,   -- rate = 100
   0, 0,     -- speed = 0
   0, 0,     -- flags = 0
+  0, 0,     -- trim = 0 (API 22.3+)
 }
 
 local msp_servo_config = {
@@ -38,6 +39,8 @@ local msp_servo_config = {
     rpos = {min = 100, max = 1000, default = 500},
     rate = {min = 50, max = 5000, default = 333, suffix = "@i18n(app.unit_hertz)@"},
     speed = {min = 0, max = 60000, default = 0, suffix = "ms"},
+    -- The FC limits trim to 20% of the servo scale (larger of rneg/rpos), so at most +-200.
+    trim = {min = -200, max = 200, default = 0},
   },
 }
 
@@ -49,7 +52,7 @@ end
 
 function msp_servo_config.decode(buf)
   buf.offset = 1
-  return {
+  local data = {
     mid = mspcodec.readU16(buf),
     min = mspcodec.readS16(buf),
     max = mspcodec.readS16(buf),
@@ -59,6 +62,10 @@ function msp_servo_config.decode(buf)
     speed = mspcodec.readU16(buf),
     flags = mspcodec.readU16(buf),
   }
+  -- FC API 22.3+ appends the S16 servo trim; older FCs don't send it, and must not be sent one.
+  data.hasTrim = #buf - (buf.offset - 1) >= 2
+  data.trim = data.hasTrim and mspcodec.readS16(buf) or 0
+  return data
 end
 
 function msp_servo_config.encode(index, data)
@@ -73,6 +80,9 @@ function msp_servo_config.encode(index, data)
   mspcodec.writeU16(payload, data.rate or 0)
   mspcodec.writeU16(payload, data.speed or 0)
   mspcodec.writeU16(payload, data.flags or 0)
+  if data.hasTrim then
+    mspcodec.writeS16(payload, data.trim or 0)
+  end
   return payload
 end
 

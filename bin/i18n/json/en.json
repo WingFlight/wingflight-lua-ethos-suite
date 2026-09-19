@@ -1484,6 +1484,12 @@
           "needs_translation": false,
           "max_length": 14
         },
+        "trim": {
+          "english": "Trim",
+          "translation": "Trim",
+          "needs_translation": false,
+          "max_length": 6
+        },
         "servo_prefix": {
           "english": "SERVO ",
           "translation": "SERVO ",

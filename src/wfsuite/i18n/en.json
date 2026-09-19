@@ -6228,6 +6228,12 @@
           "needs_translation": false,
           "translation": "Scale Positive"
         },
+        "trim": {
+          "english": "Trim",
+          "max_length": 6,
+          "needs_translation": false,
+          "translation": "Trim"
+        },
         "servo_prefix": {
           "english": "SERVO ",
           "max_length": 6,
