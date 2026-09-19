@@ -1,3 +1,7 @@
+# 0.0.24
+
+Add per-servo balance curves to the Curves page (new Servo category).
+
 # 0.0.23
 
 Add AUTOHOVER throttle assist fields to the Autolevel page.
