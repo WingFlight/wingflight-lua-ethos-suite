@@ -1,7 +1,8 @@
 -- Curves module: shape editor for the Mixer and Gain curve pools
 -- (MSP_MIXER_CURVES/MSP_SET_MIXER_CURVE, MSP_GAIN_CURVES/MSP_SET_GAIN_CURVE
 -- -- see lib/msp_mixer_curves.lua/lib/msp_gain_curves.lua for the wire
--- format and its firmware-verification caveat).
+-- format and its firmware-verification caveat) and the per-servo balance
+-- curves (MSP_SERVO_CURVES/MSP_SET_SERVO_CURVE -- lib/msp_servo_curves.lua).
 --
 -- app/pages/master_gains.lua's gain_curve_0/1/2/fw_tpa_curve fields only
 -- pick WHICH of the Gain pool's 8 slots is assigned to an axis (a plain
@@ -9,14 +10,23 @@
 -- convention); this page is where a slot's actual point-list SHAPE gets
 -- edited.
 --
+-- The Servo category differs from Mixer/Gain in two ways: there is no
+-- fixed pool (one curve per live servo, so the slot count is however many
+-- curves the GET returned, not a CURVE_COUNT constant), and a curve is a
+-- small corrective delta added to that servo's own output (Y -100..100,
+-- flat at 0 by default) rather than a reshape -- so it is not assigned
+-- from anywhere else, it simply applies to the servo it belongs to.
+--
 -- Three screens, mirroring app/pages/servos_pwm.lua's list->editor shape
 -- with one extra level on top:
---   open() -> openCategoryMenu(): Mixer / Gain chooser, no MSP traffic yet.
+--   open() -> openCategoryMenu(): Mixer / Gain / Servo chooser, no MSP
+--     traffic yet.
 --   openCategory(): one-off whole-pool GET (own progress dialog, like
 --     servos_pwm.lua's own top-level open()), then openSlotList().
---   openSlotList(): an 8-tile grid over the already-fetched pool (no
---     re-read -- the tiles show nothing curve-specific, just "Curve N",
---     so nothing to refresh); tapping a tile opens openEditor().
+--   openSlotList(): a tile grid over the already-fetched pool (no
+--     re-read -- the tiles show nothing curve-specific, just "Curve N" /
+--     "SERVO N", so nothing to refresh); tapping a tile opens
+--     openEditor().
 --   openEditor(): a PageRuntime-backed number-field editor for one curve
 --     -- count field + POINT_COUNT X/Y field pairs, rows beyond the
 --     current count disabled. field_layout.lua only indexes flat
@@ -43,21 +53,33 @@ local curveSlotLabels = requireModule("app/curve_slot_labels.lua")
 local curvePoints = requireModule("lib/curve_points.lua")
 local mixerCurves = requireModule("lib/msp_mixer_curves.lua")
 local gainCurves = requireModule("lib/msp_gain_curves.lua")
+local servoCurves = requireModule("lib/msp_servo_curves.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.curves.name)@"
 local MSG_LOADING_TITLE = "@i18n(app.msg_loading)@"
 local MSG_LOADING_BODY = "@i18n(app.msg_loading_from_fbl)@"
 local MSG_LOAD_ERROR = "@i18n(app.modules.ports.load_error_prefix)@"
+local MSG_NO_SERVOS = "@i18n(app.modules.curves.no_servos)@"
 
 -- Mixer's category tile and its 8 slot tiles use the generic curve icon
 -- (also app/tool.lua's own Curves menu entry); Gain's use
 -- master_gains.png instead -- the same icon app/pages/master_gains.lua's
 -- own menu entry uses -- so a Gain curve slot visually ties back to the
 -- Master Gains table that references it, distinct from a Mixer curve
--- slot. Loaded once here rather than per-tile inside the grid-building
--- loops, since those loops rerun on every visit to these screens.
+-- slot. Servo's category tile uses servos.png (the Servos menu entry's own
+-- icon) and each slot tile the matching servo<N>.png that
+-- app/pages/servos_pwm.lua/servos_bus.lua use for that servo, so a curve
+-- visually ties back to the servo it trims. Loaded once here rather than
+-- per-tile inside the grid-building loops, since those loops rerun on
+-- every visit to these screens; the per-servo masks fill in lazily since
+-- the servo count isn't known until the pool is fetched.
 local MIXER_ICON = lcd.loadMask("app/gfx/curves.png")
 local GAIN_ICON = lcd.loadMask("app/gfx/master_gains.png")
+local SERVO_ICON = lcd.loadMask("app/gfx/servos.png")
+-- Only servo1..servo16 .png exist; a bus-servo setup can push the total
+-- past that, and those extra slots just fall back to the generic icon.
+local MAX_SERVO_ICON = 16
+local servoIcons = {}
 
 -- Point-field row layout (openEditor). COL_GAP/SIDE_MARGIN/GUTTER_W are
 -- pixel constants for the dense point editor, separate from the shared
@@ -104,15 +126,46 @@ local function rangeOf(meta)
   return {min = meta.min, max = meta.max}
 end
 
-local CATEGORY_ORDER = {"mixer", "gain"}
+local function curveSlotTitle(n)
+  return curveSlotLabels.slotTitle(n)
+end
+
+local function mixerSlotIcon()
+  return MIXER_ICON
+end
+
+local function gainSlotIcon()
+  return GAIN_ICON
+end
+
+local function servoSlotTitle(n)
+  return "@i18n(app.modules.servos.servo_prefix)@" .. n
+end
+
+local function servoSlotIcon(n)
+  if n > MAX_SERVO_ICON then return SERVO_ICON end
+  local icon = servoIcons[n]
+  if not icon then
+    icon = lcd.loadMask("app/gfx/servo" .. n .. ".png")
+    servoIcons[n] = icon
+  end
+  return icon
+end
+
+-- slotTitle(n)/slotIcon(n): n is the 1-based slot number. The slot COUNT
+-- is not stored here -- openSlotList() sizes its grid off the fetched pool
+-- (#listState.pool), which is a fixed 8 for Mixer/Gain but the live servo
+-- count for Servo.
+local CATEGORY_ORDER = {"mixer", "gain", "servo"}
 local CATEGORIES = {
   mixer = {
     key = "mixer",
     codec = mixerCurves,
     pointCount = mixerCurves.POINT_COUNT,
-    curveCount = mixerCurves.CURVE_COUNT,
     title = "@i18n(app.modules.curves.category_mixer)@",
     icon = MIXER_ICON,
+    slotTitle = curveSlotTitle,
+    slotIcon = mixerSlotIcon,
     xRange = rangeOf(mixerCurves.FIELD_META.x),
     yRange = rangeOf(mixerCurves.FIELD_META.y),
     unloadKey = "wfsuite.lib.msp_mixer_curves",
@@ -121,12 +174,25 @@ local CATEGORIES = {
     key = "gain",
     codec = gainCurves,
     pointCount = gainCurves.POINT_COUNT,
-    curveCount = gainCurves.CURVE_COUNT,
     title = "@i18n(app.modules.curves.category_gain)@",
     icon = GAIN_ICON,
+    slotTitle = curveSlotTitle,
+    slotIcon = gainSlotIcon,
     xRange = rangeOf(gainCurves.FIELD_META.x),
     yRange = rangeOf(gainCurves.FIELD_META.y),
     unloadKey = "wfsuite.lib.msp_gain_curves",
+  },
+  servo = {
+    key = "servo",
+    codec = servoCurves,
+    pointCount = servoCurves.POINT_COUNT,
+    title = "@i18n(app.modules.curves.category_servo)@",
+    icon = SERVO_ICON,
+    slotTitle = servoSlotTitle,
+    slotIcon = servoSlotIcon,
+    xRange = rangeOf(servoCurves.FIELD_META.x),
+    yRange = rangeOf(servoCurves.FIELD_META.y),
+    unloadKey = "wfsuite.lib.msp_servo_curves",
   },
 }
 
@@ -254,7 +320,7 @@ local function openEditor(opts, category, listState, index)
   end
 
   runtime = pageRuntime.new({
-    pageTitle = PAGE_TITLE .. " / " .. category.title .. " / " .. curveSlotLabels.slotTitle(index + 1),
+    pageTitle = PAGE_TITLE .. " / " .. category.title .. " / " .. category.slotTitle(index + 1),
     logTag = "curves_editor",
     mspModule = flatSlotModule(category, index),
     initialData = flatten(listState.pool[index + 1], pointCount),
@@ -406,16 +472,25 @@ openSlotList = function(opts, category, listState)
   if opts.setPaintHandler then opts.setPaintHandler(nil) end
   if opts.setCleanupHandler then opts.setCleanupHandler(nil) end
 
+  local slotCount = #listState.pool
+  if slotCount == 0 then
+    -- Only reachable for Servo (Mixer/Gain always return a full pool):
+    -- the FC reports no servos configured, so there is nothing to trim.
+    form.addLine(MSG_NO_SERVOS)
+    headerHandle.focusMenu()
+    return
+  end
+
   local windowWidth, windowHeight = lcd.getWindowSize()
   local numPerRow, tileW, tileH, tilePadding, tileFont = tileGrid.metrics(windowWidth, windowHeight)
   local x, y = 0, form.height() + tilePadding
   local col = 0
   local buttons = {}
 
-  for i = 1, category.curveCount do
+  for i = 1, slotCount do
     buttons[i] = form.addButton(nil, {x = x, y = y, w = tileW, h = tileH}, {
-      text = curveSlotLabels.slotTitle(i),
-      icon = category.icon,
+      text = category.slotTitle(i),
+      icon = category.slotIcon(i),
       options = tileFont,
       press = function()
         listState.selected = i

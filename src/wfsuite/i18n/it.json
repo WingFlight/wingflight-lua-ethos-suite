@@ -1541,12 +1541,26 @@
           "reverse_text": false,
           "translation": "Mixer"
         },
+        "category_servo": {
+          "english": "Servo",
+          "max_length": 5,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Servo"
+        },
         "name": {
           "english": "Curves",
           "max_length": 6,
           "needs_translation": true,
           "reverse_text": false,
           "translation": "Curves"
+        },
+        "no_servos": {
+          "english": "No servos configured",
+          "max_length": 20,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "No servos configured"
         },
         "point_count": {
           "english": "Points",
