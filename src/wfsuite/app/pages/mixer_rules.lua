@@ -60,6 +60,7 @@ local progressDialog = requireModule("app/progress_dialog.lua")
 local curveSlotLabels = requireModule("app/curve_slot_labels.lua")
 local eeprom = requireModule("lib/msp_eeprom.lua")
 local mixerRules = requireModule("lib/msp_mixer_rules.lua")
+local rxMapApi = requireModule("lib/msp_rx_map.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.mixer_rules.name)@"
 local MSG_LOADING_TITLE = "@i18n(app.msg_loading)@"
@@ -79,32 +80,105 @@ local OPER_OPTIONS = {
 
 -- input: 27 entries (wire values 0-26), matching wingflight-configurator's
 -- Mixer.js inputNames exactly -- 0 None, 1-4 Stabilized R/P/Y/T, 5-8 RC
--- Command R/P/Y/T, 9-12 RC Channel R/P/Y/T, 13-15 RC Channel Aux 1-3,
--- 16-26 RC Channel 8-18 (raw numbered channels beyond the named first 7).
-local INPUT_OPTIONS = {
-  {"@i18n(app.modules.mixer_rules.input_none)@", 0},
-  {"@i18n(app.modules.mixer_rules.input_stab_roll)@", 1},
-  {"@i18n(app.modules.mixer_rules.input_stab_pitch)@", 2},
-  {"@i18n(app.modules.mixer_rules.input_stab_yaw)@", 3},
-  {"@i18n(app.modules.mixer_rules.input_stab_throttle)@", 4},
-  {"@i18n(app.modules.mixer_rules.input_rccmd_roll)@", 5},
-  {"@i18n(app.modules.mixer_rules.input_rccmd_pitch)@", 6},
-  {"@i18n(app.modules.mixer_rules.input_rccmd_yaw)@", 7},
-  {"@i18n(app.modules.mixer_rules.input_rccmd_throttle)@", 8},
-  {"@i18n(app.modules.mixer_rules.input_rcch_roll)@", 9},
-  {"@i18n(app.modules.mixer_rules.input_rcch_pitch)@", 10},
-  {"@i18n(app.modules.mixer_rules.input_rcch_yaw)@", 11},
-  {"@i18n(app.modules.mixer_rules.input_rcch_throttle)@", 12},
-  {"@i18n(app.modules.mixer_rules.input_rcch_aux1)@", 13},
-  {"@i18n(app.modules.mixer_rules.input_rcch_aux2)@", 14},
-  {"@i18n(app.modules.mixer_rules.input_rcch_aux3)@", 15},
+-- Command R/P/Y/T, 9-12 RC Channel R/P/Y/T, 13-26 CH #5-#18 (raw numbered
+-- channels beyond the named first four -- no AUX-style naming so the list
+-- doesn't switch numbering schemes partway through).
+--
+-- The 9-12 RC Channel Roll/Pitch/Yaw/Throttle "bypass" entries read that
+-- logical axis's RC input *after* wingflight-firmware's rcmap indirection
+-- (rx.c's readRxChannels(): rawChannel = rxConfig()->rcmap[axis]) -- so
+-- "Roll" means whatever physical channel the pilot's radio has mapped to
+-- it, never a fixed "Roll = CH1" (AETR vs TAER vs custom maps all differ;
+-- see wingflight-configurator's src/js/Mixer.js inputLabel() for the same
+-- resolution done there). lib/msp_rx_map.lua reports that mapping in the
+-- same order (aileron=Roll, elevator=Pitch, rudder=Yaw, throttle=Throttle);
+-- bypassLabel() below shows the pilot's actual channel when that data is
+-- available, falling back to the plain function name otherwise.
+local RCCH_BYPASS_ROLE_LABELS = {
+  "@i18n(app.modules.mixer_rules.input_role_roll)@",
+  "@i18n(app.modules.mixer_rules.input_role_pitch)@",
+  "@i18n(app.modules.mixer_rules.input_role_yaw)@",
+  "@i18n(app.modules.mixer_rules.input_role_throttle)@",
 }
-for ch = 8, 18 do
-  INPUT_OPTIONS[#INPUT_OPTIONS + 1] = {
-    string.format("@i18n(app.modules.mixer_rules.input_rcch_fmt)@", ch),
-    16 + (ch - 8),
-  }
+local RCCH_BYPASS_FALLBACK_LABELS = {
+  "@i18n(app.modules.mixer_rules.input_rcch_roll)@",
+  "@i18n(app.modules.mixer_rules.input_rcch_pitch)@",
+  "@i18n(app.modules.mixer_rules.input_rcch_yaw)@",
+  "@i18n(app.modules.mixer_rules.input_rcch_throttle)@",
+}
+local RCCH_BYPASS_RXMAP_FIELDS = {"aileron", "elevator", "rudder", "throttle"}
+
+local function bypassChannel(roleIdx, rxMap)
+  local channel = rxMap and rxMap[RCCH_BYPASS_RXMAP_FIELDS[roleIdx]]
+  return type(channel) == "number" and (channel + 1) or nil
 end
+
+local function bypassLabel(roleIdx, rxMap)
+  local channel = bypassChannel(roleIdx, rxMap)
+  if channel then
+    return string.format("@i18n(app.modules.mixer_rules.input_rcch_fmt)@", channel) ..
+      " (" .. RCCH_BYPASS_ROLE_LABELS[roleIdx] .. ")"
+  end
+  return RCCH_BYPASS_FALLBACK_LABELS[roleIdx]
+end
+
+local function buildInputOptions(rxMap)
+  local options = {
+    {"@i18n(app.modules.mixer_rules.input_none)@", 0},
+    {"@i18n(app.modules.mixer_rules.input_stab_roll)@", 1},
+    {"@i18n(app.modules.mixer_rules.input_stab_pitch)@", 2},
+    {"@i18n(app.modules.mixer_rules.input_stab_yaw)@", 3},
+    {"@i18n(app.modules.mixer_rules.input_stab_throttle)@", 4},
+    {"@i18n(app.modules.mixer_rules.input_rccmd_roll)@", 5},
+    {"@i18n(app.modules.mixer_rules.input_rccmd_pitch)@", 6},
+    {"@i18n(app.modules.mixer_rules.input_rccmd_yaw)@", 7},
+    {"@i18n(app.modules.mixer_rules.input_rccmd_throttle)@", 8},
+  }
+
+  -- Combined bypass-Roll/Pitch/Yaw/Throttle (wire 9-12) + raw CH#5-18 (wire
+  -- 13-26) run, sorted into ascending physical-channel order once rxMap
+  -- resolves all four bypass channels -- otherwise the bypass group's fixed
+  -- Roll/Pitch/Yaw/Throttle order can show e.g. "CH #2 (Roll)" ahead of
+  -- "CH #1 (Throttle)", then jump straight to "CH #5" right after, which
+  -- reads as out of order even though every value is correct. Falls back to
+  -- wire-value order (bypass group by function, then CH#5-18) when rxMap
+  -- hasn't resolved every bypass channel yet, since there's nothing to sort
+  -- by then.
+  local channelRun = {}
+  for roleIdx = 1, 4 do
+    channelRun[#channelRun + 1] = {
+      label = bypassLabel(roleIdx, rxMap),
+      value = 8 + roleIdx,
+      channel = bypassChannel(roleIdx, rxMap),
+    }
+  end
+  for ch = 5, 18 do
+    channelRun[#channelRun + 1] = {
+      label = string.format("@i18n(app.modules.mixer_rules.input_rcch_fmt)@", ch),
+      value = 13 + (ch - 5),
+      channel = ch,
+    }
+  end
+
+  local sortable = true
+  for _, entry in ipairs(channelRun) do
+    if entry.channel == nil then sortable = false end
+  end
+  if sortable then
+    table.sort(channelRun, function(a, b) return a.channel < b.channel end)
+  end
+
+  for _, entry in ipairs(channelRun) do
+    options[#options + 1] = {entry.label, entry.value}
+  end
+
+  return options
+end
+
+-- Rebuilt with the real rxMap once open() below fetches it; this default
+-- (rxMap=nil, so bypassLabel() falls back to the plain function names) is
+-- what summaryFor()/labelFor() see if either is ever called before that.
+local INPUT_OPTIONS = buildInputOptions(nil)
 
 -- output: 31 entries (wire values 0-30) -- 0 None, 1-8 PWM Servo 1-8,
 -- 9-26 Bus Servo 1-18 (wire value minus 8), 27-30 Motor 1-4 (wire value
@@ -151,6 +225,16 @@ end
 -- gain-curve pickers.
 local CURVE_OPTIONS = curveSlotLabels.optionsTable(8)
 
+-- role: descriptive tag only (mixerRuleRole_e, pg/mixer.h) -- the
+-- mixer evaluator never reads it. Lets a pilot (or this suite) recognize
+-- "the" rule serving a known role, e.g. flap-to-elevator compensation,
+-- regardless of which slot it lives in.
+local ROLE_OPTIONS = {
+  {"@i18n(app.modules.mixer_rules.role_none)@", 0},
+  {"@i18n(app.modules.mixer_rules.role_flap_compensation)@", 1},
+  {"@i18n(app.modules.mixer_rules.role_differential_thrust_yaw)@", 2},
+}
+
 local function ruleTitle(n)
   return string.format("@i18n(app.modules.mixer_rules.tile_rule_fmt)@", n)
 end
@@ -167,6 +251,7 @@ local function cloneRule(rule)
     speed = rule.speed or 0,
     curve = rule.curve or 0,
     condition = rule.condition or 0,
+    role = rule.role or 0,
   }
 end
 
@@ -281,6 +366,7 @@ local function openEditor(opts, listState, index)
   fieldLayout.buildSingle(runtime, "@i18n(app.modules.mixer_rules.speed)@", {key = "speed"})
   fieldLayout.buildSingle(runtime, "@i18n(app.modules.mixer_rules.curve)@", {key = "curve", choices = CURVE_OPTIONS})
   fieldLayout.buildSingle(runtime, "@i18n(app.modules.mixer_rules.condition)@", {key = "condition", choices = CONDITION_OPTIONS})
+  fieldLayout.buildSingle(runtime, "@i18n(app.modules.mixer_rules.role)@", {key = "role", choices = ROLE_OPTIONS})
 
   runtime:loadInitial()
 end
@@ -379,6 +465,11 @@ local function open(opts)
   local disposed = false
   local pendingPool = nil
   local pendingError = nil
+  -- Best-effort: an RX_MAP failure still resolves rxMapDone (with rxMap left
+  -- nil) rather than blocking the page on it -- the pool is what this page
+  -- actually edits, bypassLabel()'s plain-name fallback covers the rest.
+  local rxMap = nil
+  local rxMapDone = false
   local dialog = nil
 
   local function closeDialog(force)
@@ -429,7 +520,8 @@ local function open(opts)
         form.addLine(MSG_LOAD_ERROR .. " " .. PAGE_TITLE)
         return
       end
-      if pendingPool then
+      if pendingPool and rxMapDone then
+        INPUT_OPTIONS = buildInputOptions(rxMap)
         local listState = {pool = pendingPool, selected = 1}
         closeDialog()
         opts.setWakeupHandler(nil)
@@ -444,6 +536,16 @@ local function open(opts)
   end, function()
     if disposed then return end
     pendingError = true
+  end))
+
+  bus.publish("msp.request", rxMapApi.buildReadMessage(function(data)
+    if disposed then return end
+    rxMap = data
+    rxMapDone = true
+  end, function()
+    if disposed then return end
+    rxMap = nil
+    rxMapDone = true
   end))
 end
 

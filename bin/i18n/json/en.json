@@ -860,6 +860,12 @@
           "needs_translation": false,
           "max_length": 10
         },
+        "throttle_assist": {
+          "english": "Throttle Assist",
+          "translation": "Throttle Assist",
+          "needs_translation": false,
+          "max_length": 16
+        },
         "deadband": {
           "english": "Deadband",
           "translation": "Deadband",
@@ -883,6 +889,12 @@
           "translation": "Max",
           "needs_translation": false,
           "max_length": 3
+        },
+        "time": {
+          "english": "Time",
+          "translation": "Time",
+          "needs_translation": false,
+          "max_length": 4
         }
       },
       "filters": {
@@ -3227,86 +3239,86 @@
       },
       "failsafe": {
         "aux1": {
-          "english": "AUX 1",
-          "translation": "AUX 1",
+          "english": "CH #5",
+          "translation": "CH #5",
           "needs_translation": false,
           "max_length": 5
         },
         "aux2": {
-          "english": "AUX 2",
-          "translation": "AUX 2",
+          "english": "CH #6",
+          "translation": "CH #6",
           "needs_translation": false,
           "max_length": 5
         },
         "aux3": {
-          "english": "AUX 3",
-          "translation": "AUX 3",
+          "english": "CH #7",
+          "translation": "CH #7",
           "needs_translation": false,
           "max_length": 5
         },
         "aux4": {
-          "english": "AUX 4",
-          "translation": "AUX 4",
+          "english": "CH #8",
+          "translation": "CH #8",
           "needs_translation": false,
           "max_length": 5
         },
         "aux5": {
-          "english": "AUX 5",
-          "translation": "AUX 5",
+          "english": "CH #9",
+          "translation": "CH #9",
           "needs_translation": false,
           "max_length": 5
         },
         "aux6": {
-          "english": "AUX 6",
-          "translation": "AUX 6",
+          "english": "CH #10",
+          "translation": "CH #10",
           "needs_translation": false,
-          "max_length": 5
+          "max_length": 6
         },
         "aux7": {
-          "english": "AUX 7",
-          "translation": "AUX 7",
+          "english": "CH #11",
+          "translation": "CH #11",
           "needs_translation": false,
-          "max_length": 5
+          "max_length": 6
         },
         "aux8": {
-          "english": "AUX 8",
-          "translation": "AUX 8",
+          "english": "CH #12",
+          "translation": "CH #12",
           "needs_translation": false,
-          "max_length": 5
+          "max_length": 6
         },
         "aux9": {
-          "english": "AUX 9",
-          "translation": "AUX 9",
+          "english": "CH #13",
+          "translation": "CH #13",
           "needs_translation": false,
-          "max_length": 5
+          "max_length": 6
         },
         "aux10": {
-          "english": "AUX 10",
-          "translation": "AUX 10",
+          "english": "CH #14",
+          "translation": "CH #14",
           "needs_translation": false,
           "max_length": 6
         },
         "aux11": {
-          "english": "AUX 11",
-          "translation": "AUX 11",
+          "english": "CH #15",
+          "translation": "CH #15",
           "needs_translation": false,
           "max_length": 6
         },
         "aux12": {
-          "english": "AUX 12",
-          "translation": "AUX 12",
+          "english": "CH #16",
+          "translation": "CH #16",
           "needs_translation": false,
           "max_length": 6
         },
         "aux13": {
-          "english": "AUX 13",
-          "translation": "AUX 13",
+          "english": "CH #17",
+          "translation": "CH #17",
           "needs_translation": false,
           "max_length": 6
         },
         "aux14": {
-          "english": "AUX 14",
-          "translation": "AUX 14",
+          "english": "CH #18",
+          "translation": "CH #18",
           "needs_translation": false,
           "max_length": 6
         },
@@ -6796,6 +6808,30 @@
           "needs_translation": false,
           "max_length": 15
         },
+        "input_role_roll": {
+          "english": "Roll",
+          "translation": "Roll",
+          "needs_translation": false,
+          "max_length": 4
+        },
+        "input_role_pitch": {
+          "english": "Pitch",
+          "translation": "Pitch",
+          "needs_translation": false,
+          "max_length": 5
+        },
+        "input_role_yaw": {
+          "english": "Yaw",
+          "translation": "Yaw",
+          "needs_translation": false,
+          "max_length": 3
+        },
+        "input_role_throttle": {
+          "english": "Throttle",
+          "translation": "Throttle",
+          "needs_translation": false,
+          "max_length": 8
+        },
         "input_rcch_pitch": {
           "english": "RC Channel Pitch",
           "translation": "RC Channel Pitch",
@@ -6814,29 +6850,11 @@
           "needs_translation": false,
           "max_length": 19
         },
-        "input_rcch_aux1": {
-          "english": "RC Channel Aux 1",
-          "translation": "RC Channel Aux 1",
-          "needs_translation": false,
-          "max_length": 16
-        },
-        "input_rcch_aux2": {
-          "english": "RC Channel Aux 2",
-          "translation": "RC Channel Aux 2",
-          "needs_translation": false,
-          "max_length": 16
-        },
-        "input_rcch_aux3": {
-          "english": "RC Channel Aux 3",
-          "translation": "RC Channel Aux 3",
-          "needs_translation": false,
-          "max_length": 16
-        },
         "input_rcch_fmt": {
-          "english": "RC Channel %d",
-          "translation": "RC Channel %d",
+          "english": "CH #%d",
+          "translation": "CH #%d",
           "needs_translation": false,
-          "max_length": 13
+          "max_length": 6
         },
         "output": {
           "english": "Output",

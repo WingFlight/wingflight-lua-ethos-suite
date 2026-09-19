@@ -67,6 +67,7 @@ local MODE_NAME_BY_ID = {
   [62] = "GPS RTH",
   [63] = "THRUST VECTOR",
   [64] = "THRUST VECTOR ATTITUDE HOLD",
+  [65] = "TRADITIONAL",
 }
 local AUX_CHANNEL_COUNT = 20
 local RANGE_MIN = 875
@@ -147,7 +148,7 @@ end
 local function buildAuxOptions()
   local options = {{"AUTO", 1}}
   for i = 1, AUX_CHANNEL_COUNT do
-    options[#options + 1] = {"AUX " .. tostring(i), i + 1}
+    options[#options + 1] = {"CH #" .. tostring(i + 4), i + 1}
   end
   return options
 end
@@ -747,7 +748,7 @@ local function open(opts)
             autoDetectSlots[slot] = nil
             markDirty()
             needsRender = true
-            field:value("AUX " .. tostring(bestIdx + 1) .. ": " .. tostring(bestUs or 0) .. "us")
+            field:value("CH #" .. tostring(bestIdx + 5) .. ": " .. tostring(bestUs or 0) .. "us")
           else
             field:value("AUTO...")
           end

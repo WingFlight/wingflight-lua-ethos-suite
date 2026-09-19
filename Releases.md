@@ -1,3 +1,28 @@
+# 0.0.23
+
+Add AUTOHOVER throttle assist fields to the Autolevel page.
+Unify RC channel naming to CH #N in the Mixer Rules, Adjustments, and Modes pages, and resolve the Roll/Pitch/Yaw/Throttle bypass inputs to the pilot's actual mapped channel instead of a fixed order.
+
+# 0.0.22
+
+Add rule role tags and compensation gains to the Mixer Rules and Adjustments pages.
+Add the TRADITIONAL flight mode name and an audio callout for it.
+Surface the new BACKUP_RX arming disable flag; fix a stale bit-25 label.
+Add an Auto Hover roll deadband field to the Autolevel page.
+Hide the servo geometry correction field on PWM/bus servo pages.
+
+# 0.0.21
+
+Version bump for release alignment; no suite-relevant changes this cycle.
+
+# 0.0.20
+
+Version bump for release alignment; no suite-relevant changes this cycle.
+
+# 0.0.19
+
+Version bump for release alignment; no suite-relevant changes this cycle.
+
 # 0.0.18
 
 Add Thrust Vector profile support.
