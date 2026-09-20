@@ -7,20 +7,18 @@
 -- rather than that file's manual absolute-pixel math (which depends on
 -- per-radio template constants this rebuild doesn't have).
 --
--- No "O" (offset) column: roll_o/pitch_o are wire-present-but-dead
--- heli-only fields on wingflight-firmware (see lib/msp_pid_tuning.lua's
--- own header) -- yaw never had one to begin with. Building a widget for
--- a FIELD_META-less key crashes (self-caught live: "attempt to index a
--- nil value (local 'meta')"), which is what alerted to this in the first
--- place -- Phase 2a's msp_pid_tuning.lua fix removed those FIELD_META
--- entries but missed that this page still built widgets for them.
+-- No "O" (offset) column: the heli-only roll_o/pitch_o fields no longer
+-- exist on wingflight-firmware's wire (see lib/msp_pid_tuning.lua's own
+-- header). Building a widget for a FIELD_META-less key crashes ("attempt
+-- to index a nil value (local 'meta')"), so keep this grid to the fields
+-- in that codec's FIELDS.
 --
 -- Everything else -- dialog/busy/save/reload/confirm state, long-press-
 -- save, profile-switch-reload -- comes from app/page_runtime.lua, shared
 -- with app/pages/pid_controller.lua. See that file's own header comment
 -- for the full story of what it owns and why (several live-caught bugs
 -- baked into its behavior); this file only owns the MSP_PID_TUNING codec
--- (lib/msp_pid_tuning.lua) and the P/I/D/F/O/B grid below.
+-- (lib/msp_pid_tuning.lua) and the P/I/D/F/B grid below.
 --
 -- Known limitation: this reads/writes whatever PID profile is currently
 -- active on the flight controller -- there is no profile-switcher UI yet

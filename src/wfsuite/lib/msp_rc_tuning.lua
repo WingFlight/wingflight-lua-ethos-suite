@@ -9,21 +9,12 @@
 -- struct order" caveat needed. NOT uniform width: every field is U8
 -- except accel_limit_1..4, which are U16.
 --
--- Several fields are wire-present but dead on wingflight-firmware --
--- decoded/encoded in-place for wire alignment, same treatment as
--- lib/msp_pid_profile.lua's dead fields, never given a FIELD_META entry
--- or a page widget:
---   * `rates_type` -- firmware hardcodes a single rate-curve formula now
---     (applyWingflightRates() in src/main/fc/rc_rates.c); always 0 on
---     read, discarded on write. See lib/rate_curve_scale.lua.
---   * axis 4 (`rcRates_4`/`rcExpo_4`/`rates_4`/`response_time_4`/
---     `accel_limit_4`/`setpoint_boost_gain_4`/`setpoint_boost_cutoff_4`)
---     -- heli-only collective axis, entirely zeroed.
---   * `cyclic_ring`/`cyclic_polarity` -- heli-only, entirely zeroed.
--- app/pages/rates.lua/rates_advanced.lua only build widgets for axes
--- 1-3; nothing builds a rates_type or cyclic_ring/polarity widget at all
--- any more (app/pages/rates_type.lua/rates_cyclic.lua, both entirely
--- dead, were deleted).
+-- Wingflight MSP API 22.3 dropped the always-zero heli-only placeholder
+-- bytes from this message (`rates_type`, the axis-4 collective block, the
+-- axis-4 setpoint boost pair and `cyclic_ring`/`cyclic_polarity`), so every
+-- field here is live. The firmware hardcodes a single rate-curve formula
+-- (applyWingflightRates() in src/main/fc/rc_rates.c); see
+-- lib/rate_curve_scale.lua.
 --
 -- This module is deliberately raw-wire-values-only, same as every other
 -- MSP codec in this project -- it does NOT know about rates_type-
@@ -54,47 +45,36 @@ local WRITE_COMMAND = 204
 
 -- {name, wireType}, in exact wire order.
 local FIELDS = {
-  {"rates_type", "U8"}, -- dead: heli-only, firmware hardcodes one curve now
 
   {"rcRates_1", "U8"}, {"rcExpo_1", "U8"}, {"rates_1", "U8"}, {"response_time_1", "U8"}, {"accel_limit_1", "U16"},
   {"rcRates_2", "U8"}, {"rcExpo_2", "U8"}, {"rates_2", "U8"}, {"response_time_2", "U8"}, {"accel_limit_2", "U16"},
   {"rcRates_3", "U8"}, {"rcExpo_3", "U8"}, {"rates_3", "U8"}, {"response_time_3", "U8"}, {"accel_limit_3", "U16"},
-  -- axis 4 (collective) -- dead: heli-only, FC ignores
-  {"rcRates_4", "U8"}, {"rcExpo_4", "U8"}, {"rates_4", "U8"}, {"response_time_4", "U8"}, {"accel_limit_4", "U16"},
 
   {"setpoint_boost_gain_1", "U8"}, {"setpoint_boost_cutoff_1", "U8"},
   {"setpoint_boost_gain_2", "U8"}, {"setpoint_boost_cutoff_2", "U8"},
   {"setpoint_boost_gain_3", "U8"}, {"setpoint_boost_cutoff_3", "U8"},
-  {"setpoint_boost_gain_4", "U8"}, {"setpoint_boost_cutoff_4", "U8"}, -- dead: heli-only (collective), FC ignores
 
   {"yaw_dynamic_ceiling_gain", "U8"},
   {"yaw_dynamic_deadband_gain", "U8"},
   {"yaw_dynamic_deadband_filter", "U8"},
 
-  {"cyclic_ring", "U8"}, -- dead: heli-only, FC ignores
-  {"cyclic_polarity", "U8"}, -- dead: heli-only, FC ignores
 }
 
 -- Fixture reply used automatically when running in the Ethos simulator
 -- (see tasks/msp/queue.lua) -- matches what real wingflight-firmware
--- actually sends: rates_type and every axis-4/cyclic field zeroed (dead,
--- see FIELDS above), plausible values for the rest, in wire order.
+-- actually sends: plausible values for every field, in wire order.
 local SIMULATOR_RESPONSE = {
-  0,                  -- rates_type (dead, always 0)
 
   18, 0, 24, 30, 0, 0,   -- axis 1 (roll): rcRates,rcExpo,rates,response_time,accel_limit(U16)
   18, 0, 24, 30, 0, 0,   -- axis 2 (pitch)
   18, 0, 40, 30, 0, 0,   -- axis 3 (yaw)
-  0, 0, 0, 0, 0, 0,   -- axis 4 (collective, dead)
 
   0, 15,   -- setpoint_boost_gain_1, cutoff_1
   0, 90,   -- setpoint_boost_gain_2, cutoff_2
   0, 15,   -- setpoint_boost_gain_3, cutoff_3
-  0, 0,   -- setpoint_boost_gain_4, cutoff_4 (dead)
 
   30, 30, 60,   -- yaw_dynamic_ceiling_gain, deadband_gain, deadband_filter
 
-  0, 0,   -- cyclic_ring, cyclic_polarity (dead)
 }
 
 -- Per-field {min, max, default, suffix}, for the fields whose meaning
@@ -105,9 +85,6 @@ local SIMULATOR_RESPONSE = {
 -- reads/writes every one of these as a plain raw integer -- no division
 -- or multiplier at all, confirming these need no decimals/scale here
 -- either, unlike the curve fields.
--- axis-4 (collective) and cyclic_ring/cyclic_polarity entries deliberately
--- absent: dead heli-only fields, see FIELDS above -- no page builds a
--- widget for them.
 local FIELD_META = {
   response_time_1 = {min = 0, max = 250, default = 30, suffix = "ms"},
   response_time_2 = {min = 0, max = 250, default = 30, suffix = "ms"},

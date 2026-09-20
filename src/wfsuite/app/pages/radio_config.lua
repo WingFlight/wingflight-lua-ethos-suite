@@ -7,9 +7,8 @@
 -- current six-field layout only.
 --
 -- Edits MSP_RC_CONFIG / MSP_SET_RC_CONFIG (cmd 66/67, see
--- lib/msp_rc_config.lua). rc_arm_throttle is still read and written back
--- unchanged by the codec because it remains wire-present, even though the
--- field is no longer exposed in the >= 12.0.9 UI.
+-- lib/msp_rc_config.lua). rc_arm_throttle is not on the 22.3 wire, so the
+-- codec neither reads nor writes it.
 --
 -- `profileField = "none"` -- Radio Config is not PID/rate-profile scoped,
 -- so the profile-switch-auto-reload machinery should stay inert.

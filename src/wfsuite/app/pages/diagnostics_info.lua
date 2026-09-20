@@ -5,7 +5,7 @@ local common = requireModule("app/diagnostics_common.lua")
 local buildInfo = requireModule("lib/build_info.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.diagnostics.name)@ / @i18n(app.modules.info.name)@"
-local SUPPORTED_MSP = "12.09+"
+local SUPPORTED_MSP = "22.03+"
 
 local function ethosVersion()
   if not system or not system.getVersion then return "-" end
