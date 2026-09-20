@@ -130,6 +130,7 @@ local function open(opts)
   addBool(statePanel, "@i18n(app.modules.settings.flight_mode_state)@", "flight_mode")
   addBool(statePanel, "@i18n(app.modules.settings.pid_profile)@", "pid_profile")
   addBool(statePanel, "@i18n(app.modules.settings.rate_profile)@", "rate_profile")
+  addBool(statePanel, "@i18n(app.modules.settings.tv_profile)@", "tv_profile")
   addBool(statePanel, "@i18n(app.modules.settings.battery_profile_event)@", "battery_profile")
 
   local adjPanel = form.addExpansionPanel("@i18n(app.modules.settings.adj_callouts)@")

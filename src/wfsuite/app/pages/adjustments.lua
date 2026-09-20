@@ -147,6 +147,18 @@ local ADJUST_FUNCTIONS = {
   {id = 108, name = "TV Yaw F", min = 0, max = 1000},
   {id = 109, name = "TV Yaw B", min = 0, max = 1000},
   {id = 110, name = "TV Attitude Hold Gain", min = 0, max = 250},
+  {id = 111, name = "TV Profile", min = 1, max = 6},
+  -- Scales the weight *magnitude* of every mixer rule tagged with a given
+  -- mixerRuleRole_e (pg/mixer.h) -- found by tag at runtime
+  -- (flight/mixer.c's applyRoleWeight()), not a fixed rule index.
+  -- Magnitude only, 0..1000 -- each tagged rule keeps whatever sign it was
+  -- configured with (Reverse in the mixer table, or a negative weight via
+  -- CLI); this never touches it, which is what lets Differential Thrust
+  -- Yaw Gain drive both motors' rules from one scalar while keeping them
+  -- opposite signs (a differential, not a common-mode push) -- see that
+  -- function's own comment. Ranges match rc_adjustments.c's ADJ_ENTRY.
+  {id = 112, name = "Flap Compensation Gain", min = 0, max = 1000},
+  {id = 113, name = "Differential Thrust Yaw Gain", min = 0, max = 1000},
 }
 
 local FUNCTION_OPTIONS = {}
@@ -212,7 +224,7 @@ local function buildAuxOptions(includeAuto, includeAlways)
   if includeAuto then options[#options + 1] = {"AUTO", 1} end
   if includeAlways then options[#options + 1] = {"Always", #options + 1} end
   for i = 1, AUX_CHANNEL_COUNT do
-    options[#options + 1] = {"AUX " .. tostring(i), #options + 1}
+    options[#options + 1] = {"CH #" .. tostring(i + 4), #options + 1}
   end
   return options
 end

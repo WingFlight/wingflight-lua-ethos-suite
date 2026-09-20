@@ -57,6 +57,9 @@ local DEFAULTS = {
     voltage_repeat_interval = 10,
     pid_profile = true,
     rate_profile = true,
+    -- Defaults off: events/alerts/tv.wav hasn't been generated yet (see
+    -- bin/sound-generator/json/*.json) -- flip to true once it exists.
+    tv_profile = false,
     battery_profile = true,
     smartfuel = true,
     smartfuelcallout = 0,
@@ -179,6 +182,7 @@ local function normalizeEvents(values)
   events.voltage_repeat_interval = clampNumber(events.voltage_repeat_interval, DEFAULTS.events.voltage_repeat_interval, 5, 120)
   events.pid_profile = coerceBool(events.pid_profile, DEFAULTS.events.pid_profile)
   events.rate_profile = coerceBool(events.rate_profile, DEFAULTS.events.rate_profile)
+  events.tv_profile = coerceBool(events.tv_profile, DEFAULTS.events.tv_profile)
   events.battery_profile = coerceBool(events.battery_profile, DEFAULTS.events.battery_profile)
   events.smartfuel = coerceBool(events.smartfuel, DEFAULTS.events.smartfuel)
   events.smartfuelcallout = clampNumber(events.smartfuelcallout, DEFAULTS.events.smartfuelcallout, 0, 50)

@@ -90,6 +90,12 @@
     "needs_translation": false
   },
   {
+    "file": "events/alerts/tv.wav",
+    "english": "Thrust Vector",
+    "translation": "Thrust Vector",
+    "needs_translation": false
+  },
+  {
     "file": "events/alerts/elapsed.wav",
     "english": "Timer Elapsed",
     "translation": "Timer Elapsed",
@@ -543,6 +549,12 @@
     "file": "events/mode/trainer.wav",
     "english": "Trainer",
     "translation": "Trainer",
+    "needs_translation": false
+  },
+  {
+    "file": "events/mode/traditional.wav",
+    "english": "Traditional",
+    "translation": "Traditional",
     "needs_translation": false
   },
   {
