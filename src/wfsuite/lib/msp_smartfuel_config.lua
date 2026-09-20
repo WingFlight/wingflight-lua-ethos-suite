@@ -28,7 +28,7 @@ local FIELD_META = {
   smartfuel_mode = {choices = MODE_CHOICES},
   voltage_drop_rate = {min = 0, max = 250, default = 10, suffix = "mV/s"},
   charge_drop_rate = {min = 0, max = 250, default = 50, decimals = 2, suffix = "%/s"},
-  sag_gain = {min = 0, max = 100, default = 40, suffix = "%"},
+  sag_gain = {min = 0, max = 100, default = 40, decimals = 2, suffix = "V"},
 }
 
 local SIMULATOR_RESPONSE = {
