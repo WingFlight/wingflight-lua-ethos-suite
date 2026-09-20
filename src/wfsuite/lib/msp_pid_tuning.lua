@@ -11,14 +11,10 @@
 -- rotorflight-lua-ethos's mspPidTuning.lua) -- do not reorder. Also
 -- verified directly against wingflight-firmware's own wire serializer
 -- (src/main/msp/msp.c, MSP_PID_TUNING/MSP_SET_PID_TUNING cases): field
--- count and order are unchanged there (3 axes x P/I/D/F, then 3 axes x B,
--- then 2 -- CYCLIC_AXIS_COUNT -- trailing fields), so unlike
--- lib/msp_pid_profile.lua this codec needed no reshaping. `roll_o`/
--- `pitch_o` (the trailing pair) *are* wire-present-but-dead there though:
--- heli-only "cyclic offset" fields the FC always reads back 0 for and
--- silently discards on write -- decoded/encoded in-place for wire
--- alignment, same treatment as lib/msp_pid_profile.lua's dead fields.
--- app/pages/pids.lua already never built a widget for them.
+-- count and order match there (3 axes x P/I/D/F, then 3 axes x B), so
+-- unlike lib/msp_pid_profile.lua this codec needed no reshaping. The
+-- trailing heli-only `roll_o`/`pitch_o` pair (always 0, discarded on
+-- write) was dropped from the wire in MSP API 22.3.
 
 -- Self-caches via package.loaded (same mechanism lib/bus.lua uses) --
 -- app/pages/pids.lua reloads fresh via loadfile() on every open, so
@@ -44,7 +40,6 @@ local FIELDS = {
   "pitch_p", "pitch_i", "pitch_d", "pitch_f",
   "yaw_p", "yaw_i", "yaw_d", "yaw_f",
   "roll_b", "pitch_b", "yaw_b",
-  "roll_o", "pitch_o", -- dead: heli-only, FC ignores
 }
 
 -- Fixture reply used automatically when running in the Ethos simulator
@@ -54,7 +49,6 @@ local SIMULATOR_RESPONSE = {
   100, 0, 200, 0, 70, 0, 120, 0,
   100, 0, 125, 0, 83, 0, 0, 0,
   0, 0, 0, 0, 0, 0,
-  25, 0, 25, 0,
 }
 
 -- Per-field {min, max, default}, sourced from rotorflight-lua-ethos-suite's
@@ -81,7 +75,6 @@ local FIELD_META = {
   roll_b = {min = 0, max = 1000, default = 0},
   pitch_b = {min = 0, max = 1000, default = 0},
   yaw_b = {min = 0, max = 1000, default = 0},
-  -- roll_o/pitch_o deliberately absent: dead heli-only fields, see FIELDS above.
 }
 
 local msp_pid_tuning = {
