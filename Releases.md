@@ -1,5 +1,7 @@
 # Unreleased
 
+Split Thrust Vector into PIDs, Master Gains, PID Controller, PID Bandwidth and Attitude / Heading Hold tools. Each follows the selected TV profile and preserves the other tools' settings when saving.
+
 Rename the Autolevel group to Flight Modes and split it into separate Trainer, Angle, Horizon, Auto Hover and Attitude Hold tools. Horizon includes the shared Angle limits; each tool preserves other modes' settings when saving.
 
 Require MSP API 22.04 or newer and use 22.04 in the simulator. Update the firmware snapshot alongside the suite.
