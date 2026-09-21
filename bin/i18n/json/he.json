@@ -959,12 +959,36 @@
         }
       },
       "autolevel": {
+        "trainer_limits": {
+          "english": "Trainer limits",
+          "max_length": 14,
+          "needs_translation": true,
+          "translation": "Trainer limits"
+        },
+        "angle_limits": {
+          "english": "Angle limits",
+          "max_length": 12,
+          "needs_translation": true,
+          "translation": "Angle limits"
+        },
+        "bank": {
+          "english": "Bank",
+          "max_length": 4,
+          "needs_translation": true,
+          "translation": "Bank"
+        },
+        "pitch": {
+          "english": "Pitch",
+          "max_length": 5,
+          "needs_translation": true,
+          "translation": "Pitch"
+        },
         "name": {
-          "english": "Autolevel",
-          "translation": "רמה אוטומטית",
-          "needs_translation": false,
-          "reverse_text": true,
-          "max_length": 9
+          "english": "Flight Modes",
+          "translation": "Flight Modes",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 11
         },
         "acro_trainer": {
           "english": "Acro Trainer",
