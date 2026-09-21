@@ -325,6 +325,16 @@ local MENUS = {
       {title = "@i18n(app.menu_section_advanced)@", icon = lcd.loadMask("app/gfx/advanced.png"), menuId = "advanced_menu"},
     },
   },
+  autolevel_menu = {
+    title = "@i18n(app.modules.autolevel.name)@",
+    entries = {
+      {title = "@i18n(app.modules.autolevel.acro_trainer)@", icon = lcd.loadMask("app/gfx/autolevel_trainer.png"), script = "app/pages/autolevel_trainer.lua"},
+      {title = "@i18n(app.modules.autolevel.angle_mode)@", icon = lcd.loadMask("app/gfx/autolevel_angle.png"), script = "app/pages/autolevel_angle.lua"},
+      {title = "@i18n(app.modules.autolevel.horizon_mode)@", icon = lcd.loadMask("app/gfx/autolevel_horizon.png"), script = "app/pages/autolevel_horizon.lua"},
+      {title = "@i18n(app.modules.autolevel.auto_hover)@", icon = lcd.loadMask("app/gfx/autolevel_auto_hover.png"), script = "app/pages/autolevel_auto_hover.lua"},
+      {title = "@i18n(app.modules.autolevel.att_hold)@", icon = lcd.loadMask("app/gfx/autolevel_attitude_hold.png"), script = "app/pages/autolevel_attitude_hold.lua"},
+    },
+  },
   -- Matches the original's own app/modules/manifest.lua `advanced_menu`,
   -- minus Main Rotor, Tail Rotor and Rescue -- all three heli-only, no
   -- wingflight equivalent (fixed-wing has no collective pitch, tail
@@ -351,7 +361,7 @@ local MENUS = {
       -- Att Hold is the engaged flight mode).
       {title = "@i18n(app.modules.thrust_vector.name)@", icon = lcd.loadMask("app/gfx/thrust_vector.png"), script = "app/pages/thrust_vector.lua"},
       {title = "@i18n(app.modules.pid_bandwidth.name)@", icon = lcd.loadMask("app/gfx/pid_bandwidth.png"), script = "app/pages/pid_bandwidth.lua"},
-      {title = "@i18n(app.modules.autolevel.name)@", icon = lcd.loadMask("app/gfx/autolevel.png"), script = "app/pages/autolevel.lua"},
+      {title = "@i18n(app.modules.autolevel.name)@", icon = lcd.loadMask("app/gfx/autolevel.png"), menuId = "autolevel_menu"},
       -- Links straight to the page now, not a submenu: Cyclic Behaviour
       -- (cyclic_ring/cyclic_polarity) and Rate Table (rates_type) were
       -- both wire-present-but-dead heli-only concepts on wingflight-
