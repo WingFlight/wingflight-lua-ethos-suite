@@ -325,6 +325,16 @@ local MENUS = {
       {title = "@i18n(app.menu_section_advanced)@", icon = lcd.loadMask("app/gfx/advanced.png"), menuId = "advanced_menu"},
     },
   },
+  thrust_vector_menu = {
+    title = "@i18n(app.modules.thrust_vector.name)@",
+    entries = {
+      {title = "@i18n(app.modules.pids.name)@", icon = lcd.loadMask("app/gfx/pids.png"), script = "app/pages/thrust_vector_pids.lua"},
+      {title = "@i18n(app.modules.master_gains.name)@", icon = lcd.loadMask("app/gfx/master_gains.png"), script = "app/pages/thrust_vector_master_gains.lua"},
+      {title = "@i18n(app.modules.pid_controller.name)@", icon = lcd.loadMask("app/gfx/pid_controller.png"), script = "app/pages/thrust_vector_pid_controller.lua"},
+      {title = "@i18n(app.modules.pid_bandwidth.name)@", icon = lcd.loadMask("app/gfx/pid_bandwidth.png"), script = "app/pages/thrust_vector_pid_bandwidth.lua"},
+      {title = "@i18n(app.modules.thrust_vector.hold)@", icon = lcd.loadMask("app/gfx/autolevel_attitude_hold.png"), script = "app/pages/thrust_vector_hold.lua"},
+    },
+  },
   autolevel_menu = {
     title = "@i18n(app.modules.autolevel.name)@",
     entries = {
@@ -359,7 +369,7 @@ local MENUS = {
       -- of whether its own mode/feature is currently active (e.g.
       -- Autolevel is always reachable even when neither Auto Hover nor
       -- Att Hold is the engaged flight mode).
-      {title = "@i18n(app.modules.thrust_vector.name)@", icon = lcd.loadMask("app/gfx/thrust_vector.png"), script = "app/pages/thrust_vector.lua"},
+      {title = "@i18n(app.modules.thrust_vector.name)@", icon = lcd.loadMask("app/gfx/thrust_vector.png"), menuId = "thrust_vector_menu"},
       {title = "@i18n(app.modules.pid_bandwidth.name)@", icon = lcd.loadMask("app/gfx/pid_bandwidth.png"), script = "app/pages/pid_bandwidth.lua"},
       {title = "@i18n(app.modules.autolevel.name)@", icon = lcd.loadMask("app/gfx/autolevel.png"), menuId = "autolevel_menu"},
       -- Links straight to the page now, not a submenu: Cyclic Behaviour
