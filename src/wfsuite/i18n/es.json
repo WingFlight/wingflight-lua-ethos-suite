@@ -842,11 +842,11 @@
           "translation": "Máx"
         },
         "name": {
-          "english": "Autolevel",
-          "max_length": 9,
-          "needs_translation": false,
+          "english": "Flight Modes",
+          "max_length": 11,
+          "needs_translation": true,
           "reverse_text": false,
-          "translation": "Nivel automático"
+          "translation": "Flight Modes"
         },
         "rate": {
           "english": "Rate",

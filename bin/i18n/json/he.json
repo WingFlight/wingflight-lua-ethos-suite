@@ -984,11 +984,11 @@
           "translation": "Pitch"
         },
         "name": {
-          "english": "Autolevel",
-          "translation": "רמה אוטומטית",
-          "needs_translation": false,
-          "reverse_text": true,
-          "max_length": 9
+          "english": "Flight Modes",
+          "translation": "Flight Modes",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 11
         },
         "acro_trainer": {
           "english": "Acro Trainer",
