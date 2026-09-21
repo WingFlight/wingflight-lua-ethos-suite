@@ -1,3 +1,11 @@
+# 0.0.25
+
+Target MSP API 22.3: drop the heli placeholder bytes and raise the minimum supported API version.
+Add per-profile battery cell count and cell voltages.
+Add the CRSF Sensors serial port function and fix a stale RX_INPUT_BACKUP id.
+Allow negative flap compensation and diff thrust yaw adjustments.
+Show SmartFuel Sag Gain in volts instead of percent.
+
 # 0.0.24
 
 Add per-servo balance curves to the Curves page (new Servo category).
