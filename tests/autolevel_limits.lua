@@ -28,6 +28,7 @@ package.loaded["wfsuite.lib.require"] = function(path) return assert(modules[pat
 form = {clear = function() end}
 local page = assert(loadfile("src/wfsuite/app/pages/autolevel.lua"))()
 page.open({})
+assert(callbacks.refreshOnReloadFailure == true)
 local function check(supported)
   assert(runtime.fields.trainer_roll_limit.enabled == supported)
   assert(runtime.fields.trainer_pitch_limit.enabled == supported)

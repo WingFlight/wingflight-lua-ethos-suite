@@ -147,6 +147,7 @@ end
 --                               -- found live: that only actually ran once a field was interacted with,
 --                               -- not the instant data arrived, since Ethos doesn't necessarily re-invoke
 --                               -- every field's getter just because loadData() re-enabled them.
+--   refreshOnReloadFailure,     -- opt in to reapplying onLoaded gates to retained data after a failed reload
 --   beforeSave,                 -- optional; called at the start of performSave(), after the pilot
 --                               -- confirms but before any MSP_SET_* write is built.
 --   extraSaveMessage,           -- optional text appended to the generic save confirmation body.
@@ -201,6 +202,7 @@ function PageRuntime.new(config)
   self.profileField = config.profileField or "pidProfile"
   self.unloadPackageKeys = config.unloadPackageKeys
   self.onLoaded = config.onLoaded
+  self.refreshOnReloadFailure = config.refreshOnReloadFailure == true
   self.beforeSave = config.beforeSave
   self.extraSaveMessage = config.extraSaveMessage
   self.eepromWrite = config.eepromWrite ~= false
@@ -508,7 +510,7 @@ function PageRuntime:loadData(focusFn)
             field:enable(true)
           end
           -- Restore page-specific capability gates along with the previous data.
-          if self_.onLoaded then self_.pendingOnLoaded = true end
+          if self_.refreshOnReloadFailure and self_.onLoaded then self_.pendingOnLoaded = true end
         end
         self_:setBusy(false)
         self_:closeDialog(focusFn)

@@ -38,6 +38,7 @@ local function open(opts)
     mspModule = pidProfile,
     opts = opts,
     onLoaded = refreshLimitFields,
+    refreshOnReloadFailure = true,
     unloadPackageKeys = {"wfsuite.lib.msp_pid_profile"},
   })
 
