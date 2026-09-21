@@ -1,5 +1,7 @@
 # Unreleased
 
+Add MSP 22.04 to the simulator version picker and use it as the default for new simulator settings. Real connections continue to support MSP 22.03 and newer.
+
 Add independent bank/pitch limits for Trainer and Angle in Autolevel with MSP API 22.4 firmware. Shared Max fields remain available for older firmware; unsupported per-axis fields are disabled. TRAINER is already available under Controls -> Modes.
 
 # 0.0.25

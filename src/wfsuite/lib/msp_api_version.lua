@@ -21,7 +21,7 @@ local mspcodec = requireModule("lib/mspcodec.lua")
 
 local READ_COMMAND = 1
 
--- This rebuild's own floor: Wingflight's MSP API family is 22.x.
+-- Wingflight 22.3 remains the floor; API 22.4 adds optional per-axis limits.
 local EXPECTED_API_MAJOR = 22
 local MIN_API_MINOR = 3
 
@@ -29,7 +29,7 @@ local MIN_API_MINOR = 3
 -- picker (see app/pages/developer_settings.lua) -- add new entries here as
 -- Wingflight ships new MSP API versions; nothing else needs to change,
 -- the simulator byte-triplet is derived from the string itself below.
-local SIMULATABLE_VERSIONS = {"22.03"}
+local SIMULATABLE_VERSIONS = {"22.03", "22.04"}
 
 -- "Invalid" simulates talking to a *different firmware family* entirely
 -- (major 12 -- Rotorflight's own, per that project's own
