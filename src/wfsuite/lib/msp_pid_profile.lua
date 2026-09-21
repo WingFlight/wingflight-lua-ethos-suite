@@ -56,10 +56,9 @@
 -- mixes U8 and U16 fields -- FIELDS entries are {name, wireType} pairs, not
 -- bare names; see decode()/encode() below for the dispatch.
 --
--- This rebuild's floor is MSP API 22.3 (see lib/msp_api_version.lua), so
--- this codec never version-branches: every field is always present,
--- always read/written. API 22.4 appends an optional four-byte axis-limit tail;
--- absent tails are preserved on writes to older firmware.
+-- MSP API 22.4 is required (see lib/msp_api_version.lua). The four axis
+-- limits are always read/written. Shared limits remain part of the wire
+-- format: current firmware still uses them when an axis limit is zero.
 
 -- Self-caches via package.loaded (same mechanism lib/bus.lua uses) --
 -- multiple pages share this codec and each reloads fresh via loadfile() on
@@ -112,7 +111,7 @@ local FIELDS = {
   {"autohover_throttle_assist_trigger_ms", "U16"},
 }
 
--- Optional API 22.4 tail: raw zero inherits the corresponding legacy shared limit.
+-- API 22.4 axis limits: raw zero inherits the corresponding legacy shared limit.
 local AXIS_LIMITS = {
   {"angle_roll_limit", "angle_level_limit", 90},
   {"angle_pitch_limit", "angle_level_limit", 75},
@@ -195,10 +194,8 @@ local FIELD_META = {
   iterm_relax_cutoff_1 = {min = 1, max = 100, default = 10},
   iterm_relax_cutoff_2 = {min = 1, max = 100, default = 15},
   angle_level_strength = {min = 0, max = 200, default = 40},
-  angle_level_limit = {min = 10, max = 90, default = 55, suffix = "°"},
   horizon_level_strength = {min = 0, max = 200, default = 40},
   trainer_gain = {min = 25, max = 255, default = 75},
-  trainer_angle_limit = {min = 10, max = 80, default = 20, suffix = "°"},
   atthold_gain = {min = 0, max = 250, default = 40},
   atthold_deadband = {min = 0, max = 100, default = 5, suffix = "%"},
   bterm_cutoff_0 = {min = 0, max = 250, default = 15},
@@ -247,12 +244,11 @@ function msp_pid_profile.decode(buf)
       data[name] = mspcodec.readU8(buf)
     end
   end
-  data.has_axis_limits = (#buf - buf.offset + 1) >= 4
   data.axis_limits_raw = {}
   data.axis_limits_initial = {}
   for i = 1, #AXIS_LIMITS do
     local spec = AXIS_LIMITS[i]
-    local raw = data.has_axis_limits and mspcodec.readU8(buf) or 0
+    local raw = mspcodec.readU8(buf)
     local value = raw == 0 and data[spec[2]] or math.max(10, math.min(spec[3], raw))
     data[spec[1]] = value
     data.axis_limits_raw[i] = raw
@@ -271,12 +267,10 @@ function msp_pid_profile.encode(data)
       mspcodec.writeU8(payload, data[name] or 0)
     end
   end
-  if data.has_axis_limits then
-    for i = 1, #AXIS_LIMITS do
-      local value = data[AXIS_LIMITS[i][1]]
-      if value == data.axis_limits_initial[i] then value = data.axis_limits_raw[i] end
-      mspcodec.writeU8(payload, value)
-    end
+  for i = 1, #AXIS_LIMITS do
+    local value = data[AXIS_LIMITS[i][1]]
+    if value == data.axis_limits_initial[i] then value = data.axis_limits_raw[i] end
+    mspcodec.writeU8(payload, value)
   end
   return payload
 end
@@ -288,6 +282,10 @@ function msp_pid_profile.buildReadMessage(onData, onError)
   return {
     command = READ_COMMAND,
     processReply = function(_, buf)
+      if #buf < 56 then
+        if onError then onError("MSP PID profile requires API 22.4 firmware") end
+        return
+      end
       onData(msp_pid_profile.decode(buf))
     end,
     errorHandler = onError,

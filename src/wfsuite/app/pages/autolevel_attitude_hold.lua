@@ -11,7 +11,7 @@ local function buildFields(runtime, fieldLayout)
 end
 
 local function open(opts)
-  autolevel.open(opts, "@i18n(app.modules.autolevel.att_hold)@", nil, buildFields)
+  autolevel.open(opts, "@i18n(app.modules.autolevel.att_hold)@", buildFields)
 end
 
 return {open = open}

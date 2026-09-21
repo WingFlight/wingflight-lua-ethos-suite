@@ -2,9 +2,9 @@
 
 Split Autolevel into separate Trainer, Angle, Horizon, Auto Hover and Attitude Hold tools. Horizon includes the shared Angle limits; each tool preserves other modes' settings when saving.
 
-Add MSP 22.04 to the simulator version picker and use it as the default for new simulator settings. Real connections continue to support MSP 22.03 and newer.
+Require MSP API 22.04 or newer and use 22.04 in the simulator. Update the firmware snapshot alongside the suite.
 
-Add independent bank/pitch limits for Trainer and Angle in Autolevel with MSP API 22.4 firmware. Shared Max fields remain available for older firmware; unsupported per-axis fields are disabled. TRAINER is already available under Controls -> Modes.
+Add independent bank/pitch limits for Trainer and Angle in Autolevel with MSP API 22.4 firmware. Remove the legacy shared Max fields and older-firmware compatibility branches; show only bank and pitch limits. TRAINER is already available under Controls -> Modes.
 
 # 0.0.25
 

@@ -21,7 +21,7 @@ local function buildFields(runtime, fieldLayout)
 end
 
 local function open(opts)
-  autolevel.open(opts, "@i18n(app.modules.autolevel.auto_hover)@", nil, buildFields)
+  autolevel.open(opts, "@i18n(app.modules.autolevel.auto_hover)@", buildFields)
 end
 
 return {open = open}
