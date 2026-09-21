@@ -959,6 +959,30 @@
         }
       },
       "autolevel": {
+        "trainer_limits": {
+          "english": "Trainer limits",
+          "max_length": 14,
+          "needs_translation": true,
+          "translation": "Trainer limits"
+        },
+        "angle_limits": {
+          "english": "Angle limits",
+          "max_length": 12,
+          "needs_translation": true,
+          "translation": "Angle limits"
+        },
+        "bank": {
+          "english": "Bank",
+          "max_length": 4,
+          "needs_translation": true,
+          "translation": "Bank"
+        },
+        "pitch": {
+          "english": "Pitch",
+          "max_length": 5,
+          "needs_translation": true,
+          "translation": "Pitch"
+        },
         "name": {
           "english": "Autolevel",
           "translation": "Nível automático",

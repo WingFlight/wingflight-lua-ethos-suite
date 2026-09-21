@@ -1,3 +1,7 @@
+# Unreleased
+
+Add independent bank/pitch limits for Trainer and Angle in Autolevel with MSP API 22.4 firmware. Shared Max fields remain available for older firmware; unsupported per-axis fields are disabled. TRAINER is already available under Controls -> Modes.
+
 # 0.0.25
 
 Target MSP API 22.3: drop the heli placeholder bytes and raise the minimum supported API version.

@@ -507,6 +507,8 @@ function PageRuntime:loadData(focusFn)
           for _, field in pairs(self_.fields) do
             field:enable(true)
           end
+          -- Restore page-specific capability gates along with the previous data.
+          if self_.onLoaded then self_.pendingOnLoaded = true end
         end
         self_:setBusy(false)
         self_:closeDialog(focusFn)

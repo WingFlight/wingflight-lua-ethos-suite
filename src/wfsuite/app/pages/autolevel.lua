@@ -1,28 +1,9 @@
 -- Autolevel profile editor page. Loaded on demand (plain loadfile) only when the user opens Flight Tuning -> Advanced ->
 -- Autolevel -- see app/tool.lua.
 --
--- Edits fifteen MSP_PID_PROFILE fields (cmd 94/95, see
--- lib/msp_pid_profile.lua): acro trainer gain/limit, angle mode gain/
--- limit, horizon mode gain, Auto Hover gain/max angle/max rate/roll
--- deadband/throttle assist gain/max/trigger time, and Att Hold gain/
--- deadband/max rate. Eleven of these match this project's own
--- last-known-good app/modules/profile_autolevel/autolevel.lua exactly,
--- including Horizon Mode being a single-field group (no "Max" counterpart
--- -- the firmware struct has no `horizon_level_limit`, only
--- `horizon_level_strength`); Auto Hover's roll deadband and its three
--- throttle assist fields are newer than that reference (added by
--- wingflight-firmware's PG_PID_PROFILE v9->v10 and v10->v11 respectively,
--- see lib/msp_pid_profile.lua) and have no equivalent there.
---
--- Auto Hover and Att Hold are both wingflight-native (not part of the
--- rotorflight-based rewrite this base came from -- see AGENTS.md's
--- migration notes); their fields were already decoded correctly by
--- lib/msp_pid_profile.lua since Phase 2a, just not yet exposed on any
--- page. Selecting *which* flight-mode switch position activates Auto
--- Hover (vs. Manual/Passthrough/Auto Trim) is a separate concern --
--- app/pages/modes.lua's flight-mode-range configuration, not this page's
--- PID-profile tuning values -- and isn't ported yet either (see
--- AGENTS.md).
+-- Edits attitude-mode tuning via MSP_PID_PROFILE. API 22.4 adds separate
+-- roll/pitch limits for ANGLE and TRAINER. Older firmware retains shared limits.
+-- Assign the flight-mode switches separately under Controls -> Modes.
 --
 -- Everything else -- dialog/busy/save/reload/confirm state, long-press-
 -- save, profile-switch-reload -- comes from app/page_runtime.lua, shared
@@ -40,11 +21,23 @@ local PAGE_TITLE = "@i18n(app.modules.autolevel.name)@"
 -- opts.setEventHandler/opts.setWakeupHandler: see app/menu_container.lua
 -- and app/tool.lua for how Ethos's event()/wakeup() reach a page.
 local function open(opts)
-  local runtime = pageRuntime.new({
+  local runtime
+  local function refreshLimitFields()
+    if runtime.busy or not runtime.loaded then return end
+    local supported = runtime.data.has_axis_limits == true
+    runtime.fields.angle_roll_limit:enable(supported)
+    runtime.fields.angle_pitch_limit:enable(supported)
+    runtime.fields.trainer_roll_limit:enable(supported)
+    runtime.fields.trainer_pitch_limit:enable(supported)
+    runtime.fields.angle_level_limit:enable(not supported)
+    runtime.fields.trainer_angle_limit:enable(not supported)
+  end
+  runtime = pageRuntime.new({
     pageTitle = PAGE_TITLE,
     logTag = "autolevel",
     mspModule = pidProfile,
     opts = opts,
+    onLoaded = refreshLimitFields,
     unloadPackageKeys = {"wfsuite.lib.msp_pid_profile"},
   })
 
@@ -59,6 +52,15 @@ local function open(opts)
   fieldLayout.buildGroup(runtime, "@i18n(app.modules.autolevel.angle_mode)@", {
     {title = "@i18n(app.modules.autolevel.gain)@", spec = {key = "angle_level_strength"}},
     {title = "@i18n(app.modules.autolevel.max)@", spec = {key = "angle_level_limit"}},
+  })
+
+  fieldLayout.buildGroup(runtime, "@i18n(app.modules.autolevel.trainer_limits)@", {
+    {title = "@i18n(app.modules.autolevel.bank)@", spec = {key = "trainer_roll_limit"}},
+    {title = "@i18n(app.modules.autolevel.pitch)@", spec = {key = "trainer_pitch_limit"}},
+  })
+  fieldLayout.buildGroup(runtime, "@i18n(app.modules.autolevel.angle_limits)@", {
+    {title = "@i18n(app.modules.autolevel.bank)@", spec = {key = "angle_roll_limit"}},
+    {title = "@i18n(app.modules.autolevel.pitch)@", spec = {key = "angle_pitch_limit"}},
   })
 
   fieldLayout.buildSingle(runtime, "@i18n(app.modules.autolevel.horizon_mode)@",

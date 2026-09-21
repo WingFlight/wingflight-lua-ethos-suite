@@ -58,7 +58,8 @@
 --
 -- This rebuild's floor is MSP API 22.3 (see lib/msp_api_version.lua), so
 -- this codec never version-branches: every field is always present,
--- always read/written.
+-- always read/written. API 22.4 appends an optional four-byte axis-limit tail;
+-- absent tails are preserved on writes to older firmware.
 
 -- Self-caches via package.loaded (same mechanism lib/bus.lua uses) --
 -- multiple pages share this codec and each reloads fresh via loadfile() on
@@ -111,6 +112,14 @@ local FIELDS = {
   {"autohover_throttle_assist_trigger_ms", "U16"},
 }
 
+-- Optional API 22.4 tail: raw zero inherits the corresponding legacy shared limit.
+local AXIS_LIMITS = {
+  {"angle_roll_limit", "angle_level_limit", 90},
+  {"angle_pitch_limit", "angle_level_limit", 75},
+  {"trainer_roll_limit", "trainer_angle_limit", 90},
+  {"trainer_pitch_limit", "trainer_angle_limit", 75},
+}
+
 -- Fixture reply used automatically when running in the Ethos simulator
 -- (see tasks/msp/queue.lua) -- one entry per FIELDS entry, in order (U16
 -- fields as two little-endian bytes), using each field's firmware default.
@@ -148,6 +157,7 @@ local SIMULATOR_RESPONSE = {
   0,    -- autohover_throttle_assist_gain (disabled by default)
   15,   -- autohover_throttle_assist_max
   44, 1, -- autohover_throttle_assist_trigger_ms (U16 LE: 300 = 0x012C -> 44, 1)
+  0, 0, 0, 0, -- angle roll/pitch, trainer roll/pitch: inherit shared limits
 }
 
 -- Per-field {min, max, default, decimals, suffix}, sourced from this
@@ -166,6 +176,10 @@ local SIMULATOR_RESPONSE = {
 -- second research pass. `pid_mode` and `iterm_relax_type` (choice/table
 -- fields, never take a plain `:default()`) are deliberately absent.
 local FIELD_META = {
+  angle_roll_limit = {min = 10, max = 90, default = 55, suffix = "°"},
+  angle_pitch_limit = {min = 10, max = 75, default = 55, suffix = "°"},
+  trainer_roll_limit = {min = 10, max = 90, default = 20, suffix = "°"},
+  trainer_pitch_limit = {min = 10, max = 75, default = 20, suffix = "°"},
   iterm_decay_time = {min = 0, max = 250, default = 6, decimals = 1, suffix = "s"},
   iterm_decay_limit = {min = 0, max = 60, default = 35, suffix = "°"},
   error_limit_0 = {min = 0, max = 180, default = 45, suffix = "°"},
@@ -233,6 +247,17 @@ function msp_pid_profile.decode(buf)
       data[name] = mspcodec.readU8(buf)
     end
   end
+  data.has_axis_limits = (#buf - buf.offset + 1) >= 4
+  data.axis_limits_raw = {}
+  data.axis_limits_initial = {}
+  for i = 1, #AXIS_LIMITS do
+    local spec = AXIS_LIMITS[i]
+    local raw = data.has_axis_limits and mspcodec.readU8(buf) or 0
+    local value = raw == 0 and data[spec[2]] or math.max(10, math.min(spec[3], raw))
+    data[spec[1]] = value
+    data.axis_limits_raw[i] = raw
+    data.axis_limits_initial[i] = value
+  end
   return data
 end
 
@@ -244,6 +269,13 @@ function msp_pid_profile.encode(data)
       mspcodec.writeU16(payload, data[name] or 0)
     else
       mspcodec.writeU8(payload, data[name] or 0)
+    end
+  end
+  if data.has_axis_limits then
+    for i = 1, #AXIS_LIMITS do
+      local value = data[AXIS_LIMITS[i][1]]
+      if value == data.axis_limits_initial[i] then value = data.axis_limits_raw[i] end
+      mspcodec.writeU8(payload, value)
     end
   end
   return payload
