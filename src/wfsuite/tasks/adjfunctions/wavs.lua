@@ -19,7 +19,7 @@
 -- inertia precomp (66/67), and collective setpoint boost gain (71, the
 -- axis-4 MSP_RC_TUNING field) -- see lib/msp_pid_profile.lua/
 -- lib/msp_rc_tuning.lua's own headers for the wire-level confirmation of
--- each. IDs 76-81 (ADJUSTMENT_GOV_* throttle/headspeed/yaw-ff) are
+-- each. IDs 76-81 (ADJUSTMENT_GOV_* throttle/rpm/yaw-ff) are
 -- reserved in the firmware header but have no get_/set_ implementation
 -- anywhere yet, so they can't actually fire. IDs 82 (battery profile) and
 -- 84-88 (master gain per axis, autohover gain, atthold gain) *are* real

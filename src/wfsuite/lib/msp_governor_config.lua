@@ -37,7 +37,7 @@ local WRITE_COMMAND = 0x5F02
 -- governorMode_e (src/main/pg/governor.h) -- string names from
 -- wingflight-firmware's own lookupTableGovernorMode (src/main/cli/
 -- settings.c). RPM/RPM_RANGE both need real RPM feedback (an ESC/sensor
--- protocol that reports headspeed) to mean anything -- app/pages/
+-- protocol that reports RPM) to mean anything -- app/pages/
 -- governor.lua doesn't gate these out itself (unlike the configurator's
 -- `rpmAvailable` prop), since this rebuild has no equivalent capability
 -- flag threaded through to page-open time yet; picking either mode with
