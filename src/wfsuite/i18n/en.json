@@ -4351,6 +4351,74 @@
           "translation": "Yaw"
         }
       },
+      "gps_nav_config": {
+        "altitude_kp": {
+          "english": "Altitude Gain",
+          "max_length": 13,
+          "needs_translation": false,
+          "translation": "Altitude Gain"
+        },
+        "bearing_kp": {
+          "english": "Bearing Gain",
+          "max_length": 12,
+          "needs_translation": false,
+          "translation": "Bearing Gain"
+        },
+        "direction_ccw": {
+          "english": "Counter-CW",
+          "max_length": 10,
+          "needs_translation": false,
+          "translation": "Counter-CW"
+        },
+        "direction_cw": {
+          "english": "Clockwise",
+          "max_length": 9,
+          "needs_translation": false,
+          "translation": "Clockwise"
+        },
+        "loiter_direction": {
+          "english": "Loiter Dir.",
+          "max_length": 11,
+          "needs_translation": false,
+          "translation": "Loiter Dir."
+        },
+        "loiter_radius": {
+          "english": "Loiter Radius",
+          "max_length": 13,
+          "needs_translation": false,
+          "translation": "Loiter Radius"
+        },
+        "max_bank_angle": {
+          "english": "Max Bank",
+          "max_length": 8,
+          "needs_translation": false,
+          "translation": "Max Bank"
+        },
+        "max_pitch_angle": {
+          "english": "Max Pitch",
+          "max_length": 9,
+          "needs_translation": false,
+          "translation": "Max Pitch"
+        },
+        "min_sats": {
+          "english": "Min Satellites",
+          "max_length": 14,
+          "needs_translation": false,
+          "translation": "Min Satellites"
+        },
+        "name": {
+          "english": "GPS Navigation",
+          "max_length": 14,
+          "needs_translation": false,
+          "translation": "GPS Navigation"
+        },
+        "rth_altitude": {
+          "english": "RTH Altitude",
+          "max_length": 12,
+          "needs_translation": false,
+          "translation": "RTH Altitude"
+        }
+      },
       "hardware_setup": {
         "name": {
           "english": "Setup",
