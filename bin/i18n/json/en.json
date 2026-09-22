@@ -4651,18 +4651,6 @@
           "translation": "Unsupported",
           "needs_translation": false,
           "max_length": 11
-        },
-        "arming_disable_flag_27": {
-          "english": "No Filter",
-          "max_length": 10,
-          "needs_translation": false,
-          "translation": "No Filter"
-        },
-        "arming_disable_flag_28": {
-          "english": "Arm Switch",
-          "max_length": 10,
-          "needs_translation": false,
-          "translation": "Arm Switch"
         }
       },
       "rx_input_backup_status": {
