@@ -8580,12 +8580,12 @@
       "reverse_text": false,
       "max_length": 7
     },
-    "sensor_headspeed": {
-      "english": "Headspeed",
+    "sensor_motor1speed": {
+      "english": "Motor 1 RPM",
       "translation": "Prędkość głowy",
-      "needs_translation": false,
+      "needs_translation": true,
       "reverse_text": false,
-      "max_length": 9
+      "max_length": 17
     },
     "sensor_heartbeat": {
       "english": "Heartbeat",
@@ -8692,12 +8692,12 @@
       "reverse_text": false,
       "max_length": 8
     },
-    "sensor_tailspeed": {
-      "english": "Tailspeed",
+    "sensor_motor2speed": {
+      "english": "Motor 2 RPM",
       "translation": "Prędkość ogonowa",
-      "needs_translation": false,
+      "needs_translation": true,
       "reverse_text": false,
-      "max_length": 9
+      "max_length": 19
     },
     "sensor_throttle_pct": {
       "english": "Throttle %",
