@@ -4300,6 +4300,20 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "No soportado"
+        },
+        "arming_disable_flag_27": {
+          "english": "No Filter",
+          "max_length": 10,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "No Filter"
+        },
+        "arming_disable_flag_28": {
+          "english": "Arm Switch",
+          "max_length": 10,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Arm Switch"
         }
       },
       "filters": {
