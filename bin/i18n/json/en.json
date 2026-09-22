@@ -3383,6 +3383,92 @@
           "max_length": 3
         }
       },
+      "failsafe_procedure": {
+        "name": {
+          "english": "Failsafe Stage 2",
+          "translation": "Failsafe Stage 2",
+          "needs_translation": false,
+          "max_length": 17
+        },
+        "procedure": {
+          "english": "Procedure",
+          "translation": "Procedure",
+          "needs_translation": false,
+          "max_length": 9
+        },
+        "procedure_land": {
+          "english": "Land",
+          "translation": "Land",
+          "needs_translation": false,
+          "max_length": 4
+        },
+        "procedure_drop": {
+          "english": "Drop",
+          "translation": "Drop",
+          "needs_translation": false,
+          "max_length": 4
+        },
+        "procedure_gpsrescue": {
+          "english": "GPS Rescue",
+          "translation": "GPS Rescue",
+          "needs_translation": false,
+          "max_length": 10
+        },
+        "switch_mode": {
+          "english": "Switch Mode",
+          "translation": "Switch Mode",
+          "needs_translation": false,
+          "max_length": 11
+        },
+        "switch_stage1": {
+          "english": "Stage 1",
+          "translation": "Stage 1",
+          "needs_translation": false,
+          "max_length": 7
+        },
+        "switch_stage2": {
+          "english": "Stage 2",
+          "translation": "Stage 2",
+          "needs_translation": false,
+          "max_length": 7
+        },
+        "switch_kill": {
+          "english": "Kill",
+          "translation": "Kill",
+          "needs_translation": false,
+          "max_length": 4
+        },
+        "delay": {
+          "english": "Guard Delay",
+          "translation": "Guard Delay",
+          "needs_translation": false,
+          "max_length": 11
+        },
+        "off_delay": {
+          "english": "Land Delay",
+          "translation": "Land Delay",
+          "needs_translation": false,
+          "max_length": 10
+        },
+        "throttle_low_delay": {
+          "english": "Low Thr. Delay",
+          "translation": "Low Thr. Delay",
+          "needs_translation": false,
+          "max_length": 14
+        },
+        "throttle": {
+          "english": "Land Throttle",
+          "translation": "Land Throttle",
+          "needs_translation": false,
+          "max_length": 13
+        },
+        "recovery_delay": {
+          "english": "Recovery Delay",
+          "translation": "Recovery Delay",
+          "needs_translation": false,
+          "max_length": 14
+        }
+      },
       "beepers": {
         "dshot_tone": {
           "english": "ESC beacon tone",

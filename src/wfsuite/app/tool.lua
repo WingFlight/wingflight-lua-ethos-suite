@@ -192,6 +192,7 @@ local MENUS = {
       {title = "@i18n(app.modules.modes.name)@", icon = lcd.loadMask("app/gfx/modes.png"), script = "app/pages/modes.lua"},
       {title = "@i18n(app.modules.adjustments.name)@", icon = lcd.loadMask("app/gfx/adjustments.png"), script = "app/pages/adjustments.lua"},
       {title = "@i18n(app.modules.failsafe.name)@", icon = lcd.loadMask("app/gfx/failsafe.png"), script = "app/pages/failsafe.lua"},
+      {title = "@i18n(app.modules.failsafe_procedure.name)@", icon = lcd.loadMask("app/gfx/failsafe.png"), script = "app/pages/failsafe_procedure.lua"},
       {title = "@i18n(app.modules.beepers.name)@", icon = lcd.loadMask("app/gfx/beepers.png"), menuId = "beepers_menu"},
       {title = "@i18n(app.modules.blackbox.name)@", icon = lcd.loadMask("app/gfx/blackbox.png"), menuId = "blackbox_menu"},
       {title = "@i18n(app.modules.stats.name)@", icon = lcd.loadMask("app/gfx/stats.png"), script = "app/pages/stats.lua"},

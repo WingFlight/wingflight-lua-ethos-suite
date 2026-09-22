@@ -3507,6 +3507,92 @@
           "translation": "Yaw"
         }
       },
+      "failsafe_procedure": {
+        "delay": {
+          "english": "Guard Delay",
+          "max_length": 11,
+          "needs_translation": false,
+          "translation": "Guard Delay"
+        },
+        "name": {
+          "english": "Failsafe Stage 2",
+          "max_length": 17,
+          "needs_translation": false,
+          "translation": "Failsafe Stage 2"
+        },
+        "off_delay": {
+          "english": "Land Delay",
+          "max_length": 10,
+          "needs_translation": false,
+          "translation": "Land Delay"
+        },
+        "procedure": {
+          "english": "Procedure",
+          "max_length": 9,
+          "needs_translation": false,
+          "translation": "Procedure"
+        },
+        "procedure_drop": {
+          "english": "Drop",
+          "max_length": 4,
+          "needs_translation": false,
+          "translation": "Drop"
+        },
+        "procedure_gpsrescue": {
+          "english": "GPS Rescue",
+          "max_length": 10,
+          "needs_translation": false,
+          "translation": "GPS Rescue"
+        },
+        "procedure_land": {
+          "english": "Land",
+          "max_length": 4,
+          "needs_translation": false,
+          "translation": "Land"
+        },
+        "recovery_delay": {
+          "english": "Recovery Delay",
+          "max_length": 14,
+          "needs_translation": false,
+          "translation": "Recovery Delay"
+        },
+        "switch_kill": {
+          "english": "Kill",
+          "max_length": 4,
+          "needs_translation": false,
+          "translation": "Kill"
+        },
+        "switch_mode": {
+          "english": "Switch Mode",
+          "max_length": 11,
+          "needs_translation": false,
+          "translation": "Switch Mode"
+        },
+        "switch_stage1": {
+          "english": "Stage 1",
+          "max_length": 7,
+          "needs_translation": false,
+          "translation": "Stage 1"
+        },
+        "switch_stage2": {
+          "english": "Stage 2",
+          "max_length": 7,
+          "needs_translation": false,
+          "translation": "Stage 2"
+        },
+        "throttle": {
+          "english": "Land Throttle",
+          "max_length": 13,
+          "needs_translation": false,
+          "translation": "Land Throttle"
+        },
+        "throttle_low_delay": {
+          "english": "Low Thr. Delay",
+          "max_length": 14,
+          "needs_translation": false,
+          "translation": "Low Thr. Delay"
+        }
+      },
       "fblstatus": {
         "arming_disable_flag_0": {
           "english": "No Gyro",
