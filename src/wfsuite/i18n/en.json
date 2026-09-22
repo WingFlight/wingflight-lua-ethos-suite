@@ -7782,11 +7782,11 @@
       "needs_translation": false,
       "translation": "Heading"
     },
-    "sensor_headspeed": {
-      "english": "Headspeed",
-      "max_length": 9,
+    "sensor_motor1speed": {
+      "english": "Motor 1 RPM",
+      "max_length": 17,
       "needs_translation": false,
-      "translation": "Headspeed"
+      "translation": "Motor 1 RPM"
     },
     "sensor_heartbeat": {
       "english": "Heartbeat",
@@ -7878,11 +7878,11 @@
       "needs_translation": false,
       "translation": "SYS Load"
     },
-    "sensor_tailspeed": {
-      "english": "Tailspeed",
-      "max_length": 9,
+    "sensor_motor2speed": {
+      "english": "Motor 2 RPM",
+      "max_length": 19,
       "needs_translation": false,
-      "translation": "Tailspeed"
+      "translation": "Motor 2 RPM"
     },
     "sensor_throttle_pct": {
       "english": "Throttle %",
