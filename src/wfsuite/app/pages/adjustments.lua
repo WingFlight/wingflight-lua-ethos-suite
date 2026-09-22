@@ -115,7 +115,7 @@ local ADJUST_FUNCTIONS = {
   {id = 77, name = "Governor Auto Throttle", min = 0, max = 250},
   {id = 78, name = "Governor Max Throttle", min = 0, max = 100},
   {id = 79, name = "Governor Min Throttle", min = 0, max = 100},
-  {id = 80, name = "Governor Headspeed", min = 0, max = 10000},
+  {id = 80, name = "Governor RPM", min = 0, max = 10000},
   {id = 81, name = "Governor Yaw FF", min = 0, max = 250},
   {id = 82, name = "Battery Profile", min = 1, max = 6},
   {id = 84, name = "Master Gain Pitch", min = 25, max = 1000},
