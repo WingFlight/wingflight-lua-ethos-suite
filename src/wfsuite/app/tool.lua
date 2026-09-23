@@ -191,12 +191,24 @@ local MENUS = {
     entries = {
       {title = "@i18n(app.modules.modes.name)@", icon = lcd.loadMask("app/gfx/modes.png"), script = "app/pages/modes.lua"},
       {title = "@i18n(app.modules.adjustments.name)@", icon = lcd.loadMask("app/gfx/adjustments.png"), script = "app/pages/adjustments.lua"},
-      {title = "@i18n(app.modules.failsafe.name)@", icon = lcd.loadMask("app/gfx/failsafe.png"), script = "app/pages/failsafe.lua"},
-      {title = "@i18n(app.modules.failsafe_procedure.name)@", icon = lcd.loadMask("app/gfx/failsafe.png"), script = "app/pages/failsafe_procedure.lua"},
-      {title = "@i18n(app.modules.gps_nav_config.name)@", icon = lcd.loadMask("app/gfx/failsafe.png"), script = "app/pages/gps_nav_config.lua"},
+      {title = "@i18n(app.modules.failsafe.name)@", icon = lcd.loadMask("app/gfx/failsafe.png"), menuId = "failsafe_menu"},
+      {title = "@i18n(app.modules.gps_nav_config.name)@", icon = lcd.loadMask("app/gfx/gps_nav_config.png"), script = "app/pages/gps_nav_config.lua"},
       {title = "@i18n(app.modules.beepers.name)@", icon = lcd.loadMask("app/gfx/beepers.png"), menuId = "beepers_menu"},
       {title = "@i18n(app.modules.blackbox.name)@", icon = lcd.loadMask("app/gfx/blackbox.png"), menuId = "blackbox_menu"},
       {title = "@i18n(app.modules.stats.name)@", icon = lcd.loadMask("app/gfx/stats.png"), script = "app/pages/stats.lua"},
+    },
+  },
+  -- Two independent MSP round-trips (MSP_RXFAIL_CONFIG's per-channel indexed
+  -- writes vs. MSP_FAILSAFE_CONFIG's single flat-record write) -- kept as two
+  -- pages behind one submenu rather than merged into one page with expansion
+  -- panels, same reasoning as beepers_menu/blackbox_menu below (each sub-page
+  -- keeps its own independent load/save/dirty state, no cross-MSP-flow save
+  -- button to coordinate).
+  failsafe_menu = {
+    title = "@i18n(app.modules.failsafe.name)@",
+    entries = {
+      {title = "@i18n(app.modules.failsafe.menu_channel_fallback)@", icon = lcd.loadMask("app/gfx/failsafe_channel_fallback.png"), script = "app/pages/failsafe.lua"},
+      {title = "@i18n(app.modules.failsafe_procedure.name)@", icon = lcd.loadMask("app/gfx/failsafe_procedure.png"), script = "app/pages/failsafe_procedure.lua"},
     },
   },
   beepers_menu = {

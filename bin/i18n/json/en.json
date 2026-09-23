@@ -3420,6 +3420,12 @@
           "needs_translation": false,
           "max_length": 10
         },
+        "menu_channel_fallback": {
+          "english": "Channel Fallback",
+          "translation": "Channel Fallback",
+          "needs_translation": false,
+          "max_length": 16
+        },
         "name": {
           "english": "Failsafe",
           "translation": "Failsafe",
@@ -3453,10 +3459,10 @@
       },
       "failsafe_procedure": {
         "name": {
-          "english": "Failsafe Stage 2",
-          "translation": "Failsafe Stage 2",
+          "english": "Stage 2",
+          "translation": "Stage 2",
           "needs_translation": false,
-          "max_length": 17
+          "max_length": 7
         },
         "procedure": {
           "english": "Procedure",

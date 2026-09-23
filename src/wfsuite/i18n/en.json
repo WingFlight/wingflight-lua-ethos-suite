@@ -3476,6 +3476,12 @@
           "needs_translation": false,
           "translation": "Collective"
         },
+        "menu_channel_fallback": {
+          "english": "Channel Fallback",
+          "max_length": 16,
+          "needs_translation": false,
+          "translation": "Channel Fallback"
+        },
         "name": {
           "english": "Failsafe",
           "max_length": 8,
@@ -3515,10 +3521,10 @@
           "translation": "Guard Delay"
         },
         "name": {
-          "english": "Failsafe Stage 2",
-          "max_length": 17,
+          "english": "Stage 2",
+          "max_length": 7,
           "needs_translation": false,
-          "translation": "Failsafe Stage 2"
+          "translation": "Stage 2"
         },
         "off_delay": {
           "english": "Land Delay",

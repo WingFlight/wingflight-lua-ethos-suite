@@ -15,7 +15,7 @@ local progressDialog = requireModule("app/progress_dialog.lua")
 local eeprom = requireModule("lib/msp_eeprom.lua")
 local failsafeConfig = requireModule("lib/msp_failsafe_config.lua")
 
-local PAGE_TITLE = "@i18n(app.modules.failsafe_procedure.name)@"
+local PAGE_TITLE = "@i18n(app.modules.failsafe.name)@ / @i18n(app.modules.failsafe_procedure.name)@"
 local MSG_LOADING_TITLE = "@i18n(app.msg_loading)@"
 local MSG_LOADING_BODY = "@i18n(app.msg_loading_from_fbl)@"
 local MSG_SAVING_TITLE = "@i18n(app.msg_saving)@"
