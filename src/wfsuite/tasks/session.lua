@@ -105,6 +105,8 @@ local session = {
                         -- above -- still fetched in wakeup(), see below.
   flightModeFlags = nil, -- live telemetry sensor value ("flight_mode"), a bitmask -- see
                           -- tasks/audio_events.lua's announceFlightMode() for the bit->mode mapping.
+  gpsFixType = nil, -- live telemetry sensor value ("gps_fix_type"): 0 = no fix, 1 = fix,
+                     -- 2 = fix + home captured -- see tasks/audio_events.lua's announceGpsFix().
   mspTransport = nil,
   telemetrySlots = nil, -- 40-entry S.Port sensor-slot array, see lib/msp_telemetry_config.lua
   pidProfile = nil,
@@ -355,6 +357,7 @@ local function flush()
     governorMode = session.governorMode,
     governorState = session.governorState,
     flightModeFlags = session.flightModeFlags,
+    gpsFixType = session.gpsFixType,
     mspTransport = session.mspTransport,
     pidProfile = session.pidProfile,
     rateProfile = session.rateProfile,
@@ -721,6 +724,7 @@ local function setConnected(value, mspQueue, protocol)
     session.governorState = nil
     session.rxMap = nil
     session.flightModeFlags = nil
+    session.gpsFixType = nil
     session.telemetrySlots = nil
     session.pidProfile = nil
     session.rateProfile = nil
@@ -933,6 +937,15 @@ local function updateFlightMode(protocol)
   local flightModeFlags = telemetrySensors.getValue(protocol, "flight_mode")
   if flightModeFlags ~= session.flightModeFlags then
     session.flightModeFlags = flightModeFlags
+    publish()
+  end
+end
+
+local function updateGpsFixType(protocol)
+  if not telemetrySensors then return end
+  local gpsFixType = telemetrySensors.getValue(protocol, "gps_fix_type")
+  if gpsFixType ~= session.gpsFixType then
+    session.gpsFixType = gpsFixType
     publish()
   end
 end
@@ -1160,6 +1173,7 @@ local function wakeup(mspQueue, protocol, transport, simSensors)
       updateProfiles(sensorProtocol)
       updateGovernor(sensorProtocol)
       updateFlightMode(sensorProtocol)
+      updateGpsFixType(sensorProtocol)
     end
 
     if shouldRunScheduled("adjustment", ADJUSTMENT_INTERVAL, now) then

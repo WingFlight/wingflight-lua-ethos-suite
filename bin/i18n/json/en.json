@@ -1968,6 +1968,12 @@
           "needs_translation": false,
           "max_length": 14
         },
+        "gps_fix_state": {
+          "english": "GPS fix state",
+          "translation": "GPS fix state",
+          "needs_translation": false,
+          "max_length": 13
+        },
         "pid_profile": {
           "english": "PID profile",
           "translation": "PID profile",
@@ -7589,6 +7595,12 @@
       "max_length": 9,
       "needs_translation": false,
       "translation": "GPS Coord"
+    },
+    "sensor_gps_fix_type": {
+      "english": "GPS Fix",
+      "max_length": 7,
+      "needs_translation": false,
+      "translation": "GPS Fix"
     },
     "sensor_gps_hdop": {
       "english": "GPS HDOP",

@@ -106,6 +106,7 @@ local AUDIO_SESSION_KEYS = {
   "governorMode",
   "governorState",
   "flightModeFlags",
+  "gpsFixType",
   "voltage",
   "batteryConfig",
   "tempEsc",
@@ -379,6 +380,27 @@ local function announceFlightMode()
   local last = tonumber(previous.flightModeFlags)
   if value == nil or last == nil or value == last then return end
   playFlightMode(flightModeFile(value))
+end
+
+-- Not armed-gated, same reasoning as announceFlightMode() -- a pilot
+-- waiting for a fix on the bench, before ever arming, is exactly who this
+-- is for. Only the acquired/lost edge is announced (session.gpsFixType 0
+-- <-> >0), not the further 1 (fix only) -> 2 (fix + home) transition --
+-- add a third callout here if the home-capture moment also needs its own
+-- cue.
+local function announceGpsFix()
+  if not events.gps_fix then return end
+  if session.connected ~= true then return end
+
+  local value = tonumber(session.gpsFixType)
+  local last = tonumber(previous.gpsFixType)
+  if value == nil or last == nil or value == last then return end
+
+  if value > 0 and last == 0 then
+    playAlert("gpsfix.wav")
+  elseif value == 0 and last > 0 then
+    playAlert("gpslost.wav")
+  end
 end
 
 local function ensureAdjWavs()
@@ -677,6 +699,7 @@ local function rememberCurrent()
   previous.batteryProfile = session.batteryProfile
   previous.governorState = session.governorState
   previous.flightModeFlags = session.flightModeFlags
+  previous.gpsFixType = session.gpsFixType
   previous.adjFunction = session.adjFunction
   previous.adjValue = session.adjValue
 end
@@ -717,6 +740,7 @@ function audio_events.wakeup()
   announceBatteryProfile()
   announceGovernor()
   announceFlightMode()
+  announceGpsFix()
   announceVoltage(now)
   announceEscTemp(now)
   announceBecRxVoltage(now)

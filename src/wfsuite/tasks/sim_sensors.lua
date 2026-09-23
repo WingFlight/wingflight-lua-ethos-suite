@@ -72,6 +72,7 @@ local SENSORS = {
   motor2speed      = {uid = 0x5027, name = "Motor 2 Speed",    unit = UNIT_RPM,           dec = nil, min = 0,     max = 65535},
   flight_mode      = {uid = 0x5028, name = "Flight Mode",      unit = nil,                dec = 0,   min = 0,     max = 65536},
   tv_profile       = {uid = 0x5029, name = "TV Profile",       unit = nil,                dec = 0,   min = 0,     max = 6},
+  gps_fix_type     = {uid = 0x5030, name = "GPS Fix Type",     unit = nil,                dec = 0,   min = 0,     max = 2},
 }
 
 -- key -> DiySensor instance, built once from SENSORS above. Module index
