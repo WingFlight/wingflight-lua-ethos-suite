@@ -4729,10 +4729,10 @@
           "max_length": 3
         },
         "arming_disable_flag_19": {
-          "english": "Resc",
-          "translation": "Resc",
+          "english": "GPS RTH",
+          "translation": "GPS RTH",
           "needs_translation": false,
-          "max_length": 4
+          "max_length": 10
         },
         "arming_disable_flag_20": {
           "english": "RPM Filter",

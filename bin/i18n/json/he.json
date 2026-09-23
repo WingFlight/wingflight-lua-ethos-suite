@@ -5258,10 +5258,10 @@
           "reverse_text": false
         },
         "arming_disable_flag_19": {
-          "english": "Resc",
-          "max_length": 4,
-          "needs_translation": false,
-          "translation": "חילוץ",
+          "english": "GPS RTH",
+          "max_length": 10,
+          "needs_translation": true,
+          "translation": "GPS RTH",
           "reverse_text": true
         },
         "arming_disable_flag_20": {

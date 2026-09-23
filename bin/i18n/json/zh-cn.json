@@ -5258,11 +5258,11 @@
           "max_length": 3
         },
         "arming_disable_flag_19": {
-          "english": "Resc",
-          "translation": "救援模式",
-          "needs_translation": false,
+          "english": "GPS RTH",
+          "translation": "GPS RTH",
+          "needs_translation": true,
           "reverse_text": false,
-          "max_length": 4
+          "max_length": 10
         },
         "arming_disable_flag_20": {
           "english": "RPM Filter",

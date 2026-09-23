@@ -4141,11 +4141,11 @@
           "translation": "GPS"
         },
         "arming_disable_flag_19": {
-          "english": "Resc",
-          "max_length": 4,
-          "needs_translation": false,
+          "english": "GPS RTH",
+          "max_length": 10,
+          "needs_translation": true,
           "reverse_text": false,
-          "translation": "Resc"
+          "translation": "GPS RTH"
         },
         "arming_disable_flag_2": {
           "english": "RX Fail Safe",
