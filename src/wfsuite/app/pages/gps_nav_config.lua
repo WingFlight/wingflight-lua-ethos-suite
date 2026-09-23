@@ -34,7 +34,7 @@ local LOITER_DIRECTION_OPTIONS = {
 
 local function cloneConfig(config)
   return {
-    nav_loiter_radius = config and config.nav_loiter_radius or 75,
+    nav_loiter_radius = config and config.nav_loiter_radius or 100,
     nav_loiter_direction = config and config.nav_loiter_direction or 0,
     nav_rth_altitude = config and config.nav_rth_altitude or 50,
     nav_min_sats = config and config.nav_min_sats or 8,
@@ -42,6 +42,11 @@ local function cloneConfig(config)
     nav_max_pitch_angle = config and config.nav_max_pitch_angle or 15,
     nav_bearing_kp = config and config.nav_bearing_kp or 200,
     nav_altitude_kp = config and config.nav_altitude_kp or 100,
+    -- Appended MSP fields: nil when read from firmware that predates them, so fall back to
+    -- the firmware defaults (older firmware ignores them on write).
+    nav_altitude_kd = config and config.nav_altitude_kd or 200,
+    nav_throttle = config and config.nav_throttle or 60,
+    nav_turn_coordination = config and config.nav_turn_coordination or 100,
   }
 end
 
@@ -231,8 +236,11 @@ local function open(opts)
   addNumberRow("@i18n(app.modules.gps_nav_config.min_sats)@", 5, 50, "nav_min_sats")
   addNumberRow("@i18n(app.modules.gps_nav_config.max_bank_angle)@", 5, 45, "nav_max_bank_angle", "deg")
   addNumberRow("@i18n(app.modules.gps_nav_config.max_pitch_angle)@", 5, 45, "nav_max_pitch_angle", "deg")
+  addNumberRow("@i18n(app.modules.gps_nav_config.throttle)@", 0, 100, "nav_throttle", "%")
   addNumberRow("@i18n(app.modules.gps_nav_config.bearing_kp)@", 0, 1000, "nav_bearing_kp")
   addNumberRow("@i18n(app.modules.gps_nav_config.altitude_kp)@", 0, 1000, "nav_altitude_kp")
+  addNumberRow("@i18n(app.modules.gps_nav_config.altitude_kd)@", 0, 1000, "nav_altitude_kd")
+  addNumberRow("@i18n(app.modules.gps_nav_config.turn_coordination)@", 0, 200, "nav_turn_coordination", "%")
 
   loadData()
 end

@@ -15,6 +15,11 @@
 --   nav_max_pitch_angle   U8   (degrees)
 --   nav_bearing_kp        U16  (hundredths of a degree of bank per degree of error)
 --   nav_altitude_kp       U16  (hundredths of a degree of pitch per meter of error)
+--   nav_altitude_kd       U16  (hundredths of a degree of pitch per m/s of climb rate) -- appended
+--   nav_throttle          U8   (percent)                                               -- appended
+--   nav_turn_coordination U8   (percent)                                               -- appended
+-- The appended fields are only read if present; older firmware sends the first
+-- 12 bytes only, and ignores them on write.
 
 if package.loaded["wfsuite.lib.msp_gps_nav_config"] then
   return package.loaded["wfsuite.lib.msp_gps_nav_config"]
@@ -25,9 +30,10 @@ local mspcodec = requireModule("lib/mspcodec.lua")
 
 local READ_COMMAND = 0x5F16
 local WRITE_COMMAND = 0x5F17
+local FULL_BYTES = 16  -- base 12 bytes + altitude_kd, throttle, turn_coordination
 
 local SIMULATOR_RESPONSE = {
-  0x4B, 0x00,    -- nav_loiter_radius=75
+  0x64, 0x00,    -- nav_loiter_radius=100
   0,             -- nav_loiter_direction=CW
   0x32, 0x00,    -- nav_rth_altitude=50
   8,             -- nav_min_sats
@@ -35,6 +41,9 @@ local SIMULATOR_RESPONSE = {
   15,            -- nav_max_pitch_angle
   0xC8, 0x00,    -- nav_bearing_kp=200
   0x64, 0x00,    -- nav_altitude_kp=100
+  0xC8, 0x00,    -- nav_altitude_kd=200
+  60,            -- nav_throttle
+  100,           -- nav_turn_coordination
 }
 
 local msp_gps_nav_config = {
@@ -44,7 +53,7 @@ local msp_gps_nav_config = {
 
 function msp_gps_nav_config.decode(buf)
   buf.offset = 1
-  return {
+  local config = {
     nav_loiter_radius = mspcodec.readU16(buf),
     nav_loiter_direction = mspcodec.readU8(buf),
     nav_rth_altitude = mspcodec.readU16(buf),
@@ -54,6 +63,12 @@ function msp_gps_nav_config.decode(buf)
     nav_bearing_kp = mspcodec.readU16(buf),
     nav_altitude_kp = mspcodec.readU16(buf),
   }
+  if #buf >= FULL_BYTES then
+    config.nav_altitude_kd = mspcodec.readU16(buf)
+    config.nav_throttle = mspcodec.readU8(buf)
+    config.nav_turn_coordination = mspcodec.readU8(buf)
+  end
+  return config
 end
 
 function msp_gps_nav_config.buildReadMessage(onData, onError)
@@ -70,7 +85,7 @@ end
 function msp_gps_nav_config.buildWriteMessage(config, onWritten, onError)
   config = config or {}
   local payload = {}
-  mspcodec.writeU16(payload, config.nav_loiter_radius or 75)
+  mspcodec.writeU16(payload, config.nav_loiter_radius or 100)
   mspcodec.writeU8(payload, config.nav_loiter_direction or 0)
   mspcodec.writeU16(payload, config.nav_rth_altitude or 50)
   mspcodec.writeU8(payload, config.nav_min_sats or 8)
@@ -78,6 +93,9 @@ function msp_gps_nav_config.buildWriteMessage(config, onWritten, onError)
   mspcodec.writeU8(payload, config.nav_max_pitch_angle or 15)
   mspcodec.writeU16(payload, config.nav_bearing_kp or 200)
   mspcodec.writeU16(payload, config.nav_altitude_kp or 100)
+  mspcodec.writeU16(payload, config.nav_altitude_kd or 200)
+  mspcodec.writeU8(payload, config.nav_throttle or 60)
+  mspcodec.writeU8(payload, config.nav_turn_coordination or 100)
   return {
     command = WRITE_COMMAND,
     payload = payload,

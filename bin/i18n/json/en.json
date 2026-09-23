@@ -1469,6 +1469,24 @@
           "translation": "Altitude Gain",
           "needs_translation": false,
           "max_length": 13
+        },
+        "altitude_kd": {
+          "english": "Altitude Damp",
+          "translation": "Altitude Damp",
+          "needs_translation": false,
+          "max_length": 13
+        },
+        "throttle": {
+          "english": "Nav Throttle",
+          "translation": "Nav Throttle",
+          "needs_translation": false,
+          "max_length": 12
+        },
+        "turn_coordination": {
+          "english": "Turn Coord.",
+          "translation": "Turn Coord.",
+          "needs_translation": false,
+          "max_length": 11
         }
       },
       "hardware_setup": {

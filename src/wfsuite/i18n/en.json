@@ -4358,6 +4358,12 @@
         }
       },
       "gps_nav_config": {
+        "altitude_kd": {
+          "english": "Altitude Damp",
+          "max_length": 13,
+          "needs_translation": false,
+          "translation": "Altitude Damp"
+        },
         "altitude_kp": {
           "english": "Altitude Gain",
           "max_length": 13,
@@ -4423,6 +4429,18 @@
           "max_length": 12,
           "needs_translation": false,
           "translation": "RTH Altitude"
+        },
+        "throttle": {
+          "english": "Nav Throttle",
+          "max_length": 12,
+          "needs_translation": false,
+          "translation": "Nav Throttle"
+        },
+        "turn_coordination": {
+          "english": "Turn Coord.",
+          "max_length": 11,
+          "needs_translation": false,
+          "translation": "Turn Coord."
         }
       },
       "hardware_setup": {

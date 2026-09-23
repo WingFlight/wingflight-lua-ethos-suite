@@ -1,5 +1,7 @@
 # 0.0.26
 
+Add Nav Throttle, Altitude Damp and Turn Coord. to the GPS Navigation page, matching the reworked 0.0.26 firmware GPS Loiter/RTH; firmware without them keeps working and ignores them.
+
 Add a Failsafe Stage 2 page (procedure, delay/off delay/throttle low delay/throttle/recovery delay, test switch mode) and a GPS Navigation tuning page (RTH altitude, loiter radius/direction, min satellites, max bank/pitch angle, bearing/altitude gain), both requiring MSP API 22.4 firmware. Failsafe is now a submenu grouping Channel Fallback and Stage 2, each with dedicated icons.
 Add a GPS fix telemetry sensor and an audio callout ("GPS fix acquired/lost", off by default pending generated audio), including on first connect if a fix is already present.
 Remove the GPS RESCUE box name; relabel the RESC arming-disable flag to GPS RTH, matching the firmware/Configurator retirement of the redundant GPS RESCUE switch.
