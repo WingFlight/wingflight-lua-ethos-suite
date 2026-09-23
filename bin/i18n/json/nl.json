@@ -5258,10 +5258,10 @@
           "reverse_text": false
         },
         "arming_disable_flag_19": {
-          "english": "Resc",
-          "translation": "Hersc",
-          "needs_translation": false,
-          "max_length": 4,
+          "english": "GPS RTH",
+          "translation": "GPS RTH",
+          "needs_translation": true,
+          "max_length": 10,
           "reverse_text": false
         },
         "arming_disable_flag_20": {

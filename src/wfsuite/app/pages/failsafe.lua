@@ -12,7 +12,7 @@ local progressDialog = requireModule("app/progress_dialog.lua")
 local eeprom = requireModule("lib/msp_eeprom.lua")
 local rxfail = requireModule("lib/msp_rxfail_config.lua")
 
-local PAGE_TITLE = "@i18n(app.modules.failsafe.name)@"
+local PAGE_TITLE = "@i18n(app.modules.failsafe.name)@ / @i18n(app.modules.failsafe.menu_channel_fallback)@"
 local BTN_OK = "@i18n(app.btn_ok)@"
 local BTN_CANCEL = "@i18n(app.btn_cancel)@"
 local MSG_LOADING_TITLE = "@i18n(app.msg_loading)@"

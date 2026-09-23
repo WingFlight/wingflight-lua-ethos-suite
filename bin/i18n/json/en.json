@@ -1403,6 +1403,74 @@
           "max_length": 4
         }
       },
+      "gps_nav_config": {
+        "name": {
+          "english": "GPS Navigation",
+          "translation": "GPS Navigation",
+          "needs_translation": false,
+          "max_length": 14
+        },
+        "rth_altitude": {
+          "english": "RTH Altitude",
+          "translation": "RTH Altitude",
+          "needs_translation": false,
+          "max_length": 12
+        },
+        "loiter_radius": {
+          "english": "Loiter Radius",
+          "translation": "Loiter Radius",
+          "needs_translation": false,
+          "max_length": 13
+        },
+        "loiter_direction": {
+          "english": "Loiter Dir.",
+          "translation": "Loiter Dir.",
+          "needs_translation": false,
+          "max_length": 11
+        },
+        "direction_cw": {
+          "english": "Clockwise",
+          "translation": "Clockwise",
+          "needs_translation": false,
+          "max_length": 9
+        },
+        "direction_ccw": {
+          "english": "Counter-CW",
+          "translation": "Counter-CW",
+          "needs_translation": false,
+          "max_length": 10
+        },
+        "min_sats": {
+          "english": "Min Satellites",
+          "translation": "Min Satellites",
+          "needs_translation": false,
+          "max_length": 14
+        },
+        "max_bank_angle": {
+          "english": "Max Bank",
+          "translation": "Max Bank",
+          "needs_translation": false,
+          "max_length": 8
+        },
+        "max_pitch_angle": {
+          "english": "Max Pitch",
+          "translation": "Max Pitch",
+          "needs_translation": false,
+          "max_length": 9
+        },
+        "bearing_kp": {
+          "english": "Bearing Gain",
+          "translation": "Bearing Gain",
+          "needs_translation": false,
+          "max_length": 12
+        },
+        "altitude_kp": {
+          "english": "Altitude Gain",
+          "translation": "Altitude Gain",
+          "needs_translation": false,
+          "max_length": 13
+        }
+      },
       "hardware_setup": {
         "name": {
           "english": "Setup",
@@ -1899,6 +1967,12 @@
           "translation": "Governor state",
           "needs_translation": false,
           "max_length": 14
+        },
+        "gps_fix_state": {
+          "english": "GPS fix state",
+          "translation": "GPS fix state",
+          "needs_translation": false,
+          "max_length": 13
         },
         "pid_profile": {
           "english": "PID profile",
@@ -3352,6 +3426,12 @@
           "needs_translation": false,
           "max_length": 10
         },
+        "menu_channel_fallback": {
+          "english": "Channel Fallback",
+          "translation": "Channel Fallback",
+          "needs_translation": false,
+          "max_length": 16
+        },
         "name": {
           "english": "Failsafe",
           "translation": "Failsafe",
@@ -3381,6 +3461,92 @@
           "translation": "Yaw",
           "needs_translation": false,
           "max_length": 3
+        }
+      },
+      "failsafe_procedure": {
+        "name": {
+          "english": "Stage 2",
+          "translation": "Stage 2",
+          "needs_translation": false,
+          "max_length": 7
+        },
+        "procedure": {
+          "english": "Procedure",
+          "translation": "Procedure",
+          "needs_translation": false,
+          "max_length": 9
+        },
+        "procedure_land": {
+          "english": "Land",
+          "translation": "Land",
+          "needs_translation": false,
+          "max_length": 4
+        },
+        "procedure_drop": {
+          "english": "Drop",
+          "translation": "Drop",
+          "needs_translation": false,
+          "max_length": 4
+        },
+        "procedure_gpsrescue": {
+          "english": "GPS Rescue",
+          "translation": "GPS Rescue",
+          "needs_translation": false,
+          "max_length": 10
+        },
+        "switch_mode": {
+          "english": "Switch Mode",
+          "translation": "Switch Mode",
+          "needs_translation": false,
+          "max_length": 11
+        },
+        "switch_stage1": {
+          "english": "Stage 1",
+          "translation": "Stage 1",
+          "needs_translation": false,
+          "max_length": 7
+        },
+        "switch_stage2": {
+          "english": "Stage 2",
+          "translation": "Stage 2",
+          "needs_translation": false,
+          "max_length": 7
+        },
+        "switch_kill": {
+          "english": "Kill",
+          "translation": "Kill",
+          "needs_translation": false,
+          "max_length": 4
+        },
+        "delay": {
+          "english": "Guard Delay",
+          "translation": "Guard Delay",
+          "needs_translation": false,
+          "max_length": 11
+        },
+        "off_delay": {
+          "english": "Land Delay",
+          "translation": "Land Delay",
+          "needs_translation": false,
+          "max_length": 10
+        },
+        "throttle_low_delay": {
+          "english": "Low Thr. Delay",
+          "translation": "Low Thr. Delay",
+          "needs_translation": false,
+          "max_length": 14
+        },
+        "throttle": {
+          "english": "Land Throttle",
+          "translation": "Land Throttle",
+          "needs_translation": false,
+          "max_length": 13
+        },
+        "recovery_delay": {
+          "english": "Recovery Delay",
+          "translation": "Recovery Delay",
+          "needs_translation": false,
+          "max_length": 14
         }
       },
       "beepers": {
@@ -4563,10 +4729,10 @@
           "max_length": 3
         },
         "arming_disable_flag_19": {
-          "english": "Resc",
-          "translation": "Resc",
+          "english": "GPS RTH",
+          "translation": "GPS RTH",
           "needs_translation": false,
-          "max_length": 4
+          "max_length": 10
         },
         "arming_disable_flag_20": {
           "english": "RPM Filter",
@@ -7429,6 +7595,12 @@
       "max_length": 9,
       "needs_translation": false,
       "translation": "GPS Coord"
+    },
+    "sensor_gps_fix_type": {
+      "english": "GPS Fix",
+      "max_length": 7,
+      "needs_translation": false,
+      "translation": "GPS Fix"
     },
     "sensor_gps_hdop": {
       "english": "GPS HDOP",

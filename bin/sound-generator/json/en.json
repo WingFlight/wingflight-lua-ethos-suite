@@ -96,6 +96,18 @@
     "needs_translation": false
   },
   {
+    "file": "events/alerts/gpsfix.wav",
+    "english": "GPS Fix",
+    "translation": "GPS Fix",
+    "needs_translation": false
+  },
+  {
+    "file": "events/alerts/gpslost.wav",
+    "english": "GPS Fix Lost",
+    "translation": "GPS Fix Lost",
+    "needs_translation": false
+  },
+  {
     "file": "events/alerts/elapsed.wav",
     "english": "Timer Elapsed",
     "translation": "Timer Elapsed",

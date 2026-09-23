@@ -61,6 +61,10 @@ local DEFAULTS = {
     -- bin/sound-generator/json/*.json) -- flip to true once it exists.
     tv_profile = false,
     battery_profile = true,
+    -- Defaults off: events/alerts/gpsfix.wav and gpslost.wav haven't been
+    -- generated yet (see bin/sound-generator/json/*.json) -- flip to true
+    -- once they exist.
+    gps_fix = false,
     smartfuel = true,
     smartfuelcallout = 0,
     smartfuelrepeats = 1,
@@ -184,6 +188,7 @@ local function normalizeEvents(values)
   events.rate_profile = coerceBool(events.rate_profile, DEFAULTS.events.rate_profile)
   events.tv_profile = coerceBool(events.tv_profile, DEFAULTS.events.tv_profile)
   events.battery_profile = coerceBool(events.battery_profile, DEFAULTS.events.battery_profile)
+  events.gps_fix = coerceBool(events.gps_fix, DEFAULTS.events.gps_fix)
   events.smartfuel = coerceBool(events.smartfuel, DEFAULTS.events.smartfuel)
   events.smartfuelcallout = clampNumber(events.smartfuelcallout, DEFAULTS.events.smartfuelcallout, 0, 50)
   events.smartfuelrepeats = clampNumber(events.smartfuelrepeats, DEFAULTS.events.smartfuelrepeats, 1, 10)

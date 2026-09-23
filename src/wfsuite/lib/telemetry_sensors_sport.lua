@@ -76,6 +76,13 @@ return {
   flight_mode = {
     {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5121},
   },
+  -- 0 = no fix, 1 = fix, 2 = fix + home captured. Deliberately not read off
+  -- armdisableflags's GPS bit instead -- that one freezes cleared the first
+  -- time the model is ever armed (see wingflight-firmware's fc/core.c), so
+  -- it stops reflecting live GPS state right when GPS Rescue needs it most.
+  gps_fix_type = {
+    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5124},
+  },
   adj_f = {
     {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5110},
   },

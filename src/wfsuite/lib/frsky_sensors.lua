@@ -66,7 +66,7 @@ local CREATE_LIST = {
   [0x5121] = {name = "Flight Mode", unit = UNIT_RAW},
   [0x5122] = {name = "Arm Flags", unit = UNIT_RAW},
   [0x5123] = {name = "Arm Dis Flags", unit = UNIT_RAW},
-  [0x5124] = {name = "Rescue State", unit = UNIT_RAW},
+  [0x5124] = {name = "GPS Fix", unit = UNIT_RAW},
   [0x5125] = {name = "Gov State", unit = UNIT_RAW},
   [0x5130] = {name = "PID Profile", unit = UNIT_RAW},
   [0x5131] = {name = "Rates Profile", unit = UNIT_RAW},

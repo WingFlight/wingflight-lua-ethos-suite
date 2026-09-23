@@ -101,6 +101,7 @@ local SENSOR_LIST = {
   [106] = {name = "@i18n(telemetry.sensor_dbg6)@", group = "debug"},
   [107] = {name = "@i18n(telemetry.sensor_dbg7)@", group = "debug"},
   [118] = {name = "@i18n(telemetry.sensor_tv_profile)@", group = "profiles"},
+  [119] = {name = "@i18n(telemetry.sensor_gps_fix_type)@", group = "gps"},
 }
 
 local GROUP_TITLE = {
