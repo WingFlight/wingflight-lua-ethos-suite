@@ -44,6 +44,8 @@ local BAUD_RATES = {
   "400000", "460800", "500000", "921600", "1000000", "1500000", "2000000", "2470000",
 }
 
+-- hide: not compiled into Wingflight firmware. Listed only for a port that is
+-- still set to it, so it shows its real name instead of "Custom".
 local PORT_FUNCTIONS = {
   {id = 0, excl = 0, name = "@i18n(app.modules.ports.function_disabled)@", type = PORT_TYPE_DISABLED},
   {id = 1, excl = 1, name = "MSP", type = PORT_TYPE_MSP},
@@ -57,12 +59,12 @@ local PORT_FUNCTIONS = {
   {id = 2097152, excl = 2097152, name = "@i18n(app.modules.ports.function_srxl2_esc)@", type = PORT_TYPE_AUTO},
   {id = 4194304, excl = 4194304, name = "@i18n(app.modules.ports.function_crsf_sensors)@", type = PORT_TYPE_AUTO},
   {id = 8388608, excl = 8388608, name = "@i18n(app.modules.ports.function_rx_input_backup)@", type = PORT_TYPE_AUTO},
-  {id = 4, excl = 4668, name = "@i18n(app.modules.ports.function_telem_frsky)@", type = PORT_TYPE_TELEM},
+  {id = 4, excl = 4668, name = "@i18n(app.modules.ports.function_telem_frsky)@", type = PORT_TYPE_TELEM, hide = true},
   {id = 32, excl = 4668, name = "@i18n(app.modules.ports.function_telem_smartport)@", type = PORT_TYPE_TELEM},
   {id = 4096, excl = 4668, name = "@i18n(app.modules.ports.function_telem_ibus)@", type = PORT_TYPE_TELEM},
   {id = 8, excl = 4668, name = "@i18n(app.modules.ports.function_telem_hott)@", type = PORT_TYPE_TELEM},
-  {id = 512, excl = 4668, name = "@i18n(app.modules.ports.function_telem_mavlink)@", type = PORT_TYPE_MAVLINK},
-  {id = 16, excl = 4668, name = "@i18n(app.modules.ports.function_telem_ltm)@", type = PORT_TYPE_TELEM},
+  {id = 512, excl = 4668, name = "@i18n(app.modules.ports.function_telem_mavlink)@", type = PORT_TYPE_MAVLINK, hide = true},
+  {id = 16, excl = 4668, name = "@i18n(app.modules.ports.function_telem_ltm)@", type = PORT_TYPE_TELEM, hide = true},
 }
 
 local BAUD_OPTIONS = {
@@ -202,7 +204,7 @@ local function buildFunctionChoiceTable(portIndex, ports)
   local seen = {}
   for i = 1, #PORT_FUNCTIONS do
     local def = PORT_FUNCTIONS[i]
-    if functionAllowedForPort(def, portIndex, ports) or def.id == port.function_mask then
+    if def.id == port.function_mask or (not def.hide and functionAllowedForPort(def, portIndex, ports)) then
       tableData[#tableData + 1] = {def.name, def.id}
       seen[def.id] = true
     end
