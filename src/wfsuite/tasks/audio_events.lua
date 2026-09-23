@@ -725,6 +725,16 @@ function audio_events.wakeup()
   if not initialized then
     initialized = true
     rememberCurrent()
+    -- Force a fresh "no fix" baseline here, unlike every other field
+    -- rememberCurrent() just captured: a fix acquired while the link was
+    -- down (radio off, or GPS locked before this connect) should still be
+    -- announced the moment we reconnect -- that's the whole point of
+    -- alerting pilots waiting for a fix before arming (see
+    -- announceGpsFix()). Without this, a live value of 1 on first connect
+    -- would silently become the baseline and never trigger the callout.
+    if tonumber(session.gpsFixType) ~= nil then
+      previous.gpsFixType = 0
+    end
     lastSmartfuelAnnounced = tonumber(session.fuelPercent)
     return
   end
