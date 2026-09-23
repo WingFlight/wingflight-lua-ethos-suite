@@ -1,4 +1,13 @@
-# Unreleased
+# 0.0.26
+
+Add a Failsafe Stage 2 page (procedure, delay/off delay/throttle low delay/throttle/recovery delay, test switch mode) and a GPS Navigation tuning page (RTH altitude, loiter radius/direction, min satellites, max bank/pitch angle, bearing/altitude gain), both requiring MSP API 22.4 firmware. Failsafe is now a submenu grouping Channel Fallback and Stage 2, each with dedicated icons.
+Add a GPS fix telemetry sensor and an audio callout ("GPS fix acquired/lost", off by default pending generated audio), including on first connect if a fix is already present.
+Remove the GPS RESCUE box name; relabel the RESC arming-disable flag to GPS RTH, matching the firmware/Configurator retirement of the redundant GPS RESCUE switch.
+
+Announce battery profile cell count alongside capacity when the battery profile audio event fires.
+
+Rename Governor Headspeed to Governor RPM (adjustment id 80).
+Fix broken RPM sensor labels: the sensor catalog referenced telemetry.sensor_motor1speed/sensor_motor2speed keys that didn't exist in any locale, rendering blank; renamed from Headspeed/Tailspeed to match the firmware's Motor 1/2 RPM rename.
 
 Split Thrust Vector into PIDs, Master Gains, PID Controller, PID Bandwidth and Attitude / Heading Hold tools. Each follows the selected TV profile and preserves the other tools' settings when saving.
 
