@@ -78,11 +78,12 @@ local OPER_OPTIONS = {
   {"@i18n(app.modules.mixer_rules.oper_mul)@", 3},
 }
 
--- input: 27 entries (wire values 0-26), matching wingflight-configurator's
--- Mixer.js inputNames exactly -- 0 None, 1-4 Stabilized R/P/Y/T, 5-8 RC
--- Command R/P/Y/T, 9-12 RC Channel R/P/Y/T, 13-26 CH #5-#18 (raw numbered
--- channels beyond the named first four -- no AUX-style naming so the list
--- doesn't switch numbering schemes partway through).
+-- input: wire values 0-26 and 30-35, matching wingflight-configurator's
+-- Mixer.js inputNames -- 0 None, 1-4 Stabilized R/P/Y/T, 5-8 RC Command
+-- R/P/Y/T, 9-12 RC Channel R/P/Y/T, 13-26 CH #5-#18 and 30-35 CH #19-#24
+-- (raw numbered channels beyond the named first four -- no AUX-style naming
+-- so the list doesn't switch numbering schemes partway through). The
+-- thrust-vector inputs (27-29) aren't offered here.
 --
 -- The 9-12 RC Channel Roll/Pitch/Yaw/Throttle "bypass" entries read that
 -- logical axis's RC input *after* wingflight-firmware's rcmap indirection
@@ -172,6 +173,15 @@ local function buildInputOptions(rxMap)
     options[#options + 1] = {entry.label, entry.value}
   end
 
+  -- CH #19-#24 are wire 30-35, after the thrust-vector inputs (27-29), so
+  -- existing input numbers didn't move (firmware pg/mixer.h).
+  for ch = 19, 24 do
+    options[#options + 1] = {
+      string.format("@i18n(app.modules.mixer_rules.input_rcch_fmt)@", ch),
+      30 + (ch - 19),
+    }
+  end
+
   return options
 end
 
@@ -180,9 +190,9 @@ end
 -- what summaryFor()/labelFor() see if either is ever called before that.
 local INPUT_OPTIONS = buildInputOptions(nil)
 
--- output: 39 entries (wire values 0-38) -- 0 None, 1-8 PWM Servo 1-8,
+-- output: 37 entries (wire values 0-36) -- 0 None, 1-8 PWM Servo 1-8,
 -- 9-26 Bus Servo 1-18 (wire value minus 8), 27-30 Motor 1-4 (wire value
--- minus 26), 31-38 Bus Servo 19-26 (wire value minus 12). Motors keep
+-- minus 26), 31-36 Bus Servo 19-24 (wire value minus 12). Motors keep
 -- 27-30, so the later bus servos come after them on the wire; the list
 -- shows every servo before the motors. Matches wingflight-configurator's
 -- Mixer.js outputOrder()/outputLabel() and firmware flight/mixer.h.
@@ -195,7 +205,7 @@ for n = 1, 8 do
     n,
   }
 end
-for n = 1, 26 do
+for n = 1, 24 do
   OUTPUT_OPTIONS[#OUTPUT_OPTIONS + 1] = {
     string.format("@i18n(app.modules.mixer_rules.output_bus_servo_fmt)@", n),
     n <= 18 and (8 + n) or (12 + n),

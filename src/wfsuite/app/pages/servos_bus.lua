@@ -3,11 +3,11 @@
 -- BUS servos look almost identical to PWM in the UI, but the firmware
 -- indexes them differently. The original suite uses:
 --   read/center/override index = UI index + 8
---   config write index         = UI index + (servo_count - 26)
--- Keep those translations local and explicit here. The firmware has 26
--- bus servos (BUS_SERVO_CHANNELS); 16 of them are listed, or 24 when
--- F.Bus output sends the 24-channel frame. The last two channels of each
--- frame are on/off only and aren't listed.
+--   config write index         = UI index + (servo_count - 24)
+-- Keep those translations local and explicit here. The firmware has 24
+-- bus servos (BUS_SERVO_CHANNELS); 16 of them are listed, or all 24 when
+-- F.Bus output sends the 24-channel frame. The 16-channel frame's two
+-- on/off channels (17-18) aren't listed.
 --
 -- Does not query MSP_MIXER_CONFIG: its only field is `model_type`, a
 -- descriptive-only named airframe type used by the configurator's mixer
@@ -38,7 +38,7 @@ local BTN_OK = "@i18n(app.btn_ok)@"
 local BTN_CANCEL = "@i18n(app.btn_cancel)@"
 local BUS_OUTPUT_COUNT = 16
 local BUS_OUTPUT_COUNT_FBUS24 = 24
-local BUS_CONFIG_OFFSET = 26
+local BUS_CONFIG_OFFSET = 24
 local BUS_READ_BASE_INDEX = 8
 local NUMBERED_ICON_COUNT = 16
 local FUNCTION_MASK_FBUS_OUT = 524288
