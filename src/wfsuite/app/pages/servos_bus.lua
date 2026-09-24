@@ -5,14 +5,10 @@
 --   read/center/override index = UI index + 8
 --   config write index         = UI index + (servo_count - 24)
 -- Keep those translations local and explicit here. The firmware has 24
--- bus servos (BUS_SERVO_CHANNELS); 16 of them are listed, or all 24 when
--- F.Bus output sends the 24-channel frame. The 16-channel frame's two
--- on/off channels (17-18) aren't listed.
---
--- Does not query MSP_MIXER_CONFIG: its only field is `model_type`, a
--- descriptive-only named airframe type used by the configurator's mixer
--- view, with nothing here to relabel servos by -- every servo just gets
--- its plain index title.
+-- bus servos (BUS_SERVO_CHANNELS); the page lists as many as the
+-- configured SBUS/F.Bus output drives (MSP_MIXER_CONFIG's bus servo output
+-- count: sbus_out_channels / fbus_master_channels), 16 if it isn't
+-- reported.
 
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local bus = requireModule("lib/bus.lua")
@@ -27,8 +23,7 @@ local servoCenter = requireModule("lib/msp_servo_center.lua")
 local servoConfig = requireModule("lib/msp_servo_config.lua")
 local servoOverride = requireModule("lib/msp_servo_override.lua")
 local status = requireModule("lib/msp_status.lua")
-local serialConfig = requireModule("lib/msp_serial_config.lua")
-local fbusMasterConfig = requireModule("lib/msp_fbus_master_config.lua")
+local mixerConfig = requireModule("lib/msp_mixer_config.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.servos.bus)@"
 local MSG_LOADING_TITLE = "@i18n(app.msg_loading)@"
@@ -36,12 +31,11 @@ local MSG_LOADING_BODY = "@i18n(app.msg_loading_from_fbl)@"
 local MSG_LOAD_ERROR = "@i18n(app.modules.ports.load_error_prefix)@"
 local BTN_OK = "@i18n(app.btn_ok)@"
 local BTN_CANCEL = "@i18n(app.btn_cancel)@"
-local BUS_OUTPUT_COUNT = 16
-local BUS_OUTPUT_COUNT_FBUS24 = 24
+local BUS_OUTPUT_COUNT_DEFAULT = 16
+local BUS_OUTPUT_COUNT_MAX = 24
+local NUMBERED_ICON_COUNT = 16
 local BUS_CONFIG_OFFSET = 24
 local BUS_READ_BASE_INDEX = 8
-local NUMBERED_ICON_COUNT = 16
-local FUNCTION_MASK_FBUS_OUT = 524288
 local LIVE_SETTLE = 0.05
 
 local YES_NO = {
@@ -80,16 +74,6 @@ local function buildRows(count)
     rows[i] = {uiIndex = i - 1, title = servoTitle(i), icon = icon}
   end
   return rows
-end
-
-local function portsHaveFbusOut(ports)
-  for i = 1, #(ports or {}) do
-    local mask = ports[i].function_mask or 0
-    if math.floor(mask / FUNCTION_MASK_FBUS_OUT) % 2 == 1 then
-      return true
-    end
-  end
-  return false
 end
 
 local function flagsFor(reverse, geometry)
@@ -408,39 +392,23 @@ local function open(opts)
     end)
   end
 
-  local function onError()
-    if disposed then return end
-    pendingError = true
-  end
-
-  -- The serial ports and the F.Bus channel setting decide how many bus
-  -- servos to list: 24 only when an F.Bus output port sends the 24-channel
-  -- frame.
-  local hasFbusOut = nil
-  local fbusChannels = nil
-
-  local function resolveBusCount()
-    if hasFbusOut == nil or fbusChannels == nil then return end
-    pendingBusCount = (hasFbusOut and fbusChannels == fbusMasterConfig.CHANNELS_24) and
-      BUS_OUTPUT_COUNT_FBUS24 or BUS_OUTPUT_COUNT
-  end
-
   bus.publish("msp.request", status.buildReadMessage(function(data)
     if disposed then return end
     pendingStatus = data
-  end, onError))
-
-  bus.publish("msp.request", serialConfig.buildReadMessage(function(data)
+  end, function()
     if disposed then return end
-    hasFbusOut = portsHaveFbusOut(data.ports)
-    resolveBusCount()
-  end, onError))
+    pendingError = true
+  end))
 
-  bus.publish("msp.request", fbusMasterConfig.buildReadMessage(function(data)
+  bus.publish("msp.request", mixerConfig.buildReadMessage(function(data)
     if disposed then return end
-    fbusChannels = data.channels
-    resolveBusCount()
-  end, onError))
+    local count = data.bus_servo_output_count
+    if count == 0 then count = BUS_OUTPUT_COUNT_DEFAULT end
+    pendingBusCount = math.min(count, BUS_OUTPUT_COUNT_MAX)
+  end, function()
+    if disposed then return end
+    pendingError = true
+  end))
 end
 
 return {open = open}
