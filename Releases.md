@@ -1,6 +1,10 @@
-# Unreleased
+# 0.0.27
 
 Split Radio Config's shared Cyclic deadband into separate Roll and Pitch deadbands, alongside Yaw. Requires matching firmware (MSP_RC_CONFIG layout change).
+Hide FrSky Hub, MAVLink and LTM from the Ports page, which the firmware no longer compiles in. A port still set to one keeps showing its name.
+
+Announce "GPS Loiter Unavailable" / "GPS RTH Unavailable" when a GPS mode switch is on but the mode can't fly (disarmed, no fix or home), using the new 0.0.27 firmware telemetry bit.
+Add a "Traditional" flight-mode callout, and stop re-announcing the unchanged mode at takeoff and landing.
 
 # 0.0.26
 
