@@ -180,11 +180,12 @@ end
 -- what summaryFor()/labelFor() see if either is ever called before that.
 local INPUT_OPTIONS = buildInputOptions(nil)
 
--- output: 31 entries (wire values 0-30) -- 0 None, 1-8 PWM Servo 1-8,
+-- output: 39 entries (wire values 0-38) -- 0 None, 1-8 PWM Servo 1-8,
 -- 9-26 Bus Servo 1-18 (wire value minus 8), 27-30 Motor 1-4 (wire value
--- minus 26) -- matches wingflight-configurator's Mixer.js outputNames/
--- outputLabel() PWM-vs-Bus split (PWM_SERVO_COUNT=8), and this suite's
--- own app/pages/servos_pwm.lua/servos_bus.lua naming.
+-- minus 26), 31-38 Bus Servo 19-26 (wire value minus 12). Motors keep
+-- 27-30, so the later bus servos come after them on the wire; the list
+-- shows every servo before the motors. Matches wingflight-configurator's
+-- Mixer.js outputOrder()/outputLabel() and firmware flight/mixer.h.
 local OUTPUT_OPTIONS = {
   {"@i18n(app.modules.mixer_rules.output_none)@", 0},
 }
@@ -194,10 +195,10 @@ for n = 1, 8 do
     n,
   }
 end
-for n = 1, 18 do
+for n = 1, 26 do
   OUTPUT_OPTIONS[#OUTPUT_OPTIONS + 1] = {
     string.format("@i18n(app.modules.mixer_rules.output_bus_servo_fmt)@", n),
-    8 + n,
+    n <= 18 and (8 + n) or (12 + n),
   }
 end
 for n = 1, 4 do

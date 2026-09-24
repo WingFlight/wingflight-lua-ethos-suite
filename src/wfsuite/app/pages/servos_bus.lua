@@ -3,8 +3,11 @@
 -- BUS servos look almost identical to PWM in the UI, but the firmware
 -- indexes them differently. The original suite uses:
 --   read/center/override index = UI index + 8
---   config write index         = UI index + (servo_count - 18)
--- Keep those translations local and explicit here.
+--   config write index         = UI index + (servo_count - 26)
+-- Keep those translations local and explicit here. The firmware has 26
+-- bus servos (BUS_SERVO_CHANNELS); 16 of them are listed, or 24 when
+-- F.Bus output sends the 24-channel frame. The last two channels of each
+-- frame are on/off only and aren't listed.
 --
 -- Does not query MSP_MIXER_CONFIG: its only field is `model_type`, a
 -- descriptive-only named airframe type used by the configurator's mixer
@@ -24,6 +27,8 @@ local servoCenter = requireModule("lib/msp_servo_center.lua")
 local servoConfig = requireModule("lib/msp_servo_config.lua")
 local servoOverride = requireModule("lib/msp_servo_override.lua")
 local status = requireModule("lib/msp_status.lua")
+local serialConfig = requireModule("lib/msp_serial_config.lua")
+local fbusMasterConfig = requireModule("lib/msp_fbus_master_config.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.servos.bus)@"
 local MSG_LOADING_TITLE = "@i18n(app.msg_loading)@"
@@ -32,8 +37,11 @@ local MSG_LOAD_ERROR = "@i18n(app.modules.ports.load_error_prefix)@"
 local BTN_OK = "@i18n(app.btn_ok)@"
 local BTN_CANCEL = "@i18n(app.btn_cancel)@"
 local BUS_OUTPUT_COUNT = 16
-local BUS_CONFIG_OFFSET = 18
+local BUS_OUTPUT_COUNT_FBUS24 = 24
+local BUS_CONFIG_OFFSET = 26
 local BUS_READ_BASE_INDEX = 8
+local NUMBERED_ICON_COUNT = 16
+local FUNCTION_MASK_FBUS_OUT = 524288
 local LIVE_SETTLE = 0.05
 
 local YES_NO = {
@@ -65,12 +73,23 @@ local function configWriteIndex(uiIndex, servoCount)
   return value
 end
 
-local function buildRows()
+local function buildRows(count)
   local rows = {}
-  for i = 1, BUS_OUTPUT_COUNT do
-    rows[i] = {uiIndex = i - 1, title = servoTitle(i), icon = "servo" .. i .. ".png"}
+  for i = 1, count do
+    local icon = i <= NUMBERED_ICON_COUNT and ("servo" .. i .. ".png") or "servos_bus.png"
+    rows[i] = {uiIndex = i - 1, title = servoTitle(i), icon = icon}
   end
   return rows
+end
+
+local function portsHaveFbusOut(ports)
+  for i = 1, #(ports or {}) do
+    local mask = ports[i].function_mask or 0
+    if math.floor(mask / FUNCTION_MASK_FBUS_OUT) % 2 == 1 then
+      return true
+    end
+  end
+  return false
 end
 
 local function flagsFor(reverse, geometry)
@@ -326,6 +345,7 @@ end
 local function open(opts)
   local disposed = false
   local pendingStatus = nil
+  local pendingBusCount = nil
   local pendingError = nil
   local dialog = nil
   local listState = {inOverride = false}
@@ -378,9 +398,9 @@ local function open(opts)
         form.addLine(MSG_LOAD_ERROR .. " STATUS")
         return
       end
-      if pendingStatus then
+      if pendingStatus and pendingBusCount then
         listState.servoCount = pendingStatus.servo_count
-        listState.rows = buildRows()
+        listState.rows = buildRows(pendingBusCount)
         closeDialog()
         opts.setWakeupHandler(nil)
         openList(opts, listState)
@@ -388,13 +408,39 @@ local function open(opts)
     end)
   end
 
+  local function onError()
+    if disposed then return end
+    pendingError = true
+  end
+
+  -- The serial ports and the F.Bus channel setting decide how many bus
+  -- servos to list: 24 only when an F.Bus output port sends the 24-channel
+  -- frame.
+  local hasFbusOut = nil
+  local fbusChannels = nil
+
+  local function resolveBusCount()
+    if hasFbusOut == nil or fbusChannels == nil then return end
+    pendingBusCount = (hasFbusOut and fbusChannels == fbusMasterConfig.CHANNELS_24) and
+      BUS_OUTPUT_COUNT_FBUS24 or BUS_OUTPUT_COUNT
+  end
+
   bus.publish("msp.request", status.buildReadMessage(function(data)
     if disposed then return end
     pendingStatus = data
-  end, function()
+  end, onError))
+
+  bus.publish("msp.request", serialConfig.buildReadMessage(function(data)
     if disposed then return end
-    pendingError = true
-  end))
+    hasFbusOut = portsHaveFbusOut(data.ports)
+    resolveBusCount()
+  end, onError))
+
+  bus.publish("msp.request", fbusMasterConfig.buildReadMessage(function(data)
+    if disposed then return end
+    fbusChannels = data.channels
+    resolveBusCount()
+  end, onError))
 end
 
 return {open = open}
