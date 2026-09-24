@@ -66,9 +66,23 @@ local FLIGHT_MODE_PRIORITY = {
   {bit = 2, file = "horizon.wav"},      -- HORIZON_MODE_BIT
   {bit = 1, file = "angle.wav"},        -- ANGLE_MODE_BIT
   {bit = 3, file = "trainer.wav"},      -- TRAINER_MODE_BIT
-  {bit = 14, file = "traditional.wav"}, -- TRADITIONAL_MODE_BIT
   {bit = 4, file = "althold.wav"},      -- ALTHOLD_MODE_BIT
 }
+
+-- Bits deliberately left out of FLIGHT_MODE_PRIORITY:
+-- * INFLIGHT (8) is the firmware's "are we flying" latch, not a pilot mode;
+--   it never appears in the table, so it can't change the spoken mode (it
+--   used to re-trigger a callout of the unchanged mode at takeoff/landing).
+-- * TRADITIONAL (14) layers on top of whatever mode is active, so under
+--   first-match-wins it was masked by Angle/Horizon/etc. It gets its own
+--   on/off edge callout in announceFlightMode() instead.
+-- * GPS_UNAVAILABLE (15) is telemetry-only (wingflight-firmware's
+--   TELEM_FLIGHT_MODE_GPS_UNAVAILABLE_BIT): the LOITER/RTH switch is on but
+--   the mode can't fly (disarmed, no fix/home). The firmware reports the
+--   requested mode's bit alongside it, so the table still picks the right
+--   name and "unavailable" is appended.
+local TRADITIONAL_MODE_BIT = 14
+local GPS_UNAVAILABLE_BIT = 15
 
 -- Arithmetic bit test, not native bitwise operators -- same convention as
 -- lib/mspcodec.lua (works unmodified regardless of the Lua version's
@@ -379,7 +393,27 @@ local function announceFlightMode()
   local value = tonumber(session.flightModeFlags)
   local last = tonumber(previous.flightModeFlags)
   if value == nil or last == nil or value == last then return end
-  playFlightMode(flightModeFile(value))
+
+  -- Only speak when what would be said actually changes, not on every flag
+  -- change (e.g. AutoTrim toggled underneath a higher-priority mode).
+  local file = flightModeFile(value)
+  local unavailable = flightModeHasBit(value, GPS_UNAVAILABLE_BIT)
+  local spoken = file ~= flightModeFile(last) or unavailable ~= flightModeHasBit(last, GPS_UNAVAILABLE_BIT)
+  if spoken then
+    playFlightMode(file)
+    if unavailable then playFlightMode("unavailable.wav") end
+  end
+
+  -- Traditional on says "Traditional"; off re-announces the mode now being
+  -- flown (unless the main mode changed at the same time, already spoken).
+  local traditional = flightModeHasBit(value, TRADITIONAL_MODE_BIT)
+  if traditional ~= flightModeHasBit(last, TRADITIONAL_MODE_BIT) then
+    if traditional then
+      playFlightMode("traditional.wav")
+    elseif not spoken then
+      playFlightMode(file)
+    end
+  end
 end
 
 -- Not armed-gated, same reasoning as announceFlightMode() -- a pilot
