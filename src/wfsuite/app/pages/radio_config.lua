@@ -49,8 +49,9 @@ local function open(opts)
   })
 
   fieldLayout.buildGroup(runtime, "@i18n(app.modules.radio_config.deadband)@", {
+    {title = "@i18n(app.modules.radio_config.roll_deadband)@", spec = {key = "rc_roll_deadband"}},
+    {title = "@i18n(app.modules.radio_config.pitch_deadband)@", spec = {key = "rc_pitch_deadband"}},
     {title = "@i18n(app.modules.radio_config.yaw_deadband)@", spec = {key = "rc_yaw_deadband"}},
-    {title = "@i18n(app.modules.radio_config.cyclic)@", spec = {key = "rc_deadband"}},
   })
 
   runtime:loadInitial()

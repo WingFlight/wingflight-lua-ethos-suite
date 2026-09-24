@@ -1895,12 +1895,19 @@
           "reverse_text": false,
           "max_length": 10
         },
-        "cyclic": {
-          "english": "Cyclic",
-          "translation": "周期",
+        "pitch_deadband": {
+          "english": "Pitch",
+          "translation": "俯仰",
           "needs_translation": false,
           "reverse_text": false,
-          "max_length": 6
+          "max_length": 5
+        },
+        "roll_deadband": {
+          "english": "Roll",
+          "translation": "横滚",
+          "needs_translation": false,
+          "reverse_text": false,
+          "max_length": 5
         },
         "yaw_deadband": {
           "english": "Yaw",

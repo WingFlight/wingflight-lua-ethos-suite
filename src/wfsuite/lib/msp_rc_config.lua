@@ -4,8 +4,9 @@
 --
 -- Wingflight MSP API 22.3 is this rebuild's floor, so the page exposes
 -- the full field set: stick center/deflection, min/max throttle, and
--- cyclic/yaw deadband. The old always-zero rc_arm_throttle placeholder
--- was dropped from the wire in 22.3.
+-- roll/pitch/yaw deadband. The old always-zero rc_arm_throttle placeholder
+-- was dropped from the wire in 22.3, and the old shared heli "cyclic"
+-- deadband was split into separate roll and pitch deadbands.
 
 if package.loaded["wfsuite.lib.msp_rc_config"] then
   return package.loaded["wfsuite.lib.msp_rc_config"]
@@ -24,7 +25,8 @@ local FIELDS = {
   {"rc_deflection", "U16"},
   {"rc_min_throttle", "U16"},
   {"rc_max_throttle", "U16"},
-  {"rc_deadband", "U8"},
+  {"rc_roll_deadband", "U8"},
+  {"rc_pitch_deadband", "U8"},
   {"rc_yaw_deadband", "U8"},
 }
 
@@ -33,7 +35,8 @@ local SIMULATOR_RESPONSE = {
   254, 1, -- rc_deflection
   242, 3, -- rc_min_throttle
   208, 7, -- rc_max_throttle
-  4,      -- rc_deadband
+  4,      -- rc_roll_deadband
+  4,      -- rc_pitch_deadband
   4,      -- rc_yaw_deadband
 }
 
@@ -42,8 +45,9 @@ local FIELD_META = {
   rc_deflection = {min = 200, max = 700, default = 510, suffix = "us"},
   rc_min_throttle = {min = 860, max = 1500, default = 1100, suffix = "us"},
   rc_max_throttle = {min = 1510, max = 2150, default = 1900, suffix = "us"},
-  rc_deadband = {min = 0, max = 100, default = 2, suffix = "us"},
-  rc_yaw_deadband = {min = 0, max = 100, default = 2, suffix = "us"},
+  rc_roll_deadband = {min = 0, max = 100, default = 5, suffix = "us"},
+  rc_pitch_deadband = {min = 0, max = 100, default = 5, suffix = "us"},
+  rc_yaw_deadband = {min = 0, max = 100, default = 5, suffix = "us"},
 }
 
 local msp_rc_config = {

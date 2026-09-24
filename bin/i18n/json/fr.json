@@ -1895,9 +1895,16 @@
           "max_length": 10,
           "reverse_text": false
         },
-        "cyclic": {
-          "english": "Cyclic",
-          "translation": "Cyclique",
+        "pitch_deadband": {
+          "english": "Pitch",
+          "translation": "Tangage",
+          "needs_translation": false,
+          "max_length": 7,
+          "reverse_text": false
+        },
+        "roll_deadband": {
+          "english": "Roll",
+          "translation": "Roulis",
           "needs_translation": false,
           "max_length": 6,
           "reverse_text": false

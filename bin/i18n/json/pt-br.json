@@ -1895,12 +1895,19 @@
           "reverse_text": false,
           "max_length": 10
         },
-        "cyclic": {
-          "english": "Cyclic",
-          "translation": "Cíclico",
+        "pitch_deadband": {
+          "english": "Pitch",
+          "translation": "Arfagem",
           "needs_translation": false,
           "reverse_text": false,
-          "max_length": 6
+          "max_length": 7
+        },
+        "roll_deadband": {
+          "english": "Roll",
+          "translation": "Incl",
+          "needs_translation": false,
+          "reverse_text": false,
+          "max_length": 5
         },
         "yaw_deadband": {
           "english": "Yaw",
