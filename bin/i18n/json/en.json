@@ -1730,11 +1730,17 @@
           "needs_translation": false,
           "max_length": 10
         },
-        "cyclic": {
-          "english": "Cyclic",
-          "translation": "Cyclic",
+        "pitch_deadband": {
+          "english": "Pitch",
+          "translation": "Pitch",
           "needs_translation": false,
-          "max_length": 6
+          "max_length": 5
+        },
+        "roll_deadband": {
+          "english": "Roll",
+          "translation": "Roll",
+          "needs_translation": false,
+          "max_length": 5
         },
         "yaw_deadband": {
           "english": "Yaw",

@@ -1,3 +1,7 @@
+# Unreleased
+
+Split Radio Config's shared Cyclic deadband into separate Roll and Pitch deadbands, alongside Yaw. Requires matching firmware (MSP_RC_CONFIG layout change).
+
 # 0.0.26
 
 Add Nav Throttle, Altitude Damp and Turn Coord. to the GPS Navigation page, matching the reworked 0.0.26 firmware GPS Loiter/RTH; firmware without them keeps working and ignores them.

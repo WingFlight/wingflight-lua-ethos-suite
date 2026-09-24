@@ -5952,12 +5952,6 @@
           "needs_translation": false,
           "translation": "Center"
         },
-        "cyclic": {
-          "english": "Cyclic",
-          "max_length": 6,
-          "needs_translation": false,
-          "translation": "Cyclic"
-        },
         "deadband": {
           "english": "Deadband",
           "max_length": 8,
@@ -5987,6 +5981,18 @@
           "max_length": 12,
           "needs_translation": false,
           "translation": "Radio Config"
+        },
+        "pitch_deadband": {
+          "english": "Pitch",
+          "max_length": 5,
+          "needs_translation": false,
+          "translation": "Pitch"
+        },
+        "roll_deadband": {
+          "english": "Roll",
+          "max_length": 5,
+          "needs_translation": false,
+          "translation": "Roll"
         },
         "stick": {
           "english": "Stick",

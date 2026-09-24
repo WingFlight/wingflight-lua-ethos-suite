@@ -1895,11 +1895,18 @@
           "translation": "סטייה",
           "reverse_text": true
         },
-        "cyclic": {
-          "english": "Cyclic",
-          "max_length": 6,
+        "pitch_deadband": {
+          "english": "Pitch",
+          "max_length": 5,
           "needs_translation": false,
-          "translation": "מַחזוֹרִי",
+          "translation": "פיץ'",
+          "reverse_text": true
+        },
+        "roll_deadband": {
+          "english": "Roll",
+          "max_length": 5,
+          "needs_translation": false,
+          "translation": "רול",
           "reverse_text": true
         },
         "yaw_deadband": {

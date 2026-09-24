@@ -6558,13 +6558,6 @@
           "reverse_text": false,
           "translation": "Centro"
         },
-        "cyclic": {
-          "english": "Cyclic",
-          "max_length": 6,
-          "needs_translation": false,
-          "reverse_text": false,
-          "translation": "Cíclico"
-        },
         "deadband": {
           "english": "Deadband",
           "max_length": 8,
@@ -6599,6 +6592,20 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Config Rádio"
+        },
+        "pitch_deadband": {
+          "english": "Pitch",
+          "max_length": 7,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Arfagem"
+        },
+        "roll_deadband": {
+          "english": "Roll",
+          "max_length": 5,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Incl"
         },
         "stick": {
           "english": "Stick",
