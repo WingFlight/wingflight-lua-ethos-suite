@@ -606,6 +606,12 @@
     "needs_translation": true
   },
   {
+    "file": "events/mode/unavailable.wav",
+    "english": "Unavailable",
+    "translation": null,
+    "needs_translation": true
+  },
+  {
     "file": "events/mode/failsafe.wav",
     "english": "Failsafe",
     "translation": "Failsafe",
