@@ -48,11 +48,15 @@ local function open(opts)
     {title = "@i18n(app.modules.radio_config.min_throttle)@", spec = {key = "rc_min_throttle"}},
   })
 
-  fieldLayout.buildGroup(runtime, "@i18n(app.modules.radio_config.deadband)@", {
-    {title = "@i18n(app.modules.radio_config.roll_deadband)@", spec = {key = "rc_roll_deadband"}},
-    {title = "@i18n(app.modules.radio_config.pitch_deadband)@", spec = {key = "rc_pitch_deadband"}},
-    {title = "@i18n(app.modules.radio_config.yaw_deadband)@", spec = {key = "rc_yaw_deadband"}},
-  })
+  fieldLayout.buildSingle(runtime,
+    "@i18n(app.modules.radio_config.roll_deadband)@ @i18n(app.modules.radio_config.deadband)@",
+    {key = "rc_roll_deadband"})
+  fieldLayout.buildSingle(runtime,
+    "@i18n(app.modules.radio_config.pitch_deadband)@ @i18n(app.modules.radio_config.deadband)@",
+    {key = "rc_pitch_deadband"})
+  fieldLayout.buildSingle(runtime,
+    "@i18n(app.modules.radio_config.yaw_deadband)@ @i18n(app.modules.radio_config.deadband)@",
+    {key = "rc_yaw_deadband"})
 
   runtime:loadInitial()
 end
