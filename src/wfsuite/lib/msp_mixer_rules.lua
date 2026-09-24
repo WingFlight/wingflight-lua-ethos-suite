@@ -54,14 +54,14 @@ local RULE_COUNT = 32
 -- logic condition, gates this rule -- Logic Conditions has no port in
 -- this suite, so condition is exposed as a bare index, see
 -- app/pages/mixer_rules.lua). `input`/`output` min/max are enum bounds
--- (27 and 31 entries respectively, 0-based) -- see that page's own
+-- (0-35 and 0-36 respectively) -- see that page's own
 -- INPUT_OPTIONS/OUTPUT_OPTIONS for the human-readable choice tables.
 -- `role` max is mixerRuleRole_e's MIXER_RULE_ROLE_COUNT-1
 -- (pg/mixer.h) -- 0=None, 1=Flap Compensation, 2=Differential Thrust Yaw.
 local FIELD_META = {
   oper = {min = 0, max = 3, default = 0},
-  input = {min = 0, max = 26, default = 0},
-  output = {min = 0, max = 30, default = 0},
+  input = {min = 0, max = 35, default = 0},
+  output = {min = 0, max = 36, default = 0},
   offset = {min = -2500, max = 2500, default = 0},
   weight = {min = -10000, max = 10000, default = 0},
   weightNeg = {min = -10000, max = 10000, default = 0},

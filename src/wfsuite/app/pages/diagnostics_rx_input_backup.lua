@@ -47,10 +47,11 @@ local PROVIDER_NAMES = {
 
 local REFRESH_INTERVAL_SECONDS = 0.3
 
--- RX_INPUT_BACKUP_MAX_CHANNEL (drivers/rx_input_backup.h) -- the channel row
+-- Up to 24 channels (a 24-channel F.Bus/F.Port2 backup; its two on/off
+-- channels 25-26 aren't shown) -- the channel row
 -- count is fixed at page-build time, so pre-build the maximum and only as
 -- many rows as the firmware actually reports get real values; the rest stay "-".
-local MAX_CHANNELS = 18
+local MAX_CHANNELS = 24
 
 local function open(opts)
   common.openReadOnlyPage(opts, PAGE_TITLE, function(ctx)

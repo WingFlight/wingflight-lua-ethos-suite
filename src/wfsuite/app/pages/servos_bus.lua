@@ -3,13 +3,12 @@
 -- BUS servos look almost identical to PWM in the UI, but the firmware
 -- indexes them differently. The original suite uses:
 --   read/center/override index = UI index + 8
---   config write index         = UI index + (servo_count - 18)
--- Keep those translations local and explicit here.
---
--- Does not query MSP_MIXER_CONFIG: its only field is `model_type`, a
--- descriptive-only named airframe type used by the configurator's mixer
--- view, with nothing here to relabel servos by -- every servo just gets
--- its plain index title.
+--   config write index         = UI index + (servo_count - 24)
+-- Keep those translations local and explicit here. The firmware has 24
+-- bus servos (BUS_SERVO_CHANNELS); the page lists as many as the
+-- configured SBUS/F.Bus output drives (MSP_MIXER_CONFIG's bus servo output
+-- count: sbus_out_channels / fbus_master_channels), 16 if it isn't
+-- reported.
 
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local bus = requireModule("lib/bus.lua")
@@ -24,6 +23,7 @@ local servoCenter = requireModule("lib/msp_servo_center.lua")
 local servoConfig = requireModule("lib/msp_servo_config.lua")
 local servoOverride = requireModule("lib/msp_servo_override.lua")
 local status = requireModule("lib/msp_status.lua")
+local mixerConfig = requireModule("lib/msp_mixer_config.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.servos.bus)@"
 local MSG_LOADING_TITLE = "@i18n(app.msg_loading)@"
@@ -31,8 +31,10 @@ local MSG_LOADING_BODY = "@i18n(app.msg_loading_from_fbl)@"
 local MSG_LOAD_ERROR = "@i18n(app.modules.ports.load_error_prefix)@"
 local BTN_OK = "@i18n(app.btn_ok)@"
 local BTN_CANCEL = "@i18n(app.btn_cancel)@"
-local BUS_OUTPUT_COUNT = 16
-local BUS_CONFIG_OFFSET = 18
+local BUS_OUTPUT_COUNT_DEFAULT = 16
+local BUS_OUTPUT_COUNT_MAX = 24
+local NUMBERED_ICON_COUNT = 16
+local BUS_CONFIG_OFFSET = 24
 local BUS_READ_BASE_INDEX = 8
 local LIVE_SETTLE = 0.05
 
@@ -65,10 +67,11 @@ local function configWriteIndex(uiIndex, servoCount)
   return value
 end
 
-local function buildRows()
+local function buildRows(count)
   local rows = {}
-  for i = 1, BUS_OUTPUT_COUNT do
-    rows[i] = {uiIndex = i - 1, title = servoTitle(i), icon = "servo" .. i .. ".png"}
+  for i = 1, count do
+    local icon = i <= NUMBERED_ICON_COUNT and ("servo" .. i .. ".png") or "servos_bus.png"
+    rows[i] = {uiIndex = i - 1, title = servoTitle(i), icon = icon}
   end
   return rows
 end
@@ -326,6 +329,7 @@ end
 local function open(opts)
   local disposed = false
   local pendingStatus = nil
+  local pendingBusCount = nil
   local pendingError = nil
   local dialog = nil
   local listState = {inOverride = false}
@@ -378,9 +382,9 @@ local function open(opts)
         form.addLine(MSG_LOAD_ERROR .. " STATUS")
         return
       end
-      if pendingStatus then
+      if pendingStatus and pendingBusCount then
         listState.servoCount = pendingStatus.servo_count
-        listState.rows = buildRows()
+        listState.rows = buildRows(pendingBusCount)
         closeDialog()
         opts.setWakeupHandler(nil)
         openList(opts, listState)
@@ -391,6 +395,16 @@ local function open(opts)
   bus.publish("msp.request", status.buildReadMessage(function(data)
     if disposed then return end
     pendingStatus = data
+  end, function()
+    if disposed then return end
+    pendingError = true
+  end))
+
+  bus.publish("msp.request", mixerConfig.buildReadMessage(function(data)
+    if disposed then return end
+    local count = data.bus_servo_output_count
+    if count == 0 then count = BUS_OUTPUT_COUNT_DEFAULT end
+    pendingBusCount = math.min(count, BUS_OUTPUT_COUNT_MAX)
   end, function()
     if disposed then return end
     pendingError = true
