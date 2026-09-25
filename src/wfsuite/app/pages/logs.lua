@@ -356,7 +356,7 @@ local function open(opts)
         col = 0
       end
       local button = form.addButton(nil, {x = x, y = y, w = tileW, h = tileH}, {
-        text = entry.title,
+        text = tileGrid.fitLabel(entry.title, tileW, tileFont),
         icon = icon,
         options = tileFont,
         press = function() press(entry) end,

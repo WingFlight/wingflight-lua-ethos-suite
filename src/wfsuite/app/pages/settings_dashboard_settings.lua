@@ -177,7 +177,7 @@ local function open(opts)
         iconCache[theme.icon] = icon
       end
       buttons[i] = form.addButton(nil, {x = x, y = y, w = tileW, h = tileH}, {
-        text = theme.label,
+        text = tileGrid.fitLabel(theme.label, tileW, tileFont),
         icon = icon or nil,
         options = tileFont,
         press = function()

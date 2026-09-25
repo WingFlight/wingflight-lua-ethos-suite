@@ -301,7 +301,7 @@ openList = function(opts, listState)
 
   for i, row in ipairs(rows) do
     buttons[i] = form.addButton(nil, {x = x, y = y, w = tileW, h = tileH}, {
-      text = row.title,
+      text = tileGrid.fitLabel(row.title, tileW, tileFont),
       icon = lcd.loadMask("app/gfx/" .. row.icon),
       options = tileFont,
       press = function()
