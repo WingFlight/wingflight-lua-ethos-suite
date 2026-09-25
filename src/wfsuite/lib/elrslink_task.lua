@@ -95,12 +95,14 @@ local STD_TLM_RATIO_BY_PACKET_RATE = {
 }
 
 local taskComplete = false
+local operationId = 0
 local probeStartedAt = 0
 local nextActionAt = 0
 local state = "idle"
 
 local sensor = nil
-local deviceId = CRSF_ADDRESS_CRSF_TRANSMITTER
+local deviceId = nil
+local isElrsVerified = false
 local fieldCount = 0
 local currentField = 1
 local currentChunk = 0
@@ -159,6 +161,7 @@ local T = {
   unavailableSimulation = "@i18n(app.modules.elrs_telemetry.status_unavailable_simulation)@",
   connectFirst = "@i18n(app.modules.elrs_telemetry.status_connect_first)@",
   requiresCrsf = "@i18n(app.modules.elrs_telemetry.status_requires_crsf)@",
+  statusNotElrs = "@i18n(app.modules.elrs_telemetry.status_not_elrs)@",
   unavailableArmed = "@i18n(app.modules.elrs_telemetry.status_unavailable_armed)@",
   probeRequested = "@i18n(app.modules.elrs_telemetry.status_probe_requested)@",
   syncRequested = "@i18n(app.modules.elrs_telemetry.status_sync_requested)@",
@@ -169,9 +172,22 @@ local T = {
 local session = {connected = false, isArmed = nil, mspTransport = nil}
 bus.subscribe("session.update", function(snapshot)
   local wasConnected = session.connected
+  local wasArmed = session.isArmed
   session.connected = snapshot and snapshot.connected == true
   session.isArmed = snapshot and snapshot.isArmed
   session.mspTransport = snapshot and snapshot.mspTransport
+  if (session.isArmed == true and wasArmed ~= true) or (wasConnected and not session.connected) then
+    -- Invalidate asynchronous continuations, including an EEPROM save that
+    -- would otherwise follow an already-sent telemetry-config write.
+    operationId = operationId + 1
+    if not taskComplete then
+      taskComplete = true
+      state = "done"
+      statusText = session.isArmed == true and T.unavailableArmed or T.requiresActiveLink
+      for i = pendingWriteCount, 1, -1 do pendingWrites[i] = nil end
+      pendingWriteCount, pendingWriteIndex = 0, 1
+    end
+  end
 
   -- A disconnect (or a fresh connect right after one -- same edge) must
   -- not leave a previous aircraft's FC telemetry config cached; see
@@ -469,6 +485,13 @@ end
 local function syncFcToElrs(fc)
   clearPendingWrites()
 
+  if not isElrsVerified or not deviceId then
+    log("Cannot sync to ELRS: module is not verified as ExpressLRS")
+    setStatus(T.statusNotElrs)
+    completeTask()
+    return
+  end
+
   local ratioTargetIndex, ratioTargetLabel = findRatioTarget(ratioField, fc.linkRatio)
   local rateTargetIndex, rateTargetLabel = findRateTarget(rateField, fc.linkRate)
 
@@ -517,6 +540,13 @@ local function syncFcToElrs(fc)
 end
 
 local function syncElrsToFc(fc, moduleRate, moduleRateText, moduleRatioText, ratioKind, effectiveRatio)
+  if not isElrsVerified then
+    log("Cannot sync from ELRS: module is not verified as ExpressLRS")
+    setStatus(T.statusNotElrs)
+    completeTask()
+    return
+  end
+
   if type(moduleRate) ~= "number" then
     log("ELRS sync could not determine a numeric packet rate from " .. tostring(moduleRateText or "?"))
     completeTask()
@@ -548,22 +578,32 @@ local function syncElrsToFc(fc, moduleRate, moduleRateText, moduleRatioText, rat
   log("Syncing Wingflight telemetry to match ELRS: rate=" .. tostring(moduleRateText) .. ", ratio=1:" .. tostring(effectiveRatio))
   setStatus(T.writingFc)
 
+  local writeOperation = operationId
+  state = "fc_write"
+  local function writeIsActive()
+    return writeOperation == operationId and not taskComplete and session.connected
+      and session.isArmed ~= true and isElrsVerified
+  end
   bus.publish("msp.request", telemetryConfig.buildWriteMessage(fcConfigData, function()
+    if not writeIsActive() then return end
     fc.linkRate = moduleRate
     fc.linkRatio = effectiveRatio
     log("Wingflight telemetry now matches ELRS: mode=" .. telemetryModeLabel(fc.mode) .. ", rate=" .. tostring(moduleRate) .. ", ratio=1:" .. tostring(effectiveRatio))
     setStatus(T.savingFc)
 
     bus.publish("msp.request", eeprom.buildWriteMessage(function()
+      if not writeIsActive() then return end
       log("Saved Wingflight telemetry sync to EEPROM")
       setStatus(T.fcUpdated)
       completeTask()
     end, function()
+      if not writeIsActive() then return end
       log("EEPROM write failed after ELRS telemetry sync")
       setStatus(T.fcSaveFailed)
       completeTask()
     end))
   end, function(reason)
+    if not writeIsActive() then return end
     log("Failed to sync Wingflight telemetry from ELRS (" .. tostring(reason) .. ")")
     setStatus(T.fcWriteFailed)
     completeTask()
@@ -634,12 +674,14 @@ end
 -- only invalidated on an actual disconnect (see the session.update
 -- subscriber above).
 local function resetState()
+  operationId = operationId + 1
   taskComplete = false
   probeStartedAt = 0
   nextActionAt = 0
   state = "idle"
   sensor = nil
-  deviceId = CRSF_ADDRESS_CRSF_TRANSMITTER
+  deviceId = nil
+  isElrsVerified = false
   fieldCount = 0
   currentField = 1
   currentChunk = 0
@@ -685,12 +727,30 @@ function elrslink.refreshFcConfig()
 end
 
 local function handleDeviceInfo(data)
+  if state ~= "ping" then return end
   if data[2] ~= CRSF_ADDRESS_CRSF_TRANSMITTER then return end
 
-  local _, offset = readString(data, 3)
+  local deviceName, offset = readString(data, 3)
+  if not data[offset + 12] then return end -- Incomplete device-info header.
   local serial = readU32Be(data, offset)
-  if serial ~= ELRS_SERIAL_ID then return end
+  local isElrs = (serial == ELRS_SERIAL_ID)
+  if not isElrs and deviceName then
+    local lowerName = string_lower(deviceName)
+    if string_find(lowerName, "expresslrs", 1, true) or string_find(lowerName, "elrs", 1, true) then
+      isElrs = true
+    end
+  end
 
+  if not isElrs then
+    log("Non-ExpressLRS device responded at 0x" .. string.format("%02X", data[2] or 0) .. ": " .. tostring(deviceName or "unknown") .. " (serial=" .. string.format("0x%08X", serial or 0) .. ")")
+    isElrsVerified = false
+    deviceId = nil
+    setStatus(T.statusNotElrs)
+    completeTask()
+    return
+  end
+
+  isElrsVerified = true
   deviceId = data[2]
   fieldCount = data[offset + 12] or 0
   currentField = 1
@@ -705,7 +765,7 @@ local function handleDeviceInfo(data)
 end
 
 local function handleParameterEntry(data)
-  if state ~= "read" then return end
+  if state ~= "read" or not isElrsVerified or not deviceId then return end
   if data[2] ~= deviceId or data[3] ~= currentField then
     currentChunk = 0
     expectedChunksRemain = -1
@@ -759,6 +819,7 @@ local function processIncomingFrames()
     elseif command == CRSF_FRAMETYPE_PARAMETER_SETTINGS_ENTRY then
       handleParameterEntry(data)
     end
+    if taskComplete then return end
   end
 end
 
@@ -766,6 +827,14 @@ function elrslink.wakeup()
   local now = os_clock()
 
   if taskComplete then return end
+
+  if session.isArmed == true then
+    log("ELRS link task aborted: system is armed")
+    setStatus(T.unavailableArmed)
+    clearPendingWrites()
+    completeTask()
+    return
+  end
 
   if shouldSkip() then
     setStatus(T.requiresActiveLink)
@@ -775,13 +844,16 @@ function elrslink.wakeup()
 
   if state == "idle" then
     setStatus(T.waitingFcConfig)
+    local probeOperation = operationId
     ensureFcConfig(function()
+      if probeOperation ~= operationId or taskComplete then return end
       probeStartedAt = os_clock()
       state = "ping"
       nextActionAt = 0
       log("Starting ELRS link probe")
       setStatus(T.pingingModule)
     end, function()
+      if probeOperation ~= operationId or taskComplete then return end
       log("Skipping ELRS link probe because Wingflight telemetry config could not be read")
       setStatus(T.fcConfigNotReady)
       taskComplete = true
@@ -805,6 +877,14 @@ function elrslink.wakeup()
     log("ELRS link probe timed out while reading module parameters")
     setStatus(T.readTimeout)
     finalize()
+    return
+  end
+
+  if (state == "read" or state == "write") and (not isElrsVerified or not deviceId) then
+    log("ELRS link task aborted: module is not verified as ExpressLRS")
+    setStatus(T.statusNotElrs)
+    clearPendingWrites()
+    completeTask()
     return
   end
 
@@ -937,6 +1017,10 @@ end
 -- completed yet.
 function elrslink.getLinkSummary()
   return linkConfig
+end
+
+function elrslink.isVerified()
+  return isElrsVerified
 end
 
 elrslink.MODE_PROBE = SYNC_MODE_OFF

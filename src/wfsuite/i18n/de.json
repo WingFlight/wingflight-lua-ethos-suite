@@ -1674,6 +1674,27 @@
         }
       },
       "elrs_telemetry": {
+        "confirm_prompt": {
+          "english": "Apply packet rate and telemetry ratio changes to the RF module / Flight Controller?",
+          "translation": "Paketrate und Telemetrieverhältnis am HF-Modul / Flight Controller ändern?",
+          "needs_translation": false,
+          "reverse_text": false,
+          "max_length": 83
+        },
+        "confirm_title": {
+          "english": "Confirm ELRS Link Sync",
+          "translation": "ELRS Link-Sync bestätigen",
+          "needs_translation": false,
+          "reverse_text": false,
+          "max_length": 22
+        },
+        "status_not_elrs": {
+          "english": "Connected module is not ExpressLRS",
+          "translation": "Verbundenes Modul ist kein ExpressLRS",
+          "needs_translation": false,
+          "reverse_text": false,
+          "max_length": 34
+        },
         "action": {
           "english": "Action",
           "max_length": 6,
