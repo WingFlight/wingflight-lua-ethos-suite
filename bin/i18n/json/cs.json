@@ -7,6 +7,20 @@
     "reverse_text": false
   },
   "app": {
+    "msg_load_failed_title": {
+      "english": "Loading failed",
+      "translation": "Loading failed",
+      "needs_translation": true,
+      "reverse_text": false,
+      "max_length": 14
+    },
+    "msg_load_failed_body": {
+      "english": "Data could not be read from the flight controller. Please reload.",
+      "translation": "Data could not be read from the flight controller. Please reload.",
+      "needs_translation": true,
+      "reverse_text": false,
+      "max_length": 65
+    },
     "navigation_menu": {
       "english": "BACK",
       "translation": "ZPET",
