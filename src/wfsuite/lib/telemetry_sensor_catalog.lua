@@ -2,10 +2,8 @@
 --
 -- Sensor IDs, labels, groups, and aggregate/child exclusions are copied
 -- from rotorflight-lua-ethos-suite's app/modules/telemetry/telemetry.lua.
--- DEFAULT_IDS comes from that suite's telemetry sensor metadata
--- (tasks/scheduler/telemetry/sources/sensor_table.lua): every mandatory
--- sensor with a set_telemetry_sensors mapping, plus the explicitly
--- default fuel sensor.
+-- DEFAULT_IDS is the sensors this suite reads, and matches
+-- wingflight-firmware's own telemetry_sensors default.
 
 if package.loaded["wfsuite.lib.telemetry_sensor_catalog"] then
   return package.loaded["wfsuite.lib.telemetry_sensor_catalog"]
@@ -150,7 +148,9 @@ local catalog = {
     [64] = {65, 66, 67},
     [68] = {69, 70, 71},
   },
-  DEFAULT_IDS = {120, 3, 60, 4, 23, 5, 99, 121, 15, 91, 43, 6},
+  -- Same list as wingflight-firmware's telemetry_sensors default
+  -- (src/main/pg/telemetry.c) -- keep the two in sync.
+  DEFAULT_IDS = {3, 4, 5, 6, 15, 43, 50, 52, 58, 59, 60, 89, 91, 99, 120, 121},
 }
 
 package.loaded["wfsuite.lib.telemetry_sensor_catalog"] = catalog
