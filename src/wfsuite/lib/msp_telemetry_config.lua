@@ -35,12 +35,12 @@ local HEADER_BYTES = 8 -- see wire layout above
 
 -- Fixture reply used automatically in the Ethos simulator (see
 -- tasks/msp/queue.lua): near-zero header (unused, see above) plus a handful
--- of non-zero slots (95/96/97 -> PID/Rate/Battery profile, per
+-- of non-zero slots (120/121 -> System Status/Config, per
 -- lib/frsky_sid_lookup.lua) so the simulator exercises the create/rename
 -- path without claiming to mirror any particular real setup.
 local SIMULATOR_RESPONSE = {
   0, 1, 0, 0, 0, 0, 0, 0,
-  95, 96, 97,
+  120, 121,
 }
 for i = #SIMULATOR_RESPONSE + 1, HEADER_BYTES + SLOT_COUNT do
   SIMULATOR_RESPONSE[i] = 0

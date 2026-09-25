@@ -215,8 +215,8 @@ function PageRuntime.new(config)
   self.initialData = config.initialData
   -- Kept in sync from every "session.update" (see onSessionUpdate()
   -- below) purely for rebootAfterSave's own safety gate -- nil until the
-  -- first update arrives (or if the "armflags" telemetry sensor has never
-  -- resolved), treated the same as "not armed" by that gate, matching
+  -- first update arrives (or if the "system_status" telemetry sensor has
+  -- never resolved), treated the same as "not armed" by that gate, matching
   -- the original's own resolveArmedState() fallback.
   self.isArmed = nil
 

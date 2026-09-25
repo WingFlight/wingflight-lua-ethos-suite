@@ -45,6 +45,7 @@ local DiySensor = requireModule("lib/diy_sensor.lua")
 local telemetryConfig = requireModule("lib/msp_telemetry_config.lua")
 local flightTimer = requireModule("tasks/flight_timer.lua")
 local rxMapApi = requireModule("lib/msp_rx_map.lua")
+local systemStatusCodec = requireModule("lib/system_status.lua")
 
 local TELEMETRY_VALUE_INTERVAL = 0.5
 local PROFILE_INTERVAL = 0.5
@@ -105,8 +106,14 @@ local session = {
                         -- above -- still fetched in wakeup(), see below.
   flightModeFlags = nil, -- live telemetry sensor value ("flight_mode"), a bitmask -- see
                           -- tasks/audio_events.lua's announceFlightMode() for the bit->mode mapping.
-  gpsFixType = nil, -- live telemetry sensor value ("gps_fix_type"): 0 = no fix, 1 = fix,
-                     -- 2 = fix + home captured -- see tasks/audio_events.lua's announceGpsFix().
+  -- Decoded "system_status" / "system_config" sensors (lib/system_status.lua).
+  -- The fields below them (gpsFixType, navBlocked, isArmed, the profile
+  -- numbers) are unpacked from these for existing readers.
+  systemStatus = nil,
+  systemConfig = nil,
+  gpsFixType = nil, -- 0 = no fix, 1 = fix, 2 = fix + home captured -- see
+                     -- tasks/audio_events.lua's announceGpsFix().
+  navBlocked = nil, -- lib/system_status.lua NAV_BLOCKED: LOITER/RTH switched on but can't fly
   mspTransport = nil,
   telemetrySlots = nil, -- 40-entry S.Port sensor-slot array, see lib/msp_telemetry_config.lua
   pidProfile = nil,
@@ -127,12 +134,9 @@ local session = {
   bblFlags = nil,
   bblSize = nil,
   bblUsed = nil,
-  -- Arm state, read from the FC's own "armflags" telemetry sensor -- bit
-  -- 0 (ARMED, firmware src/main/fc/runtime_config.h) is the only bit that
-  -- reflects current arm state, since bits 1/2 accumulate over a session
-  -- (e.g. PREARM users see 5, then 7 -- both still armed). Nil (sensor
-  -- not broadcasting yet) leaves isArmed at its last known value rather
-  -- than guessing. The one current consumer is app/pages/configuration.lua's
+  -- Arm state, the ARMED bit of the FC's "system_status" telemetry sensor.
+  -- Nil (sensor not broadcasting yet) leaves isArmed at its last known value
+  -- rather than guessing. The one current consumer is app/pages/configuration.lua's
   -- save flow, which must not trigger MSP_REBOOT while the aircraft could
   -- be armed -- see lib/msp_reboot.lua's own comment for why this is the
   -- only safety gate on that command (firmware's own MSP_REBOOT handler
@@ -357,7 +361,10 @@ local function flush()
     governorMode = session.governorMode,
     governorState = session.governorState,
     flightModeFlags = session.flightModeFlags,
+    systemStatus = systemStatusCodec.copy(session.systemStatus),
+    systemConfig = systemStatusCodec.copy(session.systemConfig),
     gpsFixType = session.gpsFixType,
+    navBlocked = session.navBlocked,
     mspTransport = session.mspTransport,
     pidProfile = session.pidProfile,
     rateProfile = session.rateProfile,
@@ -724,7 +731,10 @@ local function setConnected(value, mspQueue, protocol)
     session.governorState = nil
     session.rxMap = nil
     session.flightModeFlags = nil
+    session.systemStatus = nil
+    session.systemConfig = nil
     session.gpsFixType = nil
+    session.navBlocked = nil
     session.telemetrySlots = nil
     session.pidProfile = nil
     session.rateProfile = nil
@@ -810,56 +820,26 @@ local function updateRfStatusTelemetry(protocol)
   if changed then publish() end
 end
 
--- Mirrors the original suite's app/lib/utils.lua getCurrentProfile()/
--- getCurrentRateProfile()/getCurrentBatteryType(): read straight off the
--- FC's own PID/rate/battery-profile telemetry sensor (lib/frsky_sensors.lua
--- labels the native S.Port broadcast; tasks/elrs_sensors.lua's own DIY
--- sensor serves the same appId on CRSF) -- not an MSP poll. Published so
+-- PID/rate/battery/TV profile numbers, unpacked from the FC's "system_config"
+-- telemetry sensor (lib/system_status.lua) -- not an MSP poll. Published so
 -- app/pages/pids.lua (or any future page) can react to a profile switch
--- without touching tasks/ directly.
+-- without touching tasks/ directly. A missing reading keeps the last known
+-- values rather than blanking them, same as lib/telemetry_sensors.lua's own
+-- miss-retry cache.
 local function updateProfiles(protocol)
   if not telemetrySensors then return end
-  local pidProfile = telemetrySensors.getValue(protocol, "pid_profile")
-  if pidProfile ~= session.pidProfile then
-    session.pidProfile = pidProfile
-    publish()
-  end
+  local config = systemStatusCodec.decodeConfig(telemetrySensors.getValue(protocol, "system_config"))
+  if config and (session.systemConfig == nil or config.raw ~= session.systemConfig.raw) then
+    session.systemConfig = config
+    session.pidProfile = config.pidProfile
+    session.rateProfile = config.rateProfile
+    session.tvProfile = config.tvProfile
 
-  local rateProfile = telemetrySensors.getValue(protocol, "rate_profile")
-  if rateProfile ~= session.rateProfile then
-    session.rateProfile = rateProfile
-    publish()
-  end
-
-  local tvProfile = telemetrySensors.getValue(protocol, "tv_profile")
-  if tvProfile ~= session.tvProfile then
-    session.tvProfile = tvProfile
-    publish()
-  end
-
-  local batteryProfile = normalizeBatteryProfile(telemetrySensors.getValue(protocol, "battery_profile"))
-  if batteryProfile ~= session.batteryProfile then
-    session.batteryProfile = batteryProfile
-    if applyActiveProfileCells(session.batteryConfig, batteryProfile) then localSmartFuel:reset() end
-    publish()
-  end
-
-  -- Bit 0 (ARMED, firmware src/main/fc/runtime_config.h) is the only bit
-  -- that reflects current arm state -- bits 1 (WAS_EVER_ARMED) and 2
-  -- (WAS_ARMED_WITH_PREARM) are historical and accumulate over a session,
-  -- so a whole-byte whitelist (armFlags == 1 or 3) stops matching once
-  -- either has been set (e.g. PREARM users see 5, then 7 -- both still
-  -- armed). When the sensor hasn't reported yet (nil), session.isArmed
-  -- keeps its last known value rather than guessing at one, same "don't
-  -- overwrite a real reading with a guess" reasoning
-  -- lib/telemetry_sensors.lua's own miss-retry cache already uses.
-  local armFlags = telemetrySensors.getValue(protocol, "armflags")
-  local isArmed
-  if armFlags ~= nil then
-    isArmed = (math.floor(armFlags) & 1) == 1
-  end
-  if isArmed ~= nil and isArmed ~= session.isArmed then
-    session.isArmed = isArmed
+    local batteryProfile = normalizeBatteryProfile(config.batteryProfile)
+    if batteryProfile ~= session.batteryProfile then
+      session.batteryProfile = batteryProfile
+      if applyActiveProfileCells(session.batteryConfig, batteryProfile) then localSmartFuel:reset() end
+    end
     publish()
   end
 
@@ -941,13 +921,22 @@ local function updateFlightMode(protocol)
   end
 end
 
-local function updateGpsFixType(protocol)
+-- Live state from the FC's "system_status" telemetry sensor
+-- (lib/system_status.lua). isArmed, gpsFixType and navBlocked are unpacked
+-- for existing readers. A missing reading keeps the last known state rather
+-- than guessing -- notably isArmed, which app/pages/configuration.lua's save
+-- flow relies on to never send MSP_REBOOT while the aircraft could be armed.
+local function updateSystemStatus(protocol)
   if not telemetrySensors then return end
-  local gpsFixType = telemetrySensors.getValue(protocol, "gps_fix_type")
-  if gpsFixType ~= session.gpsFixType then
-    session.gpsFixType = gpsFixType
-    publish()
-  end
+  local status = systemStatusCodec.decodeStatus(telemetrySensors.getValue(protocol, "system_status"))
+  if status == nil then return end
+  if session.systemStatus ~= nil and status.raw == session.systemStatus.raw then return end
+
+  session.systemStatus = status
+  session.isArmed = status.armed
+  session.gpsFixType = status.gpsFix
+  session.navBlocked = status.navBlocked
+  publish()
 end
 
 local function updateFlightTimer(now)
@@ -1173,7 +1162,7 @@ local function wakeup(mspQueue, protocol, transport, simSensors)
       updateProfiles(sensorProtocol)
       updateGovernor(sensorProtocol)
       updateFlightMode(sensorProtocol)
-      updateGpsFixType(sensorProtocol)
+      updateSystemStatus(sensorProtocol)
     end
 
     if shouldRunScheduled("adjustment", ADJUSTMENT_INTERVAL, now) then

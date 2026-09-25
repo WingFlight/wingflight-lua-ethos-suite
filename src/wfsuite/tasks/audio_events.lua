@@ -76,13 +76,17 @@ local FLIGHT_MODE_PRIORITY = {
 -- * TRADITIONAL (14) layers on top of whatever mode is active, so under
 --   first-match-wins it was masked by Angle/Horizon/etc. It gets its own
 --   on/off edge callout in announceFlightMode() instead.
--- * GPS_UNAVAILABLE (15) is telemetry-only (wingflight-firmware's
---   TELEM_FLIGHT_MODE_GPS_UNAVAILABLE_BIT): the LOITER/RTH switch is on but
---   the mode can't fly (disarmed, no fix/home). The firmware reports the
---   requested mode's bit alongside it, so the table still picks the right
---   name and "unavailable" is appended.
+--
+-- A LOITER/RTH switch that is on but can't fly (disarmed, no fix/home) never
+-- sets its flight-mode bit. system_status reports it instead
+-- (session.navBlocked, see lib/system_status.lua); effectiveFlightMode()
+-- folds it back in as the requested mode's bit so the table still picks the
+-- right name, and "unavailable" is appended.
 local TRADITIONAL_MODE_BIT = 14
-local GPS_UNAVAILABLE_BIT = 15
+local NAV_BLOCKED_MODE_BIT = {
+  [1] = 12, -- NAV_BLOCKED.LOITER -> LOITER_MODE_BIT
+  [2] = 13, -- NAV_BLOCKED.RTH -> RTH_MODE_BIT
+}
 
 -- Arithmetic bit test, not native bitwise operators -- same convention as
 -- lib/mspcodec.lua (works unmodified regardless of the Lua version's
@@ -98,6 +102,13 @@ local function flightModeFile(value)
     if flightModeHasBit(value, m.bit) then return m.file end
   end
   return "normal.wav"
+end
+
+local function effectiveFlightMode(flags, navBlocked)
+  local value = math.floor(flags)
+  local bit = NAV_BLOCKED_MODE_BIT[navBlocked]
+  if bit and not flightModeHasBit(value, bit) then value = value + 2 ^ bit end
+  return value
 end
 
 local SMARTFUEL_THRESHOLDS = {
@@ -120,6 +131,7 @@ local AUDIO_SESSION_KEYS = {
   "governorMode",
   "governorState",
   "flightModeFlags",
+  "navBlocked",
   "gpsFixType",
   "voltage",
   "batteryConfig",
@@ -392,13 +404,18 @@ local function announceFlightMode()
 
   local value = tonumber(session.flightModeFlags)
   local last = tonumber(previous.flightModeFlags)
-  if value == nil or last == nil or value == last then return end
+  if value == nil or last == nil then return end
+  local blocked = tonumber(session.navBlocked) or 0
+  local lastBlocked = tonumber(previous.navBlocked) or 0
+  if value == last and blocked == lastBlocked then return end
+  value = effectiveFlightMode(value, blocked)
+  last = effectiveFlightMode(last, lastBlocked)
 
   -- Only speak when what would be said actually changes, not on every flag
   -- change (e.g. AutoTrim toggled underneath a higher-priority mode).
   local file = flightModeFile(value)
-  local unavailable = flightModeHasBit(value, GPS_UNAVAILABLE_BIT)
-  local spoken = file ~= flightModeFile(last) or unavailable ~= flightModeHasBit(last, GPS_UNAVAILABLE_BIT)
+  local unavailable = blocked ~= 0
+  local spoken = file ~= flightModeFile(last) or unavailable ~= (lastBlocked ~= 0)
   if spoken then
     playFlightMode(file)
     if unavailable then playFlightMode("unavailable.wav") end
@@ -733,6 +750,7 @@ local function rememberCurrent()
   previous.batteryProfile = session.batteryProfile
   previous.governorState = session.governorState
   previous.flightModeFlags = session.flightModeFlags
+  previous.navBlocked = session.navBlocked
   previous.gpsFixType = session.gpsFixType
   previous.adjFunction = session.adjFunction
   previous.adjValue = session.adjValue

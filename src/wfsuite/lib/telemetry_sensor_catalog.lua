@@ -83,14 +83,7 @@ local SENSOR_LIST = {
   [87] = {name = "@i18n(telemetry.sensor_rt_load)@", group = "system"},
   [88] = {name = "@i18n(telemetry.sensor_model_id)@", group = "status"},
   [89] = {name = "@i18n(telemetry.sensor_flight_mode)@", group = "status"},
-  [90] = {name = "@i18n(telemetry.sensor_arming_flags)@", group = "status"},
   [91] = {name = "@i18n(telemetry.sensor_arming_disable)@", group = "status"},
-  [92] = {name = "@i18n(telemetry.sensor_rescue)@", group = "status"},
-  [93] = {name = "@i18n(telemetry.sensor_governor)@", group = "status"},
-  [95] = {name = "@i18n(telemetry.sensor_pid_profile)@", group = "profiles"},
-  [96] = {name = "@i18n(telemetry.sensor_rate_profile)@", group = "profiles"},
-  [97] = {name = "@i18n(telemetry.sensor_battery_profile)@", group = "profiles"},
-  [98] = {name = "@i18n(telemetry.sensor_led_profile)@", group = "profiles"},
   [99] = {name = "@i18n(telemetry.sensor_adj)@", group = "status"},
   [100] = {name = "@i18n(telemetry.sensor_dbg0)@", group = "debug"},
   [101] = {name = "@i18n(telemetry.sensor_dbg1)@", group = "debug"},
@@ -100,8 +93,11 @@ local SENSOR_LIST = {
   [105] = {name = "@i18n(telemetry.sensor_dbg5)@", group = "debug"},
   [106] = {name = "@i18n(telemetry.sensor_dbg6)@", group = "debug"},
   [107] = {name = "@i18n(telemetry.sensor_dbg7)@", group = "debug"},
-  [118] = {name = "@i18n(telemetry.sensor_tv_profile)@", group = "profiles"},
-  [119] = {name = "@i18n(telemetry.sensor_gps_fix_type)@", group = "gps"},
+  -- Packed status words (lib/system_status.lua). They replace the old arming
+  -- flags (90), PID/rate/battery/LED/TV profile (95-98, 118) and GPS fix
+  -- (119) sensors, which wingflight-firmware no longer sends.
+  [120] = {name = "@i18n(telemetry.sensor_system_status)@", group = "status"},
+  [121] = {name = "@i18n(telemetry.sensor_system_config)@", group = "status"},
 }
 
 local GROUP_TITLE = {
@@ -154,7 +150,7 @@ local catalog = {
     [64] = {65, 66, 67},
     [68] = {69, 70, 71},
   },
-  DEFAULT_IDS = {90, 3, 60, 4, 23, 5, 93, 99, 95, 96, 15, 91, 43, 97, 6},
+  DEFAULT_IDS = {120, 3, 60, 4, 23, 5, 99, 121, 15, 91, 43, 6},
 }
 
 package.loaded["wfsuite.lib.telemetry_sensor_catalog"] = catalog

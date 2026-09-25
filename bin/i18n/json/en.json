@@ -7776,6 +7776,18 @@
       "needs_translation": false,
       "translation": "SYS Load"
     },
+    "sensor_system_config": {
+      "english": "System Config",
+      "max_length": 13,
+      "needs_translation": false,
+      "translation": "System Config"
+    },
+    "sensor_system_status": {
+      "english": "System Status",
+      "max_length": 13,
+      "needs_translation": false,
+      "translation": "System Status"
+    },
     "sensor_motor2speed": {
       "english": "Motor 2 RPM",
       "max_length": 19,
