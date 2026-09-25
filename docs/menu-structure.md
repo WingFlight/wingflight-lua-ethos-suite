@@ -1,98 +1,22 @@
-# Menu Structure
+# Menu structure
 
+The menu source of truth is [`app/tool.lua`](../src/wfsuite/app/tool.lua).
+`ROOT_ENTRIES` defines the root tiles and `MENUS` defines named submenus.
+The [page index](pages/README.md) lists all reachable leaf pages and their conditions;
+each page document contains its full breadcrumb.
 
-## Main Menu
+A leaf entry has `title`, `icon` and `script="app/pages/<page>.lua"`.
+A submenu entry uses `menuId="<MENUS key>"` instead of `script`.
+Edit these Lua tables directly. Link directly to a page when a submenu would
+contain only one entry. `bin/menu/` is obsolete tooling for the removed
+`app/modules/manifest.lua` architecture and must not be used for this menu.
 
-### Configuration
-- Flight Tuning (menuId `flight_tuning_menu`)
-  - menuId `flight_tuning_menu`: Flight Tuning
-    - PIDs (script `pids/pids.lua`)
-    - Rates (script `rates/rates.lua`)
-    - Advanced (menuId `advanced_menu`)
-      - menuId `advanced_menu`: Advanced
-        - Filters (script `filters/filters.lua`)
-        - PID Controller (script `profile_pidcontroller/pidcontroller.lua`)
-        - PID Bandwidth (script `profile_pidbandwidth/pidbandwidth.lua`)
-        - Autolevel (script `profile_autolevel/autolevel.lua`)
-        - Rates (script `rates_advanced/tools/advanced.lua`)
-- Setup (menuId `setup_menu`)
-  - menuId `setup_menu`: Setup
-    - Configuration (script `configuration/configuration.lua`)
-    - Radio Config (script `radio_config/radio_config.lua`)
-    - Telemetry (script `telemetry/telemetry.lua`)
-    - Accelerometer (script `accelerometer/accelerometer.lua`)
-    - Alignment (script `alignment/alignment.lua`)
-    - Ports (script `ports/ports.lua`)
-    - Servos (menuId `servos_type`)
-      - menuId `servos_type`: Servos
-        - PWM Output (script `pwm.lua`)
-        - BUS Output (script `bus.lua`)
-    - Mixer (script `mixer/mixer.lua`)
-    - Controls (menuId `safety_menu`)
-      - menuId `safety_menu`: Controls
-        - Modes (script `modes/modes.lua`)
-        - Adjustments (script `adjustments/adjustments.lua`)
-        - Failsafe (script `failsafe/failsafe.lua`)
-        - Beepers (menuId `beepers`)
-          - menuId `beepers`: Beepers
-            - Configuration (script `configuration.lua`)
-            - ESC Beacon (script `dshot.lua`)
-        - Blackbox (menuId `blackbox`)
-          - menuId `blackbox`: Blackbox
-            - Configuration (script `configuration.lua`)
-            - Logging (script `logging.lua`)
-            - Status (script `status.lua`)
-        - Stats (script `stats/stats.lua`)
-    - Power (menuId `power`)
-      - menuId `power`: Power
-        - Battery (script `battery.lua`)
-          - variants: >= 12.0.9 => `battery.lua`
-        - Battery (script `battery_legacy.lua`)
-          - variants: < 12.0.9 => `battery_legacy.lua`
-        - Alerts (script `alerts.lua`)
-        - Sources (script `source.lua`)
-    - ESC & Motors (menuId `esc_motors`)
-      - menuId `esc_motors`: ESC & Motors
-        - Throttle (script `throttle.lua`)
-        - Telemetry (script `telemetry.lua`)
-        - RPM (script `rpm.lua`)
-        - ESC Tools (script `app/modules/esc_tools/tools/esc.lua`)
-### System
-- Tools (menuId `tools_menu`)
-  - menuId `tools_menu`: Tools
-    - Copy Profiles (script `copyprofiles/copyprofiles.lua`, disabled)
-    - Select Profile (script `profile_select/select_profile.lua`)
-    - Diagnostics (menuId `diagnostics`)
-      - menuId `diagnostics`: Diagnostics
-        - Status (script `rfstatus.lua`)
-        - Sensors (script `sensors.lua`)
-        - FBL Sensors (script `fblsensors.lua`)
-        - FBL Status (script `fblstatus.lua`)
-        - Info (script `info.lua`)
-- Logs (module `logs`, script `logs_dir.lua`)
-- Settings (menuId `settings_admin`)
-  - menuId `settings_admin`: Settings
-    - General (script `general.lua`)
-    - Shortcuts (script `shortcuts.lua`)
-    - Dashboard (script `dashboard.lua`)
-      - menuId `settings_dashboard`: Settings / Dashboard
-        - Theme (script `dashboard_theme.lua`)
-        - Settings (script `dashboard_settings.lua`)
-    - Localization (script `localizations.lua`)
-    - Audio (script `audio.lua`)
-      - menuId `settings_dashboard_audio`: Settings / Audio
-        - Events (script `audio_events.lua`)
-        - Switches (script `audio_switches.lua`)
-        - Timer (script `audio_timer.lua`)
-- Developer (module `developer`, script `developer.lua`)
-  - menuId `developer`: Developer
-    - MSP Speed (script `developer/tools/msp_speed.lua`)
-    - API Tester (script `developer/tools/api_tester.lua`)
-    - MSP Expermental (script `developer/tools/msp_exp.lua`)
-    - Settings (script `settings/tools/development.lua`)
+`app/menu_container.lua` loads pages and applies navigation guards. A running
+background task is required; entries marked `offline = true` may be opened without
+an FC connection. Servo bus and ESC protocol guards add feature-specific checks.
+`visibleWhen` controls visibility, including developer tools. Do not assume every
+page is locked while armed: verify each page and its shared runtime separately.
 
-
-## Notes
-
-- Shortcuts are user-configurable and can be shown in dock or mixed mode; they are not static manifest entries.
-- Some pages have API-gated script variants; those are listed under `variants` where applicable.
+After adding, moving or removing a page, run the documentation scaffold/index tools
+and review breadcrumbs in existing documents. Scaffolding preserves authored text;
+it does not silently rewrite an existing page after a menu move.
