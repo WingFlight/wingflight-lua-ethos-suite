@@ -1,3 +1,15 @@
+# 0.0.28
+
+Read FC status (armed, GPS fix, LOITER/RTH blocked, profile numbers) from the 0.0.28 firmware's SYSTEM_STATUS (120) and SYSTEM_CONFIG (121) telemetry sensors, which replace the removed arming flags, profile and GPS fix sensors. Requires 0.0.28 firmware with both sensors selected.
+IMPORTANT: updating the firmware keeps the model's saved telemetry sensor selection. After flashing, press Default on the Telemetry page and save, or run this in the CLI and save:
+set telemetry_sensors = 3,4,5,6,15,43,50,52,58,59,60,89,91,99,120,121
+Match the Telemetry page's Default selection to the firmware default above. It adds flight mode (89), which the flight-mode callouts need, and drops the unused governor sensor (93).
+Add FC status alerts to the dashboard footer (red for critical, amber for warnings, "(+N)" when several are active): backup RX in control, failsafe, battery critical, gyro overflow, backup RX no signal, RTH/Loiter unavailable, GPS not responding, ACC not calibrated, test override active, reboot required, Blackbox full.
+Add FC status callouts under Settings > Audio Events > FC status: backup receiver active/restored, backup receiver lost/OK, gyro overflow, GPS not responding, Blackbox full, trim captured/saved/cancelled, and an optional control limit callout (off by default). The GPS fix and TV profile callouts now default on.
+Create named S.Port sensors for Debug 0-7 (0x52F0-0x52F7) and GPS Sats (0x0860).
+
+Support 24 RC channels and 24 bus servos (MSP API 22.5): mixer inputs CH #19-#24, bus servos 19-24 at mixer outputs 31-36, 24 failsafe channels, and up to 24 backup RX channels on the diagnostics page. The Bus Servos page lists as many servos as the configured bus output drives. Requires MSP API 22.5 (0.0.28 firmware).
+
 # 0.0.27
 
 Split Radio Config's shared Cyclic deadband into separate Roll and Pitch deadbands, alongside Yaw. Requires matching firmware (MSP_RC_CONFIG layout change).
