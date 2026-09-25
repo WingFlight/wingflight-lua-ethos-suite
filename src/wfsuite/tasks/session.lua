@@ -684,6 +684,10 @@ local function runHandshake(mspQueue, protocol)
   requestTelemetryConfig(mspQueue, protocol)
 end
 
+-- Set once system_status has reported a healthy GPS this connection; see
+-- updateSystemStatus().
+local gpsSeenHealthy = false
+
 local function setConnected(value, mspQueue, protocol)
   if session.connected == value then return end
   session.connected = value
@@ -735,6 +739,7 @@ local function setConnected(value, mspQueue, protocol)
     session.systemConfig = nil
     session.gpsFixType = nil
     session.navBlocked = nil
+    gpsSeenHealthy = false
     session.telemetrySlots = nil
     session.pidProfile = nil
     session.rateProfile = nil
@@ -926,11 +931,18 @@ end
 -- for existing readers. A missing reading keeps the last known state rather
 -- than guessing -- notably isArmed, which app/pages/configuration.lua's save
 -- flow relies on to never send MSP_REBOOT while the aircraft could be armed.
+--
+-- gpsCommsLost is added here: the FC clears "GPS present" along with "GPS
+-- healthy" when the module stops talking, so the loss can only be seen as
+-- "was healthy earlier this connection, isn't now" (lib/system_alerts.lua).
 local function updateSystemStatus(protocol)
   if not telemetrySensors then return end
   local status = systemStatusCodec.decodeStatus(telemetrySensors.getValue(protocol, "system_status"))
   if status == nil then return end
   if session.systemStatus ~= nil and status.raw == session.systemStatus.raw then return end
+
+  if status.gpsHealthy then gpsSeenHealthy = true end
+  status.gpsCommsLost = gpsSeenHealthy and not status.gpsHealthy
 
   session.systemStatus = status
   session.isArmed = status.armed

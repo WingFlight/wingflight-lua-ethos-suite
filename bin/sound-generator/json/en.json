@@ -622,5 +622,71 @@
     "english": "Normal",
     "translation": "Normal",
     "needs_translation": false
+  },
+  {
+    "file": "events/alerts/rxbackup.wav",
+    "english": "Backup receiver active",
+    "translation": "Backup receiver active",
+    "needs_translation": false
+  },
+  {
+    "file": "events/alerts/rxmain.wav",
+    "english": "Main receiver restored",
+    "translation": "Main receiver restored",
+    "needs_translation": false
+  },
+  {
+    "file": "events/alerts/rxbackuplost.wav",
+    "english": "Backup receiver lost",
+    "translation": "Backup receiver lost",
+    "needs_translation": false
+  },
+  {
+    "file": "events/alerts/rxbackupok.wav",
+    "english": "Backup receiver OK",
+    "translation": "Backup receiver OK",
+    "needs_translation": false
+  },
+  {
+    "file": "events/alerts/gyrooverflow.wav",
+    "english": "Gyro overflow",
+    "translation": "Gyro overflow",
+    "needs_translation": false
+  },
+  {
+    "file": "events/alerts/gpsfail.wav",
+    "english": "GPS not responding",
+    "translation": "GPS not responding",
+    "needs_translation": false
+  },
+  {
+    "file": "events/alerts/bbfull.wav",
+    "english": "Blackbox full",
+    "translation": "Blackbox full",
+    "needs_translation": false
+  },
+  {
+    "file": "events/alerts/trimcaptured.wav",
+    "english": "Trim captured",
+    "translation": "Trim captured",
+    "needs_translation": false
+  },
+  {
+    "file": "events/alerts/trimsaved.wav",
+    "english": "Trim saved",
+    "translation": "Trim saved",
+    "needs_translation": false
+  },
+  {
+    "file": "events/alerts/trimcancelled.wav",
+    "english": "Trim cancelled",
+    "translation": "Trim cancelled",
+    "needs_translation": false
+  },
+  {
+    "file": "events/alerts/controllimit.wav",
+    "english": "Control limit",
+    "translation": "Control limit",
+    "needs_translation": false
   }
 ]

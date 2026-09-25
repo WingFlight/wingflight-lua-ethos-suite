@@ -4,6 +4,8 @@
 -- for itself, passed in as this chunk's args rather than loadfile()'d again
 -- here -- see the equivalent note atop tasks/session.lua for why.
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
+local systemAlerts = requireModule("lib/system_alerts.lua")
+local systemStatusCodec = requireModule("lib/system_status.lua")
 
 local bus, settingsStore = ...
 
@@ -29,8 +31,14 @@ local rollingSamples = {}
 local timerTriggered = false
 local timerLastBeep = nil
 local timerPreLastBeep = nil
+-- lib/system_alerts.lua rule id -> {reported, pending, since}: the state last
+-- announced, and a change waiting out the rule's debounce.
+local alertState = {}
 
 local SPEAK_WAV_SECONDS = 0.45
+-- Minimum gap between "control limit" callouts while the surfaces keep
+-- hitting their limit.
+local CONTROL_LIMIT_REPEAT_SECONDS = 3
 local SPEAK_NUM_SECONDS = 0.6
 
 local GOVERNOR_FILES = {
@@ -133,6 +141,8 @@ local AUDIO_SESSION_KEYS = {
   "flightModeFlags",
   "navBlocked",
   "gpsFixType",
+  "systemStatus",
+  "systemConfig",
   "voltage",
   "batteryConfig",
   "tempEsc",
@@ -454,6 +464,73 @@ local function announceGpsFix()
   end
 end
 
+-- FC status callouts from lib/system_alerts.lua's rules. A condition already
+-- present when the status first arrives becomes the baseline silently (the
+-- dashboard banner shows it); after that each change is announced once it has
+-- held for the rule's debounce. Not armed-gated: a backup RX that isn't linked
+-- matters most on the bench.
+local function announceSystemAlerts(now)
+  local status = session.systemStatus
+  if status == nil then return end
+  local config = session.systemConfig
+  local rules = systemAlerts.RULES
+
+  for i = 1, #rules do
+    local rule = rules[i]
+    if rule.enterSound or rule.exitSound then
+      local active = systemAlerts.isActive(rule, status, config)
+      local state = alertState[rule.id]
+      if state == nil then
+        alertState[rule.id] = {reported = active, pending = nil, since = now}
+      elseif active == state.reported then
+        state.pending = nil
+      else
+        if state.pending ~= active then
+          state.pending = active
+          state.since = now
+        end
+        if now - state.since >= (rule.debounce or 0) then
+          state.reported = active
+          state.pending = nil
+          local file
+          if active then file = rule.enterSound else file = rule.exitSound end
+          if file and events[rule.setting] then playAlert(file) end
+        end
+      end
+    end
+  end
+end
+
+-- Autotrim: captured (COLLECTING -> SAVE_PENDING), then kept on disarm
+-- (SAVE_PENDING -> IDLE while disarmed) or reverted because the switch went
+-- off first (SAVE_PENDING -> IDLE while still armed). See wingflight-firmware's
+-- flight/autotrim.c.
+local function announceAutotrim()
+  if not events.status_autotrim then return end
+  local status = session.systemStatus
+  local value = status and status.autoTrim
+  local last = previous.autoTrim
+  if value == nil or last == nil or value == last then return end
+
+  local AUTOTRIM = systemStatusCodec.AUTOTRIM
+  if value == AUTOTRIM.SAVE_PENDING then
+    playAlert("trimcaptured.wav")
+  elseif value == AUTOTRIM.IDLE and last == AUTOTRIM.SAVE_PENDING then
+    playAlert(status.armed and "trimcancelled.wav" or "trimsaved.wav")
+  end
+end
+
+-- Stabilized roll/pitch/yaw hit its mixer limit (the FC holds the flag for
+-- 500 ms). Rate-limited, and off by default: it can be chatty on 3D models.
+local function announceControlLimit(now)
+  if not events.status_saturation then return end
+  local status = session.systemStatus
+  if not (status and status.controlSaturated) then return end
+  if lastAlertAt.control_limit and (now - lastAlertAt.control_limit) < CONTROL_LIMIT_REPEAT_SECONDS then return end
+  lastAlertAt.control_limit = now
+  playAlert("controllimit.wav")
+end
+
 local function ensureAdjWavs()
   if not adjWavs then adjWavs = requireModule("tasks/adjfunctions/wavs.lua") end
   return adjWavs
@@ -754,6 +831,11 @@ local function rememberCurrent()
   previous.gpsFixType = session.gpsFixType
   previous.adjFunction = session.adjFunction
   previous.adjValue = session.adjValue
+  previous.autoTrim = session.systemStatus and session.systemStatus.autoTrim
+end
+
+local function clearAlertState()
+  for key in pairs(alertState) do alertState[key] = nil end
 end
 
 function audio_events.wakeup()
@@ -770,6 +852,7 @@ function audio_events.wakeup()
     speakingUntil = 0
     for key in pairs(rollingSamples) do rollingSamples[key] = nil end
     for key in pairs(lastAlertAt) do lastAlertAt[key] = nil end
+    clearAlertState()
     rememberCurrent()
     return
   end
@@ -795,14 +878,14 @@ function audio_events.wakeup()
   announceArmed()
   announceProfile("pidProfile", events.pid_profile, "profile.wav")
   announceProfile("rateProfile", events.rate_profile, "rates.wav")
-  -- events/alerts/tv.wav is not generated yet -- add it to
-  -- bin/sound-generator/json/*.json and run the generator (see that
-  -- directory's own tooling) before enabling events.tv_profile.
   announceProfile("tvProfile", events.tv_profile, "tv.wav")
   announceBatteryProfile()
   announceGovernor()
   announceFlightMode()
   announceGpsFix()
+  announceSystemAlerts(now)
+  announceAutotrim()
+  announceControlLimit(now)
   announceVoltage(now)
   announceEscTemp(now)
   announceBecRxVoltage(now)
@@ -818,6 +901,7 @@ function audio_events.reset()
   adjWavs = nil
   for key in pairs(previous) do previous[key] = nil end
   for key in pairs(lastAlertAt) do lastAlertAt[key] = nil end
+  clearAlertState()
   lastSmartfuelAnnounced = nil
   pendingAdjFunction = false
   resetTimerAudio()
