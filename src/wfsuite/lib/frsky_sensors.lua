@@ -71,6 +71,16 @@ local CREATE_LIST = {
   [0x5110] = {name = "Adj Function", unit = UNIT_RAW},
   [0x5111] = {name = "Adj Value", unit = UNIT_RAW},
   [0x5210] = {name = "Heading", unit = UNIT_DEGREE, decimals = 1},
+  [0x0860] = {name = "GPS Sats", unit = UNIT_RAW},
+  -- Debug 0-7: the FC's debug[] values, sent only while a debug_mode is set.
+  [0x52F0] = {name = "Debug 0", unit = UNIT_RAW},
+  [0x52F1] = {name = "Debug 1", unit = UNIT_RAW},
+  [0x52F2] = {name = "Debug 2", unit = UNIT_RAW},
+  [0x52F3] = {name = "Debug 3", unit = UNIT_RAW},
+  [0x52F4] = {name = "Debug 4", unit = UNIT_RAW},
+  [0x52F5] = {name = "Debug 5", unit = UNIT_RAW},
+  [0x52F6] = {name = "Debug 6", unit = UNIT_RAW},
+  [0x52F7] = {name = "Debug 7", unit = UNIT_RAW},
 }
 
 -- appId -> {name, onlyIfName}: renamed only if Ethos's own discovery
