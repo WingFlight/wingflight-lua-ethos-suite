@@ -154,6 +154,16 @@ local session = {
   -- rxMap.throttle}) -- a local, instant signal, not FC telemetry -- see
   -- that file's own header for why this matters.
   rxMap = nil,
+  handshake = {
+    apiVersion = false,
+    fcVariant = false,
+    mcuId = false,
+    craftName = false,
+    clockSynced = false,
+    batteryConfig = false,
+    smartfuelConfig = false,
+    rxMap = false,
+  },
 }
 
 local localSmartFuel = SmartFuel.new()
@@ -319,6 +329,48 @@ local function copyStats(stats)
   }
 end
 
+local function newHandshakeState()
+  return {
+    apiVersion = false,
+    fcVariant = false,
+    mcuId = false,
+    craftName = false,
+    clockSynced = false,
+    batteryConfig = false,
+    smartfuelConfig = false,
+    rxMap = false,
+  }
+end
+
+local function copyHandshake(h)
+  if type(h) ~= "table" then return nil end
+  return {
+    apiVersion = h.apiVersion == true,
+    fcVariant = h.fcVariant == true,
+    mcuId = h.mcuId == true,
+    craftName = h.craftName == true,
+    clockSynced = h.clockSynced == true,
+    batteryConfig = h.batteryConfig == true,
+    smartfuelConfig = h.smartfuelConfig == true,
+    rxMap = h.rxMap == true,
+  }
+end
+
+local handshakeInFlight = newHandshakeState()
+
+local function isHandshakeComplete()
+  local h = session.handshake
+  if not h then return false end
+  return h.apiVersion == true
+    and h.fcVariant == true
+    and h.mcuId == true
+    and h.craftName == true
+    and h.clockSynced == true
+    and h.batteryConfig == true
+    and h.smartfuelConfig == true
+    and h.rxMap == true
+end
+
 -- Every session-state mutator below calls publish() when its own field
 -- changes, rather than hitting the bus directly. Telemetry-driven fields
 -- (voltage, current, rpm, link quality, profiles, arm flags, ...) can flip
@@ -384,6 +436,7 @@ local function flush()
     isArmed = session.isArmed,
     armDisableFlags = session.armDisableFlags,
     rxMap = session.rxMap,
+    handshake = copyHandshake(session.handshake),
   })
 end
 
@@ -534,7 +587,7 @@ local function provisionFrskySensors(protocol)
 end
 
 local function requestTelemetryConfig(mspQueue, protocol)
-  if not mspQueue or telemetryConfigReadInFlight or session.telemetrySlots then return end
+  if not mspQueue or telemetryConfigReadInFlight or session.telemetrySlots or session.isArmed == true then return end
 
   telemetryConfigReadInFlight = true
   local queued = mspQueue:add(telemetryConfig.buildReadMessage(function(slots)
@@ -563,64 +616,90 @@ local function requestTelemetryConfig(mspQueue, protocol)
   end
 end
 
--- Runs once per genuine disconnect -> connect transition. Each read is
--- independently gated on "don't already have it", so a slow/failed
--- individual read just leaves that one field nil rather than blocking the
--- others -- there is no manifest/retry-queue runner here, only the
--- queue's own per-message retry (see tasks/msp/queue.lua).
+-- Handshake queries establish FC version, MCU UID, craft name, battery config,
+-- and capabilities. Each read is guarded by session.handshake status flags and
+-- in-flight tracking. If arming drops pending requests from the queue (via
+-- mspQueue:clear()), their error handlers receive reason == "cleared", leaving
+-- the element uncompleted so it can be resumed upon disarm.
 local function runHandshake(mspQueue, protocol)
-  if session.apiVersionMajor == nil then
-    -- Developer-only, and only reachable in the simulator (real hardware
-    -- always ignores simulatorResponse -- see tasks/msp/queue.lua's isSim
-    -- branch): lets a dev exercise the "unsupported firmware family"
-    -- dashboard state on demand instead of needing incompatible real
-    -- hardware to test it against.
+  if not mspQueue or session.connected ~= true or session.isArmed == true then
+    return
+  end
+
+  if not session.handshake.apiVersion and not handshakeInFlight.apiVersion then
     local simResponse = nil
     if isSim then
       local devSettings = settingsStore.load()
       local mode = settingsStore.simulatedApiVersionMode(devSettings)
       simResponse = mspApiVersion.simResponseForVersion(mode)
     end
-    mspQueue:add(mspApiVersion.buildReadMessage(function(data)
+    handshakeInFlight.apiVersion = true
+    local queued = mspQueue:add(mspApiVersion.buildReadMessage(function(data)
+      handshakeInFlight.apiVersion = false
+      session.handshake.apiVersion = true
       session.apiVersionMajor = data.major
       session.apiVersionMinor = data.minor
       session.apiVersionSupported = mspApiVersion.isSupported(data.major, data.minor)
-      -- Only now, once the MSP link is confirmed to actually be a
-      -- compatible one -- see playConnectBeep()'s own comment for why
-      -- this moved off the raw telemetry-link-up transition.
       if session.apiVersionSupported == true then
         playConnectBeep()
       end
       publish()
-    end, nil, simResponse))
+    end, function(reason)
+      handshakeInFlight.apiVersion = false
+      if reason ~= "cleared" then
+        debugLog.print("[session] API_VERSION read failed: " .. tostring(reason))
+      end
+    end, simResponse))
+    if queued == false then
+      handshakeInFlight.apiVersion = false
+    end
   end
 
-  if not session.fcVersion then
-    mspQueue:add(handshake.buildFcVersionReadMessage(function(data)
+  if not session.handshake.fcVariant and not handshakeInFlight.fcVariant then
+    handshakeInFlight.fcVariant = true
+    local queued = mspQueue:add(handshake.buildFcVersionReadMessage(function(data)
+      handshakeInFlight.fcVariant = false
+      session.handshake.fcVariant = true
       session.fcVersion = data.fcVersion
       session.rfVersion = data.rfVersion
       publish()
+    end, function(reason)
+      handshakeInFlight.fcVariant = false
+      if reason ~= "cleared" then
+        debugLog.print("[session] FC_VERSION read failed: " .. tostring(reason))
+      end
     end))
+    if queued == false then
+      handshakeInFlight.fcVariant = false
+    end
   end
 
-  if not session.mcuId then
-    mspQueue:add(handshake.buildUidReadMessage(function(mcuId)
+  if not session.handshake.mcuId and not handshakeInFlight.mcuId then
+    handshakeInFlight.mcuId = true
+    local queued = mspQueue:add(handshake.buildUidReadMessage(function(mcuId)
+      handshakeInFlight.mcuId = false
+      session.handshake.mcuId = true
       session.mcuId = mcuId
       loadModelPreferences()
       scheduleStatsSync(0)
       publish()
+    end, function(reason)
+      handshakeInFlight.mcuId = false
+      if reason ~= "cleared" then
+        debugLog.print("[session] UID read failed: " .. tostring(reason))
+      end
     end))
+    if queued == false then
+      handshakeInFlight.mcuId = false
+    end
   end
 
-  if not session.craftName then
-    mspQueue:add(handshake.buildNameReadMessage(function(name)
+  if not session.handshake.craftName and not handshakeInFlight.craftName then
+    handshakeInFlight.craftName = true
+    local queued = mspQueue:add(handshake.buildNameReadMessage(function(name)
+      handshakeInFlight.craftName = false
+      session.handshake.craftName = true
       session.craftName = name
-      -- Mirrors master's postconnect/craftname.lua: overwrite the pilot's
-      -- own Ethos model name with the FC's craft name, opt-in only (see
-      -- lib/settings_store.lua's syncname). originalModelName is captured
-      -- once per connect (not per handshake retry -- `not originalModelName`
-      -- guards that) and restored in setConnected(false) below, same
-      -- round-trip as master's own lib/utils.lua.
       if settingsStore.syncNameEnabled(settingsStore.load()) and model and model.name
         and session.craftName and session.craftName ~= "" then
         if not originalModelName then
@@ -630,52 +709,96 @@ local function runHandshake(mspQueue, protocol)
         pcall(model.name, session.craftName)
       end
       publish()
+    end, function(reason)
+      handshakeInFlight.craftName = false
+      if reason ~= "cleared" then
+        debugLog.print("[session] NAME read failed: " .. tostring(reason))
+      end
     end))
+    if queued == false then
+      handshakeInFlight.craftName = false
+    end
   end
 
-  if not session.clockSynced then
-    mspQueue:add(handshake.buildRtcSyncMessage(function()
+  if not session.handshake.clockSynced and not handshakeInFlight.clockSynced then
+    handshakeInFlight.clockSynced = true
+    local queued = mspQueue:add(handshake.buildRtcSyncMessage(function()
+      handshakeInFlight.clockSynced = false
+      session.handshake.clockSynced = true
       session.clockSynced = true
+      publish()
+    end, function(reason)
+      handshakeInFlight.clockSynced = false
+      if reason == "cleared" or reason == "queue_full" then return end
+      session.handshake.clockSynced = true
+      debugLog.print("[session] RTC sync failed: " .. tostring(reason))
+      publish()
     end))
+    if queued == false then
+      handshakeInFlight.clockSynced = false
+    end
   end
 
-  if not session.batteryConfig then
-    mspQueue:add(mspBattery.buildBatteryConfigReadMessage(function(data)
+  if not session.handshake.batteryConfig and not handshakeInFlight.batteryConfig then
+    handshakeInFlight.batteryConfig = true
+    local queued = mspQueue:add(mspBattery.buildBatteryConfigReadMessage(function(data)
+      handshakeInFlight.batteryConfig = false
+      session.handshake.batteryConfig = true
       applyActiveProfileCells(data, session.batteryProfile)
       session.batteryConfig = data
       publish()
+    end, function(reason)
+      handshakeInFlight.batteryConfig = false
+      if reason ~= "cleared" then
+        debugLog.print("[session] BATTERY_CONFIG read failed: " .. tostring(reason))
+      end
     end))
+    if queued == false then
+      handshakeInFlight.batteryConfig = false
+    end
   end
 
-  if session.smartfuelMode == nil then
-    mspQueue:add(mspBattery.buildSmartfuelConfigReadMessage(function(data)
+  if not session.handshake.smartfuelConfig and not handshakeInFlight.smartfuelConfig then
+    handshakeInFlight.smartfuelConfig = true
+    local queued = mspQueue:add(mspBattery.buildSmartfuelConfigReadMessage(function(data)
+      handshakeInFlight.smartfuelConfig = false
+      session.handshake.smartfuelConfig = true
       session.smartfuelMode = data.mode
       session.smartfuelVoltageFallPerSecond = data.voltageFallPerSecond
       session.smartfuelChargeDropPerSecond = data.chargeDropPerSecond
       debugLog.print("[session] SMARTFUEL_CONFIG read ok: mode=" .. tostring(data.mode))
       publish()
-    end, function()
-      -- SMARTFUEL_CONFIG (cmd 0x4000) needs API >= 12.0.9 -- right at this
-      -- rebuild's floor -- and firmware feature rollout can lag the API
-      -- version bump, so a real FC may simply not answer it yet. Without
-      -- this, a failed read left smartfuelMode nil forever, and
-      -- updateFuel()'s very first line bails out on nil -- silently
-      -- disabling fuel% *and* lib/diy_sensor.lua's smartfuel sensor for
-      -- the whole connection, never falling back to the local estimator
-      -- the mode==0 branch exists for. An unsupported command is the
-      -- strongest possible case for that fallback, so treat it exactly
-      -- like a real mode-0 reply instead of leaving it unresolved.
+    end, function(reason)
+      handshakeInFlight.smartfuelConfig = false
+      if reason == "cleared" or reason == "queue_full" then return end
+      -- Unsupported/timed-out SmartFuel reads use the local estimator.
+      -- Cancellation or queue pressure must leave the read retryable instead.
+      session.handshake.smartfuelConfig = true
       session.smartfuelMode = 0
       debugLog.print("[session] SMARTFUEL_CONFIG read failed; falling back to local smartfuel (mode=0)")
       publish()
     end))
+    if queued == false then
+      handshakeInFlight.smartfuelConfig = false
+    end
   end
 
-  if not session.rxMap then
-    mspQueue:add(rxMapApi.buildReadMessage(function(data)
+  if not session.handshake.rxMap and not handshakeInFlight.rxMap then
+    handshakeInFlight.rxMap = true
+    local queued = mspQueue:add(rxMapApi.buildReadMessage(function(data)
+      handshakeInFlight.rxMap = false
+      session.handshake.rxMap = true
       session.rxMap = data
       publish()
+    end, function(reason)
+      handshakeInFlight.rxMap = false
+      if reason ~= "cleared" then
+        debugLog.print("[session] RX_MAP read failed: " .. tostring(reason))
+      end
     end))
+    if queued == false then
+      handshakeInFlight.rxMap = false
+    end
   end
 
   -- Fetched regardless of protocol (cheap, and tasks/elrs_sensors.lua wants
@@ -695,9 +818,15 @@ local function setConnected(value, mspQueue, protocol)
 
   if value then
     debugLog.print("[session] connected (protocol=" .. tostring(protocol) .. ")")
-    runHandshake(mspQueue, protocol)
+    -- wakeup reads arm state before starting the handshake.
   else
     debugLog.print("[session] disconnected")
+    -- Cancel old callbacks before resetting fields for the next connection.
+    if mspQueue then mspQueue:clear() end
+    for key in pairs(session.handshake) do
+      session.handshake[key] = false
+      handshakeInFlight[key] = false
+    end
     -- Restore whatever the Ethos model name was before syncname (see the
     -- craft-name handshake above) last overwrote it -- must run before
     -- session.craftName is wiped below, since it's this connect's own
@@ -935,9 +1064,14 @@ end
 -- gpsCommsLost is added here: the FC clears "GPS present" along with "GPS
 -- healthy" when the module stops talking, so the loss can only be seen as
 -- "was healthy earlier this connection, isn't now" (lib/system_alerts.lua).
-local function updateSystemStatus(protocol)
+local function updateSystemStatus(protocol, mspQueue)
   if not telemetrySensors then return end
-  local status = systemStatusCodec.decodeStatus(telemetrySensors.getValue(protocol, "system_status"))
+  local raw = telemetrySensors.getValue(protocol, "system_status")
+  -- This now runs each tick: decode only changed readings, without allocating
+  -- status/logic tables while the sensor value stays the same.
+  if raw == nil then return end
+  if session.systemStatus and raw == session.systemStatus.raw then return end
+  local status = systemStatusCodec.decodeStatus(raw)
   if status == nil then return end
   if session.systemStatus ~= nil and status.raw == session.systemStatus.raw then return end
 
@@ -945,7 +1079,16 @@ local function updateSystemStatus(protocol)
   status.gpsCommsLost = gpsSeenHealthy and not status.gpsHealthy
 
   session.systemStatus = status
+  local wasArmed = session.isArmed
   session.isArmed = status.armed
+  if session.isArmed ~= wasArmed then
+    if session.isArmed == true then
+      if mspQueue then mspQueue:clear() end
+    elseif wasArmed == true then
+      -- Retry missing elements immediately; in-flight reads remain deduplicated.
+      if session.apiVersionSupported ~= false then runHandshake(mspQueue, session.mspTransport) end
+    end
+  end
   session.gpsFixType = status.gpsFix
   session.navBlocked = status.navBlocked
   publish()
@@ -1023,12 +1166,16 @@ local function onBatteryConfigSaved()
   bus.publish("msp.request", mspBattery.buildBatteryConfigReadMessage(function(data)
     applyActiveProfileCells(data, session.batteryProfile)
     session.batteryConfig = data
+    session.handshake.batteryConfig = true
     -- The local estimator's chargeLevel/initialChargeLevel were seeded
     -- against the *old* min/full cell voltage, and update()'s own clamp
     -- only ever lets fuel fall, never rise -- without a reset, a saved
     -- change here could never be reflected upward for the rest of this
     -- connection.
     localSmartFuel:reset()
+    publish()
+  end, function()
+    session.handshake.batteryConfig = false
     publish()
   end))
 end
@@ -1037,12 +1184,19 @@ bus.subscribe("battery.config.saved", onBatteryConfigSaved)
 local function onSmartfuelConfigSaved()
   if not session.connected then return end
   bus.publish("msp.request", mspBattery.buildSmartfuelConfigReadMessage(function(data)
+    session.handshake.smartfuelConfig = true
     session.smartfuelMode = data.mode
     session.smartfuelVoltageFallPerSecond = data.voltageFallPerSecond
     session.smartfuelChargeDropPerSecond = data.chargeDropPerSecond
     localSmartFuel:reset()
     publish()
-  end, function()
+  end, function(reason)
+    if reason == "cleared" or reason == "queue_full" then
+      session.handshake.smartfuelConfig = false
+      publish()
+      return
+    end
+    session.handshake.smartfuelConfig = true
     session.smartfuelMode = 0
     localSmartFuel:reset()
     publish()
@@ -1139,6 +1293,12 @@ local function wakeup(mspQueue, protocol, transport, simSensors)
   -- behaviour, not sensor-value lookup.
   local sensorProtocol = isSim and "sim" or protocol
 
+  if session.connected then updateSystemStatus(sensorProtocol, mspQueue) end
+  if session.connected and session.isArmed ~= true and session.apiVersionSupported ~= false
+      and not isHandshakeComplete() and shouldRunScheduled("handshake_retry", 2.0, now) then
+    runHandshake(mspQueue, protocol)
+  end
+
   -- apiVersionSupported ~= false (not runHandshake()'s one-time reads,
   -- which must still run in order to determine this in the first place --
   -- only this block, everything below that re-issues MSP requests on
@@ -1174,7 +1334,6 @@ local function wakeup(mspQueue, protocol, transport, simSensors)
       updateProfiles(sensorProtocol)
       updateGovernor(sensorProtocol)
       updateFlightMode(sensorProtocol)
-      updateSystemStatus(sensorProtocol)
     end
 
     if shouldRunScheduled("adjustment", ADJUSTMENT_INTERVAL, now) then
@@ -1185,7 +1344,7 @@ local function wakeup(mspQueue, protocol, transport, simSensors)
       updateBlackboxSummary(mspQueue)
     end
 
-    if session.connected and not session.telemetrySlots
+    if session.connected and session.isArmed ~= true and not session.telemetrySlots
         and shouldRunScheduled("telemetry_config", TELEMETRY_CONFIG_RETRY_INTERVAL, now) then
       requestTelemetryConfig(mspQueue, protocol)
     end
@@ -1226,4 +1385,9 @@ local function setTelemetrySensors(instance)
   telemetrySensors = instance
 end
 
-return {wakeup = wakeup, setTelemetrySensors = setTelemetrySensors, setBatteryProfile = setBatteryProfile}
+return {
+  wakeup = wakeup,
+  setTelemetrySensors = setTelemetrySensors,
+  setBatteryProfile = setBatteryProfile,
+  isHandshakeComplete = isHandshakeComplete,
+}
