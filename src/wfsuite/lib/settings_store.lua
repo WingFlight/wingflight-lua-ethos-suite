@@ -57,14 +57,17 @@ local DEFAULTS = {
     voltage_repeat_interval = 10,
     pid_profile = true,
     rate_profile = true,
-    -- Defaults off: events/alerts/tv.wav hasn't been generated yet (see
-    -- bin/sound-generator/json/*.json) -- flip to true once it exists.
-    tv_profile = false,
+    tv_profile = true,
     battery_profile = true,
-    -- Defaults off: events/alerts/gpsfix.wav and gpslost.wav haven't been
-    -- generated yet (see bin/sound-generator/json/*.json) -- flip to true
-    -- once they exist.
-    gps_fix = false,
+    gps_fix = true,
+    -- FC status callouts (lib/system_alerts.lua, tasks/audio_events.lua).
+    status_rx_backup = true,
+    status_gyro = true,
+    status_gps = true,
+    status_blackbox = true,
+    status_autotrim = true,
+    -- Off by default: "control limit" can be chatty on 3D models.
+    status_saturation = false,
     smartfuel = true,
     smartfuelcallout = 0,
     smartfuelrepeats = 1,
@@ -189,6 +192,12 @@ local function normalizeEvents(values)
   events.tv_profile = coerceBool(events.tv_profile, DEFAULTS.events.tv_profile)
   events.battery_profile = coerceBool(events.battery_profile, DEFAULTS.events.battery_profile)
   events.gps_fix = coerceBool(events.gps_fix, DEFAULTS.events.gps_fix)
+  events.status_rx_backup = coerceBool(events.status_rx_backup, DEFAULTS.events.status_rx_backup)
+  events.status_gyro = coerceBool(events.status_gyro, DEFAULTS.events.status_gyro)
+  events.status_gps = coerceBool(events.status_gps, DEFAULTS.events.status_gps)
+  events.status_blackbox = coerceBool(events.status_blackbox, DEFAULTS.events.status_blackbox)
+  events.status_autotrim = coerceBool(events.status_autotrim, DEFAULTS.events.status_autotrim)
+  events.status_saturation = coerceBool(events.status_saturation, DEFAULTS.events.status_saturation)
   events.smartfuel = coerceBool(events.smartfuel, DEFAULTS.events.smartfuel)
   events.smartfuelcallout = clampNumber(events.smartfuelcallout, DEFAULTS.events.smartfuelcallout, 0, 50)
   events.smartfuelrepeats = clampNumber(events.smartfuelrepeats, DEFAULTS.events.smartfuelrepeats, 1, 10)

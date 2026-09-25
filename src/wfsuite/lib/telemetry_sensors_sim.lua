@@ -42,17 +42,12 @@ return {
   throttle_percent = {
     {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5014},
   },
-  pid_profile = {
-    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5012},
+  -- Packed by tasks/sim_sensors.lua from the editor's per-field files.
+  system_status = {
+    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5031},
   },
-  rate_profile = {
-    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5013},
-  },
-  battery_profile = {
-    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5026},
-  },
-  tv_profile = {
-    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5029},
+  system_config = {
+    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5032},
   },
   governor = {
     {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5009},
@@ -60,17 +55,11 @@ return {
   flight_mode = {
     {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5028},
   },
-  gps_fix_type = {
-    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5030},
-  },
   adj_f = {
     {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5010},
   },
   adj_v = {
     {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5011},
-  },
-  armflags = {
-    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5001},
   },
   -- Fabricated by tasks/sim_sensors.lua's own SENSORS.armdisableflags
   -- entry, same uid.
