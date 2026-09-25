@@ -35,8 +35,8 @@ Keep behavior correct while minimizing runtime memory churn and CPU load on Etho
 Reference docs:
 - `docs/memory-and-module-lifecycle.md` -- loadfile() caching, why eager
   subsystem registration beats lazy proxies, subscription cleanup, and
-  why not to reach for collectgarbage(). Current and accurate (unlike the
-  docs listed as stale in Section 11).
+  why not to reach for collectgarbage(). See also the documentation
+  index in `docs/README.md`.
 
 ## 3) Non-Negotiables For Agent Changes
 
@@ -93,8 +93,8 @@ Rules:
 - Edit `app/tool.lua`'s `MENUS` table directly.
 - Don't leave a single-entry submenu: link straight to the page instead
   (see `advanced_menu`'s "Rates Advanced" entry for the pattern).
-- `docs/menu-structure.md` is stale (describes the old generator); do not
-  treat it as authoritative.
+- `docs/menu-structure.md` describes the current static menu;
+  `docs/pages/README.md` is the generated page documentation index.
 
 ## 7) i18n Rules
 
@@ -194,10 +194,11 @@ firmware) rather than rotorflight (helicopter firmware). Status:
   manifest for the old `app/modules/manifest.lua` structure, which this
   architecture doesn't have (see Section 6). Running it does not error,
   but its output is dead weight.
-- **`docs/system-architecture.md`, `docs/menu-structure.md`,
-  `docs/i18n-locales.md` are all stale**, describing the pre-rewrite
-  architecture (`wfsuite.*` global table, `app/modules/`,
-  `tasks/scheduler/`). Not yet rewritten for the new architecture.
+- **Documentation refreshed**: `docs/system-architecture.md`,
+  `docs/menu-structure.md`, and `docs/i18n-locales.md` describe the current
+  architecture and locale-source drift. `docs/pages/README.md` indexes
+  page references with explicit draft/reviewed status; maintain them with
+  `bin/docs/generate_menu_docs.py` (see `docs/README.md`).
 - **Ported since this section was first written**: Mixer Config
   (`app/pages/mixer_config.lua`), Cross Axis Relax/Master Gain/FW TPA
   (`app/pages/pid_controller.lua`), Arm Ready Wiggle codec

@@ -1,212 +1,50 @@
-## 1. System Architecture Overview
-
-This section provides a high-level view of the Rotorflight Lua Ethos Suite (`wfsuite`) and its major components.
-
-### Directory Structure
-
-* **`src/wfsuite/main.lua`**: Entry point that initializes the suite, loads configuration, user preferences, session state, tasks, and the application.
-* **`src/wfsuite/app/`**: UI application logic (`app.lua`), module definitions (`modules/`), and UI libraries (`lib/ui.lua`, `lib/utils.lua`).
-* **`src/wfsuite/tasks/`**: Background tasks and services.
-* **`src/wfsuite/tasks/scheduler/`**: MSP communication, telemetry, sensors, logging, and scheduler plumbing.
-* **`src/wfsuite/tasks/events/`**: Event hooks (connect/disconnect, model change, etc.).
-* **`src/wfsuite/widgets/`**: Reusable UI widgets for dashboard elements and toolbox tools.
-* **`src/wfsuite/lib/`**: Utility libraries (INI, i18n, compilation, general utils).
-
-### Interaction Flow
-
-1. **Initialization**: `main.lua` sets up `wfsuite.config`, loads or creates user preferences (`wfsuite.preferences`), initializes session variables (`wfsuite.session`), and starts the background task (`wfsuite.tasks`) alongside the UI application (`wfsuite.app`).
-2. **Tasks vs. App**:
-
-   * **Tasks**: Handle MSP interactions, scheduling, parsing, telemetry, and callbacks. Exposed via `wfsuite.tasks.msp.api` and `wfsuite.tasks.callback`.
-   * **App**: Manages pages and user interaction. Loads modules from `app/modules`, builds menus, and invokes MSP operations through the API loader.
-3. **Widgets**: Modules and pages incorporate widgets for consistent UI elements. Widgets are loaded from `widgets/dashboard/objects` and can be configured via module parameters.
-4. **Session & Preferences**:
-
-* **Preferences**: Stored in `SCRIPTS:/wfsuite.user/preferences.ini`, merged with defaults on startup.
-   * **Session**: Runtime state (e.g., `activeProfile`, `apiVersion`, `flightMode`) tracked in `wfsuite.session` to coordinate between tasks and UI.
-
-## 2. Module Creation Guide (`wfsuite/app/modules`)
-
-This section details how to add a new application module that leverages the API data system for form generation.
-
-### Module Structure
-
-Each module lives in its own folder under `app/modules/`:
-
-```
-app/modules/<module_name>/
-  ├─ init.lua       -- Module metadata (title, section, script, icon, order)
-  ├─ <module>.lua   -- Core module logic (UI rendering, callbacks)
-  ├─ help.lua       -- Help text and documentation for the module
-  └─ <icon>.png     -- Icon displayed in navigation
-```
-
-* **`init.lua`** returns a table. Modules are listed in `app/modules/manifest.lua` and assembled into menus in `app/modules/init.lua` using `app/modules/sections.lua`.
-* **Core Logic** (`<module>.lua`) implements a `Page` table with methods such as:
-
-  * `Page:onEnter()` to initialize form data
-  * `Page:onDraw()` to render fields and widgets
-  * `Page:onExit()` to clean up or persist changes
-
-### Using the apidata System
-
-Modules leverage the `app.Page.apidata` object to generate forms and interact with MSP APIs:
-
-1. **Initialization**:
-
-   ```lua
-   local API = wfsuite.app.Page.apidata.load(apiName)
-   app.Page.apidata = {
-     api      = API,
-     formdata = API.data(),
-     structure= API.data().structure,
-   }
-   ```
-2. **Form Fields**:
-
-   * `formdata.fields` is a table of field definitions, each with attributes like `label`, `type`, `byteorder`, and `field` name.
-   * The module iterates over `formdata.fields` to render input widgets, e.g.:
-
-     ```lua
-     for _, field in ipairs(app.Page.apidata.formdata.fields) do
-       ui.renderField(field)
-     end
-     ```
-3. **Reading/Writing Values**:
-
-   * Use `app.Page.apidata.api.readValue(key)` to fetch the current value from the parsed data.
-   * Use `app.Page.apidata.api.setValue(key, newValue)` to queue a write operation.
-4. **Submission & Callbacks**:
-
-   * On form submission, modules call `app.Page.apidata.api.write()` to push updates.
-   * Use `wfsuite.tasks.callback.now()` via `api.scheduleWakeup()` for asynchronous operations.
-
-### MSP API Delta Cache
-
-MSP API reads can keep raw buffers for delta payloads or drop them to reduce RAM:
-
-* **Enabled**: stores parsed values plus raw buffer, position map, and byte counts (allows delta payloads).
-* **Disabled**: stores parsed values only. Raw buffers/position maps are dropped (no delta writes).
-
-Defaults:
-
-* When the app GUI is running: delta cache enabled
-* When the app GUI is not running: delta cache disabled
-
-Per-page override:
-
-```lua
-local apidata = {
-  enableDeltaCache = false,
-  api = {"STATUS", "RC_TUNING"},
-  formdata = {labels = {}, fields = {...}}
-}
-```
-
-Per-API override in a page:
-
-```lua
-local apidata = {
-  api = {
-    {id = 1, name = "STATUS", enableDeltaCache = false, rebuildOnWrite = true},
-    {name = "RC_TUNING"}
-  },
-  formdata = {labels = {}, fields = {...}}
-}
-```
-
-Optional per-API write override:
-
-* `rebuildOnWrite = true` forces full payload writes for that API during `saveSettings`.
-* `id = <number>` lets `mspapi = <number>` map by id instead of list order.
-
-Direct API override:
-
-```lua
-local API = wfsuite.tasks.msp.api.load("STATUS")
-API.enableDeltaCache(false)
-```
-
-Boolean semantics:
-
-* `API.enableDeltaCache(true)` → delta cache enabled (buffers/position maps kept)
-* `API.enableDeltaCache(false)` → delta cache disabled (parsed values only)
-
-`setCacheMode(...)` has been removed in favor of `enableDeltaCache(...)`.
-
-### Integration with MSP Tasks
-
-* Modules do **not** parse raw MSP data directly. Instead, they rely on the `tasks/scheduler/msp/api` loader to fetch parsed data structures and buffer states.
-* For custom behavior, modules can invoke `wfsuite.tasks.msp.api.scheduleWakeup()` to schedule periodic reads or writes.
-
-### MSP Queue Backpressure and Tuning
-
-The MSP queue (`tasks/scheduler/msp/mspQueue.lua`) exposes enqueue outcomes so callers can react to congestion and duplicates:
-
-* Return shape from `mspQueue:add(...)`: `ok, reason, qid, pending`
-* Common `reason` values:
-  * `"queued"`: accepted
-  * `"queued_busy"`: accepted, but queue is above warning threshold
-  * `"duplicate"`: dropped due to UUID dedupe
-  * `"busy"`: dropped by hard cap (`maxQueueDepth > 0`)
-
-Operational guidance:
-
-* Use stable UUIDs for periodic/retriggerable MSP operations.
-* On `"duplicate"` / `"busy"`, callers should back off and retry later.
-* For direct queue writes (outside API wrappers), avoid mutating "last sent" state unless enqueue succeeds.
-
-Queue pacing and throughput tuning live in:
-
-* `tasks/scheduler/msp/msp.lua`: `interMessageDelay`, `busyWarningThreshold`, `maxQueueDepth`, `busyStatusCooldown`
-* `tasks/scheduler/msp/protocols.lua`: protocol-specific `mspIntervalOveride`
-
-Tune in small steps and monitor retries/timeouts before reducing delays further.
-
-## 3. MSP API Documentation (`wfsuite/tasks/scheduler/msp/api`)
-
-This section describes the MSP API loader and its capabilities for parsing and interacting with MultiWii Serial Protocol data.
-
-### API Loader (`api.lua`)
-
-* **Base Directory**: API definitions reside in `tasks/scheduler/msp/api/` and are versioned based on the Ethos firmware version.
-* **File Caching**: `_fileExistsCache` optimizes repeated file-existence checks.
-
-#### Key Functions
-
-* `apiLoader.load(apiName)`:
-
-  * Loads `<apiName>.lua` via `dofile`, ensures it returns a table with `read` or `write` functions, and wraps them for logging.
-  * Returns `nil` if the file is missing or invalid.
-
-* `apiLoader.clearFileExistsCache()`:
-
-  * Clears the cached file-existence results (useful after adding/removing API files).
-
-* `apiLoader.scheduleWakeup(func)`:
-
-  * Schedules a callback using the global `tasks.callback` system for immediate execution.
-
-* `get_type_size(data_type)`:
-
-  * Returns the byte size for MSP data types (e.g., `U8=1`, `S16=2`, ..., `U128=16`).
-
-* **Parsing Functions**:
-
-    * Processes up to a fixed number of fields per call (default 5), allowing chunked parsing across ticks.
-  * `parseMSPData(buf, structure, processed, other, options)`:
-
-    * Blocking mode: Parses entire buffer according to `structure` and returns a table with `parsedData`, `positionmap`, and other metadata.
-    * Chunked mode: Accepts `options.chunked=true` and uses `scheduleWakeup` to process asynchronously, invoking `options.completionCallback` upon completion.
-
-### MSP Helper (`mspHelper.lua`)
-
-* Implements generic reading of unsigned and signed integers of various byte widths:
-
-  * `readUInt(buf, numBytes, byteorder)`
-  * `readSInt(buf, numBytes, byteorder)`
-  * Maintains an internal buffer offset (`buf.offset`).
-
----
-
-
+# System architecture
+
+WFSuite has three independent subsystems registered by
+[`main.lua`](../src/wfsuite/main.lua): the system tool, dashboard widgets, and the
+background task. Each owns its state through closures. They communicate through
+[`lib/bus.lua`](../src/wfsuite/lib/bus.lua), rather than a shared `wfsuite` global.
+
+## Entry points and shared code
+
+| Area | Entry or location | Responsibility |
+| --- | --- | --- |
+| System tool | `app/tool.lua` | Static menus, navigation and page callbacks |
+| Pages | `app/pages/*.lua` | Configuration, settings and diagnostics |
+| Page helpers | `app/page_runtime.lua`, `app/field_layout.lua` | Common read/save lifecycle and form fields |
+| Background | `tasks/background.lua` | Background service registration |
+| Scheduler and session | `tasks/scheduler.lua`, `tasks/session.lua` | Scheduled work and connection/session state |
+| MSP transport | `tasks/msp/` | Transport and request queue |
+| Command codecs | `lib/msp_*.lua` | Wire schemas, decoding, encoding and message builders |
+| Widgets | `widgets/dashboard.lua`, `widgets/activelook.lua` | Dashboard and glasses integration |
+| Shared utilities | `lib/` | Bus, module loader and other reusable helpers |
+
+Paths in the table are relative to `src/wfsuite/`.
+
+## Loading and lifetime
+
+Top-level subsystems load eagerly. On-device testing found that lazy callback
+proxies increased retained RAM. ActiveLook registers only when
+`system.registerGlassesWidget` exists. This capability check is distinct from a
+user preference for disabling subsystem registration.
+
+Leaf pages load when opened through `app/menu_container.lua`; they are not cached
+as live pages between visits. Shared modules use `lib/require.lua` and
+`package.loaded` where appropriate. See [Memory and module lifecycle](memory-and-module-lifecycle.md)
+for ownership, subscription cleanup and caching rules.
+
+## Adding a page
+
+Use a similar existing page as the implementation reference. Many pages create a
+`page_runtime` instance, build fields and call `loadInitial()`; custom pages manage
+their own asynchronous requests and cleanup. Close dialogs, unsubscribe listeners
+and release transient references on exit. Keep wakeup and paint paths free of
+avoidable allocation and repeated UI updates.
+
+Add its entry directly to `ROOT_ENTRIES` or `MENUS` in `app/tool.lua`, then scaffold
+and review its [page documentation](README.md#maintaining-page-documentation).
+There is no module manifest or menu generation step.
+
+New MSP codecs must be checked against Wingflight firmware's actual
+`src/main/msp/msp.c` serializer and write handler. Retained wire positions may be
+zeroed or ignored; Rotorflight field names alone do not establish compatibility.

@@ -1,69 +1,31 @@
-# Locale Add/Update Touch Points
+# Locale workflow
 
-This document highlights the touch points and workflow used to add or update locales (e.g., `pt-br`, `no`) in this repo.
+Runtime translations live in `src/wfsuite/i18n/<locale>.json` and supply the
+`@i18n(...)@` tokens used by pages and menus. The page documentation tool reads
+`src/wfsuite/i18n/en.json` directly without changing any translations.
 
-## Quick Checklist
-1. Add i18n source file under `bin/i18n/json/<locale>.json`.
-2. Build/verify locale JSON into `src/wfsuite/i18n/<locale>.json`.
-3. Add locale to workflow matrices so per-locale ZIPs are built.
-4. Add locale to the updater GUI locale list (in the updater repo).
-5. Add sound pack sources and generated audio (if applicable).
-6. (Optional) Update demo links or docs that mention locales.
+## Current source drift
 
-## Touch Points (By Area)
-### 1) i18n Source Files (authoritative inputs)
-Single-file locale sources (authoritative inputs):
-- `bin/i18n/json/<locale>.json`
+`bin/i18n/json/<locale>.json` is the intended generator input, but it is incomplete
+relative to the runtime files. Regenerating can remove real help text, including
+ACC_TRIM and BATTERY_CONFIG entries. Until those sources are reconciled, treat the
+runtime JSON as the practical source of truth, edit it directly, and mirror new
+keys into `bin/i18n/json/` as required by [AGENTS.md](../AGENTS.md).
 
-### 2) Locale JSON (generated output)
-Build or update:
-- `src/wfsuite/i18n/<locale>.json`
+Keep locale key structure consistent with English. Inspect diffs carefully before
+accepting generator output. Do not run `build-single-json.py` merely to make a
+documentation change. The translation helpers remain available:
 
-Built by (sync/copy):
-- `bin/i18n/build-single-json.py --only <locale>`
+```sh
+python3 bin/i18n/update-missing-translations.py --only <locale>
+python3 bin/i18n/update-max-lengths.py --only <locale>
+python3 bin/i18n/build-single-json.py --only <locale>
+```
 
-### 3) CI/Workflows (per-locale builds)
-Add/remove locales in the language matrix:
-- `.github/workflows/pr.yml`
-- `.github/workflows/push.yml`
-- `.github/workflows/release.yml`
-- `.github/workflows/snapshot.yml`
+## Adding a locale
 
-These workflows:
-- Build merged JSON per locale.
-- Resolve `@i18n(...)@` tags for each locale.
-- Package per-locale ZIPs.
-- Copy per-locale sound packs into the staged tree.
-
-### 4) Updater GUI (locale selection + asset naming)
-Update locale list in:
-- `rotorflight-lua-ethos-suite-updater/src/update_radio_gui.py`
-
-Specifically:
-- `AVAILABLE_LOCALES = ["en", ...]`
-
-The updater uses this to populate the locale dropdown and pick release assets named
-`rotorflight-lua-ethos-suite-<version>-<locale>.zip`.
-
-### 5) Sound Packs (optional but recommended)
-If you support spoken audio:
-- `bin/sound-generator/json/<locale>.json` (TTS strings)
-- `bin/sound-generator/soundpack/<locale>/` (generated audio)
-- `bin/sound-generator/generate-all.bat` (voice presets per locale)
-
-Note:
-- The release packaging steps copy `bin/sound-generator/soundpack/<locale>` into the locale build if present.
-
-### 6) Demo/Docs (optional)
-If you want demo links for the new locale:
-- `demo/readme.md`
-
-## Suggested Workflow
-1. Add/update translation JSON under `bin/i18n/json/<locale>.json`.
-2. Run `bin/i18n/update-max-lengths.py` to refresh per-key `max_length` in `en.json`.
-3. Run `bin/i18n/build-single-json.py --only <locale>` to rebuild `src/wfsuite/i18n/<locale>.json`.
-3. Add `<locale>` to all workflow matrices.
-4. Add `<locale>` to `AVAILABLE_LOCALES` in the updater GUI.
-5. Add or generate sound packs (if used).
-6. (Optional) Update demo/docs to mention the new locale.
-
+Create the locale files with the same keys as English and check the language
+matrices in `.github/workflows/`. Packaging uses `bin/package/build_package.py`,
+which includes locale generation and token resolution; review the generation step
+in light of the source drift above. Coordinate locale availability with the
+Wingflight updater and add sound pack data under `bin/sound-generator/` when needed.
