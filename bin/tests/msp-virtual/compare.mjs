@@ -10,7 +10,7 @@ const { lua, lauxlib, lualib, to_luastring } = fengari;
 const [cfgRoot, virtualLua, packLua, manifestPath] = process.argv.slice(2);
 const imp = (p) => import(pathToFileURL(`${cfgRoot}/${p}`).href);
 const { Manifest } = await imp("src/js/param/manifest.js");
-const { VirtualMsp } = await imp("src/js/param/virtual_msp.js");
+const { VirtualMsp, indexRequest } = await imp("src/js/param/virtual_msp.js");
 const { symmetricPairs } = await imp("src/js/param/verify_msp.js");
 const { MSPCodes } = await imp("src/js/msp/MSPCodes.js");
 
@@ -38,7 +38,7 @@ const jsIo = (groups) => ({
     async writeRange(pgn, off, bytes) { groups.get(pgn).set(bytes, off); },
 });
 const le = (v, w) => Array.from({ length: w }, (_, i) => (v >> (8 * i)) & 0xff);
-const requests = (c) => (c.index ? Array.from({ length: c.index.max }, (_, i) => le(i, c.index.w)) : [[]]);
+const requests = (c) => (c.index ? Array.from({ length: c.index.max }, (_, i) => indexRequest(c, i)) : [[]]);
 const luaTable = (bytes) => `{${[...bytes].join(",")}}`;
 const hex = (b) => [...b].map((x) => x.toString(16).padStart(2, "0")).join("");
 
@@ -117,7 +117,7 @@ for (const [code, c] of Object.entries(codecs)) {
 
 let setters = 0;
 for (const { get: getCode, set: setCode, indexed } of symmetricPairs(codecs, MSPCodes)) {
-  for (const request of indexed ? requests({ index: indexed }) : [[]]) {
+  for (const request of indexed ? requests(codecs[setCode]) : [[]]) {
     const a = makeBoard(), b = makeBoard();
     for (const [pgn, bytes] of a) b.get(pgn).set(bytes);
     const payload = [...request, ...(await new VirtualMsp(manifest, jsIo(a)).read(getCode, request))];
@@ -147,7 +147,7 @@ for (const [code, c] of Object.entries(codecs)) {
     const indices = c.index ? [...new Set([0, Math.floor(c.index.max / 2), c.index.max - 1])] : [null];
     for (const i of indices) {
         const payload = Array.from({ length }, () => random());
-        if (i !== null) payload.splice(0, c.index.w, ...le(i, c.index.w));
+        if (i !== null) payload.splice(0, c.index.w, ...indexRequest(c, i));
         const a = makeBoard();
         runLua(`B4 = ${luaBoard(a)}`);
         const jsRefused = await new VirtualMsp(manifest, jsIo(a)).write(Number(code), payload).then(() => false, () => true);
@@ -162,17 +162,24 @@ for (const [code, c] of Object.entries(codecs)) {
     }
 }
 
-// refusals must agree too: an out-of-range index
+// A request selecting no element (an index past the bound, an id not in the
+// map): refused by both, or accepted by both with nothing stored.
 for (const [code, c] of Object.entries(codecs)) {
-    if (c.dir === "in" && c.index) {
-        const r = runLua(`return run(BOARD, ${code}, {${c.index.max}, 0, 0, 0, 0, 0, 0, 0})`);
-        check(`indexed setter ${code} refuses index ${c.index.max}`, r === "ERR refused", r);
-    }
-    if (c.dir === "out" && c.index) {
-        const request = [...le(c.index.max, c.index.w), ...new Array((c.len ?? c.index.w) - c.index.w).fill(0)];
-        const r = runLua(`return run(BOARD, ${code}, ${luaTable(request)})`);
-        check(`indexed reply ${code} refuses index ${c.index.max}`, r === "ERR refused", r);
-    }
+    if (!c.index) continue;
+    let value = c.index.max;
+    while (c.index.map?.includes(value)) value++;
+    const length = c.dir === "in" ? (c.len ?? c.index.w + 8) : (c.len ?? c.index.w);
+    const request = [...le(value, c.index.w), ...new Array(length - c.index.w).fill(0)];
+    const a = makeBoard();
+    runLua(`B5 = ${luaBoard(a)}`);
+    const js = new VirtualMsp(manifest, jsIo(a));
+    const jsResult = await (c.dir === "in" ? js.write(Number(code), request).then(() => "") : js.read(Number(code), request).then(hex))
+        .catch(() => "refused");
+    const r = runLua(`return run(B5, ${code}, ${luaTable(request)})`);
+    const agree = jsResult === "refused" ? r.startsWith("ERR") : r === jsResult;
+    const boardsAgree = [...a.keys()].every((pgn) => runLua(`return dump(B5, ${pgn})`) === hex(a.get(pgn)));
+    check(`${c.dir === "in" ? "setter" : "reply"} ${code} selecting no element (${value}): ${jsResult || "accepted"}`,
+        agree && boardsAgree, `lua ${r}`);
 }
 
 // ... and an out-of-range selector: both refuse rather than read past the array

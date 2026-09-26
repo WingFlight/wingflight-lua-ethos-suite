@@ -91,12 +91,21 @@ local function decode(s)
     indexW = s:byte(2),
     indexMax = strUInt(s, 3, 2),
     indexStride = strUInt(s, 5, 2),
-    lenKind = s:byte(7),
-    len = strUInt(s, 8, 2),
+    indexMissIgnored = s:byte(7) == 1,
+    lenKind = s:byte(9),
+    len = strUInt(s, 10, 2),
     ops = {},
   }
-  local nops = strUInt(s, 10, 2)
-  local p = 12
+  local nops = strUInt(s, 12, 2)
+  local p = 14
+  local nmap = s:byte(8)
+  if nmap > 0 then
+    codec.indexMap = {}
+    for k = 1, nmap do
+      codec.indexMap[k] = strUInt(s, p, 2)
+      p = p + 2
+    end
+  end
   for i = 1, nops do
     local kind = s:byte(p)
     local op
@@ -150,7 +159,8 @@ local function needsSelection(codec)
   return false
 end
 
--- The index a request selects (its first bytes), or nil where the firmware
+-- The element a request selects (its first bytes), false where the firmware
+-- accepts a request that selects none and does nothing, or nil where it
 -- refuses the request's length or index.
 local function requestIndex(codec, data)
   local n = #data
@@ -158,8 +168,19 @@ local function requestIndex(codec, data)
   if codec.lenKind == 2 and n < codec.len then return nil end
   if codec.indexW == 0 then return 0 end
   if n < codec.indexW then return nil end
-  local index = tabUInt(data, 1, codec.indexW)
-  if index >= codec.indexMax then return nil end
+  local value = tabUInt(data, 1, codec.indexW)
+  local index = value
+  if codec.indexMap then
+    -- the request names an element by the id a const table gives it
+    index = nil
+    for k = 1, #codec.indexMap do
+      if codec.indexMap[k] == value then index = k - 1; break end
+    end
+  end
+  if index == nil or index >= codec.indexMax then
+    if codec.indexMissIgnored then return false end
+    return nil
+  end
   return index
 end
 
@@ -191,7 +212,7 @@ function Virtual:handles(msg)
   local n = msg.payload and #msg.payload or 0
   local indexW = s:byte(2)
   if indexW == 0 then return n == 0 end
-  local want = s:byte(7) == 1 and strUInt(s, 8, 2) or indexW
+  local want = s:byte(9) == 1 and strUInt(s, 10, 2) or indexW
   return n == want
 end
 
@@ -222,7 +243,12 @@ function Virtual:expand(msg, queue)
   -- Parse the request as the firmware would, refuse where it did.
   local data = msg.payload or {}
   local index = requestIndex(codec, data)
-  if not index then return fail("refused") end
+  if index == nil then return fail("refused") end
+  if index == false then
+    -- accepted, and nothing stored (or, for a reply, nothing written)
+    if msg.processReply then msg.processReply(msg, {}) end
+    return
+  end
 
   local job = { selection = nil, which = {}, bytes = {} }
 
