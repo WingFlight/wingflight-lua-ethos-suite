@@ -7603,6 +7603,13 @@
           "reverse_text": false,
           "translation": "Zaznamenat data MSP"
         },
+        "addressed_access": {
+          "english": "Addressed MSP",
+          "max_length": 13,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Addressed MSP"
+        },
         "low_voltage_alert": {
           "english": "Low voltage alert",
           "max_length": 17,

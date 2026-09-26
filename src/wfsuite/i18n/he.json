@@ -7603,6 +7603,13 @@
           "reverse_text": true,
           "translation": "רישום נתוני MSP"
         },
+        "addressed_access": {
+          "english": "Addressed MSP",
+          "max_length": 13,
+          "needs_translation": true,
+          "reverse_text": true,
+          "translation": "Addressed MSP"
+        },
         "low_voltage_alert": {
           "english": "Low voltage alert",
           "max_length": 17,

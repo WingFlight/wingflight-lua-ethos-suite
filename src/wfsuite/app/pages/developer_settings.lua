@@ -108,6 +108,18 @@ local function open(opts)
       updateSaveEnabled()
     end)
 
+  line = form.addLine("@i18n(app.modules.settings.addressed_access)@")
+  form.addBooleanField(line, nil,
+    function()
+      return settings and settings.developer and settings.developer.addressed_access == true
+    end,
+    function(value)
+      if not settings then return end
+      settings.developer = settings.developer or {}
+      settings.developer.addressed_access = value == true
+      updateSaveEnabled()
+    end)
+
   line = form.addLine("@i18n(app.modules.settings.memory_logs)@")
   form.addBooleanField(line, nil,
     function()

@@ -130,15 +130,25 @@ end
 function Queue:processQueue()
   if self:isProcessed() then return end
 
+  local isSim = system.getVersion().simulation == true
+
   if not self.current then
     self.current = popFirst(self.pending)
     self.retryCount = 0
     self.lastSent = nil
+    -- Legacy config opcodes the firmware build's codec pack covers may be
+    -- answered from addressed parameter access instead (tasks/msp/virtual.lua;
+    -- opt-in, set by tasks/session.lua). It queues its own PARAM_READ /
+    -- PARAM_WRITE messages at the front and delivers to this message itself.
+    local virtual = self.virtual
+    if virtual and not isSim and virtual:intercept(self.current, self) then
+      self.current = nil
+      return
+    end
   end
 
   local msg = self.current
   local common = self.common
-  local isSim = system.getVersion().simulation == true
 
   if isSim then
     if not msg.simulatorResponse then

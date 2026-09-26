@@ -42,6 +42,10 @@ local DEFAULTS = {
     debug_logs = false,
     log_msp = false,
     memory_logs = false,
+    -- Experimental, off: answer legacy MSP config reads from addressed
+    -- parameter access (tasks/msp/virtual.lua), each opcode only after this
+    -- connection saw it match the firmware's own reply.
+    addressed_access = false,
     -- Simulator-only (see tasks/session.lua's runHandshake()): which
     -- fixture to hand the MSP_API_VERSION handshake read, to exercise the
     -- dashboard's unsupported-firmware-family state on demand. "invalid"
@@ -231,6 +235,7 @@ local function normalize(settings)
   settings.developer.debug_logs = coerceBool(settings.developer.debug_logs, DEFAULTS.developer.debug_logs)
   settings.developer.log_msp = coerceBool(settings.developer.log_msp, DEFAULTS.developer.log_msp)
   settings.developer.memory_logs = coerceBool(settings.developer.memory_logs, DEFAULTS.developer.memory_logs)
+  settings.developer.addressed_access = coerceBool(settings.developer.addressed_access, DEFAULTS.developer.addressed_access)
   settings.developer.simulated_api_version = coerceEnum(settings.developer.simulated_api_version, DEFAULTS.developer.simulated_api_version, SIMULATED_API_VERSION_MODES)
 
   settings.events = normalizeEvents(settings.events)
@@ -339,6 +344,11 @@ end
 function settings_store.syncNameEnabled(settings)
   local general = type(settings) == "table" and settings.general or nil
   return coerceBool(fieldValue(general, "syncname"), DEFAULTS.general.syncname) == true
+end
+
+function settings_store.addressedAccessEnabled(settings)
+  local developer = type(settings) == "table" and settings.developer or nil
+  return coerceBool(fieldValue(developer, "addressed_access"), DEFAULTS.developer.addressed_access) == true
 end
 
 function settings_store.developerModeEnabled(settings)
