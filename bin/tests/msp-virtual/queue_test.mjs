@@ -34,6 +34,11 @@ const firmware = {
 const [INDEXED, indexedCodec] = Object.entries(manifest.raw.msp_codecs).find(
     ([, c]) => c.dir === "out" && c.index?.w === 1 && (c.len ?? 1) === 1,
 );
+// Stage B: what the firmware's own setter stores for a request (applied by
+// the fake transport), and one aimed elsewhere, as a wrong codec would see it.
+const SETTER_PAYLOAD = [...(await js.read(MSPCodes.MSP_ARMING_CONFIG))].map((b) => (b + 1) & 0xff);
+const setterRuns = await js.plan(SETTER, SETTER_PAYLOAD);
+const luaRuns = (runs) => `{${runs.map((r) => `{${r.pgn},${r.offset},{${[...r.bytes].join(",")}}}`).join(",")}}`;
 const firmwareIndexed = [];
 for (let i = 0; i < 2; i++) firmwareIndexed.push([...(await js.read(Number(INDEXED), [i]))]);
 
@@ -58,6 +63,8 @@ lua_(`
   FIRMWARE = {${Object.entries(firmware).map(([c, b]) => `[${c}]={${b.join(",")}}`).join(",")}}
   FIRMWARE_INDEXED = { [${INDEXED}] = {${firmwareIndexed.map((b, i) => `[${i}]={${b.join(",")}}`).join(",")}} }
   WIRE = {}      -- every command that went over the wire, in order
+  FIRMWARE_WRITES = {}  -- cmd -> { {pgn, off, bytes}, ... } the firmware's setter stores
+  FIRMWARE_ERRORS = {}  -- cmd -> true: the firmware answers MSP_RESULT_ERROR
   local pendingReply
   COMMON = {
     mspSendRequest = function(cmd, payload)
@@ -69,6 +76,15 @@ lua_(`
         for k = 1, len do r[k] = BOARD[pgn][off + k] end
         pendingReply = { cmd, r }
       elseif cmd == 0x5F23 then
+        local pgn, off = p[1] + p[2] * 256, p[3] + p[4] * 256
+        for k = 5, #p do BOARD[pgn][off + k - 4] = p[k] end
+        pendingReply = { cmd, {} }
+      elseif FIRMWARE_ERRORS[cmd] then
+        pendingReply = { cmd, {}, "error" }
+      elseif FIRMWARE_WRITES[cmd] then
+        for _, w in ipairs(FIRMWARE_WRITES[cmd]) do
+          for k = 1, #w[3] do BOARD[w[1]][w[2] + k] = w[3][k] end
+        end
         pendingReply = { cmd, {} }
       else
         local byIndex = FIRMWARE_INDEXED[cmd]
@@ -82,7 +98,7 @@ lua_(`
       local r = pendingReply; pendingReply = nil
       local copy = {}
       for i = 1, #r[2] do copy[i] = r[2][i] end
-      return r[1], copy, nil
+      return r[1], copy, r[3]
     end,
     mspClearBufs = function() pendingReply = nil end,
   }
@@ -158,12 +174,45 @@ check("indexed reply, index 1 again, answered locally",
 check("indexed reply with extra arguments goes to the firmware",
     lua_(`request(Q, ${INDEXED}, {0, 0}); return tostring(wireCount(${INDEXED}))`) === "3");
 
-// 6. With no virtual layer (setting off) nothing is intercepted.
+// 6. Setters (stage B), with writes enabled: the first request goes to the
+//    firmware and is verified behind it by a dry run; later ones are written
+//    through PARAM_WRITE. Nothing extra is written while verifying.
+lua_(`WIRE = {}; V.writes = true; FIRMWARE_WRITES[${SETTER}] = ${luaRuns(setterRuns)}`);
+const payloadLua = `{${SETTER_PAYLOAD.join(",")}}`;
+const firstSet = lua_(`return request(Q, ${SETTER}, ${payloadLua})`);
+check("setter, first request, goes to the firmware", firstSet === "" && lua_(`return tostring(wireCount(${SETTER}))`) === "1", firstSet);
+check("and is verified without writing", lua_(`return tostring(VERIFIED[${SETTER}])`) === "true" && lua_(`return tostring(wireCount(0x5F23))`) === "0");
+const bumped = SETTER_PAYLOAD.map((b) => (b + 1) & 0xff);
+const bumpedRuns = await js.plan(SETTER, bumped);
+lua_(`request(Q, ${SETTER}, {${bumped.join(",")}})`);
+check("a verified setter is written through PARAM_WRITE, not sent",
+    lua_(`return tostring(wireCount(${SETTER}))`) === "1" && Number(lua_(`return tostring(wireCount(0x5F23))`)) >= 1);
+check("and stores what the firmware's setter would",
+    bumpedRuns.every((r) => lua_(`local t = {} for k = 1, ${r.bytes.length} do t[k] = BOARD[${r.pgn}][${r.offset} + k] end return table.concat(t, ",")`) === [...r.bytes].join(",")));
+
+// A codec that stores elsewhere than the firmware: not verified, stays on it.
+lua_(`WIRE = {}; V2 = Virtual.new(PACK); V2.writes = true; Q3 = Queue.new(COMMON, DEBUG); Q3.virtual = V2
+      V2.onVerified = function(cmd, same) VERIFIED2 = same end
+      FIRMWARE_WRITES[${SETTER}] = ${luaRuns(setterRuns.map((r) => ({ ...r, offset: r.offset + 1 })))}`);
+lua_(`request(Q3, ${SETTER}, ${payloadLua}); request(Q3, ${SETTER}, ${payloadLua})`);
+check("a setter the firmware stores elsewhere is kept on the firmware",
+    lua_(`return tostring(VERIFIED2)`) === "false" && lua_(`return tostring(wireCount(${SETTER}))`) === "2");
+
+// A request the firmware refuses verifies nothing; the next one is watched.
+lua_(`WIRE = {}; V4 = Virtual.new(PACK); V4.writes = true; Q4 = Queue.new(COMMON, DEBUG); Q4.virtual = V4
+      FIRMWARE_ERRORS[${SETTER}] = true; FIRMWARE_WRITES[${SETTER}] = ${luaRuns(setterRuns)}`);
+const refused = lua_(`return request(Q4, ${SETTER}, ${payloadLua})`);
+lua_(`FIRMWARE_ERRORS[${SETTER}] = nil`);
+lua_(`request(Q4, ${SETTER}, ${payloadLua})`);
+check("a refused first request reaches the caller's errorHandler and verifies nothing",
+    refused.startsWith("ERR") && lua_(`return tostring(V4.verifiedSetters[${SETTER}])`) === "true", refused);
+
+// 7. With no virtual layer (setting off) nothing is intercepted.
 lua_(`Q2 = Queue.new(COMMON, DEBUG); WIRE = {}`);
 lua_(`request(Q2, ${REPLY}); request(Q2, ${REPLY})`);
 check("without the setting both requests hit the firmware", lua_(`return tostring(wireCount(${REPLY}))`) === "2");
 
-// 7. build id decoding
+// 8. build id decoding
 lua_(`BID = dofile("${S}/lib/msp_build_id.lua")`);
 check("build id decodes when valid",
     lua_(`return tostring(BID.decode({1, 0x77,0x9b,0xbd,0x3c,0xc4,0x38,0x14,0xe0, 2,0, 0,0,0,0}))`) === "779bbd3cc43814e0");

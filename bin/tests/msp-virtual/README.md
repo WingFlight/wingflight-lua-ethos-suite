@@ -32,7 +32,9 @@ node queue_test.mjs ../../../../wingflight-configurator ../../../src/wfsuite \
   transport: the first request for an opcode goes to the firmware and is
   verified behind it; later ones are answered locally; an indexed reply is
   verified per index; an opcode whose codec disagrees with the firmware,
-  setters, and requests with other arguments keep going to the firmware;
-  nothing is intercepted with the setting off.
+  and requests with other arguments keep going to the firmware; setters
+  go to the firmware unless writes are enabled, and then are verified on
+  first use by a dry run (a setter the firmware stores elsewhere, or refuses,
+  is not); nothing is intercepted with the setting off.
 
 fengari has no `collectgarbage()`; `queue_test.mjs` stubs it.

@@ -54,9 +54,18 @@ on, `Queue:processQueue()` asks `Virtual:intercept()` about each message as it
 is dequeued (never in the simulator):
 
 1. An opcode the pack has no codec for goes to the firmware.
-2. A setter goes to the firmware. Setters are not taken yet: a wrong setter
-   would write, not just show, the wrong bytes (the configurator gates them
-   the same way).
+2. A setter goes to the firmware -- unless **Developer settings → Addr.
+   writes** is on as well. Then each setter opcode's first request on a
+   connection goes to the firmware, and once the firmware has taken it,
+   `virtual.lua` runs the codec on the same payload as a dry run: it must
+   find on the board exactly the bytes it would store. That makes the
+   setter *verified*, and later requests for it are written through
+   `PARAM_WRITE`. Nothing extra is written to the board to verify. A setter
+   the firmware refused, or a request that stored nothing, verifies
+   nothing, and the next request is watched instead. Setter side effects
+   (reloading a profile, rebuilding filters) are not replayed: the save
+   (`MSP_EEPROM_WRITE`, always the firmware's) applies them, as it does for
+   the configurator.
 3. A request carrying arguments goes to the firmware, unless the codec is
    indexed and the arguments are exactly its index.
 4. The first request for a reply opcode on a connection goes to the firmware,
