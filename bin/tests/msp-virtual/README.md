@@ -19,16 +19,20 @@ node queue_test.mjs ../../../../wingflight-configurator ../../../src/wfsuite \
 
 - **`compare.mjs`** runs every codec in the pack through `virtual.lua` and
   through the configurator's `src/js/param/virtual_msp.js` on the same random
-  board (non-zero profile selections), and requires identical reply bytes,
-  identical boards after each setter, and the same index refusals. The
+  board (non-zero profile selections), and requires identical reply bytes
+  (indexed replies at every index), identical boards after each setter --
+  written back from its getter, and fed random payloads -- and the same
+  refusals of an index or a selector out of range. The
   configurator's layer is the one verified against the firmware itself
   (`verify_msp`, and on SITL `scripts/verify-msp-sitl.mjs`), so agreement here
   carries that verification over to the radio. A planted bug in sign
-  extension or profile addressing makes it fail.
+  extension, profile or index addressing, a selector or a string bound makes
+  it fail.
 - **`queue_test.mjs`** drives the real `tasks/msp/queue.lua` with a fake
   transport: the first request for an opcode goes to the firmware and is
-  verified behind it; later ones are answered locally; an opcode whose codec
-  disagrees with the firmware, setters, and requests with arguments keep going
-  to the firmware; nothing is intercepted with the setting off.
+  verified behind it; later ones are answered locally; an indexed reply is
+  verified per index; an opcode whose codec disagrees with the firmware,
+  setters, and requests with other arguments keep going to the firmware;
+  nothing is intercepted with the setting off.
 
 fengari has no `collectgarbage()`; `queue_test.mjs` stubs it.

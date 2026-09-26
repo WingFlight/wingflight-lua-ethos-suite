@@ -33,6 +33,10 @@ local PARAM_READ = 0x5F22
 local PARAM_WRITE = 0x5F23
 local SYSTEM_CONFIG_PGN = 18
 local CHUNK = 128 -- MSP-over-telemetry buffers are 192 in / 320 out
+local PACK_FORMAT = 2
+
+-- op kinds (wf_lua_pack.py)
+local K_FIELD, K_CONST, K_SKIP, K_DATA, K_SELECT, K_STR_OUT, K_STR_IN = 1, 2, 3, 4, 5, 6, 7
 
 -- op flags (wf_lua_pack.py)
 local F_OPTIONAL, F_INDEXED, F_SIGNED, F_WIRE_SIGNED = 1, 2, 4, 8
@@ -78,23 +82,26 @@ local function putInt(out, value, n)
   end
 end
 
--- Decode one codec string into a header and a list of op tables.
+-- Decode one codec string into a header and a list of op tables. Every op
+-- that touches a group gets `size` (its bytes there); every op gets `w` (its
+-- request/reply bytes; 0 for a string, whose length varies).
 local function decode(s)
   local codec = {
     dir = s:byte(1),
     indexW = s:byte(2),
     indexMax = strUInt(s, 3, 2),
-    lenKind = s:byte(5),
-    len = strUInt(s, 6, 2),
+    indexStride = strUInt(s, 5, 2),
+    lenKind = s:byte(7),
+    len = strUInt(s, 8, 2),
     ops = {},
   }
-  local nops = strUInt(s, 8, 2)
-  local p = 10
+  local nops = strUInt(s, 10, 2)
+  local p = 12
   for i = 1, nops do
     local kind = s:byte(p)
     local op
-    if kind == 1 then
-      op = { kind = 1, w = s:byte(p + 1), pgn = strUInt(s, p + 2, 2), off = strUInt(s, p + 4, 2),
+    if kind == K_FIELD then
+      op = { kind = kind, w = s:byte(p + 1), pgn = strUInt(s, p + 2, 2), off = strUInt(s, p + 4, 2),
              size = s:byte(p + 6), flags = s:byte(p + 7) }
       p = p + 8
       if hasFlag(op.flags, F_CHECK) then
@@ -102,16 +109,31 @@ local function decode(s)
         op.max = toSigned(strUInt(s, p + 4, 4), 4)
         p = p + 8
       end
-    elseif kind == 2 then
-      op = { kind = 2, w = s:byte(p + 1), value = toSigned(strUInt(s, p + 2, 4), 4), flags = 0 }
+    elseif kind == K_CONST then
+      op = { kind = kind, w = s:byte(p + 1), value = toSigned(strUInt(s, p + 2, 4), 4), flags = 0 }
       p = p + 6
-    elseif kind == 3 then
-      op = { kind = 3, w = s:byte(p + 1), flags = s:byte(p + 2) }
+    elseif kind == K_SKIP then
+      op = { kind = kind, w = s:byte(p + 1), flags = s:byte(p + 2) }
       p = p + 3
-    elseif kind == 4 then
-      op = { kind = 4, len = strUInt(s, p + 1, 2), pgn = strUInt(s, p + 3, 2), off = strUInt(s, p + 5, 2),
+    elseif kind == K_DATA then
+      local len = strUInt(s, p + 1, 2)
+      op = { kind = kind, w = len, size = len, pgn = strUInt(s, p + 3, 2), off = strUInt(s, p + 5, 2),
              flags = s:byte(p + 7) }
       p = p + 8
+    elseif kind == K_SELECT then
+      op = { kind = kind, w = s:byte(p + 1), pgn = strUInt(s, p + 2, 2), off = strUInt(s, p + 4, 2),
+             size = s:byte(p + 6), flags = s:byte(p + 7),
+             selPgn = strUInt(s, p + 8, 2), selOff = strUInt(s, p + 10, 2), selSize = s:byte(p + 12),
+             stride = strUInt(s, p + 13, 2), count = strUInt(s, p + 15, 2) }
+      p = p + 17
+    elseif kind == K_STR_OUT then
+      op = { kind = kind, w = 0, size = strUInt(s, p + 1, 2), pgn = strUInt(s, p + 3, 2),
+             off = strUInt(s, p + 5, 2), flags = s:byte(p + 7) }
+      p = p + 8
+    elseif kind == K_STR_IN then
+      op = { kind = kind, w = 0, max = strUInt(s, p + 1, 2), size = strUInt(s, p + 3, 2),
+             pgn = strUInt(s, p + 5, 2), off = strUInt(s, p + 7, 2), flags = s:byte(p + 9) }
+      p = p + 10
     else
       return nil, "unknown op kind " .. tostring(kind)
     end
@@ -128,6 +150,19 @@ local function needsSelection(codec)
   return false
 end
 
+-- The index a request selects (its first bytes), or nil where the firmware
+-- refuses the request's length or index.
+local function requestIndex(codec, data)
+  local n = #data
+  if codec.lenKind == 1 and n ~= codec.len then return nil end
+  if codec.lenKind == 2 and n < codec.len then return nil end
+  if codec.indexW == 0 then return 0 end
+  if n < codec.indexW then return nil end
+  local index = tabUInt(data, 1, codec.indexW)
+  if index >= codec.indexMax then return nil end
+  return index
+end
+
 function Virtual.new(pack)
   return setmetatable({ pack = pack }, Virtual)
 end
@@ -141,49 +176,59 @@ function Virtual.load(buildId, dir)
   if not ok or type(pack) ~= "table" or pack.build ~= buildId then
     return nil, "codec pack " .. path .. " is not for build " .. tostring(buildId)
   end
+  if pack.format ~= PACK_FORMAT then
+    return nil, "codec pack " .. path .. " is format " .. tostring(pack.format) .. ", not " .. PACK_FORMAT
+  end
   return Virtual.new(pack)
 end
 
 function Virtual:handles(msg)
   local s = self.pack.codecs[msg.command]
   if not s then return false end
-  -- A reply codec answers a plain request only; a request with arguments
-  -- (a page, an index) is not what the codec describes.
-  if s:byte(1) == 0 and msg.payload and #msg.payload > 0 then return false end
-  return true
+  if s:byte(1) ~= 0 then return true end
+  -- A reply codec answers a plain request, or one of exactly its index; other
+  -- arguments (a page, a mode) are not what the codec describes.
+  local n = msg.payload and #msg.payload or 0
+  local indexW = s:byte(2)
+  if indexW == 0 then return n == 0 end
+  local want = s:byte(7) == 1 and strUInt(s, 8, 2) or indexW
+  return n == want
 end
 
 -- Byte offset of an op in its group, for the selection / element index.
-function Virtual:offset(op, selection, index)
+function Virtual:offset(codec, op, selection, index)
   local g = self.pack.groups[op.pgn]
   local elem = floor(g[1] / g[2])
   local f = op.flags
   if hasFlag(f, F_PID) then return op.off + selection.pid * elem end
   if hasFlag(f, F_RATE) then return op.off + selection.rate * elem end
   if hasFlag(f, F_TV) then return op.off + selection.tv * elem end
-  if hasFlag(f, F_INDEXED) then return op.off + index * elem end
+  if hasFlag(f, F_INDEXED) then
+    local stride = codec.indexStride > 0 and codec.indexStride or elem
+    return op.off + index * stride
+  end
   return op.off
 end
 
 -- Build the chain for `msg` and put its first step at the front of the queue.
 function Virtual:expand(msg, queue)
-  local codec, err = decode(self.pack.codecs[msg.command])
-  if not codec then
-    if msg.errorHandler then msg.errorHandler(err) end
-    return
-  end
-
-  local job = { selection = nil, bytes = {} }
-
   local function fail(reason)
     if msg.errorHandler then msg.errorHandler(reason) end
   end
 
+  local codec, err = decode(self.pack.codecs[msg.command])
+  if not codec then return fail(err) end
+
+  -- Parse the request as the firmware would, refuse where it did.
+  local data = msg.payload or {}
+  local index = requestIndex(codec, data)
+  if not index then return fail("refused") end
+
+  local job = { selection = nil, which = {}, bytes = {} }
+
   local function push(step)
     table.insert(queue.pending, 1, step)
   end
-
-  local run -- run(i): queue step i, or finish
 
   local function readStep(pgn, off, len, store)
     return {
@@ -209,121 +254,169 @@ function Virtual:expand(msg, queue)
     }
   end
 
-  -- The board's profile selection, when the codec addresses a profile.
-  local function withSelection(continue)
-    if not needsSelection(codec) then return continue() end
-    local sel = self.pack.selection
-    local lo = math.min(sel.pid, sel.rate, sel.tv)
-    local hi = math.max(sel.pid, sel.rate, sel.tv)
-    push(readStep(SYSTEM_CONFIG_PGN, lo, hi - lo + 1, function(buf)
-      job.selection = { pid = buf[sel.pid - lo + 1], rate = buf[sel.rate - lo + 1], tv = buf[sel.tv - lo + 1] }
-      continue()
-    end))
+  -- Run `steps` (each queues a message and calls its continuation from the
+  -- reply) one after another, then `done`.
+  local function sequence(steps, done)
+    local i = 0
+    local function nextStep()
+      i = i + 1
+      if steps[i] then return steps[i](nextStep) end
+      done()
+    end
+    nextStep()
   end
 
-  if codec.dir == 0 then
-    -- Reply: read the span each group needs, then assemble.
-    withSelection(function()
-      local placed, spans, order = {}, {}, {}
-      for i = 1, #codec.ops do
-        local op = codec.ops[i]
-        if op.kind == 1 or op.kind == 4 then
-          local at = self:offset(op, job.selection, 0)
-          local len = op.kind == 1 and op.size or op.len
-          placed[i] = at
-          local s = spans[op.pgn]
-          if not s then
-            spans[op.pgn] = { lo = at, hi = at + len }
-            order[#order + 1] = op.pgn
-          else
-            if at < s.lo then s.lo = at end
-            if at + len > s.hi then s.hi = at + len end
-          end
-        end
-      end
-
-      local reads = {}
-      for _, pgn in ipairs(order) do
-        local s = spans[pgn]
-        local at = s.lo
-        while at < s.hi do
-          local len = math.min(CHUNK, s.hi - at)
-          reads[#reads + 1] = { pgn = pgn, off = at, len = len }
-          at = at + len
-        end
-      end
-
-      local function assemble()
-        local out = {}
-        for i = 1, #codec.ops do
-          local op = codec.ops[i]
-          if op.kind == 2 then
-            putInt(out, op.value, op.w)
-          elseif op.kind == 1 then
-            local v = tabUInt(job.bytes[op.pgn], placed[i] + 1, op.size)
-            if hasFlag(op.flags, F_SIGNED) then v = toSigned(v, op.size) end
-            putInt(out, v, op.w) -- C: sign-extend signed fields, zero-extend unsigned
-          elseif op.kind == 4 then
-            local b = job.bytes[op.pgn]
-            for k = 1, op.len do out[#out + 1] = b[placed[i] + k] or 0 end
-          end
-        end
-        if msg.processReply then msg.processReply(msg, out) end
-      end
-
-      local i = 0
-      run = function()
-        i = i + 1
-        local r = reads[i]
-        if not r then return assemble() end
-        push(readStep(r.pgn, r.off, r.len, function(buf)
-          local g = job.bytes[r.pgn]
-          if not g then g = {}; job.bytes[r.pgn] = g end
-          for k = 1, r.len do g[r.off + k] = buf[k] end
-          run()
+  -- What decides where ops land before their bytes are read: the board's
+  -- profile selection, and each selected element's selector.
+  local prepare = {}
+  if needsSelection(codec) then
+    prepare[#prepare + 1] = function(continue)
+      local sel = self.pack.selection
+      local lo = math.min(sel.pid, sel.rate, sel.tv)
+      local hi = math.max(sel.pid, sel.rate, sel.tv)
+      push(readStep(SYSTEM_CONFIG_PGN, lo, hi - lo + 1, function(buf)
+        job.selection = { pid = buf[sel.pid - lo + 1], rate = buf[sel.rate - lo + 1], tv = buf[sel.tv - lo + 1] }
+        continue()
+      end))
+    end
+  end
+  for i = 1, #codec.ops do
+    local op = codec.ops[i]
+    if op.kind == K_SELECT then
+      prepare[#prepare + 1] = function(continue)
+        push(readStep(op.selPgn, op.selOff, op.selSize, function(buf)
+          job.which[i] = tabUInt(buf, 1, op.selSize)
+          continue()
         end))
       end
-      run()
+    end
+  end
+
+  -- Offset of every op that touches a group, or nil and the reason.
+  local function place()
+    local placed = {}
+    for i = 1, #codec.ops do
+      local op = codec.ops[i]
+      if op.pgn then
+        local at = self:offset(codec, op, job.selection, index)
+        if op.kind == K_SELECT then
+          -- out of range, the firmware itself would read past the array
+          if job.which[i] >= op.count then return nil, "selector_out_of_range" end
+          at = at + job.which[i] * op.stride
+        end
+        if at + op.size > self.pack.groups[op.pgn][1] then return nil, "codec_out_of_range" end
+        placed[i] = at
+      end
+    end
+    return placed
+  end
+
+  local function reply(placed)
+    -- Only the span of each group the reply needs.
+    local spans, order = {}, {}
+    for i = 1, #codec.ops do
+      local op, at = codec.ops[i], placed[i]
+      if at then
+        local s = spans[op.pgn]
+        if not s then
+          spans[op.pgn] = { lo = at, hi = at + op.size }
+          order[#order + 1] = op.pgn
+        else
+          if at < s.lo then s.lo = at end
+          if at + op.size > s.hi then s.hi = at + op.size end
+        end
+      end
+    end
+
+    local reads = {}
+    for _, pgn in ipairs(order) do
+      local s = spans[pgn]
+      local at = s.lo
+      while at < s.hi do
+        local off, len = at, math.min(CHUNK, s.hi - at)
+        reads[#reads + 1] = function(continue)
+          push(readStep(pgn, off, len, function(buf)
+            local g = job.bytes[pgn]
+            if not g then g = {}; job.bytes[pgn] = g end
+            for k = 1, len do g[off + k] = buf[k] end
+            continue()
+          end))
+        end
+        at = at + len
+      end
+    end
+
+    sequence(reads, function()
+      local out = {}
+      for i = 1, #codec.ops do
+        local op = codec.ops[i]
+        local b, at = job.bytes[op.pgn], placed[i]
+        local kind = op.kind
+        if kind == K_CONST then
+          putInt(out, op.value, op.w)
+        elseif (kind == K_FIELD or kind == K_SELECT) and op.w ~= op.size then
+          local v = tabUInt(b, at + 1, op.size)
+          if hasFlag(op.flags, F_SIGNED) then v = toSigned(v, op.size) end
+          putInt(out, v, op.w) -- C: sign-extend signed fields, zero-extend unsigned
+        elseif kind == K_FIELD or kind == K_SELECT or kind == K_DATA then
+          -- the bytes as stored, whatever the width (64-bit fields too)
+          for k = 1, op.size do out[#out + 1] = b[at + k] or 0 end
+        elseif kind == K_STR_OUT then
+          for k = 1, op.size do
+            local c = b[at + k] or 0
+            if c == 0 then break end
+            out[#out + 1] = c
+          end
+        else
+          return fail("op_in_reply")
+        end
+      end
+      if msg.processReply then msg.processReply(msg, out) end
     end)
-    return
   end
 
-  -- Setter: parse the payload as the firmware would, refuse where it did.
-  local data = msg.payload or {}
-  local n = #data
-  if codec.lenKind == 1 and n ~= codec.len then return fail("refused") end
-  if codec.lenKind == 2 and n < codec.len then return fail("refused") end
-  local pos = 1
-  local index = 0
-  if codec.indexW > 0 then
-    if n < codec.indexW then return fail("refused") end
-    index = tabUInt(data, 1, codec.indexW)
-    pos = 1 + codec.indexW
-    if index >= codec.indexMax then return fail("refused") end
-  end
-
-  withSelection(function()
+  local function setter(placed)
+    local n = #data
+    local pos = 1 + codec.indexW
     local patches, order = {}, {}
+    local function patch(pgn, at, bytes)
+      local p = patches[pgn]
+      if not p then p = {}; patches[pgn] = p; order[#order + 1] = pgn end
+      for k = 1, #bytes do p[at + k - 1] = bytes[k] end
+    end
+
     for i = 1, #codec.ops do
       local op = codec.ops[i]
       local w = op.w
-      if pos + w - 1 > n then
+      if op.kind == K_STR_IN then
+        -- the field cleared, then what the request sent, at most max
+        local take = math.min(op.max, n - pos + 1)
+        local bytes = {}
+        for k = 1, op.size do bytes[k] = 0 end
+        for k = 1, take do bytes[k] = data[pos + k - 1] end
+        pos = pos + take
+        patch(op.pgn, placed[i], bytes)
+      elseif pos + w - 1 > n then
+        -- the firmware would read past the request; an optional tail is left out
         if not hasFlag(op.flags, F_OPTIONAL) then return fail("refused") end
-      elseif op.kind == 3 then
+      elseif op.kind == K_SKIP then
         pos = pos + w
-      elseif op.kind == 1 then
+      elseif op.kind ~= K_FIELD and op.kind ~= K_SELECT then
+        return fail("op_in_setter")
+      elseif w == op.size and not op.min then
+        -- the bytes as sent, whatever the width (64-bit fields too)
+        local bytes = {}
+        for k = 1, w do bytes[k] = data[pos + k - 1] end
+        pos = pos + w
+        patch(op.pgn, placed[i], bytes)
+      else
         local v = tabUInt(data, pos, w)
         if hasFlag(op.flags, F_WIRE_SIGNED) then v = toSigned(v, w) end
         pos = pos + w
         if op.min and (v < op.min or v > op.max) then return fail("refused") end
         local bytes = {}
         putInt(bytes, v, op.size) -- the store truncates to the field
-        local at = self:offset(op, job.selection, index)
-        local p = patches[op.pgn]
-        if not p then p = {}; patches[op.pgn] = p; order[#order + 1] = op.pgn end
-        for k = 1, op.size do p[at + k - 1] = bytes[k] end
-      else
-        return fail("refused")
+        patch(op.pgn, placed[i], bytes)
       end
     end
 
@@ -338,24 +431,22 @@ function Virtual:expand(msg, queue)
       while s <= #offs do
         local e = s
         while e < #offs and offs[e + 1] == offs[e] + 1 and e - s + 1 < CHUNK do e = e + 1 end
-        local bytes = {}
+        local off, bytes = offs[s], {}
         for k = s, e do bytes[#bytes + 1] = p[offs[k]] end
-        writes[#writes + 1] = { pgn = pgn, off = offs[s], bytes = bytes }
+        writes[#writes + 1] = function(continue) push(writeStep(pgn, off, bytes, continue)) end
         s = e + 1
       end
     end
 
-    local i = 0
-    run = function()
-      i = i + 1
-      local w = writes[i]
-      if not w then
-        if msg.processReply then msg.processReply(msg, {}) end
-        return
-      end
-      push(writeStep(w.pgn, w.off, w.bytes, run))
-    end
-    run()
+    sequence(writes, function()
+      if msg.processReply then msg.processReply(msg, {}) end
+    end)
+  end
+
+  sequence(prepare, function()
+    local placed, reason = place()
+    if not placed then return fail(reason) end
+    if codec.dir == 0 then reply(placed) else setter(placed) end
   end)
 end
 
@@ -363,21 +454,25 @@ end
 -- answered here only once this connection has seen the firmware's own reply
 -- to it match what expand() builds, byte for byte. The first request for an
 -- opcode goes to the firmware as always -- the page gets the real reply at
--- once -- and the comparison runs behind it. Setters are not taken yet: the
--- firmware still has them, and a wrong setter would write, not just show,
--- the wrong bytes (the configurator gates them the same way).
+-- once -- and the comparison runs behind it. An indexed reply is verified per
+-- index, each being its own request. Setters are not taken yet: the firmware
+-- still has them, and a wrong setter would write, not just show, the wrong
+-- bytes (the configurator gates them the same way).
 function Virtual:intercept(msg, queue)
   if not self:handles(msg) then return false end
   local cmd = msg.command
   if self.pack.codecs[cmd]:byte(1) ~= 0 then return false end
+  local payload = {}
+  for i = 1, #(msg.payload or {}) do payload[i] = msg.payload[i] end
+  local key = #payload > 0 and (cmd .. ":" .. table.concat(payload, ",")) or cmd
   self.verified = self.verified or {}
-  local state = self.verified[cmd]
+  local state = self.verified[key]
   if state == true then
     self:expand(msg, queue)
     return true
   end
   if state == nil then
-    self.verified[cmd] = "pending"
+    self.verified[key] = "pending"
     local original = msg.processReply
     msg.processReply = function(m, buf)
       -- Copy first: a transport may reuse its receive buffer.
@@ -386,17 +481,18 @@ function Virtual:intercept(msg, queue)
       if original then original(m, buf) end
       self:expand({
         command = cmd,
+        payload = payload,
         processReply = function(_, mine)
           local same = #mine == #real
           for i = 1, #real do
             if not same then break end
             same = mine[i] == real[i]
           end
-          self.verified[cmd] = same
+          self.verified[key] = same
           if self.onVerified then self.onVerified(cmd, same) end
         end,
         errorHandler = function(reason)
-          self.verified[cmd] = false
+          self.verified[key] = false
           if self.onVerified then self.onVerified(cmd, false, reason) end
         end,
       }, queue)
@@ -404,6 +500,5 @@ function Virtual:intercept(msg, queue)
   end
   return false
 end
-
 
 return Virtual
