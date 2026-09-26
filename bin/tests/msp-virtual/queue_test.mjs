@@ -29,6 +29,13 @@ const firmware = {
     [REPLY]: [...(await js.read(REPLY))],
     [PLAIN]: [...(await js.read(PLAIN))].map((b, i) => (i === 0 ? (b + 1) & 0xff : b)), // disagrees with the codec
 };
+// A reply indexed by its request's first byte (MSP_GET_*): the firmware's
+// answer per index.
+const [INDEXED, indexedCodec] = Object.entries(manifest.raw.msp_codecs).find(
+    ([, c]) => c.dir === "out" && c.index?.w === 1 && (c.len ?? 1) === 1,
+);
+const firmwareIndexed = [];
+for (let i = 0; i < 2; i++) firmwareIndexed.push([...(await js.read(Number(INDEXED), [i]))]);
 
 const L = lauxlib.luaL_newstate();
 lualib.luaL_openlibs(L);
@@ -49,6 +56,7 @@ lua_(`
   PACK = dofile("${packLua.replace(/\\/g, "/")}")
   BOARD = {${[...board].map(([pgn, b]) => `[${pgn}]={${[...b].join(",")}}`).join(",")}}
   FIRMWARE = {${Object.entries(firmware).map(([c, b]) => `[${c}]={${b.join(",")}}`).join(",")}}
+  FIRMWARE_INDEXED = { [${INDEXED}] = {${firmwareIndexed.map((b, i) => `[${i}]={${b.join(",")}}`).join(",")}} }
   WIRE = {}      -- every command that went over the wire, in order
   local pendingReply
   COMMON = {
@@ -63,7 +71,8 @@ lua_(`
       elseif cmd == 0x5F23 then
         pendingReply = { cmd, {} }
       else
-        pendingReply = { cmd, FIRMWARE[cmd] or {} }
+        local byIndex = FIRMWARE_INDEXED[cmd]
+        pendingReply = { cmd, (byIndex and byIndex[p[1]]) or FIRMWARE[cmd] or {} }
       end
       return true
     end,
@@ -135,12 +144,26 @@ check("a setter goes to the firmware", lua_(`return tostring(wireCount(${SETTER}
 lua_(`request(Q, ${REPLY}, {7})`);
 check("a request with arguments goes to the firmware", lua_(`return tostring(wireCount(${REPLY}))`) === "2");
 
-// 5. With no virtual layer (setting off) nothing is intercepted.
+// 5. An indexed reply is verified per index: each index's first request goes
+//    to the firmware, later ones are answered locally.
+const indexed = (i) => lua_(`return request(Q, ${INDEXED}, {${i}})`);
+check("indexed reply, first request of index 0, from the firmware",
+    indexed(0) === hexOf(firmwareIndexed[0]) && lua_(`return tostring(wireCount(${INDEXED}))`) === "1");
+check("indexed reply, index 0 again, answered locally",
+    indexed(0) === hexOf(firmwareIndexed[0]) && lua_(`return tostring(wireCount(${INDEXED}))`) === "1");
+check("indexed reply, index 1, verified on its own",
+    indexed(1) === hexOf(firmwareIndexed[1]) && lua_(`return tostring(wireCount(${INDEXED}))`) === "2");
+check("indexed reply, index 1 again, answered locally",
+    indexed(1) === hexOf(firmwareIndexed[1]) && lua_(`return tostring(wireCount(${INDEXED}))`) === "2");
+check("indexed reply with extra arguments goes to the firmware",
+    lua_(`request(Q, ${INDEXED}, {0, 0}); return tostring(wireCount(${INDEXED}))`) === "3");
+
+// 6. With no virtual layer (setting off) nothing is intercepted.
 lua_(`Q2 = Queue.new(COMMON, DEBUG); WIRE = {}`);
 lua_(`request(Q2, ${REPLY}); request(Q2, ${REPLY})`);
 check("without the setting both requests hit the firmware", lua_(`return tostring(wireCount(${REPLY}))`) === "2");
 
-// 6. build id decoding
+// 7. build id decoding
 lua_(`BID = dofile("${S}/lib/msp_build_id.lua")`);
 check("build id decodes when valid",
     lua_(`return tostring(BID.decode({1, 0x77,0x9b,0xbd,0x3c,0xc4,0x38,0x14,0xe0, 2,0, 0,0,0,0}))`) === "779bbd3cc43814e0");

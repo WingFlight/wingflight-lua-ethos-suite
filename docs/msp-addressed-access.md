@@ -39,7 +39,13 @@ from its own `msp.c` into a **codec pack** per build.
 Each codec in a pack is a binary string (the encoding is documented in the
 firmware's `src/utils/wf_lua_pack.py`), decoded one opcode at a time when it
 is used: as Lua tables, the ~2000 unrolled wire fields of a build would cost
-far more RAM.
+far more RAM. A pack carries its encoding's `format`; the suite refuses a pack
+of another format, as it does one for another build.
+
+The codecs cover plain fields, profile fields, per-index setters and replies
+(`MSP_GET_*`, the index being the request's first bytes), an array element
+chosen by a stored selector (the battery profile's capacity), NUL-terminated
+strings in and out (`MSP_NAME`), and 64-bit fields.
 
 ## When a request is answered locally
 
@@ -51,12 +57,14 @@ is dequeued (never in the simulator):
 2. A setter goes to the firmware. Setters are not taken yet: a wrong setter
    would write, not just show, the wrong bytes (the configurator gates them
    the same way).
-3. A request carrying arguments goes to the firmware.
+3. A request carrying arguments goes to the firmware, unless the codec is
+   indexed and the arguments are exactly its index.
 4. The first request for a reply opcode on a connection goes to the firmware,
    and the page gets that reply at once. Behind it, `virtual.lua` builds the
    same reply from `PARAM_READ`s and compares. A match makes that opcode
    *verified* for the rest of the connection; a mismatch keeps it on the
-   firmware. The outcome is logged (`[virtual] opcode N ...`).
+   firmware. The outcome is logged (`[virtual] opcode N ...`). An indexed
+   reply is verified per index: each index is its own request.
 5. A verified opcode is answered locally: its `PARAM_READ`s are queued at the
    front, and the assembled reply goes to the original `processReply`.
    Errors reach its `errorHandler`; retries, timeouts and transports are the
