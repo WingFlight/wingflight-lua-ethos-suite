@@ -1840,6 +1840,12 @@
           "needs_translation": false,
           "max_length": 13
         },
+        "addressed_writes": {
+          "english": "Addr. writes",
+          "translation": "Addr. writes",
+          "needs_translation": false,
+          "max_length": 13
+        },
         "memory_logs": {
           "english": "Memory logs",
           "translation": "Memory logs",

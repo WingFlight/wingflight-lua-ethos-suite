@@ -246,6 +246,7 @@ function Virtual:expand(msg, queue)
   if index == nil then return fail("refused") end
   if index == false then
     -- accepted, and nothing stored (or, for a reply, nothing written)
+    if msg.dryRun then return fail("stored_nothing") end
     if msg.processReply then msg.processReply(msg, {}) end
     return
   end
@@ -459,10 +460,26 @@ function Virtual:expand(msg, queue)
         while e < #offs and offs[e + 1] == offs[e] + 1 and e - s + 1 < CHUNK do e = e + 1 end
         local off, bytes = offs[s], {}
         for k = s, e do bytes[#bytes + 1] = p[offs[k]] end
-        writes[#writes + 1] = function(continue) push(writeStep(pgn, off, bytes, continue)) end
+        if msg.dryRun then
+          -- Only compare: are these bytes already what the board holds?
+          writes[#writes + 1] = function(continue)
+            push(readStep(pgn, off, #bytes, function(buf)
+              for k = 1, #bytes do
+                if buf[k] ~= bytes[k] then
+                  return fail(string.format("pgn %d offset %d: the firmware stored %d, the codec would store %d",
+                    pgn, off + k - 1, buf[k], bytes[k]))
+                end
+              end
+              continue()
+            end))
+          end
+        else
+          writes[#writes + 1] = function(continue) push(writeStep(pgn, off, bytes, continue)) end
+        end
         s = e + 1
       end
     end
+    if msg.dryRun and #writes == 0 then return fail("stored_nothing") end
 
     sequence(writes, function()
       if msg.processReply then msg.processReply(msg, {}) end
@@ -476,18 +493,67 @@ function Virtual:expand(msg, queue)
   end)
 end
 
+-- A setter's first request goes to the firmware; once it has taken it, a
+-- dry run of the codec on the same payload must find on the board exactly
+-- the bytes it would store (the configurator's checkSetterAfterFirmware()).
+-- Only then are later requests for it written through PARAM_WRITE. Nothing
+-- extra is written to the board. A request the firmware refused, or one that
+-- stored nothing, verifies nothing, and the next request is watched instead.
+function Virtual:watchSetter(msg, queue)
+  local cmd = msg.command
+  self.verifiedSetters = self.verifiedSetters or {}
+  local state = self.verifiedSetters[cmd]
+  if state == true then
+    self:expand(msg, queue)
+    return true
+  end
+  if state ~= nil then return false end
+  self.verifiedSetters[cmd] = "pending"
+  local payload = {}
+  for i = 1, #(msg.payload or {}) do payload[i] = msg.payload[i] end
+  local originalReply, originalError = msg.processReply, msg.errorHandler
+  msg.errorHandler = function(reason)
+    self.verifiedSetters[cmd] = nil
+    if originalError then originalError(reason) end
+  end
+  msg.processReply = function(m, buf)
+    if originalReply then originalReply(m, buf) end
+    self:expand({
+      command = cmd,
+      payload = payload,
+      dryRun = true,
+      processReply = function()
+        self.verifiedSetters[cmd] = true
+        if self.onVerified then self.onVerified(cmd, true) end
+      end,
+      errorHandler = function(reason)
+        if reason == "stored_nothing" then
+          self.verifiedSetters[cmd] = nil
+          return
+        end
+        self.verifiedSetters[cmd] = false
+        if self.onVerified then self.onVerified(cmd, false, reason) end
+      end,
+    }, queue)
+  end
+  return false
+end
+
 -- Should the queue hand `msg` to expand()? The policy: a reply opcode is
 -- answered here only once this connection has seen the firmware's own reply
 -- to it match what expand() builds, byte for byte. The first request for an
 -- opcode goes to the firmware as always -- the page gets the real reply at
 -- once -- and the comparison runs behind it. An indexed reply is verified per
--- index, each being its own request. Setters are not taken yet: the firmware
--- still has them, and a wrong setter would write, not just show, the wrong
--- bytes (the configurator gates them the same way).
+-- index, each being its own request. Setters are taken only with writes
+-- enabled as well (`self.writes`), and only once verified: watchSetter().
 function Virtual:intercept(msg, queue)
   if not self:handles(msg) then return false end
   local cmd = msg.command
-  if self.pack.codecs[cmd]:byte(1) ~= 0 then return false end
+  if self.pack.codecs[cmd]:byte(1) ~= 0 then
+    -- setters: only with writes enabled (developer settings), each verified first
+    if not self.writes then return false end
+    return self:watchSetter(msg, queue)
+  end
   local payload = {}
   for i = 1, #(msg.payload or {}) do payload[i] = msg.payload[i] end
   local key = #payload > 0 and (cmd .. ":" .. table.concat(payload, ",")) or cmd

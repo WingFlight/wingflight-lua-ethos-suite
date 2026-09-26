@@ -549,13 +549,16 @@ local function runHandshake(mspQueue, protocol)
         debugLog.print("[session] addressed access off: " .. tostring(why))
         return
       end
+      -- Setters too, if also opted in; each verified on its first use.
+      virtual.writes = settingsStore.addressedWritesEnabled(settingsStore.load())
       virtual.onVerified = function(cmd, same, reason)
         debugLog.print(string.format("[virtual] opcode %d %s%s", cmd,
           same and "matches the firmware; answered locally from now on" or "differs; stays on the firmware",
           reason and (" (" .. tostring(reason) .. ")") or ""))
       end
       mspQueue.virtual = virtual
-      debugLog.print("[session] addressed access: codec pack for build " .. id)
+      debugLog.print("[session] addressed access: codec pack for build " .. id
+        .. (virtual.writes and ", setters included" or ""))
     end, function(reason)
       debugLog.print("[session] addressed access off: build id read failed (" .. tostring(reason) .. ")")
     end))
