@@ -554,9 +554,10 @@ function Virtual:intercept(msg, queue)
     if not self.writes then return false end
     return self:watchSetter(msg, queue)
   end
-  local payload = {}
-  for i = 1, #(msg.payload or {}) do payload[i] = msg.payload[i] end
-  local key = #payload > 0 and (cmd .. ":" .. table.concat(payload, ",")) or cmd
+  -- An indexed reply's key is its index; a plain one's is the opcode itself,
+  -- so the common case allocates nothing before it is answered.
+  local request = msg.payload
+  local key = (request and #request > 0) and (cmd .. ":" .. table.concat(request, ",")) or cmd
   self.verified = self.verified or {}
   local state = self.verified[key]
   if state == true then
@@ -565,6 +566,8 @@ function Virtual:intercept(msg, queue)
   end
   if state == nil then
     self.verified[key] = "pending"
+    local payload = {}
+    for i = 1, #(request or {}) do payload[i] = request[i] end
     local original = msg.processReply
     msg.processReply = function(m, buf)
       -- Copy first: a transport may reuse its receive buffer.
