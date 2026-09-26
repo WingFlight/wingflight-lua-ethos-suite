@@ -2,11 +2,11 @@
 -- MSP_SET_RC_CONFIG command pair (cmd 66 read / 67 write) -- used by
 -- app/pages/radio_config.lua.
 --
--- Wingflight 2.3 / MSP API >= 12.09 is this rebuild's floor, so the
--- page only exposes the current field set used by the original suite's
--- >= 12.0.9 branch: stick center/deflection, min/max throttle, and
--- cyclic/yaw deadband. rc_arm_throttle remains wire-present in the
--- command for read/write round-tripping, but is not shown on the page.
+-- Wingflight MSP API 22.3 is this rebuild's floor, so the page exposes
+-- the full field set: stick center/deflection, min/max throttle, and
+-- roll/pitch/yaw deadband. The old always-zero rc_arm_throttle placeholder
+-- was dropped from the wire in 22.3, and the old shared heli "cyclic"
+-- deadband was split into separate roll and pitch deadbands.
 
 if package.loaded["wfsuite.lib.msp_rc_config"] then
   return package.loaded["wfsuite.lib.msp_rc_config"]
@@ -23,31 +23,31 @@ local WRITE_COMMAND = 67
 local FIELDS = {
   {"rc_center", "U16"},
   {"rc_deflection", "U16"},
-  {"rc_arm_throttle", "U16"},
   {"rc_min_throttle", "U16"},
   {"rc_max_throttle", "U16"},
-  {"rc_deadband", "U8"},
+  {"rc_roll_deadband", "U8"},
+  {"rc_pitch_deadband", "U8"},
   {"rc_yaw_deadband", "U8"},
 }
 
 local SIMULATOR_RESPONSE = {
   220, 5, -- rc_center
   254, 1, -- rc_deflection
-  232, 3, -- rc_arm_throttle
   242, 3, -- rc_min_throttle
   208, 7, -- rc_max_throttle
-  4,      -- rc_deadband
+  4,      -- rc_roll_deadband
+  4,      -- rc_pitch_deadband
   4,      -- rc_yaw_deadband
 }
 
 local FIELD_META = {
   rc_center = {min = 1400, max = 1600, default = 1500, suffix = "us"},
   rc_deflection = {min = 200, max = 700, default = 510, suffix = "us"},
-  rc_arm_throttle = {min = 850, max = 1500, default = 1050, suffix = "us"},
   rc_min_throttle = {min = 860, max = 1500, default = 1100, suffix = "us"},
   rc_max_throttle = {min = 1510, max = 2150, default = 1900, suffix = "us"},
-  rc_deadband = {min = 0, max = 100, default = 2, suffix = "us"},
-  rc_yaw_deadband = {min = 0, max = 100, default = 2, suffix = "us"},
+  rc_roll_deadband = {min = 0, max = 100, default = 5, suffix = "us"},
+  rc_pitch_deadband = {min = 0, max = 100, default = 5, suffix = "us"},
+  rc_yaw_deadband = {min = 0, max = 100, default = 5, suffix = "us"},
 }
 
 local msp_rc_config = {

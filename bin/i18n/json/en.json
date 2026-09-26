@@ -6,6 +6,18 @@
     "max_length": 6
   },
   "app": {
+    "msg_load_failed_title": {
+      "english": "Loading failed",
+      "translation": "Loading failed",
+      "needs_translation": false,
+      "max_length": 14
+    },
+    "msg_load_failed_body": {
+      "english": "Data could not be read from the flight controller. Please reload.",
+      "translation": "Data could not be read from the flight controller. Please reload.",
+      "needs_translation": false,
+      "max_length": 65
+    },
     "navigation_menu": {
       "english": "BACK",
       "translation": "BACK",
@@ -824,11 +836,35 @@
         }
       },
       "autolevel": {
-        "name": {
-          "english": "Autolevel",
-          "translation": "Autolevel",
+        "trainer_limits": {
+          "english": "Trainer limits",
+          "max_length": 14,
           "needs_translation": false,
-          "max_length": 9
+          "translation": "Trainer limits"
+        },
+        "angle_limits": {
+          "english": "Angle limits",
+          "max_length": 12,
+          "needs_translation": false,
+          "translation": "Angle limits"
+        },
+        "bank": {
+          "english": "Bank",
+          "max_length": 4,
+          "needs_translation": false,
+          "translation": "Bank"
+        },
+        "pitch": {
+          "english": "Pitch",
+          "max_length": 5,
+          "needs_translation": false,
+          "translation": "Pitch"
+        },
+        "name": {
+          "english": "Flight Modes",
+          "translation": "Flight Modes",
+          "needs_translation": false,
+          "max_length": 11
         },
         "acro_trainer": {
           "english": "Acro Trainer",
@@ -1379,6 +1415,92 @@
           "max_length": 4
         }
       },
+      "gps_nav_config": {
+        "name": {
+          "english": "GPS Navigation",
+          "translation": "GPS Navigation",
+          "needs_translation": false,
+          "max_length": 14
+        },
+        "rth_altitude": {
+          "english": "RTH Altitude",
+          "translation": "RTH Altitude",
+          "needs_translation": false,
+          "max_length": 12
+        },
+        "loiter_radius": {
+          "english": "Loiter Radius",
+          "translation": "Loiter Radius",
+          "needs_translation": false,
+          "max_length": 13
+        },
+        "loiter_direction": {
+          "english": "Loiter Dir.",
+          "translation": "Loiter Dir.",
+          "needs_translation": false,
+          "max_length": 11
+        },
+        "direction_cw": {
+          "english": "Clockwise",
+          "translation": "Clockwise",
+          "needs_translation": false,
+          "max_length": 9
+        },
+        "direction_ccw": {
+          "english": "Counter-CW",
+          "translation": "Counter-CW",
+          "needs_translation": false,
+          "max_length": 10
+        },
+        "min_sats": {
+          "english": "Min Satellites",
+          "translation": "Min Satellites",
+          "needs_translation": false,
+          "max_length": 14
+        },
+        "max_bank_angle": {
+          "english": "Max Bank",
+          "translation": "Max Bank",
+          "needs_translation": false,
+          "max_length": 8
+        },
+        "max_pitch_angle": {
+          "english": "Max Pitch",
+          "translation": "Max Pitch",
+          "needs_translation": false,
+          "max_length": 9
+        },
+        "bearing_kp": {
+          "english": "Bearing Gain",
+          "translation": "Bearing Gain",
+          "needs_translation": false,
+          "max_length": 12
+        },
+        "altitude_kp": {
+          "english": "Altitude Gain",
+          "translation": "Altitude Gain",
+          "needs_translation": false,
+          "max_length": 13
+        },
+        "altitude_kd": {
+          "english": "Altitude Damp",
+          "translation": "Altitude Damp",
+          "needs_translation": false,
+          "max_length": 13
+        },
+        "throttle": {
+          "english": "Nav Throttle",
+          "translation": "Nav Throttle",
+          "needs_translation": false,
+          "max_length": 12
+        },
+        "turn_coordination": {
+          "english": "Turn Coord.",
+          "translation": "Turn Coord.",
+          "needs_translation": false,
+          "max_length": 11
+        }
+      },
       "hardware_setup": {
         "name": {
           "english": "Setup",
@@ -1620,11 +1742,17 @@
           "needs_translation": false,
           "max_length": 10
         },
-        "cyclic": {
-          "english": "Cyclic",
-          "translation": "Cyclic",
+        "pitch_deadband": {
+          "english": "Pitch",
+          "translation": "Pitch",
           "needs_translation": false,
-          "max_length": 6
+          "max_length": 5
+        },
+        "roll_deadband": {
+          "english": "Roll",
+          "translation": "Roll",
+          "needs_translation": false,
+          "max_length": 5
         },
         "yaw_deadband": {
           "english": "Yaw",
@@ -1887,6 +2015,12 @@
           "translation": "Governor state",
           "needs_translation": false,
           "max_length": 14
+        },
+        "gps_fix_state": {
+          "english": "GPS fix state",
+          "translation": "GPS fix state",
+          "needs_translation": false,
+          "max_length": 13
         },
         "pid_profile": {
           "english": "PID profile",
@@ -2283,6 +2417,48 @@
           "max_length": 16,
           "needs_translation": false,
           "translation": "Temperature Unit"
+        },
+        "status_alerts": {
+          "english": "FC status",
+          "translation": "FC status",
+          "needs_translation": false,
+          "max_length": 9
+        },
+        "status_rx_backup": {
+          "english": "Backup receiver",
+          "translation": "Backup receiver",
+          "needs_translation": false,
+          "max_length": 15
+        },
+        "status_gyro": {
+          "english": "Gyro overflow",
+          "translation": "Gyro overflow",
+          "needs_translation": false,
+          "max_length": 13
+        },
+        "status_gps": {
+          "english": "GPS not responding",
+          "translation": "GPS not responding",
+          "needs_translation": false,
+          "max_length": 18
+        },
+        "status_blackbox": {
+          "english": "Blackbox full",
+          "translation": "Blackbox full",
+          "needs_translation": false,
+          "max_length": 13
+        },
+        "status_autotrim": {
+          "english": "Autotrim",
+          "translation": "Autotrim",
+          "needs_translation": false,
+          "max_length": 8
+        },
+        "status_saturation": {
+          "english": "Control limit",
+          "translation": "Control limit",
+          "needs_translation": false,
+          "max_length": 13
         }
       },
       "telemetry": {
@@ -3340,6 +3516,12 @@
           "needs_translation": false,
           "max_length": 10
         },
+        "menu_channel_fallback": {
+          "english": "Channel Fallback",
+          "translation": "Channel Fallback",
+          "needs_translation": false,
+          "max_length": 16
+        },
         "name": {
           "english": "Failsafe",
           "translation": "Failsafe",
@@ -3369,6 +3551,92 @@
           "translation": "Yaw",
           "needs_translation": false,
           "max_length": 3
+        }
+      },
+      "failsafe_procedure": {
+        "name": {
+          "english": "Stage 2",
+          "translation": "Stage 2",
+          "needs_translation": false,
+          "max_length": 7
+        },
+        "procedure": {
+          "english": "Procedure",
+          "translation": "Procedure",
+          "needs_translation": false,
+          "max_length": 9
+        },
+        "procedure_land": {
+          "english": "Land",
+          "translation": "Land",
+          "needs_translation": false,
+          "max_length": 4
+        },
+        "procedure_drop": {
+          "english": "Drop",
+          "translation": "Drop",
+          "needs_translation": false,
+          "max_length": 4
+        },
+        "procedure_gpsrescue": {
+          "english": "GPS Rescue",
+          "translation": "GPS Rescue",
+          "needs_translation": false,
+          "max_length": 10
+        },
+        "switch_mode": {
+          "english": "Switch Mode",
+          "translation": "Switch Mode",
+          "needs_translation": false,
+          "max_length": 11
+        },
+        "switch_stage1": {
+          "english": "Stage 1",
+          "translation": "Stage 1",
+          "needs_translation": false,
+          "max_length": 7
+        },
+        "switch_stage2": {
+          "english": "Stage 2",
+          "translation": "Stage 2",
+          "needs_translation": false,
+          "max_length": 7
+        },
+        "switch_kill": {
+          "english": "Kill",
+          "translation": "Kill",
+          "needs_translation": false,
+          "max_length": 4
+        },
+        "delay": {
+          "english": "Guard Delay",
+          "translation": "Guard Delay",
+          "needs_translation": false,
+          "max_length": 11
+        },
+        "off_delay": {
+          "english": "Land Delay",
+          "translation": "Land Delay",
+          "needs_translation": false,
+          "max_length": 10
+        },
+        "throttle_low_delay": {
+          "english": "Low Thr. Delay",
+          "translation": "Low Thr. Delay",
+          "needs_translation": false,
+          "max_length": 14
+        },
+        "throttle": {
+          "english": "Land Throttle",
+          "translation": "Land Throttle",
+          "needs_translation": false,
+          "max_length": 13
+        },
+        "recovery_delay": {
+          "english": "Recovery Delay",
+          "translation": "Recovery Delay",
+          "needs_translation": false,
+          "max_length": 14
         }
       },
       "beepers": {
@@ -4551,10 +4819,10 @@
           "max_length": 3
         },
         "arming_disable_flag_19": {
-          "english": "Resc",
-          "translation": "Resc",
+          "english": "GPS RTH",
+          "translation": "GPS RTH",
           "needs_translation": false,
-          "max_length": 4
+          "max_length": 10
         },
         "arming_disable_flag_20": {
           "english": "RPM Filter",
@@ -4704,6 +4972,24 @@
         }
       },
       "elrs_telemetry": {
+        "confirm_prompt": {
+          "english": "Apply packet rate and telemetry ratio changes to the RF module / Flight Controller?",
+          "translation": "Apply packet rate and telemetry ratio changes to the RF module / Flight Controller?",
+          "needs_translation": false,
+          "max_length": 83
+        },
+        "confirm_title": {
+          "english": "Confirm ELRS Link Sync",
+          "translation": "Confirm ELRS Link Sync",
+          "needs_translation": false,
+          "max_length": 22
+        },
+        "status_not_elrs": {
+          "english": "Connected module is not ExpressLRS",
+          "translation": "Connected module is not ExpressLRS",
+          "needs_translation": false,
+          "max_length": 34
+        },
         "action": {
           "english": "Action",
           "translation": "Action",
@@ -7418,6 +7704,12 @@
       "needs_translation": false,
       "translation": "GPS Coord"
     },
+    "sensor_gps_fix_type": {
+      "english": "GPS Fix",
+      "max_length": 7,
+      "needs_translation": false,
+      "translation": "GPS Fix"
+    },
     "sensor_gps_hdop": {
       "english": "GPS HDOP",
       "max_length": 8,
@@ -7472,11 +7764,11 @@
       "needs_translation": false,
       "translation": "Heading"
     },
-    "sensor_headspeed": {
-      "english": "Headspeed",
-      "max_length": 9,
+    "sensor_motor1speed": {
+      "english": "Motor 1 RPM",
+      "max_length": 17,
       "needs_translation": false,
-      "translation": "Headspeed"
+      "translation": "Motor 1 RPM"
     },
     "sensor_heartbeat": {
       "english": "Heartbeat",
@@ -7568,11 +7860,23 @@
       "needs_translation": false,
       "translation": "SYS Load"
     },
-    "sensor_tailspeed": {
-      "english": "Tailspeed",
-      "max_length": 9,
+    "sensor_system_config": {
+      "english": "System Config",
+      "max_length": 13,
       "needs_translation": false,
-      "translation": "Tailspeed"
+      "translation": "System Config"
+    },
+    "sensor_system_status": {
+      "english": "System Status",
+      "max_length": 13,
+      "needs_translation": false,
+      "translation": "System Status"
+    },
+    "sensor_motor2speed": {
+      "english": "Motor 2 RPM",
+      "max_length": 19,
+      "needs_translation": false,
+      "translation": "Motor 2 RPM"
     },
     "sensor_throttle_pct": {
       "english": "Throttle %",
@@ -8210,6 +8514,78 @@
         "max_length": 9,
         "needs_translation": false,
         "translation": "Max Watts"
+      },
+      "alert_rx_backup_active": {
+        "english": "BACKUP RX IN CONTROL",
+        "translation": "BACKUP RX IN CONTROL",
+        "needs_translation": false,
+        "max_length": 20
+      },
+      "alert_failsafe": {
+        "english": "FAILSAFE",
+        "translation": "FAILSAFE",
+        "needs_translation": false,
+        "max_length": 8
+      },
+      "alert_battery_critical": {
+        "english": "BATTERY CRITICAL",
+        "translation": "BATTERY CRITICAL",
+        "needs_translation": false,
+        "max_length": 16
+      },
+      "alert_gyro_overflow": {
+        "english": "GYRO OVERFLOW",
+        "translation": "GYRO OVERFLOW",
+        "needs_translation": false,
+        "max_length": 13
+      },
+      "alert_rx_backup_down": {
+        "english": "BACKUP RX NO SIGNAL",
+        "translation": "BACKUP RX NO SIGNAL",
+        "needs_translation": false,
+        "max_length": 19
+      },
+      "alert_rth_unavailable": {
+        "english": "RTH UNAVAILABLE",
+        "translation": "RTH UNAVAILABLE",
+        "needs_translation": false,
+        "max_length": 15
+      },
+      "alert_loiter_unavailable": {
+        "english": "LOITER UNAVAILABLE",
+        "translation": "LOITER UNAVAILABLE",
+        "needs_translation": false,
+        "max_length": 18
+      },
+      "alert_gps_lost": {
+        "english": "GPS NOT RESPONDING",
+        "translation": "GPS NOT RESPONDING",
+        "needs_translation": false,
+        "max_length": 18
+      },
+      "alert_acc_uncalibrated": {
+        "english": "ACC NOT CALIBRATED",
+        "translation": "ACC NOT CALIBRATED",
+        "needs_translation": false,
+        "max_length": 18
+      },
+      "alert_override": {
+        "english": "TEST OVERRIDE ACTIVE",
+        "translation": "TEST OVERRIDE ACTIVE",
+        "needs_translation": false,
+        "max_length": 20
+      },
+      "alert_reboot_required": {
+        "english": "REBOOT REQUIRED",
+        "translation": "REBOOT REQUIRED",
+        "needs_translation": false,
+        "max_length": 15
+      },
+      "alert_blackbox_full": {
+        "english": "BLACKBOX FULL",
+        "translation": "BLACKBOX FULL",
+        "needs_translation": false,
+        "max_length": 13
       }
     },
     "governor": {

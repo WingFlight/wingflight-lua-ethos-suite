@@ -7,16 +7,15 @@
 -- -> Telemetry page uses the full-config read/write helpers added below,
 -- preserving the header bytes while editing just the slot assignments.
 --
--- Wire layout: telemetry_inverted(U8), halfDuplex(U8), enableSensors(U32),
--- pinSwap(U8), crsf_telemetry_mode(U8), crsf_telemetry_link_rate(U16),
+-- Wire layout: telemetry_inverted(U8), halfDuplex(U8), pinSwap(U8),
+-- crsf_telemetry_mode(U8), crsf_telemetry_link_rate(U16),
 -- crsf_telemetry_link_ratio(U16), then telem_sensor_slot_1..40 (U8 each) --
--- 12 header bytes + 40 slot bytes. Matches
--- rotorflight-lua-ethos-suite's tasks/scheduler/msp/api/TELEMETRY_CONFIG.lua
--- field order. That original only includes the pinSwap/crsf_*/slot fields
--- for API >= 12.0.8; this rebuild's floor is >= 12.09 (see AGENTS.md), so
--- they're unconditionally present here -- no version-gated field list.
+-- 8 header bytes + 40 slot bytes. The always-zero rotorflight
+-- enableSensors(U32) that used to follow halfDuplex was dropped in MSP
+-- API 22.3, and this rebuild's floor is 22.3 (see lib/msp_api_version.lua),
+-- so there is no version-gated field list.
 --
--- telemetry_inverted/halfDuplex/enableSensors/pinSwap have no consumer yet
+-- telemetry_inverted/halfDuplex/pinSwap have no consumer yet
 -- and just round-trip unchanged through the Setup -> Telemetry page's
 -- load/save; crsf_telemetry_mode does have one -- see app/pages/telemetry.lua's
 -- beforeSave, which forces it to CUSTOM so a CRSF receiver actually sends
@@ -32,16 +31,16 @@ end
 local READ_COMMAND = 73
 local WRITE_COMMAND = 74
 local SLOT_COUNT = 40
-local HEADER_BYTES = 12 -- see wire layout above
+local HEADER_BYTES = 8 -- see wire layout above
 
 -- Fixture reply used automatically in the Ethos simulator (see
--- tasks/msp/queue.lua): zeroed header (unused, see above) plus a handful
--- of non-zero slots (95/96/97 -> PID/Rate/Battery profile, per
+-- tasks/msp/queue.lua): near-zero header (unused, see above) plus a handful
+-- of non-zero slots (120/121 -> System Status/Config, per
 -- lib/frsky_sid_lookup.lua) so the simulator exercises the create/rename
 -- path without claiming to mirror any particular real setup.
 local SIMULATOR_RESPONSE = {
-  0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-  95, 96, 97,
+  0, 1, 0, 0, 0, 0, 0, 0,
+  120, 121,
 }
 for i = #SIMULATOR_RESPONSE + 1, HEADER_BYTES + SLOT_COUNT do
   SIMULATOR_RESPONSE[i] = 0
@@ -58,7 +57,6 @@ local function decodeFull(buf)
   local data = {
     telemetry_inverted = mspcodec.readU8(buf),
     halfDuplex = mspcodec.readU8(buf),
-    enableSensors = mspcodec.readU32(buf),
     pinSwap = mspcodec.readU8(buf),
     crsf_telemetry_mode = mspcodec.readU8(buf),
     crsf_telemetry_link_rate = mspcodec.readU16(buf),
@@ -76,7 +74,6 @@ local function encodeFull(data)
   data = data or {}
   mspcodec.writeU8(payload, data.telemetry_inverted or 0)
   mspcodec.writeU8(payload, data.halfDuplex or 0)
-  mspcodec.writeU32(payload, data.enableSensors or 0)
   mspcodec.writeU8(payload, data.pinSwap or 0)
   mspcodec.writeU8(payload, data.crsf_telemetry_mode or 0)
   mspcodec.writeU16(payload, data.crsf_telemetry_link_rate or 0)

@@ -229,10 +229,9 @@ local function openScreen(nav, menus, rootEntries, screen, setEventHandler, setW
     end
 
     if isEntryVisible(entry) then
-      -- Keep tile labels explicit; Ethos's default font clips long
-      -- titles well before the tile's own width would require it.
+      -- Fit labels inside the button frame before Ethos draws them.
       tileButtons[i] = form.addButton(nil, {x = x, y = y, w = tileW, h = tileH}, {
-        text = entry.title,
+        text = tileGrid.fitLabel(entry.title, tileW, tileFont),
         icon = entry.icon,
         options = tileFont,
         press = function()

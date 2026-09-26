@@ -9,13 +9,13 @@
             <Option value="3" label="RECOVERY" />
             <Option value="4" label="ACTIVE" />
             <Option value="5" label="THROTTLE-OFF" />
-            <Option value="6" label="LOST HEADSPEED" />
+            <Option value="6" label="LOST RPM" />
             <Option value="7" label="AUTOROTATION" />
             <Option value="8" label="BAILOUT" />
             <Option value="100" label="DISABLED" />
             <Option value="101" label="DISAMED" />
         </Sensor>
-        <Sensor name="rpm" label="Headspeed" round="true" type="range" default="1800" min="0" max="2000" rand="10" multiplier="1" unit="rpm" />
+        <Sensor name="rpm" label="Governor RPM" round="true" type="range" default="1800" min="0" max="2000" rand="10" multiplier="1" unit="rpm" />
     </Group>
 
     <Group name="Power System">

@@ -7,6 +7,20 @@
     "reverse_text": false
   },
   "app": {
+    "msg_load_failed_title": {
+      "english": "Loading failed",
+      "translation": "Loading failed",
+      "needs_translation": true,
+      "reverse_text": false,
+      "max_length": 14
+    },
+    "msg_load_failed_body": {
+      "english": "Data could not be read from the flight controller. Please reload.",
+      "translation": "Data could not be read from the flight controller. Please reload.",
+      "needs_translation": true,
+      "reverse_text": false,
+      "max_length": 65
+    },
     "navigation_menu": {
       "english": "BACK",
       "translation": "Terug",
@@ -959,12 +973,36 @@
         }
       },
       "autolevel": {
+        "trainer_limits": {
+          "english": "Trainer limits",
+          "max_length": 14,
+          "needs_translation": true,
+          "translation": "Trainer limits"
+        },
+        "angle_limits": {
+          "english": "Angle limits",
+          "max_length": 12,
+          "needs_translation": true,
+          "translation": "Angle limits"
+        },
+        "bank": {
+          "english": "Bank",
+          "max_length": 4,
+          "needs_translation": true,
+          "translation": "Bank"
+        },
+        "pitch": {
+          "english": "Pitch",
+          "max_length": 5,
+          "needs_translation": true,
+          "translation": "Pitch"
+        },
         "name": {
-          "english": "Autolevel",
-          "translation": "Automatisch nivelleren",
-          "needs_translation": false,
+          "english": "Flight Modes",
+          "translation": "Flight Modes",
+          "needs_translation": true,
           "reverse_text": false,
-          "max_length": 9
+          "max_length": 11
         },
         "acro_trainer": {
           "english": "Acro Trainer",
@@ -1871,9 +1909,16 @@
           "max_length": 10,
           "reverse_text": false
         },
-        "cyclic": {
-          "english": "Cyclic",
-          "translation": "Cyclisch",
+        "pitch_deadband": {
+          "english": "Pitch",
+          "translation": "Toonhoogte",
+          "needs_translation": false,
+          "max_length": 10,
+          "reverse_text": false
+        },
+        "roll_deadband": {
+          "english": "Roll",
+          "translation": "Rollen",
           "needs_translation": false,
           "max_length": 6,
           "reverse_text": false
@@ -5248,10 +5293,10 @@
           "reverse_text": false
         },
         "arming_disable_flag_19": {
-          "english": "Resc",
-          "translation": "Hersc",
-          "needs_translation": false,
-          "max_length": 4,
+          "english": "GPS RTH",
+          "translation": "GPS RTH",
+          "needs_translation": true,
+          "max_length": 10,
           "reverse_text": false
         },
         "arming_disable_flag_20": {
@@ -5354,6 +5399,27 @@
         }
       },
       "elrs_telemetry": {
+        "confirm_prompt": {
+          "english": "Apply packet rate and telemetry ratio changes to the RF module / Flight Controller?",
+          "translation": "Apply packet rate and telemetry ratio changes to the RF module / Flight Controller?",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 83
+        },
+        "confirm_title": {
+          "english": "Confirm ELRS Link Sync",
+          "translation": "Confirm ELRS Link Sync",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 22
+        },
+        "status_not_elrs": {
+          "english": "Connected module is not ExpressLRS",
+          "translation": "Connected module is not ExpressLRS",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 34
+        },
         "action": {
           "english": "Action",
           "translation": "Actie",
@@ -8570,12 +8636,12 @@
       "reverse_text": false,
       "max_length": 7
     },
-    "sensor_headspeed": {
-      "english": "Headspeed",
+    "sensor_motor1speed": {
+      "english": "Motor 1 RPM",
       "translation": "Hoofdsnelheid",
-      "needs_translation": false,
+      "needs_translation": true,
       "reverse_text": false,
-      "max_length": 9
+      "max_length": 17
     },
     "sensor_heartbeat": {
       "english": "Heartbeat",
@@ -8682,12 +8748,12 @@
       "reverse_text": false,
       "max_length": 8
     },
-    "sensor_tailspeed": {
-      "english": "Tailspeed",
+    "sensor_motor2speed": {
+      "english": "Motor 2 RPM",
       "translation": "Staartsnelheid",
-      "needs_translation": false,
+      "needs_translation": true,
       "reverse_text": false,
-      "max_length": 9
+      "max_length": 19
     },
     "sensor_throttle_pct": {
       "english": "Throttle %",

@@ -256,6 +256,20 @@
     }
   },
   "app": {
+    "msg_load_failed_title": {
+      "english": "Loading failed",
+      "translation": "Loading failed",
+      "needs_translation": true,
+      "reverse_text": false,
+      "max_length": 14
+    },
+    "msg_load_failed_body": {
+      "english": "Data could not be read from the flight controller. Please reload.",
+      "translation": "Data could not be read from the flight controller. Please reload.",
+      "needs_translation": true,
+      "reverse_text": false,
+      "max_length": 65
+    },
     "btn_add": {
       "english": "Add",
       "max_length": 3,
@@ -761,6 +775,30 @@
         }
       },
       "autolevel": {
+        "trainer_limits": {
+          "english": "Trainer limits",
+          "max_length": 14,
+          "needs_translation": true,
+          "translation": "Trainer limits"
+        },
+        "angle_limits": {
+          "english": "Angle limits",
+          "max_length": 12,
+          "needs_translation": true,
+          "translation": "Angle limits"
+        },
+        "bank": {
+          "english": "Bank",
+          "max_length": 4,
+          "needs_translation": true,
+          "translation": "Bank"
+        },
+        "pitch": {
+          "english": "Pitch",
+          "max_length": 5,
+          "needs_translation": true,
+          "translation": "Pitch"
+        },
         "acro_trainer": {
           "english": "Acro Trainer",
           "max_length": 12,
@@ -818,11 +856,11 @@
           "translation": "Max"
         },
         "name": {
-          "english": "Autolevel",
-          "max_length": 9,
-          "needs_translation": false,
+          "english": "Flight Modes",
+          "max_length": 11,
+          "needs_translation": true,
           "reverse_text": false,
-          "translation": "Automatisch nivelleren"
+          "translation": "Flight Modes"
         },
         "rate": {
           "english": "Rate",
@@ -1650,6 +1688,27 @@
         }
       },
       "elrs_telemetry": {
+        "confirm_prompt": {
+          "english": "Apply packet rate and telemetry ratio changes to the RF module / Flight Controller?",
+          "translation": "Apply packet rate and telemetry ratio changes to the RF module / Flight Controller?",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 83
+        },
+        "confirm_title": {
+          "english": "Confirm ELRS Link Sync",
+          "translation": "Confirm ELRS Link Sync",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 22
+        },
+        "status_not_elrs": {
+          "english": "Connected module is not ExpressLRS",
+          "translation": "Connected module is not ExpressLRS",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 34
+        },
         "action": {
           "english": "Action",
           "max_length": 6,
@@ -4117,11 +4176,11 @@
           "translation": "GPS"
         },
         "arming_disable_flag_19": {
-          "english": "Resc",
-          "max_length": 4,
-          "needs_translation": false,
+          "english": "GPS RTH",
+          "max_length": 10,
+          "needs_translation": true,
           "reverse_text": false,
-          "translation": "Hersc"
+          "translation": "GPS RTH"
         },
         "arming_disable_flag_2": {
           "english": "RX Fail Safe",
@@ -6534,13 +6593,6 @@
           "reverse_text": false,
           "translation": "Midden"
         },
-        "cyclic": {
-          "english": "Cyclic",
-          "max_length": 6,
-          "needs_translation": false,
-          "reverse_text": false,
-          "translation": "Cyclisch"
-        },
         "deadband": {
           "english": "Deadband",
           "max_length": 8,
@@ -6575,6 +6627,20 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Radioconfiguratie"
+        },
+        "pitch_deadband": {
+          "english": "Pitch",
+          "max_length": 5,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Pitch"
+        },
+        "roll_deadband": {
+          "english": "Roll",
+          "max_length": 6,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Rollen"
         },
         "stick": {
           "english": "Stick",
@@ -8835,10 +8901,10 @@
       "reverse_text": false,
       "translation": "Rubriek"
     },
-    "sensor_headspeed": {
-      "english": "Headspeed",
-      "max_length": 9,
-      "needs_translation": false,
+    "sensor_motor1speed": {
+      "english": "Motor 1 RPM",
+      "max_length": 17,
+      "needs_translation": true,
       "reverse_text": false,
       "translation": "Hoofdsnelheid"
     },
@@ -8947,10 +9013,10 @@
       "reverse_text": false,
       "translation": "SYS-belasting"
     },
-    "sensor_tailspeed": {
-      "english": "Tailspeed",
-      "max_length": 9,
-      "needs_translation": false,
+    "sensor_motor2speed": {
+      "english": "Motor 2 RPM",
+      "max_length": 19,
+      "needs_translation": true,
       "reverse_text": false,
       "translation": "Staartsnelheid"
     },

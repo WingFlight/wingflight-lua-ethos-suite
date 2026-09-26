@@ -7,6 +7,20 @@
     "max_length": 6
   },
   "app": {
+    "msg_load_failed_title": {
+      "english": "Loading failed",
+      "translation": "Laden fehlgeschlagen",
+      "needs_translation": false,
+      "reverse_text": false,
+      "max_length": 14
+    },
+    "msg_load_failed_body": {
+      "english": "Data could not be read from the flight controller. Please reload.",
+      "translation": "Daten konnten nicht vom Flight Controller gelesen werden. Bitte neu laden.",
+      "needs_translation": false,
+      "reverse_text": false,
+      "max_length": 65
+    },
     "navigation_menu": {
       "english": "BACK",
       "translation": "ZURÜCK",
@@ -163,7 +177,7 @@
     },
     "menu_section_flight_tuning": {
       "english": "Flight Tuning",
-      "translation": "Flugabstimmung",
+      "translation": "Flug-Tuning",
       "needs_translation": false,
       "reverse_text": false,
       "max_length": 13
@@ -959,12 +973,36 @@
         }
       },
       "autolevel": {
+        "trainer_limits": {
+          "english": "Trainer limits",
+          "max_length": 14,
+          "needs_translation": true,
+          "translation": "Trainer limits"
+        },
+        "angle_limits": {
+          "english": "Angle limits",
+          "max_length": 12,
+          "needs_translation": true,
+          "translation": "Angle limits"
+        },
+        "bank": {
+          "english": "Bank",
+          "max_length": 4,
+          "needs_translation": true,
+          "translation": "Bank"
+        },
+        "pitch": {
+          "english": "Pitch",
+          "max_length": 5,
+          "needs_translation": true,
+          "translation": "Pitch"
+        },
         "name": {
-          "english": "Autolevel",
-          "translation": "Autolevel",
-          "needs_translation": false,
+          "english": "Flight Modes",
+          "translation": "Flight Modes",
+          "needs_translation": true,
           "reverse_text": false,
-          "max_length": 9
+          "max_length": 11
         },
         "acro_trainer": {
           "english": "Acro Trainer",
@@ -1871,12 +1909,19 @@
           "reverse_text": false,
           "max_length": 10
         },
-        "cyclic": {
-          "english": "Cyclic",
-          "translation": "Zyklisch",
+        "pitch_deadband": {
+          "english": "Pitch",
+          "translation": "Nick",
           "needs_translation": false,
           "reverse_text": false,
-          "max_length": 6
+          "max_length": 5
+        },
+        "roll_deadband": {
+          "english": "Roll",
+          "translation": "Roll",
+          "needs_translation": false,
+          "reverse_text": false,
+          "max_length": 5
         },
         "yaw_deadband": {
           "english": "Yaw",
@@ -5248,11 +5293,11 @@
           "max_length": 3
         },
         "arming_disable_flag_19": {
-          "english": "Resc",
-          "translation": "Rettung",
-          "needs_translation": false,
+          "english": "GPS RTH",
+          "translation": "GPS RTH",
+          "needs_translation": true,
           "reverse_text": false,
-          "max_length": 4
+          "max_length": 10
         },
         "arming_disable_flag_20": {
           "english": "RPM Filter",
@@ -5354,6 +5399,27 @@
         }
       },
       "elrs_telemetry": {
+        "confirm_prompt": {
+          "english": "Apply packet rate and telemetry ratio changes to the RF module / Flight Controller?",
+          "translation": "Paketrate und Telemetrieverhältnis am HF-Modul / Flight Controller ändern?",
+          "needs_translation": false,
+          "reverse_text": false,
+          "max_length": 83
+        },
+        "confirm_title": {
+          "english": "Confirm ELRS Link Sync",
+          "translation": "ELRS Link-Sync bestätigen",
+          "needs_translation": false,
+          "reverse_text": false,
+          "max_length": 22
+        },
+        "status_not_elrs": {
+          "english": "Connected module is not ExpressLRS",
+          "translation": "Verbundenes Modul ist kein ExpressLRS",
+          "needs_translation": false,
+          "reverse_text": false,
+          "max_length": 34
+        },
         "action": {
           "english": "Action",
           "translation": "Aktion",
@@ -8570,12 +8636,12 @@
       "reverse_text": false,
       "max_length": 7
     },
-    "sensor_headspeed": {
-      "english": "Headspeed",
+    "sensor_motor1speed": {
+      "english": "Motor 1 RPM",
       "translation": "Rotordrehzahl",
-      "needs_translation": false,
+      "needs_translation": true,
       "reverse_text": false,
-      "max_length": 9
+      "max_length": 17
     },
     "sensor_heartbeat": {
       "english": "Heartbeat",
@@ -8682,12 +8748,12 @@
       "reverse_text": false,
       "max_length": 8
     },
-    "sensor_tailspeed": {
-      "english": "Tailspeed",
+    "sensor_motor2speed": {
+      "english": "Motor 2 RPM",
       "translation": "Heckgeschwindigkeit",
-      "needs_translation": false,
+      "needs_translation": true,
       "reverse_text": false,
-      "max_length": 9
+      "max_length": 19
     },
     "sensor_throttle_pct": {
       "english": "Throttle %",

@@ -45,20 +45,14 @@ return {
     {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x1014},
     {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5FE1},
   },
-  -- Same appIds tasks/elrs_sensors.lua's DIY sensors use (SIDs 0x1211/
-  -- 0x1212/0x1214) -- this resolves to that same sensor once it exists.
-  pid_profile = {
-    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x1211},
+  -- Packed status words, decoded by lib/system_status.lua. Same appIds
+  -- tasks/elrs_sensors.lua's DIY sensors use (lib/elrs_sensor_table.lua) --
+  -- this resolves to that same sensor once it exists.
+  system_status = {
+    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x1230},
   },
-  rate_profile = {
-    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x1212},
-  },
-  battery_profile = {
-    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x1214},
-  },
-  -- Same appId tasks/elrs_sensors.lua's DIY sensor uses (SID 0x1215).
-  tv_profile = {
-    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x1215},
+  system_config = {
+    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x1231},
   },
   governor = {
     {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x1205},
@@ -72,12 +66,8 @@ return {
   adj_v = {
     {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x1222},
   },
-  armflags = {
-    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x1202},
-  },
   -- Why-can't-arm bitmask (see lib/msp_status.lua's own arming_disable_flags
-  -- and widgets/dashboard/context.lua's armingDisableFlagsToString()) --
-  -- broadcast at the appId right after armflags's own.
+  -- and widgets/dashboard/context.lua's armingDisableFlagsToString()).
   armdisableflags = {
     {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x1203},
   },

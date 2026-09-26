@@ -7,9 +7,8 @@
 -- current six-field layout only.
 --
 -- Edits MSP_RC_CONFIG / MSP_SET_RC_CONFIG (cmd 66/67, see
--- lib/msp_rc_config.lua). rc_arm_throttle is still read and written back
--- unchanged by the codec because it remains wire-present, even though the
--- field is no longer exposed in the >= 12.0.9 UI.
+-- lib/msp_rc_config.lua). rc_arm_throttle is not on the 22.3 wire, so the
+-- codec neither reads nor writes it.
 --
 -- `profileField = "none"` -- Radio Config is not PID/rate-profile scoped,
 -- so the profile-switch-auto-reload machinery should stay inert.
@@ -49,10 +48,15 @@ local function open(opts)
     {title = "@i18n(app.modules.radio_config.min_throttle)@", spec = {key = "rc_min_throttle"}},
   })
 
-  fieldLayout.buildGroup(runtime, "@i18n(app.modules.radio_config.deadband)@", {
-    {title = "@i18n(app.modules.radio_config.yaw_deadband)@", spec = {key = "rc_yaw_deadband"}},
-    {title = "@i18n(app.modules.radio_config.cyclic)@", spec = {key = "rc_deadband"}},
-  })
+  fieldLayout.buildSingle(runtime,
+    "@i18n(app.modules.radio_config.roll_deadband)@ @i18n(app.modules.radio_config.deadband)@",
+    {key = "rc_roll_deadband"})
+  fieldLayout.buildSingle(runtime,
+    "@i18n(app.modules.radio_config.pitch_deadband)@ @i18n(app.modules.radio_config.deadband)@",
+    {key = "rc_pitch_deadband"})
+  fieldLayout.buildSingle(runtime,
+    "@i18n(app.modules.radio_config.yaw_deadband)@ @i18n(app.modules.radio_config.deadband)@",
+    {key = "rc_yaw_deadband"})
 
   runtime:loadInitial()
 end

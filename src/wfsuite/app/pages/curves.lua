@@ -489,7 +489,7 @@ openSlotList = function(opts, category, listState)
 
   for i = 1, slotCount do
     buttons[i] = form.addButton(nil, {x = x, y = y, w = tileW, h = tileH}, {
-      text = category.slotTitle(i),
+      text = tileGrid.fitLabel(category.slotTitle(i), tileW, tileFont),
       icon = category.slotIcon(i),
       options = tileFont,
       press = function()
@@ -612,7 +612,7 @@ openCategoryMenu = function(opts)
   for i, catKey in ipairs(CATEGORY_ORDER) do
     local category = CATEGORIES[catKey]
     buttons[i] = form.addButton(nil, {x = x, y = y, w = tileW, h = tileH}, {
-      text = category.title,
+      text = tileGrid.fitLabel(category.title, tileW, tileFont),
       icon = category.icon,
       options = tileFont,
       press = function() openCategory(opts, category) end,

@@ -51,23 +51,14 @@ return {
     {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x0600},
     {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5FE1},
   },
-  -- Native S.Port broadcasts if the FC sends them directly, but in
-  -- practice these are the same appIds lib/frsky_sensors.lua labels from
-  -- TELEMETRY_CONFIG's slot assignment -- see tasks/session.lua's
-  -- profile-change tracking.
-  pid_profile = {
-    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5130},
-    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5471},
+  -- Packed status words, decoded by lib/system_status.lua -- the same
+  -- appIds lib/frsky_sensors.lua labels from TELEMETRY_CONFIG's slot
+  -- assignment. See tasks/session.lua's updateSystemStatus()/updateProfiles().
+  system_status = {
+    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5140},
   },
-  rate_profile = {
-    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5131},
-    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5472},
-  },
-  battery_profile = {
-    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5133},
-  },
-  tv_profile = {
-    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5134},
+  system_config = {
+    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5141},
   },
   governor = {
     {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5125},
@@ -82,15 +73,8 @@ return {
   adj_v = {
     {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5111},
   },
-  -- Arm-status flags -- see tasks/session.lua's own updateProfiles() for
-  -- how the raw value maps to a plain isArmed boolean.
-  armflags = {
-    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5122},
-    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5462},
-  },
   -- Why-can't-arm bitmask (see lib/msp_status.lua's own arming_disable_flags
-  -- and widgets/dashboard/context.lua's armingDisableFlagsToString()) --
-  -- broadcast at the appId right after armflags's own.
+  -- and widgets/dashboard/context.lua's armingDisableFlagsToString()).
   armdisableflags = {
     {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5123},
   },

@@ -21,6 +21,8 @@ local header = requireModule("app/header.lua")
 local elrsTask = requireModule("lib/elrslink_task.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.diagnostics.name)@ / @i18n(app.modules.elrs_telemetry.name)@"
+local BTN_OK = "@i18n(app.btn_ok)@"
+local BTN_CANCEL = "@i18n(app.btn_cancel)@"
 
 local T = {
   status = "@i18n(app.modules.elrs_telemetry.status)@",
@@ -36,6 +38,8 @@ local T = {
   notProbed = "@i18n(app.modules.elrs_telemetry.status_not_probed)@",
   modeNative = "@i18n(app.modules.elrs_telemetry.mode_native)@",
   modeCustom = "@i18n(app.modules.elrs_telemetry.mode_custom)@",
+  confirmSyncTitle = "@i18n(app.modules.elrs_telemetry.confirm_title)@",
+  confirmSyncPrompt = "@i18n(app.modules.elrs_telemetry.confirm_prompt)@",
 }
 
 local REFRESH_INTERVAL_SECONDS = 0.2
@@ -44,8 +48,9 @@ local function open(opts)
   opts = opts or {}
   local disposed = false
   local headerHandle = nil
+  local syncDialog = nil
   local sessionHandler = nil
-  local session = {connected = false, mspTransport = nil}
+  local session = {connected = false, isArmed = nil, mspTransport = nil}
   local fields = {}
   local fieldCache = {}
   local buttons = {}
@@ -91,6 +96,7 @@ local function open(opts)
   end
 
   local function setButtonsEnabled(enabled)
+    if not next(buttons) then return end
     if buttonsEnabledCache == enabled then return end
     buttonsEnabledCache = enabled
     for _, button in pairs(buttons) do
@@ -112,16 +118,45 @@ local function open(opts)
     setFieldValue("wingflight", formatFcSummary())
     setFieldValue("elrs", formatElrsSummary())
     setFieldValue("action", elrsTask.getModeLabel())
-    setButtonsEnabled(not elrsTask.isRunning())
+    local canRun = not elrsTask.isRunning() and session.isArmed ~= true
+    setButtonsEnabled(canRun)
   end
 
   local function startAction(mode)
+    if disposed then return end
+    if session.isArmed == true or elrsTask.isRunning() then return end
     elrsTask.start(mode)
     updateDisplay(true)
   end
 
+  local function closeSyncDialog()
+    local dialog = syncDialog
+    syncDialog = nil
+    if dialog then dialog:close() end
+  end
+
+  local function confirmSync(mode)
+    if disposed or syncDialog then return end
+    if session.isArmed == true or elrsTask.isRunning() then return end
+    -- A sync must never bypass confirmation if the dialog API is unavailable.
+    if not form or type(form.openDialog) ~= "function" then return end
+    syncDialog = form.openDialog({
+      title = T.confirmSyncTitle,
+      message = T.confirmSyncPrompt,
+      buttons = {
+        {label = BTN_OK, action = function() startAction(mode); return true end},
+        {label = BTN_CANCEL, action = function() return true end},
+      },
+      close = function() syncDialog = nil end,
+      wakeup = function() end,
+      paint = function() end,
+      options = TEXT_LEFT,
+    })
+  end
+
   local function goBack()
     disposed = true
+    closeSyncDialog()
     if sessionHandler then
       bus.unsubscribe("session.update", sessionHandler)
       sessionHandler = nil
@@ -156,19 +191,14 @@ local function open(opts)
   if opts.setCleanupHandler then
     opts.setCleanupHandler(function()
       disposed = true
+      closeSyncDialog()
+      elrsTask.reset()
       if sessionHandler then
         bus.unsubscribe("session.update", sessionHandler)
         sessionHandler = nil
       end
     end)
   end
-
-  sessionHandler = bus.subscribe("session.update", function(snapshot)
-    if disposed then return end
-    session.connected = snapshot and snapshot.connected == true
-    session.mspTransport = snapshot and snapshot.mspTransport
-    updateDisplay(true)
-  end)
 
   local line = form.addLine(T.status)
   fields.status = form.addStaticText(line, nil, elrsTask.getStatus())
@@ -182,17 +212,11 @@ local function open(opts)
   line = form.addLine(T.action)
   fields.action = form.addStaticText(line, nil, elrsTask.getModeLabel())
 
-  -- All three actions on one row: a single leading flex slot (left blank,
-  -- unlike app/header.lua's own use of this same shape for its title text)
-  -- followed by three content-fit button slots -- the exact
-  -- form.getFieldSlots(line, {0, hint, hint, ...}) shape header.lua's own
-  -- Menu/Save/Reload/Tool row already proves works for more than one
-  -- button after the flex slot.
-  local function addActionButton(line, slot, key, label, mode)
+  local function addActionButton(line, slot, key, label, onPress)
     buttons[key] = form.addButton(line, slot, {
       text = label,
       options = FONT_S + CENTERED,
-      press = function() startAction(mode) end,
+      press = onPress,
     })
   end
 
@@ -203,9 +227,24 @@ local function open(opts)
     "   " .. T.fcToElrs .. "   ",
     "   " .. T.elrsToFc .. "   ",
   })
-  addActionButton(buttonLine, buttonSlots[2], "probe", T.probe, elrsTask.MODE_PROBE)
-  addActionButton(buttonLine, buttonSlots[3], "fcToElrs", T.fcToElrs, elrsTask.MODE_FC_TO_ELRS)
-  addActionButton(buttonLine, buttonSlots[4], "elrsToFc", T.elrsToFc, elrsTask.MODE_ELRS_TO_FC)
+  addActionButton(buttonLine, buttonSlots[2], "probe", T.probe, function()
+    startAction(elrsTask.MODE_PROBE)
+  end)
+  addActionButton(buttonLine, buttonSlots[3], "fcToElrs", T.fcToElrs, function()
+    confirmSync(elrsTask.MODE_FC_TO_ELRS)
+  end)
+  addActionButton(buttonLine, buttonSlots[4], "elrsToFc", T.elrsToFc, function()
+    confirmSync(elrsTask.MODE_ELRS_TO_FC)
+  end)
+
+  sessionHandler = bus.subscribe("session.update", function(snapshot)
+    if disposed then return end
+    session.connected = snapshot and snapshot.connected == true
+    session.isArmed = snapshot and snapshot.isArmed
+    if session.isArmed == true then closeSyncDialog() end
+    session.mspTransport = snapshot and snapshot.mspTransport
+    updateDisplay(true)
+  end)
 
   if opts.setWakeupHandler then
     opts.setWakeupHandler(function()

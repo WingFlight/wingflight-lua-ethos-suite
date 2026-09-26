@@ -1,6 +1,6 @@
 -- MSP_RXFAIL_CONFIG helper (cmd 77 read / 78 write).
 --
--- Read returns up to 18 RC-channel failsafe records: mode(U8), value(U16).
+-- Read returns up to 24 RC-channel failsafe records: mode(U8), value(U16).
 -- Write updates one channel at a time, matching the firmware/API shape.
 
 if package.loaded["wfsuite.lib.msp_rxfail_config"] then
@@ -12,7 +12,7 @@ local mspcodec = requireModule("lib/mspcodec.lua")
 
 local READ_COMMAND = 77
 local WRITE_COMMAND = 78
-local CHANNEL_COUNT = 18
+local CHANNEL_COUNT = 24
 local RECORD_BYTES = 3
 
 local SIMULATOR_RESPONSE = {}

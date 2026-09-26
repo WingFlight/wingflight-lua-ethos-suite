@@ -4,6 +4,8 @@
 -- for itself, passed in as this chunk's args rather than loadfile()'d again
 -- here -- see the equivalent note atop tasks/session.lua for why.
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
+local systemAlerts = requireModule("lib/system_alerts.lua")
+local systemStatusCodec = requireModule("lib/system_status.lua")
 
 local bus, settingsStore = ...
 
@@ -29,8 +31,14 @@ local rollingSamples = {}
 local timerTriggered = false
 local timerLastBeep = nil
 local timerPreLastBeep = nil
+-- lib/system_alerts.lua rule id -> {reported, pending, since}: the state last
+-- announced, and a change waiting out the rule's debounce.
+local alertState = {}
 
 local SPEAK_WAV_SECONDS = 0.45
+-- Minimum gap between "control limit" callouts while the surfaces keep
+-- hitting their limit.
+local CONTROL_LIMIT_REPEAT_SECONDS = 3
 local SPEAK_NUM_SECONDS = 0.6
 
 local GOVERNOR_FILES = {
@@ -66,8 +74,26 @@ local FLIGHT_MODE_PRIORITY = {
   {bit = 2, file = "horizon.wav"},      -- HORIZON_MODE_BIT
   {bit = 1, file = "angle.wav"},        -- ANGLE_MODE_BIT
   {bit = 3, file = "trainer.wav"},      -- TRAINER_MODE_BIT
-  {bit = 14, file = "traditional.wav"}, -- TRADITIONAL_MODE_BIT
   {bit = 4, file = "althold.wav"},      -- ALTHOLD_MODE_BIT
+}
+
+-- Bits deliberately left out of FLIGHT_MODE_PRIORITY:
+-- * INFLIGHT (8) is the firmware's "are we flying" latch, not a pilot mode;
+--   it never appears in the table, so it can't change the spoken mode (it
+--   used to re-trigger a callout of the unchanged mode at takeoff/landing).
+-- * TRADITIONAL (14) layers on top of whatever mode is active, so under
+--   first-match-wins it was masked by Angle/Horizon/etc. It gets its own
+--   on/off edge callout in announceFlightMode() instead.
+--
+-- A LOITER/RTH switch that is on but can't fly (disarmed, no fix/home) never
+-- sets its flight-mode bit. system_status reports it instead
+-- (session.navBlocked, see lib/system_status.lua); effectiveFlightMode()
+-- folds it back in as the requested mode's bit so the table still picks the
+-- right name, and "unavailable" is appended.
+local TRADITIONAL_MODE_BIT = 14
+local NAV_BLOCKED_MODE_BIT = {
+  [1] = 12, -- NAV_BLOCKED.LOITER -> LOITER_MODE_BIT
+  [2] = 13, -- NAV_BLOCKED.RTH -> RTH_MODE_BIT
 }
 
 -- Arithmetic bit test, not native bitwise operators -- same convention as
@@ -84,6 +110,13 @@ local function flightModeFile(value)
     if flightModeHasBit(value, m.bit) then return m.file end
   end
   return "normal.wav"
+end
+
+local function effectiveFlightMode(flags, navBlocked)
+  local value = math.floor(flags)
+  local bit = NAV_BLOCKED_MODE_BIT[navBlocked]
+  if bit and not flightModeHasBit(value, bit) then value = value + 2 ^ bit end
+  return value
 end
 
 local SMARTFUEL_THRESHOLDS = {
@@ -106,6 +139,10 @@ local AUDIO_SESSION_KEYS = {
   "governorMode",
   "governorState",
   "flightModeFlags",
+  "navBlocked",
+  "gpsFixType",
+  "systemStatus",
+  "systemConfig",
   "voltage",
   "batteryConfig",
   "tempEsc",
@@ -319,6 +356,26 @@ local function batteryProfileCapacity(profile)
   return nil
 end
 
+local function batteryProfileCellCount(profile)
+  local config = session.batteryConfig
+  if type(config) ~= "table" then return nil end
+
+  local profileCells = config.profileCells
+  if type(profileCells) == "table" then
+    local cells = profileCells[profile]
+    if cells == nil then cells = profileCells[profile + 1] end
+    if type(cells) == "table" then
+      cells = cells.cellCount
+    end
+    cells = tonumber(cells)
+    if cells and cells > 0 then return cells end
+  end
+
+  local cells = tonumber(config.cellCount)
+  if cells and cells > 0 then return cells end
+  return nil
+end
+
 local function announceBatteryProfile()
   if not events.battery_profile then return end
   local value = normalizeBatteryProfile(session.batteryProfile)
@@ -327,9 +384,11 @@ local function announceBatteryProfile()
 
   local capacity = batteryProfileCapacity(value)
   if not capacity then return end
+  local cells = batteryProfileCellCount(value)
 
   playAlert("battery.wav")
   playNumber(math.floor(capacity + 0.5), UNIT_MILLIAMPERE_HOUR)
+  if cells then playNumber(math.floor(cells + 0.5), UNIT_CELLS) end
 end
 
 local function announceGovernor()
@@ -355,8 +414,121 @@ local function announceFlightMode()
 
   local value = tonumber(session.flightModeFlags)
   local last = tonumber(previous.flightModeFlags)
+  if value == nil or last == nil then return end
+  local blocked = tonumber(session.navBlocked) or 0
+  local lastBlocked = tonumber(previous.navBlocked) or 0
+  if value == last and blocked == lastBlocked then return end
+  value = effectiveFlightMode(value, blocked)
+  last = effectiveFlightMode(last, lastBlocked)
+
+  -- Only speak when what would be said actually changes, not on every flag
+  -- change (e.g. AutoTrim toggled underneath a higher-priority mode).
+  local file = flightModeFile(value)
+  local unavailable = blocked ~= 0
+  local spoken = file ~= flightModeFile(last) or unavailable ~= (lastBlocked ~= 0)
+  if spoken then
+    playFlightMode(file)
+    if unavailable then playFlightMode("unavailable.wav") end
+  end
+
+  -- Traditional on says "Traditional"; off re-announces the mode now being
+  -- flown (unless the main mode changed at the same time, already spoken).
+  local traditional = flightModeHasBit(value, TRADITIONAL_MODE_BIT)
+  if traditional ~= flightModeHasBit(last, TRADITIONAL_MODE_BIT) then
+    if traditional then
+      playFlightMode("traditional.wav")
+    elseif not spoken then
+      playFlightMode(file)
+    end
+  end
+end
+
+-- Not armed-gated, same reasoning as announceFlightMode() -- a pilot
+-- waiting for a fix on the bench, before ever arming, is exactly who this
+-- is for. Only the acquired/lost edge is announced (session.gpsFixType 0
+-- <-> >0), not the further 1 (fix only) -> 2 (fix + home) transition --
+-- add a third callout here if the home-capture moment also needs its own
+-- cue.
+local function announceGpsFix()
+  if not events.gps_fix then return end
+  if session.connected ~= true then return end
+
+  local value = tonumber(session.gpsFixType)
+  local last = tonumber(previous.gpsFixType)
   if value == nil or last == nil or value == last then return end
-  playFlightMode(flightModeFile(value))
+
+  if value > 0 and last == 0 then
+    playAlert("gpsfix.wav")
+  elseif value == 0 and last > 0 then
+    playAlert("gpslost.wav")
+  end
+end
+
+-- FC status callouts from lib/system_alerts.lua's rules. A condition already
+-- present when the status first arrives becomes the baseline silently (the
+-- dashboard banner shows it); after that each change is announced once it has
+-- held for the rule's debounce. Not armed-gated: a backup RX that isn't linked
+-- matters most on the bench.
+local function announceSystemAlerts(now)
+  local status = session.systemStatus
+  if status == nil then return end
+  local config = session.systemConfig
+  local rules = systemAlerts.RULES
+
+  for i = 1, #rules do
+    local rule = rules[i]
+    if rule.enterSound or rule.exitSound then
+      local active = systemAlerts.isActive(rule, status, config)
+      local state = alertState[rule.id]
+      if state == nil then
+        alertState[rule.id] = {reported = active, pending = nil, since = now}
+      elseif active == state.reported then
+        state.pending = nil
+      else
+        if state.pending ~= active then
+          state.pending = active
+          state.since = now
+        end
+        if now - state.since >= (rule.debounce or 0) then
+          state.reported = active
+          state.pending = nil
+          local file
+          if active then file = rule.enterSound else file = rule.exitSound end
+          if file and events[rule.setting] then playAlert(file) end
+        end
+      end
+    end
+  end
+end
+
+-- Autotrim: captured (COLLECTING -> SAVE_PENDING), then kept on disarm
+-- (SAVE_PENDING -> IDLE while disarmed) or reverted because the switch went
+-- off first (SAVE_PENDING -> IDLE while still armed). See wingflight-firmware's
+-- flight/autotrim.c.
+local function announceAutotrim()
+  if not events.status_autotrim then return end
+  local status = session.systemStatus
+  local value = status and status.autoTrim
+  local last = previous.autoTrim
+  if value == nil or last == nil or value == last then return end
+
+  local AUTOTRIM = systemStatusCodec.AUTOTRIM
+  if value == AUTOTRIM.SAVE_PENDING then
+    playAlert("trimcaptured.wav")
+  elseif value == AUTOTRIM.IDLE and last == AUTOTRIM.SAVE_PENDING then
+    playAlert(status.armed and "trimcancelled.wav" or "trimsaved.wav")
+  end
+end
+
+-- Stabilized roll/pitch/yaw hit its mixer limit (the FC holds the flag for
+-- 500 ms). Rate-limited, and off by default: it can be chatty on 3D models.
+local function announceControlLimit(now)
+  if not events.status_saturation then return end
+  local status = session.systemStatus
+  if not (status and status.controlSaturated) then return end
+  if lastAlertAt.control_limit and (now - lastAlertAt.control_limit) < CONTROL_LIMIT_REPEAT_SECONDS then return end
+  lastAlertAt.control_limit = now
+  playAlert("controllimit.wav")
 end
 
 local function ensureAdjWavs()
@@ -655,8 +827,15 @@ local function rememberCurrent()
   previous.batteryProfile = session.batteryProfile
   previous.governorState = session.governorState
   previous.flightModeFlags = session.flightModeFlags
+  previous.navBlocked = session.navBlocked
+  previous.gpsFixType = session.gpsFixType
   previous.adjFunction = session.adjFunction
   previous.adjValue = session.adjValue
+  previous.autoTrim = session.systemStatus and session.systemStatus.autoTrim
+end
+
+local function clearAlertState()
+  for key in pairs(alertState) do alertState[key] = nil end
 end
 
 function audio_events.wakeup()
@@ -673,6 +852,7 @@ function audio_events.wakeup()
     speakingUntil = 0
     for key in pairs(rollingSamples) do rollingSamples[key] = nil end
     for key in pairs(lastAlertAt) do lastAlertAt[key] = nil end
+    clearAlertState()
     rememberCurrent()
     return
   end
@@ -680,6 +860,16 @@ function audio_events.wakeup()
   if not initialized then
     initialized = true
     rememberCurrent()
+    -- Force a fresh "no fix" baseline here, unlike every other field
+    -- rememberCurrent() just captured: a fix acquired while the link was
+    -- down (radio off, or GPS locked before this connect) should still be
+    -- announced the moment we reconnect -- that's the whole point of
+    -- alerting pilots waiting for a fix before arming (see
+    -- announceGpsFix()). Without this, a live value of 1 on first connect
+    -- would silently become the baseline and never trigger the callout.
+    if tonumber(session.gpsFixType) ~= nil then
+      previous.gpsFixType = 0
+    end
     lastSmartfuelAnnounced = tonumber(session.fuelPercent)
     return
   end
@@ -688,13 +878,14 @@ function audio_events.wakeup()
   announceArmed()
   announceProfile("pidProfile", events.pid_profile, "profile.wav")
   announceProfile("rateProfile", events.rate_profile, "rates.wav")
-  -- events/alerts/tv.wav is not generated yet -- add it to
-  -- bin/sound-generator/json/*.json and run the generator (see that
-  -- directory's own tooling) before enabling events.tv_profile.
   announceProfile("tvProfile", events.tv_profile, "tv.wav")
   announceBatteryProfile()
   announceGovernor()
   announceFlightMode()
+  announceGpsFix()
+  announceSystemAlerts(now)
+  announceAutotrim()
+  announceControlLimit(now)
   announceVoltage(now)
   announceEscTemp(now)
   announceBecRxVoltage(now)
@@ -710,6 +901,7 @@ function audio_events.reset()
   adjWavs = nil
   for key in pairs(previous) do previous[key] = nil end
   for key in pairs(lastAlertAt) do lastAlertAt[key] = nil end
+  clearAlertState()
   lastSmartfuelAnnounced = nil
   pendingAdjFunction = false
   resetTimerAudio()

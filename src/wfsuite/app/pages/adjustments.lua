@@ -115,7 +115,7 @@ local ADJUST_FUNCTIONS = {
   {id = 77, name = "Governor Auto Throttle", min = 0, max = 250},
   {id = 78, name = "Governor Max Throttle", min = 0, max = 100},
   {id = 79, name = "Governor Min Throttle", min = 0, max = 100},
-  {id = 80, name = "Governor Headspeed", min = 0, max = 10000},
+  {id = 80, name = "Governor RPM", min = 0, max = 10000},
   {id = 81, name = "Governor Yaw FF", min = 0, max = 250},
   {id = 82, name = "Battery Profile", min = 1, max = 6},
   {id = 84, name = "Master Gain Pitch", min = 25, max = 1000},
@@ -148,17 +148,18 @@ local ADJUST_FUNCTIONS = {
   {id = 109, name = "TV Yaw B", min = 0, max = 1000},
   {id = 110, name = "TV Attitude Hold Gain", min = 0, max = 250},
   {id = 111, name = "TV Profile", min = 1, max = 6},
-  -- Scales the weight *magnitude* of every mixer rule tagged with a given
+  -- Scales the weight of every mixer rule tagged with a given
   -- mixerRuleRole_e (pg/mixer.h) -- found by tag at runtime
-  -- (flight/mixer.c's applyRoleWeight()), not a fixed rule index.
-  -- Magnitude only, 0..1000 -- each tagged rule keeps whatever sign it was
-  -- configured with (Reverse in the mixer table, or a negative weight via
-  -- CLI); this never touches it, which is what lets Differential Thrust
-  -- Yaw Gain drive both motors' rules from one scalar while keeping them
-  -- opposite signs (a differential, not a common-mode push) -- see that
-  -- function's own comment. Ranges match rc_adjustments.c's ADJ_ENTRY.
-  {id = 112, name = "Flap Compensation Gain", min = 0, max = 1000},
-  {id = 113, name = "Differential Thrust Yaw Gain", min = 0, max = 1000},
+  -- (flight/mixer.c's applyRoleWeight()), not a fixed rule index. The
+  -- value is applied on top of each tagged rule's configured sign (Reverse
+  -- in the mixer table, or a negative weight via CLI): Flap Compensation
+  -- Flap Compensation Gain and Differential Thrust Yaw Gain are signed, -1000..1000, so
+  -- a negative value flips every tagged rule together -- for Differential
+  -- Thrust Yaw Gain that keeps both motors' rules opposite signs (a
+  -- differential, not a common-mode push) -- see that function's own
+  -- comment. Ranges match rc_adjustments.c's ADJ_ENTRY.
+  {id = 112, name = "Flap Compensation Gain", min = -1000, max = 1000},
+  {id = 113, name = "Differential Thrust Yaw Gain", min = -1000, max = 1000},
 }
 
 local FUNCTION_OPTIONS = {}

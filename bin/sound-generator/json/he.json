@@ -96,6 +96,18 @@
     "needs_translation": true
   },
   {
+    "file": "events/alerts/gpsfix.wav",
+    "english": "GPS Fix",
+    "translation": null,
+    "needs_translation": true
+  },
+  {
+    "file": "events/alerts/gpslost.wav",
+    "english": "GPS Fix Lost",
+    "translation": null,
+    "needs_translation": true
+  },
+  {
     "file": "events/alerts/elapsed.wav",
     "english": "Timer Elapsed",
     "translation": "הטיימר הסתיים",
@@ -594,6 +606,12 @@
     "needs_translation": true
   },
   {
+    "file": "events/mode/unavailable.wav",
+    "english": "Unavailable",
+    "translation": null,
+    "needs_translation": true
+  },
+  {
     "file": "events/mode/failsafe.wav",
     "english": "Failsafe",
     "translation": "Failsafe",
@@ -604,5 +622,71 @@
     "english": "Normal",
     "translation": "Normal",
     "needs_translation": false
+  },
+  {
+    "file": "events/alerts/rxbackup.wav",
+    "english": "Backup receiver active",
+    "translation": null,
+    "needs_translation": true
+  },
+  {
+    "file": "events/alerts/rxmain.wav",
+    "english": "Main receiver restored",
+    "translation": null,
+    "needs_translation": true
+  },
+  {
+    "file": "events/alerts/rxbackuplost.wav",
+    "english": "Backup receiver lost",
+    "translation": null,
+    "needs_translation": true
+  },
+  {
+    "file": "events/alerts/rxbackupok.wav",
+    "english": "Backup receiver OK",
+    "translation": null,
+    "needs_translation": true
+  },
+  {
+    "file": "events/alerts/gyrooverflow.wav",
+    "english": "Gyro overflow",
+    "translation": null,
+    "needs_translation": true
+  },
+  {
+    "file": "events/alerts/gpsfail.wav",
+    "english": "GPS not responding",
+    "translation": null,
+    "needs_translation": true
+  },
+  {
+    "file": "events/alerts/bbfull.wav",
+    "english": "Blackbox full",
+    "translation": null,
+    "needs_translation": true
+  },
+  {
+    "file": "events/alerts/trimcaptured.wav",
+    "english": "Trim captured",
+    "translation": null,
+    "needs_translation": true
+  },
+  {
+    "file": "events/alerts/trimsaved.wav",
+    "english": "Trim saved",
+    "translation": null,
+    "needs_translation": true
+  },
+  {
+    "file": "events/alerts/trimcancelled.wav",
+    "english": "Trim cancelled",
+    "translation": null,
+    "needs_translation": true
+  },
+  {
+    "file": "events/alerts/controllimit.wav",
+    "english": "Control limit",
+    "translation": null,
+    "needs_translation": true
   }
 ]

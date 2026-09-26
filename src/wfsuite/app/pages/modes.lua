@@ -51,7 +51,6 @@ local MODE_NAME_BY_ID = {
   [42] = "USER3",
   [43] = "USER4",
   [45] = "PARALYZE",
-  [46] = "GPS RESCUE",
   [47] = "TRAINER",
   [48] = "VTX CONTROL DISABLE",
   [51] = "STICK COMMANDS DISABLE",

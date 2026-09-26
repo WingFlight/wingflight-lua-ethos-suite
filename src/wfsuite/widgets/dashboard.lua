@@ -57,6 +57,16 @@ local function ensureMspApiVersion()
   return mspApiVersion
 end
 
+-- Only needed once the FC's system_status telemetry has arrived.
+local systemAlerts = nil
+
+local function ensureSystemAlerts()
+  if not systemAlerts then
+    systemAlerts = requireModule("lib/system_alerts.lua")
+  end
+  return systemAlerts
+end
+
 -- modelPreferences/ethosVersion are also loadfile()'d lazily -- neither is
 -- used by create()/paint()'s own first-tick work either (modelPreferences
 -- only once a model actually connects, ethosVersion only once the toolbar
@@ -1116,6 +1126,8 @@ local function update(widget, snapshot)
   widget.connected = snapshot.connected == true
   widget.isArmed = snapshot.isArmed
   widget.armDisableFlags = snapshot.armDisableFlags
+  widget.systemStatus = snapshot.systemStatus
+  widget.systemConfig = snapshot.systemConfig
 
   widget.craftName = snapshot.craftName
   widget.mcuId = snapshot.mcuId
@@ -1287,8 +1299,9 @@ local function prewarmDashboardState(widget)
   widget.dashboardPrewarmed[key] = true
 end
 
--- Lightweight dashboard error overlays -- currently two: "connected to
--- invalid/unsupported firmware" and "background task not running". Both
+-- Lightweight dashboard error overlays: "background task not running",
+-- "connected to invalid/unsupported firmware", and the FC status alerts from
+-- lib/system_alerts.lua (red for critical, amber for warnings). All
 -- share this same single-line strip across the footer (bottom edge) of
 -- the screen, drawn on top of whatever the theme/toolbar already painted
 -- there, not a modal dialog or a restructuring of the normal paint
@@ -1303,17 +1316,43 @@ end
 -- priority ordering.
 local FOOTER_ALERT_BG = lcd.RGB(180, 20, 20, 1)
 local FOOTER_ALERT_TEXT = lcd.RGB(255, 255, 255, 1)
+local FOOTER_WARNING_BG = lcd.RGB(230, 150, 0, 1)
+local FOOTER_WARNING_TEXT = lcd.RGB(0, 0, 0, 1)
 
-local function drawFooterBanner(w, h, text)
+local function drawFooterBanner(w, h, text, bg, fg)
   lcd.font(w <= 640 and FONT_XS or FONT_S)
   local _, textH = lcd.getTextSize(text)
   local bannerH = textH + (w <= 640 and 8 or 12)
   local bannerY = h - bannerH
 
-  lcd.color(FOOTER_ALERT_BG)
+  lcd.color(bg or FOOTER_ALERT_BG)
   lcd.drawFilledRectangle(0, bannerY, w, bannerH)
-  lcd.color(FOOTER_ALERT_TEXT)
+  lcd.color(fg or FOOTER_ALERT_TEXT)
   lcd.drawText(w * 0.5, bannerY + (bannerH - textH) * 0.5, text, CENTERED)
+end
+
+-- Highest-priority FC status alert, with "(+N)" when others are active too.
+-- The banner text is cached per (rule, count) so paint doesn't build a new
+-- string every frame.
+local statusBannerRule, statusBannerCount, statusBannerText = nil, 0, nil
+
+local function drawStatusBanner(widget, w, h)
+  if widget.systemStatus == nil then return false end
+  local alerts = ensureSystemAlerts()
+  local rule, count = alerts.topBanner(widget.systemStatus, widget.systemConfig)
+  if rule == nil then return false end
+
+  if rule ~= statusBannerRule or count ~= statusBannerCount then
+    statusBannerRule, statusBannerCount = rule, count
+    statusBannerText = count > 1 and (rule.text .. " (+" .. (count - 1) .. ")") or rule.text
+  end
+
+  if rule.level == alerts.LEVEL.CRITICAL then
+    drawFooterBanner(w, h, statusBannerText, FOOTER_ALERT_BG, FOOTER_ALERT_TEXT)
+  else
+    drawFooterBanner(w, h, statusBannerText, FOOTER_WARNING_BG, FOOTER_WARNING_TEXT)
+  end
+  return true
 end
 
 -- See lib/msp_api_version.lua's classifyUnsupported() for the two states
@@ -1360,7 +1399,7 @@ end
 -- Priority order: background-task-down first (the more fundamental
 -- problem -- without it, session/MSP state can never resolve either way,
 -- so widget.connected can never even become true), then invalid/
--- unsupported firmware. In practice these are close to mutually
+-- unsupported firmware, then FC status alerts. In practice the first two are close to mutually
 -- exclusive already (widget.connected requires the background task to be
 -- alive), but keeping an explicit order costs nothing and avoids ever
 -- drawing both at once.
@@ -1374,8 +1413,13 @@ local function drawFooterAlert(widget, w, h)
 
   if widget.connected == true and widget.apiVersionSupported == false then
     local text = apiVersionWarningText(widget)
-    if text then drawFooterBanner(w, h, text) end
+    if text then
+      drawFooterBanner(w, h, text)
+      return
+    end
   end
+
+  if widget.connected == true then drawStatusBanner(widget, w, h) end
 end
 
 local function paint(widget)

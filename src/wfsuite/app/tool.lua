@@ -173,6 +173,7 @@ local MENUS = {
       -- tuning field itself (PID Controller only picks WHICH slot is
       -- assigned; this is where the slot's shape gets edited).
       {title = "@i18n(app.modules.curves.name)@", icon = lcd.loadMask("app/gfx/curves.png"), script = "app/pages/curves.lua"},
+      {title = "@i18n(app.modules.gps_nav_config.name)@", icon = lcd.loadMask("app/gfx/gps_nav_config.png"), script = "app/pages/gps_nav_config.lua"},
       {title = "@i18n(app.modules.servos.name)@", icon = lcd.loadMask("app/gfx/servos.png"), menuId = "servos_menu"},
       {title = "@i18n(app.menu_section_controls)@", icon = lcd.loadMask("app/gfx/controls.png"), menuId = "controls_menu"},
       {title = "@i18n(app.modules.power.name)@", icon = lcd.loadMask("app/gfx/power.png"), menuId = "power_menu"},
@@ -191,10 +192,23 @@ local MENUS = {
     entries = {
       {title = "@i18n(app.modules.modes.name)@", icon = lcd.loadMask("app/gfx/modes.png"), script = "app/pages/modes.lua"},
       {title = "@i18n(app.modules.adjustments.name)@", icon = lcd.loadMask("app/gfx/adjustments.png"), script = "app/pages/adjustments.lua"},
-      {title = "@i18n(app.modules.failsafe.name)@", icon = lcd.loadMask("app/gfx/failsafe.png"), script = "app/pages/failsafe.lua"},
+      {title = "@i18n(app.modules.failsafe.name)@", icon = lcd.loadMask("app/gfx/failsafe.png"), menuId = "failsafe_menu"},
       {title = "@i18n(app.modules.beepers.name)@", icon = lcd.loadMask("app/gfx/beepers.png"), menuId = "beepers_menu"},
       {title = "@i18n(app.modules.blackbox.name)@", icon = lcd.loadMask("app/gfx/blackbox.png"), menuId = "blackbox_menu"},
       {title = "@i18n(app.modules.stats.name)@", icon = lcd.loadMask("app/gfx/stats.png"), script = "app/pages/stats.lua"},
+    },
+  },
+  -- Two independent MSP round-trips (MSP_RXFAIL_CONFIG's per-channel indexed
+  -- writes vs. MSP_FAILSAFE_CONFIG's single flat-record write) -- kept as two
+  -- pages behind one submenu rather than merged into one page with expansion
+  -- panels, same reasoning as beepers_menu/blackbox_menu below (each sub-page
+  -- keeps its own independent load/save/dirty state, no cross-MSP-flow save
+  -- button to coordinate).
+  failsafe_menu = {
+    title = "@i18n(app.modules.failsafe.name)@",
+    entries = {
+      {title = "@i18n(app.modules.failsafe.menu_channel_fallback)@", icon = lcd.loadMask("app/gfx/failsafe_channel_fallback.png"), script = "app/pages/failsafe.lua"},
+      {title = "@i18n(app.modules.failsafe_procedure.name)@", icon = lcd.loadMask("app/gfx/failsafe_procedure.png"), script = "app/pages/failsafe_procedure.lua"},
     },
   },
   beepers_menu = {
@@ -325,6 +339,26 @@ local MENUS = {
       {title = "@i18n(app.menu_section_advanced)@", icon = lcd.loadMask("app/gfx/advanced.png"), menuId = "advanced_menu"},
     },
   },
+  thrust_vector_menu = {
+    title = "@i18n(app.modules.thrust_vector.name)@",
+    entries = {
+      {title = "@i18n(app.modules.pids.name)@", icon = lcd.loadMask("app/gfx/pids.png"), script = "app/pages/thrust_vector_pids.lua"},
+      {title = "@i18n(app.modules.master_gains.name)@", icon = lcd.loadMask("app/gfx/master_gains.png"), script = "app/pages/thrust_vector_master_gains.lua"},
+      {title = "@i18n(app.modules.pid_controller.name)@", icon = lcd.loadMask("app/gfx/pid_controller.png"), script = "app/pages/thrust_vector_pid_controller.lua"},
+      {title = "@i18n(app.modules.pid_bandwidth.name)@", icon = lcd.loadMask("app/gfx/pid_bandwidth.png"), script = "app/pages/thrust_vector_pid_bandwidth.lua"},
+      {title = "@i18n(app.modules.thrust_vector.hold)@", icon = lcd.loadMask("app/gfx/autolevel_attitude_hold.png"), script = "app/pages/thrust_vector_hold.lua"},
+    },
+  },
+  autolevel_menu = {
+    title = "@i18n(app.modules.autolevel.name)@",
+    entries = {
+      {title = "@i18n(app.modules.autolevel.acro_trainer)@", icon = lcd.loadMask("app/gfx/autolevel_trainer.png"), script = "app/pages/autolevel_trainer.lua"},
+      {title = "@i18n(app.modules.autolevel.angle_mode)@", icon = lcd.loadMask("app/gfx/autolevel_angle.png"), script = "app/pages/autolevel_angle.lua"},
+      {title = "@i18n(app.modules.autolevel.horizon_mode)@", icon = lcd.loadMask("app/gfx/autolevel_horizon.png"), script = "app/pages/autolevel_horizon.lua"},
+      {title = "@i18n(app.modules.autolevel.auto_hover)@", icon = lcd.loadMask("app/gfx/autolevel_auto_hover.png"), script = "app/pages/autolevel_auto_hover.lua"},
+      {title = "@i18n(app.modules.autolevel.att_hold)@", icon = lcd.loadMask("app/gfx/autolevel_attitude_hold.png"), script = "app/pages/autolevel_attitude_hold.lua"},
+    },
+  },
   -- Matches the original's own app/modules/manifest.lua `advanced_menu`,
   -- minus Main Rotor, Tail Rotor and Rescue -- all three heli-only, no
   -- wingflight equivalent (fixed-wing has no collective pitch, tail
@@ -349,9 +383,9 @@ local MENUS = {
       -- of whether its own mode/feature is currently active (e.g.
       -- Autolevel is always reachable even when neither Auto Hover nor
       -- Att Hold is the engaged flight mode).
-      {title = "@i18n(app.modules.thrust_vector.name)@", icon = lcd.loadMask("app/gfx/thrust_vector.png"), script = "app/pages/thrust_vector.lua"},
+      {title = "@i18n(app.modules.thrust_vector.name)@", icon = lcd.loadMask("app/gfx/thrust_vector.png"), menuId = "thrust_vector_menu"},
       {title = "@i18n(app.modules.pid_bandwidth.name)@", icon = lcd.loadMask("app/gfx/pid_bandwidth.png"), script = "app/pages/pid_bandwidth.lua"},
-      {title = "@i18n(app.modules.autolevel.name)@", icon = lcd.loadMask("app/gfx/autolevel.png"), script = "app/pages/autolevel.lua"},
+      {title = "@i18n(app.modules.autolevel.name)@", icon = lcd.loadMask("app/gfx/autolevel.png"), menuId = "autolevel_menu"},
       -- Links straight to the page now, not a submenu: Cyclic Behaviour
       -- (cyclic_ring/cyclic_polarity) and Rate Table (rates_type) were
       -- both wire-present-but-dead heli-only concepts on wingflight-

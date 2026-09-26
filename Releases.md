@@ -1,3 +1,52 @@
+# 0.0.28
+
+Read FC status (armed, GPS fix, LOITER/RTH blocked, profile numbers) from the 0.0.28 firmware's SYSTEM_STATUS (120) and SYSTEM_CONFIG (121) telemetry sensors, which replace the removed arming flags, profile and GPS fix sensors. Requires 0.0.28 firmware with both sensors selected.
+IMPORTANT: updating the firmware keeps the model's saved telemetry sensor selection. After flashing, press Default on the Telemetry page and save, or run this in the CLI and save:
+set telemetry_sensors = 3,4,5,6,15,43,50,52,58,59,60,89,91,99,120,121
+Match the Telemetry page's Default selection to the firmware default above. It adds flight mode (89), which the flight-mode callouts need, and drops the unused governor sensor (93).
+Add FC status alerts to the dashboard footer (red for critical, amber for warnings, "(+N)" when several are active): backup RX in control, failsafe, battery critical, gyro overflow, backup RX no signal, RTH/Loiter unavailable, GPS not responding, ACC not calibrated, test override active, reboot required, Blackbox full.
+Add FC status callouts under Settings > Audio Events > FC status: backup receiver active/restored, backup receiver lost/OK, gyro overflow, GPS not responding, Blackbox full, trim captured/saved/cancelled, and an optional control limit callout (off by default). The GPS fix and TV profile callouts now default on.
+Create named S.Port sensors for Debug 0-7 (0x52F0-0x52F7) and GPS Sats (0x0860).
+
+Support 24 RC channels and 24 bus servos (MSP API 22.5): mixer inputs CH #19-#24, bus servos 19-24 at mixer outputs 31-36, 24 failsafe channels, and up to 24 backup RX channels on the diagnostics page. The Bus Servos page lists as many servos as the configured bus output drives. Requires MSP API 22.5 (0.0.28 firmware).
+
+# 0.0.27
+
+Split Radio Config's shared Cyclic deadband into separate Roll and Pitch deadbands, alongside Yaw. Requires matching firmware (MSP_RC_CONFIG layout change).
+Hide FrSky Hub, MAVLink and LTM from the Ports page, which the firmware no longer compiles in. A port still set to one keeps showing its name.
+
+Announce "GPS Loiter Unavailable" / "GPS RTH Unavailable" when a GPS mode switch is on but the mode can't fly (disarmed, no fix or home), using the new 0.0.27 firmware telemetry bit.
+Add a "Traditional" flight-mode callout, and stop re-announcing the unchanged mode at takeoff and landing.
+
+# 0.0.26
+
+Add Nav Throttle, Altitude Damp and Turn Coord. to the GPS Navigation page, matching the reworked 0.0.26 firmware GPS Loiter/RTH; firmware without them keeps working and ignores them.
+
+Add a Failsafe Stage 2 page (procedure, delay/off delay/throttle low delay/throttle/recovery delay, test switch mode) and a GPS Navigation tuning page (RTH altitude, loiter radius/direction, min satellites, max bank/pitch angle, bearing/altitude gain), both requiring MSP API 22.4 firmware. Failsafe is now a submenu grouping Channel Fallback and Stage 2, each with dedicated icons.
+Add a GPS fix telemetry sensor and an audio callout ("GPS fix acquired/lost", off by default pending generated audio), including on first connect if a fix is already present.
+Remove the GPS RESCUE box name; relabel the RESC arming-disable flag to GPS RTH, matching the firmware/Configurator retirement of the redundant GPS RESCUE switch.
+
+Announce battery profile cell count alongside capacity when the battery profile audio event fires.
+
+Rename Governor Headspeed to Governor RPM (adjustment id 80).
+Fix broken RPM sensor labels: the sensor catalog referenced telemetry.sensor_motor1speed/sensor_motor2speed keys that didn't exist in any locale, rendering blank; renamed from Headspeed/Tailspeed to match the firmware's Motor 1/2 RPM rename.
+
+Split Thrust Vector into PIDs, Master Gains, PID Controller, PID Bandwidth and Attitude / Heading Hold tools. Each follows the selected TV profile and preserves the other tools' settings when saving.
+
+Rename the Autolevel group to Flight Modes and split it into separate Trainer, Angle, Horizon, Auto Hover and Attitude Hold tools. Horizon includes the shared Angle limits; each tool preserves other modes' settings when saving.
+
+Require MSP API 22.04 or newer and use 22.04 in the simulator. Update the firmware snapshot alongside the suite.
+
+Add independent bank/pitch limits for Trainer and Angle in Autolevel with MSP API 22.4 firmware. Remove the legacy shared Max fields and older-firmware compatibility branches; show only bank and pitch limits. TRAINER is already available under Controls -> Modes.
+
+# 0.0.25
+
+Target MSP API 22.3: drop the heli placeholder bytes and raise the minimum supported API version.
+Add per-profile battery cell count and cell voltages.
+Add the CRSF Sensors serial port function and fix a stale RX_INPUT_BACKUP id.
+Allow negative flap compensation and diff thrust yaw adjustments.
+Show SmartFuel Sag Gain in volts instead of percent.
+
 # 0.0.24
 
 Add per-servo balance curves to the Curves page (new Servo category).

@@ -27,6 +27,11 @@ Wingflight is a fixed-wing fork of [Rotorflight](https://github.com/rotorflight)
 
 ----------
 
+## Documentation
+
+See the [documentation guide](docs/README.md) and [configuration page index](docs/pages/README.md).
+Page references are marked as draft or reviewed.
+
 ## What is WFSuite?
 
 **WFSuite** is a touch-based, Lua-scripted GUI suite for the Ethos platform. It enables easy setup, tuning, and diagnostics of Wingflight-based aircraft using supported FrSky transmitters. It offers:

@@ -12,7 +12,7 @@ local progressDialog = requireModule("app/progress_dialog.lua")
 local eeprom = requireModule("lib/msp_eeprom.lua")
 local rxfail = requireModule("lib/msp_rxfail_config.lua")
 
-local PAGE_TITLE = "@i18n(app.modules.failsafe.name)@"
+local PAGE_TITLE = "@i18n(app.modules.failsafe.name)@ / @i18n(app.modules.failsafe.menu_channel_fallback)@"
 local BTN_OK = "@i18n(app.btn_ok)@"
 local BTN_CANCEL = "@i18n(app.btn_cancel)@"
 local MSG_LOADING_TITLE = "@i18n(app.msg_loading)@"
@@ -30,7 +30,7 @@ local MODE_SET = 2
 -- project already set once, pre-rewrite (see git history's "Remove
 -- collective channel and dependancies (#6)"). One extra aux slot
 -- (aux14) added at the end to keep this list's length matching
--- lib/msp_rxfail_config.lua's CHANNEL_COUNT (18) exactly, same fix that
+-- the first 18 channels, same fix that
 -- commit made.
 local CHANNEL_LABELS = {
   "@i18n(app.modules.failsafe.roll)@",
@@ -52,6 +52,11 @@ local CHANNEL_LABELS = {
   "@i18n(app.modules.failsafe.aux13)@",
   "@i18n(app.modules.failsafe.aux14)@",
 }
+-- CH #19-#24 (24-channel receivers such as F.Bus), to match
+-- lib/msp_rxfail_config.lua's CHANNEL_COUNT (24).
+for ch = 19, 24 do
+  CHANNEL_LABELS[#CHANNEL_LABELS + 1] = string.format("@i18n(app.modules.mixer_rules.input_rcch_fmt)@", ch)
+end
 
 local MODE_OPTIONS = {
   {"@i18n(api.RXFAIL_CONFIG.tbl_auto)@", 0},

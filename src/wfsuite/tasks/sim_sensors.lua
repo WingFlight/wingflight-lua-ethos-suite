@@ -17,7 +17,7 @@
 --     telemetry-derived sensor sources Ethos's simulator can auto-populate
 --     at *real* appId ranges (RSSI, voltage, etc.) that could otherwise
 --     collide with auto-discovery. These sensors all live at
---     0x5001-0x5028, a range nothing else in this suite or Ethos itself
+--     0x5002-0x5032, a range nothing else in this suite or Ethos itself
 --     ever populates, so there is nothing to drop.
 --   - appId/unit/decimals/range values copied straight from that original's
 --     tasks/scheduler/telemetry/sources/sim.lua (uid/unit/dec/min/max
@@ -43,8 +43,7 @@ local DiySensor = requireModule("lib/diy_sensor.lua")
 -- tasks/elrs_sensors.lua's own aggregate decoders already use for
 -- simulator/debug-only sensor labels.
 local SENSORS = {
-  armflags         = {uid = 0x5001, name = "Arm Flags",        unit = nil,               dec = nil, min = 0,     max = 2},
-  voltage          = {uid = 0x5002, name = "Voltage",          unit = UNIT_VOLT,          dec = 2,   min = 0,     max = 3000},
+  voltage         = {uid = 0x5002, name = "Voltage",          unit = UNIT_VOLT,          dec = 2,   min = 0,     max = 3000},
   rpm              = {uid = 0x5003, name = "RPM",              unit = UNIT_RPM,           dec = nil, min = 0,     max = 2000},
   current          = {uid = 0x5004, name = "Current",          unit = UNIT_AMPERE,        dec = 0,   min = 0,     max = 300},
   temp_esc         = {uid = 0x5005, name = "ESC Temp",         unit = UNIT_DEGREE,        dec = 0,   min = 0,     max = 100},
@@ -54,8 +53,6 @@ local SENSORS = {
   governor         = {uid = 0x5009, name = "Governor",         unit = nil,                dec = 0,   min = 0,     max = 200},
   adj_f            = {uid = 0x5010, name = "Adjust Function",  unit = nil,                dec = 0,   min = 0,     max = 10},
   adj_v            = {uid = 0x5011, name = "Adjust Value",     unit = nil,                dec = 0,   min = 0,     max = 2000},
-  pid_profile      = {uid = 0x5012, name = "PID Profile",      unit = nil,                dec = 0,   min = 0,     max = 6},
-  rate_profile     = {uid = 0x5013, name = "Rate Profile",     unit = nil,                dec = 0,   min = 0,     max = 6},
   throttle_percent = {uid = 0x5014, name = "Throttle %",       unit = nil,                dec = 0,   min = 0,     max = 100},
   armdisableflags  = {uid = 0x5015, name = "Arm Disable Flags", unit = nil,               dec = nil, min = 0,     max = 65536},
   altitude         = {uid = 0x5016, name = "Altitude",         unit = UNIT_METER,         dec = 0,   min = 0,     max = 50000},
@@ -68,10 +65,27 @@ local SENSORS = {
   attroll          = {uid = 0x5023, name = "Roll Attitude",    unit = UNIT_DEGREE,        dec = 1,   min = -1800, max = 3600},
   attpitch         = {uid = 0x5024, name = "Pitch Attitude",   unit = UNIT_DEGREE,        dec = 1,   min = -1800, max = 3600},
   groundspeed      = {uid = 0x5025, name = "Ground Speed",     unit = UNIT_KNOT,          dec = 1,   min = -1800, max = 3600},
-  battery_profile  = {uid = 0x5026, name = "Battery Profile",  unit = nil,                dec = 0,   min = 0,     max = 6},
   motor2speed      = {uid = 0x5027, name = "Motor 2 Speed",    unit = UNIT_RPM,           dec = nil, min = 0,     max = 65535},
   flight_mode      = {uid = 0x5028, name = "Flight Mode",      unit = nil,                dec = 0,   min = 0,     max = 65536},
-  tv_profile       = {uid = 0x5029, name = "TV Profile",       unit = nil,                dec = 0,   min = 0,     max = 6},
+  system_status    = {uid = 0x5031, name = "System Status",    unit = nil,                dec = 0,   min = 0,     max = 2147483647},
+  system_config    = {uid = 0x5032, name = "System Config",    unit = nil,                dec = 0,   min = 0,     max = 2147483647},
+}
+
+-- The packed system_status/system_config words (lib/system_status.lua) are
+-- built from the editor's per-field sim/sensors/*.lua files, so the
+-- bin/sensors/ desktop editor keeps its simple Arm/profile/GPS controls.
+-- key -> function(read) returning the packed value.
+local PACKED = {
+  system_status = function(read)
+    local armed = (math.floor(tonumber(read("armflags")) or 0) & 1)
+    local gpsFix = math.floor(tonumber(read("gps_fix_type")) or 0) & 0x3
+    return armed | (gpsFix << 9)
+  end,
+  system_config = function(read)
+    local function profile(key) return math.floor(tonumber(read(key)) or 1) & 0x7 end
+    return profile("pid_profile") | (profile("rate_profile") << 3)
+      | (profile("battery_profile") << 6) | (profile("tv_profile") << 9)
+  end,
 }
 
 -- key -> DiySensor instance, built once from SENSORS above. Module index
@@ -123,7 +137,9 @@ local function wakeup()
   readTelemetryStateOverride()
 
   for key, sensor in pairs(sensors) do
-    local value = readValue(key)
+    local pack = PACKED[key]
+    local value
+    if pack then value = pack(readValue) else value = readValue(key) end
     if value ~= nil then sensor:set(value, true) end
   end
 end

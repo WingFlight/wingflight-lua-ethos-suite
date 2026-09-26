@@ -1110,6 +1110,147 @@ function utils.resolveFont(value, default)
   return default
 end
 
+local function trimLastUtf8Char(str)
+  local len = #str
+  while len > 0 and str:byte(len) >= 128 and str:byte(len) < 192 do
+    len = len - 1
+  end
+  if len > 0 then
+    len = len - 1
+  end
+  return str:sub(1, len)
+end
+
+function utils.trimLastUtf8Char(str)
+  return trimLastUtf8Char(str)
+end
+
+-- The legacy utils.box() path has no per-box layout cache. Keep a small,
+-- bounded truncation cache so unchanged long labels do not rebuild substrings
+-- on every paint. Cached-layout callers normally bypass this on cache hits.
+local fittedTextCache = {}
+local fittedTextNext = 1
+
+function utils.fitText(text, maxW, font)
+  if type(text) ~= "string" or text == "" then return text end
+  if text:sub(1, 6) == "@i18n(" then return text end
+  if not maxW then return text end
+  if maxW <= 0 then return "" end
+  if not (lcd and lcd.getTextSize) then return text end
+  if font and lcd.font then lcd.font(font) end
+  if font then
+    for i = 1, #fittedTextCache do
+      local cached = fittedTextCache[i]
+      if cached.text == text and cached.width == maxW and cached.font == font then
+        return cached.result
+      end
+    end
+  end
+  if lcd.getTextSize(text) <= maxW then return text end
+
+  local ellipsis = "..."
+  if lcd.getTextSize(ellipsis) > maxW then return "" end
+  local trimmed = text
+  local result = ellipsis
+  while #trimmed > 0 do
+    trimmed = trimLastUtf8Char(trimmed):gsub("%s+$", "")
+    local candidate = trimmed .. ellipsis
+    if lcd.getTextSize(candidate) <= maxW then
+      result = candidate
+      break
+    end
+  end
+  if font then
+    local cached = fittedTextCache[fittedTextNext] or {}
+    cached.text, cached.width, cached.font, cached.result = text, maxW, font, result
+    fittedTextCache[fittedTextNext] = cached
+    fittedTextNext = fittedTextNext % 8 + 1
+  end
+  return result
+end
+
+local VALUE_STEP_FONTS
+local function getValueStepFonts()
+  if VALUE_STEP_FONTS then
+    return VALUE_STEP_FONTS
+  end
+  VALUE_STEP_FONTS = {}
+  local fontNames = {"FONT_XXXXL", "FONT_XXL", "FONT_XL", "FONT_L", "FONT_STD", "FONT_S", "FONT_XS"}
+  for i = 1, #fontNames do
+    local f = utils.resolveFont(fontNames[i], nil)
+    if f ~= nil then
+      VALUE_STEP_FONTS[#VALUE_STEP_FONTS + 1] = f
+    end
+  end
+  return VALUE_STEP_FONTS
+end
+
+local function resolveAndFitValue(value, valuefont, regionW, regionH)
+  local resolvedValueFont = utils.resolveFont(valuefont, nil)
+  if not resolvedValueFont then
+    local fonts = utils.getFontListsForResolution().value_default
+    resolvedValueFont = fonts[1] or FONT_XS
+    local fitValue = value
+    if string.find(fitValue, "%%", 1, true) then fitValue = fitValue:gsub("%%", "W") end
+    for i = 1, #fonts do
+      local candidate = fonts[i]
+      lcd.font(candidate)
+      local tw, th = lcd.getTextSize(fitValue)
+      if tw <= regionW and th <= regionH then resolvedValueFont = candidate end
+    end
+  end
+
+  lcd.font(resolvedValueFont)
+  local valueW, valueH = lcd.getTextSize(value)
+  local renderValue = value
+
+  if regionW and regionW <= 0 then
+    return resolvedValueFont, "", 0, valueH
+  end
+  if regionW and valueW > regionW then
+    local stepFonts = getValueStepFonts()
+    local startIdx = nil
+    for i = 1, #stepFonts do
+      if stepFonts[i] == resolvedValueFont then
+        startIdx = i
+        break
+      end
+    end
+
+    if startIdx and startIdx < #stepFonts then
+      local stepped = false
+      for i = startIdx + 1, #stepFonts do
+        local candidate = stepFonts[i]
+        lcd.font(candidate)
+        local tw, th = lcd.getTextSize(value)
+        if tw <= regionW and (not regionH or th <= regionH) then
+          resolvedValueFont = candidate
+          valueW, valueH = tw, th
+          stepped = true
+          break
+        end
+      end
+      if not stepped then
+        resolvedValueFont = stepFonts[#stepFonts]
+        lcd.font(resolvedValueFont)
+        valueW, valueH = lcd.getTextSize(value)
+      end
+    end
+
+    if valueW > regionW then
+      renderValue = utils.fitText(value, regionW, resolvedValueFont)
+      lcd.font(resolvedValueFont)
+      valueW, valueH = lcd.getTextSize(renderValue)
+    end
+  end
+
+  return resolvedValueFont, renderValue, valueW, valueH
+end
+
+function utils.resolveAndFitValue(value, valuefont, regionW, regionH)
+  return resolveAndFitValue(value, valuefont, regionW, regionH)
+end
+
 function utils.resolveColor(value)
   if type(value) == "number" then return value end
   if type(value) == "table" and #value >= 3 then return rgb(value[1], value[2], value[3]) end
@@ -1376,6 +1517,8 @@ function context.widgets.dashboard.clearCaches(options)
   options = options or {}
   if options.renders then clearTable(context.widgets.dashboard.renders) end
   if options.theme then
+    clearTable(fittedTextCache)
+    fittedTextNext = 1
     clearTable(paletteCache)
     clearTable(themeStateCache)
     clearTable(themePaletteCache)
@@ -1737,39 +1880,30 @@ function utils.box(x, y, w, h, title, titlepos, titlealign, titlefont, titlespac
   if image then
     drawImageInRect(regionX, regionY, regionW, regionH, image, imagewidth, imageheight, imagealign, bgcolor)
   elseif value then
-
-    local resolvedValueFont = utils.resolveFont(valuefont, nil)
-    if not resolvedValueFont then
-      local fonts = utils.getFontListsForResolution().value_default
-      resolvedValueFont = fonts[#fonts]
-      local fitValue = value
-      if string.find(fitValue, "%%", 1, true) then fitValue = fitValue:gsub("%%", "W") end
-      for _, candidate in ipairs(fonts) do
-        lcd.font(candidate)
-        local tw, th = lcd.getTextSize(fitValue)
-        if tw <= regionW and th <= regionH then
-          resolvedValueFont = candidate
-        end
-      end
-    end
-    lcd.font(resolvedValueFont)
-    local tw, th = lcd.getTextSize(value)
+    local resolvedValueFont, renderValue, tw, th = resolveAndFitValue(value, valuefont, regionW, regionH)
     local sx = regionX
     local align = valuealign or "center"
     if align == "right" then sx = regionX + regionW - tw elseif align ~= "left" then sx = regionX + (regionW - tw) / 2 end
+    lcd.font(resolvedValueFont)
     lcd.color(utils.resolveThemeColor("textcolor", textcolor))
-    lcd.drawText(sx, regionY + (regionH - th) / 2, value)
+    lcd.drawText(sx, regionY + (regionH - th) / 2, renderValue)
   end
 
   if title then
-    lcd.font(resolvedTitleFont)
-    local regionW = w - titlepaddingleft - titlepaddingright
-    local sx = x + titlepaddingleft + (regionW - titleW) / 2
+    local regionTitleW = w - titlepaddingleft - titlepaddingright
+    local renderTitle = title
+    if titleW > regionTitleW then
+      renderTitle = utils.fitText(title, regionTitleW, resolvedTitleFont)
+      lcd.font(resolvedTitleFont)
+      titleW, titleTextH = lcd.getTextSize(renderTitle)
+    end
+    local sx = x + titlepaddingleft + (regionTitleW - titleW) / 2
     if titlealign == "left" then sx = x + titlepaddingleft end
-    if titlealign == "right" then sx = x + titlepaddingleft + regionW - titleW end
+    if titlealign == "right" then sx = x + titlepaddingleft + regionTitleW - titleW end
     local sy = titlepos == "bottom" and (y + h - titlepaddingbottom - titleTextH) or (y + titlepaddingtop)
+    lcd.font(resolvedTitleFont)
     lcd.color(utils.resolveThemeColor("titlecolor", titlecolor))
-    lcd.drawText(sx, sy, title)
+    lcd.drawText(sx, sy, renderTitle)
   end
 end
 
@@ -1927,21 +2061,7 @@ local function prepareTextLayout(box, x, y, w, h, titleIn, titlepos, titlealign,
 
   layout.valueDraw = false
   if value then
-    local resolvedValueFont = utils.resolveFont(valuefont, nil)
-    if not resolvedValueFont then
-      local fonts = utils.getFontListsForResolution().value_default
-      resolvedValueFont = fonts[#fonts]
-      local fitValue = value
-      if string.find(fitValue, "%%", 1, true) then fitValue = fitValue:gsub("%%", "W") end
-      for i = 1, #fonts do
-        local candidate = fonts[i]
-        lcd.font(candidate)
-        local tw, th = lcd.getTextSize(fitValue)
-        if tw <= regionW and th <= regionH then resolvedValueFont = candidate end
-      end
-    end
-    lcd.font(resolvedValueFont)
-    local valueW, valueH = lcd.getTextSize(value)
+    local resolvedValueFont, renderValue, valueW, valueH = resolveAndFitValue(value, valuefont, regionW, regionH)
     local sx = regionX
     local align = valuealign or "center"
     if align == "right" then
@@ -1953,11 +2073,18 @@ local function prepareTextLayout(box, x, y, w, h, titleIn, titlepos, titlealign,
     layout.valueFont = resolvedValueFont
     layout.valueX = sx
     layout.valueY = regionY + (regionH - valueH) / 2
+    layout.renderValue = renderValue
   end
 
   layout.titleDraw = false
   if title then
     local regionTitleW = w - titlepaddingleft - titlepaddingright
+    local renderTitle = title
+    if titleW > regionTitleW then
+      renderTitle = utils.fitText(title, regionTitleW, resolvedTitleFont)
+      lcd.font(resolvedTitleFont)
+      titleW, titleTextH = lcd.getTextSize(renderTitle)
+    end
     local sx = x + titlepaddingleft + (regionTitleW - titleW) / 2
     if titlealign == "left" then sx = x + titlepaddingleft end
     if titlealign == "right" then sx = x + titlepaddingleft + regionTitleW - titleW end
@@ -1966,6 +2093,7 @@ local function prepareTextLayout(box, x, y, w, h, titleIn, titlepos, titlealign,
     layout.titleFont = resolvedTitleFont
     layout.titleX = sx
     layout.titleY = sy
+    layout.renderTitle = renderTitle
   end
 
   box[cacheField] = layout
@@ -1981,12 +2109,12 @@ function utils.paintTextLayout(layout, valuecolor, titlecolor)
   if layout.valueDraw then
     lcd.font(layout.valueFont)
     lcd.color(utils.resolveThemeColor("textcolor", valuecolor))
-    lcd.drawText(layout.valueX, layout.valueY, layout.value)
+    lcd.drawText(layout.valueX, layout.valueY, layout.renderValue or layout.value)
   end
   if layout.titleDraw then
     lcd.font(layout.titleFont)
     lcd.color(utils.resolveThemeColor("titlecolor", titlecolor))
-    lcd.drawText(layout.titleX, layout.titleY, layout.title)
+    lcd.drawText(layout.titleX, layout.titleY, layout.renderTitle or layout.title)
   end
 end
 
