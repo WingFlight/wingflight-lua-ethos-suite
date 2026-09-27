@@ -38,7 +38,8 @@ local CURVE_SLOT_OPTIONS = curveSlotLabels.optionsTable(8)
 
 -- Gain, Curve, Decay, Relax column widths (see field_layout.tableSlots);
 -- Curve gets more room so "None" and "Curve 8" are not truncated.
-local COLUMN_WEIGHTS = {1, 1.4, 1, 1}
+local COLUMN_WEIGHTS = {1, 1.25, 1, 1}
+local COLUMN_START = 0.33 -- fraction of the row width where the first column starts
 
 local AXES = {
   {label = "@i18n(app.modules.master_gains.axis_roll)@", gainKey = "master_gain_0", curveKey = "gain_curve_0", decayKey = "iterm_decay_time_0", relaxKey = "iterm_relax_cutoff_0"},
@@ -66,7 +67,7 @@ local function open(opts)
   -- naming the columns once reads better than field_layout.buildGroup's
   -- usual per-row inline mini-labels repeated on all four rows.
   local headerLine = form.addLine(" ")
-  local headerSlots = fieldLayout.tableSlots(headerLine, COLUMN_WEIGHTS)
+  local headerSlots = fieldLayout.tableSlots(headerLine, COLUMN_WEIGHTS, COLUMN_START)
   form.addStaticText(headerLine, headerSlots[1], "@i18n(app.modules.master_gains.gain)@", RIGHT)
   form.addStaticText(headerLine, headerSlots[2], "@i18n(app.modules.master_gains.curve)@", RIGHT)
   form.addStaticText(headerLine, headerSlots[3], "@i18n(app.modules.master_gains.decay)@", RIGHT)
@@ -78,7 +79,7 @@ local function open(opts)
   -- lower = more. Throttle has neither, so its last two slots stay empty.
   for _, axis in ipairs(AXES) do
     local line = form.addLine(axis.label)
-    local slots = fieldLayout.tableSlots(line, COLUMN_WEIGHTS)
+    local slots = fieldLayout.tableSlots(line, COLUMN_WEIGHTS, COLUMN_START)
     fieldLayout.buildField(runtime, line, slots[1], {key = axis.gainKey})
     fieldLayout.buildField(runtime, line, slots[2], {key = axis.curveKey, choices = CURVE_SLOT_OPTIONS})
     if axis.decayKey then

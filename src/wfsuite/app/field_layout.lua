@@ -388,7 +388,7 @@ end
 -- label (the Curve choice showed "N..." instead of "None"). y/h and the
 -- right edge come from a single getFieldSlots() slot, so rows still line
 -- up with the form; columns start at `leftFraction` of that right edge and
--- share the rest by `weights` (e.g. {1, 1.4, 1, 1}). Same hand-placement
+-- share the rest by `weights` (e.g. {1, 1.25, 1, 1}). Same hand-placement
 -- approach app/pages/curves.lua uses for its point grid.
 local TABLE_COL_GAP = 8
 
