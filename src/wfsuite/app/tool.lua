@@ -348,6 +348,7 @@ local MENUS = {
     entries = {
       {title = "@i18n(app.modules.pids.name)@", icon = lcd.loadMask("app/gfx/pids.png"), script = "app/pages/thrust_vector_pids.lua"},
       {title = "@i18n(app.modules.master_gains.name)@", icon = lcd.loadMask("app/gfx/master_gains.png"), script = "app/pages/thrust_vector_master_gains.lua"},
+      {title = "@i18n(app.modules.gain_curves.name)@", icon = lcd.loadMask("app/gfx/curves.png"), script = "app/pages/thrust_vector_gain_curves.lua"},
       {title = "@i18n(app.modules.pid_controller.name)@", icon = lcd.loadMask("app/gfx/pid_controller.png"), script = "app/pages/thrust_vector_pid_controller.lua"},
       {title = "@i18n(app.modules.pid_bandwidth.name)@", icon = lcd.loadMask("app/gfx/pid_bandwidth.png"), script = "app/pages/thrust_vector_pid_bandwidth.lua"},
       {title = "@i18n(app.modules.thrust_vector.hold)@", icon = lcd.loadMask("app/gfx/autolevel_attitude_hold.png"), script = "app/pages/thrust_vector_hold.lua"},
@@ -376,6 +377,9 @@ local MENUS = {
     entries = {
       {title = "@i18n(app.modules.filters.name)@", icon = lcd.loadMask("app/gfx/filters.png"), script = "app/pages/filters.lua"},
       {title = "@i18n(app.modules.pid_controller.name)@", icon = lcd.loadMask("app/gfx/pid_controller.png"), script = "app/pages/pid_controller.lua"},
+      -- Gain curve assignment, split off Flight Feel as an advanced shaping
+      -- tool (see app/pages/gain_curves.lua).
+      {title = "@i18n(app.modules.gain_curves.name)@", icon = lcd.loadMask("app/gfx/curves.png"), script = "app/pages/gain_curves.lua"},
       -- FEATURE_THRUST_VECTOR (see app/pages/configuration.lua) is opt-in
       -- and off by default, but this entry is unconditional -- same
       -- convention every other Advanced entry already follows regardless

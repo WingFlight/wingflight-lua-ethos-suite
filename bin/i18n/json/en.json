@@ -7035,6 +7035,14 @@
           "max_length": 8
         }
       },
+      "gain_curves": {
+        "name": {
+          "english": "Gain Curves",
+          "translation": "Gain Curves",
+          "needs_translation": false,
+          "max_length": 11
+        }
+      },
       "mixer_rules": {
         "name": {
           "english": "Mixer Rules",
