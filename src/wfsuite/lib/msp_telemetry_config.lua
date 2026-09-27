@@ -18,8 +18,8 @@
 -- telemetry_inverted/halfDuplex/pinSwap have no consumer yet
 -- and just round-trip unchanged through the Setup -> Telemetry page's
 -- load/save; crsf_telemetry_mode does have one -- see app/pages/telemetry.lua's
--- beforeSave, which forces it to CUSTOM so a CRSF receiver actually sends
--- the slots this page writes.
+-- beforeSave, which forces it to CUSTOM because the suite decodes custom
+-- CRSF telemetry only, and preserves the slots the page has no switch for.
 
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local mspcodec = requireModule("lib/mspcodec.lua")

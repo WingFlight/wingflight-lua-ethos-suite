@@ -5,8 +5,9 @@
 -- it predates this lite app's shared runtime; here the core behavior is
 -- expressed as ordinary multi-source page data:
 --   FEATURE_CONFIG: ensure the Telemetry feature bit is enabled on save.
---   TELEMETRY_CONFIG: edit the 40 sensor slot assignments, and force
---   crsf_telemetry_mode to CUSTOM so a CRSF receiver actually sends them.
+--   TELEMETRY_CONFIG: edit the 40 sensor slot assignments, preserving slots
+--   this catalog has no switch for, and force crsf_telemetry_mode to CUSTOM
+--   (see the note on CRSF_TELEMETRY_MODE_CUSTOM below).
 --
 -- The page shows the original grouped boolean sensor list, preserves the
 -- FC's telemetry header bytes, writes up to 40 selected sensor IDs back to
@@ -24,11 +25,15 @@ local PAGE_TITLE = "@i18n(app.modules.telemetry.name)@"
 local BTN_OK = "@i18n(app.btn_ok)@"
 local BTN_CANCEL = "@i18n(app.btn_cancel)@"
 
--- Firmware's CRSF_TELEMETRY_MODE_CUSTOM (src/main/pg/telemetry.h): with
--- crsf_telemetry_mode left at its default NATIVE (0), the FC ignores
--- telem_sensor_slot_1..40 entirely and sends its fixed built-in CRSF sensor
--- set instead -- the slots this page writes below would silently have no
--- effect over CRSF. Forcing CUSTOM here is harmless for non-CRSF receivers
+-- Firmware's CRSF_TELEMETRY_MODE_CUSTOM (src/main/pg/telemetry.h). The mode
+-- picks which sensor table the 40 slots filter: wingflight-firmware's
+-- initCrsfTelemetry()/crsfInitSensors() (src/main/telemetry/crsf.c) schedules
+-- only the sensors a slot selects in *both* modes, from
+-- crsfNativeSensorDefinitions (7 whole CRSF frames) in NATIVE (0, the
+-- default) or crsfCustomSensorDefinitions (0x10xx/0x12xx custom telemetry)
+-- in CUSTOM. Forcing CUSTOM is needed because this suite decodes custom
+-- telemetry only (tasks/elrs_sensors.lua against lib/elrs_sensor_table.lua):
+-- in NATIVE it would see no sensors at all. Harmless for non-CRSF receivers
 -- (crsf_telemetry_mode is only consulted by the CRSF telemetry driver).
 local CRSF_TELEMETRY_MODE_CUSTOM = 1
 
@@ -60,17 +65,45 @@ local function countSelected(selected)
   return count
 end
 
+-- A slot holding an id this catalog has no switch for (GPS, ESC2, the
+-- temperature and FBUS sensors, the native CRSF frames, ...) is one the pilot
+-- can't see here, so a save must leave it alone.
+local function isUnmanaged(id)
+  return id ~= nil and id ~= 0 and catalog.SENSOR_LIST[id] == nil
+end
+
+local function countUnmanaged(slots)
+  local count = 0
+  if type(slots) ~= "table" then return 0 end
+  for i = 1, telemetryConfig.SLOT_COUNT do
+    if isUnmanaged(slots[i]) then count = count + 1 end
+  end
+  return count
+end
+
+-- Rewrites the slots in place: unmanaged slots keep their id and position,
+-- and the selected sensors fill the remaining slots in catalog order. This
+-- used to re-emit only the selected sensors as a dense list, zeroing every
+-- unmanaged slot (for example a GPS sensor set from the configurator) on
+-- save. Ported from rotorflight-lua-ethos-suite PR #2404, which took the
+-- rule from the EdgeTX suite's buildWritePayload().
 local function selectedToSlots(selected, slots)
   slots = slots or {}
-  local slotIndex = 1
-  for _, id in ipairs(catalog.SENSOR_IDS) do
-    if selected[id] == true and slotIndex <= telemetryConfig.SLOT_COUNT then
-      slots[slotIndex] = id
-      slotIndex = slotIndex + 1
+  local ids = catalog.SENSOR_IDS
+  local nextId = 1
+  for i = 1, telemetryConfig.SLOT_COUNT do
+    if not isUnmanaged(slots[i]) then
+      local id = 0
+      while nextId <= #ids do
+        local candidate = ids[nextId]
+        nextId = nextId + 1
+        if selected[candidate] == true then
+          id = candidate
+          break
+        end
+      end
+      slots[i] = id
     end
-  end
-  for i = slotIndex, telemetryConfig.SLOT_COUNT do
-    slots[i] = 0
   end
   return slots
 end
@@ -98,6 +131,8 @@ local function open(opts)
   local selected = {}
   local previousConflictState = {}
   local fieldsBySensor = {}
+  -- Preserved slots take up room in the 40 just as selected sensors do.
+  local unmanagedCount = 0
 
   local function refreshConflictFields()
     for _, field in pairs(fieldsBySensor) do
@@ -135,6 +170,7 @@ local function open(opts)
     onLoaded = function()
       local telemetry = runtime.data.telemetry or {}
       selectedFromSlots(telemetry.slots, selected)
+      unmanagedCount = countUnmanaged(telemetry.slots)
       previousConflictState = {}
       refreshConflictFields()
       if form.invalidate then form.invalidate() end
@@ -149,6 +185,16 @@ local function open(opts)
       end
       local telemetry = rt.data.telemetry
       if telemetry then
+        -- The switch setter already refuses a 41st sensor, but the Tool
+        -- button's defaults are not checked against the preserved slots.
+        -- beforeSave cannot veto the write, so on overflow the slots and mode
+        -- are left exactly as read (the write re-sends the FC's current
+        -- state) and the dialog tells the pilot, rather than silently
+        -- dropping sensors.
+        if countSelected(selected) + unmanagedCount > telemetryConfig.SLOT_COUNT then
+          openTooManyDialog()
+          return
+        end
         telemetry.slots = selectedToSlots(selected, telemetry.slots)
         telemetry.crsf_telemetry_mode = CRSF_TELEMETRY_MODE_CUSTOM
       end
@@ -217,7 +263,7 @@ local function open(opts)
           end,
           function(value)
             if value == true and selected[sensorId] ~= true
-                and countSelected(selected) >= telemetryConfig.SLOT_COUNT then
+                and countSelected(selected) + unmanagedCount >= telemetryConfig.SLOT_COUNT then
               openTooManyDialog()
               return false
             end
