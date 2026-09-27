@@ -147,6 +147,25 @@ local function stop()
   log.modelName = nil
 end
 
+-- Hold the log open across a short link loss: the samples so far are in the
+-- file, the handle is closed so nothing is written without a link, and the
+-- next flush() reopens the same path in append mode. One flight stays one
+-- file, so the peaks the log viewer derives are those of the whole flight.
+local function pause()
+  if not log.active then return end
+  flush(true)
+  closeHandle()
+end
+
+-- tasks/flight_timer.lua owns the decision (published as
+-- session.flightResumable) and its grace window. A pilot who has disarmed
+-- ends the flight even if the link just came back; nil means "not known yet",
+-- the normal state while the link is down, and holding is right then.
+local function holdAcrossLinkLoss()
+  if session.isArmed == false then return false end
+  return log.active and session.flightResumable == true
+end
+
 local function start()
   local dir = ensureDir()
   if not dir then return false end
@@ -173,8 +192,11 @@ local function start()
   return true
 end
 
+-- A resumed log is already open, so it does not wait for the handshake to
+-- refill mcuId (which is deferred while armed).
 local function inFlight()
-  return session.connected == true and session.isArmed == true and session.mcuId ~= nil
+  return session.connected == true and session.isArmed == true
+    and (session.mcuId ~= nil or log.active == true)
 end
 
 local function loggingEnabled()
@@ -190,7 +212,9 @@ end
 local function onSessionUpdate(snapshot)
   for k in pairs(session) do session[k] = nil end
   for k, v in pairs(snapshot or {}) do session[k] = v end
-  if not inFlight() then stop() end
+  if not inFlight() then
+    if holdAcrossLinkLoss() then pause() else stop() end
+  end
   updateModelIni()
 end
 
@@ -221,7 +245,7 @@ function logging.wakeup(protocol)
     return
   end
   if not inFlight() then
-    stop()
+    if not holdAcrossLinkLoss() then stop() end
     return
   end
   if not log.active and not start() then return end
