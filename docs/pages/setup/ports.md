@@ -26,6 +26,7 @@ Requires a running background task and a flight controller connection.
 | Load error: | TODO: explain behaviour, displayed units, range and conditions. |
 | Loading serial ports... | TODO: explain behaviour, displayed units, range and conditions. |
 | Save error: | TODO: explain behaviour, displayed units, range and conditions. |
+| Saved; written to flash on disarm | Shown after saving while armed: the port settings were sent, but the flight controller refuses the EEPROM write while armed and commits them when you disarm. Not an error. |
 | No serial ports reported by FC. | TODO: explain behaviour, displayed units, range and conditions. |
 
 ## Notes
