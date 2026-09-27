@@ -23,7 +23,7 @@ Requires a running background task and a flight controller connection.
 
 | Setting | What it does |
 | --- | --- |
-| Power Type | TODO: explain behaviour, displayed units, range and conditions. |
+| Power Type | Auto, Electric or Nitro, stored on the transmitter per model. Picks the word in front of the SmartFuel percentage and low-fuel announcements: Electric says "Battery" and "Battery empty", Nitro says "Fuel" and "Low fuel". Auto counts the model as electric when the flight controller's battery config has a cell count or a pack capacity set, and as nitro when it has neither or none has been read yet. The dashboard uses the same rule. |
 | Smart Fuel | TODO: explain behaviour, displayed units, range and conditions. |
 | Voltage Drop Rate | TODO: explain behaviour, displayed units, range and conditions. |
 | Charge Drop Rate | TODO: explain behaviour, displayed units, range and conditions. |
