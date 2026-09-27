@@ -8,7 +8,7 @@ local function buildFields(runtime, fieldLayout, tvPid)
     {title = "@i18n(app.modules.pid_controller.limit)@", spec = {key = "iterm_decay_limit"}},
   })
 
-  -- Relax cutoff is a column on Thrust Vector -> Master Gains.
+  -- Bounce-back Suppression is a column on Thrust Vector -> Flight Feel.
   fieldLayout.buildGroup(runtime, "@i18n(app.modules.thrust_vector.iterm_relax_level)@", {
     {title = "@i18n(app.modules.pid_controller.roll)@", spec = {key = "iterm_relax_level_0"}},
     {title = "@i18n(app.modules.pid_controller.pitch)@", spec = {key = "iterm_relax_level_1"}},

@@ -84,7 +84,7 @@ local FIELDS = {
   {"gyro_cutoff_0", "U8"}, {"gyro_cutoff_1", "U8"}, {"gyro_cutoff_2", "U8"},
   {"dterm_cutoff_0", "U8"}, {"dterm_cutoff_1", "U8"}, {"dterm_cutoff_2", "U8"},
   {"iterm_relax_level_0", "U8"}, {"iterm_relax_level_1", "U8"}, {"iterm_relax_level_2", "U8"}, -- roll, pitch, yaw (API 22.8)
-  {"iterm_relax_cutoff_0", "U8"}, {"iterm_relax_cutoff_1", "U8"}, {"iterm_relax_cutoff_2", "U8"},
+  {"bounceback_0", "U8"}, {"bounceback_1", "U8"}, {"bounceback_2", "U8"}, -- Bounce-back Suppression 1-10 (API 22.9)
   {"angle_level_strength", "U8"},
   {"angle_level_limit", "U8"},
   {"horizon_level_strength", "U8"},
@@ -131,7 +131,7 @@ local SIMULATOR_RESPONSE = {
   50, 50, 100,  -- gyro_cutoff_0/1/2
   15, 15, 20,   -- dterm_cutoff_0/1/2
   22, 22, 22,   -- iterm_relax_level_0/1/2
-  10, 10, 10,   -- iterm_relax_cutoff_0/1/2
+  5, 5, 5,      -- bounceback_0/1/2
   40,   -- angle_level_strength
   55,   -- angle_level_limit
   0,    -- horizon_level_strength
@@ -195,9 +195,9 @@ local FIELD_META = {
   iterm_relax_level_0 = {min = 10, max = 250, default = 22, suffix = "°/s"},
   iterm_relax_level_1 = {min = 10, max = 250, default = 22, suffix = "°/s"},
   iterm_relax_level_2 = {min = 10, max = 250, default = 22, suffix = "°/s"},
-  iterm_relax_cutoff_0 = {min = 1, max = 100, default = 10, suffix = "Hz"},
-  iterm_relax_cutoff_1 = {min = 1, max = 100, default = 10, suffix = "Hz"},
-  iterm_relax_cutoff_2 = {min = 1, max = 100, default = 10, suffix = "Hz"},
+  bounceback_0 = {min = 1, max = 10, default = 5},
+  bounceback_1 = {min = 1, max = 10, default = 5},
+  bounceback_2 = {min = 1, max = 10, default = 5},
   angle_level_strength = {min = 0, max = 200, default = 40},
   horizon_level_strength = {min = 0, max = 200, default = 40},
   trainer_gain = {min = 25, max = 255, default = 75},

@@ -118,9 +118,9 @@ local ADJUST_FUNCTIONS = {
   {id = 80, name = "Governor RPM", min = 0, max = 10000},
   {id = 81, name = "Governor Yaw FF", min = 0, max = 250},
   {id = 82, name = "Battery Profile", min = 1, max = 6},
-  {id = 84, name = "Master Gain Pitch", min = 25, max = 1000},
-  {id = 85, name = "Master Gain Roll", min = 25, max = 1000},
-  {id = 86, name = "Master Gain Yaw", min = 25, max = 1000},
+  {id = 84, name = "Gain Pitch", min = 25, max = 1000},
+  {id = 85, name = "Gain Roll", min = 25, max = 1000},
+  {id = 86, name = "Gain Yaw", min = 25, max = 1000},
   {id = 87, name = "Autohover Gain", min = 0, max = 250},
   {id = 88, name = "Att Hold Gain", min = 0, max = 250},
   {id = 89, name = "Servo Trim Roll", min = -200, max = 200},
@@ -128,9 +128,9 @@ local ADJUST_FUNCTIONS = {
   {id = 91, name = "Servo Trim Yaw", min = -200, max = 200},
   -- Thrust Vector adjustment IDs/ranges verified against
   -- wingflight-firmware src/main/fc/rc_adjustments.h/.c.
-  {id = 92, name = "TV Master Gain Roll", min = 25, max = 1000},
-  {id = 93, name = "TV Master Gain Pitch", min = 25, max = 1000},
-  {id = 94, name = "TV Master Gain Yaw", min = 25, max = 1000},
+  {id = 92, name = "TV Gain Roll", min = 25, max = 1000},
+  {id = 93, name = "TV Gain Pitch", min = 25, max = 1000},
+  {id = 94, name = "TV Gain Yaw", min = 25, max = 1000},
   {id = 95, name = "TV Roll P", min = 0, max = 1000},
   {id = 96, name = "TV Roll I", min = 0, max = 1000},
   {id = 97, name = "TV Roll D", min = 0, max = 1000},
@@ -160,21 +160,21 @@ local ADJUST_FUNCTIONS = {
   -- comment. Ranges match rc_adjustments.c's ADJ_ENTRY.
   {id = 112, name = "Flap Compensation Gain", min = -1000, max = 1000},
   {id = 113, name = "Differential Thrust Yaw Gain", min = -1000, max = 1000},
-  -- Per-axis I-term decay time in 0.01 s (60 = 0.60 s), ITERM_DECAY_TIME_MIN/MAX.
-  {id = 114, name = "I-term Decay Time Roll", min = 1, max = 100},
-  {id = 115, name = "I-term Decay Time Pitch", min = 1, max = 100},
-  {id = 116, name = "I-term Decay Time Yaw", min = 1, max = 100},
-  {id = 117, name = "TV I-term Decay Time Roll", min = 1, max = 100},
-  {id = 118, name = "TV I-term Decay Time Pitch", min = 1, max = 100},
-  {id = 119, name = "TV I-term Decay Time Yaw", min = 1, max = 100},
-  -- Per-axis I-term relax cutoff in Hz (bounce-back suppression, lower = more),
-  -- ITERM_RELAX_CUTOFF_MIN/MAX.
-  {id = 120, name = "I-term Relax Cutoff Roll", min = 1, max = 100},
-  {id = 121, name = "I-term Relax Cutoff Pitch", min = 1, max = 100},
-  {id = 122, name = "I-term Relax Cutoff Yaw", min = 1, max = 100},
-  {id = 123, name = "TV I-term Relax Cutoff Roll", min = 1, max = 100},
-  {id = 124, name = "TV I-term Relax Cutoff Pitch", min = 1, max = 100},
-  {id = 125, name = "TV I-term Relax Cutoff Yaw", min = 1, max = 100},
+  -- Per-axis Lock (I-term decay time) in 0.01 s (60 = 0.60 s), ITERM_DECAY_TIME_MIN/MAX.
+  {id = 114, name = "Lock Roll", min = 1, max = 100},
+  {id = 115, name = "Lock Pitch", min = 1, max = 100},
+  {id = 116, name = "Lock Yaw", min = 1, max = 100},
+  {id = 117, name = "TV Lock Roll", min = 1, max = 100},
+  {id = 118, name = "TV Lock Pitch", min = 1, max = 100},
+  {id = 119, name = "TV Lock Yaw", min = 1, max = 100},
+  -- Per-axis Bounce-back Suppression score 1-10 (higher = less bounce-back),
+  -- BOUNCEBACK_MIN/MAX.
+  {id = 120, name = "Bounce-back Suppression Roll", min = 1, max = 10},
+  {id = 121, name = "Bounce-back Suppression Pitch", min = 1, max = 10},
+  {id = 122, name = "Bounce-back Suppression Yaw", min = 1, max = 10},
+  {id = 123, name = "TV Bounce-back Suppression Roll", min = 1, max = 10},
+  {id = 124, name = "TV Bounce-back Suppression Pitch", min = 1, max = 10},
+  {id = 125, name = "TV Bounce-back Suppression Yaw", min = 1, max = 10},
 }
 
 local FUNCTION_OPTIONS = {}

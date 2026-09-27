@@ -6981,10 +6981,10 @@
       },
       "master_gains": {
         "name": {
-          "english": "Master Gains",
-          "translation": "Master Gains",
+          "english": "Flight Feel",
+          "translation": "Flight Feel",
           "needs_translation": false,
-          "max_length": 12
+          "max_length": 11
         },
         "gain": {
           "english": "Gain",
@@ -6992,17 +6992,17 @@
           "needs_translation": false,
           "max_length": 4
         },
-        "decay": {
-          "english": "Decay",
-          "translation": "Decay",
+        "lock": {
+          "english": "Lock",
+          "translation": "Lock",
           "needs_translation": false,
-          "max_length": 5
+          "max_length": 4
         },
-        "relax": {
-          "english": "Relax",
-          "translation": "Relax",
+        "bounceback": {
+          "english": "Bounce",
+          "translation": "Bounce",
           "needs_translation": false,
-          "max_length": 5
+          "max_length": 6
         },
         "curve": {
           "english": "Curve",
