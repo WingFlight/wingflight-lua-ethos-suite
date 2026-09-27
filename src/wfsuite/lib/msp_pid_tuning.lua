@@ -54,24 +54,25 @@ local SIMULATOR_RESPONSE = {
 -- Per-field {min, max, default}, sourced from rotorflight-lua-ethos-suite's
 -- own tasks/scheduler/msp/api/PID_TUNING.lua FIELD_SPEC, same convention as
 -- lib/msp_pid_profile.lua's own FIELD_META (see its comment) -- min/max
--- really is a flat 0-1000 for every one of these (confirmed against that
--- schema, not assumed: app/pages/pids.lua's previous blanket 0-1000 for
--- every column turned out to already be correct), but `default` differs
--- per axis/column -- e.g. roll_d defaults to 0 while pitch_d defaults to
--- 40 -- so it still needs a per-field entry, not a single shared constant.
+-- is 0-1000 for every one of these except the F gains, which the firmware
+-- floors at 50 (PID_F_GAIN_MIN in src/main/flight/pid.h: MANUAL mode flies
+-- on the F-term alone, so F = 0 meant no surface movement). `default`
+-- differs per axis/column -- e.g. roll_d defaults to 0 while pitch_d
+-- defaults to 40 -- so it still needs a per-field entry, not a single
+-- shared constant.
 local FIELD_META = {
   roll_p = {min = 0, max = 1000, default = 50},
   roll_i = {min = 0, max = 1000, default = 100},
   roll_d = {min = 0, max = 1000, default = 0},
-  roll_f = {min = 0, max = 1000, default = 100},
+  roll_f = {min = 50, max = 1000, default = 100},
   pitch_p = {min = 0, max = 1000, default = 50},
   pitch_i = {min = 0, max = 1000, default = 100},
   pitch_d = {min = 0, max = 1000, default = 40},
-  pitch_f = {min = 0, max = 1000, default = 100},
+  pitch_f = {min = 50, max = 1000, default = 100},
   yaw_p = {min = 0, max = 1000, default = 80},
   yaw_i = {min = 0, max = 1000, default = 120},
   yaw_d = {min = 0, max = 1000, default = 10},
-  yaw_f = {min = 0, max = 1000, default = 0},
+  yaw_f = {min = 50, max = 1000, default = 100},
   roll_b = {min = 0, max = 1000, default = 0},
   pitch_b = {min = 0, max = 1000, default = 0},
   yaw_b = {min = 0, max = 1000, default = 0},
