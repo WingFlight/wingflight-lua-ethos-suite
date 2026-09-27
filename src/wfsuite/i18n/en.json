@@ -222,18 +222,6 @@
     }
   },
   "app": {
-    "msg_load_failed_title": {
-      "english": "Loading failed",
-      "translation": "Loading failed",
-      "needs_translation": false,
-      "max_length": 14
-    },
-    "msg_load_failed_body": {
-      "english": "Data could not be read from the flight controller. Please reload.",
-      "translation": "Data could not be read from the flight controller. Please reload.",
-      "needs_translation": false,
-      "max_length": 65
-    },
     "btn_add": {
       "english": "Add",
       "max_length": 3,
@@ -668,35 +656,17 @@
         }
       },
       "autolevel": {
-        "trainer_limits": {
-          "english": "Trainer limits",
-          "max_length": 14,
+        "acro_trainer": {
+          "english": "Acro Trainer",
+          "max_length": 12,
           "needs_translation": false,
-          "translation": "Trainer limits"
+          "translation": "Acro Trainer"
         },
         "angle_limits": {
           "english": "Angle limits",
           "max_length": 12,
           "needs_translation": false,
           "translation": "Angle limits"
-        },
-        "bank": {
-          "english": "Bank",
-          "max_length": 4,
-          "needs_translation": false,
-          "translation": "Bank"
-        },
-        "pitch": {
-          "english": "Pitch",
-          "max_length": 5,
-          "needs_translation": false,
-          "translation": "Pitch"
-        },
-        "acro_trainer": {
-          "english": "Acro Trainer",
-          "max_length": 12,
-          "needs_translation": false,
-          "translation": "Acro Trainer"
         },
         "angle_mode": {
           "english": "Angle Mode",
@@ -715,6 +685,12 @@
           "max_length": 10,
           "needs_translation": false,
           "translation": "Auto hover"
+        },
+        "bank": {
+          "english": "Bank",
+          "max_length": 4,
+          "needs_translation": false,
+          "translation": "Bank"
         },
         "deadband": {
           "english": "Deadband",
@@ -742,9 +718,15 @@
         },
         "name": {
           "english": "Flight Modes",
-          "max_length": 11,
+          "max_length": 12,
           "needs_translation": false,
           "translation": "Flight Modes"
+        },
+        "pitch": {
+          "english": "Pitch",
+          "max_length": 5,
+          "needs_translation": false,
+          "translation": "Pitch"
         },
         "rate": {
           "english": "Rate",
@@ -754,7 +736,7 @@
         },
         "throttle_assist": {
           "english": "Throttle Assist",
-          "max_length": 16,
+          "max_length": 15,
           "needs_translation": false,
           "translation": "Throttle Assist"
         },
@@ -763,6 +745,12 @@
           "max_length": 4,
           "needs_translation": false,
           "translation": "Time"
+        },
+        "trainer_limits": {
+          "english": "Trainer limits",
+          "max_length": 14,
+          "needs_translation": false,
+          "translation": "Trainer limits"
         }
       },
       "beepers": {
@@ -1244,6 +1232,12 @@
         }
       },
       "configuration": {
+        "arm_wiggle": {
+          "english": "ARM_WIGGLE",
+          "max_length": 10,
+          "needs_translation": false,
+          "translation": "ARM_WIGGLE"
+        },
         "craft_name": {
           "english": "Craft name",
           "max_length": 10,
@@ -1267,12 +1261,6 @@
           "max_length": 16,
           "needs_translation": false,
           "translation": "THRUST_VECTORING"
-        },
-        "arm_wiggle": {
-          "english": "ARM_WIGGLE",
-          "max_length": 12,
-          "needs_translation": false,
-          "translation": "ARM_WIGGLE"
         },
         "name": {
           "english": "Configuration",
@@ -1468,24 +1456,6 @@
         }
       },
       "elrs_telemetry": {
-        "confirm_prompt": {
-          "english": "Apply packet rate and telemetry ratio changes to the RF module / Flight Controller?",
-          "translation": "Apply packet rate and telemetry ratio changes to the RF module / Flight Controller?",
-          "needs_translation": false,
-          "max_length": 83
-        },
-        "confirm_title": {
-          "english": "Confirm ELRS Link Sync",
-          "translation": "Confirm ELRS Link Sync",
-          "needs_translation": false,
-          "max_length": 22
-        },
-        "status_not_elrs": {
-          "english": "Connected module is not ExpressLRS",
-          "translation": "Connected module is not ExpressLRS",
-          "needs_translation": false,
-          "max_length": 34
-        },
         "action": {
           "english": "Action",
           "max_length": 6,
@@ -1515,6 +1485,18 @@
           "max_length": 10,
           "needs_translation": false,
           "translation": "WF -> ELRS"
+        },
+        "confirm_prompt": {
+          "english": "Apply packet rate and telemetry ratio changes to the RF module / Flight Controller?",
+          "max_length": 83,
+          "needs_translation": false,
+          "translation": "Apply packet rate and telemetry ratio changes to the RF module / Flight Controller?"
+        },
+        "confirm_title": {
+          "english": "Confirm ELRS Link Sync",
+          "max_length": 22,
+          "needs_translation": false,
+          "translation": "Confirm ELRS Link Sync"
         },
         "elrs_module": {
           "english": "ELRS Module",
@@ -1581,6 +1563,12 @@
           "max_length": 27,
           "needs_translation": false,
           "translation": "No ELRS TX module responded"
+        },
+        "status_not_elrs": {
+          "english": "Connected module is not ExpressLRS",
+          "max_length": 34,
+          "needs_translation": false,
+          "translation": "Connected module is not ExpressLRS"
         },
         "status_not_probed": {
           "english": "Not probed yet",
@@ -3698,7 +3686,7 @@
         },
         "arming_disable_flag_19": {
           "english": "GPS RTH",
-          "max_length": 10,
+          "max_length": 7,
           "needs_translation": false,
           "translation": "GPS RTH"
         },
@@ -3740,7 +3728,7 @@
         },
         "arming_disable_flag_25": {
           "english": "Override",
-          "max_length": 9,
+          "max_length": 8,
           "needs_translation": false,
           "translation": "Override"
         },
@@ -3839,68 +3827,6 @@
           "max_length": 11,
           "needs_translation": false,
           "translation": "Unsupported"
-        }
-      },
-      "rx_input_backup_status": {
-        "active_backup": {
-          "english": "Active: Backup RX",
-          "max_length": 17,
-          "needs_translation": false,
-          "translation": "Active: Backup RX"
-        },
-        "active_main": {
-          "english": "Active: Main RX",
-          "max_length": 15,
-          "needs_translation": false,
-          "translation": "Active: Main RX"
-        },
-        "active_source": {
-          "english": "Active Source",
-          "max_length": 13,
-          "needs_translation": false,
-          "translation": "Active Source"
-        },
-        "channel": {
-          "english": "CH",
-          "max_length": 2,
-          "needs_translation": false,
-          "translation": "CH"
-        },
-        "link": {
-          "english": "Link",
-          "max_length": 4,
-          "needs_translation": false,
-          "translation": "Link"
-        },
-        "link_down": {
-          "english": "Down",
-          "max_length": 4,
-          "needs_translation": false,
-          "translation": "Down"
-        },
-        "link_up": {
-          "english": "Up",
-          "max_length": 2,
-          "needs_translation": false,
-          "translation": "Up"
-        },
-        "name": {
-          "english": "Serial Rx (Backup)",
-          "max_length": 19,
-          "needs_translation": false,
-          "translation": "Serial Rx (Backup)"
-        },
-        "not_configured": {
-          "english": "No port is assigned the backup RX function.",
-          "max_length": 45,
-          "needs_translation": false,
-          "translation": "No port is assigned the backup RX function."
-        },
-        "protocol": {
-          "english": "Protocol",
-          "max_length": 8,
-          "needs_translation": false,
-          "translation": "Protocol"
         }
       },
       "filters": {
@@ -4936,30 +4862,6 @@
           "needs_translation": false,
           "translation": "RC Channel Roll"
         },
-        "input_role_roll": {
-          "english": "Roll",
-          "max_length": 4,
-          "needs_translation": false,
-          "translation": "Roll"
-        },
-        "input_role_pitch": {
-          "english": "Pitch",
-          "max_length": 5,
-          "needs_translation": false,
-          "translation": "Pitch"
-        },
-        "input_role_yaw": {
-          "english": "Yaw",
-          "max_length": 3,
-          "needs_translation": false,
-          "translation": "Yaw"
-        },
-        "input_role_throttle": {
-          "english": "Throttle",
-          "max_length": 8,
-          "needs_translation": false,
-          "translation": "Throttle"
-        },
         "input_rcch_throttle": {
           "english": "RC Channel Throttle",
           "max_length": 19,
@@ -4995,6 +4897,30 @@
           "max_length": 14,
           "needs_translation": false,
           "translation": "RC Command Yaw"
+        },
+        "input_role_pitch": {
+          "english": "Pitch",
+          "max_length": 5,
+          "needs_translation": false,
+          "translation": "Pitch"
+        },
+        "input_role_roll": {
+          "english": "Roll",
+          "max_length": 4,
+          "needs_translation": false,
+          "translation": "Roll"
+        },
+        "input_role_throttle": {
+          "english": "Throttle",
+          "max_length": 8,
+          "needs_translation": false,
+          "translation": "Throttle"
+        },
+        "input_role_yaw": {
+          "english": "Yaw",
+          "max_length": 3,
+          "needs_translation": false,
+          "translation": "Yaw"
         },
         "input_stab_pitch": {
           "english": "Stabilized Pitch",
@@ -5112,13 +5038,13 @@
         },
         "role_differential_thrust_yaw": {
           "english": "Differential Thrust Yaw",
-          "max_length": 24,
+          "max_length": 23,
           "needs_translation": false,
           "translation": "Differential Thrust Yaw"
         },
         "role_flap_compensation": {
           "english": "Flap Compensation",
-          "max_length": 18,
+          "max_length": 17,
           "needs_translation": false,
           "translation": "Flap Compensation"
         },
@@ -5658,6 +5584,12 @@
           "needs_translation": false,
           "translation": "Blackbox"
         },
+        "function_crsf_sensors": {
+          "english": "CRSF Sensors",
+          "max_length": 12,
+          "needs_translation": false,
+          "translation": "CRSF Sensors"
+        },
         "function_custom": {
           "english": "Custom",
           "max_length": 6,
@@ -5682,6 +5614,12 @@
           "needs_translation": false,
           "translation": "FBus Out"
         },
+        "function_rx_input_backup": {
+          "english": "Serial Rx (Backup)",
+          "max_length": 18,
+          "needs_translation": false,
+          "translation": "Serial Rx (Backup)"
+        },
         "function_rx_serial": {
           "english": "RX Serial",
           "max_length": 9,
@@ -5705,18 +5643,6 @@
           "max_length": 9,
           "needs_translation": false,
           "translation": "SRXL2 ESC"
-        },
-        "function_crsf_sensors": {
-          "english": "CRSF Sensors",
-          "max_length": 12,
-          "needs_translation": false,
-          "translation": "CRSF Sensors"
-        },
-        "function_rx_input_backup": {
-          "english": "Serial Rx (Backup)",
-          "max_length": 19,
-          "needs_translation": false,
-          "translation": "Serial Rx (Backup)"
         },
         "function_telem_frsky": {
           "english": "Telemetry FrSky",
@@ -5790,17 +5716,17 @@
           "needs_translation": false,
           "translation": "[RX]"
         },
-        "save_error_prefix": {
-          "english": "Save error:",
-          "max_length": 11,
-          "needs_translation": false,
-          "translation": "Save error:"
-        },
         "save_armed": {
           "english": "Saved; written to flash on disarm",
           "max_length": 33,
           "needs_translation": false,
           "translation": "Saved; written to flash on disarm"
+        },
+        "save_error_prefix": {
+          "english": "Save error:",
+          "max_length": 11,
+          "needs_translation": false,
+          "translation": "Save error:"
         }
       },
       "power": {
@@ -6026,7 +5952,7 @@
         },
         "roll_deadband": {
           "english": "Roll",
-          "max_length": 5,
+          "max_length": 4,
           "needs_translation": false,
           "translation": "Roll"
         },
@@ -6421,6 +6347,68 @@
           "max_length": 9,
           "needs_translation": false,
           "translation": "RF Module"
+        }
+      },
+      "rx_input_backup_status": {
+        "active_backup": {
+          "english": "Active: Backup RX",
+          "max_length": 17,
+          "needs_translation": false,
+          "translation": "Active: Backup RX"
+        },
+        "active_main": {
+          "english": "Active: Main RX",
+          "max_length": 15,
+          "needs_translation": false,
+          "translation": "Active: Main RX"
+        },
+        "active_source": {
+          "english": "Active Source",
+          "max_length": 13,
+          "needs_translation": false,
+          "translation": "Active Source"
+        },
+        "channel": {
+          "english": "CH",
+          "max_length": 2,
+          "needs_translation": false,
+          "translation": "CH"
+        },
+        "link": {
+          "english": "Link",
+          "max_length": 4,
+          "needs_translation": false,
+          "translation": "Link"
+        },
+        "link_down": {
+          "english": "Down",
+          "max_length": 4,
+          "needs_translation": false,
+          "translation": "Down"
+        },
+        "link_up": {
+          "english": "Up",
+          "max_length": 2,
+          "needs_translation": false,
+          "translation": "Up"
+        },
+        "name": {
+          "english": "Serial Rx (Backup)",
+          "max_length": 18,
+          "needs_translation": false,
+          "translation": "Serial Rx (Backup)"
+        },
+        "not_configured": {
+          "english": "No port is assigned the backup RX function.",
+          "max_length": 43,
+          "needs_translation": false,
+          "translation": "No port is assigned the backup RX function."
+        },
+        "protocol": {
+          "english": "Protocol",
+          "max_length": 8,
+          "needs_translation": false,
+          "translation": "Protocol"
         }
       },
       "servos": {
@@ -6996,6 +6984,48 @@
           "needs_translation": false,
           "translation": "Invalid"
         },
+        "status_alerts": {
+          "english": "FC status",
+          "max_length": 9,
+          "needs_translation": false,
+          "translation": "FC status"
+        },
+        "status_autotrim": {
+          "english": "Autotrim",
+          "max_length": 8,
+          "needs_translation": false,
+          "translation": "Autotrim"
+        },
+        "status_blackbox": {
+          "english": "Blackbox full",
+          "max_length": 13,
+          "needs_translation": false,
+          "translation": "Blackbox full"
+        },
+        "status_gps": {
+          "english": "GPS not responding",
+          "max_length": 18,
+          "needs_translation": false,
+          "translation": "GPS not responding"
+        },
+        "status_gyro": {
+          "english": "Gyro overflow",
+          "max_length": 13,
+          "needs_translation": false,
+          "translation": "Gyro overflow"
+        },
+        "status_rx_backup": {
+          "english": "Backup receiver",
+          "max_length": 15,
+          "needs_translation": false,
+          "translation": "Backup receiver"
+        },
+        "status_saturation": {
+          "english": "Control limit",
+          "max_length": 13,
+          "needs_translation": false,
+          "translation": "Control limit"
+        },
         "temperature_unit": {
           "english": "Temperature Unit",
           "max_length": 16,
@@ -7169,48 +7199,6 @@
           "max_length": 7,
           "needs_translation": false,
           "translation": "Voltage"
-        },
-        "status_alerts": {
-          "english": "FC status",
-          "max_length": 9,
-          "needs_translation": false,
-          "translation": "FC status"
-        },
-        "status_rx_backup": {
-          "english": "Backup receiver",
-          "max_length": 15,
-          "needs_translation": false,
-          "translation": "Backup receiver"
-        },
-        "status_gyro": {
-          "english": "Gyro overflow",
-          "max_length": 13,
-          "needs_translation": false,
-          "translation": "Gyro overflow"
-        },
-        "status_gps": {
-          "english": "GPS not responding",
-          "max_length": 18,
-          "needs_translation": false,
-          "translation": "GPS not responding"
-        },
-        "status_blackbox": {
-          "english": "Blackbox full",
-          "max_length": 13,
-          "needs_translation": false,
-          "translation": "Blackbox full"
-        },
-        "status_autotrim": {
-          "english": "Autotrim",
-          "max_length": 8,
-          "needs_translation": false,
-          "translation": "Autotrim"
-        },
-        "status_saturation": {
-          "english": "Control limit",
-          "max_length": 13,
-          "needs_translation": false,
-          "translation": "Control limit"
         }
       },
       "stats": {
@@ -7366,13 +7354,13 @@
         },
         "hold": {
           "english": "Attitude / Heading Hold",
-          "max_length": 24,
+          "max_length": 23,
           "needs_translation": false,
           "translation": "Attitude / Heading Hold"
         },
         "iterm_relax_level": {
           "english": "Iterm Relax Level",
-          "max_length": 18,
+          "max_length": 17,
           "needs_translation": false,
           "translation": "Iterm Relax Level"
         },
@@ -7451,6 +7439,18 @@
       "max_length": 27,
       "needs_translation": false,
       "translation": "Background task not running"
+    },
+    "msg_load_failed_body": {
+      "english": "Data could not be read from the flight controller. Please reload.",
+      "max_length": 65,
+      "needs_translation": false,
+      "translation": "Data could not be read from the flight controller. Please reload."
+    },
+    "msg_load_failed_title": {
+      "english": "Loading failed",
+      "max_length": 14,
+      "needs_translation": false,
+      "translation": "Loading failed"
     },
     "msg_loading": {
       "english": "Loading...",
@@ -8056,12 +8056,6 @@
       "needs_translation": false,
       "translation": "Heading"
     },
-    "sensor_motor1speed": {
-      "english": "Motor 1 RPM",
-      "max_length": 17,
-      "needs_translation": false,
-      "translation": "Motor 1 RPM"
-    },
     "sensor_heartbeat": {
       "english": "Heartbeat",
       "max_length": 9,
@@ -8097,6 +8091,18 @@
       "max_length": 8,
       "needs_translation": false,
       "translation": "Model ID"
+    },
+    "sensor_motor1speed": {
+      "english": "Motor 1 RPM",
+      "max_length": 11,
+      "needs_translation": false,
+      "translation": "Motor 1 RPM"
+    },
+    "sensor_motor2speed": {
+      "english": "Motor 2 RPM",
+      "max_length": 11,
+      "needs_translation": false,
+      "translation": "Motor 2 RPM"
     },
     "sensor_pid_profile": {
       "english": "PID Profile",
@@ -8163,12 +8169,6 @@
       "max_length": 13,
       "needs_translation": false,
       "translation": "System Status"
-    },
-    "sensor_motor2speed": {
-      "english": "Motor 2 RPM",
-      "max_length": 19,
-      "needs_translation": false,
-      "translation": "Motor 2 RPM"
     },
     "sensor_throttle_pct": {
       "english": "Throttle %",
@@ -8247,6 +8247,78 @@
       }
     },
     "dashboard": {
+      "alert_acc_uncalibrated": {
+        "english": "ACC NOT CALIBRATED",
+        "max_length": 18,
+        "needs_translation": false,
+        "translation": "ACC NOT CALIBRATED"
+      },
+      "alert_battery_critical": {
+        "english": "BATTERY CRITICAL",
+        "max_length": 16,
+        "needs_translation": false,
+        "translation": "BATTERY CRITICAL"
+      },
+      "alert_blackbox_full": {
+        "english": "BLACKBOX FULL",
+        "max_length": 13,
+        "needs_translation": false,
+        "translation": "BLACKBOX FULL"
+      },
+      "alert_failsafe": {
+        "english": "FAILSAFE",
+        "max_length": 8,
+        "needs_translation": false,
+        "translation": "FAILSAFE"
+      },
+      "alert_gps_lost": {
+        "english": "GPS NOT RESPONDING",
+        "max_length": 18,
+        "needs_translation": false,
+        "translation": "GPS NOT RESPONDING"
+      },
+      "alert_gyro_overflow": {
+        "english": "GYRO OVERFLOW",
+        "max_length": 13,
+        "needs_translation": false,
+        "translation": "GYRO OVERFLOW"
+      },
+      "alert_loiter_unavailable": {
+        "english": "LOITER UNAVAILABLE",
+        "max_length": 18,
+        "needs_translation": false,
+        "translation": "LOITER UNAVAILABLE"
+      },
+      "alert_override": {
+        "english": "TEST OVERRIDE ACTIVE",
+        "max_length": 20,
+        "needs_translation": false,
+        "translation": "TEST OVERRIDE ACTIVE"
+      },
+      "alert_reboot_required": {
+        "english": "REBOOT REQUIRED",
+        "max_length": 15,
+        "needs_translation": false,
+        "translation": "REBOOT REQUIRED"
+      },
+      "alert_rth_unavailable": {
+        "english": "RTH UNAVAILABLE",
+        "max_length": 15,
+        "needs_translation": false,
+        "translation": "RTH UNAVAILABLE"
+      },
+      "alert_rx_backup_active": {
+        "english": "BACKUP RX IN CONTROL",
+        "max_length": 20,
+        "needs_translation": false,
+        "translation": "BACKUP RX IN CONTROL"
+      },
+      "alert_rx_backup_down": {
+        "english": "BACKUP RX NO SIGNAL",
+        "max_length": 19,
+        "needs_translation": false,
+        "translation": "BACKUP RX NO SIGNAL"
+      },
       "altitude_max": {
         "english": "Altitude Max",
         "max_length": 12,
@@ -8582,78 +8654,6 @@
         "max_length": 9,
         "needs_translation": false,
         "translation": "Max Watts"
-      },
-      "alert_rx_backup_active": {
-        "english": "BACKUP RX IN CONTROL",
-        "max_length": 20,
-        "needs_translation": false,
-        "translation": "BACKUP RX IN CONTROL"
-      },
-      "alert_failsafe": {
-        "english": "FAILSAFE",
-        "max_length": 8,
-        "needs_translation": false,
-        "translation": "FAILSAFE"
-      },
-      "alert_battery_critical": {
-        "english": "BATTERY CRITICAL",
-        "max_length": 16,
-        "needs_translation": false,
-        "translation": "BATTERY CRITICAL"
-      },
-      "alert_gyro_overflow": {
-        "english": "GYRO OVERFLOW",
-        "max_length": 13,
-        "needs_translation": false,
-        "translation": "GYRO OVERFLOW"
-      },
-      "alert_rx_backup_down": {
-        "english": "BACKUP RX NO SIGNAL",
-        "max_length": 19,
-        "needs_translation": false,
-        "translation": "BACKUP RX NO SIGNAL"
-      },
-      "alert_rth_unavailable": {
-        "english": "RTH UNAVAILABLE",
-        "max_length": 15,
-        "needs_translation": false,
-        "translation": "RTH UNAVAILABLE"
-      },
-      "alert_loiter_unavailable": {
-        "english": "LOITER UNAVAILABLE",
-        "max_length": 18,
-        "needs_translation": false,
-        "translation": "LOITER UNAVAILABLE"
-      },
-      "alert_gps_lost": {
-        "english": "GPS NOT RESPONDING",
-        "max_length": 18,
-        "needs_translation": false,
-        "translation": "GPS NOT RESPONDING"
-      },
-      "alert_acc_uncalibrated": {
-        "english": "ACC NOT CALIBRATED",
-        "max_length": 18,
-        "needs_translation": false,
-        "translation": "ACC NOT CALIBRATED"
-      },
-      "alert_override": {
-        "english": "TEST OVERRIDE ACTIVE",
-        "max_length": 20,
-        "needs_translation": false,
-        "translation": "TEST OVERRIDE ACTIVE"
-      },
-      "alert_reboot_required": {
-        "english": "REBOOT REQUIRED",
-        "max_length": 15,
-        "needs_translation": false,
-        "translation": "REBOOT REQUIRED"
-      },
-      "alert_blackbox_full": {
-        "english": "BLACKBOX FULL",
-        "max_length": 13,
-        "needs_translation": false,
-        "translation": "BLACKBOX FULL"
       }
     },
     "governor": {

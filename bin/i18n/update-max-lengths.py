@@ -4,6 +4,12 @@ import re
 import argparse
 from collections import OrderedDict
 from pathlib import Path
+import sys
+
+# Windows consoles often default to cp1252, which cannot print the status
+# symbols this script uses; write UTF-8 instead of crashing.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 JSON_ROOT = Path(__file__).parent / "json"
 

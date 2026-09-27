@@ -81,7 +81,7 @@ def main():
         for key, uses in sorted(missing.items()):
             for rel, lineno in uses:
                 print(f"  {rel}:{lineno}: {key}")
-        print("[i18n] Add them to src/wfsuite/i18n/<locale>.json and mirror to bin/i18n/json/ (see AGENTS.md section 7).")
+        print("[i18n] Add them to bin/i18n/json/en.json and regenerate src/wfsuite/i18n/ (see AGENTS.md section 7).")
     else:
         print(f"[i18n] OK: every @i18n tag in src/ resolves against {args.lang}.json")
 
