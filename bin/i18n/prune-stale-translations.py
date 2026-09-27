@@ -7,6 +7,11 @@ import sys
 from collections import OrderedDict
 from pathlib import Path
 
+# Windows consoles often default to cp1252, which cannot print the status
+# symbols this script uses; write UTF-8 instead of crashing.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 TAG_RE = re.compile(r"@i18n\(\s*([^)]+?)\s*\)(?::[A-Za-z_]+\(\))?@")
 
 

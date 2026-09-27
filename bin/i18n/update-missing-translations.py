@@ -2,6 +2,12 @@ import json
 import re
 from collections import OrderedDict
 from pathlib import Path
+import sys
+
+# Windows consoles often default to cp1252, which cannot print the status
+# symbols this script uses; write UTF-8 instead of crashing.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 ROOT_DIR = Path(__file__).parent / "json"
 
@@ -67,6 +73,10 @@ def build_translation(ref, target, order, locale: str):
 
         if isinstance(ref_val, dict) and "english" in ref_val and "translation" in ref_val:
             if isinstance(tgt_val, dict) and "translation" in tgt_val:
+                # The existing translation was made from different English: it no
+                # longer means the same thing, so show the new English until it is
+                # translated again rather than keep a now-wrong translation.
+                english_changed = tgt_val.get("english") not in (None, ref_val["english"])
                 # Preserve existing key order from target to avoid noisy diffs.
                 keys = list(tgt_val.keys())
                 if not keys:
@@ -76,15 +86,17 @@ def build_translation(ref, target, order, locale: str):
                     if k == "english":
                         entry[k] = ref_val["english"]
                     elif k == "translation":
-                        entry[k] = tgt_val["translation"]
+                        entry[k] = ref_val["english"] if english_changed else tgt_val["translation"]
                     elif k == "needs_translation":
-                        entry[k] = tgt_val.get("needs_translation", False)
+                        entry[k] = True if english_changed else tgt_val.get("needs_translation", False)
+                    elif k == "reverse_text" and english_changed:
+                        continue  # recomputed below for the new text
                     else:
                         entry[k] = tgt_val.get(k)
                 # Ensure required keys exist
                 entry.setdefault("english", ref_val["english"])
-                entry.setdefault("translation", tgt_val["translation"])
-                entry.setdefault("needs_translation", tgt_val.get("needs_translation", False))
+                entry.setdefault("translation", ref_val["english"] if english_changed else tgt_val["translation"])
+                entry.setdefault("needs_translation", True if english_changed else tgt_val.get("needs_translation", False))
                 _maybe_set_reverse_text(entry, locale)
                 output[key] = entry
             else:
