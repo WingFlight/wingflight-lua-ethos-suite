@@ -2,8 +2,17 @@
 -- only (a factory function, not a stateful module -- see below for why).
 -- Transcribed from rotorflight-lua-ethos-suite's
 -- tasks/scheduler/sensors/elrs_sensors.lua, ported in full (it's small
--- data, not much cost to carry entries this rebuild doesn't use yet) --
--- not independently verified against real hardware by this rebuild.
+-- data, not much cost to carry entries this rebuild doesn't use yet).
+--
+-- INVARIANT: this table must cover every appId the flight controller
+-- broadcasts. tasks/elrs_sensors.lua's parseFrame() walks a frame as
+-- (U16 appId, value) pairs and stops at the first appId it has no entry
+-- for -- it cannot skip one, because the pair's byte width lives here and
+-- nowhere on the wire. One gap therefore costs every sensor packed after it
+-- in that same frame, and looks like a dead sensor rather than a missing
+-- entry. The reference is the TLM_SENSOR(...) list in wingflight-firmware's
+-- src/main/telemetry/crsf.c; bin/telemetry/verify_sensor_table.py checks
+-- the two against each other and names any missing entries.
 --
 -- Returns a *factory function* taking a `decoders` table (both the pure
 -- primitives from lib/elrs_decode_primitives.lua and the aggregate
