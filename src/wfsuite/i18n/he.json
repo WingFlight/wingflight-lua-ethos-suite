@@ -5316,6 +5316,13 @@
           "needs_translation": false,
           "reverse_text": true,
           "translation": "גיינים ראשיי"
+        },
+        "relax": {
+          "english": "Relax",
+          "max_length": 5,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Relax"
         }
       },
       "mixer": {

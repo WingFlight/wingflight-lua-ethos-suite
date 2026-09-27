@@ -24,13 +24,9 @@ Requires a running background task and a flight controller connection.
 | Setting | What it does |
 | --- | --- |
 | In-flight Error Decay (Limit) | Maximum speed, in °/s, at which accumulated I-term error bleeds off. Only matters for large accumulated errors; leave at the default. The decay time is on the *Master Gains* page. |
-| Iterm Relax: Type | TODO: explain behaviour, displayed units, range and conditions. |
-| Iterm Relax Level (R) | TODO: explain behaviour, displayed units, range and conditions. |
-| Iterm Relax Level (P) | TODO: explain behaviour, displayed units, range and conditions. |
-| Iterm Relax Level (Y) | TODO: explain behaviour, displayed units, range and conditions. |
-| Iterm Relax Cutoff (R) | TODO: explain behaviour, displayed units, range and conditions. |
-| Iterm Relax Cutoff (P) | TODO: explain behaviour, displayed units, range and conditions. |
-| Iterm Relax Cutoff (Y) | TODO: explain behaviour, displayed units, range and conditions. |
+| Iterm Relax Level (R) | I-term relax level in °/s (10-250, default 22): the stick movement at which I-term build-up is fully suppressed during a fast move. Lower suppresses more strongly. The main bounce-back setting is Relax on *Master Gains*; leave level at the default unless that is not enough. |
+| Iterm Relax Level (P) | Same as roll, for pitch. |
+| Iterm Relax Level (Y) | Same as roll, for yaw. |
 | Error Limit (R) | TODO: explain behaviour, displayed units, range and conditions. |
 | Error Limit (P) | TODO: explain behaviour, displayed units, range and conditions. |
 | Error Limit (Y) | TODO: explain behaviour, displayed units, range and conditions. |

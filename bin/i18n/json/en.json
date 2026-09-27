@@ -6998,6 +6998,12 @@
           "needs_translation": false,
           "max_length": 5
         },
+        "relax": {
+          "english": "Relax",
+          "translation": "Relax",
+          "needs_translation": false,
+          "max_length": 5
+        },
         "curve": {
           "english": "Curve",
           "translation": "Curve",
