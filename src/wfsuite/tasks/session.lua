@@ -960,9 +960,29 @@ end
 -- without touching tasks/ directly. A missing reading keeps the last known
 -- values rather than blanking them, same as lib/telemetry_sensors.lua's own
 -- miss-retry cache.
+--
+-- The firmware packs every profile as its index + 1 (wingflight-firmware
+-- telemetry/status.c telemetrySystemConfig()), so a live FC never sends a
+-- profile field of 0, nor above the profile count of 6. A 0 comes from a
+-- sensor Ethos has discovered but that carries no data yet: decoded, it
+-- would be announced as "Profile 0" and select battery profile index 0, and
+-- clear every sensor-present flag. Such a reading counts as missing.
+-- Ported from rotorflight-lua-ethos-suite PR #2402.
+local function validProfile(value)
+  return value >= 1 and value <= 6
+end
+
+local function validConfig(config)
+  return validProfile(config.pidProfile)
+    and validProfile(config.rateProfile)
+    and validProfile(config.batteryProfile)
+    and validProfile(config.tvProfile)
+end
+
 local function updateProfiles(protocol)
   if not telemetrySensors then return end
   local config = systemStatusCodec.decodeConfig(telemetrySensors.getValue(protocol, "system_config"))
+  if config and not validConfig(config) then config = nil end
   if config and (session.systemConfig == nil or config.raw ~= session.systemConfig.raw) then
     session.systemConfig = config
     session.pidProfile = config.pidProfile
