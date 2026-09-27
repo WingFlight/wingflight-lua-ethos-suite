@@ -27,7 +27,7 @@ local PAGE_TITLE = "@i18n(app.modules.master_gains.name)@"
 -- Gain, Lock, Bounce Back column widths (see field_layout.tableSlots); Bounce
 -- Back has the widest header. Curves are assigned on app/pages/gain_curves.lua.
 local COLUMN_WEIGHTS = {1, 1, 1.3}
-local COLUMN_START = 0.33 -- fraction of the row width where the first column starts
+local COLUMN_START = 0.45 -- fraction of the row width where the first column starts
 
 local AXES = {
   {label = "@i18n(app.modules.master_gains.axis_roll)@", gainKey = "master_gain_0", decayKey = "iterm_decay_time_0", bouncebackKey = "bounceback_0"},

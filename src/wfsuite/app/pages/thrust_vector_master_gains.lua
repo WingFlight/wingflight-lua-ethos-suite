@@ -4,7 +4,7 @@ local thrustVector = assert(loadfile("app/pages/thrust_vector.lua"))()
 
 -- Gain, Lock, Bounce Back column widths, as app/pages/master_gains.lua.
 local COLUMN_WEIGHTS = {1, 1, 1.3}
-local COLUMN_START = 0.33 -- fraction of the row width where the first column starts
+local COLUMN_START = 0.45 -- fraction of the row width where the first column starts
 
 local function buildFields(runtime, fieldLayout, tvPid)
   -- Flight Feel -- header row + per-axis rows, mirroring
