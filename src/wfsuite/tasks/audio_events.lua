@@ -6,6 +6,7 @@
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local systemAlerts = requireModule("lib/system_alerts.lua")
 local systemStatusCodec = requireModule("lib/system_status.lua")
+local engineType = requireModule("lib/engine_type.lua")
 
 local bus, settingsStore = ...
 
@@ -152,6 +153,7 @@ local AUDIO_SESSION_KEYS = {
   "adjValue",
   "timerLive",
   "timerTarget",
+  "smartfuelModelType",
 }
 
 local function fileExists(path)
@@ -259,6 +261,31 @@ end
 
 local function onSessionUpdate(snapshot)
   copySnapshot(snapshot)
+end
+
+-- The fuel percentage and low-fuel callouts say "battery" for an electric
+-- model. Auto is resolved from the battery config by lib/engine_type.lua,
+-- the same rule the dashboard's isElectricEngine() uses.
+local function isElectricModel()
+  return engineType.isElectric(session.batteryConfig, session.smartfuelModelType)
+end
+
+-- There is no status/alerts/battery.wav, but events/alerts/battery.wav is the
+-- same word, so the electric percentage callout is played from there.
+local function playPercentCallout()
+  if isElectricModel() then
+    playAlert("battery.wav")
+  else
+    playStatus("fuel.wav")
+  end
+end
+
+local function playLowCallout()
+  if isElectricModel() then
+    playStatus("lowbat.wav")
+  else
+    playStatus("lowfuel.wav")
+  end
 end
 
 local function onSettingsUpdate(snapshot)
@@ -666,13 +693,13 @@ local function announceSmartfuel(now)
   if value <= 0 then
     local repeats = tonumber(events.smartfuelrepeats) or 1
     if not lastLowFuelAnnounced then
-      playStatus("lowfuel.wav")
+      playLowCallout()
       if events.smartfuelhaptic then haptic() end
       lastLowFuelAnnounced = true
       lastLowFuelRepeatAt = now
       lastLowFuelRepeatCount = 1
     elseif lastLowFuelRepeatCount < repeats and (now - lastLowFuelRepeatAt) >= 10 then
-      playStatus("lowfuel.wav")
+      playLowCallout()
       if events.smartfuelhaptic then haptic() end
       lastLowFuelRepeatAt = now
       lastLowFuelRepeatCount = lastLowFuelRepeatCount + 1
@@ -695,7 +722,7 @@ local function announceSmartfuel(now)
   for i = 1, #thresholds do
     local threshold = thresholds[i]
     if value <= threshold and lastSmartfuelAnnounced > threshold then
-      playStatus("fuel.wav")
+      playPercentCallout()
       playNumber(threshold, UNIT_PERCENT)
       lastSmartfuelAnnounced = threshold
       return
