@@ -9,24 +9,26 @@ local CURVE_SLOT_OPTIONS = curveSlotLabels.optionsTable(8)
 
 local function buildFields(runtime, fieldLayout, tvPid)
   -- Master Gain -- header row + per-axis rows, mirroring
-  -- app/pages/master_gains.lua's own Gain/Curve/Decay table.
+  -- app/pages/master_gains.lua's own Gain/Curve/Decay/Relax table.
   local mgHeaderLine = form.addLine(" ")
-  local mgHeaderSlots = form.getFieldSlots(mgHeaderLine, {0, 0, 0})
+  local mgHeaderSlots = form.getFieldSlots(mgHeaderLine, {0, 0, 0, 0})
   form.addStaticText(mgHeaderLine, mgHeaderSlots[1], "@i18n(app.modules.master_gains.gain)@", RIGHT)
   form.addStaticText(mgHeaderLine, mgHeaderSlots[2], "@i18n(app.modules.master_gains.curve)@", RIGHT)
   form.addStaticText(mgHeaderLine, mgHeaderSlots[3], "@i18n(app.modules.master_gains.decay)@", RIGHT)
+  form.addStaticText(mgHeaderLine, mgHeaderSlots[4], "@i18n(app.modules.master_gains.relax)@", RIGHT)
 
   local MASTER_GAIN_AXES = {
-    {label = "@i18n(app.modules.master_gains.axis_roll)@", key = "master_gain_0", curveKey = "gain_curve_0", decayKey = "iterm_decay_time_0"},
-    {label = "@i18n(app.modules.master_gains.axis_pitch)@", key = "master_gain_1", curveKey = "gain_curve_1", decayKey = "iterm_decay_time_1"},
-    {label = "@i18n(app.modules.master_gains.axis_yaw)@", key = "master_gain_2", curveKey = "gain_curve_2", decayKey = "iterm_decay_time_2"},
+    {label = "@i18n(app.modules.master_gains.axis_roll)@", key = "master_gain_0", curveKey = "gain_curve_0", decayKey = "iterm_decay_time_0", relaxKey = "iterm_relax_cutoff_0"},
+    {label = "@i18n(app.modules.master_gains.axis_pitch)@", key = "master_gain_1", curveKey = "gain_curve_1", decayKey = "iterm_decay_time_1", relaxKey = "iterm_relax_cutoff_1"},
+    {label = "@i18n(app.modules.master_gains.axis_yaw)@", key = "master_gain_2", curveKey = "gain_curve_2", decayKey = "iterm_decay_time_2", relaxKey = "iterm_relax_cutoff_2"},
   }
   for _, axis in ipairs(MASTER_GAIN_AXES) do
     local line = form.addLine(axis.label)
-    local slots = form.getFieldSlots(line, {0, 0, 0})
+    local slots = form.getFieldSlots(line, {0, 0, 0, 0})
     fieldLayout.buildField(runtime, line, slots[1], {key = axis.key})
     fieldLayout.buildField(runtime, line, slots[2], {key = axis.curveKey, choices = CURVE_SLOT_OPTIONS})
     fieldLayout.buildField(runtime, line, slots[3], {key = axis.decayKey})
+    fieldLayout.buildField(runtime, line, slots[4], {key = axis.relaxKey})
   end
 
 end

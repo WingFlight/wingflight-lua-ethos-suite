@@ -5,8 +5,8 @@
 -- lib/msp_pid_profile.lua) -- a *different* command from app/pages/pids.lua's
 -- MSP_PID_TUNING (cmd 112/202), even though both are scoped to the same
 -- active PID profile on the flight controller. Exposes iterm decay
--- limit (the decay time is on Master Gains), error limit (roll/pitch/yaw), iterm relax (type +
--- roll/pitch/yaw cutoffs), and cross-axis relax (wingflight-native) --
+-- limit (the decay time is on Master Gains), error limit (roll/pitch/yaw), iterm relax level
+-- (roll/pitch/yaw; the cutoff is on Master Gains), and cross-axis relax (wingflight-native) --
 -- wingflight-firmware has no HSI offset limit or ground-error-decay
 -- concept (both heli-only; see lib/msp_pid_profile.lua for the full list
 -- of wire-present-but-dead fields), so neither gets a widget here, unlike
@@ -38,12 +38,6 @@ local pidProfile = requireModule("lib/msp_pid_profile.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.pid_controller.name)@"
 
-local ITERM_RELAX_OPTIONS = {
-  {"@i18n(app.modules.pid_controller.tbl_off)@", 0},
-  {"@i18n(app.modules.pid_controller.tbl_rp)@", 1},
-  {"@i18n(app.modules.pid_controller.tbl_rpy)@", 2},
-}
-
 -- opts.onBack: called to return to the menu (the header's Menu button or
 -- the physical Back key -- see app/page_runtime.lua's buildChrome()).
 -- opts.setEventHandler/opts.setWakeupHandler: see app/menu_container.lua
@@ -70,12 +64,12 @@ local function open(opts)
     {title = "@i18n(app.modules.pid_controller.yaw)@", spec = {key = "error_limit_2"}},
   })
 
-  fieldLayout.buildSingle(runtime, "@i18n(app.modules.pid_controller.iterm_relax_type)@", {key = "iterm_relax_type", choices = ITERM_RELAX_OPTIONS})
-
-  fieldLayout.buildGroup(runtime, "@i18n(app.modules.pid_controller.iterm_relax_cutoff)@", {
-    {title = "@i18n(app.modules.pid_controller.roll)@", spec = {key = "iterm_relax_cutoff_0"}},
-    {title = "@i18n(app.modules.pid_controller.pitch)@", spec = {key = "iterm_relax_cutoff_1"}},
-    {title = "@i18n(app.modules.pid_controller.yaw)@", spec = {key = "iterm_relax_cutoff_2"}},
+  -- Relax is always on for roll/pitch/yaw (API 22.8); its cutoff, the main
+  -- bounce-back setting, is a column on Master Gains. Level stays here.
+  fieldLayout.buildGroup(runtime, "@i18n(app.modules.thrust_vector.iterm_relax_level)@", {
+    {title = "@i18n(app.modules.pid_controller.roll)@", spec = {key = "iterm_relax_level_0"}},
+    {title = "@i18n(app.modules.pid_controller.pitch)@", spec = {key = "iterm_relax_level_1"}},
+    {title = "@i18n(app.modules.pid_controller.yaw)@", spec = {key = "iterm_relax_level_2"}},
   })
 
   fieldLayout.buildGroup(runtime, "@i18n(app.modules.pid_controller.cross_axis_relax)@", {

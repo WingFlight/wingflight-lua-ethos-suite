@@ -83,7 +83,7 @@ local FIELDS = {
   {"error_limit_0", "U8"}, {"error_limit_1", "U8"}, {"error_limit_2", "U8"}, -- roll, pitch, yaw
   {"gyro_cutoff_0", "U8"}, {"gyro_cutoff_1", "U8"}, {"gyro_cutoff_2", "U8"},
   {"dterm_cutoff_0", "U8"}, {"dterm_cutoff_1", "U8"}, {"dterm_cutoff_2", "U8"},
-  {"iterm_relax_type", "U8"},
+  {"iterm_relax_level_0", "U8"}, {"iterm_relax_level_1", "U8"}, {"iterm_relax_level_2", "U8"}, -- roll, pitch, yaw (API 22.8)
   {"iterm_relax_cutoff_0", "U8"}, {"iterm_relax_cutoff_1", "U8"}, {"iterm_relax_cutoff_2", "U8"},
   {"angle_level_strength", "U8"},
   {"angle_level_limit", "U8"},
@@ -130,8 +130,8 @@ local SIMULATOR_RESPONSE = {
   45, 45, 60,   -- error_limit_0/1/2 (roll, pitch, yaw)
   50, 50, 100,  -- gyro_cutoff_0/1/2
   15, 15, 20,   -- dterm_cutoff_0/1/2
-  2,    -- iterm_relax_type
-  10, 10, 15,   -- iterm_relax_cutoff_0/1/2
+  22, 22, 22,   -- iterm_relax_level_0/1/2
+  10, 10, 10,   -- iterm_relax_cutoff_0/1/2
   40,   -- angle_level_strength
   55,   -- angle_level_limit
   0,    -- horizon_level_strength
@@ -172,8 +172,8 @@ local SIMULATOR_RESPONSE = {
 -- entry to matter, but every field with a real (non-bare, non-choice,
 -- non-bare) min/max/default is included, so a future page (e.g. Auto
 -- Hover, Cross Axis Relax, Master Gain adjusters) can reuse this without a
--- second research pass. `pid_mode` and `iterm_relax_type` (choice/table
--- fields, never take a plain `:default()`) are deliberately absent.
+-- second research pass. `pid_mode` (a choice/table
+-- field, never takes a plain `:default()`) is deliberately absent.
 local FIELD_META = {
   angle_roll_limit = {min = 10, max = 90, default = 55, suffix = "°"},
   angle_pitch_limit = {min = 10, max = 75, default = 55, suffix = "°"},
@@ -192,9 +192,12 @@ local FIELD_META = {
   dterm_cutoff_0 = {min = 0, max = 250, default = 15},
   dterm_cutoff_1 = {min = 0, max = 250, default = 15},
   dterm_cutoff_2 = {min = 0, max = 250, default = 20},
-  iterm_relax_cutoff_0 = {min = 1, max = 100, default = 10},
-  iterm_relax_cutoff_1 = {min = 1, max = 100, default = 10},
-  iterm_relax_cutoff_2 = {min = 1, max = 100, default = 15},
+  iterm_relax_level_0 = {min = 10, max = 250, default = 22, suffix = "°/s"},
+  iterm_relax_level_1 = {min = 10, max = 250, default = 22, suffix = "°/s"},
+  iterm_relax_level_2 = {min = 10, max = 250, default = 22, suffix = "°/s"},
+  iterm_relax_cutoff_0 = {min = 1, max = 100, default = 10, suffix = "Hz"},
+  iterm_relax_cutoff_1 = {min = 1, max = 100, default = 10, suffix = "Hz"},
+  iterm_relax_cutoff_2 = {min = 1, max = 100, default = 10, suffix = "Hz"},
   angle_level_strength = {min = 0, max = 200, default = 40},
   horizon_level_strength = {min = 0, max = 200, default = 40},
   trainer_gain = {min = 25, max = 255, default = 75},
@@ -284,8 +287,8 @@ function msp_pid_profile.buildReadMessage(onData, onError)
   return {
     command = READ_COMMAND,
     processReply = function(_, buf)
-      if #buf < 58 then
-        if onError then onError("MSP PID profile requires API 22.7 firmware") end
+      if #buf < 60 then
+        if onError then onError("MSP PID profile requires API 22.8 firmware") end
         return
       end
       onData(msp_pid_profile.decode(buf))

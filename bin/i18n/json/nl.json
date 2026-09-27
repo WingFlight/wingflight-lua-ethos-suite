@@ -8145,6 +8145,13 @@
           "reverse_text": false,
           "max_length": 5
         },
+        "relax": {
+          "english": "Relax",
+          "translation": "Relax",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 5
+        },
         "curve": {
           "english": "Curve",
           "translation": "Curve",

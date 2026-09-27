@@ -167,6 +167,14 @@ local ADJUST_FUNCTIONS = {
   {id = 117, name = "TV I-term Decay Time Roll", min = 1, max = 100},
   {id = 118, name = "TV I-term Decay Time Pitch", min = 1, max = 100},
   {id = 119, name = "TV I-term Decay Time Yaw", min = 1, max = 100},
+  -- Per-axis I-term relax cutoff in Hz (bounce-back suppression, lower = more),
+  -- ITERM_RELAX_CUTOFF_MIN/MAX.
+  {id = 120, name = "I-term Relax Cutoff Roll", min = 1, max = 100},
+  {id = 121, name = "I-term Relax Cutoff Pitch", min = 1, max = 100},
+  {id = 122, name = "I-term Relax Cutoff Yaw", min = 1, max = 100},
+  {id = 123, name = "TV I-term Relax Cutoff Roll", min = 1, max = 100},
+  {id = 124, name = "TV I-term Relax Cutoff Pitch", min = 1, max = 100},
+  {id = 125, name = "TV I-term Relax Cutoff Yaw", min = 1, max = 100},
 }
 
 local FUNCTION_OPTIONS = {}
