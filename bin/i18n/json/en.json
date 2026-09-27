@@ -6992,6 +6992,12 @@
           "needs_translation": false,
           "max_length": 4
         },
+        "iterm_decay_time": {
+          "english": "I-term Decay Time",
+          "translation": "I-term Decay Time",
+          "needs_translation": false,
+          "max_length": 17
+        },
         "curve": {
           "english": "Curve",
           "translation": "Curve",

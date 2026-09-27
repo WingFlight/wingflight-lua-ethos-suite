@@ -20,6 +20,8 @@ local function buildFields(runtime, fieldLayout, tvPid)
     fieldLayout.buildField(runtime, line, slots[1], {key = axis.key})
   end
 
+  fieldLayout.buildSingle(runtime, "@i18n(app.modules.master_gains.iterm_decay_time)@", {key = "iterm_decay_time"})
+
 end
 
 local function open(opts)

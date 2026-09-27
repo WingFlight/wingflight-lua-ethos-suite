@@ -23,8 +23,7 @@ Requires a running background task and a flight controller connection.
 
 | Setting | What it does |
 | --- | --- |
-| In-flight Error Decay (Time) | TODO: explain behaviour, displayed units, range and conditions. |
-| In-flight Error Decay (Limit) | TODO: explain behaviour, displayed units, range and conditions. |
+| In-flight Error Decay (Limit) | Maximum speed, in °/s, at which accumulated I-term error bleeds off. Only matters for large accumulated errors; leave at the default. The decay time is on the *Master Gains* page. |
 | Iterm Relax: Type | TODO: explain behaviour, displayed units, range and conditions. |
 | Iterm Relax Level (R) | TODO: explain behaviour, displayed units, range and conditions. |
 | Iterm Relax Level (P) | TODO: explain behaviour, displayed units, range and conditions. |

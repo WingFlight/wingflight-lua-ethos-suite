@@ -8138,6 +8138,13 @@
           "max_length": 4,
           "reverse_text": false
         },
+        "iterm_decay_time": {
+          "english": "I-term Decay Time",
+          "translation": "I-term Decay Time",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 17
+        },
         "curve": {
           "english": "Curve",
           "translation": "Curve",

@@ -160,6 +160,9 @@ local ADJUST_FUNCTIONS = {
   -- comment. Ranges match rc_adjustments.c's ADJ_ENTRY.
   {id = 112, name = "Flap Compensation Gain", min = -1000, max = 1000},
   {id = 113, name = "Differential Thrust Yaw Gain", min = -1000, max = 1000},
+  -- I-term decay time in 0.01 s (60 = 0.60 s), ITERM_DECAY_TIME_MIN/MAX.
+  {id = 114, name = "I-term Decay Time", min = 1, max = 100},
+  {id = 115, name = "TV I-term Decay Time", min = 1, max = 100},
 }
 
 local FUNCTION_OPTIONS = {}

@@ -5,7 +5,7 @@
 -- lib/msp_pid_profile.lua) -- a *different* command from app/pages/pids.lua's
 -- MSP_PID_TUNING (cmd 112/202), even though both are scoped to the same
 -- active PID profile on the flight controller. Exposes iterm decay
--- (time/limit), error limit (roll/pitch/yaw), iterm relax (type +
+-- limit (the decay time is on Master Gains), error limit (roll/pitch/yaw), iterm relax (type +
 -- roll/pitch/yaw cutoffs), and cross-axis relax (wingflight-native) --
 -- wingflight-firmware has no HSI offset limit or ground-error-decay
 -- concept (both heli-only; see lib/msp_pid_profile.lua for the full list
@@ -61,7 +61,6 @@ local function open(opts)
   runtime:buildChrome()
 
   fieldLayout.buildGroup(runtime, "@i18n(app.modules.pid_controller.inflight_error_decay)@", {
-    {title = "@i18n(app.modules.pid_controller.time)@", spec = {key = "iterm_decay_time"}},
     {title = "@i18n(app.modules.pid_controller.limit)@", spec = {key = "iterm_decay_limit"}},
   })
 
