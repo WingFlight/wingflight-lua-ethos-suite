@@ -78,7 +78,7 @@ local WRITE_COMMAND = 95
 
 local FIELDS = {
   {"pid_mode", "U8"},
-  {"iterm_decay_time", "U8"},
+  {"iterm_decay_time_0", "U8"}, {"iterm_decay_time_1", "U8"}, {"iterm_decay_time_2", "U8"}, -- roll, pitch, yaw
   {"iterm_decay_limit", "U8"},
   {"error_limit_0", "U8"}, {"error_limit_1", "U8"}, {"error_limit_2", "U8"}, -- roll, pitch, yaw
   {"gyro_cutoff_0", "U8"}, {"gyro_cutoff_1", "U8"}, {"gyro_cutoff_2", "U8"},
@@ -125,7 +125,7 @@ local AXIS_LIMITS = {
 -- Matches this project's own last-known-good SIM_RESPONSE byte-for-byte.
 local SIMULATOR_RESPONSE = {
   1,    -- pid_mode
-  60,   -- iterm_decay_time (0.60s, decimals=2)
+  60, 60, 60,   -- iterm_decay_time_0/1/2 (0.60s, decimals=2)
   35,   -- iterm_decay_limit
   45, 45, 60,   -- error_limit_0/1/2 (roll, pitch, yaw)
   50, 50, 100,  -- gyro_cutoff_0/1/2
@@ -164,7 +164,7 @@ local SIMULATOR_RESPONSE = {
 -- FIELD_SPEC (field, type, min, max, default, unit, decimals, scale, ...).
 -- `default` here is in the same *raw wire* domain as `min`/`max` (matching
 -- how this rebuild's own app/field_layout.lua already treats decimals --
--- e.g. iterm_decay_time displays as "0.60s" but its actual field range/
+-- e.g. iterm_decay_time_0 displays as "0.60s" but its actual field range/
 -- value is 1-100 with decimals=2), not the display-scaled value the
 -- original schema's own `default` column shows for that field.
 --
@@ -179,7 +179,9 @@ local FIELD_META = {
   angle_pitch_limit = {min = 10, max = 75, default = 55, suffix = "°"},
   trainer_roll_limit = {min = 10, max = 90, default = 20, suffix = "°"},
   trainer_pitch_limit = {min = 10, max = 75, default = 20, suffix = "°"},
-  iterm_decay_time = {min = 1, max = 100, default = 60, decimals = 2, suffix = "s"},
+  iterm_decay_time_0 = {min = 1, max = 100, default = 60, decimals = 2, suffix = "s"},
+  iterm_decay_time_1 = {min = 1, max = 100, default = 60, decimals = 2, suffix = "s"},
+  iterm_decay_time_2 = {min = 1, max = 100, default = 60, decimals = 2, suffix = "s"},
   iterm_decay_limit = {min = 0, max = 250, default = 35, suffix = "°/s"},
   error_limit_0 = {min = 0, max = 180, default = 45, suffix = "°"},
   error_limit_1 = {min = 0, max = 180, default = 45, suffix = "°"},
@@ -282,8 +284,8 @@ function msp_pid_profile.buildReadMessage(onData, onError)
   return {
     command = READ_COMMAND,
     processReply = function(_, buf)
-      if #buf < 56 then
-        if onError then onError("MSP PID profile requires API 22.4 firmware") end
+      if #buf < 58 then
+        if onError then onError("MSP PID profile requires API 22.7 firmware") end
         return
       end
       onData(msp_pid_profile.decode(buf))

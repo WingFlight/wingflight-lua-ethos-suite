@@ -24,7 +24,7 @@ Requires a running background task and a flight controller connection.
 | Setting | What it does |
 | --- | --- |
 | TODO | Inspect the page and its helpers; automatic extraction found no controls. |
-| I-term Decay Time | How long the model remembers a disturbance before letting it go, in seconds (0.01-1.00, default 0.60). Longer feels more locked in; shorter feels freer and suits 3D flying. Master gain sets how hard the model pushes back, this sets for how long. Also available as an in-flight adjustment function. |
+| Decay (per axis) | I-term decay time: how long that axis remembers a disturbance before letting it go, in seconds (0.01-1.00, default 0.60). Longer feels more locked in; shorter feels freer and suits 3D flying. Master gain sets how hard the axis pushes back, this sets for how long. Also available as an in-flight adjustment function per axis. |
 
 ## Notes
 
