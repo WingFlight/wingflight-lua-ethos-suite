@@ -52,4 +52,13 @@ correctness or detect all stale prose. `--check --require-reviewed` additionally
 fails while drafts remain. CI runs coverage and tooling tests; publishing a website
 is a separate step after content review.
 
-The tooling was adapted from [Rotorflight PR #2369](https://github.com/rotorflight/rotorflight-lua-ethos-suite/pull/2369).
+Pages are filled in as changes reach them: a pull request that changes something a
+pilot can observe brings the affected page file with it, or says on a line of its own
+beginning `Documentation:` why it needs no documentation change. The rule is in
+[.agents/rules/documentation.md](../.agents/rules/documentation.md); the
+`Documentation rule` job in `.github/workflows/pr.yml` runs
+`bin/docs/verify_documentation_rule.py` and fails when neither is there. It does not
+judge the stated reason.
+
+The tooling was adapted from [Rotorflight PR #2369](https://github.com/rotorflight/rotorflight-lua-ethos-suite/pull/2369)
+and [#2390](https://github.com/rotorflight/rotorflight-lua-ethos-suite/pull/2390).
