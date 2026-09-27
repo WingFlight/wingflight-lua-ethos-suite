@@ -382,6 +382,34 @@ end
 -- themselves -- but app/header.lua's title bug came from a *different*
 -- mixed-hint shape and was worked around rather than confirmed correct,
 -- so this specific combination still needs its own live check.
+-- Column rects for a table row (the Master Gains pages' header and axis
+-- rows), computed by hand so columns can be wider than form.getFieldSlots()'s
+-- equal all-flex split, which leaves them crammed to the right of the row
+-- label (the Curve choice showed "N..." instead of "None"). y/h and the
+-- right edge come from a single getFieldSlots() slot, so rows still line
+-- up with the form; columns start at `leftFraction` of that right edge and
+-- share the rest by `weights` (e.g. {1, 1.4, 1, 1}). Same hand-placement
+-- approach app/pages/curves.lua uses for its point grid.
+local TABLE_COL_GAP = 8
+
+function field_layout.tableSlots(line, weights, leftFraction)
+  local row = form.getFieldSlots(line, {0})[1]
+  local right = row.x + row.w
+  local left = math.floor(right * (leftFraction or 0.25))
+  local total = 0
+  for _, weight in ipairs(weights) do total = total + weight end
+  local usable = right - left - TABLE_COL_GAP * (#weights - 1)
+
+  local slots = {}
+  local x = left
+  for i, weight in ipairs(weights) do
+    local w = (i == #weights) and (right - x) or math.floor(usable * weight / total)
+    slots[i] = {x = x, y = row.y, w = w, h = row.h}
+    x = x + w + TABLE_COL_GAP
+  end
+  return slots
+end
+
 function field_layout.buildGroup(runtime, groupLabel, columns, parent)
   local hints = {}
   for _, column in ipairs(columns) do
