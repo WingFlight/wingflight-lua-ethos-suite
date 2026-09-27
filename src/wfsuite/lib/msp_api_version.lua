@@ -21,7 +21,7 @@ local mspcodec = requireModule("lib/mspcodec.lua")
 
 local READ_COMMAND = 1
 
--- Wingflight 22.9 is required for the Bounce-back Suppression score.
+-- Wingflight 22.9 is required for the Bounce Back score.
 local EXPECTED_API_MAJOR = 22
 local MIN_API_MINOR = 9
 

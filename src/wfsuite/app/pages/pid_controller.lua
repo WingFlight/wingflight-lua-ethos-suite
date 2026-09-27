@@ -6,7 +6,7 @@
 -- MSP_PID_TUNING (cmd 112/202), even though both are scoped to the same
 -- active PID profile on the flight controller. Exposes iterm decay
 -- limit (the decay time, Lock, is on Flight Feel), error limit (roll/pitch/yaw), iterm relax level
--- (roll/pitch/yaw; Bounce-back Suppression is on Flight Feel), and cross-axis relax (wingflight-native) --
+-- (roll/pitch/yaw; Bounce Back is on Flight Feel), and cross-axis relax (wingflight-native) --
 -- wingflight-firmware has no HSI offset limit or ground-error-decay
 -- concept (both heli-only; see lib/msp_pid_profile.lua for the full list
 -- of wire-present-but-dead fields), so neither gets a widget here, unlike
@@ -65,7 +65,7 @@ local function open(opts)
   })
 
   -- Relax is always on for roll/pitch/yaw (API 22.8); its main setting,
-  -- Bounce-back Suppression, is a column on Flight Feel. Level stays here.
+  -- Bounce Back, is a column on Flight Feel. Level stays here.
   fieldLayout.buildGroup(runtime, "@i18n(app.modules.thrust_vector.iterm_relax_level)@", {
     {title = "@i18n(app.modules.pid_controller.roll)@", spec = {key = "iterm_relax_level_0"}},
     {title = "@i18n(app.modules.pid_controller.pitch)@", spec = {key = "iterm_relax_level_1"}},

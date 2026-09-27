@@ -8146,11 +8146,11 @@
           "max_length": 4
         },
         "bounceback": {
-          "english": "Bounce",
-          "translation": "Bounce",
+          "english": "Bounce Back",
+          "translation": "Bounce Back",
           "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 6
+          "max_length": 11,
+          "reverse_text": false
         },
         "curve": {
           "english": "Curve",

@@ -167,14 +167,14 @@ local ADJUST_FUNCTIONS = {
   {id = 117, name = "TV Lock Roll", min = 1, max = 100},
   {id = 118, name = "TV Lock Pitch", min = 1, max = 100},
   {id = 119, name = "TV Lock Yaw", min = 1, max = 100},
-  -- Per-axis Bounce-back Suppression score 1-10 (higher = less bounce-back),
+  -- Per-axis Bounce Back score 1-10 (higher = less bounce-back),
   -- BOUNCEBACK_MIN/MAX.
-  {id = 120, name = "Bounce-back Suppression Roll", min = 1, max = 10},
-  {id = 121, name = "Bounce-back Suppression Pitch", min = 1, max = 10},
-  {id = 122, name = "Bounce-back Suppression Yaw", min = 1, max = 10},
-  {id = 123, name = "TV Bounce-back Suppression Roll", min = 1, max = 10},
-  {id = 124, name = "TV Bounce-back Suppression Pitch", min = 1, max = 10},
-  {id = 125, name = "TV Bounce-back Suppression Yaw", min = 1, max = 10},
+  {id = 120, name = "Bounce Back Roll", min = 1, max = 10},
+  {id = 121, name = "Bounce Back Pitch", min = 1, max = 10},
+  {id = 122, name = "Bounce Back Yaw", min = 1, max = 10},
+  {id = 123, name = "TV Bounce Back Roll", min = 1, max = 10},
+  {id = 124, name = "TV Bounce Back Pitch", min = 1, max = 10},
+  {id = 125, name = "TV Bounce Back Yaw", min = 1, max = 10},
 }
 
 local FUNCTION_OPTIONS = {}

@@ -51,7 +51,7 @@ local FIELDS = {
   {"iterm_decay_time_0", "U8"}, {"iterm_decay_time_1", "U8"}, {"iterm_decay_time_2", "U8"}, -- roll, pitch, yaw
   {"iterm_decay_limit", "U8"},
   {"iterm_relax_level_0", "U8"}, {"iterm_relax_level_1", "U8"}, {"iterm_relax_level_2", "U8"},
-  {"bounceback_0", "U8"}, {"bounceback_1", "U8"}, {"bounceback_2", "U8"}, -- Bounce-back Suppression 1-10 (API 22.9)
+  {"bounceback_0", "U8"}, {"bounceback_1", "U8"}, {"bounceback_2", "U8"}, -- Bounce Back 1-10 (API 22.9)
   {"error_limit_0", "U8"}, {"error_limit_1", "U8"}, {"error_limit_2", "U8"},
   {"dterm_cutoff_0", "U8"}, {"dterm_cutoff_1", "U8"}, {"dterm_cutoff_2", "U8"},
   {"bterm_cutoff_0", "U8"}, {"bterm_cutoff_1", "U8"}, {"bterm_cutoff_2", "U8"},

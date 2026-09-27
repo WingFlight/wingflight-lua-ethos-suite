@@ -4547,10 +4547,10 @@
           "translation": "Yaw"
         },
         "bounceback": {
-          "english": "Bounce",
-          "max_length": 6,
+          "english": "Bounce Back",
+          "max_length": 11,
           "needs_translation": false,
-          "translation": "Bounce"
+          "translation": "Bounce Back"
         },
         "curve": {
           "english": "Curve",

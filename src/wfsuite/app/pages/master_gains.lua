@@ -75,7 +75,7 @@ local function open(opts)
 
   -- Lock (I-term decay time) is the other half of how "locked" each axis
   -- feels: Gain sets how hard it pushes back, Lock how long it remembers
-  -- the disturbance. Bounce-back Suppression is a 1-10 score (higher = less
+  -- the disturbance. Bounce Back is a 1-10 score (higher = less
   -- bounce-back). Throttle has neither, so its last two slots stay empty.
   for _, axis in ipairs(AXES) do
     local line = form.addLine(axis.label)
