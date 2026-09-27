@@ -8,7 +8,7 @@ sidebar_label: Pages
 Reference documentation for each configuration and settings page reachable
 within the WFSuite Ethos system tool.
 
-**Coverage:** 78 reachable pages in navigation hierarchy. Drafts require review.
+**Coverage:** 80 reachable pages in navigation hierarchy. Drafts require review.
 
 The *Conditions* column names what hides, greys out or locks a page; the sentences
 and structure follow [_template.md](../_template.md).
@@ -24,11 +24,13 @@ is there. The rule is in [.agents/rules/documentation.md](../../.agents/rules/do
 | --- | --- | --- | --- |
 | PIDs | [flight_tuning/pids.md](flight_tuning/pids.md) | Requires a running background task and a flight controller connection. | draft |
 | Rates | [flight_tuning/rates.md](flight_tuning/rates.md) | Requires a running background task and a flight controller connection. | draft |
+| Flight Feel | [flight_tuning/master_gains.md](flight_tuning/master_gains.md) | Requires a running background task and a flight controller connection. | draft |
 | Filters | [flight_tuning/filters.md](flight_tuning/filters.md) | Requires a running background task and a flight controller connection. | draft |
 | PID Controller | [flight_tuning/pid_controller.md](flight_tuning/pid_controller.md) | Requires a running background task and a flight controller connection. | draft |
-| Flight Feel | [flight_tuning/master_gains.md](flight_tuning/master_gains.md) | Requires a running background task and a flight controller connection. | draft |
+| Gain Curves | [flight_tuning/gain_curves.md](flight_tuning/gain_curves.md) | Requires a running background task and a flight controller connection. | draft |
 | PIDs | [flight_tuning/thrust_vector_pids.md](flight_tuning/thrust_vector_pids.md) | Requires a running background task and a flight controller connection. | draft |
 | Flight Feel | [flight_tuning/thrust_vector_master_gains.md](flight_tuning/thrust_vector_master_gains.md) | Requires a running background task and a flight controller connection. | draft |
+| Gain Curves | [flight_tuning/thrust_vector_gain_curves.md](flight_tuning/thrust_vector_gain_curves.md) | Requires a running background task and a flight controller connection. | draft |
 | PID Controller | [flight_tuning/thrust_vector_pid_controller.md](flight_tuning/thrust_vector_pid_controller.md) | Requires a running background task and a flight controller connection. | draft |
 | PID Bandwidth | [flight_tuning/thrust_vector_pid_bandwidth.md](flight_tuning/thrust_vector_pid_bandwidth.md) | Requires a running background task and a flight controller connection. | draft |
 | Attitude / Heading Hold | [flight_tuning/thrust_vector_hold.md](flight_tuning/thrust_vector_hold.md) | Requires a running background task and a flight controller connection. | draft |

@@ -4632,6 +4632,15 @@
           "translation": "NONE"
         }
       },
+      "gain_curves": {
+        "name": {
+          "english": "Gain Curves",
+          "max_length": 11,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Gain Curves"
+        }
+      },
       "governor": {
         "auto_timeout": {
           "english": "Autorotation Timeout",

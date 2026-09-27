@@ -1,51 +1,39 @@
--- Master Gains page. Loaded on demand from Advanced -> Master Gains.
+-- Flight Feel page (file name kept from its Master Gains origin). Loaded on
+-- demand from Flight Tuning -> Flight Feel.
 --
 -- Edits the same MSP_PID_PROFILE / MSP_SET_PID_PROFILE command (cmd
 -- 94/95, see lib/msp_pid_profile.lua) as app/pages/pid_controller.lua --
 -- a second page sharing one codec, same as every field that page itself
 -- doesn't build a widget for already round-trips unchanged on every save
--- (see that file's own header comment). Split out to its own page rather
--- than living inside PID Controller: master_gain_0-2/gain_curve_0-2/
--- fw_tpa_gain/fw_tpa_curve form one coherent "Master Gains" table (one
--- row per axis -- Roll/Pitch/Yaw/Throttle -- each a live P/I/D/F scale
--- plus which app/pages/curves.lua gain-curve slot shapes it vs. stick
--- input), matching wingflight-configurator's own Master Gains table,
--- where Throttle (fw_tpa_gain/fw_tpa_curve) is that table's 4th row, not
--- a separate "Throttle Attenuation" concept -- it's the same PID-gain-
--- vs-stick-input curve mechanism as the other three axes, just keyed to
--- throttle position instead of roll/pitch/yaw.
+-- (see that file's own header comment). One row per axis
+-- (Roll/Pitch/Yaw/Throttle), matching wingflight-configurator's Flight
+-- Feel table: Gain (master_gain_0-2, fw_tpa_gain on Throttle), Lock
+-- (iterm_decay_time_0-2) and Bounce Back (bounceback_0-2). Throttle has
+-- only a Gain.
 --
--- iterm_decay_time_0-2 are the table's third (Decay) column. Every other
--- MSP_PID_PROFILE field (iterm decay limit/relax, error limit,
--- cross-axis relax, etc.) is still read and written back unchanged every
--- round-trip here -- this page just doesn't build a widget for them,
--- exactly the same relationship PID Controller has with THESE four
--- fields' fw_tpa_gain/fw_tpa_curve/master_gain_*/gain_curve_* now that
--- they've moved here.
+-- Gain curves (gain_curve_0-2/fw_tpa_curve) are assigned on
+-- app/pages/gain_curves.lua under Advanced, since they are an advanced
+-- shaping tool. Every other MSP_PID_PROFILE field is still read and
+-- written back unchanged every round-trip here -- this page just doesn't
+-- build a widget for it.
 
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local pageRuntime = requireModule("app/page_runtime.lua")
 local fieldLayout = requireModule("app/field_layout.lua")
 local pidProfile = requireModule("lib/msp_pid_profile.lua")
-local curveSlotLabels = requireModule("app/curve_slot_labels.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.master_gains.name)@"
 
--- "None"/"Curve 1".."Curve 8" -- gain_curve_0/1/2/fw_tpa_curve only pick
--- WHICH of app/pages/curves.lua's 8 Gain-curve pool slots is assigned
--- here; shape editing lives on that page, not here.
-local CURVE_SLOT_OPTIONS = curveSlotLabels.optionsTable(8)
-
--- Gain, Curve, Lock, Bounce-back column widths (see field_layout.tableSlots);
--- Curve gets more room so "None" and "Curve 8" are not truncated.
-local COLUMN_WEIGHTS = {1, 1.25, 1, 1}
-local COLUMN_START = 0.33 -- fraction of the row width where the first column starts
+-- Gain, Lock, Bounce Back column widths (see field_layout.tableSlots); Bounce
+-- Back has the widest header. Curves are assigned on app/pages/gain_curves.lua.
+local COLUMN_WEIGHTS = {1, 1, 1.3}
+local COLUMN_START = 0.45 -- fraction of the row width where the first column starts
 
 local AXES = {
-  {label = "@i18n(app.modules.master_gains.axis_roll)@", gainKey = "master_gain_0", curveKey = "gain_curve_0", decayKey = "iterm_decay_time_0", bouncebackKey = "bounceback_0"},
-  {label = "@i18n(app.modules.master_gains.axis_pitch)@", gainKey = "master_gain_1", curveKey = "gain_curve_1", decayKey = "iterm_decay_time_1", bouncebackKey = "bounceback_1"},
-  {label = "@i18n(app.modules.master_gains.axis_yaw)@", gainKey = "master_gain_2", curveKey = "gain_curve_2", decayKey = "iterm_decay_time_2", bouncebackKey = "bounceback_2"},
-  {label = "@i18n(app.modules.master_gains.axis_throttle)@", gainKey = "fw_tpa_gain", curveKey = "fw_tpa_curve"},
+  {label = "@i18n(app.modules.master_gains.axis_roll)@", gainKey = "master_gain_0", decayKey = "iterm_decay_time_0", bouncebackKey = "bounceback_0"},
+  {label = "@i18n(app.modules.master_gains.axis_pitch)@", gainKey = "master_gain_1", decayKey = "iterm_decay_time_1", bouncebackKey = "bounceback_1"},
+  {label = "@i18n(app.modules.master_gains.axis_yaw)@", gainKey = "master_gain_2", decayKey = "iterm_decay_time_2", bouncebackKey = "bounceback_2"},
+  {label = "@i18n(app.modules.master_gains.axis_throttle)@", gainKey = "fw_tpa_gain"},
 }
 
 -- opts.onBack: called to return to the menu (the header's Menu button or
@@ -69,9 +57,8 @@ local function open(opts)
   local headerLine = form.addLine(" ")
   local headerSlots = fieldLayout.tableSlots(headerLine, COLUMN_WEIGHTS, COLUMN_START)
   form.addStaticText(headerLine, headerSlots[1], "@i18n(app.modules.master_gains.gain)@", RIGHT)
-  form.addStaticText(headerLine, headerSlots[2], "@i18n(app.modules.master_gains.curve)@", RIGHT)
-  form.addStaticText(headerLine, headerSlots[3], "@i18n(app.modules.master_gains.lock)@", RIGHT)
-  form.addStaticText(headerLine, headerSlots[4], "@i18n(app.modules.master_gains.bounceback)@", RIGHT)
+  form.addStaticText(headerLine, headerSlots[2], "@i18n(app.modules.master_gains.lock)@", RIGHT)
+  form.addStaticText(headerLine, headerSlots[3], "@i18n(app.modules.master_gains.bounceback)@", RIGHT)
 
   -- Lock (I-term decay time) is the other half of how "locked" each axis
   -- feels: Gain sets how hard it pushes back, Lock how long it remembers
@@ -81,10 +68,9 @@ local function open(opts)
     local line = form.addLine(axis.label)
     local slots = fieldLayout.tableSlots(line, COLUMN_WEIGHTS, COLUMN_START)
     fieldLayout.buildField(runtime, line, slots[1], {key = axis.gainKey})
-    fieldLayout.buildField(runtime, line, slots[2], {key = axis.curveKey, choices = CURVE_SLOT_OPTIONS})
     if axis.decayKey then
-      fieldLayout.buildField(runtime, line, slots[3], {key = axis.decayKey})
-      fieldLayout.buildField(runtime, line, slots[4], {key = axis.bouncebackKey})
+      fieldLayout.buildField(runtime, line, slots[2], {key = axis.decayKey})
+      fieldLayout.buildField(runtime, line, slots[3], {key = axis.bouncebackKey})
     end
   end
 

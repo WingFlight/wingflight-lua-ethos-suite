@@ -336,6 +336,10 @@ local MENUS = {
     entries = {
       {title = "@i18n(app.modules.pids.name)@", icon = lcd.loadMask("app/gfx/pids.png"), script = "app/pages/pids.lua"},
       {title = "@i18n(app.modules.rates.name)@", icon = lcd.loadMask("app/gfx/rates.png"), script = "app/pages/rates.lua"},
+      -- Flight Feel (Gain, Curve, Lock, Bounce Back) is where pilots start
+      -- tuning, so it sits beside PIDs and Rates rather than under Advanced
+      -- (see app/pages/master_gains.lua's own header).
+      {title = "@i18n(app.modules.master_gains.name)@", icon = lcd.loadMask("app/gfx/master_gains.png"), script = "app/pages/master_gains.lua"},
       {title = "@i18n(app.menu_section_advanced)@", icon = lcd.loadMask("app/gfx/advanced.png"), menuId = "advanced_menu"},
     },
   },
@@ -344,6 +348,7 @@ local MENUS = {
     entries = {
       {title = "@i18n(app.modules.pids.name)@", icon = lcd.loadMask("app/gfx/pids.png"), script = "app/pages/thrust_vector_pids.lua"},
       {title = "@i18n(app.modules.master_gains.name)@", icon = lcd.loadMask("app/gfx/master_gains.png"), script = "app/pages/thrust_vector_master_gains.lua"},
+      {title = "@i18n(app.modules.gain_curves.name)@", icon = lcd.loadMask("app/gfx/curves.png"), script = "app/pages/thrust_vector_gain_curves.lua"},
       {title = "@i18n(app.modules.pid_controller.name)@", icon = lcd.loadMask("app/gfx/pid_controller.png"), script = "app/pages/thrust_vector_pid_controller.lua"},
       {title = "@i18n(app.modules.pid_bandwidth.name)@", icon = lcd.loadMask("app/gfx/pid_bandwidth.png"), script = "app/pages/thrust_vector_pid_bandwidth.lua"},
       {title = "@i18n(app.modules.thrust_vector.hold)@", icon = lcd.loadMask("app/gfx/autolevel_attitude_hold.png"), script = "app/pages/thrust_vector_hold.lua"},
@@ -372,11 +377,9 @@ local MENUS = {
     entries = {
       {title = "@i18n(app.modules.filters.name)@", icon = lcd.loadMask("app/gfx/filters.png"), script = "app/pages/filters.lua"},
       {title = "@i18n(app.modules.pid_controller.name)@", icon = lcd.loadMask("app/gfx/pid_controller.png"), script = "app/pages/pid_controller.lua"},
-      -- Split out of PID Controller: master_gain_0-2/gain_curve_0-2/
-      -- fw_tpa_gain/fw_tpa_curve share that page's MSP_PID_PROFILE codec
-      -- but form one coherent "Master Gains" table (see
-      -- app/pages/master_gains.lua's own header) -- sits right beside it.
-      {title = "@i18n(app.modules.master_gains.name)@", icon = lcd.loadMask("app/gfx/master_gains.png"), script = "app/pages/master_gains.lua"},
+      -- Gain curve assignment, split off Flight Feel as an advanced shaping
+      -- tool (see app/pages/gain_curves.lua).
+      {title = "@i18n(app.modules.gain_curves.name)@", icon = lcd.loadMask("app/gfx/curves.png"), script = "app/pages/gain_curves.lua"},
       -- FEATURE_THRUST_VECTOR (see app/pages/configuration.lua) is opt-in
       -- and off by default, but this entry is unconditional -- same
       -- convention every other Advanced entry already follows regardless
