@@ -125,7 +125,7 @@ local AXIS_LIMITS = {
 -- Matches this project's own last-known-good SIM_RESPONSE byte-for-byte.
 local SIMULATOR_RESPONSE = {
   1,    -- pid_mode
-  6,    -- iterm_decay_time (0.6s, decimals=1)
+  60,   -- iterm_decay_time (0.60s, decimals=2)
   35,   -- iterm_decay_limit
   45, 45, 60,   -- error_limit_0/1/2 (roll, pitch, yaw)
   50, 50, 100,  -- gyro_cutoff_0/1/2
@@ -164,8 +164,8 @@ local SIMULATOR_RESPONSE = {
 -- FIELD_SPEC (field, type, min, max, default, unit, decimals, scale, ...).
 -- `default` here is in the same *raw wire* domain as `min`/`max` (matching
 -- how this rebuild's own app/field_layout.lua already treats decimals --
--- e.g. iterm_decay_time displays as "0.6s" but its actual field range/
--- value is 0-250 with decimals=1), not the display-scaled value the
+-- e.g. iterm_decay_time displays as "0.60s" but its actual field range/
+-- value is 1-100 with decimals=2), not the display-scaled value the
 -- original schema's own `default` column shows for that field.
 --
 -- Only fields an app/pages/*.lua page actually builds a widget for need an
@@ -179,8 +179,8 @@ local FIELD_META = {
   angle_pitch_limit = {min = 10, max = 75, default = 55, suffix = "°"},
   trainer_roll_limit = {min = 10, max = 90, default = 20, suffix = "°"},
   trainer_pitch_limit = {min = 10, max = 75, default = 20, suffix = "°"},
-  iterm_decay_time = {min = 0, max = 250, default = 6, decimals = 1, suffix = "s"},
-  iterm_decay_limit = {min = 0, max = 60, default = 35, suffix = "°"},
+  iterm_decay_time = {min = 1, max = 100, default = 60, decimals = 2, suffix = "s"},
+  iterm_decay_limit = {min = 0, max = 250, default = 35, suffix = "°/s"},
   error_limit_0 = {min = 0, max = 180, default = 45, suffix = "°"},
   error_limit_1 = {min = 0, max = 180, default = 45, suffix = "°"},
   error_limit_2 = {min = 0, max = 180, default = 60, suffix = "°"},

@@ -21,15 +21,15 @@ local mspcodec = requireModule("lib/mspcodec.lua")
 
 local READ_COMMAND = 1
 
--- Wingflight 22.5 is required for the 24-channel bus servo index layout.
+-- Wingflight 22.6 is required for iterm_decay_time in 0.01 s units.
 local EXPECTED_API_MAJOR = 22
-local MIN_API_MINOR = 5
+local MIN_API_MINOR = 6
 
 -- Concrete versions offered by the developer "simulated API version"
 -- picker (see app/pages/developer_settings.lua) -- add new entries here as
 -- Wingflight ships new MSP API versions; nothing else needs to change,
 -- the simulator byte-triplet is derived from the string itself below.
-local SIMULATABLE_VERSIONS = {"22.05"}
+local SIMULATABLE_VERSIONS = {"22.06"}
 
 -- "Invalid" simulates talking to a *different firmware family* entirely
 -- (major 12 -- Rotorflight's own, per that project's own

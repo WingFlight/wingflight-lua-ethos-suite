@@ -71,7 +71,7 @@ local SIMULATOR_RESPONSE = {
   50, 0,  16, 0,  0, 0,  100, 0,  0, 0,   -- pitch_p/i/d/f/b
   80, 0,  20, 0,  0, 0,  100, 0,  0, 0,   -- yaw_p/i/d/f/b
   100, 0, 100, 0, 100, 0, -- master_gain_0/1/2
-  6,    -- iterm_decay_time
+  60,   -- iterm_decay_time (0.60s, decimals=2)
   35,   -- iterm_decay_limit
   2,    -- iterm_relax_type (RPY)
   22, 22, 22,   -- iterm_relax_level_0/1/2
@@ -111,7 +111,7 @@ local FIELD_META = {
   master_gain_0 = {min = 25, max = 1000, default = 100, suffix = "%"},
   master_gain_1 = {min = 25, max = 1000, default = 100, suffix = "%"},
   master_gain_2 = {min = 25, max = 1000, default = 100, suffix = "%"},
-  iterm_decay_time = {min = 0, max = 250, default = 6, decimals = 1, suffix = "s"},
+  iterm_decay_time = {min = 1, max = 100, default = 60, decimals = 2, suffix = "s"},
   iterm_decay_limit = {min = 0, max = 250, default = 35, suffix = "°/s"},
   iterm_relax_level_0 = {min = 10, max = 250, default = 22},
   iterm_relax_level_1 = {min = 10, max = 250, default = 22},

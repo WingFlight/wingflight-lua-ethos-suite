@@ -15,7 +15,8 @@
 -- vs-stick-input curve mechanism as the other three axes, just keyed to
 -- throttle position instead of roll/pitch/yaw.
 --
--- Every other MSP_PID_PROFILE field (iterm decay/relax, error limit,
+-- iterm_decay_time also has a widget here, below the table. Every other
+-- MSP_PID_PROFILE field (iterm decay limit/relax, error limit,
 -- cross-axis relax, etc.) is still read and written back unchanged every
 -- round-trip here -- this page just doesn't build a widget for them,
 -- exactly the same relationship PID Controller has with THESE four
@@ -71,6 +72,10 @@ local function open(opts)
     fieldLayout.buildField(runtime, line, slots[1], {key = axis.gainKey})
     fieldLayout.buildField(runtime, line, slots[2], {key = axis.curveKey, choices = CURVE_SLOT_OPTIONS})
   end
+
+  -- The other half of how "locked" the model feels: gain sets how hard it
+  -- pushes back, decay time how long it remembers the disturbance.
+  fieldLayout.buildSingle(runtime, "@i18n(app.modules.master_gains.iterm_decay_time)@", {key = "iterm_decay_time"})
 
   runtime:loadInitial()
 end

@@ -5303,6 +5303,13 @@
           "reverse_text": false,
           "translation": "增益"
         },
+        "iterm_decay_time": {
+          "english": "I-term Decay Time",
+          "max_length": 17,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "I-term Decay Time"
+        },
         "name": {
           "english": "Master Gains",
           "max_length": 12,

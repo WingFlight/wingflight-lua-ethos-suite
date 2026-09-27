@@ -8,10 +8,9 @@ local ITERM_RELAX_OPTIONS = {
 }
 
 local function buildFields(runtime, fieldLayout, tvPid)
-  -- PID Settings: iterm decay, iterm relax, error limit, cutoffs -- same
+  -- PID Settings: iterm decay limit, iterm relax, error limit, cutoffs -- same
   -- grouped-line shapes app/pages/pid_controller.lua/autolevel.lua use.
   fieldLayout.buildGroup(runtime, "@i18n(app.modules.pid_controller.inflight_error_decay)@", {
-    {title = "@i18n(app.modules.pid_controller.time)@", spec = {key = "iterm_decay_time"}},
     {title = "@i18n(app.modules.pid_controller.limit)@", spec = {key = "iterm_decay_limit"}},
   })
 
