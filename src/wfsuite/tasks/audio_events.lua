@@ -23,6 +23,9 @@ local adjWavs = nil
 local lastAlertAt = {}
 local craftNameAnnounced = false
 local lastSmartfuelAnnounced = nil
+-- Whether a fuel reading has been evaluated yet, as opposed to merely being
+-- present. See announceSmartfuel().
+local fuelEvaluated = false
 local lastLowFuelAnnounced = false
 local lastLowFuelRepeatAt = 0
 local lastLowFuelRepeatCount = 0
@@ -682,13 +685,53 @@ local function resetLowFuel()
   lastLowFuelRepeatCount = 0
 end
 
+local function resetFuelAnnouncements()
+  lastSmartfuelAnnounced = nil
+  fuelEvaluated = false
+  resetLowFuel()
+end
+
+-- The FC reports no battery yet: batteryState is MAX(voltageState,
+-- consumptionState) in wingflight-firmware's sensors/battery.c, and it is
+-- INIT from boot and NOT_PRESENT without a pack (USB on the bench) -- exactly
+-- when sensors/smartfuel.c resets the charge level to 0. A 0 then means "no
+-- battery", not "empty battery". nil (no system_status reading yet) doesn't
+-- gate, so the first-reading seed below still covers it.
+local function batteryAbsent()
+  local status = session.systemStatus
+  local state = status and status.batteryState
+  return state == systemStatusCodec.BATTERY.NOT_PRESENT
+    or state == systemStatusCodec.BATTERY.INIT
+end
+
+-- The first reading is only recorded, whatever it says. The threshold loop
+-- already treated lastSmartfuelAnnounced == nil as "nothing to compare
+-- against yet", but the zero branch ran before that gate, so a first reading
+-- of 0 -- what a sensor that has no data yet reports -- went straight to
+-- "low fuel" and a haptic. An empty pack reads 0 too, so the first 0 is seeded
+-- and every later one goes through: a genuinely empty pack is announced one
+-- evaluation later, not silenced. Ported from rotorflight-lua-ethos-suite
+-- PR #2406; the batteryAbsent() gate is wingflight-only.
 local function announceSmartfuel(now)
   if not events.smartfuel then return end
   if session.connected ~= true then return end
 
+  if batteryAbsent() then
+    -- Start over once a pack is detected, so its first reading is seeded.
+    resetFuelAnnouncements()
+    return
+  end
+
   local value = tonumber(session.fuelPercent)
   if value == nil then return end
   value = math.floor(value + 0.5)
+
+  if not fuelEvaluated then
+    fuelEvaluated = true
+    lastSmartfuelAnnounced = value
+    resetLowFuel()
+    return
+  end
 
   if value <= 0 then
     local repeats = tonumber(events.smartfuelrepeats) or 1
@@ -707,11 +750,6 @@ local function announceSmartfuel(now)
     return
   end
   resetLowFuel()
-
-  if lastSmartfuelAnnounced == nil then
-    lastSmartfuelAnnounced = value
-    return
-  end
 
   local thresholds = smartfuelThresholds()
   if not thresholds then
@@ -871,9 +909,8 @@ function audio_events.wakeup()
   if session.connected ~= true then
     initialized = false
     craftNameAnnounced = false
-    lastSmartfuelAnnounced = nil
+    resetFuelAnnouncements()
     adjWavs = nil
-    resetLowFuel()
     pendingAdjFunction = false
     resetTimerAudio()
     speakingUntil = 0
@@ -897,7 +934,9 @@ function audio_events.wakeup()
     if tonumber(session.gpsFixType) ~= nil then
       previous.gpsFixType = 0
     end
-    lastSmartfuelAnnounced = tonumber(session.fuelPercent)
+    -- No fuel seed here: announceSmartfuel() seeds the first reading it
+    -- evaluates. This one seeded a 0 as a number, which slipped past the old
+    -- nil gate and is how a fresh connect came to announce "low fuel".
     return
   end
 
@@ -929,12 +968,11 @@ function audio_events.reset()
   for key in pairs(previous) do previous[key] = nil end
   for key in pairs(lastAlertAt) do lastAlertAt[key] = nil end
   clearAlertState()
-  lastSmartfuelAnnounced = nil
+  resetFuelAnnouncements()
   pendingAdjFunction = false
   resetTimerAudio()
   speakingUntil = 0
   for key in pairs(rollingSamples) do rollingSamples[key] = nil end
-  resetLowFuel()
 end
 
 function audio_events.setSettings(snapshot)
