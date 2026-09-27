@@ -379,6 +379,11 @@ def update_index():
         "The *Conditions* column names what hides, greys out or locks a page; the sentences",
         "and structure follow [_template.md](../_template.md).",
         "",
+        "Pages are filled in as changes reach them: a pull request that changes a page brings",
+        "that page's file with it, or says on a line of its own why it needs no documentation",
+        "change. The `Documentation rule` job in `.github/workflows/pr.yml` fails when neither",
+        "is there. The rule is in [.agents/rules/documentation.md](../../.agents/rules/documentation.md).",
+        "",
     ]
 
     for sec_title, sec_pages in sections.items():
