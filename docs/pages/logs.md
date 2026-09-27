@@ -19,6 +19,24 @@ TODO: Explain what this page controls and when a pilot would use it.
 
 Available without a flight controller connection; the background task must be running.
 
+## One flight, one log
+
+A log opens when the model arms and closes when it disarms. A short loss of
+telemetry while the model is still armed (behind an obstacle, or on a fast
+pass) no longer splits the flight into two logs, so the peaks the viewer shows
+are those of the whole flight. The time without a link isn't counted as flight
+time.
+
+Two things still end a log and start a new one:
+
+* **Disarming.** A log always ends when you disarm, whether the link stayed up
+  or not, so landing, disarming and arming again always gives a separate log.
+* **A gap longer than 30 seconds.** If the link is gone for longer than that,
+  the flight is closed rather than resumed.
+
+The flight timer and the flight count in the model statistics follow the same
+rule, so a flight that briefly loses the link is counted once.
+
 ## Settings
 
 | Setting | What it does |

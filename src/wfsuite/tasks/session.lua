@@ -125,6 +125,7 @@ local session = {
   timerLive = 0,
   timerSession = 0,
   timerFlightCounted = false,
+  flightResumable = false,
   timerTarget = 300,
   smartfuelModelType = 0,
   modelPreferences = nil,
@@ -427,6 +428,9 @@ local function flush()
     timerLive = session.timerLive,
     timerSession = session.timerSession,
     timerFlightCounted = session.timerFlightCounted,
+    -- tasks/logging.lua holds its file open across a short link loss while
+    -- this is true (see tasks/flight_timer.lua).
+    flightResumable = session.flightResumable,
     timerTarget = session.timerTarget,
     smartfuelModelType = session.smartfuelModelType,
     modelStats = copyStats(session.modelStats),
@@ -811,6 +815,28 @@ end
 -- updateSystemStatus().
 local gpsSeenHealthy = false
 
+-- Which aircraft this is: its UID, name and the per-model preferences/stats
+-- loaded for it. Cleared on disconnect, except while a flight is held open
+-- across a short link loss (tasks/flight_timer.lua) -- the flight's stats
+-- must still land on this aircraft when it closes; updateFlightTimer()
+-- clears it once nothing is held any more.
+local function clearAircraftIdentity()
+  -- Restore whatever the Ethos model name was before syncname (see the
+  -- craft-name handshake above) last overwrote it -- must run before
+  -- session.craftName is wiped, since it's this connect's own captured
+  -- originalModelName that's being restored, not a fresh read.
+  if originalModelName and model and model.name then
+    pcall(model.name, originalModelName)
+  end
+  originalModelName = nil
+  session.mcuId = nil
+  session.craftName = nil
+  session.modelPreferences = nil
+  session.modelPreferencesFile = nil
+  session.modelPreferencesMcuId = nil
+  session.modelStats = nil
+end
+
 local function setConnected(value, mspQueue, protocol)
   if session.connected == value then return end
   session.connected = value
@@ -827,14 +853,14 @@ local function setConnected(value, mspQueue, protocol)
       session.handshake[key] = false
       handshakeInFlight[key] = false
     end
-    -- Restore whatever the Ethos model name was before syncname (see the
-    -- craft-name handshake above) last overwrote it -- must run before
-    -- session.craftName is wiped below, since it's this connect's own
-    -- captured originalModelName that's being restored, not a fresh read.
-    if originalModelName and model and model.name then
-      pcall(model.name, originalModelName)
+    local holdingFlight = flightTimer.inProgress()
+    if holdingFlight then
+      -- Same aircraft for the flight being held: keep its UID so the
+      -- handshake doesn't re-read it.
+      if session.mcuId then session.handshake.mcuId = true end
+    else
+      clearAircraftIdentity()
     end
-    originalModelName = nil
     -- Forget everything the handshake fetched so it re-runs in full on the
     -- next connect (a stale FC version/UID/battery config from a previous
     -- session -- or a different aircraft entirely -- must not survive a
@@ -844,8 +870,6 @@ local function setConnected(value, mspQueue, protocol)
     session.apiVersionMajor = nil
     session.apiVersionMinor = nil
     session.apiVersionSupported = nil
-    session.mcuId = nil
-    session.craftName = nil
     session.clockSynced = false
     session.batteryConfig = nil
     session.consumption = nil
@@ -876,15 +900,8 @@ local function setConnected(value, mspQueue, protocol)
     session.batteryProfile = nil
     session.adjFunction = nil
     session.adjValue = nil
-    session.timerLive = 0
-    session.timerSession = 0
-    session.timerFlightCounted = false
     session.timerTarget = 300
     session.smartfuelModelType = 0
-    session.modelPreferences = nil
-    session.modelPreferencesFile = nil
-    session.modelPreferencesMcuId = nil
-    session.modelStats = nil
     session.bblFlags = nil
     session.bblSize = nil
     session.bblUsed = nil
@@ -894,7 +911,17 @@ local function setConnected(value, mspQueue, protocol)
     telemetryConfigReadInFlight = false
     pendingStatsSync = false
     pendingStatsSyncAt = nil
-    flightTimer.reset()
+    -- The flight timer is deliberately NOT reset here. Everything above is
+    -- per-link state, because a reconnect may be a different aircraft; a
+    -- flight in progress is not. Wiping it split one flight into two records
+    -- on a brief in-flight link drop, and past the count threshold counted
+    -- the same flight twice. tasks/flight_timer.lua holds the flight across
+    -- a short gap and closes it on disarm or once the gap outlasts its grace
+    -- window. The publish() below only marks the session dirty; the snapshot
+    -- is flushed at the end of wakeup(), after updateFlightTimer() has frozen
+    -- the flight, so tasks/logging.lua never sees a disconnect without
+    -- flightResumable.
+    session.flightResumable = holdingFlight
     session.isArmed = nil
     session.armDisableFlags = nil
     localSmartFuel:reset()
@@ -1116,7 +1143,12 @@ end
 
 local function updateFlightTimer(now)
   local changed, snapshot, event = flightTimer.update(session.connected, session.isArmed, now)
-  if changed then
+  -- Checked every tick, not only on change: the grace window can run out
+  -- while the link stays down, and tasks/logging.lua has to learn that the
+  -- flight can no longer be resumed.
+  local resumable = flightTimer.resumable(now)
+  if changed or resumable ~= session.flightResumable then
+    session.flightResumable = resumable
     session.timerLive = snapshot.timerLive
     session.timerSession = snapshot.timerSession
     session.timerFlightCounted = snapshot.timerFlightCounted
@@ -1138,6 +1170,14 @@ local function updateFlightTimer(now)
       saveModelPreferences()
       scheduleStatsSync(1)
     end
+  end
+
+  -- A held flight kept the aircraft identity through the disconnect so its
+  -- stats could land above; once nothing is held, drop it as setConnected()
+  -- would have.
+  if not session.connected and session.mcuId ~= nil and not flightTimer.inProgress(now) then
+    clearAircraftIdentity()
+    publish()
   end
 end
 
