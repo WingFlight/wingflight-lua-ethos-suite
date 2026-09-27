@@ -24,6 +24,7 @@ Requires a running background task and a flight controller connection.
 | Setting | What it does |
 | --- | --- |
 | TODO | Inspect the page and its helpers; automatic extraction found no controls. |
+| Curve (per axis) | Gain curve slot (None, Curve 1-8) that further scales that axis's master gain by stick deflection. Uses the same shared curve pool as the main loop (*Curves* page). Requires API 22.7 firmware. |
 | Decay (per axis) | I-term decay time: how long that axis remembers a disturbance before letting it go, in seconds (0.01-1.00, default 0.60). Longer feels more locked in; shorter feels freer and suits 3D flying. Master gain sets how hard the axis pushes back, this sets for how long. Also available as an in-flight adjustment function per axis. |
 
 ## Notes
