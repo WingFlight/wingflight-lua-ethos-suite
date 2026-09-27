@@ -20,3 +20,4 @@ bin/updater/src/build
 /bin/updater/wfsuite_updater_work
 .vscode/settings.json
 bin/package/rotorflight-lua-ethos-suite-local-test-en.zip
+.vscode/logs/
