@@ -24,9 +24,9 @@ is there. The rule is in [.agents/rules/documentation.md](../../.agents/rules/do
 | --- | --- | --- | --- |
 | PIDs | [flight_tuning/pids.md](flight_tuning/pids.md) | Requires a running background task and a flight controller connection. | draft |
 | Rates | [flight_tuning/rates.md](flight_tuning/rates.md) | Requires a running background task and a flight controller connection. | draft |
+| Flight Feel | [flight_tuning/master_gains.md](flight_tuning/master_gains.md) | Requires a running background task and a flight controller connection. | draft |
 | Filters | [flight_tuning/filters.md](flight_tuning/filters.md) | Requires a running background task and a flight controller connection. | draft |
 | PID Controller | [flight_tuning/pid_controller.md](flight_tuning/pid_controller.md) | Requires a running background task and a flight controller connection. | draft |
-| Flight Feel | [flight_tuning/master_gains.md](flight_tuning/master_gains.md) | Requires a running background task and a flight controller connection. | draft |
 | PIDs | [flight_tuning/thrust_vector_pids.md](flight_tuning/thrust_vector_pids.md) | Requires a running background task and a flight controller connection. | draft |
 | Flight Feel | [flight_tuning/thrust_vector_master_gains.md](flight_tuning/thrust_vector_master_gains.md) | Requires a running background task and a flight controller connection. | draft |
 | PID Controller | [flight_tuning/thrust_vector_pid_controller.md](flight_tuning/thrust_vector_pid_controller.md) | Requires a running background task and a flight controller connection. | draft |

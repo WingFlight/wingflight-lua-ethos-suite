@@ -8,7 +8,7 @@ local curveSlotLabels = requireModule("app/curve_slot_labels.lua")
 local CURVE_SLOT_OPTIONS = curveSlotLabels.optionsTable(8)
 
 -- Gain, Curve, Lock, Bounce-back column widths, as app/pages/master_gains.lua.
-local COLUMN_WEIGHTS = {1, 1.25, 1, 1}
+local COLUMN_WEIGHTS = {1, 1.2, 0.85, 1.35}
 local COLUMN_START = 0.33 -- fraction of the row width where the first column starts
 
 local function buildFields(runtime, fieldLayout, tvPid)

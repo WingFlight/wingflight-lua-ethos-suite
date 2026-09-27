@@ -37,8 +37,9 @@ local PAGE_TITLE = "@i18n(app.modules.master_gains.name)@"
 local CURVE_SLOT_OPTIONS = curveSlotLabels.optionsTable(8)
 
 -- Gain, Curve, Lock, Bounce-back column widths (see field_layout.tableSlots);
--- Curve gets more room so "None" and "Curve 8" are not truncated.
-local COLUMN_WEIGHTS = {1, 1.25, 1, 1}
+-- Curve and Bounce Back (the widest header) get more room so "None", "Curve 8"
+-- and the header are not truncated; Lock only ever shows a short value.
+local COLUMN_WEIGHTS = {1, 1.2, 0.85, 1.35}
 local COLUMN_START = 0.33 -- fraction of the row width where the first column starts
 
 local AXES = {
