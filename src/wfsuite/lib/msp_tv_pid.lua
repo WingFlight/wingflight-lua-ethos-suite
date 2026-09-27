@@ -4,10 +4,11 @@
 -- from MSP_PID_PROFILE/MSP_PID_TUNING (lib/msp_pid_profile.lua/
 -- lib/msp_pid_tuning.lua): tvPidProfile_t is deliberately a trimmed-down
 -- sibling of pidProfile_t (see wingflight-firmware's pg/tv_pid.h) -- no
--- pid_mode, gain_curve, fw_tpa, leveling/trainer/autohover sub-modes, or
+-- pid_mode, fw_tpa, leveling/trainer/autohover sub-modes, or
 -- cross-axis relax. The one exception is `hold`: an independent attitude/
 -- heading hold for this loop only (BOXTVHOLD / "THRUST VECTOR ATTITUDE
--- HOLD"), tacked on at the tail of the wire struct.
+-- HOLD"), tacked on at the tail of the wire struct, followed by the per-axis
+-- gain_curve (API 22.7), which reads the main loop's shared gain-curve pool.
 --
 -- One of PID_PROFILE_COUNT independently-switchable profiles (mirrors
 -- pidProfile_t) -- see lib/msp_select_tv_profile.lua for switching the
@@ -47,7 +48,7 @@ local FIELDS = {
   {"pitch_p", "U16"}, {"pitch_i", "U16"}, {"pitch_d", "U16"}, {"pitch_f", "U16"}, {"pitch_b", "U16"},
   {"yaw_p", "U16"}, {"yaw_i", "U16"}, {"yaw_d", "U16"}, {"yaw_f", "U16"}, {"yaw_b", "U16"},
   {"master_gain_0", "U16"}, {"master_gain_1", "U16"}, {"master_gain_2", "U16"}, -- roll, pitch, yaw
-  {"iterm_decay_time", "U8"},
+  {"iterm_decay_time_0", "U8"}, {"iterm_decay_time_1", "U8"}, {"iterm_decay_time_2", "U8"}, -- roll, pitch, yaw
   {"iterm_decay_limit", "U8"},
   {"iterm_relax_type", "U8"},
   {"iterm_relax_level_0", "U8"}, {"iterm_relax_level_1", "U8"}, {"iterm_relax_level_2", "U8"},
@@ -59,6 +60,7 @@ local FIELDS = {
   {"hold_gain", "U8"},
   {"hold_deadband", "U8"},
   {"hold_max_rate", "U16"},
+  {"gain_curve_0", "U8"}, {"gain_curve_1", "U8"}, {"gain_curve_2", "U8"}, -- roll, pitch, yaw (API 22.7)
 }
 
 -- Fixture reply used automatically when running in the Ethos simulator (see
@@ -71,7 +73,7 @@ local SIMULATOR_RESPONSE = {
   50, 0,  16, 0,  0, 0,  100, 0,  0, 0,   -- pitch_p/i/d/f/b
   80, 0,  20, 0,  0, 0,  100, 0,  0, 0,   -- yaw_p/i/d/f/b
   100, 0, 100, 0, 100, 0, -- master_gain_0/1/2
-  60,   -- iterm_decay_time (0.60s, decimals=2)
+  60, 60, 60,   -- iterm_decay_time_0/1/2 (0.60s, decimals=2)
   35,   -- iterm_decay_limit
   2,    -- iterm_relax_type (RPY)
   22, 22, 22,   -- iterm_relax_level_0/1/2
@@ -83,6 +85,7 @@ local SIMULATOR_RESPONSE = {
   40,   -- hold_gain
   5,    -- hold_deadband
   44, 1, -- hold_max_rate (U16 LE: 300 = 0x012C -> 44, 1)
+  0, 0, 0, -- gain_curve_0/1/2
 }
 
 -- Per-field {min, max, default, decimals, suffix}, sourced from
@@ -90,8 +93,8 @@ local SIMULATOR_RESPONSE = {
 -- wingflight-configurator's ThrustVector.svelte (same bounds this project's
 -- own last-known-good schemas used for the main loop -- see
 -- lib/msp_pid_profile.lua's own FIELD_META comment). `default` is in the
--- same raw wire domain as `min`/`max`, matching iterm_decay_time's
--- decimals=1 display (seconds) over its actual 0-250 (deciseconds) range.
+-- same raw wire domain as `min`/`max`, matching iterm_decay_time_0's
+-- decimals=2 display (seconds) over its actual 1-100 (0.01 s) range.
 local FIELD_META = {
   roll_p = {min = 0, max = 1000, default = 50},
   roll_i = {min = 0, max = 1000, default = 16},
@@ -111,7 +114,9 @@ local FIELD_META = {
   master_gain_0 = {min = 25, max = 1000, default = 100, suffix = "%"},
   master_gain_1 = {min = 25, max = 1000, default = 100, suffix = "%"},
   master_gain_2 = {min = 25, max = 1000, default = 100, suffix = "%"},
-  iterm_decay_time = {min = 1, max = 100, default = 60, decimals = 2, suffix = "s"},
+  iterm_decay_time_0 = {min = 1, max = 100, default = 60, decimals = 2, suffix = "s"},
+  iterm_decay_time_1 = {min = 1, max = 100, default = 60, decimals = 2, suffix = "s"},
+  iterm_decay_time_2 = {min = 1, max = 100, default = 60, decimals = 2, suffix = "s"},
   iterm_decay_limit = {min = 0, max = 250, default = 35, suffix = "°/s"},
   iterm_relax_level_0 = {min = 10, max = 250, default = 22},
   iterm_relax_level_1 = {min = 10, max = 250, default = 22},
@@ -134,6 +139,9 @@ local FIELD_META = {
   hold_gain = {min = 0, max = 250, default = 40},
   hold_deadband = {min = 0, max = 100, default = 5, suffix = "%"},
   hold_max_rate = {min = 0, max = 1800, default = 300, suffix = "°/s"},
+  gain_curve_0 = {min = 0, max = 8, default = 0},
+  gain_curve_1 = {min = 0, max = 8, default = 0},
+  gain_curve_2 = {min = 0, max = 8, default = 0},
 }
 
 local msp_tv_pid = {

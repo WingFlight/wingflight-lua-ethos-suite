@@ -15,7 +15,7 @@
 -- vs-stick-input curve mechanism as the other three axes, just keyed to
 -- throttle position instead of roll/pitch/yaw.
 --
--- iterm_decay_time also has a widget here, below the table. Every other
+-- iterm_decay_time_0-2 are the table's third (Decay) column. Every other
 -- MSP_PID_PROFILE field (iterm decay limit/relax, error limit,
 -- cross-axis relax, etc.) is still read and written back unchanged every
 -- round-trip here -- this page just doesn't build a widget for them,
@@ -37,9 +37,9 @@ local PAGE_TITLE = "@i18n(app.modules.master_gains.name)@"
 local CURVE_SLOT_OPTIONS = curveSlotLabels.optionsTable(8)
 
 local AXES = {
-  {label = "@i18n(app.modules.master_gains.axis_roll)@", gainKey = "master_gain_0", curveKey = "gain_curve_0"},
-  {label = "@i18n(app.modules.master_gains.axis_pitch)@", gainKey = "master_gain_1", curveKey = "gain_curve_1"},
-  {label = "@i18n(app.modules.master_gains.axis_yaw)@", gainKey = "master_gain_2", curveKey = "gain_curve_2"},
+  {label = "@i18n(app.modules.master_gains.axis_roll)@", gainKey = "master_gain_0", curveKey = "gain_curve_0", decayKey = "iterm_decay_time_0"},
+  {label = "@i18n(app.modules.master_gains.axis_pitch)@", gainKey = "master_gain_1", curveKey = "gain_curve_1", decayKey = "iterm_decay_time_1"},
+  {label = "@i18n(app.modules.master_gains.axis_yaw)@", gainKey = "master_gain_2", curveKey = "gain_curve_2", decayKey = "iterm_decay_time_2"},
   {label = "@i18n(app.modules.master_gains.axis_throttle)@", gainKey = "fw_tpa_gain", curveKey = "fw_tpa_curve"},
 }
 
@@ -62,20 +62,23 @@ local function open(opts)
   -- naming the columns once reads better than field_layout.buildGroup's
   -- usual per-row inline mini-labels repeated on all four rows.
   local headerLine = form.addLine(" ")
-  local headerSlots = form.getFieldSlots(headerLine, {0, 0})
+  local headerSlots = form.getFieldSlots(headerLine, {0, 0, 0})
   form.addStaticText(headerLine, headerSlots[1], "@i18n(app.modules.master_gains.gain)@", RIGHT)
   form.addStaticText(headerLine, headerSlots[2], "@i18n(app.modules.master_gains.curve)@", RIGHT)
+  form.addStaticText(headerLine, headerSlots[3], "@i18n(app.modules.master_gains.decay)@", RIGHT)
 
+  -- Decay (I-term decay time) is the other half of how "locked" each axis
+  -- feels: gain sets how hard it pushes back, decay how long it remembers
+  -- the disturbance. Throttle has no decay, so its third slot stays empty.
   for _, axis in ipairs(AXES) do
     local line = form.addLine(axis.label)
-    local slots = form.getFieldSlots(line, {0, 0})
+    local slots = form.getFieldSlots(line, {0, 0, 0})
     fieldLayout.buildField(runtime, line, slots[1], {key = axis.gainKey})
     fieldLayout.buildField(runtime, line, slots[2], {key = axis.curveKey, choices = CURVE_SLOT_OPTIONS})
+    if axis.decayKey then
+      fieldLayout.buildField(runtime, line, slots[3], {key = axis.decayKey})
+    end
   end
-
-  -- The other half of how "locked" the model feels: gain sets how hard it
-  -- pushes back, decay time how long it remembers the disturbance.
-  fieldLayout.buildSingle(runtime, "@i18n(app.modules.master_gains.iterm_decay_time)@", {key = "iterm_decay_time"})
 
   runtime:loadInitial()
 end

@@ -5296,19 +5296,19 @@
           "reverse_text": false,
           "translation": "Curva"
         },
+        "decay": {
+          "english": "Decay",
+          "max_length": 5,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Decay"
+        },
         "gain": {
           "english": "Gain",
           "max_length": 4,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Guad"
-        },
-        "iterm_decay_time": {
-          "english": "I-term Decay Time",
-          "max_length": 17,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "I-term Decay Time"
         },
         "name": {
           "english": "Master Gains",
