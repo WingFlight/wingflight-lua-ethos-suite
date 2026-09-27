@@ -5795,6 +5795,12 @@
           "max_length": 11,
           "needs_translation": false,
           "translation": "Save error:"
+        },
+        "save_armed": {
+          "english": "Saved; written to flash on disarm",
+          "max_length": 33,
+          "needs_translation": false,
+          "translation": "Saved; written to flash on disarm"
         }
       },
       "power": {

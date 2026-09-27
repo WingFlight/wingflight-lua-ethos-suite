@@ -2803,6 +2803,12 @@
           "translation": "Save error:",
           "needs_translation": false,
           "max_length": 11
+        },
+        "save_armed": {
+          "english": "Saved; written to flash on disarm",
+          "translation": "Saved; written to flash on disarm",
+          "needs_translation": false,
+          "max_length": 33
         }
       },
       "mixer": {
