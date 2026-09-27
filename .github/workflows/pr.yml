@@ -22,6 +22,12 @@ jobs:
       - name: Check the flight record behaviour
         run: lua5.4 bin/flight_record/verify_flight_record.lua
 
+      # Same Lua job: a fresh connect must not announce "low fuel" from a
+      # SmartFuel reading that is 0 only because no battery is known yet.
+      - name: Check the SmartFuel announcements
+        if: success() || failure()
+        run: lua5.4 bin/tests/smartfuel_announce.lua
+
   # Per-language PR builds (mirrors push.yml behavior)
   create-zip:
     name: Build PR ZIP (${{ matrix.lang }})
