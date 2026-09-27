@@ -8,6 +8,9 @@
       "osx": {
         "command": "${config:python.defaultInterpreterPath}"
       },
+      "windows": {
+        "command": "${config:python.defaultInterpreterPath}"
+      },
       "args": [
         "${workspaceFolder}/.vscode/scripts/deploy.py",
         "--lang",
@@ -48,6 +51,9 @@
       "osx": {
         "command": "${config:python.defaultInterpreterPath}"
       },
+      "windows": {
+        "command": "${config:python.defaultInterpreterPath}"
+      },
       "args": [
         "${workspaceFolder}/.vscode/scripts/deploy.py",
         "--radio",
@@ -72,6 +78,9 @@
       "type": "process",
       "command": "python",
       "osx": {
+        "command": "${config:python.defaultInterpreterPath}"
+      },
+      "windows": {
         "command": "${config:python.defaultInterpreterPath}"
       },
       "args": [
@@ -100,6 +109,9 @@
       "osx": {
         "command": "${config:python.defaultInterpreterPath}"
       },
+      "windows": {
+        "command": "${config:python.defaultInterpreterPath}"
+      },
       "args": [
         "${workspaceFolder}/.vscode/scripts/deploy.py",
         "--radio",
@@ -123,6 +135,9 @@
       "type": "process",
       "command": "python",
       "osx": {
+        "command": "${config:python.defaultInterpreterPath}"
+      },
+      "windows": {
         "command": "${config:python.defaultInterpreterPath}"
       },
       "args": [
@@ -152,6 +167,9 @@
       "osx": {
         "command": "${config:python.defaultInterpreterPath}"
       },
+      "windows": {
+        "command": "${config:python.defaultInterpreterPath}"
+      },
       "args": [
         "${workspaceFolder}/.vscode/scripts/deploy.py",
         "--radio",
@@ -177,6 +195,9 @@
       "osx": {
         "command": "${config:python.defaultInterpreterPath}"
       },
+      "windows": {
+        "command": "${config:python.defaultInterpreterPath}"
+      },
       "args": [
         "${workspaceFolder}/.vscode/scripts/deploy.py",
         "--clear-lock"
@@ -195,6 +216,9 @@
       "osx": {
         "command": "${config:python.defaultInterpreterPath}"
       },
+      "windows": {
+        "command": "${config:python.defaultInterpreterPath}"
+      },
       "args": [
         "${workspaceFolder}/.vscode/scripts/debug_connection.py"
       ],
@@ -210,6 +234,9 @@
       "type": "process",
       "command": "python",
       "osx": {
+        "command": "${config:python.defaultInterpreterPath}"
+      },
+      "windows": {
         "command": "${config:python.defaultInterpreterPath}"
       },
       "args": [
@@ -231,6 +258,9 @@
       "osx": {
         "command": "${config:python.defaultInterpreterPath}"
       },
+      "windows": {
+        "command": "${config:python.defaultInterpreterPath}"
+      },
       "args": [
         "${workspaceFolder}/.vscode/scripts/debug_connection.py",
         "--switch",
@@ -250,6 +280,9 @@
       "osx": {
         "command": "${config:python.defaultInterpreterPath}"
       },
+      "windows": {
+        "command": "${config:python.defaultInterpreterPath}"
+      },
       "args": [
         "${workspaceFolder}/bin/menu/generate.py"
       ],
@@ -265,6 +298,9 @@
       "type": "process",
       "command": "python",
       "osx": {
+        "command": "${config:python.defaultInterpreterPath}"
+      },
+      "windows": {
         "command": "${config:python.defaultInterpreterPath}"
       },
       "args": [
