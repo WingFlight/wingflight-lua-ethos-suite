@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # ←—— add/remove locales here
+        # add/remove locales here
         lang: [en, de, es, fr, it, nl, pt-br, no, cs, pl, he, zh-cn]
 
     steps:
