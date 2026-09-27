@@ -26,7 +26,7 @@ Requires a running background task and a flight controller connection.
 | TODO | Inspect the page and its helpers; automatic extraction found no controls. |
 | Curve (per axis) | Gain curve slot (None, Curve 1-8) that further scales that axis's master gain by stick deflection. Uses the same shared curve pool as the main loop (*Curves* page). Requires API 22.7 firmware. |
 | Decay (per axis) | I-term decay time: how long that axis remembers a disturbance before letting it go, in seconds (0.01-1.00, default 0.60). Longer feels more locked in; shorter feels freer and suits 3D flying. Master gain sets how hard the axis pushes back, this sets for how long. Also available as an in-flight adjustment function per axis. |
-| Relax (per axis) | I-term relax cutoff in Hz (1-100, default 10): bounce-back suppression. Lower values suppress more bounce-back at the end of rolls and other fast moves; higher values keep more I-term through sustained high-rate turns. About 15-30 for small, light aircraft, 10-15 for mid-size, below 10 for large, heavy aircraft. Relax is always on for every axis. Also available as an in-flight adjustment function per axis. |
+| Relax (per axis) | I-term relax cutoff in Hz (1-100, default 10): bounce-back suppression. Lower values suppress more bounce-back at the end of rolls and other fast moves; higher values keep more I-term through sustained high-rate turns. Most airframes end up between 5 and 10 Hz; lower it a step at a time if the model bounces back. Relax is always on for every axis. Also available as an in-flight adjustment function per axis. |
 
 ## Notes
 
