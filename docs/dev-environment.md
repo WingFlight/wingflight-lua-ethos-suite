@@ -44,8 +44,8 @@ python -m pip install -r requirements.txt
 Notes:
 - Use `pyserial`, not the unrelated `serial` package.
 - `pywin32` is Windows-specific and is skipped automatically by `requirements.txt` on other platforms.
-- On Windows, the HID DLL step may still be needed if `hidapi.dll` is not found.
-- On macOS, install the native HID library first: `brew install hidapi`.
+- HID uses the `hidapi` package, which includes the native library: no `hidapi.dll` copy (Windows) or `brew install hidapi` (macOS) is needed.
+- `.vscode/scripts/deploy.py` checks for `tqdm`, `pyserial`, `hidapi` and `pywin32` on each run and pip-installs any that are missing into the interpreter VS Code uses. If the older `hid` package is installed but cannot load its native library, it is replaced with `hidapi`.
 
 ### 1) i18n sync
 Used in CI and when updating translations:
