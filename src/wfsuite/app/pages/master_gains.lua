@@ -36,15 +36,15 @@ local PAGE_TITLE = "@i18n(app.modules.master_gains.name)@"
 -- here; shape editing lives on that page, not here.
 local CURVE_SLOT_OPTIONS = curveSlotLabels.optionsTable(8)
 
--- Gain, Curve, Decay, Relax column widths (see field_layout.tableSlots);
+-- Gain, Curve, Lock, Bounce-back column widths (see field_layout.tableSlots);
 -- Curve gets more room so "None" and "Curve 8" are not truncated.
 local COLUMN_WEIGHTS = {1, 1.25, 1, 1}
 local COLUMN_START = 0.33 -- fraction of the row width where the first column starts
 
 local AXES = {
-  {label = "@i18n(app.modules.master_gains.axis_roll)@", gainKey = "master_gain_0", curveKey = "gain_curve_0", decayKey = "iterm_decay_time_0", relaxKey = "iterm_relax_cutoff_0"},
-  {label = "@i18n(app.modules.master_gains.axis_pitch)@", gainKey = "master_gain_1", curveKey = "gain_curve_1", decayKey = "iterm_decay_time_1", relaxKey = "iterm_relax_cutoff_1"},
-  {label = "@i18n(app.modules.master_gains.axis_yaw)@", gainKey = "master_gain_2", curveKey = "gain_curve_2", decayKey = "iterm_decay_time_2", relaxKey = "iterm_relax_cutoff_2"},
+  {label = "@i18n(app.modules.master_gains.axis_roll)@", gainKey = "master_gain_0", curveKey = "gain_curve_0", decayKey = "iterm_decay_time_0", bouncebackKey = "bounceback_0"},
+  {label = "@i18n(app.modules.master_gains.axis_pitch)@", gainKey = "master_gain_1", curveKey = "gain_curve_1", decayKey = "iterm_decay_time_1", bouncebackKey = "bounceback_1"},
+  {label = "@i18n(app.modules.master_gains.axis_yaw)@", gainKey = "master_gain_2", curveKey = "gain_curve_2", decayKey = "iterm_decay_time_2", bouncebackKey = "bounceback_2"},
   {label = "@i18n(app.modules.master_gains.axis_throttle)@", gainKey = "fw_tpa_gain", curveKey = "fw_tpa_curve"},
 }
 
@@ -70,13 +70,13 @@ local function open(opts)
   local headerSlots = fieldLayout.tableSlots(headerLine, COLUMN_WEIGHTS, COLUMN_START)
   form.addStaticText(headerLine, headerSlots[1], "@i18n(app.modules.master_gains.gain)@", RIGHT)
   form.addStaticText(headerLine, headerSlots[2], "@i18n(app.modules.master_gains.curve)@", RIGHT)
-  form.addStaticText(headerLine, headerSlots[3], "@i18n(app.modules.master_gains.decay)@", RIGHT)
-  form.addStaticText(headerLine, headerSlots[4], "@i18n(app.modules.master_gains.relax)@", RIGHT)
+  form.addStaticText(headerLine, headerSlots[3], "@i18n(app.modules.master_gains.lock)@", RIGHT)
+  form.addStaticText(headerLine, headerSlots[4], "@i18n(app.modules.master_gains.bounceback)@", RIGHT)
 
-  -- Decay (I-term decay time) is the other half of how "locked" each axis
-  -- feels: gain sets how hard it pushes back, decay how long it remembers
-  -- the disturbance. Relax (I-term relax cutoff) is bounce-back suppression:
-  -- lower = more. Throttle has neither, so its last two slots stay empty.
+  -- Lock (I-term decay time) is the other half of how "locked" each axis
+  -- feels: Gain sets how hard it pushes back, Lock how long it remembers
+  -- the disturbance. Bounce Back is a 1-10 score (higher = less
+  -- bounce-back). Throttle has neither, so its last two slots stay empty.
   for _, axis in ipairs(AXES) do
     local line = form.addLine(axis.label)
     local slots = fieldLayout.tableSlots(line, COLUMN_WEIGHTS, COLUMN_START)
@@ -84,7 +84,7 @@ local function open(opts)
     fieldLayout.buildField(runtime, line, slots[2], {key = axis.curveKey, choices = CURVE_SLOT_OPTIONS})
     if axis.decayKey then
       fieldLayout.buildField(runtime, line, slots[3], {key = axis.decayKey})
-      fieldLayout.buildField(runtime, line, slots[4], {key = axis.relaxKey})
+      fieldLayout.buildField(runtime, line, slots[4], {key = axis.bouncebackKey})
     end
   end
 

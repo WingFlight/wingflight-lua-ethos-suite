@@ -21,15 +21,15 @@ local mspcodec = requireModule("lib/mspcodec.lua")
 
 local READ_COMMAND = 1
 
--- Wingflight 22.8 is required for the I-term relax level (no relax type).
+-- Wingflight 22.9 is required for the Bounce Back score.
 local EXPECTED_API_MAJOR = 22
-local MIN_API_MINOR = 8
+local MIN_API_MINOR = 9
 
 -- Concrete versions offered by the developer "simulated API version"
 -- picker (see app/pages/developer_settings.lua) -- add new entries here as
 -- Wingflight ships new MSP API versions; nothing else needs to change,
 -- the simulator byte-triplet is derived from the string itself below.
-local SIMULATABLE_VERSIONS = {"22.08"}
+local SIMULATABLE_VERSIONS = {"22.09"}
 
 -- "Invalid" simulates talking to a *different firmware family* entirely
 -- (major 12 -- Rotorflight's own, per that project's own

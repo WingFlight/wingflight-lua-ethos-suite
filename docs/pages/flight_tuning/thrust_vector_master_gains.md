@@ -1,12 +1,12 @@
 ---
-title: "Master Gains"
-sidebar_label: "Master Gains"
+title: "Flight Feel"
+sidebar_label: "Flight Feel"
 sidebar_position: 20
 documentation_status: draft
 source: app/pages/thrust_vector_master_gains.lua
 ---
 
-# Master Gains
+# Flight Feel
 
 > Draft scaffold. Extracted labels may be incomplete or out of order. Behaviour,
 > displayed units, defaults and save effects require source review.
@@ -15,7 +15,7 @@ TODO: Explain what this page controls and when a pilot would use it.
 
 ## Where to find it
 
-*Configuration* → *Flight Tuning* → *Advanced* → *Thrust Vector* → *Master Gains*
+*Configuration* → *Flight Tuning* → *Advanced* → *Thrust Vector* → *Flight Feel*
 
 Requires a running background task and a flight controller connection.
 
@@ -24,9 +24,9 @@ Requires a running background task and a flight controller connection.
 | Setting | What it does |
 | --- | --- |
 | TODO | Inspect the page and its helpers; automatic extraction found no controls. |
-| Curve (per axis) | Gain curve slot (None, Curve 1-8) that further scales that axis's master gain by stick deflection. Uses the same shared curve pool as the main loop (*Curves* page). Requires API 22.7 firmware. |
-| Decay (per axis) | I-term decay time: how long that axis remembers a disturbance before letting it go, in seconds (0.01-1.00, default 0.60). Longer feels more locked in; shorter feels freer and suits 3D flying. Master gain sets how hard the axis pushes back, this sets for how long. Also available as an in-flight adjustment function per axis. |
-| Relax (per axis) | I-term relax cutoff in Hz (1-100, default 10): bounce-back suppression. Lower values suppress more bounce-back at the end of rolls and other fast moves; higher values keep more I-term through sustained high-rate turns. Most airframes end up between 5 and 10 Hz; lower it a step at a time if the model bounces back. Relax is always on for every axis. Also available as an in-flight adjustment function per axis. |
+| Curve (per axis) | Gain curve slot (None, Curve 1-8) that further scales that axis's Gain by stick deflection. Uses the same shared curve pool as the main loop (*Curves* page). Requires API 22.7 firmware. |
+| Lock (per axis) | How long that axis holds on to a correction after a gust or bump before letting it go (the I-term decay time), in seconds (0.01-1.00, default 0.60). Longer feels more locked in; shorter feels freer and suits 3D flying. Gain sets how hard the axis pushes back, Lock sets for how long. Also an in-flight adjustment function per axis. |
+| Bounce Back (per axis) | Bounce Back, 1-10 (default 5): how strongly the axis stops a fast roll, loop or snap from bouncing back when you centre the stick. Higher = less bounce-back; lower keeps more hold through long, sustained rolls and loops. Most airframes end up between 5 and 9; raise it a step at a time if the model bounces back. Also an in-flight adjustment function per axis. |
 
 ## Notes
 

@@ -4546,17 +4546,17 @@
           "needs_translation": false,
           "translation": "Yaw"
         },
+        "bounceback": {
+          "english": "Bounce Back",
+          "max_length": 11,
+          "needs_translation": false,
+          "translation": "Bounce Back"
+        },
         "curve": {
           "english": "Curve",
           "max_length": 5,
           "needs_translation": false,
           "translation": "Curve"
-        },
-        "decay": {
-          "english": "Decay",
-          "max_length": 5,
-          "needs_translation": false,
-          "translation": "Decay"
         },
         "gain": {
           "english": "Gain",
@@ -4564,17 +4564,17 @@
           "needs_translation": false,
           "translation": "Gain"
         },
-        "name": {
-          "english": "Master Gains",
-          "max_length": 12,
+        "lock": {
+          "english": "Lock",
+          "max_length": 4,
           "needs_translation": false,
-          "translation": "Master Gains"
+          "translation": "Lock"
         },
-        "relax": {
-          "english": "Relax",
-          "max_length": 5,
+        "name": {
+          "english": "Flight Feel",
+          "max_length": 11,
           "needs_translation": false,
-          "translation": "Relax"
+          "translation": "Flight Feel"
         }
       },
       "mixer": {

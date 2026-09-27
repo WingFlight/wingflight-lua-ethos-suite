@@ -51,7 +51,7 @@ local FIELDS = {
   {"iterm_decay_time_0", "U8"}, {"iterm_decay_time_1", "U8"}, {"iterm_decay_time_2", "U8"}, -- roll, pitch, yaw
   {"iterm_decay_limit", "U8"},
   {"iterm_relax_level_0", "U8"}, {"iterm_relax_level_1", "U8"}, {"iterm_relax_level_2", "U8"},
-  {"iterm_relax_cutoff_0", "U8"}, {"iterm_relax_cutoff_1", "U8"}, {"iterm_relax_cutoff_2", "U8"},
+  {"bounceback_0", "U8"}, {"bounceback_1", "U8"}, {"bounceback_2", "U8"}, -- Bounce Back 1-10 (API 22.9)
   {"error_limit_0", "U8"}, {"error_limit_1", "U8"}, {"error_limit_2", "U8"},
   {"dterm_cutoff_0", "U8"}, {"dterm_cutoff_1", "U8"}, {"dterm_cutoff_2", "U8"},
   {"bterm_cutoff_0", "U8"}, {"bterm_cutoff_1", "U8"}, {"bterm_cutoff_2", "U8"},
@@ -75,7 +75,7 @@ local SIMULATOR_RESPONSE = {
   60, 60, 60,   -- iterm_decay_time_0/1/2 (0.60s, decimals=2)
   35,   -- iterm_decay_limit
   22, 22, 22,   -- iterm_relax_level_0/1/2
-  10, 10, 10,   -- iterm_relax_cutoff_0/1/2
+  5, 5, 5,      -- bounceback_0/1/2
   45, 45, 60,   -- error_limit_0/1/2
   15, 15, 20,   -- dterm_cutoff_0/1/2
   15, 15, 20,   -- bterm_cutoff_0/1/2
@@ -119,9 +119,9 @@ local FIELD_META = {
   iterm_relax_level_0 = {min = 10, max = 250, default = 22, suffix = "°/s"},
   iterm_relax_level_1 = {min = 10, max = 250, default = 22, suffix = "°/s"},
   iterm_relax_level_2 = {min = 10, max = 250, default = 22, suffix = "°/s"},
-  iterm_relax_cutoff_0 = {min = 1, max = 100, default = 10, suffix = "Hz"},
-  iterm_relax_cutoff_1 = {min = 1, max = 100, default = 10, suffix = "Hz"},
-  iterm_relax_cutoff_2 = {min = 1, max = 100, default = 10, suffix = "Hz"},
+  bounceback_0 = {min = 1, max = 10, default = 5},
+  bounceback_1 = {min = 1, max = 10, default = 5},
+  bounceback_2 = {min = 1, max = 10, default = 5},
   error_limit_0 = {min = 0, max = 180, default = 45, suffix = "°"},
   error_limit_1 = {min = 0, max = 180, default = 45, suffix = "°"},
   error_limit_2 = {min = 0, max = 180, default = 60, suffix = "°"},
