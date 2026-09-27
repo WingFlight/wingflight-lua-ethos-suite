@@ -26,8 +26,8 @@ Keep behavior correct while minimizing runtime memory churn and CPU load on Etho
   `tasks/scheduler/msp/` path any more.
 - Dashboard widgets/objects: `src/wfsuite/widgets/`
 - Shared utilities: `src/wfsuite/lib/`
-- i18n sources and generators: `bin/i18n/` -- see Section 11's warning
-  before running `build-single-json.py`.
+- i18n sources and generators: `bin/i18n/` -- see Section 7 for the
+  edit-then-generate workflow.
 - `bin/menu/` -- wingflight-only tooling with no equivalent in the
   current architecture; see Section 11, do not use it expecting it to do
   anything for the current menu system.
@@ -109,8 +109,17 @@ Commands:
 - `python bin/i18n/update-max-lengths.py [--only <locale...>]`
 - `python bin/i18n/build-single-json.py [--only <locale...>]`
 
+Workflow: edit `bin/i18n/json/en.json` (new or changed English), then run
+the three commands above in order. They copy new keys to every locale
+(English text, `needs_translation: true`), reset a translation whose
+English changed, refresh `max_length`, and regenerate `src/wfsuite/i18n/`.
+Running them again changes nothing. `bin/i18n/auto-translate.py` fills
+`needs_translation` entries in `bin/i18n/json/` (needs `ANTHROPIC_API_KEY`);
+run `build-single-json.py` afterwards so the translations reach `src/`.
+
 Rules:
-- Do not hand-edit generated files in `src/wfsuite/i18n/` if a source JSON change is intended.
+- Do not hand-edit generated files in `src/wfsuite/i18n/`: edit `bin/i18n/json/`
+  and regenerate, or the next regeneration silently discards the edit.
 - Keep translation key structure consistent with `en.json`.
 - Every `@i18n(key)@` tag must resolve: a missing key is not a build error,
   the pilot just sees the raw tag text on the radio. Check with
@@ -192,25 +201,19 @@ firmware) rather than rotorflight (helicopter firmware). Status:
   has an arguably better gate: `main.lua` only loads it when
   `system.registerGlassesWidget` exists (an automatic hardware/firmware
   capability check), not a manual preference.
-- **Known trap -- do not run `bin/i18n/build-single-json.py` without
-  checking its diff first.** `bin/i18n/json/` (this file's nominal
-  i18n source of truth, Section 7) is itself stale/incomplete relative
-  to `src/wfsuite/i18n/`, inherited from the upstream rewrite -- running
-  the regeneration deletes real content (confirmed: it strips help text
-  like `api.ACC_TRIM.pitch/roll` and several `api.BATTERY_CONFIG.*`
-  entries that exist in `src/wfsuite/i18n/` but not in `bin/i18n/json/`).
-  Until someone reconciles the two, treat `src/wfsuite/i18n/*.json` as
-  the practical source of truth and hand-edit it directly when needed
-  (matching what every locale-file edit in this migration has done),
-  and separately mirror any *new keys* into `bin/i18n/json/` too so
-  they're not lost if/when the drift does eventually get fixed.
+- **i18n sources reconciled**: `bin/i18n/json/` had drifted from
+  `src/wfsuite/i18n/` during the migration (src had newer keys and
+  English; bin had translations src never received), so for a while src
+  was hand-edited directly. The two were merged and `bin/i18n/json/` is
+  the source of truth again: follow Section 7's workflow and don't
+  hand-edit `src/wfsuite/i18n/`.
 - **`bin/menu/` is stale**, not just unused: it still generates a
   manifest for the old `app/modules/manifest.lua` structure, which this
   architecture doesn't have (see Section 6). Running it does not error,
   but its output is dead weight.
 - **Documentation refreshed**: `docs/system-architecture.md`,
   `docs/menu-structure.md`, and `docs/i18n-locales.md` describe the current
-  architecture and locale-source drift. `docs/pages/README.md` indexes
+  architecture and the locale workflow. `docs/pages/README.md` indexes
   page references with explicit draft/reviewed status; maintain them with
   `bin/docs/generate_menu_docs.py` (see `docs/README.md`).
 - **Ported since this section was first written**: Mixer Config

@@ -864,7 +864,7 @@
           "english": "Flight Modes",
           "translation": "Flight Modes",
           "needs_translation": false,
-          "max_length": 11
+          "max_length": 12
         },
         "acro_trainer": {
           "english": "Acro Trainer",
@@ -900,7 +900,7 @@
           "english": "Throttle Assist",
           "translation": "Throttle Assist",
           "needs_translation": false,
-          "max_length": 16
+          "max_length": 15
         },
         "deadband": {
           "english": "Deadband",
@@ -1654,7 +1654,7 @@
           "english": "ARM_WIGGLE",
           "translation": "ARM_WIGGLE",
           "needs_translation": false,
-          "max_length": 12
+          "max_length": 10
         },
         "name": {
           "english": "Configuration",
@@ -1752,7 +1752,7 @@
           "english": "Roll",
           "translation": "Roll",
           "needs_translation": false,
-          "max_length": 5
+          "max_length": 4
         },
         "yaw_deadband": {
           "english": "Yaw",
@@ -2469,6 +2469,44 @@
           "translation": "No more than 40 sensors can be enabled at once"
         }
       },
+      "thrust_vector": {
+        "bterm_cutoff": {
+          "english": "B-term Cutoff",
+          "translation": "B-term Cutoff",
+          "needs_translation": false,
+          "max_length": 13
+        },
+        "dterm_cutoff": {
+          "english": "D-term Cutoff",
+          "translation": "D-term Cutoff",
+          "needs_translation": false,
+          "max_length": 13
+        },
+        "gyro_cutoff": {
+          "english": "Gyro Cutoff",
+          "translation": "Gyro Cutoff",
+          "needs_translation": false,
+          "max_length": 11
+        },
+        "hold": {
+          "english": "Attitude / Heading Hold",
+          "translation": "Attitude / Heading Hold",
+          "needs_translation": false,
+          "max_length": 23
+        },
+        "iterm_relax_level": {
+          "english": "Iterm Relax Level",
+          "translation": "Iterm Relax Level",
+          "needs_translation": false,
+          "max_length": 17
+        },
+        "name": {
+          "english": "Thrust Vector",
+          "translation": "Thrust Vector",
+          "needs_translation": false,
+          "max_length": 13
+        }
+      },
       "accelerometer": {
         "msg_calibrate": {
           "english": "Calibrate the accelerometer?",
@@ -2724,7 +2762,7 @@
           "english": "Serial Rx (Backup)",
           "translation": "Serial Rx (Backup)",
           "needs_translation": false,
-          "max_length": 19
+          "max_length": 18
         },
         "function_telem_frsky": {
           "english": "Telemetry FrSky",
@@ -4816,7 +4854,7 @@
           "english": "GPS RTH",
           "translation": "GPS RTH",
           "needs_translation": false,
-          "max_length": 10
+          "max_length": 7
         },
         "arming_disable_flag_20": {
           "english": "RPM Filter",
@@ -4849,10 +4887,16 @@
           "max_length": 14
         },
         "arming_disable_flag_25": {
-          "english": "Arm Switch",
-          "translation": "Arm Switch",
+          "english": "Override",
+          "translation": "Override",
           "needs_translation": false,
-          "max_length": 10
+          "max_length": 8
+        },
+        "arming_disable_flag_26": {
+          "english": "Backup RX",
+          "translation": "Backup RX",
+          "needs_translation": false,
+          "max_length": 9
         },
         "arming_flags": {
           "english": "Arming Flags",
@@ -4950,13 +4994,13 @@
           "english": "Serial Rx (Backup)",
           "translation": "Serial Rx (Backup)",
           "needs_translation": false,
-          "max_length": 19
+          "max_length": 18
         },
         "not_configured": {
           "english": "No port is assigned the backup RX function.",
           "translation": "No port is assigned the backup RX function.",
           "needs_translation": false,
-          "max_length": 45
+          "max_length": 43
         },
         "protocol": {
           "english": "Protocol",
@@ -7178,6 +7222,30 @@
           "needs_translation": false,
           "max_length": 12
         },
+        "role": {
+          "english": "Role",
+          "translation": "Role",
+          "needs_translation": false,
+          "max_length": 4
+        },
+        "role_differential_thrust_yaw": {
+          "english": "Differential Thrust Yaw",
+          "translation": "Differential Thrust Yaw",
+          "needs_translation": false,
+          "max_length": 23
+        },
+        "role_flap_compensation": {
+          "english": "Flap Compensation",
+          "translation": "Flap Compensation",
+          "needs_translation": false,
+          "max_length": 17
+        },
+        "role_none": {
+          "english": "None",
+          "translation": "None",
+          "needs_translation": false,
+          "max_length": 4
+        },
         "output_bus_servo_fmt": {
           "english": "Bus Servo %d",
           "translation": "Bus Servo %d",
@@ -7760,7 +7828,7 @@
     },
     "sensor_motor1speed": {
       "english": "Motor 1 RPM",
-      "max_length": 17,
+      "max_length": 11,
       "needs_translation": false,
       "translation": "Motor 1 RPM"
     },
@@ -7868,7 +7936,7 @@
     },
     "sensor_motor2speed": {
       "english": "Motor 2 RPM",
-      "max_length": 19,
+      "max_length": 11,
       "needs_translation": false,
       "translation": "Motor 2 RPM"
     },
@@ -8454,6 +8522,12 @@
         "max_length": 7,
         "needs_translation": false,
         "translation": "RPM Min"
+      },
+      "startup_invalid_device": {
+        "english": "Invalid device connected",
+        "translation": "Invalid device connected",
+        "needs_translation": false,
+        "max_length": 24
       },
       "throttle": {
         "english": "Throttle",

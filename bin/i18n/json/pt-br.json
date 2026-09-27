@@ -856,17 +856,17 @@
           "reverse_text": false
         },
         "throttle_group": {
-          "english": "Throttle",
-          "translation": "Throttle",
-          "needs_translation": false,
-          "max_length": 8,
+          "english": "Idle",
+          "translation": "Idle",
+          "needs_translation": true,
+          "max_length": 4,
           "reverse_text": false
         },
         "throttle": {
-          "english": "Throttle",
-          "translation": "Throttle",
-          "needs_translation": false,
-          "max_length": 8,
+          "english": "Idle floor",
+          "translation": "Idle floor",
+          "needs_translation": true,
+          "max_length": 10,
           "reverse_text": false
         },
         "handover": {
@@ -882,106 +882,6 @@
           "needs_translation": false,
           "max_length": 7,
           "reverse_text": false
-        }
-      },
-      "gps_nav_config": {
-        "altitude_kd": {
-          "english": "Altitude Damp",
-          "translation": "Altitude Damp",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 13
-        },
-        "altitude_kp": {
-          "english": "Altitude Gain",
-          "translation": "Altitude Gain",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 13
-        },
-        "bearing_kp": {
-          "english": "Bearing Gain",
-          "translation": "Bearing Gain",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 12
-        },
-        "direction_ccw": {
-          "english": "Counter-CW",
-          "translation": "Counter-CW",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 10
-        },
-        "direction_cw": {
-          "english": "Clockwise",
-          "translation": "Clockwise",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 9
-        },
-        "loiter_direction": {
-          "english": "Loiter Dir.",
-          "translation": "Loiter Dir.",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 11
-        },
-        "loiter_radius": {
-          "english": "Loiter Radius",
-          "translation": "Loiter Radius",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 13
-        },
-        "max_bank_angle": {
-          "english": "Max Bank",
-          "translation": "Max Bank",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 8
-        },
-        "max_pitch_angle": {
-          "english": "Max Pitch",
-          "translation": "Max Pitch",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 9
-        },
-        "min_sats": {
-          "english": "Min Satellites",
-          "translation": "Min Satellites",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 14
-        },
-        "name": {
-          "english": "GPS Navigation",
-          "translation": "GPS Navigation",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 14
-        },
-        "rth_altitude": {
-          "english": "RTH Altitude",
-          "translation": "RTH Altitude",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 12
-        },
-        "throttle": {
-          "english": "Nav Throttle",
-          "translation": "Nav Throttle",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 12
-        },
-        "turn_coordination": {
-          "english": "Turn Coord.",
-          "translation": "Turn Coord.",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 11
         }
       },
       "main_rotor": {
@@ -1077,32 +977,36 @@
           "english": "Trainer limits",
           "max_length": 14,
           "needs_translation": true,
-          "translation": "Trainer limits"
+          "translation": "Trainer limits",
+          "reverse_text": false
         },
         "angle_limits": {
           "english": "Angle limits",
           "max_length": 12,
           "needs_translation": true,
-          "translation": "Angle limits"
+          "translation": "Angle limits",
+          "reverse_text": false
         },
         "bank": {
           "english": "Bank",
           "max_length": 4,
           "needs_translation": true,
-          "translation": "Bank"
+          "translation": "Bank",
+          "reverse_text": false
         },
         "pitch": {
           "english": "Pitch",
           "max_length": 5,
           "needs_translation": true,
-          "translation": "Pitch"
+          "translation": "Pitch",
+          "reverse_text": false
         },
         "name": {
           "english": "Flight Modes",
           "translation": "Flight Modes",
           "needs_translation": true,
           "reverse_text": false,
-          "max_length": 11
+          "max_length": 12
         },
         "acro_trainer": {
           "english": "Acro Trainer",
@@ -1139,6 +1043,13 @@
           "reverse_text": false,
           "max_length": 10
         },
+        "throttle_assist": {
+          "english": "Throttle Assist",
+          "translation": "Throttle Assist",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 15
+        },
         "deadband": {
           "english": "Deadband",
           "translation": "Zona mor",
@@ -1150,20 +1061,6 @@
           "english": "Rate",
           "translation": "Taxa",
           "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 4
-        },
-        "throttle_assist": {
-          "english": "Throttle Assist",
-          "translation": "Throttle Assist",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 16
-        },
-        "time": {
-          "english": "Time",
-          "translation": "Time",
-          "needs_translation": true,
           "reverse_text": false,
           "max_length": 4
         },
@@ -1180,6 +1077,13 @@
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 3
+        },
+        "time": {
+          "english": "Time",
+          "translation": "Time",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 4
         }
       },
       "filters": {
@@ -1743,6 +1647,106 @@
           "max_length": 4
         }
       },
+      "gps_nav_config": {
+        "name": {
+          "english": "GPS Navigation",
+          "translation": "GPS Navigation",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 14
+        },
+        "rth_altitude": {
+          "english": "RTH Altitude",
+          "translation": "RTH Altitude",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 12
+        },
+        "loiter_radius": {
+          "english": "Loiter Radius",
+          "translation": "Loiter Radius",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 13
+        },
+        "loiter_direction": {
+          "english": "Loiter Dir.",
+          "translation": "Loiter Dir.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 11
+        },
+        "direction_cw": {
+          "english": "Clockwise",
+          "translation": "Clockwise",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 9
+        },
+        "direction_ccw": {
+          "english": "Counter-CW",
+          "translation": "Counter-CW",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 10
+        },
+        "min_sats": {
+          "english": "Min Satellites",
+          "translation": "Min Satellites",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 14
+        },
+        "max_bank_angle": {
+          "english": "Max Bank",
+          "translation": "Max Bank",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 8
+        },
+        "max_pitch_angle": {
+          "english": "Max Pitch",
+          "translation": "Max Pitch",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 9
+        },
+        "bearing_kp": {
+          "english": "Bearing Gain",
+          "translation": "Bearing Gain",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 12
+        },
+        "altitude_kp": {
+          "english": "Altitude Gain",
+          "translation": "Altitude Gain",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 13
+        },
+        "altitude_kd": {
+          "english": "Altitude Damp",
+          "translation": "Altitude Damp",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 13
+        },
+        "throttle": {
+          "english": "Nav Throttle",
+          "translation": "Nav Throttle",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 12
+        },
+        "turn_coordination": {
+          "english": "Turn Coord.",
+          "translation": "Turn Coord.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 11
+        }
+      },
       "hardware_setup": {
         "name": {
           "english": "Setup",
@@ -1921,7 +1925,7 @@
           "translation": "ARM_WIGGLE",
           "needs_translation": false,
           "reverse_text": false,
-          "max_length": 12
+          "max_length": 10
         },
         "name": {
           "english": "Configuration",
@@ -2028,14 +2032,14 @@
           "translation": "Arfagem",
           "needs_translation": false,
           "reverse_text": false,
-          "max_length": 7
+          "max_length": 5
         },
         "roll_deadband": {
           "english": "Roll",
           "translation": "Incl",
           "needs_translation": false,
           "reverse_text": false,
-          "max_length": 5
+          "max_length": 4
         },
         "yaw_deadband": {
           "english": "Yaw",
@@ -2349,6 +2353,13 @@
           "reverse_text": false,
           "max_length": 12
         },
+        "tv_profile": {
+          "english": "Thrust Vector",
+          "translation": "Thrust Vector",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 13
+        },
         "battery_profile_event": {
           "english": "Battery profile",
           "translation": "Bateria",
@@ -2432,55 +2443,6 @@
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 7
-        },
-        "status_alerts": {
-          "english": "FC status",
-          "translation": "FC status",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 9
-        },
-        "status_rx_backup": {
-          "english": "Backup receiver",
-          "translation": "Backup receiver",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 15
-        },
-        "status_gyro": {
-          "english": "Gyro overflow",
-          "translation": "Gyro overflow",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 13
-        },
-        "status_gps": {
-          "english": "GPS not responding",
-          "translation": "GPS not responding",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 18
-        },
-        "status_blackbox": {
-          "english": "Blackbox full",
-          "translation": "Blackbox full",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 13
-        },
-        "status_autotrim": {
-          "english": "Autotrim",
-          "translation": "Autotrim",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 8
-        },
-        "status_saturation": {
-          "english": "Control limit",
-          "translation": "Control limit",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 13
         },
         "low_voltage_alert": {
           "english": "Low voltage alert",
@@ -2621,13 +2583,6 @@
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 23
-        },
-        "tv_profile": {
-          "english": "Thrust Vector",
-          "translation": "Thrust Vector",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 13
         },
         "timer_prealert": {
           "english": "Pre-timer Alert",
@@ -2845,6 +2800,55 @@
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 16
+        },
+        "status_alerts": {
+          "english": "FC status",
+          "translation": "FC status",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 9
+        },
+        "status_rx_backup": {
+          "english": "Backup receiver",
+          "translation": "Backup receiver",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 15
+        },
+        "status_gyro": {
+          "english": "Gyro overflow",
+          "translation": "Gyro overflow",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 13
+        },
+        "status_gps": {
+          "english": "GPS not responding",
+          "translation": "GPS not responding",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 18
+        },
+        "status_blackbox": {
+          "english": "Blackbox full",
+          "translation": "Blackbox full",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 13
+        },
+        "status_autotrim": {
+          "english": "Autotrim",
+          "translation": "Autotrim",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 8
+        },
+        "status_saturation": {
+          "english": "Control limit",
+          "translation": "Control limit",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 13
         }
       },
       "telemetry": {
@@ -2897,14 +2901,14 @@
           "translation": "Attitude / Heading Hold",
           "needs_translation": true,
           "reverse_text": false,
-          "max_length": 24
+          "max_length": 23
         },
         "iterm_relax_level": {
           "english": "Iterm Relax Level",
           "translation": "Iterm Relax Level",
           "needs_translation": true,
           "reverse_text": false,
-          "max_length": 18
+          "max_length": 17
         },
         "name": {
           "english": "Thrust Vector",
@@ -3211,7 +3215,7 @@
           "translation": "Serial Rx (Backup)",
           "needs_translation": true,
           "reverse_text": false,
-          "max_length": 19
+          "max_length": 18
         },
         "function_telem_frsky": {
           "english": "Telemetry FrSky",
@@ -4022,102 +4026,102 @@
       },
       "failsafe": {
         "aux1": {
-          "english": "AUX 1",
-          "translation": "AUX 1",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 5
+          "english": "CH #5",
+          "translation": "CH #5",
+          "needs_translation": true,
+          "max_length": 5,
+          "reverse_text": false
         },
         "aux2": {
-          "english": "AUX 2",
-          "translation": "AUX 2",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 5
+          "english": "CH #6",
+          "translation": "CH #6",
+          "needs_translation": true,
+          "max_length": 5,
+          "reverse_text": false
         },
         "aux3": {
-          "english": "AUX 3",
-          "translation": "AUX 3",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 5
+          "english": "CH #7",
+          "translation": "CH #7",
+          "needs_translation": true,
+          "max_length": 5,
+          "reverse_text": false
         },
         "aux4": {
-          "english": "AUX 4",
-          "translation": "AUX 4",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 5
+          "english": "CH #8",
+          "translation": "CH #8",
+          "needs_translation": true,
+          "max_length": 5,
+          "reverse_text": false
         },
         "aux5": {
-          "english": "AUX 5",
-          "translation": "AUX 5",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 5
+          "english": "CH #9",
+          "translation": "CH #9",
+          "needs_translation": true,
+          "max_length": 5,
+          "reverse_text": false
         },
         "aux6": {
-          "english": "AUX 6",
-          "translation": "AUX 6",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 5
+          "english": "CH #10",
+          "translation": "CH #10",
+          "needs_translation": true,
+          "max_length": 6,
+          "reverse_text": false
         },
         "aux7": {
-          "english": "AUX 7",
-          "translation": "AUX 7",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 5
+          "english": "CH #11",
+          "translation": "CH #11",
+          "needs_translation": true,
+          "max_length": 6,
+          "reverse_text": false
         },
         "aux8": {
-          "english": "AUX 8",
-          "translation": "AUX 8",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 5
+          "english": "CH #12",
+          "translation": "CH #12",
+          "needs_translation": true,
+          "max_length": 6,
+          "reverse_text": false
         },
         "aux9": {
-          "english": "AUX 9",
-          "translation": "AUX 9",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 5
+          "english": "CH #13",
+          "translation": "CH #13",
+          "needs_translation": true,
+          "max_length": 6,
+          "reverse_text": false
         },
         "aux10": {
-          "english": "AUX 10",
-          "translation": "AUX 10",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 6
+          "english": "CH #14",
+          "translation": "CH #14",
+          "needs_translation": true,
+          "max_length": 6,
+          "reverse_text": false
         },
         "aux11": {
-          "english": "AUX 11",
-          "translation": "AUX 11",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 6
+          "english": "CH #15",
+          "translation": "CH #15",
+          "needs_translation": true,
+          "max_length": 6,
+          "reverse_text": false
         },
         "aux12": {
-          "english": "AUX 12",
-          "translation": "AUX 12",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 6
+          "english": "CH #16",
+          "translation": "CH #16",
+          "needs_translation": true,
+          "max_length": 6,
+          "reverse_text": false
         },
         "aux13": {
-          "english": "AUX 13",
-          "translation": "AUX 13",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 6
+          "english": "CH #17",
+          "translation": "CH #17",
+          "needs_translation": true,
+          "max_length": 6,
+          "reverse_text": false
         },
         "aux14": {
-          "english": "AUX 14",
-          "translation": "AUX 14",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 6
+          "english": "CH #18",
+          "translation": "CH #18",
+          "needs_translation": true,
+          "max_length": 6,
+          "reverse_text": false
         },
         "collective": {
           "english": "Collective",
@@ -4170,13 +4174,6 @@
         }
       },
       "failsafe_procedure": {
-        "delay": {
-          "english": "Guard Delay",
-          "translation": "Guard Delay",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 11
-        },
         "name": {
           "english": "Stage 2",
           "translation": "Stage 2",
@@ -4184,19 +4181,19 @@
           "reverse_text": false,
           "max_length": 7
         },
-        "off_delay": {
-          "english": "Land Delay",
-          "translation": "Land Delay",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 10
-        },
         "procedure": {
           "english": "Procedure",
           "translation": "Procedure",
           "needs_translation": true,
           "reverse_text": false,
           "max_length": 9
+        },
+        "procedure_land": {
+          "english": "Land",
+          "translation": "Land",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 4
         },
         "procedure_drop": {
           "english": "Drop",
@@ -4211,27 +4208,6 @@
           "needs_translation": true,
           "reverse_text": false,
           "max_length": 10
-        },
-        "procedure_land": {
-          "english": "Land",
-          "translation": "Land",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 4
-        },
-        "recovery_delay": {
-          "english": "Recovery Delay",
-          "translation": "Recovery Delay",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 14
-        },
-        "switch_kill": {
-          "english": "Kill",
-          "translation": "Kill",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 4
         },
         "switch_mode": {
           "english": "Switch Mode",
@@ -4254,6 +4230,34 @@
           "reverse_text": false,
           "max_length": 7
         },
+        "switch_kill": {
+          "english": "Kill",
+          "translation": "Kill",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 4
+        },
+        "delay": {
+          "english": "Guard Delay",
+          "translation": "Guard Delay",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 11
+        },
+        "off_delay": {
+          "english": "Land Delay",
+          "translation": "Land Delay",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 10
+        },
+        "throttle_low_delay": {
+          "english": "Low Thr. Delay",
+          "translation": "Low Thr. Delay",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 14
+        },
         "throttle": {
           "english": "Land Throttle",
           "translation": "Land Throttle",
@@ -4261,9 +4265,9 @@
           "reverse_text": false,
           "max_length": 13
         },
-        "throttle_low_delay": {
-          "english": "Low Thr. Delay",
-          "translation": "Low Thr. Delay",
+        "recovery_delay": {
+          "english": "Recovery Delay",
+          "translation": "Recovery Delay",
           "needs_translation": true,
           "reverse_text": false,
           "max_length": 14
@@ -5646,7 +5650,7 @@
           "translation": "GPS RTH",
           "needs_translation": true,
           "reverse_text": false,
-          "max_length": 10
+          "max_length": 7
         },
         "arming_disable_flag_20": {
           "english": "RPM Filter",
@@ -5684,11 +5688,11 @@
           "max_length": 14
         },
         "arming_disable_flag_25": {
-          "english": "Arm Switch",
-          "translation": "Chave de Arm",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 10
+          "english": "Override",
+          "translation": "Override",
+          "needs_translation": true,
+          "max_length": 8,
+          "reverse_text": false
         },
         "arming_disable_flag_26": {
           "english": "Backup RX",
@@ -5809,14 +5813,14 @@
           "translation": "Serial Rx (Backup)",
           "needs_translation": true,
           "reverse_text": false,
-          "max_length": 19
+          "max_length": 18
         },
         "not_configured": {
           "english": "No port is assigned the backup RX function.",
           "translation": "No port is assigned the backup RX function.",
           "needs_translation": true,
           "reverse_text": false,
-          "max_length": 45
+          "max_length": 43
         },
         "protocol": {
           "english": "Protocol",
@@ -8374,32 +8378,11 @@
           "max_length": 19,
           "reverse_text": false
         },
-        "input_rcch_aux1": {
-          "english": "RC Channel Aux 1",
-          "translation": "RC Canal Aux 1",
-          "needs_translation": false,
-          "max_length": 16,
-          "reverse_text": false
-        },
-        "input_rcch_aux2": {
-          "english": "RC Channel Aux 2",
-          "translation": "RC Canal Aux 2",
-          "needs_translation": false,
-          "max_length": 16,
-          "reverse_text": false
-        },
-        "input_rcch_aux3": {
-          "english": "RC Channel Aux 3",
-          "translation": "RC Canal Aux 3",
-          "needs_translation": false,
-          "max_length": 16,
-          "reverse_text": false
-        },
         "input_rcch_fmt": {
-          "english": "RC Channel %d",
-          "translation": "RC Canal %d",
-          "needs_translation": false,
-          "max_length": 13,
+          "english": "CH #%d",
+          "translation": "CH #%d",
+          "needs_translation": true,
+          "max_length": 6,
           "reverse_text": false
         },
         "output": {
@@ -8435,14 +8418,14 @@
           "translation": "Differential Thrust Yaw",
           "needs_translation": true,
           "reverse_text": false,
-          "max_length": 24
+          "max_length": 23
         },
         "role_flap_compensation": {
           "english": "Flap Compensation",
           "translation": "Flap Compensation",
           "needs_translation": true,
           "reverse_text": false,
-          "max_length": 18
+          "max_length": 17
         },
         "role_none": {
           "english": "None",
@@ -9057,6 +9040,13 @@
       "reverse_text": false,
       "max_length": 9
     },
+    "sensor_gps_fix_type": {
+      "english": "GPS Fix",
+      "translation": "GPS Fix",
+      "needs_translation": true,
+      "reverse_text": false,
+      "max_length": 7
+    },
     "sensor_gps_hdop": {
       "english": "GPS HDOP",
       "translation": "GPS HDOP",
@@ -9125,7 +9115,7 @@
       "translation": "Vel.Cabeça",
       "needs_translation": true,
       "reverse_text": false,
-      "max_length": 17
+      "max_length": 11
     },
     "sensor_heartbeat": {
       "english": "Heartbeat",
@@ -9251,12 +9241,19 @@
       "translation": "Velocidade traseira",
       "needs_translation": true,
       "reverse_text": false,
-      "max_length": 19
+      "max_length": 11
     },
     "sensor_throttle_pct": {
       "english": "Throttle %",
       "translation": "% de aceleração",
       "needs_translation": false,
+      "reverse_text": false,
+      "max_length": 10
+    },
+    "sensor_tv_profile": {
+      "english": "TV Profile",
+      "translation": "TV Profile",
+      "needs_translation": true,
       "reverse_text": false,
       "max_length": 10
     },
@@ -9921,6 +9918,13 @@
         "needs_translation": false,
         "reverse_text": false,
         "max_length": 7
+      },
+      "startup_invalid_device": {
+        "english": "Invalid device connected",
+        "translation": "Invalid device connected",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 24
       },
       "throttle": {
         "english": "Throttle",
