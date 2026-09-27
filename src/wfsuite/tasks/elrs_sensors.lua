@@ -205,7 +205,18 @@ end
 -- exhausted. An unrecognized sid can't be decoded without knowing its
 -- byte width, so parsing stops there (matches the original's own
 -- "parse break" behaviour) -- the rest of that frame's data is lost, not
--- the connection.
+-- the connection. Both aborts name the sid they gave up on in the debug
+-- log, so a gap reads as a missing table entry rather than a dead sensor;
+-- bin/telemetry/verify_sensor_table.py keeps the table complete against the
+-- firmware's set.
+local function logAbort(reason, sid, at, len)
+  if not debugLog.enabled() then return end
+  debugLog.print(string.format(
+    "[elrs] frame walk aborted: %s for appId 0x%04X at byte %d of %d -- "
+      .. "every sensor packed after it in this frame is lost",
+    reason, sid or 0, at, len))
+end
+
 local function parseFrame(data)
   local len = #data
   local ptr = 4 -- skip 2 address bytes + 1 frame-id byte
@@ -214,14 +225,21 @@ local function parseFrame(data)
   -- last byte with nothing left to pair it with -- matches the original's
   -- own `while ptr < #data` guard exactly.
   while ptr < len do
+    local sidPtr = ptr
     local sid
     sid, ptr = elrsDecode.decU16(data, ptr)
     local meta = sensorTable[sid]
-    if not meta then return end
+    if not meta then
+      logAbort("no decoder", sid, sidPtr, len)
+      return
+    end
 
     local prevPtr = ptr
     local ok, value, nextPtr = pcall(meta.dec, data, ptr)
-    if not ok or not nextPtr or nextPtr <= prevPtr then return end
+    if not ok or not nextPtr or nextPtr <= prevPtr then
+      logAbort(ok and "decoder did not advance" or "decoder failed", sid, prevPtr, len)
+      return
+    end
     ptr = nextPtr
 
     if value ~= nil then
