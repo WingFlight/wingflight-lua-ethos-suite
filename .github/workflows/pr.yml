@@ -34,6 +34,13 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/tests/arming_flags.lua
 
+      # Settings and log headers are staged to a temp file before replacing the
+      # live file, so a power loss during a save does not truncate the data the
+      # suite owns on the SD card.
+      - name: Check atomic storage writes
+        if: success() || failure()
+        run: lua5.4 bin/storage/verify_atomic_writes.lua
+
   # Per-language PR builds (mirrors push.yml behavior)
   create-zip:
     name: Build PR ZIP (${{ matrix.lang }})

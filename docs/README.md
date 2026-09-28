@@ -13,6 +13,7 @@ it does not imply testing on a radio or every firmware version.
 - [Locale workflow](i18n-locales.md)
 - [Dashboard themes](dashboard-themes.md)
 - [Dashboard objects](dashboard-objects.md)
+- [Storage writes](reference/storage.md)
 
 ## Maintaining page documentation
 

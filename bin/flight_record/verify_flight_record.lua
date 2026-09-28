@@ -23,7 +23,9 @@ local function scriptDir()
   return (path:match("^(.*)[/\\][^/\\]*$")) or "."
 end
 
-local TASKS = scriptDir() .. "/../../src/wfsuite/tasks"
+local ROOT = scriptDir() .. "/../.."
+local TASKS = ROOT .. "/src/wfsuite/tasks"
+local SUITE = ROOT .. "/src/wfsuite"
 
 local failures = 0
 local checks = 0
@@ -212,19 +214,40 @@ end
 -- tasks/logging.lua
 -- ---------------------------------------------------------------------------
 
--- An in-memory stand-in for a file handle, enough for logging.lua.
-local function fakeHandle()
-  return {
-    write = function(self) return self end,
-    flush = function() end,
-    close = function() end,
-  }
+local IS_WINDOWS = package.config:sub(1, 1) == "\\"
+
+local function shellQuote(s)
+  if IS_WINDOWS then return '"' .. s .. '"' end
+  return "'" .. s:gsub("'", "'\\''") .. "'"
 end
 
--- Loads logging.lua with its three chunk args stubbed, and io.open answering
--- LOGS:/ paths in memory. Returns the module, the bus handlers it subscribed,
--- and the list of CSV files it opened for writing (a new record each).
+local function makeDir(path)
+  if IS_WINDOWS then
+    os.execute("mkdir " .. shellQuote(path) .. " 2>nul")
+  else
+    os.execute("mkdir -p " .. shellQuote(path))
+  end
+end
+
+local function removeTree(path)
+  if IS_WINDOWS then
+    os.execute("rmdir /s /q " .. shellQuote(path:gsub("/", "\\")) .. " 2>nul")
+  else
+    os.execute("rm -rf " .. shellQuote(path))
+  end
+end
+
+local LOG_SCRATCH = (os.getenv("TMPDIR") or os.getenv("TEMP") or os.getenv("TMP")
+  or (IS_WINDOWS and "." or "/tmp")) .. "/wfsuite_flight_record_logs"
+
+-- Loads logging.lua with its three chunk args stubbed, and LOGS:/ paths
+-- redirected to a scratch directory. Returns the module, the bus handlers it
+-- subscribed, and the list of CSV files it opened for writing (a new record
+-- each).
 local function loadLogging()
+  removeTree(LOG_SCRATCH)
+  makeDir(LOG_SCRATCH)
+
   local handlers = {}
   local bus = {subscribe = function(event, fn) handlers[event] = fn end}
   local settingsStore = {
@@ -235,22 +258,53 @@ local function loadLogging()
   local debugLog = {print = function() end}
 
   local started = {}
-  local realOpen = io.open
+  local realOpen, realRename, realRemove, realMkdir = io.open, os.rename, os.remove, os.mkdir
+  local previousRequire = package.loaded["wfsuite.lib.require"]
+
+  local function redirect(path)
+    return (tostring(path):gsub("^LOGS:", LOG_SCRATCH))
+  end
+
+  package.loaded["wfsuite.lib.require"] = function(name)
+    local key = "wfsuite." .. name:gsub("%.lua$", ""):gsub("/", ".")
+    local cached = package.loaded[key]
+    if cached ~= nil then return cached end
+    local chunk, err = loadfile(SUITE .. "/" .. name)
+    if not chunk then error(err) end
+    local ok, result = pcall(chunk)
+    if not ok then error(result) end
+    package.loaded[key] = (result == nil) and true or result
+    return package.loaded[key]
+  end
+
   io.open = function(path, mode)
-    path = tostring(path)
-    if path:sub(1, 5) ~= "LOGS:" then return realOpen(path, mode) end
-    if mode == "w" and path:match("%.csv$") then started[#started + 1] = path end
-    return fakeHandle()
+    local handle = realOpen(redirect(path), mode)
+    if handle and tostring(mode) == "w" and tostring(path):match("%.csv") then
+      started[#started + 1] = tostring(path)
+    end
+    return handle
+  end
+  os.rename = function(old, new) return realRename(redirect(old), redirect(new)) end
+  os.remove = function(path) return realRemove(redirect(path)) end
+  os.mkdir = function(path)
+    makeDir(redirect(path))
+    return true
   end
 
   local ok, mod = pcall(function()
     return assert(loadfile(TASKS .. "/logging.lua"))(bus, settingsStore, debugLog)
   end)
   if not ok then
-    io.open = realOpen
+    io.open, os.rename, os.remove, os.mkdir = realOpen, realRename, realRemove, realMkdir
+    package.loaded["wfsuite.lib.require"] = previousRequire
+    removeTree(LOG_SCRATCH)
     error(mod)
   end
-  local function restore() io.open = realOpen end
+  local function restore()
+    io.open, os.rename, os.remove, os.mkdir = realOpen, realRename, realRemove, realMkdir
+    package.loaded["wfsuite.lib.require"] = previousRequire
+    removeTree(LOG_SCRATCH)
+  end
   return mod, handlers, started, restore
 end
 

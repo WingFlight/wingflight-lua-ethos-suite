@@ -4,6 +4,9 @@
 -- loaded for itself, passed in as this chunk's args rather than loadfile()'d
 -- again here -- see the equivalent note atop tasks/session.lua for why.
 local bus, settingsStore, debugLog = ...
+local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
+local ini = requireModule("lib/ini.lua")
+local atomicWrite = requireModule("lib/atomic_write.lua")
 
 local FLUSH_INTERVAL = 2.5
 local FLUSH_QUEUE_SIZE = 20
@@ -56,12 +59,7 @@ local function ensureDir()
 end
 
 local function writeModelIni(dir, name)
-  local path = dir .. "/logs.ini"
-  local file = io.open(path, "w")
-  if not file then return end
-  file:write("[model]\n")
-  file:write("name=", name or modelName(), "\n")
-  file:close()
+  return ini.save_ini_file(dir .. "/logs.ini", {model = {name = name or modelName()}})
 end
 
 local function updateModelIni()
@@ -178,14 +176,11 @@ local function start()
   log.lastSample = 0
   log.lastFlush = os.clock()
 
-  local file = io.open(log.filePath, "w")
-  if not file then
+  if not atomicWrite.write(log.filePath, headerLine() .. "\n") then
     log.fileName = nil
     log.filePath = nil
     return false
   end
-  file:write(headerLine(), "\n")
-  file:close()
 
   log.active = true
   debugLog.print("[logging] started " .. log.fileName)

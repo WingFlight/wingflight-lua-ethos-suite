@@ -4,6 +4,9 @@ if package.loaded["wfsuite.lib.ini"] then
   return package.loaded["wfsuite.lib.ini"]
 end
 
+local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
+local atomicWrite = requireModule("lib/atomic_write.lua")
+
 local ini = {}
 
 function ini.load_file_as_string(path)
@@ -77,20 +80,25 @@ function ini.save_ini_file(fileName, data)
   assert(type(fileName) == "string", 'Parameter "fileName" must be a string.')
   assert(type(data) == "table", 'Parameter "data" must be a table.')
 
-  local file = io.open(fileName, "w")
+  local file = atomicWrite.stage(fileName)
   if not file then return false end
 
-  for section, params in pairs(data) do
-    file:write("[", tostring(section), "]\n")
-    for key, value in pairs(params) do
-      if type(value) == "boolean" then value = value and "true" or "false" end
-      file:write(("%s=%s\n"):format(tostring(key), tostring(value)))
+  local ok, err = pcall(function()
+    for section, params in pairs(data) do
+      file:write("[", tostring(section), "]\n")
+      for key, value in pairs(params) do
+        if type(value) == "boolean" then value = value and "true" or "false" end
+        file:write(("%s=%s\n"):format(tostring(key), tostring(value)))
+      end
+      file:write("\n")
     end
-    file:write("\n")
+  end)
+  if not ok then
+    atomicWrite.abort(file, fileName)
+    return false, err
   end
 
-  file:close()
-  return true
+  return atomicWrite.commit(file, fileName)
 end
 
 function ini.merge_ini_tables(master, slave)
