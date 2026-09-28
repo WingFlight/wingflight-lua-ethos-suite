@@ -7051,12 +7051,24 @@
           "translation": "Throttle",
           "needs_translation": false,
           "max_length": 8
+        },
+        "axis_speed": {
+          "english": "Speed",
+          "translation": "Speed",
+          "needs_translation": false,
+          "max_length": 5
         }
       },
       "gain_curves": {
         "name": {
           "english": "Gain Curves",
           "translation": "Gain Curves",
+          "needs_translation": false,
+          "max_length": 11
+        },
+        "speed_max": {
+          "english": "Speed Range",
+          "translation": "Speed Range",
           "needs_translation": false,
           "max_length": 11
         }

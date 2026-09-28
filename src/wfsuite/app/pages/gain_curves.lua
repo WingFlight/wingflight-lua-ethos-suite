@@ -1,7 +1,8 @@
 -- Flight Tuning -> Advanced -> Gain Curves.
 --
 -- Assigns a gain curve (one of app/pages/curves.lua's 8 shared pool slots)
--- to each axis's Flight Feel Gain, and to Throttle. Kept off the Flight Feel
+-- to each axis's Flight Feel Gain, to Throttle and to GPS Speed (plus the
+-- speed at the Speed curve's right edge). Kept off the Flight Feel
 -- page (app/pages/master_gains.lua) because curves are an advanced shaping
 -- tool; shape editing lives on app/pages/curves.lua. Same MSP_PID_PROFILE
 -- codec as Flight Feel and PID Controller.
@@ -22,6 +23,7 @@ local ROWS = {
   {label = "@i18n(app.modules.master_gains.axis_pitch)@", key = "gain_curve_1"},
   {label = "@i18n(app.modules.master_gains.axis_yaw)@", key = "gain_curve_2"},
   {label = "@i18n(app.modules.master_gains.axis_throttle)@", key = "fw_tpa_curve"},
+  {label = "@i18n(app.modules.master_gains.axis_speed)@", key = "fw_spa_curve"},
 }
 
 -- opts.onBack: called to return to the menu (see app/page_runtime.lua's
@@ -41,6 +43,7 @@ local function open(opts)
   for _, row in ipairs(ROWS) do
     fieldLayout.buildSingle(runtime, row.label, {key = row.key, choices = CURVE_SLOT_OPTIONS})
   end
+  fieldLayout.buildSingle(runtime, "@i18n(app.modules.gain_curves.speed_max)@", {key = "fw_spa_speed_max"})
 
   runtime:loadInitial()
 end
