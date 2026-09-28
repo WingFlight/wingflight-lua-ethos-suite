@@ -552,12 +552,6 @@
     "needs_translation": true
   },
   {
-    "file": "events/mode/althold.wav",
-    "english": "Altitude Hold",
-    "translation": "Altitude Hold",
-    "needs_translation": false
-  },
-  {
     "file": "events/mode/passthrough.wav",
     "english": "Passthrough",
     "translation": "Passthrough",
