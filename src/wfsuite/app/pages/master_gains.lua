@@ -7,8 +7,8 @@
 -- doesn't build a widget for already round-trips unchanged on every save
 -- (see that file's own header comment). One row per axis
 -- (Roll/Pitch/Yaw/Throttle), matching wingflight-configurator's Flight
--- Feel table: Gain (master_gain_0-2, fw_tpa_gain on Throttle), Lock
--- (iterm_decay_time_0-2) and Bounce Back (bounceback_0-2). Throttle has
+-- Feel table: Gain (master_gain_0-2, fw_tpa_gain on Throttle), Decay
+-- (iterm_decay_time_0-2) and Relax (bounceback_0-2). Throttle has
 -- only a Gain.
 --
 -- Gain curves (gain_curve_0-2/fw_tpa_curve) are assigned on
@@ -24,8 +24,8 @@ local pidProfile = requireModule("lib/msp_pid_profile.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.master_gains.name)@"
 
--- Gain, Lock, Bounce Back column widths (see field_layout.tableSlots); Bounce
--- Back has the widest header. Curves are assigned on app/pages/gain_curves.lua.
+-- Gain, Decay, Relax column widths (see field_layout.tableSlots); Relax
+-- gets a little more room. Curves are assigned on app/pages/gain_curves.lua.
 local COLUMN_WEIGHTS = {1, 1, 1.3}
 local COLUMN_START = 0.45 -- fraction of the row width where the first column starts
 
@@ -60,9 +60,9 @@ local function open(opts)
   form.addStaticText(headerLine, headerSlots[2], "@i18n(app.modules.master_gains.lock)@", RIGHT)
   form.addStaticText(headerLine, headerSlots[3], "@i18n(app.modules.master_gains.bounceback)@", RIGHT)
 
-  -- Lock (I-term decay time) is the other half of how "locked" each axis
-  -- feels: Gain sets how hard it pushes back, Lock how long it remembers
-  -- the disturbance. Bounce Back is a 1-10 score (higher = less
+  -- I-term Decay is the other half of how "locked" each axis
+  -- feels: Master Gain sets how hard it pushes back, Decay how long it remembers
+  -- the disturbance. I-term Relax is a 1-10 score (higher = more relax, less
   -- bounce-back). Throttle has neither, so its last two slots stay empty.
   for _, axis in ipairs(AXES) do
     local line = form.addLine(axis.label)

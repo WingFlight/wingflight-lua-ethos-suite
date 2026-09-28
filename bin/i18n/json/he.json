@@ -8160,17 +8160,17 @@
           "reverse_text": true
         },
         "lock": {
-          "english": "Lock",
-          "translation": "Lock",
+          "english": "Decay",
+          "translation": "Decay",
           "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 4
+          "max_length": 5,
+          "reverse_text": false
         },
         "bounceback": {
-          "english": "Bounce Back",
-          "translation": "Bounce Back",
+          "english": "Relax",
+          "translation": "Relax",
           "needs_translation": true,
-          "max_length": 11,
+          "max_length": 5,
           "reverse_text": false
         },
         "curve": {

@@ -1,14 +1,14 @@
--- Thrust Vector -> Flight Feel (Gain, Lock, Bounce Back; curves are on
+-- Thrust Vector -> Flight Feel (Gain, Decay, Relax; curves are on
 -- app/pages/thrust_vector_gain_curves.lua).
 local thrustVector = assert(loadfile("app/pages/thrust_vector.lua"))()
 
--- Gain, Lock, Bounce Back column widths, as app/pages/master_gains.lua.
+-- Gain, Decay, Relax column widths, as app/pages/master_gains.lua.
 local COLUMN_WEIGHTS = {1, 1, 1.3}
 local COLUMN_START = 0.45 -- fraction of the row width where the first column starts
 
 local function buildFields(runtime, fieldLayout, tvPid)
   -- Flight Feel -- header row + per-axis rows, mirroring
-  -- app/pages/master_gains.lua's own Gain/Lock/Bounce Back table.
+  -- app/pages/master_gains.lua's own Gain/Decay/Relax table.
   local mgHeaderLine = form.addLine(" ")
   local mgHeaderSlots = fieldLayout.tableSlots(mgHeaderLine, COLUMN_WEIGHTS, COLUMN_START)
   form.addStaticText(mgHeaderLine, mgHeaderSlots[1], "@i18n(app.modules.master_gains.gain)@", RIGHT)
