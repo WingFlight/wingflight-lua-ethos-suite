@@ -4005,6 +4005,12 @@
           "max_length": 11,
           "needs_translation": false,
           "translation": "Gain Curves"
+        },
+        "speed_max": {
+          "english": "Speed Range",
+          "max_length": 11,
+          "needs_translation": false,
+          "translation": "Speed Range"
         }
       },
       "governor": {
@@ -4559,6 +4565,12 @@
           "max_length": 4,
           "needs_translation": false,
           "translation": "Roll"
+        },
+        "axis_speed": {
+          "english": "Speed",
+          "max_length": 5,
+          "needs_translation": false,
+          "translation": "Speed"
         },
         "axis_throttle": {
           "english": "Throttle",

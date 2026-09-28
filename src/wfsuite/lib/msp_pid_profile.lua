@@ -59,6 +59,13 @@
 -- MSP API 22.4 is required (see lib/msp_api_version.lua). The four axis
 -- limits are always read/written. Shared limits remain part of the wire
 -- format: current firmware still uses them when an axis limit is zero.
+--
+-- MSP API 22.10 appends GPS speed attenuation (SPA_FIELDS) after the axis
+-- limits: fw_spa_gain/fw_spa_curve mirror fw_tpa_gain/fw_tpa_curve with GPS
+-- speed in place of throttle, and fw_spa_speed_max (km/h) is the speed at
+-- the curve's right edge. The firmware keeps them in their own per-profile
+-- storage, but they travel in this message. Minimum API is 22.10, so they
+-- are always read/written like everything else here.
 
 -- Self-caches via package.loaded (same mechanism lib/bus.lua uses) --
 -- multiple pages share this codec and each reloads fresh via loadfile() on
@@ -111,6 +118,13 @@ local FIELDS = {
   {"autohover_throttle_assist_trigger_ms", "U16"},
 }
 
+-- API 22.10 GPS speed attenuation, after the axis limits on the wire.
+local SPA_FIELDS = {
+  {"fw_spa_gain", "U8"},
+  {"fw_spa_curve", "U8"},
+  {"fw_spa_speed_max", "U16"},
+}
+
 -- API 22.4 axis limits: raw zero inherits the corresponding legacy shared limit.
 local AXIS_LIMITS = {
   {"angle_roll_limit", "angle_level_limit", 90},
@@ -157,6 +171,9 @@ local SIMULATOR_RESPONSE = {
   15,   -- autohover_throttle_assist_max
   44, 1, -- autohover_throttle_assist_trigger_ms (U16 LE: 300 = 0x012C -> 44, 1)
   0, 0, 0, 0, -- angle roll/pitch, trainer roll/pitch: inherit shared limits
+  100,  -- fw_spa_gain
+  0,    -- fw_spa_curve (off)
+  150, 0, -- fw_spa_speed_max (U16 LE: 150 km/h)
 }
 
 -- Per-field {min, max, default, decimals, suffix}, sourced from this
@@ -208,6 +225,9 @@ local FIELD_META = {
   bterm_cutoff_2 = {min = 0, max = 250, default = 20},
   fw_tpa_gain = {min = 25, max = 200, default = 100, suffix = "%"},
   fw_tpa_curve = {min = 0, max = 8, default = 0},
+  fw_spa_gain = {min = 25, max = 200, default = 100, suffix = "%"},
+  fw_spa_curve = {min = 0, max = 8, default = 0},
+  fw_spa_speed_max = {min = 10, max = 600, default = 150, suffix = "km/h"},
   master_gain_0 = {min = 25, max = 1000, default = 100, suffix = "%"},
   master_gain_1 = {min = 25, max = 1000, default = 100, suffix = "%"},
   master_gain_2 = {min = 25, max = 1000, default = 100, suffix = "%"},
@@ -259,6 +279,14 @@ function msp_pid_profile.decode(buf)
     data.axis_limits_raw[i] = raw
     data.axis_limits_initial[i] = value
   end
+  for i = 1, #SPA_FIELDS do
+    local name, wireType = SPA_FIELDS[i][1], SPA_FIELDS[i][2]
+    if wireType == "U16" then
+      data[name] = mspcodec.readU16(buf)
+    else
+      data[name] = mspcodec.readU8(buf)
+    end
+  end
   return data
 end
 
@@ -277,6 +305,14 @@ function msp_pid_profile.encode(data)
     if value == data.axis_limits_initial[i] then value = data.axis_limits_raw[i] end
     mspcodec.writeU8(payload, value)
   end
+  for i = 1, #SPA_FIELDS do
+    local name, wireType = SPA_FIELDS[i][1], SPA_FIELDS[i][2]
+    if wireType == "U16" then
+      mspcodec.writeU16(payload, data[name] or 0)
+    else
+      mspcodec.writeU8(payload, data[name] or 0)
+    end
+  end
   return payload
 end
 
@@ -287,8 +323,8 @@ function msp_pid_profile.buildReadMessage(onData, onError)
   return {
     command = READ_COMMAND,
     processReply = function(_, buf)
-      if #buf < 60 then
-        if onError then onError("MSP PID profile requires API 22.8 firmware") end
+      if #buf < 64 then
+        if onError then onError("MSP PID profile requires API 22.10 firmware") end
         return
       end
       onData(msp_pid_profile.decode(buf))

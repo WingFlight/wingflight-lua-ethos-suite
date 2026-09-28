@@ -6,12 +6,12 @@
 -- a second page sharing one codec, same as every field that page itself
 -- doesn't build a widget for already round-trips unchanged on every save
 -- (see that file's own header comment). One row per axis
--- (Roll/Pitch/Yaw/Throttle), matching wingflight-configurator's Flight
--- Feel table: Gain (master_gain_0-2, fw_tpa_gain on Throttle), Decay
--- (iterm_decay_time_0-2) and Relax (bounceback_0-2). Throttle has
--- only a Gain.
+-- (Roll/Pitch/Yaw/Throttle/Speed), matching wingflight-configurator's Flight
+-- Feel table: Gain (master_gain_0-2, fw_tpa_gain on Throttle, fw_spa_gain
+-- on Speed), Decay (iterm_decay_time_0-2) and Relax (bounceback_0-2).
+-- Throttle and Speed have only a Gain.
 --
--- Gain curves (gain_curve_0-2/fw_tpa_curve) are assigned on
+-- Gain curves (gain_curve_0-2/fw_tpa_curve/fw_spa_curve) are assigned on
 -- app/pages/gain_curves.lua under Advanced, since they are an advanced
 -- shaping tool. Every other MSP_PID_PROFILE field is still read and
 -- written back unchanged every round-trip here -- this page just doesn't
@@ -34,6 +34,7 @@ local AXES = {
   {label = "@i18n(app.modules.master_gains.axis_pitch)@", gainKey = "master_gain_1", decayKey = "iterm_decay_time_1", bouncebackKey = "bounceback_1"},
   {label = "@i18n(app.modules.master_gains.axis_yaw)@", gainKey = "master_gain_2", decayKey = "iterm_decay_time_2", bouncebackKey = "bounceback_2"},
   {label = "@i18n(app.modules.master_gains.axis_throttle)@", gainKey = "fw_tpa_gain"},
+  {label = "@i18n(app.modules.master_gains.axis_speed)@", gainKey = "fw_spa_gain"},
 }
 
 -- opts.onBack: called to return to the menu (the header's Menu button or
@@ -63,7 +64,8 @@ local function open(opts)
   -- I-term Decay is the other half of how "locked" each axis
   -- feels: Master Gain sets how hard it pushes back, Decay how long it remembers
   -- the disturbance. I-term Relax is a 1-10 score (higher = more relax, less
-  -- bounce-back). Throttle has neither, so its last two slots stay empty.
+  -- bounce-back). Throttle and Speed have neither, so their last two slots
+  -- stay empty.
   for _, axis in ipairs(AXES) do
     local line = form.addLine(axis.label)
     local slots = fieldLayout.tableSlots(line, COLUMN_WEIGHTS, COLUMN_START)
