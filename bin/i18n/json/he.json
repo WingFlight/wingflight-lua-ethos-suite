@@ -1036,20 +1036,6 @@
           "reverse_text": true,
           "max_length": 8
         },
-        "auto_hover": {
-          "english": "Auto hover",
-          "translation": "ריחוף אוטו",
-          "needs_translation": false,
-          "reverse_text": true,
-          "max_length": 10
-        },
-        "throttle_assist": {
-          "english": "Throttle Assist",
-          "max_length": 15,
-          "needs_translation": true,
-          "translation": "Throttle Assist",
-          "reverse_text": false
-        },
         "deadband": {
           "english": "Deadband",
           "translation": "אזור מת",
@@ -1070,20 +1056,6 @@
           "needs_translation": false,
           "reverse_text": true,
           "max_length": 4
-        },
-        "max": {
-          "english": "Max",
-          "translation": "מקסימום",
-          "needs_translation": false,
-          "reverse_text": true,
-          "max_length": 3
-        },
-        "time": {
-          "english": "Time",
-          "max_length": 4,
-          "needs_translation": true,
-          "translation": "Time",
-          "reverse_text": false
         }
       },
       "filters": {

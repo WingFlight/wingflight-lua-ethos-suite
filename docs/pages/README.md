@@ -8,7 +8,7 @@ sidebar_label: Pages
 Reference documentation for each configuration and settings page reachable
 within the WFSuite Ethos system tool.
 
-**Coverage:** 80 reachable pages in navigation hierarchy. Drafts require review.
+**Coverage:** 79 reachable pages in navigation hierarchy. Drafts require review.
 
 The *Conditions* column names what hides, greys out or locks a page; the sentences
 and structure follow [_template.md](../_template.md).
@@ -38,7 +38,6 @@ is there. The rule is in [.agents/rules/documentation.md](../../.agents/rules/do
 | Acro Trainer | [flight_tuning/autolevel_trainer.md](flight_tuning/autolevel_trainer.md) | Requires a running background task and a flight controller connection. | draft |
 | Angle Mode | [flight_tuning/autolevel_angle.md](flight_tuning/autolevel_angle.md) | Requires a running background task and a flight controller connection. | draft |
 | Horizon Mode | [flight_tuning/autolevel_horizon.md](flight_tuning/autolevel_horizon.md) | Requires a running background task and a flight controller connection. | draft |
-| Auto hover | [flight_tuning/autolevel_auto_hover.md](flight_tuning/autolevel_auto_hover.md) | Requires a running background task and a flight controller connection. | draft |
 | Att Hold | [flight_tuning/autolevel_attitude_hold.md](flight_tuning/autolevel_attitude_hold.md) | Requires a running background task and a flight controller connection. | draft |
 | Rates | [flight_tuning/rates_advanced.md](flight_tuning/rates_advanced.md) | Requires a running background task and a flight controller connection. | draft |
 

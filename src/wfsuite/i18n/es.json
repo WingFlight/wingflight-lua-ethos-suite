@@ -789,13 +789,6 @@
           "reverse_text": false,
           "translation": "Mant."
         },
-        "auto_hover": {
-          "english": "Auto hover",
-          "max_length": 10,
-          "needs_translation": false,
-          "reverse_text": false,
-          "translation": "Vuelo auto"
-        },
         "bank": {
           "english": "Bank",
           "max_length": 4,
@@ -824,13 +817,6 @@
           "reverse_text": false,
           "translation": "Modo horizonte"
         },
-        "max": {
-          "english": "Max",
-          "max_length": 3,
-          "needs_translation": false,
-          "reverse_text": false,
-          "translation": "Máx"
-        },
         "name": {
           "english": "Flight Modes",
           "max_length": 12,
@@ -851,20 +837,6 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Vel."
-        },
-        "throttle_assist": {
-          "english": "Throttle Assist",
-          "max_length": 15,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "Throttle Assist"
-        },
-        "time": {
-          "english": "Time",
-          "max_length": 4,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "Time"
         },
         "trainer_limits": {
           "english": "Trainer limits",

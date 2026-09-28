@@ -680,12 +680,6 @@
           "needs_translation": false,
           "translation": "Att Hold"
         },
-        "auto_hover": {
-          "english": "Auto hover",
-          "max_length": 10,
-          "needs_translation": false,
-          "translation": "Auto hover"
-        },
         "bank": {
           "english": "Bank",
           "max_length": 4,
@@ -710,12 +704,6 @@
           "needs_translation": false,
           "translation": "Horizon Mode"
         },
-        "max": {
-          "english": "Max",
-          "max_length": 3,
-          "needs_translation": false,
-          "translation": "Max"
-        },
         "name": {
           "english": "Flight Modes",
           "max_length": 12,
@@ -733,18 +721,6 @@
           "max_length": 4,
           "needs_translation": false,
           "translation": "Rate"
-        },
-        "throttle_assist": {
-          "english": "Throttle Assist",
-          "max_length": 15,
-          "needs_translation": false,
-          "translation": "Throttle Assist"
-        },
-        "time": {
-          "english": "Time",
-          "max_length": 4,
-          "needs_translation": false,
-          "translation": "Time"
         },
         "trainer_limits": {
           "english": "Trainer limits",

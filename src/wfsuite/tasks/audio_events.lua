@@ -72,7 +72,6 @@ local FLIGHT_MODE_PRIORITY = {
   {bit = 12, file = "gpsloiter.wav"},   -- LOITER_MODE_BIT
   {bit = 7, file = "passthrough.wav"},  -- PASSTHROUGH_MODE_BIT
   {bit = 10, file = "manual.wav"},      -- MANUAL_MODE_BIT
-  {bit = 9, file = "autohover.wav"},    -- AUTOHOVER_MODE_BIT
   {bit = 5, file = "atthold.wav"},      -- ATTHOLD_MODE_BIT
   {bit = 11, file = "autotrim.wav"},    -- AUTOTRIM_MODE_BIT
   {bit = 2, file = "horizon.wav"},      -- HORIZON_MODE_BIT

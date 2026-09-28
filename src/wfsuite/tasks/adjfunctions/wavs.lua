@@ -22,7 +22,7 @@
 -- each. IDs 76-81 (ADJUSTMENT_GOV_* throttle/rpm/yaw-ff) are
 -- reserved in the firmware header but have no get_/set_ implementation
 -- anywhere yet, so they can't actually fire. IDs 82 (battery profile) and
--- 84-88 (master gain per axis, autohover gain, atthold gain) *are* real
+-- 84-86 and 88 (master gain per axis, atthold gain) *are* real
 -- and implemented, but have no page exposing an adjustment range for
 -- them yet -- left for whenever those wingflight features are ported (see
 -- AGENTS.md's migration notes), same as those features' own MSP fields.

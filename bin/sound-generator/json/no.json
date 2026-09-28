@@ -540,12 +540,6 @@
     "needs_translation": false
   },
   {
-    "file": "events/mode/autohover.wav",
-    "english": "Auto Hover",
-    "translation": "Auto Hover",
-    "needs_translation": false
-  },
-  {
     "file": "events/mode/atthold.wav",
     "english": "Att Hold",
     "translation": "Att Hold",
