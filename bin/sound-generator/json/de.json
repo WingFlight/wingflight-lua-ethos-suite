@@ -372,12 +372,6 @@
     "needs_translation": true
   },
   {
-    "file": "adjfunctions/horizon.wav",
-    "english": "horizon",
-    "translation": "Horizont",
-    "needs_translation": false
-  },
-  {
     "file": "adjfunctions/acro.wav",
     "english": "Acro",
     "translation": "Akro",
@@ -525,12 +519,6 @@
     "file": "events/mode/angle.wav",
     "english": "Angle",
     "translation": "Angle",
-    "needs_translation": false
-  },
-  {
-    "file": "events/mode/horizon.wav",
-    "english": "Horizon",
-    "translation": "Horizon",
     "needs_translation": false
   },
   {

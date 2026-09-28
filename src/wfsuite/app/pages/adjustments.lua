@@ -81,7 +81,6 @@ local ADJUST_FUNCTIONS = {
   {id = 43, name = "Rescue Alt I", min = 0, max = 250},
   {id = 44, name = "Rescue Alt D", min = 0, max = 250},
   {id = 45, name = "Angle Level Gain", min = 0, max = 200},
-  {id = 46, name = "Horizon Level Gain", min = 0, max = 200},
   {id = 47, name = "Acro Trainer Gain", min = 25, max = 255},
   {id = 48, name = "Governor Gain", min = 0, max = 250},
   {id = 49, name = "Governor P", min = 0, max = 250},

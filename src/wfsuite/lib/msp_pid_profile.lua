@@ -54,6 +54,9 @@
 --   * API 22.11 removed Auto Hover. Its 9 bytes keep their wire position
 --     as `reserved_0`..`reserved_8` (the FC sends zeros and ignores them);
 --     the codec round-trips whatever it read, like every other field.
+--   * API 22.12 removed Horizon. Its level-strength byte (after
+--     `angle_level_limit`) keeps its position as `reserved_7`, handled the
+--     same way.
 --
 -- Unlike lib/msp_pid_tuning.lua's MSP_PID_TUNING (all U16), this command
 -- mixes U8 and U16 fields -- FIELDS entries are {name, wireType} pairs, not
@@ -97,7 +100,7 @@ local FIELDS = {
   {"bounceback_0", "U8"}, {"bounceback_1", "U8"}, {"bounceback_2", "U8"}, -- I-term Relax score 1-10 (API 22.9)
   {"angle_level_strength", "U8"},
   {"angle_level_limit", "U8"},
-  {"horizon_level_strength", "U8"},
+  {"reserved_7", "U8"}, -- was Horizon level strength (API 22.12)
   {"trainer_gain", "U8"},
   {"trainer_angle_limit", "U8"},
   {"atthold_gain", "U8"},
@@ -147,7 +150,7 @@ local SIMULATOR_RESPONSE = {
   5, 5, 5,      -- bounceback_0/1/2
   40,   -- angle_level_strength
   55,   -- angle_level_limit
-  0,    -- horizon_level_strength
+  0,    -- reserved_7 (was Horizon)
   75,   -- trainer_gain
   20,   -- trainer_angle_limit
   40,   -- atthold_gain
@@ -210,7 +213,6 @@ local FIELD_META = {
   bounceback_1 = {min = 1, max = 10, default = 5},
   bounceback_2 = {min = 1, max = 10, default = 5},
   angle_level_strength = {min = 0, max = 200, default = 40},
-  horizon_level_strength = {min = 0, max = 200, default = 40},
   trainer_gain = {min = 25, max = 255, default = 75},
   atthold_gain = {min = 0, max = 250, default = 40},
   atthold_deadband = {min = 0, max = 100, default = 5, suffix = "%"},

@@ -74,7 +74,6 @@ local FLIGHT_MODE_PRIORITY = {
   {bit = 10, file = "manual.wav"},      -- MANUAL_MODE_BIT
   {bit = 5, file = "atthold.wav"},      -- ATTHOLD_MODE_BIT
   {bit = 11, file = "autotrim.wav"},    -- AUTOTRIM_MODE_BIT
-  {bit = 2, file = "horizon.wav"},      -- HORIZON_MODE_BIT
   {bit = 1, file = "angle.wav"},        -- ANGLE_MODE_BIT
   {bit = 3, file = "trainer.wav"},      -- TRAINER_MODE_BIT
   {bit = 4, file = "althold.wav"},      -- ALTHOLD_MODE_BIT
@@ -85,7 +84,7 @@ local FLIGHT_MODE_PRIORITY = {
 --   it never appears in the table, so it can't change the spoken mode (it
 --   used to re-trigger a callout of the unchanged mode at takeoff/landing).
 -- * TRADITIONAL (14) layers on top of whatever mode is active, so under
---   first-match-wins it was masked by Angle/Horizon/etc. It gets its own
+--   first-match-wins it was masked by Angle/Trainer/etc. It gets its own
 --   on/off edge callout in announceFlightMode() instead.
 --
 -- A LOITER/RTH switch that is on but can't fly (disarmed, no fix/home) never
@@ -434,7 +433,7 @@ local function announceGovernor()
 end
 
 -- Unlike announceGovernor(), not armed-gated: mode selection (Angle,
--- Horizon, etc.) is useful information before arming too, matching this
+-- Trainer, etc.) is useful information before arming too, matching this
 -- project's own last-known-good telemetry.lua, which never checked
 -- isArmed for this announcement either.
 local function announceFlightMode()

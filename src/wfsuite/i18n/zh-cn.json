@@ -810,13 +810,6 @@
           "reverse_text": false,
           "translation": "增益"
         },
-        "horizon_mode": {
-          "english": "Horizon Mode",
-          "max_length": 12,
-          "needs_translation": false,
-          "reverse_text": false,
-          "translation": "水平模式"
-        },
         "name": {
           "english": "Flight Modes",
           "max_length": 12,
