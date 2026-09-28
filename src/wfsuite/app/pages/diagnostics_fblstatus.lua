@@ -5,71 +5,22 @@ local bus = requireModule("lib/bus.lua")
 local common = requireModule("app/diagnostics_common.lua")
 local mspStatus = requireModule("lib/msp_status.lua")
 local dataflashSummary = requireModule("lib/msp_dataflash_summary.lua")
+local armingFlags = requireModule("lib/arming_flags.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.diagnostics.name)@ / @i18n(app.modules.fblstatus.name)@"
 
-local ARMING_FLAGS = {
-  [0] = "@i18n(app.modules.fblstatus.arming_disable_flag_0)@",
-  [1] = "@i18n(app.modules.fblstatus.arming_disable_flag_1)@",
-  [2] = "@i18n(app.modules.fblstatus.arming_disable_flag_2)@",
-  [3] = "@i18n(app.modules.fblstatus.arming_disable_flag_3)@",
-  [4] = "@i18n(app.modules.fblstatus.arming_disable_flag_4)@",
-  [5] = "@i18n(app.modules.fblstatus.arming_disable_flag_5)@",
-  [6] = "@i18n(app.modules.fblstatus.arming_disable_flag_6)@",
-  [7] = "@i18n(app.modules.fblstatus.arming_disable_flag_7)@",
-  [8] = "@i18n(app.modules.fblstatus.arming_disable_flag_8)@",
-  [9] = "@i18n(app.modules.fblstatus.arming_disable_flag_9)@",
-  [10] = "@i18n(app.modules.fblstatus.arming_disable_flag_10)@",
-  [11] = "@i18n(app.modules.fblstatus.arming_disable_flag_11)@",
-  [12] = "@i18n(app.modules.fblstatus.arming_disable_flag_12)@",
-  [13] = "@i18n(app.modules.fblstatus.arming_disable_flag_13)@",
-  [14] = "@i18n(app.modules.fblstatus.arming_disable_flag_14)@",
-  [15] = "@i18n(app.modules.fblstatus.arming_disable_flag_15)@",
-  [16] = "@i18n(app.modules.fblstatus.arming_disable_flag_16)@",
-  [17] = "@i18n(app.modules.fblstatus.arming_disable_flag_17)@",
-  [18] = "@i18n(app.modules.fblstatus.arming_disable_flag_18)@",
-  [19] = "@i18n(app.modules.fblstatus.arming_disable_flag_19)@",
-  [20] = "@i18n(app.modules.fblstatus.arming_disable_flag_20)@",
-  [21] = "@i18n(app.modules.fblstatus.arming_disable_flag_21)@",
-  [22] = "@i18n(app.modules.fblstatus.arming_disable_flag_22)@",
-  [23] = "@i18n(app.modules.fblstatus.arming_disable_flag_23)@",
-  [24] = "@i18n(app.modules.fblstatus.arming_disable_flag_24)@",
-  [25] = "@i18n(app.modules.fblstatus.arming_disable_flag_25)@",
-  [26] = "@i18n(app.modules.fblstatus.arming_disable_flag_26)@",
-}
-
-local function hasBit(mask, bit)
-  return math.floor((tonumber(mask or 0) or 0) / (2 ^ bit)) % 2 >= 1
-end
+-- Heading above the per-reason rows, which are indented under it.
+local ARMING_DETAIL_HEADING = "@i18n(app.modules.fblstatus.arming_flags_active_list)@"
+local ARMING_DETAIL_INDENT = 12
 
 local function percentTenths(value)
   if value == nil then return "-" end
   return string.format("%.1f%%", (tonumber(value) or 0) / 10)
 end
 
-local function armingFlagsText(mask)
-  mask = tonumber(mask or 0) or 0
-  if mask == 0 then return "@i18n(app.modules.fblstatus.ok)@" end
-  local parts = {}
-  -- Stops one bit short of firmware's ARMING_DISABLED_ARM_SWITCH (always the
-  -- last flag) same as widgets/dashboard/context.lua's own
-  -- armingDisableFlagsToString() - see that function's comment for why.
-  for bit = 0, 26 do
-    if hasBit(mask, bit) then
-      parts[#parts + 1] = ARMING_FLAGS[bit] or tostring(bit)
-    end
-  end
-  if #parts == 0 then return tostring(mask) end
-  local text = parts[1]
-  for i = 2, #parts do
-    text = text .. ", " .. parts[i]
-  end
-  return text
-end
-
 local function dataflashText(summary)
   if not summary then return "-" end
-  if not hasBit(summary.flags, 1) then return "@i18n(app.modules.fblstatus.unsupported)@" end
+  if not armingFlags.hasBit(summary.flags, 1) then return "@i18n(app.modules.fblstatus.unsupported)@" end
   local free = math.max((summary.total or 0) - (summary.used or 0), 0)
   return common.formatBytes(free)
 end
@@ -91,6 +42,45 @@ local function open(opts)
     local pending = 0
     local lastPoll = 0
 
+    -- The reasons, one full-width row each, below the page's other lines.
+    -- armingRows[1] is the heading. Rows are created on demand and then only
+    -- re-texted: this form API can't remove a line, so a reason cleared while
+    -- the page is open leaves an empty row until the page is re-entered.
+    local armingRows = {}
+    local armingActive = {}
+    local armingMask = nil
+
+    local function renderArming(mask)
+      mask = armingFlags.normalize(mask)
+      if mask == armingMask then return end
+      armingMask = mask
+
+      local active = armingFlags.active(mask, armingActive)
+      common.updateField(fields.arming, armingFlags.summary(#active))
+      common.setOkColor(fields.arming, #active == 0)
+
+      if #active == 0 then
+        for i = 1, #armingRows do armingRows[i]:value("") end
+        return
+      end
+      if armingRows[1] == nil then
+        armingRows[1] = common.addTextLine(ARMING_DETAIL_HEADING)
+      else
+        armingRows[1]:value(ARMING_DETAIL_HEADING)
+      end
+      for i = 1, #active do
+        local row = armingRows[i + 1]
+        if row == nil then
+          armingRows[i + 1] = common.addTextLine(active[i], ARMING_DETAIL_INDENT)
+        else
+          row:value(active[i])
+        end
+      end
+      for i = #active + 2, #armingRows do
+        armingRows[i]:value("")
+      end
+    end
+
     local function finish()
       if ctx.isDisposed() then
         pending = 0
@@ -102,7 +92,7 @@ local function open(opts)
     end
 
     local function applyStatus(data)
-      common.updateField(fields.arming, armingFlagsText(data.arming_disable_flags))
+      renderArming(data.arming_disable_flags)
       common.updateField(fields.realTimeLoad, percentTenths(data.max_real_time_load))
       common.updateField(fields.cpuLoad, percentTenths(data.average_cpu_load))
       common.updateField(fields.pidProfile, string.format("%d / %d", (data.current_pid_profile_index or 0) + 1, data.pid_profile_count or 0))

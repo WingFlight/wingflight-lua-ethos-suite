@@ -46,9 +46,37 @@ end
 function diagnostics_common.updateStatus(field, value)
   if not field then return end
   diagnostics_common.updateField(field, diagnostics_common.yesNo(value))
-  if field.color and value ~= nil then
-    field:color(value and GREEN or RED)
+  diagnostics_common.setOkColor(field, value)
+end
+
+-- GREEN for ok, RED for not; nil leaves the colour alone.
+function diagnostics_common.setOkColor(field, ok)
+  if field and field.color and ok ~= nil then
+    field:color(ok and GREEN or RED)
   end
+end
+
+-- A line whose text spans the whole window rather than the narrow right-hand
+-- value column addValueLine() writes into -- the construction
+-- app/esc_error.lua uses for its reason lines. Returns the static text so the
+-- caller can re-text it in place: this form API can't remove a line, and
+-- rebuilding the page on every poll would flicker.
+function diagnostics_common.addTextLine(text, indent)
+  indent = indent or 0
+  local line = form.addLine("")
+  local slots = form.getFieldSlots(line, {0})
+  local slot = (slots and slots[1]) or {}
+  local width = nil
+  if lcd and lcd.getWindowSize then
+    width = lcd.getWindowSize()
+  end
+  width = width or slot.w or 0
+  return form.addStaticText(line, {
+    x = indent,
+    y = slot.y or 0,
+    w = math.max(width - indent, 0),
+    h = slot.h or 0,
+  }, text, LEFT)
 end
 
 function diagnostics_common.openReadOnlyPage(opts, pageTitle, build)
