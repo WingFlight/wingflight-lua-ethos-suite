@@ -34,7 +34,8 @@
 --   payload = {...} | nil,              -- omit/{} for parameterless reads
 --   isWrite = true | nil,                -- only matters to CRSF (frame type)
 --   processReply = function(message, buf) ... end,
---   errorHandler = function(reason) ... end,   -- reason: "timeout"|"max_retries"
+--   errorHandler = function(reason) ... end,   -- reason: "max_retries"|"cleared"|
+--                                               --   "queue_full"|"invalid_request"|...
 --   simulatorResponse = {...},           -- reply bytes used in the Ethos simulator
 --   retryDelay = <seconds added to the 0.8s default>,
 --   maxRetries = <default 5>,
@@ -74,6 +75,11 @@ function Queue:isProcessed()
 end
 
 function Queue:add(message)
+  if not message or type(message.command) ~= "number"
+      or (message.payload ~= nil and type(message.payload) ~= "table") then
+    notifyError(message, "invalid_request")
+    return false
+  end
   if #self.pending >= MAX_PENDING then
     notifyError(message, "queue_full")
     return false
@@ -103,6 +109,7 @@ function Queue:clear()
   self.pending = {}
   self.current = nil
   self.lastSent = nil
+  self.retryCount = 0
   self.common.mspClearBufs()
   if droppedCurrent then notifyError(droppedCurrent, "cleared") end
   for i = 1, #droppedPending do notifyError(droppedPending[i], "cleared") end
@@ -113,10 +120,38 @@ local function popFirst(list)
   return table.remove(list, 1)
 end
 
+-- Retires whatever message is in flight.
+--
+-- The shared TX buffer in tasks/msp/common.lua belongs to the *message* being
+-- sent, not to the queue, and mspSendRequest() refuses to arm a new one while
+-- that buffer is still populated. So retiring a message has to hand the buffer
+-- back -- otherwise a message that died between two of its frames left the
+-- buffer occupied for the rest of the script's life, and from then on every
+-- mspSendRequest() returned false without putting a byte on the wire, mspLastReq
+-- was never updated, mspPollReply() could never match, and each new message
+-- burned its whole retry budget before dying on max_retries. All MSP traffic
+-- dead, no error and no timeout to show for it, and the only way out was
+-- reloading the script.
+--
+-- Doing it here rather than at the individual abort sites makes that a
+-- property of "a message ended" instead of something each new return has to
+-- remember.
 function Queue:_finish()
+  self.common.mspClearTxBuf()
   self.current = nil
   self.lastSent = nil
+  self.retryCount = 0
   collectgarbage()
+end
+
+-- Abort the in-flight message: retire it, then report the reason. The message
+-- is snapshotted before _finish() because that clears self.current, and the
+-- handler has to be the one belonging to the message that was just abandoned.
+function Queue:abortCurrent(reason)
+  local msg = self.current
+  self:_finish()
+  notifyError(msg, reason or "aborted")
+  return msg
 end
 
 function Queue:_deliver(buf)
@@ -137,14 +172,19 @@ function Queue:processQueue()
   end
 
   local msg = self.current
+  local payload = msg.payload or EMPTY_PAYLOAD
+  if type(msg.command) ~= "number" or type(payload) ~= "table" then
+    self:abortCurrent("invalid_request")
+    return
+  end
+
   local common = self.common
   local isSim = system.getVersion().simulation == true
 
   if isSim then
     if not msg.simulatorResponse then
       debugLog.msp("SIM", msg.command, msg.payload, "no_response")
-      self:_finish()
-      notifyError(msg, "no_response")
+      self:abortCurrent("no_response")
       return
     end
     debugLog.msp("SIM>", msg.command, msg.payload)
@@ -167,18 +207,30 @@ function Queue:processQueue()
     -- arrival instead of getting its own window -- effectively giving
     -- every message one fewer real attempt than maxRetries promised.
     if self.lastSent and self.retryCount > maxRetries then
-      local handler = msg.errorHandler
-      self:_finish()
-      if handler then handler("max_retries") end
+      self:abortCurrent("max_retries")
       return
     end
-    local payload = msg.payload or EMPTY_PAYLOAD
-    common.mspSendRequest(msg.command, payload, msg.isWrite)
-    debugLog.msp("TX", msg.command, payload, "try=" .. tostring(self.retryCount + 1))
-    self.lastSent = now
-    self.retryCount = self.retryCount + 1
+    -- The return value used to be dropped on the floor, which made a refused
+    -- hand-off indistinguishable from a successful send: lastSent and
+    -- retryCount were advanced either way, so maxRetries was reached after
+    -- 6 x 0.8s of wall clock with not one byte having left the radio. Count
+    -- real hand-offs only, and say so out loud when there was none.
+    if common.mspSendRequest(msg.command, payload, msg.isWrite) then
+      debugLog.msp("TX", msg.command, payload, "try=" .. tostring(self.retryCount + 1))
+      self.lastSent = now
+      self.retryCount = self.retryCount + 1
+    else
+      debugLog.msp("TX!", msg.command, payload, "tx_busy")
+    end
   end
 
+  -- One frame per wakeup, deliberately. Both transports hand the frame to
+  -- Ethos's pushFrame(), and mspProcessTxQ() ignores whether it was
+  -- accepted. Draining a whole multi-frame write in one tick (as
+  -- rotorflight PR #2411 does) broke every save on hardware -- the burst
+  -- outruns what pushFrame() will queue, so the FC never sees a complete
+  -- write. An abandoned mid-send write no longer poisons the link either
+  -- way, since _finish() hands the TX buffer back.
   common.mspProcessTxQ()
   local cmd, buf, err = common.mspPollReply()
 
@@ -186,10 +238,7 @@ function Queue:processQueue()
     debugLog.msp("RX", cmd, buf)
     self:_deliver(buf)
   elseif err then
-    debugLog.msp("ERR", msg.command, msg.payload or EMPTY_PAYLOAD, err)
-    local handler = msg.errorHandler
-    self:_finish()
-    if handler then handler(err) end
+    self:abortCurrent(err)
   end
 end
 

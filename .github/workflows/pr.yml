@@ -41,6 +41,15 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/storage/verify_atomic_writes.lua
 
+      # An MSP request abandoned between two of its frames used to leave the
+      # shared TX buffer occupied, after which no request could be framed at
+      # all -- every configuration page then hung until the script was
+      # reloaded. It needs a queue, a clock and a link that stops answering,
+      # so no build step reaches it.
+      - name: Check the MSP queue after an aborted request
+        if: success() || failure()
+        run: lua5.4 bin/msp_queue/verify_msp_queue.lua
+
   # Per-language PR builds (mirrors push.yml behavior)
   create-zip:
     name: Build PR ZIP (${{ matrix.lang }})
