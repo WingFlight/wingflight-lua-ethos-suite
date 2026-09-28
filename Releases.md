@@ -1,3 +1,23 @@
+# 0.0.29
+
+Require MSP API 22.10 (0.0.29 firmware). The firmware update resets every PID and thrust-vector profile to defaults, so note your tune before flashing.
+Rename Master Gains to Flight Feel (main and Thrust Vector) and move it up to Flight Tuning, with per-axis Gain, Decay and Relax columns (Master Gain, I-term Decay, I-term Relax). Decay is in 0.01 s steps (0.01-1.00 s); Relax is a 1-10 score (higher = less bounce-back). The Relax Type selector is gone because relax is always on, and the main-loop relax level is shown on PID Controller. Adjustment functions 114-125 use the same names.
+Add Gain Curves pages: Flight Tuning > Advanced > Gain Curves (Roll, Pitch, Yaw, Throttle, Speed) and Thrust Vector > Gain Curves (Roll, Pitch, Yaw, the new thrust-vector curves).
+Add GPS speed attenuation (SPA): a Speed row on Flight Feel, and the Speed curve and Speed Range (km/h) on Gain Curves.
+Set the F gain minimum to 50 and the F reset value to 100 (yaw was 0), matching the firmware. Fix the I-term decay limit maximum to 250 deg/s.
+
+Keep one flight as one record and one log across a telemetry drop of up to 30 s while armed, instead of splitting it and counting it twice.
+Stop SmartFuel announcing low fuel from the first reading after connecting or while no battery is detected, and say "Battery" instead of "Fuel" for electric models.
+Save settings and log headers through a temporary file, so a power loss during a save can't truncate them.
+Keep telemetry sensor slots the Telemetry page has no switch for (GPS, ESC2, temperature, FBUS, native CRSF) when saving, instead of clearing them.
+Show FBL Status arming-disable reasons on their own full-width rows so none are cut off.
+Ignore a SYSTEM_CONFIG reading with no data yet, which announced "Profile 0".
+Resume the connection handshake after disarming when arming interrupted it, and keep a page whose read failed disabled with a "Loading failed" notice until it is reloaded.
+Ask for confirmation before ELRS link sync applies packet rate and telemetry ratio changes, and refuse it while armed or on a module that isn't ExpressLRS.
+Fix ESC temperature gauges ignoring the temperature unit setting, long status text overflowing dashboard tiles, and AERC preflight arc font sizes. Widen the compact tile grids so UTF-8 labels fit.
+Ship around 100 translations per language that never reached the radio, and fix raw @i18n(...)@ text where keys were missing.
+Deploy installs its own Python dependencies and no longer needs hidapi.dll or brew hidapi.
+
 # 0.0.28
 
 Read FC status (armed, GPS fix, LOITER/RTH blocked, profile numbers) from the 0.0.28 firmware's SYSTEM_STATUS (120) and SYSTEM_CONFIG (121) telemetry sensors, which replace the removed arming flags, profile and GPS fix sensors. Requires 0.0.28 firmware with both sensors selected.
