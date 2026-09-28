@@ -28,6 +28,12 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/tests/smartfuel_announce.lua
 
+      # FBL Status must keep arming-disable reasons out of the narrow value
+      # column, where the joined list was cut off on small screens.
+      - name: Check the FBL Status arming flags
+        if: success() || failure()
+        run: lua5.4 bin/tests/arming_flags.lua
+
   # Per-language PR builds (mirrors push.yml behavior)
   create-zip:
     name: Build PR ZIP (${{ matrix.lang }})

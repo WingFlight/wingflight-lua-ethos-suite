@@ -4349,6 +4349,13 @@
           "reverse_text": false,
           "translation": "Backup RX"
         },
+        "arming_disable_flag_27": {
+          "english": "Arm Switch",
+          "max_length": 10,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Arm Switch"
+        },
         "arming_disable_flag_3": {
           "english": "Bad RX Recovery",
           "max_length": 15,
@@ -4404,6 +4411,20 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Flags di Armo"
+        },
+        "arming_flags_active_fmt": {
+          "english": "%d active",
+          "max_length": 9,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "%d active"
+        },
+        "arming_flags_active_list": {
+          "english": "Active reasons:",
+          "max_length": 15,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Active reasons:"
         },
         "cpu_load": {
           "english": "CPU Load",
