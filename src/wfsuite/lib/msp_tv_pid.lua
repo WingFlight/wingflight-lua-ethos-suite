@@ -4,7 +4,7 @@
 -- from MSP_PID_PROFILE/MSP_PID_TUNING (lib/msp_pid_profile.lua/
 -- lib/msp_pid_tuning.lua): tvPidProfile_t is deliberately a trimmed-down
 -- sibling of pidProfile_t (see wingflight-firmware's pg/tv_pid.h) -- no
--- pid_mode, fw_tpa, leveling/trainer/autohover sub-modes, or
+-- pid_mode, fw_tpa, leveling/trainer sub-modes, or
 -- cross-axis relax. The one exception is `hold`: an independent attitude/
 -- heading hold for this loop only (BOXTVHOLD / "THRUST VECTOR ATTITUDE
 -- HOLD"), tacked on at the tail of the wire struct, followed by the per-axis

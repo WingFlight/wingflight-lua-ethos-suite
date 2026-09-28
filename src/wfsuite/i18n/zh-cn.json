@@ -789,13 +789,6 @@
           "reverse_text": false,
           "translation": "姿态保持"
         },
-        "auto_hover": {
-          "english": "Auto hover",
-          "max_length": 10,
-          "needs_translation": false,
-          "reverse_text": false,
-          "translation": "自动悬停"
-        },
         "bank": {
           "english": "Bank",
           "max_length": 4,
@@ -824,13 +817,6 @@
           "reverse_text": false,
           "translation": "水平模式"
         },
-        "max": {
-          "english": "Max",
-          "max_length": 3,
-          "needs_translation": false,
-          "reverse_text": false,
-          "translation": "麦克斯"
-        },
         "name": {
           "english": "Flight Modes",
           "max_length": 12,
@@ -851,20 +837,6 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "速率"
-        },
-        "throttle_assist": {
-          "english": "Throttle Assist",
-          "max_length": 15,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "Throttle Assist"
-        },
-        "time": {
-          "english": "Time",
-          "max_length": 4,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "Time"
         },
         "trainer_limits": {
           "english": "Trainer limits",

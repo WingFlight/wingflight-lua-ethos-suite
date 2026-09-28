@@ -360,7 +360,6 @@ local MENUS = {
       {title = "@i18n(app.modules.autolevel.acro_trainer)@", icon = lcd.loadMask("app/gfx/autolevel_trainer.png"), script = "app/pages/autolevel_trainer.lua"},
       {title = "@i18n(app.modules.autolevel.angle_mode)@", icon = lcd.loadMask("app/gfx/autolevel_angle.png"), script = "app/pages/autolevel_angle.lua"},
       {title = "@i18n(app.modules.autolevel.horizon_mode)@", icon = lcd.loadMask("app/gfx/autolevel_horizon.png"), script = "app/pages/autolevel_horizon.lua"},
-      {title = "@i18n(app.modules.autolevel.auto_hover)@", icon = lcd.loadMask("app/gfx/autolevel_auto_hover.png"), script = "app/pages/autolevel_auto_hover.lua"},
       {title = "@i18n(app.modules.autolevel.att_hold)@", icon = lcd.loadMask("app/gfx/autolevel_attitude_hold.png"), script = "app/pages/autolevel_attitude_hold.lua"},
     },
   },

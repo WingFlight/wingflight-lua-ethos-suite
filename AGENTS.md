@@ -143,7 +143,7 @@ Rules:
   and commands (MSP_GOVERNOR_CONFIG/PROFILE and MSP_RESCUE_PROFILE are
   gone outright; MSP_PID_PROFILE/MSP_PID_TUNING/MSP_RC_TUNING/
   MSP_MIXER_CONFIG keep their wire position but zero/ignore several
-  fields) while adding others (master_gain, autohover, cross_axis_relax,
+  fields) while adding others (master_gain, cross_axis_relax,
   gain_curve on MSP_PID_PROFILE) that a rotorflight-only cross-check
   would never surface. See `lib/msp_pid_profile.lua`'s and
   `lib/msp_rc_tuning.lua`'s own header comments for the full pattern and

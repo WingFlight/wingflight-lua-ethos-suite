@@ -51,6 +51,9 @@
 --     capped hard at `_max` percent and ramped in over `_trigger_ms`, only
 --     while Auto Hover's pitch correction stays pinned at max_rate. Same
 --     no-version-branching treatment as every other field in this file.
+--   * API 22.11 removed Auto Hover. Its 9 bytes keep their wire position
+--     as `reserved_0`..`reserved_8` (the FC sends zeros and ignores them);
+--     the codec round-trips whatever it read, like every other field.
 --
 -- Unlike lib/msp_pid_tuning.lua's MSP_PID_TUNING (all U16), this command
 -- mixes U8 and U16 fields -- FIELDS entries are {name, wireType} pairs, not
@@ -103,19 +106,15 @@ local FIELDS = {
   {"fw_tpa_gain", "U8"},
   {"fw_tpa_curve", "U8"},
   {"master_gain_0", "U16"}, {"master_gain_1", "U16"}, {"master_gain_2", "U16"}, -- roll, pitch, yaw
-  {"autohover_gain", "U8"},
-  {"autohover_max_angle", "U8"},
-  {"autohover_max_rate", "U16"},
+  {"reserved_0", "U8"}, {"reserved_1", "U8"}, {"reserved_2", "U16"}, -- was Auto Hover gain/max angle/max rate
   {"cross_axis_relax_strength", "U8"},
   {"cross_axis_relax_level", "U8"},
   {"cross_axis_relax_cutoff", "U8"},
   {"cross_axis_relax_pitch_strength", "U8"},
   {"gain_curve_0", "U8"}, {"gain_curve_1", "U8"}, {"gain_curve_2", "U8"}, -- roll, pitch, yaw
   {"atthold_max_rate", "U16"},
-  {"autohover_roll_deadband", "U8"},
-  {"autohover_throttle_assist_gain", "U8"},
-  {"autohover_throttle_assist_max", "U8"},
-  {"autohover_throttle_assist_trigger_ms", "U16"},
+  {"reserved_3", "U8"}, -- was Auto Hover roll deadband
+  {"reserved_4", "U8"}, {"reserved_5", "U8"}, {"reserved_6", "U16"}, -- was Auto Hover throttle assist
 }
 
 -- API 22.10 GPS speed attenuation, after the axis limits on the wire.
@@ -157,19 +156,14 @@ local SIMULATOR_RESPONSE = {
   100,  -- fw_tpa_gain
   0,    -- fw_tpa_curve
   100, 0, 100, 0, 100, 0, -- master_gain_0/1/2 (U16 LE: 100 -> 100, 0)
-  50,   -- autohover_gain
-  30,   -- autohover_max_angle
-  44, 1, -- autohover_max_rate (U16 LE: 300 = 0x012C -> 44, 1)
+  0, 0, 0, 0, -- reserved_0..2 (was Auto Hover)
   0,    -- cross_axis_relax_strength
   100,  -- cross_axis_relax_level
   10,   -- cross_axis_relax_cutoff
   0,    -- cross_axis_relax_pitch_strength
   0, 0, 0, -- gain_curve_0/1/2
   44, 1, -- atthold_max_rate (U16 LE: 300 = 0x012C -> 44, 1)
-  5,    -- autohover_roll_deadband
-  0,    -- autohover_throttle_assist_gain (disabled by default)
-  15,   -- autohover_throttle_assist_max
-  44, 1, -- autohover_throttle_assist_trigger_ms (U16 LE: 300 = 0x012C -> 44, 1)
+  0, 0, 0, 0, 0, -- reserved_3..6 (was Auto Hover)
   0, 0, 0, 0, -- angle roll/pitch, trainer roll/pitch: inherit shared limits
   100,  -- fw_spa_gain
   0,    -- fw_spa_curve (off)
@@ -231,9 +225,6 @@ local FIELD_META = {
   master_gain_0 = {min = 25, max = 1000, default = 100, suffix = "%"},
   master_gain_1 = {min = 25, max = 1000, default = 100, suffix = "%"},
   master_gain_2 = {min = 25, max = 1000, default = 100, suffix = "%"},
-  autohover_gain = {min = 0, max = 250, default = 50},
-  autohover_max_angle = {min = 0, max = 90, default = 30, suffix = "°"},
-  autohover_max_rate = {min = 0, max = 1800, default = 300, suffix = "°/s"},
   cross_axis_relax_strength = {min = 0, max = 100, default = 0, suffix = "%"},
   cross_axis_relax_level = {min = 10, max = 250, default = 100},
   cross_axis_relax_cutoff = {min = 1, max = 100, default = 10, suffix = "Hz"},
@@ -242,10 +233,6 @@ local FIELD_META = {
   gain_curve_1 = {min = 0, max = 8, default = 0},
   gain_curve_2 = {min = 0, max = 8, default = 0},
   atthold_max_rate = {min = 0, max = 1800, default = 300, suffix = "°/s"},
-  autohover_roll_deadband = {min = 0, max = 100, default = 5, suffix = "%"},
-  autohover_throttle_assist_gain = {min = 0, max = 100, default = 0, suffix = "%/s"},
-  autohover_throttle_assist_max = {min = 0, max = 50, default = 15, suffix = "%"},
-  autohover_throttle_assist_trigger_ms = {min = 0, max = 2000, default = 300, suffix = "ms"},
 }
 
 local msp_pid_profile = {
