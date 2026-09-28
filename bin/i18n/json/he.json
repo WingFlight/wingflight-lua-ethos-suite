@@ -1022,13 +1022,6 @@
           "reverse_text": true,
           "max_length": 10
         },
-        "horizon_mode": {
-          "english": "Horizon Mode",
-          "translation": "מצב אופק",
-          "needs_translation": false,
-          "reverse_text": true,
-          "max_length": 12
-        },
         "att_hold": {
           "english": "Att Hold",
           "translation": "שמור עמד",

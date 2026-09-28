@@ -17,7 +17,7 @@
 -- app/pages/master_gains.lua page instead, sharing this same codec --
 -- see that file's own header for why.
 -- The other fields in that MSP command (gyro/dterm/bterm cutoffs,
--- angle/horizon/trainer, atthold, etc.) are still read and
+-- angle/trainer, atthold, etc.) are still read and
 -- written back unchanged every round-trip -- lib/msp_pid_profile.lua's
 -- codec always handles the full struct -- this page just doesn't build an
 -- editable widget for them yet (most belong on dedicated pages once those

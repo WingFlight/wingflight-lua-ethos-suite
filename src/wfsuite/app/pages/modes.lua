@@ -29,7 +29,6 @@ local MODE_LOGIC_OPTIONS = {{"OR", 0}, {"AND", 1}}
 local MODE_NAME_BY_ID = {
   [0] = "ARM",
   [1] = "ANGLE",
-  [2] = "HORIZON",
   [3] = "ALTHOLD",
   [6] = "ATT HOLD",
   [13] = "BEEPER",

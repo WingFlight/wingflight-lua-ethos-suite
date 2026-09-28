@@ -29,7 +29,7 @@ local MIN_API_MINOR = 10
 -- picker (see app/pages/developer_settings.lua) -- add new entries here as
 -- Wingflight ships new MSP API versions; nothing else needs to change,
 -- the simulator byte-triplet is derived from the string itself below.
-local SIMULATABLE_VERSIONS = {"22.09", "22.10", "22.11"}
+local SIMULATABLE_VERSIONS = {"22.09", "22.10", "22.11", "22.12"}
 
 -- "Invalid" simulates talking to a *different firmware family* entirely
 -- (major 12 -- Rotorflight's own, per that project's own

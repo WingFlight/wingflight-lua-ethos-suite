@@ -1022,13 +1022,6 @@
           "reverse_text": false,
           "max_length": 10
         },
-        "horizon_mode": {
-          "english": "Horizon Mode",
-          "translation": "Modalità Orizzonte",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 12
-        },
         "att_hold": {
           "english": "Att Hold",
           "translation": "Att Hold",

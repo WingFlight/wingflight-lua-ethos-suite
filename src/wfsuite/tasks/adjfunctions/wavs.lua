@@ -55,7 +55,6 @@ return {
   [37] = "roll dterm cutoff",
   [38] = "yaw dterm cutoff",
   [45] = "angle level gain",
-  [46] = "horizon level gain",
   [47] = "acro gain",
   [56] = "pitch b gain",
   [57] = "roll b gain",
