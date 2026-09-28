@@ -1,4 +1,6 @@
--- Flight Tuning -> Advanced -> Auto Level -> Angle.
+-- Flight Tuning -> Advanced -> Auto Level -> Self-Level.
+-- Angle is no longer a flight mode (API 22.12); these settings set how firmly
+-- Failsafe, GPS Rescue, RTH and Loiter level the aircraft, and how far they bank.
 local autolevel = assert(loadfile("app/pages/autolevel.lua"))()
 
 local function buildFields(runtime, fieldLayout)

@@ -1016,18 +1016,11 @@
           "max_length": 12
         },
         "angle_mode": {
-          "english": "Angle Mode",
-          "translation": "Modo de ángulo",
-          "needs_translation": false,
+          "english": "Self-Level",
+          "translation": "Self-Level",
+          "needs_translation": true,
           "reverse_text": false,
           "max_length": 10
-        },
-        "horizon_mode": {
-          "english": "Horizon Mode",
-          "translation": "Modo horizonte",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 12
         },
         "att_hold": {
           "english": "Att Hold",

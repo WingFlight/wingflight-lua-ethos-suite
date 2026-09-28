@@ -776,11 +776,11 @@
           "translation": "Angle limits"
         },
         "angle_mode": {
-          "english": "Angle Mode",
+          "english": "Self-Level",
           "max_length": 10,
-          "needs_translation": false,
+          "needs_translation": true,
           "reverse_text": false,
-          "translation": "Modalità angolo"
+          "translation": "Self-Level"
         },
         "att_hold": {
           "english": "Att Hold",
@@ -809,13 +809,6 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Guadagno"
-        },
-        "horizon_mode": {
-          "english": "Horizon Mode",
-          "max_length": 12,
-          "needs_translation": false,
-          "reverse_text": false,
-          "translation": "Modalità Orizzonte"
         },
         "name": {
           "english": "Flight Modes",

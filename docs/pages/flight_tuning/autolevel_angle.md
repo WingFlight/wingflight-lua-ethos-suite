@@ -1,21 +1,18 @@
 ---
-title: "Angle Mode"
-sidebar_label: "Angle Mode"
+title: "Self-Level"
+sidebar_label: "Self-Level"
 sidebar_position: 20
-documentation_status: draft
+documentation_status: reviewed
 source: app/pages/autolevel_angle.lua
 ---
 
-# Angle Mode
+# Self-Level
 
-> Draft scaffold. Extracted labels may be incomplete or out of order. Behaviour,
-> displayed units, defaults and save effects require source review.
-
-TODO: Explain what this page controls and when a pilot would use it.
+Sets how the flight controller levels the aircraft when Failsafe, GPS Rescue, RTH or Loiter is flying it. Angle is no longer a flight mode you can put on a switch (firmware API 22.12), but these settings still control that self-leveling.
 
 ## Where to find it
 
-*Configuration* → *Flight Tuning* → *Advanced* → *Flight Modes* → *Angle Mode*
+*Configuration* → *Flight Tuning* → *Advanced* → *Flight Modes* → *Self-Level*
 
 Requires a running background task and a flight controller connection.
 
@@ -23,18 +20,18 @@ Requires a running background task and a flight controller connection.
 
 | Setting | What it does |
 | --- | --- |
-| Gain | TODO: explain behaviour, displayed units, range and conditions. |
-| Bank | TODO: explain behaviour, displayed units, range and conditions. |
-| Pitch | TODO: explain behaviour, displayed units, range and conditions. |
+| Gain | How firmly the aircraft is brought back to level, or to the bank and pitch GPS navigation asks for. 0–200, default 40. Higher corrects faster. |
+| Bank | The most roll the self-leveling may command, 10–90°. GPS navigation turns never bank past this. |
+| Pitch | The most pitch the self-leveling may command, 10–75°. |
 
 ## Notes
 
-TODO: Verify persistence, reboot behaviour, profile scope and any restrictions in
-this page and its shared helpers. Codec defaults may be UI fallbacks rather than
-firmware defaults; wire values may need scaling before display.
+The settings are per PID profile. Save writes them to the flight controller with the rest of the PID profile. Bank and Pitch default to the shared angle limit (55°).
+
+In-flight adjustment function 45 (Self-Level Gain) tunes Gain from a transmitter knob.
 
 ## Source
 
 [Page implementation](../../../src/wfsuite/app/pages/autolevel_angle.lua). Menu conditions come from `app/tool.lua`.
 
-*Scaffolded against WFSuite Ethos 2.3.1; content awaiting review.*
+*Reviewed against WFSuite Ethos 2.3.1 page and codec source and wingflight-firmware API 22.12; not radio-tested.*

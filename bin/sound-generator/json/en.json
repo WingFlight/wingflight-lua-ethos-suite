@@ -372,12 +372,6 @@
     "needs_translation": false
   },
   {
-    "file": "adjfunctions/horizon.wav",
-    "english": "horizon",
-    "translation": "horizon",
-    "needs_translation": false
-  },
-  {
     "file": "adjfunctions/acro.wav",
     "english": "Acro",
     "translation": "Acro",
@@ -519,18 +513,6 @@
     "file": "status/alerts/lowbat.wav",
     "english": "Battery Empty",
     "translation": "Battery Empty",
-    "needs_translation": false
-  },
-  {
-    "file": "events/mode/angle.wav",
-    "english": "Angle",
-    "translation": "Angle",
-    "needs_translation": false
-  },
-  {
-    "file": "events/mode/horizon.wav",
-    "english": "Horizon",
-    "translation": "Horizon",
     "needs_translation": false
   },
   {

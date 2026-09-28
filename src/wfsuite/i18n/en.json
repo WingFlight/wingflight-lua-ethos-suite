@@ -669,10 +669,10 @@
           "translation": "Angle limits"
         },
         "angle_mode": {
-          "english": "Angle Mode",
+          "english": "Self-Level",
           "max_length": 10,
           "needs_translation": false,
-          "translation": "Angle Mode"
+          "translation": "Self-Level"
         },
         "att_hold": {
           "english": "Att Hold",
@@ -697,12 +697,6 @@
           "max_length": 4,
           "needs_translation": false,
           "translation": "Gain"
-        },
-        "horizon_mode": {
-          "english": "Horizon Mode",
-          "max_length": 12,
-          "needs_translation": false,
-          "translation": "Horizon Mode"
         },
         "name": {
           "english": "Flight Modes",

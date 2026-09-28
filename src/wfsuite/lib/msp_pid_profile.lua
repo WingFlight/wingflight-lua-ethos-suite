@@ -51,6 +51,9 @@
 --     capped hard at `_max` percent and ramped in over `_trigger_ms`, only
 --     while Auto Hover's pitch correction stays pinned at max_rate. Same
 --     no-version-branching treatment as every other field in this file.
+--   * API 22.12 removed Horizon; its level-strength byte is `reserved_7`.
+--     Angle is no longer a mode, but `angle_level_*` still set the
+--     failsafe/GPS self-leveling.
 --   * API 22.11 removed Auto Hover. Its 9 bytes keep their wire position
 --     as `reserved_0`..`reserved_8` (the FC sends zeros and ignores them);
 --     the codec round-trips whatever it read, like every other field.
@@ -97,7 +100,7 @@ local FIELDS = {
   {"bounceback_0", "U8"}, {"bounceback_1", "U8"}, {"bounceback_2", "U8"}, -- I-term Relax score 1-10 (API 22.9)
   {"angle_level_strength", "U8"},
   {"angle_level_limit", "U8"},
-  {"horizon_level_strength", "U8"},
+  {"reserved_7", "U8"}, -- was Horizon level strength (removed in API 22.12)
   {"trainer_gain", "U8"},
   {"trainer_angle_limit", "U8"},
   {"atthold_gain", "U8"},
@@ -147,7 +150,7 @@ local SIMULATOR_RESPONSE = {
   5, 5, 5,      -- bounceback_0/1/2
   40,   -- angle_level_strength
   55,   -- angle_level_limit
-  0,    -- horizon_level_strength
+  0,    -- reserved_7 (was Horizon)
   75,   -- trainer_gain
   20,   -- trainer_angle_limit
   40,   -- atthold_gain
@@ -210,7 +213,6 @@ local FIELD_META = {
   bounceback_1 = {min = 1, max = 10, default = 5},
   bounceback_2 = {min = 1, max = 10, default = 5},
   angle_level_strength = {min = 0, max = 200, default = 40},
-  horizon_level_strength = {min = 0, max = 200, default = 40},
   trainer_gain = {min = 25, max = 255, default = 75},
   atthold_gain = {min = 0, max = 250, default = 40},
   atthold_deadband = {min = 0, max = 100, default = 5, suffix = "%"},
