@@ -336,7 +336,7 @@ local MENUS = {
     entries = {
       {title = "@i18n(app.modules.pids.name)@", icon = lcd.loadMask("app/gfx/pids.png"), script = "app/pages/pids.lua"},
       {title = "@i18n(app.modules.rates.name)@", icon = lcd.loadMask("app/gfx/rates.png"), script = "app/pages/rates.lua"},
-      -- Flight Feel (Gain, Curve, Lock, Bounce Back) is where pilots start
+      -- Flight Feel (Master Gain, I-term Decay, I-term Relax) is where pilots start
       -- tuning, so it sits beside PIDs and Rates rather than under Advanced
       -- (see app/pages/master_gains.lua's own header).
       {title = "@i18n(app.modules.master_gains.name)@", icon = lcd.loadMask("app/gfx/master_gains.png"), script = "app/pages/master_gains.lua"},

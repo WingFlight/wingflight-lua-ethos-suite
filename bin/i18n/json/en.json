@@ -7011,16 +7011,16 @@
           "max_length": 4
         },
         "lock": {
-          "english": "Lock",
-          "translation": "Lock",
+          "english": "Decay",
+          "translation": "Decay",
           "needs_translation": false,
-          "max_length": 4
+          "max_length": 5
         },
         "bounceback": {
-          "english": "Bounce Back",
-          "translation": "Bounce Back",
+          "english": "Relax",
+          "translation": "Relax",
           "needs_translation": false,
-          "max_length": 11
+          "max_length": 5
         },
         "curve": {
           "english": "Curve",

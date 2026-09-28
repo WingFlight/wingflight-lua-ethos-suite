@@ -4573,10 +4573,10 @@
           "translation": "Yaw"
         },
         "bounceback": {
-          "english": "Bounce Back",
-          "max_length": 11,
+          "english": "Relax",
+          "max_length": 5,
           "needs_translation": false,
-          "translation": "Bounce Back"
+          "translation": "Relax"
         },
         "curve": {
           "english": "Curve",
@@ -4591,10 +4591,10 @@
           "translation": "Gain"
         },
         "lock": {
-          "english": "Lock",
-          "max_length": 4,
+          "english": "Decay",
+          "max_length": 5,
           "needs_translation": false,
-          "translation": "Lock"
+          "translation": "Decay"
         },
         "name": {
           "english": "Flight Feel",

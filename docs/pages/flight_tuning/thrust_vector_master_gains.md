@@ -24,8 +24,8 @@ Requires a running background task and a flight controller connection.
 | Setting | What it does |
 | --- | --- |
 | TODO | Inspect the page and its helpers; automatic extraction found no controls. |
-| Lock (per axis) | How long that axis holds on to a correction after a gust or bump before letting it go (the I-term decay time), in seconds (0.01-1.00, default 0.60). Longer feels more locked in; shorter feels freer and suits 3D flying. Gain sets how hard the axis pushes back, Lock sets for how long. Also an in-flight adjustment function per axis. |
-| Bounce Back (per axis) | Bounce Back, 1-10 (default 5): how strongly the axis stops a fast roll, loop or snap from bouncing back when you centre the stick. Higher = less bounce-back; lower keeps more hold through long, sustained rolls and loops. Most airframes end up between 5 and 9; raise it a step at a time if the model bounces back. Also an in-flight adjustment function per axis. |
+| Decay (per axis) | How long that axis holds on to a correction after a gust or bump before letting it go (I-term decay time), in seconds (0.01-1.00, default 0.60). Longer feels more locked in; shorter feels freer and suits 3D flying. Master Gain sets how hard the axis pushes back, I-term Decay sets for how long. Also an in-flight adjustment function per axis. |
+| Relax (per axis) | I-term Relax, 1-10 (default 5): how strongly the axis stops a fast roll, loop or snap from bouncing back when you centre the stick. Higher = more relax, so less bounce-back; lower keeps more hold through long, sustained rolls and loops. Most airframes end up between 5 and 9; raise it a step at a time if the model bounces back. Also an in-flight adjustment function per axis. |
 
 ## Notes
 

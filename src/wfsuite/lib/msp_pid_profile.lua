@@ -84,7 +84,7 @@ local FIELDS = {
   {"gyro_cutoff_0", "U8"}, {"gyro_cutoff_1", "U8"}, {"gyro_cutoff_2", "U8"},
   {"dterm_cutoff_0", "U8"}, {"dterm_cutoff_1", "U8"}, {"dterm_cutoff_2", "U8"},
   {"iterm_relax_level_0", "U8"}, {"iterm_relax_level_1", "U8"}, {"iterm_relax_level_2", "U8"}, -- roll, pitch, yaw (API 22.8)
-  {"bounceback_0", "U8"}, {"bounceback_1", "U8"}, {"bounceback_2", "U8"}, -- Bounce Back 1-10 (API 22.9)
+  {"bounceback_0", "U8"}, {"bounceback_1", "U8"}, {"bounceback_2", "U8"}, -- I-term Relax score 1-10 (API 22.9)
   {"angle_level_strength", "U8"},
   {"angle_level_limit", "U8"},
   {"horizon_level_strength", "U8"},
