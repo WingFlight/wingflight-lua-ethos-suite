@@ -26,12 +26,12 @@
 --
 -- Everything else below is loadfile()'d lazily instead, on first actual
 -- need (matching the same ensureX() pattern already used in
--- widgets/dashboard.lua): navigation/menuContainer are only needed once
--- create() actually runs, memstats only in close(), and the two protocol
+-- widgets/dashboard.lua): navigation/menuContainer/memstats are only
+-- needed once create() actually runs, and the two protocol
 -- guards only get attached to MENUS right before create()'s own
 -- menuContainer.openRoot() call. Deferring menuContainer's own load this
 -- way also defers its own further eager chain (app/close_key.lua,
--- app/header.lua, a second lib/memstats.lua load, app/tile_grid.lua) to
+-- app/header.lua, app/tile_grid.lua) to
 -- that same first-open moment instead of paying all of it at boot for
 -- pilots who may never open this tool in a given session.
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
@@ -562,6 +562,7 @@ local function create()
   taskAlertOpen = false
   taskAlertShown = false
   updateDeveloperMode()
+  ensureMemstats()
   ensureMenuGuards()
   ensureMenuContainer().openRoot(ensureNav(), ROOT_ENTRIES, setEventHandler, setWakeupHandler, setPaintHandler, setCleanupHandler, MENUS, taskGuard)
   -- Lets background-screen widgets (widgets/dashboard.lua) skip their own
@@ -603,12 +604,20 @@ end
 -- run after form mutation has already been forbidden, and Ethos owns final
 -- form teardown during app exit.
 local function close(state)
-  ensureMemstats().print("app.close (start)")
+  -- memstats and nav are nil-checked, not ensure()d: create() sets both, so
+  -- if either is absent the tool was never opened, there is no nav stack to
+  -- clear, and ensure()ing them here would load the very modules this file
+  -- defers to first open.
+  if memstats then
+    memstats.print("app.close (start)")
+  end
   if currentCleanupHandler then
     currentCleanupHandler()
     currentCleanupHandler = nil
   end
-  ensureNav().clear()
+  if nav then
+    nav.clear()
+  end
   setEventHandler(nil)
   setWakeupHandler(nil)
   setPaintHandler(nil)
@@ -617,7 +626,9 @@ local function close(state)
     package.loaded[key] = nil
   end
   collectgarbage("collect")
-  ensureMemstats().print("app.close (end)")
+  if memstats then
+    memstats.print("app.close (end)")
+  end
 end
 
 local tool = {

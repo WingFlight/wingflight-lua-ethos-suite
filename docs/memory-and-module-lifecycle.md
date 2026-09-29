@@ -34,6 +34,11 @@ this section is about *whether to defer registering a whole subsystem at
 all*; §2 is about the mechanics of what happens when the same file is
 `loadfile()`'d more than once regardless.
 
+**Scope of the rule:** it covers *registration* -- whether a subsystem's
+callbacks are wired up eagerly or behind a proxy. It does not cover *when a
+subsystem loads the UI subtree underneath it*. That narrower case is §10,
+and deferring it is worth doing.
+
 ## 2. `loadfile()` has no `require()`-style caching
 
 `require()` caches by module name: the second call to `require("foo")`
@@ -206,11 +211,60 @@ case.** A targeted fix (self-caching, subscription cleanup, in-place
 clearing) that actually reduces *live references* is the only kind of
 fix that can work here.
 
+## 10. Deferring a subsystem's UI subtree is not §1
+
+`app/tool.lua` still registers eagerly at boot (§1), but everything the tool
+only needs once it is open -- `app/navigation.lua`, `app/menu_container.lua`
+(and through it `app/close_key.lua`, `app/header.lua`, `app/tile_grid.lua`),
+`app/esc_protocol_guard.lua`, `app/servo_bus_guard.lua` (and their
+`lib/msp_esc_sensor_config.lua`/`lib/msp_serial_config.lua` codecs), and
+`lib/memstats.lua` -- is loaded through `ensureX()` helpers from `create()`,
+not at module scope. Only `lib/bus.lua` stays eager, because the tool's
+`bus.subscribe()` calls have to be live from boot.
+
+Two rules keep that deferral intact:
+
+- **Nothing on the boot path may call an `ensureX()`.** `close()` nil-checks
+  `memstats` and `nav` instead of ensuring them: if they are absent the tool
+  was never opened, and ensuring them there would load the very modules the
+  deferral exists to keep out.
+- **A module the subtree loads must not be required at module scope by
+  something that loads at boot.** `menu_container.lua` requires `memstats` at
+  its call site for the same reason.
+
+The same change in rotorflight-lua-ethos-suite (#2421) measured **−60.4 kB**
+of resting Lua heap on an X18RS, connected with the tool closed. The saving
+is in the **resting** state, not the peak: with the tool open the modules
+are loaded either way, so a pilot who keeps the tool open gets nothing back.
+Wingflight had already deferred most of this subtree before that port; the
+port added the `close()` nil-checks and the `menu_container.lua` change.
+
+Two harnesses pin it, both run in the PR workflow:
+
+- `bin/tool_ui/verify_tool_ui_lazy.lua` -- none of the modules above are in
+  `package.loaded` before `create()` (including after a `close()` with no
+  `create()`), all are after, and neither `close()` nor a second `create()`
+  loads anything more.
+- `bin/tool_ui/verify_no_extra_msp.lua` -- counts `msp.request` at
+  `bus.publish` over three tool cycles through both guarded menus, with 100
+  wakeups inside one. It answers every request as a live FC would; without
+  that, a guard's `pending` flag hides a broken `attempted` latch and the
+  harness cannot go red.
+
+**A measurement trap from that work:** an A/B between two builds captured
+under different radio state gives a spectacularly wrong number (−523.5 kB
+upstream, of which 463.1 kB was Lua deleted off the card between runs). If
+the numbers do not decompose, add a third measurement, and compare
+`bmpRamAvail` between runs -- if it differs, the screen state differs and the
+comparison is void.
+
 ## Quick reference
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | Considering deferring/proxying a top-level subsystem's registration to save startup RAM | Already tried and reverted -- measured worse retained-RAM growth | Don't, without new on-device evidence (§1) |
+| A rarely opened page or tool pulls a big UI subtree in at boot | Modules required at module scope, retained for the session by the `requireModule` cache | Load at the point of use via `ensureX()`; nil-check, don't ensure, in `close()` (§10) |
+| An A/B between two builds gives an implausibly large delta | The runs had different radio state | Add a third measurement; compare `bmpRamAvail` first (§10) |
 | RAM climbs on every visit to the same page | Module reloaded fresh via `loadfile()`, rebuilding module-level tables | Self-cache (§3) |
 | RAM climbs *and* stale/duplicate event behavior appears over time | Module subscribes to the bus at load time, never cached | Self-cache (§3/§4) — non-negotiable |
 | A page's own live-data callback keeps firing after leaving the page | Page subscribed in open(), never unsubscribed in close() | Pair subscribe/unsubscribe (§5) |
