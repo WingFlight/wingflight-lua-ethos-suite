@@ -854,6 +854,12 @@
           "needs_translation": false,
           "translation": "Bank"
         },
+        "damping": {
+          "english": "Damping",
+          "max_length": 7,
+          "needs_translation": false,
+          "translation": "Damping"
+        },
         "pitch": {
           "english": "Pitch",
           "max_length": 5,

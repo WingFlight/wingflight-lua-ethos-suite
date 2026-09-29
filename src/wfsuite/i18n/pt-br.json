@@ -796,6 +796,13 @@
           "reverse_text": false,
           "translation": "Bank"
         },
+        "damping": {
+          "english": "Damping",
+          "max_length": 7,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Damping"
+        },
         "deadband": {
           "english": "Deadband",
           "max_length": 8,

@@ -994,6 +994,13 @@
           "translation": "Bank",
           "reverse_text": false
         },
+        "damping": {
+          "english": "Damping",
+          "translation": "Damping",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 7
+        },
         "pitch": {
           "english": "Pitch",
           "max_length": 5,
