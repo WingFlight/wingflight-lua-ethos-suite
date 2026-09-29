@@ -8664,6 +8664,183 @@
           "reverse_text": false,
           "translation": "Yaw. oříznout %"
         }
+      },
+      "tune_advisor": {
+        "big_inputs_fmt": {
+          "english": "Big inputs get less: %sx small, %sx medium",
+          "max_length": 42,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Big inputs get less: %sx small, %sx medium"
+        },
+        "clear_prompt": {
+          "english": "Clear the collected flight data?",
+          "max_length": 32,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Clear the collected flight data?"
+        },
+        "collecting": {
+          "english": "collecting",
+          "max_length": 10,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "collecting"
+        },
+        "data": {
+          "english": "Data",
+          "max_length": 4,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Data"
+        },
+        "data_fmt": {
+          "english": "%dm %02ds, %s",
+          "max_length": 13,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "%dm %02ds, %s"
+        },
+        "ff_hot_fmt": {
+          "english": "F hot (%sx): F %d->%d, rate %d->%d",
+          "max_length": 34,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "F hot (%sx): F %d->%d, rate %d->%d"
+        },
+        "ff_irregular": {
+          "english": "F: response too irregular to judge",
+          "max_length": 34,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "F: response too irregular to judge"
+        },
+        "ff_low_fmt": {
+          "english": "F low (%sx): F %d->%d, rate %d->%d",
+          "max_length": 34,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "F low (%sx): F %d->%d, rate %d->%d"
+        },
+        "ff_more_fmt": {
+          "english": "F: fly more rate-mode stick (%d%%)",
+          "max_length": 34,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "F: fly more rate-mode stick (%d%%)"
+        },
+        "ff_ok_fmt": {
+          "english": "F matches the airframe (%sx)",
+          "max_length": 28,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "F matches the airframe (%sx)"
+        },
+        "full_stick_fmt": {
+          "english": "Full stick asks %d deg/s, gets %d: lower rate",
+          "max_length": 45,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Full stick asks %d deg/s, gets %d: lower rate"
+        },
+        "match_fmt": {
+          "english": "%sx, %d ms",
+          "max_length": 10,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "%sx, %d ms"
+        },
+        "name": {
+          "english": "Tune Advisor",
+          "max_length": 12,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Tune Advisor"
+        },
+        "paused": {
+          "english": "paused",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "paused"
+        },
+        "pitch": {
+          "english": "Pitch",
+          "max_length": 5,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Pitch"
+        },
+        "roll": {
+          "english": "Roll",
+          "max_length": 4,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Roll"
+        },
+        "stops_brake_fmt": {
+          "english": "Stops bounce %d%%: raise P %d->%d or add B",
+          "max_length": 42,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Stops bounce %d%%: raise P %d->%d or add B"
+        },
+        "stops_fix_f_fmt": {
+          "english": "Stops bounce %d%%: match F first, then raise P",
+          "max_length": 46,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Stops bounce %d%%: match F first, then raise P"
+        },
+        "stops_more_fmt": {
+          "english": "Stops: need more releases (%d/%d)",
+          "max_length": 33,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Stops: need more releases (%d/%d)"
+        },
+        "stops_ok_fmt": {
+          "english": "Stops clean (%d%% rebound)",
+          "max_length": 26,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Stops clean (%d%% rebound)"
+        },
+        "stops_relax_fmt": {
+          "english": "Stops bounce %d%%, I pushes back: raise Relax",
+          "max_length": 45,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Stops bounce %d%%, I pushes back: raise Relax"
+        },
+        "throttle_fmt": {
+          "english": "Response %sx low throttle, %sx high",
+          "max_length": 35,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Response %sx low throttle, %sx high"
+        },
+        "unsupported": {
+          "english": "Needs newer firmware",
+          "max_length": 20,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Needs newer firmware"
+        },
+        "yaw": {
+          "english": "Yaw",
+          "max_length": 3,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Yaw"
+        },
+        "yaw_not_judged": {
+          "english": "Rudder response is not judged",
+          "max_length": 29,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Rudder response is not judged"
+        }
       }
     },
     "msg_background_task_missing_body": {

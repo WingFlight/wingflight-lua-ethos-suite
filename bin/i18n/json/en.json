@@ -7332,6 +7332,158 @@
           "needs_translation": false,
           "max_length": 5
         }
+      },
+      "tune_advisor": {
+        "name": {
+          "english": "Tune Advisor",
+          "translation": "Tune Advisor",
+          "needs_translation": false,
+          "max_length": 12
+        },
+        "data": {
+          "english": "Data",
+          "translation": "Data",
+          "needs_translation": false,
+          "max_length": 4
+        },
+        "data_fmt": {
+          "english": "%dm %02ds, %s",
+          "translation": "%dm %02ds, %s",
+          "needs_translation": false,
+          "max_length": 13
+        },
+        "collecting": {
+          "english": "collecting",
+          "translation": "collecting",
+          "needs_translation": false,
+          "max_length": 10
+        },
+        "paused": {
+          "english": "paused",
+          "translation": "paused",
+          "needs_translation": false,
+          "max_length": 6
+        },
+        "unsupported": {
+          "english": "Needs newer firmware",
+          "translation": "Needs newer firmware",
+          "needs_translation": false,
+          "max_length": 20
+        },
+        "clear_prompt": {
+          "english": "Clear the collected flight data?",
+          "translation": "Clear the collected flight data?",
+          "needs_translation": false,
+          "max_length": 32
+        },
+        "roll": {
+          "english": "Roll",
+          "translation": "Roll",
+          "needs_translation": false,
+          "max_length": 4
+        },
+        "pitch": {
+          "english": "Pitch",
+          "translation": "Pitch",
+          "needs_translation": false,
+          "max_length": 5
+        },
+        "yaw": {
+          "english": "Yaw",
+          "translation": "Yaw",
+          "needs_translation": false,
+          "max_length": 3
+        },
+        "match_fmt": {
+          "english": "%sx, %d ms",
+          "translation": "%sx, %d ms",
+          "needs_translation": false,
+          "max_length": 10
+        },
+        "ff_more_fmt": {
+          "english": "F: fly more rate-mode stick (%d%%)",
+          "translation": "F: fly more rate-mode stick (%d%%)",
+          "needs_translation": false,
+          "max_length": 34
+        },
+        "ff_irregular": {
+          "english": "F: response too irregular to judge",
+          "translation": "F: response too irregular to judge",
+          "needs_translation": false,
+          "max_length": 34
+        },
+        "ff_hot_fmt": {
+          "english": "F hot (%sx): F %d->%d, rate %d->%d",
+          "translation": "F hot (%sx): F %d->%d, rate %d->%d",
+          "needs_translation": false,
+          "max_length": 34
+        },
+        "ff_low_fmt": {
+          "english": "F low (%sx): F %d->%d, rate %d->%d",
+          "translation": "F low (%sx): F %d->%d, rate %d->%d",
+          "needs_translation": false,
+          "max_length": 34
+        },
+        "ff_ok_fmt": {
+          "english": "F matches the airframe (%sx)",
+          "translation": "F matches the airframe (%sx)",
+          "needs_translation": false,
+          "max_length": 28
+        },
+        "throttle_fmt": {
+          "english": "Response %sx low throttle, %sx high",
+          "translation": "Response %sx low throttle, %sx high",
+          "needs_translation": false,
+          "max_length": 35
+        },
+        "big_inputs_fmt": {
+          "english": "Big inputs get less: %sx small, %sx medium",
+          "translation": "Big inputs get less: %sx small, %sx medium",
+          "needs_translation": false,
+          "max_length": 42
+        },
+        "full_stick_fmt": {
+          "english": "Full stick asks %d deg/s, gets %d: lower rate",
+          "translation": "Full stick asks %d deg/s, gets %d: lower rate",
+          "needs_translation": false,
+          "max_length": 45
+        },
+        "stops_more_fmt": {
+          "english": "Stops: need more releases (%d/%d)",
+          "translation": "Stops: need more releases (%d/%d)",
+          "needs_translation": false,
+          "max_length": 33
+        },
+        "stops_ok_fmt": {
+          "english": "Stops clean (%d%% rebound)",
+          "translation": "Stops clean (%d%% rebound)",
+          "needs_translation": false,
+          "max_length": 26
+        },
+        "stops_relax_fmt": {
+          "english": "Stops bounce %d%%, I pushes back: raise Relax",
+          "translation": "Stops bounce %d%%, I pushes back: raise Relax",
+          "needs_translation": false,
+          "max_length": 45
+        },
+        "stops_fix_f_fmt": {
+          "english": "Stops bounce %d%%: match F first, then raise P",
+          "translation": "Stops bounce %d%%: match F first, then raise P",
+          "needs_translation": false,
+          "max_length": 46
+        },
+        "stops_brake_fmt": {
+          "english": "Stops bounce %d%%: raise P %d->%d or add B",
+          "translation": "Stops bounce %d%%: raise P %d->%d or add B",
+          "needs_translation": false,
+          "max_length": 42
+        },
+        "yaw_not_judged": {
+          "english": "Rudder response is not judged",
+          "translation": "Rudder response is not judged",
+          "needs_translation": false,
+          "max_length": 29
+        }
       }
     },
     "menu_section_controls": {

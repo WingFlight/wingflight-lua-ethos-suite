@@ -340,6 +340,8 @@ local MENUS = {
       -- tuning, so it sits beside PIDs and Rates rather than under Advanced
       -- (see app/pages/master_gains.lua's own header).
       {title = "@i18n(app.modules.master_gains.name)@", icon = lcd.loadMask("app/gfx/master_gains.png"), script = "app/pages/master_gains.lua"},
+      -- Reads what the FC measured in flight and suggests changes to the pages above.
+      {title = "@i18n(app.modules.tune_advisor.name)@", icon = lcd.loadMask("app/gfx/flight_tuning.png"), script = "app/pages/tune_advisor.lua"},
       {title = "@i18n(app.menu_section_advanced)@", icon = lcd.loadMask("app/gfx/advanced.png"), menuId = "advanced_menu"},
     },
   },
