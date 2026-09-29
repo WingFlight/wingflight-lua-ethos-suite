@@ -1,22 +1,25 @@
 -- Configuration -> Flight Tuning -> Tune Advisor page.
 --
 -- Reads the FC's in-flight rate-loop statistics (lib/msp_tune_advisor.lua,
--- wingflight-firmware flight/tune_advisor.c) and turns them into one short
--- suggestion per topic per axis. The firmware only measures; the rules
--- below are the advice, kept here so they can change without a flash.
+-- wingflight-firmware flight/tune_advisor.c) and turns them into concrete
+-- changes, one axis at a time: what was measured, which setting to change
+-- (named by the page it lives on, in the units that page shows), and why.
+-- The firmware only measures; the rules below are the advice, kept here so
+-- they can change without a flash.
 --
--- Rules, per axis (yaw's rudder response is not judged):
+-- Rules, per axis (roll and pitch; yaw's rudder response is not judged):
 -- - Feed-forward match (gyro / setpoint at the best delay). Above FF_HOT the
---   aircraft outruns the stick: suggest lower F and higher rates by the
---   same factor, which keeps the stick-to-surface feel. Below FF_LOW it
---   lags: the reverse. One step is capped at FF_STEP_MAX so the pilot flies
---   and re-checks rather than jumping.
--- - Throttle spread and big-input fall-off are shown as facts, no action.
+--   aircraft outruns the stick: lower F and raise RC Rate by the same
+--   factor, which keeps the stick-to-surface feel. Below FF_LOW, the
+--   reverse. One step is capped at FF_STEP_MAX so the pilot flies and
+--   re-checks rather than jumping.
 -- - Full stick (roll only; 3D pitch parks at full elevator on purpose):
---   surfaces saturated and the rate reached well below the rate asked.
--- - Stick releases: the rebound after a stop. I-term pushing back points
---   at I-term Relax; otherwise the controller is barely braking, so more P
---   (once F matches) or B.
+--   surfaces saturated and the rate reached well below the rate asked, so
+--   RC Rate is suggested at what the model actually reaches.
+-- - Throttle spread is shown as a fact, last, when there is room.
+-- - Stick releases: the rebound after a stop. I-term pushing back points at
+--   I-term Relax; with F still off, F comes first; otherwise the controller
+--   is barely braking, so more P (or B).
 --
 -- Clear (header Tool button) resets the FC's statistics; they also reset
 -- on their own when the tune changes.
@@ -33,37 +36,56 @@ local BTN_OK = "@i18n(app.btn_ok)@"
 local BTN_CANCEL = "@i18n(app.btn_cancel)@"
 
 local T = {
+  axis = "@i18n(app.modules.tune_advisor.axis)@",
   data = "@i18n(app.modules.tune_advisor.data)@",
   dataFmt = "@i18n(app.modules.tune_advisor.data_fmt)@",
   collecting = "@i18n(app.modules.tune_advisor.collecting)@",
   paused = "@i18n(app.modules.tune_advisor.paused)@",
   unsupported = "@i18n(app.modules.tune_advisor.unsupported)@",
   clearPrompt = "@i18n(app.modules.tune_advisor.clear_prompt)@",
-  axes = {
-    "@i18n(app.modules.tune_advisor.roll)@",
-    "@i18n(app.modules.tune_advisor.pitch)@",
-    "@i18n(app.modules.tune_advisor.yaw)@",
-  },
-  matchFmt = "@i18n(app.modules.tune_advisor.match_fmt)@",
-  ffMoreFmt = "@i18n(app.modules.tune_advisor.ff_more_fmt)@",
-  ffIrregular = "@i18n(app.modules.tune_advisor.ff_irregular)@",
-  ffHotFmt = "@i18n(app.modules.tune_advisor.ff_hot_fmt)@",
-  ffLowFmt = "@i18n(app.modules.tune_advisor.ff_low_fmt)@",
-  ffOkFmt = "@i18n(app.modules.tune_advisor.ff_ok_fmt)@",
-  throttleFmt = "@i18n(app.modules.tune_advisor.throttle_fmt)@",
-  bigInputsFmt = "@i18n(app.modules.tune_advisor.big_inputs_fmt)@",
-  fullStickFmt = "@i18n(app.modules.tune_advisor.full_stick_fmt)@",
+  response = "@i18n(app.modules.tune_advisor.response)@",
+  stops = "@i18n(app.modules.tune_advisor.stops)@",
+  changes = "@i18n(app.modules.tune_advisor.changes)@",
+  why = "@i18n(app.modules.tune_advisor.why)@",
+
+  respMoreFmt = "@i18n(app.modules.tune_advisor.resp_more_fmt)@",
+  respUneven = "@i18n(app.modules.tune_advisor.resp_uneven)@",
+  respFastFmt = "@i18n(app.modules.tune_advisor.resp_fast_fmt)@",
+  respSlowFmt = "@i18n(app.modules.tune_advisor.resp_slow_fmt)@",
+  respOk = "@i18n(app.modules.tune_advisor.resp_ok)@",
   stopsMoreFmt = "@i18n(app.modules.tune_advisor.stops_more_fmt)@",
-  stopsOkFmt = "@i18n(app.modules.tune_advisor.stops_ok_fmt)@",
-  stopsRelaxFmt = "@i18n(app.modules.tune_advisor.stops_relax_fmt)@",
-  stopsFixFFmt = "@i18n(app.modules.tune_advisor.stops_fix_f_fmt)@",
-  stopsBrakeFmt = "@i18n(app.modules.tune_advisor.stops_brake_fmt)@",
-  yawNotJudged = "@i18n(app.modules.tune_advisor.yaw_not_judged)@",
+  stopsValueFmt = "@i18n(app.modules.tune_advisor.stops_value_fmt)@",
+
+  actFlyRoll = "@i18n(app.modules.tune_advisor.act_fly_roll)@",
+  actFlyPitch = "@i18n(app.modules.tune_advisor.act_fly_pitch)@",
+  actFFmt = "@i18n(app.modules.tune_advisor.act_f_fmt)@",
+  actRateFmt = "@i18n(app.modules.tune_advisor.act_rate_fmt)@",
+  actRelaxFmt = "@i18n(app.modules.tune_advisor.act_relax_fmt)@",
+  actPFmt = "@i18n(app.modules.tune_advisor.act_p_fmt)@",
+  actNone = "@i18n(app.modules.tune_advisor.act_none)@",
+
+  whyMore = "@i18n(app.modules.tune_advisor.why_more)@",
+  whyUneven = "@i18n(app.modules.tune_advisor.why_uneven)@",
+  whyFast = "@i18n(app.modules.tune_advisor.why_fast)@",
+  whySlow = "@i18n(app.modules.tune_advisor.why_slow)@",
+  whyKeepFeel = "@i18n(app.modules.tune_advisor.why_keep_feel)@",
+  whyFullFmt = "@i18n(app.modules.tune_advisor.why_full_fmt)@",
+  whyThrHighFmt = "@i18n(app.modules.tune_advisor.why_thr_high_fmt)@",
+  whyThrLowFmt = "@i18n(app.modules.tune_advisor.why_thr_low_fmt)@",
+  whyRelax = "@i18n(app.modules.tune_advisor.why_relax)@",
+  whyFixFFmt = "@i18n(app.modules.tune_advisor.why_fix_f_fmt)@",
+  whyBrakeFmt = "@i18n(app.modules.tune_advisor.why_brake_fmt)@",
+  whyOk = "@i18n(app.modules.tune_advisor.why_ok)@",
 }
 
-local REFRESH_INTERVAL_SECONDS = 2
+-- Roll and pitch only: the FC reports yaw too, but rudder response is not judged
+local AXES = {
+  {"@i18n(app.modules.tune_advisor.roll)@", 1},
+  {"@i18n(app.modules.tune_advisor.pitch)@", 2},
+}
+local AXIS_ROLL = 1
 
-local AXIS_ROLL, AXIS_PITCH, AXIS_YAW = 1, 2, 3
+local REFRESH_INTERVAL_SECONDS = 2
 
 -- Feed-forward match
 local FF_MIN_COUNT = 1000       -- 10 s of usable 40-200 deg/s stick
@@ -71,13 +93,13 @@ local FF_MIN_CORR = 0.85
 local FF_HOT = 1.15
 local FF_LOW = 0.85
 local FF_STEP_MAX = 0.2         -- change F by at most 20% per step
-local F_MIN, F_MAX = 0, 1000    -- PID_GAIN_MAX
-local RC_RATE_MAX = 200         -- CONTROL_RATE_CONFIG_RC_RATES_MAX; deg/s = rc_rate x 5
+local F_MAX = 1000              -- PID_GAIN_MAX
+local RC_RATE_MAX = 200         -- CONTROL_RATE_CONFIG_RC_RATES_MAX
+local RC_RATE_DPS = 5           -- the Rates page shows RC Rate as raw x 5 deg/s
 
--- Facts worth showing
+-- Throttle fact
 local BAND_MIN_COUNT = 300
 local THROTTLE_SPREAD = 1.25
-local BIG_INPUT_FALLOFF = 1.3
 
 -- Full stick
 local FULL_MIN_COUNT = 100
@@ -89,8 +111,10 @@ local STOPS_MIN = 10
 local REBOUND_BAD = 0.12
 local ITERM_PUSH = 0.03         -- I at release, surface units
 local P_STEP = 1.2
+local RELAX_MAX = 10
 
-local LINES_PER_AXIS = 3
+local MAX_ACTIONS = 3
+local MAX_WHYS = 3
 
 local function round(v)
   return math.floor(v + 0.5)
@@ -102,76 +126,88 @@ local function clamp(v, lo, hi)
   return v
 end
 
-local function ratioText(v)
-  return string.format("%.2f", v)
-end
-
 local function ffJudged(a)
   return a.ffCount >= FF_MIN_COUNT and a.ffCorr >= FF_MIN_CORR
 end
 
-local function ffAdvice(a, axis)
-  if axis == AXIS_YAW then return T.yawNotJudged end
-  if a.ffCount < FF_MIN_COUNT then
-    return string.format(T.ffMoreFmt, math.floor(100 * a.ffCount / FF_MIN_COUNT))
-  end
-  if a.ffCorr < FF_MIN_CORR then return T.ffIrregular end
-
-  local g = a.ffGain
-  if g > FF_HOT or g < FF_LOW then
-    local scale = clamp(1 / g, 1 - FF_STEP_MAX, 1 + FF_STEP_MAX)
-    local newF = clamp(round(a.F * scale), F_MIN, F_MAX)
-    -- Keep stick-to-surface the same: F x rate is what the pilot feels
-    local newRate = (newF > 0) and clamp(round(a.rcRate * a.F / newF), 1, RC_RATE_MAX) or a.rcRate
-    return string.format(g > FF_HOT and T.ffHotFmt or T.ffLowFmt, ratioText(g), a.F, newF, a.rcRate, newRate)
-  end
-  return string.format(T.ffOkFmt, ratioText(g))
+local function ffOff(a)
+  return ffJudged(a) and (a.ffGain > FF_HOT or a.ffGain < FF_LOW)
 end
 
--- Second line: the most useful fact about how the response varies
-local function responseNote(a, axis)
-  if axis == AXIS_YAW or not ffJudged(a) then return "" end
+-- Fills actions/whys (cleared by the caller) for one axis; returns the
+-- Response and Stops values.
+local function advise(a, axis, name, actions, whys)
+  local function act(s) if #actions < MAX_ACTIONS then actions[#actions + 1] = s end end
+  local function why(s) if #whys < MAX_WHYS then whys[#whys + 1] = s end end
 
-  if axis == AXIS_ROLL and a.fullCount >= FULL_MIN_COUNT
-      and a.fullSatCount >= FULL_SAT_SHARE * a.fullCount
-      and a.fullMaxRate < FULL_REACH * a.rcRate * 5 then
-    return string.format(T.fullStickFmt, a.rcRate * 5, a.fullMaxRate)
-  end
-
-  local lo, hi = a.thrBands[1], a.thrBands[3]
-  if lo.count >= BAND_MIN_COUNT and hi.count >= BAND_MIN_COUNT and lo.gain > 0 and hi.gain > 0 then
-    local spread = math.max(lo.gain, hi.gain) / math.min(lo.gain, hi.gain)
-    if spread >= THROTTLE_SPREAD then
-      return string.format(T.throttleFmt, ratioText(lo.gain), ratioText(hi.gain))
+  -- Response: feed-forward match
+  local response
+  if a.ffCount < FF_MIN_COUNT then
+    response = string.format(T.respMoreFmt, math.floor(100 * a.ffCount / FF_MIN_COUNT))
+    act(axis == AXIS_ROLL and T.actFlyRoll or T.actFlyPitch)
+    why(T.whyMore)
+  elseif a.ffCorr < FF_MIN_CORR then
+    response = T.respUneven
+    why(T.whyUneven)
+  elseif ffOff(a) then
+    local g = a.ffGain
+    local hot = g > FF_HOT
+    response = string.format(hot and T.respFastFmt or T.respSlowFmt, round(math.abs(g - 1) * 100))
+    local newF = clamp(round(a.F * clamp(1 / g, 1 - FF_STEP_MAX, 1 + FF_STEP_MAX)), 1, F_MAX)
+    -- Keep stick-to-surface the same: F x rate is what the pilot feels
+    local newRate = clamp(round(a.rcRate * a.F / newF), 1, RC_RATE_MAX)
+    act(string.format(T.actFFmt, name, a.F, newF))
+    act(string.format(T.actRateFmt, name, a.rcRate * RC_RATE_DPS, newRate * RC_RATE_DPS))
+    why(hot and T.whyFast or T.whySlow)
+    why(T.whyKeepFeel)
+  else
+    response = T.respOk
+    if axis == AXIS_ROLL and a.fullCount >= FULL_MIN_COUNT
+        and a.fullSatCount >= FULL_SAT_SHARE * a.fullCount
+        and a.fullMaxRate < FULL_REACH * a.rcRate * RC_RATE_DPS then
+      local newRate = clamp(round(a.fullMaxRate / RC_RATE_DPS), 1, RC_RATE_MAX)
+      act(string.format(T.actRateFmt, name, a.rcRate * RC_RATE_DPS, newRate * RC_RATE_DPS))
+      why(string.format(T.whyFullFmt, a.rcRate * RC_RATE_DPS, a.fullMaxRate))
     end
   end
 
-  local small, mid = a.spBands[1], a.spBands[2]
-  if small.count >= BAND_MIN_COUNT and mid.count >= BAND_MIN_COUNT and mid.gain > 0
-      and small.gain / mid.gain >= BIG_INPUT_FALLOFF then
-    return string.format(T.bigInputsFmt, ratioText(small.gain), ratioText(mid.gain))
-  end
-
-  return ""
-end
-
-local function stopsAdvice(a, axis)
-  if axis == AXIS_YAW then return "" end
+  -- Stops: rebound after a release
+  local stops
   if a.releases < STOPS_MIN then
-    return string.format(T.stopsMoreFmt, a.releases, STOPS_MIN)
+    stops = string.format(T.stopsMoreFmt, a.releases, STOPS_MIN)
+  else
+    local rebound = round(a.meanRebound * 100)
+    stops = string.format(T.stopsValueFmt, rebound)
+    if a.meanRebound >= REBOUND_BAD then
+      if a.meanIterm >= ITERM_PUSH and a.relax < RELAX_MAX then
+        act(string.format(T.actRelaxFmt, name, a.relax, a.relax + 1))
+        why(T.whyRelax)
+      elseif ffOff(a) then
+        why(string.format(T.whyFixFFmt, rebound))
+      else
+        act(string.format(T.actPFmt, name, a.P, clamp(round(a.P * P_STEP), a.P + 1, F_MAX)))
+        why(string.format(T.whyBrakeFmt, rebound))
+      end
+    end
   end
 
-  local rebound = round(a.meanRebound * 100)
-  if a.meanRebound < REBOUND_BAD then
-    return string.format(T.stopsOkFmt, rebound)
+  -- Least important last: a fact, no action
+  if ffJudged(a) then
+    local lo, hi = a.thrBands[1], a.thrBands[3]
+    if lo.count >= BAND_MIN_COUNT and hi.count >= BAND_MIN_COUNT and lo.gain > 0 and hi.gain > 0 then
+      local spread = math.max(lo.gain, hi.gain) / math.min(lo.gain, hi.gain)
+      if spread >= THROTTLE_SPREAD then
+        why(string.format(hi.gain > lo.gain and T.whyThrHighFmt or T.whyThrLowFmt, round((spread - 1) * 100)))
+      end
+    end
   end
-  if a.meanIterm >= ITERM_PUSH then
-    return string.format(T.stopsRelaxFmt, rebound)
+
+  if #actions == 0 then
+    act(T.actNone)
+    if #whys == 0 then why(T.whyOk) end
   end
-  if ffJudged(a) and (a.ffGain > FF_HOT or a.ffGain < FF_LOW) then
-    return string.format(T.stopsFixFFmt, rebound)
-  end
-  return string.format(T.stopsBrakeFmt, rebound, a.P, clamp(round(a.P * P_STEP), a.P + 1, F_MAX))
+
+  return response, stops
 end
 
 local function open(opts)
@@ -180,30 +216,55 @@ local function open(opts)
   local headerHandle = nil
   local pending = false
   local lastPoll = 0
+  local lastData = nil
   local lastSignature = nil
+  local selected = 1              -- index into AXES
   local fieldCache = {}
+  local actions, whys = {}, {}
 
-  local dataField = nil
-  local axisFields = {}   -- [axis] = {match = field, lines = {field, field, field}}
+  local dataField, responseField, stopsField
+  local actionFields, whyFields = {}, {}
 
-  local function setField(field, value)
+  local function setValue(field, value)
     if not field or fieldCache[field] == value then return end
     fieldCache[field] = value
     common.updateField(field, value)
   end
 
-  local function setLine(field, value)
+  local function setText(field, value)
     if not field or fieldCache[field] == value then return end
     fieldCache[field] = value
     if field.value then field:value(value) end
   end
 
+  local function clearList(list)
+    for i = #list, 1, -1 do list[i] = nil end
+  end
+
   local function showUnsupported()
-    setField(dataField, T.unsupported)
-    for axis = 1, tuneAdvisor.AXIS_COUNT do
-      setField(axisFields[axis].match, "-")
-      for i = 1, LINES_PER_AXIS do setLine(axisFields[axis].lines[i], "") end
-    end
+    setValue(dataField, T.unsupported)
+    setValue(responseField, "-")
+    setValue(stopsField, "-")
+    for i = 1, MAX_ACTIONS do setText(actionFields[i], "") end
+    for i = 1, MAX_WHYS do setText(whyFields[i], "") end
+  end
+
+  local function render()
+    local data = lastData
+    if not data then return end
+    local axis = AXES[selected][2]
+    local a = data.axes[axis]
+
+    setValue(dataField, string.format(T.dataFmt, math.floor(data.seconds / 60), data.seconds % 60,
+      data.collecting and T.collecting or T.paused))
+
+    clearList(actions)
+    clearList(whys)
+    local response, stops = advise(a, axis, AXES[selected][1], actions, whys)
+    setValue(responseField, response)
+    setValue(stopsField, stops)
+    for i = 1, MAX_ACTIONS do setText(actionFields[i], actions[i] or "") end
+    for i = 1, MAX_WHYS do setText(whyFields[i], whys[i] or "") end
   end
 
   local function apply(data)
@@ -211,26 +272,12 @@ local function open(opts)
     local signature = data.seconds * 2 + (data.collecting and 1 or 0)
     for axis = 1, tuneAdvisor.AXIS_COUNT do
       local a = data.axes[axis]
-      signature = signature * 31 + a.ffCount + a.releases + a.fullCount + a.F + a.P + a.rcRate
+      signature = signature * 31 + a.ffCount + a.releases + a.fullCount + a.F + a.P + a.rcRate + a.relax
     end
     if signature == lastSignature then return end
     lastSignature = signature
-
-    setField(dataField, string.format(T.dataFmt, math.floor(data.seconds / 60), data.seconds % 60,
-      data.collecting and T.collecting or T.paused))
-
-    for axis = 1, tuneAdvisor.AXIS_COUNT do
-      local a = data.axes[axis]
-      local f = axisFields[axis]
-      if axis ~= AXIS_YAW and a.ffCount > 0 then
-        setField(f.match, string.format(T.matchFmt, ratioText(a.ffGain), a.ffLagMs))
-      else
-        setField(f.match, "-")
-      end
-      setLine(f.lines[1], ffAdvice(a, axis))
-      setLine(f.lines[2], responseNote(a, axis))
-      setLine(f.lines[3], stopsAdvice(a, axis))
-    end
+    lastData = data
+    render()
   end
 
   local function poll()
@@ -247,6 +294,7 @@ local function open(opts)
       if disposed then return end
       if headerHandle then headerHandle.setReloadEnabled(true) end
       lastSignature = nil
+      lastData = nil
       showUnsupported()
     end))
   end
@@ -303,6 +351,7 @@ local function open(opts)
   if opts.setCleanupHandler then
     opts.setCleanupHandler(function()
       disposed = true
+      lastData = nil
       for k in pairs(fieldCache) do fieldCache[k] = nil end
     end)
   end
@@ -316,15 +365,24 @@ local function open(opts)
     end)
   end
 
+  local axisLine = form.addLine(T.axis)
+  form.addChoiceField(axisLine, nil, AXES,
+    function() return AXES[selected][2] end,
+    function(value)
+      for i, entry in ipairs(AXES) do
+        if entry[2] == value then selected = i end
+      end
+      render()
+    end)
+
   dataField = common.addValueLine(T.data, "-")
-  for axis = 1, tuneAdvisor.AXIS_COUNT do
-    local lines = {}
-    local match = common.addValueLine(T.axes[axis], "-")
-    for i = 1, LINES_PER_AXIS do
-      lines[i] = common.addTextLine("", 8)
-    end
-    axisFields[axis] = {match = match, lines = lines}
-  end
+  responseField = common.addValueLine(T.response, "-")
+  stopsField = common.addValueLine(T.stops, "-")
+
+  common.addTextLine(T.changes)
+  for i = 1, MAX_ACTIONS do actionFields[i] = common.addTextLine("", 16) end
+  common.addTextLine(T.why)
+  for i = 1, MAX_WHYS do whyFields[i] = common.addTextLine("", 16) end
 
   poll()
 end

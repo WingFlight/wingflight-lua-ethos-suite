@@ -28,12 +28,23 @@ shows "Needs newer firmware". The page refreshes every 2 seconds.
 
 | Line | What it shows |
 | --- | --- |
-| Data | Minutes and seconds of rate flight measured, and whether measuring is happening now (collecting) or not (paused). |
-| Roll / Pitch / Yaw | How fast the model rolls compared with the rate the stick asks for (1.00x = exactly as asked), and the delay before it answers. Yaw is not judged. |
-| F line | **F hot**: the model rolls faster than asked, so F sends too much surface. It suggests a lower F and a higher rate by the same amount, so the stick feels the same but asks for the rate the model really flies. **F low** is the reverse. One step changes F by at most 20%. **F matches** needs no change. "Fly more" shows how much data is still needed; "too irregular" means the response varies too much to judge, which is common on pitch in 3D flying. |
-| Second line | A fact, when there is one: full stick asks for more rate than the model can reach with its surfaces at their limit (lower the rate or add surface throw); or the response changes with throttle; or big inputs get less rate than small ones. |
-| Stops line | How much the model bounces back after you centre the stick, as a share of the roll rate. **Clean** needs no change. If the I-term is pushing back, raise *I-term Relax* on *Flight Feel*. If F does not match yet, fix F first. Otherwise the controller is barely braking the stop: raise P (the suggested step is 20%) or add B. |
+| Axis | Roll or Pitch. Everything below is for the chosen axis. Yaw (rudder) is not judged. |
+| Flight data | Minutes and seconds of rate flight measured, and whether measuring is happening now (collecting) or not (paused). |
+| Response | How fast the model turns compared with the rate the stick asks for, for example "53% faster than asked". "Needs more flying" shows how much data is still needed; "Too uneven to judge" is common on pitch in 3D flying. |
+| Stops | How much the model bounces back after you centre the stick, as a share of the turn rate. Needs 10 stops. |
+| Suggested changes | Up to three changes, each named by the page and setting to change and in the units that page shows, for example *PIDs > Roll > F: 100 -> 80* and *Rates > Roll > RC Rate: 350 -> 440*. Make them, fly again and come back. |
+| Why | The reason for each change, and a fact worth knowing when there is room (for example how much faster the model turns at high throttle). |
 | Tool button | Clears the measurements after asking to confirm. |
+
+The suggestions follow these rules:
+
+- **Turns faster or slower than asked** (more than 15% off): change F and RC Rate by the same amount in
+  opposite directions. The stick moves the surfaces as far as before, but now asks for the rate the model
+  really flies. One step changes F by at most 20%.
+- **Full stick asks for more roll rate than the model reaches**, with the surfaces at their limit: lower RC Rate
+  to what the model reaches, or add surface throw.
+- **Stops bounce back 12% or more**: if the I-term pushes back, raise *Flight Feel > Relax* by one. If F does not
+  match yet, fix F first. Otherwise the controller is barely braking the stop: raise P by 20% (or add B).
 
 ## Notes
 

@@ -7340,11 +7340,29 @@
           "needs_translation": false,
           "max_length": 12
         },
-        "data": {
-          "english": "Data",
-          "translation": "Data",
+        "axis": {
+          "english": "Axis",
+          "translation": "Axis",
           "needs_translation": false,
           "max_length": 4
+        },
+        "roll": {
+          "english": "Roll",
+          "translation": "Roll",
+          "needs_translation": false,
+          "max_length": 4
+        },
+        "pitch": {
+          "english": "Pitch",
+          "translation": "Pitch",
+          "needs_translation": false,
+          "max_length": 5
+        },
+        "data": {
+          "english": "Flight data",
+          "translation": "Flight data",
+          "needs_translation": false,
+          "max_length": 11
         },
         "data_fmt": {
           "english": "%dm %02ds, %s",
@@ -7376,113 +7394,185 @@
           "needs_translation": false,
           "max_length": 32
         },
-        "roll": {
-          "english": "Roll",
-          "translation": "Roll",
+        "response": {
+          "english": "Response",
+          "translation": "Response",
           "needs_translation": false,
-          "max_length": 4
+          "max_length": 8
         },
-        "pitch": {
-          "english": "Pitch",
-          "translation": "Pitch",
+        "stops": {
+          "english": "Stops",
+          "translation": "Stops",
           "needs_translation": false,
           "max_length": 5
         },
-        "yaw": {
-          "english": "Yaw",
-          "translation": "Yaw",
+        "changes": {
+          "english": "Suggested changes",
+          "translation": "Suggested changes",
+          "needs_translation": false,
+          "max_length": 17
+        },
+        "why": {
+          "english": "Why",
+          "translation": "Why",
           "needs_translation": false,
           "max_length": 3
         },
-        "match_fmt": {
-          "english": "%sx, %d ms",
-          "translation": "%sx, %d ms",
+        "resp_more_fmt": {
+          "english": "Needs more flying (%d%%)",
+          "translation": "Needs more flying (%d%%)",
           "needs_translation": false,
-          "max_length": 10
+          "max_length": 24
         },
-        "ff_more_fmt": {
-          "english": "F: fly more rate-mode stick (%d%%)",
-          "translation": "F: fly more rate-mode stick (%d%%)",
+        "resp_uneven": {
+          "english": "Too uneven to judge",
+          "translation": "Too uneven to judge",
           "needs_translation": false,
-          "max_length": 34
+          "max_length": 19
         },
-        "ff_irregular": {
-          "english": "F: response too irregular to judge",
-          "translation": "F: response too irregular to judge",
+        "resp_fast_fmt": {
+          "english": "%d%% faster than asked",
+          "translation": "%d%% faster than asked",
           "needs_translation": false,
-          "max_length": 34
+          "max_length": 22
         },
-        "ff_hot_fmt": {
-          "english": "F hot (%sx): F %d->%d, rate %d->%d",
-          "translation": "F hot (%sx): F %d->%d, rate %d->%d",
+        "resp_slow_fmt": {
+          "english": "%d%% slower than asked",
+          "translation": "%d%% slower than asked",
           "needs_translation": false,
-          "max_length": 34
+          "max_length": 22
         },
-        "ff_low_fmt": {
-          "english": "F low (%sx): F %d->%d, rate %d->%d",
-          "translation": "F low (%sx): F %d->%d, rate %d->%d",
+        "resp_ok": {
+          "english": "Matches the stick",
+          "translation": "Matches the stick",
           "needs_translation": false,
-          "max_length": 34
+          "max_length": 17
         },
-        "ff_ok_fmt": {
-          "english": "F matches the airframe (%sx)",
-          "translation": "F matches the airframe (%sx)",
+        "stops_more_fmt": {
+          "english": "Needs more stops (%d/%d)",
+          "translation": "Needs more stops (%d/%d)",
           "needs_translation": false,
-          "max_length": 28
+          "max_length": 24
         },
-        "throttle_fmt": {
-          "english": "Response %sx low throttle, %sx high",
-          "translation": "Response %sx low throttle, %sx high",
+        "stops_value_fmt": {
+          "english": "%d%% bounce-back",
+          "translation": "%d%% bounce-back",
+          "needs_translation": false,
+          "max_length": 16
+        },
+        "act_fly_roll": {
+          "english": "Fly rolls in rate mode, centre the stick after each",
+          "translation": "Fly rolls in rate mode, centre the stick after each",
+          "needs_translation": false,
+          "max_length": 51
+        },
+        "act_fly_pitch": {
+          "english": "Fly pitch inputs in rate mode, centre the stick after each",
+          "translation": "Fly pitch inputs in rate mode, centre the stick after each",
+          "needs_translation": false,
+          "max_length": 58
+        },
+        "act_f_fmt": {
+          "english": "PIDs > %s > F:  %d -> %d",
+          "translation": "PIDs > %s > F:  %d -> %d",
+          "needs_translation": false,
+          "max_length": 24
+        },
+        "act_rate_fmt": {
+          "english": "Rates > %s > RC Rate:  %d -> %d",
+          "translation": "Rates > %s > RC Rate:  %d -> %d",
+          "needs_translation": false,
+          "max_length": 31
+        },
+        "act_relax_fmt": {
+          "english": "Flight Feel > %s > Relax:  %d -> %d",
+          "translation": "Flight Feel > %s > Relax:  %d -> %d",
           "needs_translation": false,
           "max_length": 35
         },
-        "big_inputs_fmt": {
-          "english": "Big inputs get less: %sx small, %sx medium",
-          "translation": "Big inputs get less: %sx small, %sx medium",
+        "act_p_fmt": {
+          "english": "PIDs > %s > P:  %d -> %d",
+          "translation": "PIDs > %s > P:  %d -> %d",
+          "needs_translation": false,
+          "max_length": 24
+        },
+        "act_none": {
+          "english": "No change suggested",
+          "translation": "No change suggested",
+          "needs_translation": false,
+          "max_length": 19
+        },
+        "why_more": {
+          "english": "Data builds up while you fly in rate mode.",
+          "translation": "Data builds up while you fly in rate mode.",
           "needs_translation": false,
           "max_length": 42
         },
-        "full_stick_fmt": {
-          "english": "Full stick asks %d deg/s, gets %d: lower rate",
-          "translation": "Full stick asks %d deg/s, gets %d: lower rate",
+        "why_uneven": {
+          "english": "The response varies too much to judge. Common in 3D.",
+          "translation": "The response varies too much to judge. Common in 3D.",
           "needs_translation": false,
-          "max_length": 45
+          "max_length": 52
         },
-        "stops_more_fmt": {
-          "english": "Stops: need more releases (%d/%d)",
-          "translation": "Stops: need more releases (%d/%d)",
+        "why_fast": {
+          "english": "The model turns faster than the stick asks for.",
+          "translation": "The model turns faster than the stick asks for.",
           "needs_translation": false,
-          "max_length": 33
+          "max_length": 47
         },
-        "stops_ok_fmt": {
-          "english": "Stops clean (%d%% rebound)",
-          "translation": "Stops clean (%d%% rebound)",
+        "why_slow": {
+          "english": "The model turns slower than the stick asks for.",
+          "translation": "The model turns slower than the stick asks for.",
           "needs_translation": false,
-          "max_length": 26
+          "max_length": 47
         },
-        "stops_relax_fmt": {
-          "english": "Stops bounce %d%%, I pushes back: raise Relax",
-          "translation": "Stops bounce %d%%, I pushes back: raise Relax",
+        "why_keep_feel": {
+          "english": "Changing F and RC Rate together keeps the stick feel.",
+          "translation": "Changing F and RC Rate together keeps the stick feel.",
           "needs_translation": false,
-          "max_length": 45
+          "max_length": 53
         },
-        "stops_fix_f_fmt": {
-          "english": "Stops bounce %d%%: match F first, then raise P",
-          "translation": "Stops bounce %d%%: match F first, then raise P",
+        "why_full_fmt": {
+          "english": "Full stick asks %d deg/s but the model tops out at %d.",
+          "translation": "Full stick asks %d deg/s but the model tops out at %d.",
           "needs_translation": false,
-          "max_length": 46
+          "max_length": 54
         },
-        "stops_brake_fmt": {
-          "english": "Stops bounce %d%%: raise P %d->%d or add B",
-          "translation": "Stops bounce %d%%: raise P %d->%d or add B",
+        "why_thr_high_fmt": {
+          "english": "It turns %d%% faster at high throttle than at low.",
+          "translation": "It turns %d%% faster at high throttle than at low.",
           "needs_translation": false,
-          "max_length": 42
+          "max_length": 50
         },
-        "yaw_not_judged": {
-          "english": "Rudder response is not judged",
-          "translation": "Rudder response is not judged",
+        "why_thr_low_fmt": {
+          "english": "It turns %d%% faster at low throttle than at high.",
+          "translation": "It turns %d%% faster at low throttle than at high.",
           "needs_translation": false,
-          "max_length": 29
+          "max_length": 50
+        },
+        "why_relax": {
+          "english": "After a stop, the I-term pushes the model back.",
+          "translation": "After a stop, the I-term pushes the model back.",
+          "needs_translation": false,
+          "max_length": 47
+        },
+        "why_fix_f_fmt": {
+          "english": "Stops bounce back %d%%. Fix F first, then check again.",
+          "translation": "Stops bounce back %d%%. Fix F first, then check again.",
+          "needs_translation": false,
+          "max_length": 54
+        },
+        "why_brake_fmt": {
+          "english": "Stops bounce back %d%%. More P brakes them (or add B).",
+          "translation": "Stops bounce back %d%%. More P brakes them (or add B).",
+          "needs_translation": false,
+          "max_length": 54
+        },
+        "why_ok": {
+          "english": "The model answers the stick as asked.",
+          "translation": "The model answers the stick as asked.",
+          "needs_translation": false,
+          "max_length": 37
         }
       }
     },
