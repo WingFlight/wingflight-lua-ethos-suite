@@ -7538,6 +7538,12 @@
           "needs_translation": false,
           "translation": "%dm %02ds, %s"
         },
+        "more_why": {
+          "english": "More under Why",
+          "max_length": 14,
+          "needs_translation": false,
+          "translation": "More under Why"
+        },
         "name": {
           "english": "Tune Advisor",
           "max_length": 12,

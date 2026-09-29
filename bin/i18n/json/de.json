@@ -8641,6 +8641,13 @@
           "reverse_text": false,
           "max_length": 7
         },
+        "more_why": {
+          "english": "More under Why",
+          "translation": "More under Why",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 14
+        },
         "why": {
           "english": "Why",
           "translation": "Why",

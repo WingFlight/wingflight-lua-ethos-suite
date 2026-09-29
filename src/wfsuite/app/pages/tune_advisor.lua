@@ -56,6 +56,7 @@ local T = {
   stops = "@i18n(app.modules.tune_advisor.stops)@",
   changes = "@i18n(app.modules.tune_advisor.changes)@",
   changesShort = "@i18n(app.modules.tune_advisor.changes_short)@",
+  moreWhy = "@i18n(app.modules.tune_advisor.more_why)@",
   why = "@i18n(app.modules.tune_advisor.why)@",
 
   respMoreFmt = "@i18n(app.modules.tune_advisor.resp_more_fmt)@",
@@ -440,12 +441,13 @@ local function open(opts)
         lcd.color(c.rule)
         lcd.drawLine(PAD_X, y - 3, w - PAD_X, y - 3)
       end
-      -- Out of room: the last line that fits says "..." instead, rather than
-      -- showing some reasons and silently dropping the rest
+      -- Out of room: the last line that fits says so instead, rather than
+      -- showing some reasons and silently dropping the rest. In the compact
+      -- Changes view it points at the Why view, which shows them all.
       if y + lineH > h then break end
       if i < #view.layout and y + 2 * lineH > h then
         lcd.color(c.muted)
-        lcd.drawText(item.x, y, OVERFLOW_MARK, LEFT)
+        lcd.drawText(item.x, y, (compact and section == SECTION_CHANGES) and T.moreWhy or OVERFLOW_MARK, LEFT)
         break
       end
       if item.kind == "rule" then
