@@ -7466,6 +7466,12 @@
           "needs_translation": false,
           "translation": "Fly rolls in rate mode, centre the stick after each"
         },
+        "act_fly_yaw": {
+          "english": "Fly rudder inputs in rate mode, centre the stick after each",
+          "max_length": 59,
+          "needs_translation": false,
+          "translation": "Fly rudder inputs in rate mode, centre the stick after each"
+        },
         "act_none": {
           "english": "No change suggested",
           "max_length": 19,
@@ -7687,6 +7693,12 @@
           "max_length": 52,
           "needs_translation": false,
           "translation": "The response varies too much to judge. Common in 3D."
+        },
+        "yaw": {
+          "english": "Yaw",
+          "max_length": 3,
+          "needs_translation": false,
+          "translation": "Yaw"
         }
       }
     },

@@ -7,8 +7,12 @@
 -- The firmware only measures; the rules below are the advice, kept here so
 -- they can change without a flash.
 --
--- Rules, per axis (roll and pitch; yaw's rudder response is not judged):
--- - Feed-forward match (gyro / setpoint at the best delay). Above FF_HOT the
+-- One axis at a time: the FC answers one axis per request so the reply
+-- fits MSP over telemetry.
+--
+-- Rules, per axis:
+-- - Feed-forward match (gyro / setpoint at the best delay), judged only
+--   when the ratio is consistent (on a wing, rudder rarely is). Above FF_HOT the
 --   aircraft outruns the stick: lower F and raise RC Rate by the same
 --   factor, which keeps the stick-to-surface feel. Below FF_LOW, the
 --   reverse. One step is capped at FF_STEP_MAX so the pilot flies and
@@ -58,6 +62,7 @@ local T = {
 
   actFlyRoll = "@i18n(app.modules.tune_advisor.act_fly_roll)@",
   actFlyPitch = "@i18n(app.modules.tune_advisor.act_fly_pitch)@",
+  actFlyYaw = "@i18n(app.modules.tune_advisor.act_fly_yaw)@",
   actFFmt = "@i18n(app.modules.tune_advisor.act_f_fmt)@",
   actRateFmt = "@i18n(app.modules.tune_advisor.act_rate_fmt)@",
   actRelaxFmt = "@i18n(app.modules.tune_advisor.act_relax_fmt)@",
@@ -78,12 +83,13 @@ local T = {
   whyOk = "@i18n(app.modules.tune_advisor.why_ok)@",
 }
 
--- Roll and pitch only: the FC reports yaw too, but rudder response is not judged
+-- {label, axis}: axis is the FC's 1-based axis (1 roll, 2 pitch, 3 yaw)
 local AXES = {
   {"@i18n(app.modules.tune_advisor.roll)@", 1},
   {"@i18n(app.modules.tune_advisor.pitch)@", 2},
+  {"@i18n(app.modules.tune_advisor.yaw)@", 3},
 }
-local AXIS_ROLL = 1
+local AXIS_ROLL, AXIS_PITCH = 1, 2
 
 local REFRESH_INTERVAL_SECONDS = 2
 
@@ -144,7 +150,7 @@ local function advise(a, axis, name, actions, whys)
   local response
   if a.ffCount < FF_MIN_COUNT then
     response = string.format(T.respMoreFmt, math.floor(100 * a.ffCount / FF_MIN_COUNT))
-    act(axis == AXIS_ROLL and T.actFlyRoll or T.actFlyPitch)
+    act(axis == AXIS_ROLL and T.actFlyRoll or axis == AXIS_PITCH and T.actFlyPitch or T.actFlyYaw)
     why(T.whyMore)
   elseif a.ffCorr < FF_MIN_CORR then
     response = T.respUneven
@@ -251,9 +257,9 @@ local function open(opts)
 
   local function render()
     local data = lastData
-    if not data then return end
     local axis = AXES[selected][2]
-    local a = data.axes[axis]
+    if not data or data.axis ~= axis then return end
+    local a = data.a
 
     setValue(dataField, string.format(T.dataFmt, math.floor(data.seconds / 60), data.seconds % 60,
       data.collecting and T.collecting or T.paused))
@@ -269,11 +275,9 @@ local function open(opts)
 
   local function apply(data)
     -- Skip the rebuild when nothing new was collected
-    local signature = data.seconds * 2 + (data.collecting and 1 or 0)
-    for axis = 1, tuneAdvisor.AXIS_COUNT do
-      local a = data.axes[axis]
-      signature = signature * 31 + a.ffCount + a.releases + a.fullCount + a.F + a.P + a.rcRate + a.relax
-    end
+    local a = data.a
+    local signature = ((data.seconds * 2 + (data.collecting and 1 or 0)) * 4 + data.axis) * 31
+      + a.ffCount + a.releases + a.fullCount + a.F + a.P + a.rcRate + a.relax
     if signature == lastSignature then return end
     lastSignature = signature
     lastData = data
@@ -284,10 +288,14 @@ local function open(opts)
     if disposed or pending then return end
     pending = true
     if headerHandle then headerHandle.setReloadEnabled(false) end
-    bus.publish("msp.request", tuneAdvisor.buildReadMessage(function(data)
+    bus.publish("msp.request", tuneAdvisor.buildReadMessage(AXES[selected][2], function(data)
       pending = false
       if disposed then return end
       if headerHandle then headerHandle.setReloadEnabled(true) end
+      if data.axis ~= AXES[selected][2] then
+        poll()      -- the axis changed while this request was out
+        return
+      end
       apply(data)
     end, function()
       pending = false
@@ -372,7 +380,10 @@ local function open(opts)
       for i, entry in ipairs(AXES) do
         if entry[2] == value then selected = i end
       end
-      render()
+      -- Each axis is its own request: fetch the new one now
+      lastSignature = nil
+      lastPoll = os.clock()
+      poll()
     end)
 
   dataField = common.addValueLine(T.data, "-")

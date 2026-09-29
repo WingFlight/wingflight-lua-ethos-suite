@@ -7358,6 +7358,12 @@
           "needs_translation": false,
           "max_length": 5
         },
+        "yaw": {
+          "english": "Yaw",
+          "translation": "Yaw",
+          "needs_translation": false,
+          "max_length": 3
+        },
         "data": {
           "english": "Flight data",
           "translation": "Flight data",
@@ -7471,6 +7477,12 @@
           "translation": "Fly pitch inputs in rate mode, centre the stick after each",
           "needs_translation": false,
           "max_length": 58
+        },
+        "act_fly_yaw": {
+          "english": "Fly rudder inputs in rate mode, centre the stick after each",
+          "translation": "Fly rudder inputs in rate mode, centre the stick after each",
+          "needs_translation": false,
+          "max_length": 59
         },
         "act_f_fmt": {
           "english": "PIDs > %s > F:  %d -> %d",
