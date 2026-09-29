@@ -27,12 +27,14 @@
 --
 -- Clear (header Tool button) resets the FC's statistics; they also reset
 -- on their own when the tune changes.
+--
+-- The header and Axis selector are form fields; everything below them is
+-- painted (see open()), like app/pages/logs.lua's graph view.
 
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local bus = requireModule("lib/bus.lua")
 local closeKey = requireModule("app/close_key.lua")
 local header = requireModule("app/header.lua")
-local common = requireModule("app/diagnostics_common.lua")
 local tuneAdvisor = requireModule("lib/msp_tune_advisor.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.tune_advisor.name)@"
@@ -216,6 +218,48 @@ local function advise(a, axis, name, actions, whys)
   return response, stops
 end
 
+-- Painted layout below the form (the header and Axis selector are form
+-- fields). Form lines each take a full touch-target row, which left large
+-- gaps around short text lines; painting packs the text at font height.
+local PAD_X = 8
+local VALUE_COL = 0.42          -- value column, fraction of the width
+local SECTION_GAP = 0.6         -- extra space before a heading, in line heights
+
+local cachedColors, cachedDark = nil, nil
+
+-- Theme colours, rebuilt only when the radio switches light/dark
+local function colors()
+  local isDark = lcd.darkMode()
+  if cachedColors and cachedDark == isDark then return cachedColors end
+  cachedDark = isDark
+  cachedColors = {
+    text = isDark and lcd.RGB(235, 235, 235) or lcd.RGB(20, 20, 20),
+    muted = isDark and lcd.GREY(170) or lcd.GREY(90),
+    accent = isDark and lcd.RGB(255, 170, 0) or lcd.RGB(200, 90, 0),
+    rule = isDark and lcd.GREY(70) or lcd.GREY(200),
+  }
+  return cachedColors
+end
+
+-- Word-wrap text into lines no wider than maxW (in the current lcd.font)
+local function wrapInto(out, text, maxW)
+  local line = ""
+  for word in text:gmatch("%S+") do
+    local candidate = (line == "") and word or (line .. " " .. word)
+    if line ~= "" and lcd.getTextSize(candidate) > maxW then
+      out[#out + 1] = line
+      line = word
+    else
+      line = candidate
+    end
+  end
+  if line ~= "" then out[#out + 1] = line end
+end
+
+local function clearList(list)
+  for i = #list, 1, -1 do list[i] = nil end
+end
+
 local function open(opts)
   opts = opts or {}
   local disposed = false
@@ -225,52 +269,40 @@ local function open(opts)
   local lastData = nil
   local lastSignature = nil
   local selected = 1              -- index into AXES
-  local fieldCache = {}
   local actions, whys = {}, {}
 
-  local dataField, responseField, stopsField
-  local actionFields, whyFields = {}, {}
+  -- What paint shows. layout (the wrapped lines) is rebuilt on the next
+  -- paint after a change, never on a paint with nothing new.
+  local view = {data = "-", response = "-", stops = "-", actions = {}, whys = {}, layout = nil}
 
-  local function setValue(field, value)
-    if not field or fieldCache[field] == value then return end
-    fieldCache[field] = value
-    common.updateField(field, value)
-  end
-
-  local function setText(field, value)
-    if not field or fieldCache[field] == value then return end
-    fieldCache[field] = value
-    if field.value then field:value(value) end
-  end
-
-  local function clearList(list)
-    for i = #list, 1, -1 do list[i] = nil end
+  local function changed()
+    view.layout = nil
+    if lcd.invalidate then lcd.invalidate() end
   end
 
   local function showUnsupported()
-    setValue(dataField, T.unsupported)
-    setValue(responseField, "-")
-    setValue(stopsField, "-")
-    for i = 1, MAX_ACTIONS do setText(actionFields[i], "") end
-    for i = 1, MAX_WHYS do setText(whyFields[i], "") end
+    view.data, view.response, view.stops = T.unsupported, "-", "-"
+    clearList(view.actions)
+    clearList(view.whys)
+    changed()
   end
 
   local function render()
     local data = lastData
     local axis = AXES[selected][2]
     if not data or data.axis ~= axis then return end
-    local a = data.a
 
-    setValue(dataField, string.format(T.dataFmt, math.floor(data.seconds / 60), data.seconds % 60,
-      data.collecting and T.collecting or T.paused))
+    view.data = string.format(T.dataFmt, math.floor(data.seconds / 60), data.seconds % 60,
+      data.collecting and T.collecting or T.paused)
 
     clearList(actions)
     clearList(whys)
-    local response, stops = advise(a, axis, AXES[selected][1], actions, whys)
-    setValue(responseField, response)
-    setValue(stopsField, stops)
-    for i = 1, MAX_ACTIONS do setText(actionFields[i], actions[i] or "") end
-    for i = 1, MAX_WHYS do setText(whyFields[i], whys[i] or "") end
+    view.response, view.stops = advise(data.a, axis, AXES[selected][1], actions, whys)
+    clearList(view.actions)
+    clearList(view.whys)
+    for i = 1, #actions do view.actions[i] = actions[i] end
+    for i = 1, #whys do view.whys[i] = whys[i] end
+    changed()
   end
 
   local function apply(data)
@@ -284,7 +316,8 @@ local function open(opts)
     render()
   end
 
-  local function poll()
+  local poll
+  poll = function()
     if disposed or pending then return end
     pending = true
     if headerHandle then headerHandle.setReloadEnabled(false) end
@@ -332,8 +365,70 @@ local function open(opts)
   local function goBack()
     disposed = true
     if opts.setWakeupHandler then opts.setWakeupHandler(nil) end
+    if opts.setPaintHandler then opts.setPaintHandler(nil) end
     if opts.setCleanupHandler then opts.setCleanupHandler(nil) end
     if opts.onBack then opts.onBack() end
+  end
+
+  local function buildLayout(w)
+    local layout = {}
+    local valueX = math.floor(w * VALUE_COL)
+    local indent = PAD_X * 2
+    local wrapW = w - PAD_X - indent - PAD_X
+    local wrapped = {}
+
+    local function pair(label, value)
+      layout[#layout + 1] = {kind = "pair", text = label, value = value, x = PAD_X, valueX = valueX}
+    end
+    local function section(title, items, kind)
+      if #items == 0 then return end
+      layout[#layout + 1] = {kind = "heading", text = title, x = PAD_X}
+      for _, s in ipairs(items) do
+        clearList(wrapped)
+        wrapInto(wrapped, s, wrapW)
+        for _, line in ipairs(wrapped) do
+          layout[#layout + 1] = {kind = kind, text = line, x = PAD_X + indent}
+        end
+      end
+    end
+
+    pair(T.data, view.data)
+    pair(T.response, view.response)
+    pair(T.stops, view.stops)
+    section(T.changes, view.actions, "action")
+    section(T.why, view.whys, "why")
+    return layout
+  end
+
+  local function paint()
+    if disposed then return end
+    local w, h = lcd.getWindowSize()
+    lcd.font(FONT_S)
+    if not view.layout then view.layout = buildLayout(w) end
+
+    local c = colors()
+    local _, textH = lcd.getTextSize("Ag")
+    local lineH = textH + 4
+    local y = form.height() + 6
+
+    for _, item in ipairs(view.layout) do
+      if item.kind == "heading" then
+        y = y + math.floor(lineH * SECTION_GAP)
+        lcd.color(c.rule)
+        lcd.drawLine(PAD_X, y - 3, w - PAD_X, y - 3)
+      end
+      if y + lineH > h then break end
+      if item.kind == "pair" then
+        lcd.color(c.muted)
+        lcd.drawText(item.x, y, item.text, LEFT)
+        lcd.color(c.text)
+        lcd.drawText(item.valueX, y, item.value, LEFT)
+      else
+        lcd.color(item.kind == "heading" and c.accent or item.kind == "action" and c.text or c.muted)
+        lcd.drawText(item.x, y, item.text, LEFT)
+      end
+      y = y + lineH
+    end
   end
 
   form.clear()
@@ -360,7 +455,7 @@ local function open(opts)
     opts.setCleanupHandler(function()
       disposed = true
       lastData = nil
-      for k in pairs(fieldCache) do fieldCache[k] = nil end
+      view.layout = nil
     end)
   end
   if opts.setWakeupHandler then
@@ -372,6 +467,7 @@ local function open(opts)
       end
     end)
   end
+  if opts.setPaintHandler then opts.setPaintHandler(paint) end
 
   local axisLine = form.addLine(T.axis)
   form.addChoiceField(axisLine, nil, AXES,
@@ -386,15 +482,7 @@ local function open(opts)
       poll()
     end)
 
-  dataField = common.addValueLine(T.data, "-")
-  responseField = common.addValueLine(T.response, "-")
-  stopsField = common.addValueLine(T.stops, "-")
-
-  common.addTextLine(T.changes)
-  for i = 1, MAX_ACTIONS do actionFields[i] = common.addTextLine("", 16) end
-  common.addTextLine(T.why)
-  for i = 1, MAX_WHYS do whyFields[i] = common.addTextLine("", 16) end
-
+  changed()
   poll()
 end
 
