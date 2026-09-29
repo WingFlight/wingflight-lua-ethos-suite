@@ -335,13 +335,13 @@ local function open(opts)
 
   local poll
   poll = function()
+    -- Reload stays enabled: this polls every 2 s, and greying the button for
+    -- each request made it flicker. A press while a request is out is a no-op.
     if disposed or pending then return end
     pending = true
-    if headerHandle then headerHandle.setReloadEnabled(false) end
     bus.publish("msp.request", tuneAdvisor.buildReadMessage(AXES[selected][2], function(data)
       pending = false
       if disposed then return end
-      if headerHandle then headerHandle.setReloadEnabled(true) end
       if data.axis ~= AXES[selected][2] then
         poll()      -- the axis changed while this request was out
         return
@@ -350,7 +350,6 @@ local function open(opts)
     end, function()
       pending = false
       if disposed then return end
-      if headerHandle then headerHandle.setReloadEnabled(true) end
       lastSignature = nil
       lastData = nil
       showUnsupported()
