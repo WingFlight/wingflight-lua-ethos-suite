@@ -30,8 +30,8 @@
 --
 -- The header and Axis selector are form fields; everything below them is
 -- painted (see open()), like app/pages/logs.lua's graph view. Narrow screens
--- (480 wide: X18, X10) cannot fit both sections, so a Changes/Why selector
--- beside Axis shows one at a time.
+-- (480 wide: X18, X10) cannot always fit every reason, so a Changes/Why
+-- selector beside Axis switches to a view of the reasons alone.
 
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local bus = requireModule("lib/bus.lua")
@@ -287,9 +287,13 @@ local function open(opts)
   -- paint after a change, never on a paint with nothing new.
   local view = {data = "-", response = "-", stops = "-", actions = {}, whys = {}, layout = nil}
 
+  -- MSP replies arrive in the background task, where lcd.invalidate() does
+  -- not reach this page's window: flag it and invalidate from our own wakeup
+  -- (as app/pages/curves.lua and logs.lua do).
+  local needsPaint = false
   local function changed()
     view.layout = nil
-    if lcd.invalidate then lcd.invalidate() end
+    needsPaint = true
   end
 
   local function showUnsupported()
@@ -408,11 +412,11 @@ local function open(opts)
     pair(T.data, view.data)
     pair(T.response, view.response)
     pair(T.stops, view.stops)
-    if not compact then
+    -- Compact screens: Changes shows the reasons too, as far as they fit
+    -- (paint marks the rest with "..."); Why shows only the reasons, in full.
+    if not compact or showing == SECTION_CHANGES then
       section(T.changes, view.actions, "action", true)
       section(T.why, view.whys, "why", true)
-    elseif showing == SECTION_CHANGES then
-      section(T.changes, view.actions, "action", false)
     else
       section(T.why, view.whys, "why", false)
     end
@@ -436,10 +440,12 @@ local function open(opts)
         lcd.color(c.rule)
         lcd.drawLine(PAD_X, y - 3, w - PAD_X, y - 3)
       end
-      -- Out of room: mark it rather than cut a line in half
-      if y + lineH > h then
+      -- Out of room: the last line that fits says "..." instead, rather than
+      -- showing some reasons and silently dropping the rest
+      if y + lineH > h then break end
+      if i < #view.layout and y + 2 * lineH > h then
         lcd.color(c.muted)
-        lcd.drawText(w - PAD_X, y - lineH, OVERFLOW_MARK, RIGHT)
+        lcd.drawText(item.x, y, OVERFLOW_MARK, LEFT)
         break
       end
       if item.kind == "rule" then
@@ -486,6 +492,10 @@ local function open(opts)
   end
   if opts.setWakeupHandler then
     opts.setWakeupHandler(function()
+      if needsPaint then
+        needsPaint = false
+        if lcd.invalidate then lcd.invalidate() end
+      end
       local now = os.clock()
       if not pending and now - lastPoll >= REFRESH_INTERVAL_SECONDS then
         lastPoll = now
