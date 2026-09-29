@@ -21,15 +21,15 @@ local mspcodec = requireModule("lib/mspcodec.lua")
 
 local READ_COMMAND = 1
 
--- Wingflight 22.10 is required for GPS speed attenuation (fw_spa_*).
+-- Wingflight 22.13 is required for ANGLE mode damping (angle_level_damping).
 local EXPECTED_API_MAJOR = 22
-local MIN_API_MINOR = 10
+local MIN_API_MINOR = 13
 
 -- Concrete versions offered by the developer "simulated API version"
 -- picker (see app/pages/developer_settings.lua) -- add new entries here as
 -- Wingflight ships new MSP API versions; nothing else needs to change,
 -- the simulator byte-triplet is derived from the string itself below.
-local SIMULATABLE_VERSIONS = {"22.09", "22.10", "22.11", "22.12"}
+local SIMULATABLE_VERSIONS = {"22.09", "22.10", "22.11", "22.12", "22.13"}
 
 -- "Invalid" simulates talking to a *different firmware family* entirely
 -- (major 12 -- Rotorflight's own, per that project's own
