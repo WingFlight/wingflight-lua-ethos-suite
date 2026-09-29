@@ -8634,6 +8634,13 @@
           "reverse_text": false,
           "max_length": 17
         },
+        "changes_short": {
+          "english": "Changes",
+          "translation": "Changes",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 7
+        },
         "why": {
           "english": "Why",
           "translation": "Why",

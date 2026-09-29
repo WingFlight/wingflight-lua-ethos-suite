@@ -29,13 +29,16 @@
 -- on their own when the tune changes.
 --
 -- The header and Axis selector are form fields; everything below them is
--- painted (see open()), like app/pages/logs.lua's graph view.
+-- painted (see open()), like app/pages/logs.lua's graph view. Narrow screens
+-- (480 wide: X18, X10) cannot fit both sections, so a Changes/Why selector
+-- beside Axis shows one at a time.
 
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local bus = requireModule("lib/bus.lua")
 local closeKey = requireModule("app/close_key.lua")
 local header = requireModule("app/header.lua")
 local tuneAdvisor = requireModule("lib/msp_tune_advisor.lua")
+local fieldLayout = requireModule("app/field_layout.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.tune_advisor.name)@"
 local BTN_OK = "@i18n(app.btn_ok)@"
@@ -52,6 +55,7 @@ local T = {
   response = "@i18n(app.modules.tune_advisor.response)@",
   stops = "@i18n(app.modules.tune_advisor.stops)@",
   changes = "@i18n(app.modules.tune_advisor.changes)@",
+  changesShort = "@i18n(app.modules.tune_advisor.changes_short)@",
   why = "@i18n(app.modules.tune_advisor.why)@",
 
   respMoreFmt = "@i18n(app.modules.tune_advisor.resp_more_fmt)@",
@@ -224,6 +228,12 @@ end
 local PAD_X = 8
 local VALUE_COL = 0.42          -- value column, fraction of the width
 local SECTION_GAP = 0.6         -- extra space before a heading, in line heights
+local COMPACT_WIDTH = 600       -- narrower screens show one section at a time
+local LINE_PAD = 4              -- pixels between lines
+local LINE_PAD_COMPACT = 2
+local OVERFLOW_MARK = "..."
+
+local SECTION_CHANGES, SECTION_WHY = 1, 2
 
 local cachedColors, cachedDark = nil, nil
 
@@ -269,7 +279,9 @@ local function open(opts)
   local lastData = nil
   local lastSignature = nil
   local selected = 1              -- index into AXES
+  local section = SECTION_CHANGES -- compact screens only
   local actions, whys = {}, {}
+  local compact = lcd.getWindowSize() < COMPACT_WIDTH
 
   -- What paint shows. layout (the wrapped lines) is rebuilt on the next
   -- paint after a change, never on a paint with nothing new.
@@ -370,7 +382,7 @@ local function open(opts)
     if opts.onBack then opts.onBack() end
   end
 
-  local function buildLayout(w)
+  local function buildLayout(w, showing)
     local layout = {}
     local valueX = math.floor(w * VALUE_COL)
     local indent = PAD_X * 2
@@ -380,9 +392,10 @@ local function open(opts)
     local function pair(label, value)
       layout[#layout + 1] = {kind = "pair", text = label, value = value, x = PAD_X, valueX = valueX}
     end
-    local function section(title, items, kind)
+    -- The heading is left out on compact screens: the selector names the section
+    local function section(title, items, kind, withHeading)
       if #items == 0 then return end
-      layout[#layout + 1] = {kind = "heading", text = title, x = PAD_X}
+      layout[#layout + 1] = {kind = withHeading and "heading" or "rule", text = title, x = PAD_X}
       for _, s in ipairs(items) do
         clearList(wrapped)
         wrapInto(wrapped, s, wrapW)
@@ -395,8 +408,14 @@ local function open(opts)
     pair(T.data, view.data)
     pair(T.response, view.response)
     pair(T.stops, view.stops)
-    section(T.changes, view.actions, "action")
-    section(T.why, view.whys, "why")
+    if not compact then
+      section(T.changes, view.actions, "action", true)
+      section(T.why, view.whys, "why", true)
+    elseif showing == SECTION_CHANGES then
+      section(T.changes, view.actions, "action", false)
+    else
+      section(T.why, view.whys, "why", false)
+    end
     return layout
   end
 
@@ -404,21 +423,28 @@ local function open(opts)
     if disposed then return end
     local w, h = lcd.getWindowSize()
     lcd.font(FONT_S)
-    if not view.layout then view.layout = buildLayout(w) end
+    if not view.layout then view.layout = buildLayout(w, section) end
 
     local c = colors()
     local _, textH = lcd.getTextSize("Ag")
-    local lineH = textH + 4
-    local y = form.height() + 6
+    local lineH = textH + (compact and LINE_PAD_COMPACT or LINE_PAD)
+    local y = form.height() + (compact and 3 or 6)
 
-    for _, item in ipairs(view.layout) do
-      if item.kind == "heading" then
+    for i, item in ipairs(view.layout) do
+      if item.kind == "heading" or item.kind == "rule" then
         y = y + math.floor(lineH * SECTION_GAP)
         lcd.color(c.rule)
         lcd.drawLine(PAD_X, y - 3, w - PAD_X, y - 3)
       end
-      if y + lineH > h then break end
-      if item.kind == "pair" then
+      -- Out of room: mark it rather than cut a line in half
+      if y + lineH > h then
+        lcd.color(c.muted)
+        lcd.drawText(w - PAD_X, y - lineH, OVERFLOW_MARK, RIGHT)
+        break
+      end
+      if item.kind == "rule" then
+        -- divider only; the next item takes this y
+      elseif item.kind == "pair" then
         lcd.color(c.muted)
         lcd.drawText(item.x, y, item.text, LEFT)
         lcd.color(c.text)
@@ -427,7 +453,7 @@ local function open(opts)
         lcd.color(item.kind == "heading" and c.accent or item.kind == "action" and c.text or c.muted)
         lcd.drawText(item.x, y, item.text, LEFT)
       end
-      y = y + lineH
+      if item.kind ~= "rule" then y = y + lineH end
     end
   end
 
@@ -469,18 +495,26 @@ local function open(opts)
   end
   if opts.setPaintHandler then opts.setPaintHandler(paint) end
 
+  local function onAxis(value)
+    for i, entry in ipairs(AXES) do
+      if entry[2] == value then selected = i end
+    end
+    -- Each axis is its own request: fetch the new one now
+    lastSignature = nil
+    lastPoll = os.clock()
+    poll()
+  end
+
   local axisLine = form.addLine(T.axis)
-  form.addChoiceField(axisLine, nil, AXES,
-    function() return AXES[selected][2] end,
-    function(value)
-      for i, entry in ipairs(AXES) do
-        if entry[2] == value then selected = i end
-      end
-      -- Each axis is its own request: fetch the new one now
-      lastSignature = nil
-      lastPoll = os.clock()
-      poll()
-    end)
+  if compact then
+    local slots = fieldLayout.tableSlots(axisLine, {1, 1}, 0.25)
+    form.addChoiceField(axisLine, slots[1], AXES, function() return AXES[selected][2] end, onAxis)
+    form.addChoiceField(axisLine, slots[2], {{T.changesShort, SECTION_CHANGES}, {T.why, SECTION_WHY}},
+      function() return section end,
+      function(value) section = value; changed() end)
+  else
+    form.addChoiceField(axisLine, nil, AXES, function() return AXES[selected][2] end, onAxis)
+  end
 
   changed()
   poll()

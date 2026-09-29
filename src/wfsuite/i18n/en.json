@@ -7508,6 +7508,12 @@
           "needs_translation": false,
           "translation": "Suggested changes"
         },
+        "changes_short": {
+          "english": "Changes",
+          "max_length": 7,
+          "needs_translation": false,
+          "translation": "Changes"
+        },
         "clear_prompt": {
           "english": "Clear the collected flight data?",
           "max_length": 32,

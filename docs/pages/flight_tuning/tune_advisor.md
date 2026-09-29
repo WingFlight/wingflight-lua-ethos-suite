@@ -29,6 +29,7 @@ shows "Needs newer firmware". The page refreshes every 2 seconds.
 | Line | What it shows |
 | --- | --- |
 | Axis | Roll, Pitch or Yaw. Everything below is for the chosen axis. On a wing the rudder response is often too uneven to judge. |
+| Changes / Why | Only on 480-pixel-wide radios (X18, X18R, X10 and similar), beside Axis: the screen shows the suggested changes or the reasons, one at a time. Larger radios show both. |
 | Flight data | Minutes and seconds of rate flight measured, and whether measuring is happening now (collecting) or not (paused). |
 | Response | How fast the model turns compared with the rate the stick asks for, for example "53% faster than asked". "Needs more flying" shows how much data is still needed; "Too uneven to judge" is common on pitch in 3D flying. |
 | Stops | How much the model bounces back after you centre the stick, as a share of the turn rate. Needs 10 stops. |
