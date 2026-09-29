@@ -50,6 +50,21 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/msp_queue/verify_msp_queue.lua
 
+      # The system tool's UI subtree (menu_container, header, tile_grid,
+      # navigation, both menu guards and their MSP codecs, memstats) loads on
+      # first create(), not at boot. Nothing reaches that from a build step.
+      - name: Check the tool's UI is not loaded at boot
+        if: success() || failure()
+        run: lua5.4 bin/tool_ui/verify_tool_ui_lazy.lua
+
+      # Deferring that load must not add MSP traffic or accumulate anything
+      # per open/close cycle. This counts msp.request at bus.publish over
+      # three tool cycles plus 100 wakeups inside a guarded menu, and goes red
+      # if a guard stops latching (309 requests instead of 6).
+      - name: Check the tool adds no MSP requests across cycles
+        if: success() || failure()
+        run: lua5.4 bin/tool_ui/verify_no_extra_msp.lua
+
   # Per-language PR builds (mirrors push.yml behavior)
   create-zip:
     name: Build PR ZIP (${{ matrix.lang }})
