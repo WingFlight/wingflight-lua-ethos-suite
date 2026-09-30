@@ -271,3 +271,27 @@ jobs:
           python bin/docs/verify_documentation_rule.py \
             --base '${{ github.event.pull_request.base.sha }}' \
             --body-file pr-body.txt
+
+  # pr.yml is rendered from bin/ci/pr_jobs.py, so two pull requests that each
+  # add a harness add a registry entry rather than colliding on the same lines
+  # of this file. This job is the other half of that: a registry edited without
+  # regenerating leaves the two disagreeing, and it also pins the shape a bad
+  # merge produced upstream twice -- every job needs a runs-on and a step.
+  pr-workflow-drift:
+    name: The pull request workflow matches its registry
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Prove the check can go red
+        run: python bin/ci/verify_pr_workflow.py --self-test
+
+      - name: Check pr.yml against the registry
+        run: python bin/ci/verify_pr_workflow.py

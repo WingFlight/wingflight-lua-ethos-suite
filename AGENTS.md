@@ -159,6 +159,9 @@ Rules:
 
 Before finishing:
 - Verify no generated file drift (`menu`/`i18n`) if source files were touched.
+- `.github/workflows/pr.yml` is generated: to add a Lua harness, add a `LuaStep`
+  to `bin/ci/pr_jobs.py` and run `python bin/ci/verify_pr_workflow.py --write`.
+  Do not edit `pr.yml` by hand; the `pr-workflow-drift` job fails when they differ.
 - If you added or changed any `@i18n(...)@` tag, run `python bin/i18n/check-tags.py`
   and fix what it reports.
 - Check for hot-path allocations introduced by the change.
