@@ -65,6 +65,17 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/tool_ui/verify_no_extra_msp.lua
 
+      # The bus is the only channel between the tool, the dashboard and the
+      # background task, and publish() calls its handlers synchronously -- a
+      # handler that publishes back into the same topic recurses, and in the
+      # reference Lua VM every Lua-to-Lua call is one C stack level. This
+      # drives a real cycle and asserts it terminates at the guard rather than
+      # at the VM's own "C stack overflow", and that the memory log reports
+      # the smallest mainStackAvailable it has ever seen.
+      - name: Check bus publish is bounded and the stack minimum is tracked
+        if: success() || failure()
+        run: lua5.4 bin/stack/verify_stack_bounds.lua
+
   # Per-language PR builds (mirrors push.yml behavior)
   create-zip:
     name: Build PR ZIP (${{ matrix.lang }})

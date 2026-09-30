@@ -140,6 +140,40 @@ local loadedTheme = nil
 local loadedState = nil
 local systemToolHandle = nil
 local clock = os.clock
+
+-- Second stack sample point (ported from
+-- rotorflight/rotorflight-lua-ethos-suite#2426; see lib/stack_probe.lua).
+--
+-- The background task's own reading of mainStackAvailable is taken at ONE
+-- fixed call site, and a fixed call site has a fixed depth -- its minimum,
+-- maximum and latest value are the same measurement three times over. They
+-- measure how much the stack usage varies *around* that point, never how deep
+-- the point itself is. Only a reading taken somewhere else can say that.
+--
+-- So: one sample at the top of paint(), which is structurally the same position
+-- as the background task's wakeup -- one frame below Ethos' dispatcher. If both
+-- read 0 the radio is at the edge no matter where anyone looks; if they differ,
+-- the difference is the dispatch context, not us.
+--
+-- Rate-limited because system.getMemoryUsage() builds a Lua table on every
+-- call, and paint() runs at frame rate. Wingflight additionally gates it on the
+-- developer "memory logs" setting: the reading is only ever reported on the
+-- background task's [bgtask mem] line, which only prints with that setting on,
+-- so with it off neither the table nor lib/stack_probe.lua is ever paid for.
+local PAINT_STACK_SAMPLE_INTERVAL = 1
+local lastPaintStackSampleAt = nil
+local stackProbe = nil
+
+local function sampleStackFromPaint(widget)
+  local now = clock()
+  if lastPaintStackSampleAt and (now - lastPaintStackSampleAt) < PAINT_STACK_SAMPLE_INTERVAL then
+    return
+  end
+  lastPaintStackSampleAt = now
+  if not (widget and settingsStore.memoryLogsEnabled(widget.settingsSnapshot)) then return end
+  stackProbe = stackProbe or requireModule("lib/stack_probe.lua")
+  stackProbe.notePaint((system.getMemoryUsage() or {}).mainStackAvailable)
+end
 -- Set true while app/tool.lua's full-screen tool owns the display (see its
 -- create()/close()) -- matches master's rfsuite.tasks.appRunning gate on
 -- dashboard.lua's own wakeup(): a background-screen widget doing full
@@ -1423,6 +1457,7 @@ local function drawFooterAlert(widget, w, h)
 end
 
 local function paint(widget)
+  sampleStackFromPaint(widget)
   local w, h = lcd.getWindowSize()
   if widget and widget.themeReloadPending == true then
     if prepareDashboard(widget) then finishThemeReload(widget) end
