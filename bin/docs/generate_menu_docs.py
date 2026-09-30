@@ -275,10 +275,10 @@ def format_conditions(conds):
         sentences.append("Read-only while the model is armed.")
 
     if conds.get("requiresServoBus"):
-        sentences.append("Only available when servo bus output is configured.")
+        sentences.append("Only available when servo bus output is configured. If that check cannot reach the flight controller, it is retried every 5 seconds.")
 
     if conds.get("escProtocolId"):
-        sentences.append(f"Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: {conds['escProtocolId']}).")
+        sentences.append(f"Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: {conds['escProtocolId']}). If that read fails, it is retried every 5 seconds.")
 
     if conds.get("developer"):
         sentences.append("Hidden until *System* → *Settings* → *Developer* mode is active.")
