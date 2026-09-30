@@ -50,6 +50,16 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/msp_queue/verify_msp_queue.lua
 
+      # Three drain loops run inside one background-task wakeup with no yield
+      # point in between; on a single-core MCU sharing time with Ethos's UI, their
+      # budget is UI latency. This drives them against a permanently full queue
+      # and a clock that charges real time per frame, so it measures the budgets
+      # instead of trusting them -- and checks that bounding the poll does not
+      # break reply assembly, which is what says how far a budget may be cut.
+      - name: Check the background task drain budgets
+        if: success() || failure()
+        run: lua5.4 bin/perf/verify_clock_budgets.lua
+
       # The system tool's UI subtree (menu_container, header, tile_grid,
       # navigation, both menu guards and their MSP codecs, memstats) loads on
       # first create(), not at boot. Nothing reaches that from a build step.
