@@ -20,7 +20,13 @@
 -- closures by page+field shape, because live testing showed Ethos retains
 -- some form callback/widget allocations after `form.clear()`. Reusing the
 -- same callback objects cannot fix retained widget objects, but should avoid
--- adding fresh retained Lua closures on every repeat visit. One of several such caches
+-- adding fresh retained Lua closures on every repeat visit. That pooling
+-- property is load-bearing and is why the pool is never shrunk on the way
+-- out -- see releaseRuntime()'s own comment for the measurement behind that.
+-- The pool is instead kept small per entry (two closures, not three; see the
+-- bitGet/numberGet family) and is sized off a fixed set of field shapes
+-- rather than the number of pages visited, so it reaches a steady size on
+-- the first tour of the app and stays there. One of several such caches
 -- added after a live memory investigation confirmed the *bulk* of this
 -- rebuild's observed RAM growth is an Ethos platform trait (the `form`
 -- widget system itself retaining something per created field, outside
@@ -187,14 +193,26 @@ end
 
 local accessorSlots = {}
 
+-- The key is exactly the set of inputs a pooled slot's behaviour depends on:
+-- the page, the field/bit/source registry key, the kind, and scale/decimals.
+--
+-- Concatenated directly rather than assembled into a throwaway table first:
+-- this runs once per buildField() call, i.e. once per field per page visit,
+-- and the table form spends a 5-element table plus the table.concat() work to
+-- build one string that is itself garbage the moment the pool lookup below
+-- completes. Measured upstream (rotorflight#2416, collector stopped, 200k
+-- calls over real shapes): 162.4 B/call for the table form against 26.4
+-- B/call for this one. Both forms produce a byte-identical key, so no
+-- existing pool entry is orphaned by the change.
+--
+-- This is churn, not residency: every byte of it is collectable the moment
+-- the lookup completes, so it does not show up in the pool's steady-state
+-- footprint (poolStats() below). It matters because buildField() runs once
+-- per field per page visit, and churn is what makes a collect expensive later.
 local function slotId(runtime, spec, kind, scale, decimals)
-  return table.concat({
-    tostring(runtime.logTag or runtime.pageTitle or "?"),
-    registryKey(spec),
-    kind,
-    tostring(scale or ""),
-    tostring(decimals or ""),
-  }, "|")
+  return tostring(runtime.logTag or runtime.pageTitle or "?") .. "|"
+    .. registryKey(spec) .. "|" .. kind .. "|"
+    .. tostring(scale or "") .. "|" .. tostring(decimals or "")
 end
 
 local function rememberRuntimeSlot(runtime, id)
@@ -206,21 +224,68 @@ local function rememberRuntimeSlot(runtime, id)
   list[#list + 1] = id
 end
 
--- Pools a slot's dirty-marking setter wrapper the same way slot.get/
--- slot.set themselves are pooled -- created once per slot, not once per
--- buildField() call, and reads slot.controlRef dynamically (updated below
--- on every claim, same lifecycle as slot.dataRef) rather than closing over
--- `runtime` directly. `controlRef` -- not the full runtime -- is what's
--- safe to hold indefinitely in this permanently-pooled table: page_runtime.
--- lua's own PageRuntime:dispose() nils controlRef.runtime specifically so
--- closures like this one that outlive the page still only pin a tiny
--- emptied indirection table, never the disposed runtime (and everything
--- it references) itself. See this file's own module comment for why
+-- One getter/setter body per field *kind*, at module level, rather than one
+-- closure each per slot. Only two of them have to be closures at all: the
+-- `form` API hands the getter and the setter straight to the widget as
+-- zero-/one-argument callables, so those two must capture `slot` and are
+-- pooled per slot below. The plain setter does not -- it is only ever
+-- called from inside the pooled dirty-marking wrapper, so it takes the slot
+-- as a parameter instead and is shared by every slot in the pool.
+--
+-- slot.set was never reachable from outside this file: buildField() hands
+-- the widget access.get and access.setWithDirty, and nothing else in the
+-- codebase reads a slot. So dropping it loses no capability -- it just means
+-- one less closure to keep alive per pooled field. Measured upstream
+-- (rotorflight#2416, replaying that suite's real field inventory, full
+-- collect either side): ~14 B per pooled entry, ~2.7% of the pool. Small,
+-- because most of a pooled entry is its long key string, not its closures --
+-- but free, and permanent for as long as a retained widget holds the slot.
+local function bitGet(slot)
+  if not slot.dataRef then return 0 end
+  return getBit(refDataTable(slot.dataRef, slot.source)[slot.key], slot.bit)
+end
+
+local function bitSet(slot, value)
+  if not slot.dataRef then return end
+  local t = refDataTable(slot.dataRef, slot.source)
+  t[slot.key] = setBit(t[slot.key], slot.bit, value)
+end
+
+local function choiceGet(slot)
+  if not slot.dataRef then return nil end
+  return refDataTable(slot.dataRef, slot.source)[slot.key]
+end
+
+local function choiceSet(slot, value)
+  if not slot.dataRef then return end
+  refDataTable(slot.dataRef, slot.source)[slot.key] = value
+end
+
+local function numberGet(slot)
+  if not slot.dataRef then return 0 end
+  return scaledValue(refDataTable(slot.dataRef, slot.source)[slot.key], slot.scale, slot.decimals)
+end
+
+local function numberSet(slot, value)
+  if not slot.dataRef then return end
+  refDataTable(slot.dataRef, slot.source)[slot.key] = unscaledValue(value, slot.scale, slot.decimals)
+end
+
+-- Pools a slot's dirty-marking setter wrapper the same way slot.get itself
+-- is pooled -- created once per slot, not once per buildField() call, and
+-- reads slot.controlRef dynamically (re-assigned below on every claim, same
+-- lifecycle as slot.dataRef) rather than closing over `runtime` directly.
+-- `controlRef` -- not the full runtime -- is what's safe to hold
+-- indefinitely in this permanently-pooled table: page_runtime.lua's own
+-- PageRuntime:dispose() nils controlRef.runtime specifically so closures
+-- like this one that outlive the page still only pin a tiny emptied
+-- indirection table, never the disposed runtime (and everything it
+-- references) itself. See this file's own module comment for why
 -- fresh-per-visit closures matter here at all.
-local function makeSetWithDirty(slot)
+local function makeSetWithDirty(slot, setter)
   return function(value)
     local runtime = slot.controlRef and slot.controlRef.runtime
-    slot.set(value)
+    setter(slot, value)
     if runtime and runtime.refreshDirty then
       runtime:refreshDirty()
     elseif runtime then
@@ -235,26 +300,12 @@ local function configureChoiceSlot(runtime, spec)
   if not slot then
     slot = {}
     if spec.bit then
-      slot.get = function()
-        if not slot.dataRef then return 0 end
-        return getBit(refDataTable(slot.dataRef, slot.source)[slot.key], slot.bit)
-      end
-      slot.set = function(value)
-        if not slot.dataRef then return end
-        local t = refDataTable(slot.dataRef, slot.source)
-        t[slot.key] = setBit(t[slot.key], slot.bit, value)
-      end
+      slot.get = function() return bitGet(slot) end
+      slot.setWithDirty = makeSetWithDirty(slot, bitSet)
     else
-      slot.get = function()
-        if not slot.dataRef then return nil end
-        return refDataTable(slot.dataRef, slot.source)[slot.key]
-      end
-      slot.set = function(value)
-        if not slot.dataRef then return end
-        refDataTable(slot.dataRef, slot.source)[slot.key] = value
-      end
+      slot.get = function() return choiceGet(slot) end
+      slot.setWithDirty = makeSetWithDirty(slot, choiceSet)
     end
-    slot.setWithDirty = makeSetWithDirty(slot)
     accessorSlots[id] = slot
   end
   slot.dataRef = runtime.dataRef
@@ -271,15 +322,8 @@ local function configureNumberSlot(runtime, spec, scale, decimals)
   local slot = accessorSlots[id]
   if not slot then
     slot = {}
-    slot.get = function()
-      if not slot.dataRef then return 0 end
-      return scaledValue(refDataTable(slot.dataRef, slot.source)[slot.key], slot.scale, slot.decimals)
-    end
-    slot.set = function(value)
-      if not slot.dataRef then return end
-      refDataTable(slot.dataRef, slot.source)[slot.key] = unscaledValue(value, slot.scale, slot.decimals)
-    end
-    slot.setWithDirty = makeSetWithDirty(slot)
+    slot.get = function() return numberGet(slot) end
+    slot.setWithDirty = makeSetWithDirty(slot, numberSet)
     accessorSlots[id] = slot
   end
   slot.dataRef = runtime.dataRef
@@ -292,6 +336,23 @@ local function configureNumberSlot(runtime, spec, scale, decimals)
   return slot
 end
 
+-- Detaches a leaving page's slots: drops the page's dataRef/controlRef
+-- references so a pooled closure can never keep the disposed runtime (and
+-- everything it transitively references) alive. The slots themselves stay in
+-- the pool on purpose.
+--
+-- Evicting them here looks like the obvious completion of this loop, but it
+-- is a measured regression rather than a saving. §8 of
+-- docs/memory-and-module-lifecycle.md is explicit that Ethos retains some
+-- `form` callback/widget allocations after `form.clear()`, which is the
+-- entire reason this pool exists: the retained widget keeps the closure
+-- alive, so evicting the pool entry does not free the closures, it only
+-- guarantees the *next* visit builds a fresh set -- one closure set per field
+-- per visit, growing without bound, versus a pool that reaches a fixed size
+-- on the first tour and then stops (see §8a for upstream's measurement). A
+-- slot whose dataRef/controlRef are both nil is already down to its two
+-- closures and its shape fields; the only thing left to reclaim is the table
+-- header, and Lua reclaims that as soon as the retained widget lets go.
 function field_layout.releaseRuntime(runtime)
   local list = runtime and runtime._fieldLayoutSlotIds
   if not list then return end
@@ -306,6 +367,27 @@ function field_layout.releaseRuntime(runtime)
     list[i] = nil
   end
   runtime._fieldLayoutSlotIds = nil
+end
+
+-- Read-only view of the pool, for measuring this module's actual footprint
+-- on a radio instead of guessing at it -- `collectgarbage("count")` reports
+-- live heap *plus* uncollected garbage (see lib/memstats.lua), so a heap
+-- reading around a page tour cannot separate this pool's contribution from
+-- anything else. Prints nothing and frees nothing on its own:
+--   local n, live = field_layout.poolStats()
+-- `count` is the whole pool, `live` the subset currently claimed by an open
+-- page (dataRef/controlRef set). The difference is the retained-but-detached
+-- tail, which is what a full collect would have to reclaim and cannot while a
+-- widget still holds a closure.
+function field_layout.poolStats()
+  local count, live = 0, 0
+  for _, slot in pairs(accessorSlots) do
+    count = count + 1
+    if slot.dataRef ~= nil or slot.controlRef ~= nil then
+      live = live + 1
+    end
+  end
+  return count, live
 end
 
 -- Builds one editable field (number or choice) for `spec.key`, wires its

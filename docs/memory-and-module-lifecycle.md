@@ -243,6 +243,48 @@ retained closures on every repeat visit. `app/field_layout.lua` pools
 field getter/setter closures by page+field shape for exactly this reason
 — see its own header comment for the full reasoning.
 
+### 8a. But do not shrink the pool on the way out
+
+Ported from rotorflight/rotorflight-lua-ethos-suite#2416.
+
+The natural next step after "the pool is a permanent table" is to drop each
+entry when its page is released, on the reasoning that a slot whose
+`dataRef` and `controlRef` are both nil is dead weight. **That is a
+regression, not a saving**, and it is worth writing down because the
+argument for it is very plausible.
+
+The retained widget is what holds the closure alive. Evicting the pool
+entry does not free the closure -- it only guarantees the *next* visit to
+that page builds a fresh set, while the old widget keeps the old one. So
+eviction converts a bounded, one-time pool into closure sets that grow
+linearly with the number of page visits, which is the exact thing §8's
+pooling exists to prevent.
+
+Upstream measured this by replaying every page's real field inventory
+(rotorflight's page set, not wingflight's) through `app/field_layout.lua`
+on Lua 5.4, opening each page, building every field and releasing the
+runtime:
+
+| Full tours of the page set | Pooled (current) | Evict-on-release |
+|---|---|---|
+| 1 | 195 entries built | 195 built |
+| 2 | 195 | 390 |
+| 5 | 195 | 975 |
+| 20 | 195 | 3900 |
+
+The shape carries over even though wingflight's numbers differ: the pool is
+*bounded by construction*, not merely slow to grow. It is keyed by field
+shape, and every field shape in the app is a literal in some page's source,
+so it saturates on the first tour and never grows again.
+
+The real lever on this pool is therefore its **per-entry cost**, not its
+size. Every entry is a slot table plus its key string plus two closures
+(it was three -- the plain setter is now one shared function per field
+kind). `field_layout.poolStats()` returns `(count, live)` so the pool's size
+and its detached tail can be checked on a radio instead of estimated;
+`bin/field_layout/verify_field_layout.lua` pins the pooling, the detach on
+`releaseRuntime()`, and the two-closure shape.
+
 ## 9. A dead end: don't reach for `collectgarbage()` without new evidence
 
 A prior version of the menu-rebuild path forced `collectgarbage("collect")`
