@@ -37,6 +37,32 @@ Two things still end a log and start a new one:
 The flight timer and the flight count in the model statistics follow the same
 rule, so a flight that briefly loses the link is counted once.
 
+## When the card cannot be written
+
+Samples are buffered on the radio and written out every few seconds. If the
+card cannot be written -- removed, full, or not writable -- the buffer is
+**kept**, not discarded, and the next attempt writes it, so a card that comes
+back mid-flight loses nothing.
+
+While the card stays unwritable the buffer holds at most 80 samples and then
+starts dropping the oldest, so memory use stays bounded either way.
+
+Each failure prints one line to the script log:
+
+```
+[logging] cannot open LOGS:/wfsuite/telemetry/<id>/<file>.csv -- keeping 20 samples
+[logging] write to LOGS:/wfsuite/telemetry/<id>/<file>.csv failed -- keeping 43 samples
+[logging] log ended with 61 unwritten samples in LOGS:/wfsuite/telemetry/<id>/<file>.csv
+```
+
+That is one line per streak, not one per attempt, so a card that stays away for
+a whole flight does not bury the rest of the output. The lines are printed even
+with *Debug logs* off: this is lost flight data, not a developer trace.
+
+The last line is the one that matters: a log that ends while the card is still
+unwritable says so and counts what was lost. That is the only case where samples
+cannot be recovered, because there is no later attempt to recover them in.
+
 ## Settings
 
 | Setting | What it does |

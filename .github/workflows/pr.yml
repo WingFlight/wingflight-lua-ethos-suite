@@ -113,6 +113,15 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/dialog_lifecycle/verify_dialog_lifecycle.lua
 
+      # A flight log is the pilot's evidence after a crash, and both ways it
+      # could lose rows were silent: an io.open that failed emptied the buffer,
+      # and a failed write() trimmed the rows it had just failed to persist.
+      # Only a card that cannot be written reaches either path, so the real
+      # logger is driven here with io.open and the handle's write() as seams.
+      - name: Check an unwritable card does not discard the log buffer
+        if: success() || failure()
+        run: lua5.4 bin/logging/verify_log_flush_retry.lua
+
       # The system tool's UI subtree (menu_container, header, tile_grid,
       # navigation, both menu guards and their MSP codecs, memstats) loads on
       # first create(), not at boot. Nothing reaches that from a build step.
