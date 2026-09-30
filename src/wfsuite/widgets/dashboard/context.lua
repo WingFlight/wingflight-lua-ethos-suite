@@ -57,9 +57,46 @@ local paletteCache = {}
 local themeStateCache = {}
 local themePaletteCache = {}
 local systemThemeSupport = nil
+-- drawImageInRect()'s per-draw memo: imageCache[fallback][path]. It runs on
+-- paint, so a hit has to allocate nothing -- going through loadImage() every
+-- frame would re-normalise the path (several gsub passes) and, before this,
+-- a "path|fallback" key was concatenated per draw, which with a logo fallback
+-- is past Lua's 40-byte short-string limit and so a fresh string every frame.
+-- Two lookups instead, and no string is built.
+--
+-- It must not pin bitmaps either: each inner table holds the imageBitmapCache
+-- *record*, not the bitmap, and its values are weak, so once the LRU below
+-- evicts a record nothing here keeps it (or its bitmap) alive. `false` marks
+-- a path that resolved to nothing; that is a boolean, never collected, and
+-- goes on clearCaches({images = true}) with the rest. The outer table has one
+-- key per distinct fallback logo (a handful), so it stays strong.
 local imageCache = {}
+local WEAK_VALUES = {__mode = "v"}
 local imagePathCache = {}
+-- imageBitmapCache holds decoded bitmaps, so unlike imagePathCache above it
+-- is bounded rather than merely cleared. Its key space is open-ended: every
+-- distinct model photo, dial panel and per-box `image` parameter ever
+-- resolved mints a new key, and a key looked up once used to stay resident
+-- for the rest of the app session with no release path at all. Each entry is
+-- a userdata handle plus its own decoded pixel buffer sized by the source
+-- file (widgets/dashboard/gfx/dials alone is a few hundred KB of panels), so
+-- this is the one image cache where an unbounded key count turns into RAM.
+-- imagePathCache is left to clearCaches({images = ...}): an entry there costs
+-- tens of bytes, and it additionally has to keep its negative ("path or
+-- false") results or a missing image is re-probed against the filesystem on
+-- every single load.
+--
+-- 32 sits above what a full theme plus the current model photo resolves
+-- (one panel per configured dial and one bitmap per distinct image path), so
+-- in normal operation nothing is ever evicted and the bitmap is re-decoded
+-- exactly once per theme load, same as before. It is a ceiling, not a target:
+-- path churn within a session can no longer accumulate without limit.
+local IMAGE_BITMAP_CACHE_MAX = 32
 local imageBitmapCache = {}
+local imageBitmapClock = 0
+-- Assigned next to context.utils.loadImage() below; declared here because
+-- drawImageInRect() sits earlier in the file.
+local loadImageEntry
 local liveSourceCache = {}
 local liveMissRetryAt = {}
 local liveMissCount = {}
@@ -1514,6 +1551,24 @@ local function clearTable(t)
   for key in pairs(t) do t[key] = nil end
 end
 
+-- Object modules that keep their own decoded-bitmap memo (see
+-- objects/image/model.lua's _imgCache) cannot be reached from here by name:
+-- the engine loadfile()s an object module on demand, and the module is a
+-- local. They register a clearer instead, and clearCaches({images = true})
+-- runs every registered clearer. This has to be an explicit registry rather
+-- than a table rewrite or a package.loaded sweep, because a clearer holds a
+-- closure over the module's own cache table: replacing the table here would
+-- leave the module writing into the orphaned one.
+local imageCacheClearers = {}
+
+function utils.registerImageCacheClearer(fn)
+  if type(fn) ~= "function" then return end
+  for i = 1, #imageCacheClearers do
+    if imageCacheClearers[i] == fn then return end
+  end
+  imageCacheClearers[#imageCacheClearers + 1] = fn
+end
+
 function context.widgets.dashboard.clearCaches(options)
   options = options or {}
   if options.renders then clearTable(context.widgets.dashboard.renders) end
@@ -1529,7 +1584,15 @@ function context.widgets.dashboard.clearCaches(options)
     clearTable(imageCache)
     clearTable(imagePathCache)
     clearTable(imageBitmapCache)
+    -- wfsuite.session IS context.session here: object modules get this very
+    -- module back under the name `wfsuite` (see objects/dial/image.lua's
+    -- `local wfsuite = requireModule("widgets/dashboard/context.lua")`), so
+    -- this is the table dial/image.lua writes its panels into.
     if context.session then clearTable(context.session.dialImageCache) end
+    for i = 1, #imageCacheClearers do
+      local ok, err = pcall(imageCacheClearers[i])
+      if not ok then print("[dashboard] image cache clearer failed: " .. tostring(err)) end
+    end
   end
   if options.liveSources then
     clearTable(liveSourceCache)
@@ -1761,17 +1824,29 @@ end
 -- title-only callers (objects/image/{image,model}.lua) can draw their image
 -- against utils.prepareTextLayout()'s cached content region without going
 -- through utils.box()'s (uncached) title-measurement path a second time.
+--
+-- imageCache holds the imageBitmapCache record weakly (see its declaration),
+-- so the bitmap stays bounded by the LRU. A hit re-stamps the record: an image
+-- drawn every frame is the most recently used one, not a candidate for
+-- eviction just because the draw path never went back through loadImage().
 local function drawImageInRect(regionX, regionY, regionW, regionH, image, imagewidth, imageheight, imagealign, bgcolor)
   local bitmap = nil
   if type(image) == "string" then
     local fallbackLogo = utils.getLogoFallbackForBackground and utils.getLogoFallbackForBackground(bgcolor)
-    local cacheKey = image .. "|" .. tostring(fallbackLogo or "")
-    bitmap = imageCache[cacheKey]
-    if bitmap == nil then
-      bitmap = context.utils.loadImage(image, nil, fallbackLogo) or false
-      imageCache[cacheKey] = bitmap
+    local byFallback = imageCache[fallbackLogo or ""]
+    if not byFallback then
+      byFallback = setmetatable({}, WEAK_VALUES)
+      imageCache[fallbackLogo or ""] = byFallback
     end
-    if bitmap == false then bitmap = nil end
+    local entry = byFallback[image]
+    if entry == nil then
+      entry = loadImageEntry(image, nil, fallbackLogo) or false
+      byFallback[image] = entry
+    elseif entry then
+      imageBitmapClock = imageBitmapClock + 1
+      entry.used = imageBitmapClock
+    end
+    if entry then bitmap = entry.bitmap end
   else
     bitmap = image
   end
@@ -2286,37 +2361,84 @@ local function loadBitmap(path)
   return nil
 end
 
-function context.utils.loadImage(image1, image2, image3)
-  local images = {image1, image2, image3}
-  for i = 1, 3 do
-    local image = normalizeImagePath(images[i])
-    if image then
-      local cachedBitmap = imageBitmapCache[image]
-      if cachedBitmap then return cachedBitmap end
+-- Least-recently-used eviction for imageBitmapCache. Deliberately not a
+-- linked list: the map holds at most IMAGE_BITMAP_CACHE_MAX entries, so the
+-- "which one is oldest" walk is over a table of a few dozen records, and it
+-- only runs on a decode miss -- never on a hit. An entry is a record rather
+-- than the bare bitmap handle so the recency stamp has somewhere to live
+-- without a second parallel map that could drift, and so drawImageInRect()'s
+-- weak memo has something to hold that dies with the LRU entry.
+--
+-- The live count is recomputed from the table instead of kept in a counter:
+-- a counter has to be reset on every clear path (clearCaches, and nothing
+-- else can reach this local), and a missed reset would silently make the
+-- loop below evict down to nothing.
+local function trimImageBitmapCache()
+  local count = 0
+  for _ in pairs(imageBitmapCache) do count = count + 1 end
 
-      local path = imagePathCache[image]
-      if path == nil then
-        for _, candidate in ipairs(imageCandidates(image)) do
-          if fileExists(candidate) then
-            path = normalizeImagePath(candidate)
-            break
-          end
-        end
-        imagePathCache[image] = path or false
-      elseif path == false then
-        path = nil
-      end
-
-      if path then
-        local bitmap = loadBitmap(path)
-        if bitmap then
-          imageBitmapCache[image] = bitmap
-          return bitmap
-        end
+  while count > IMAGE_BITMAP_CACHE_MAX do
+    local oldestKey, oldestUsed
+    for key, entry in pairs(imageBitmapCache) do
+      if oldestUsed == nil or entry.used < oldestUsed then
+        oldestKey, oldestUsed = key, entry.used
       end
     end
+    if not oldestKey then break end
+    imageBitmapCache[oldestKey] = nil
+    count = count - 1
+  end
+end
+
+local function cacheImageBitmap(key, bitmap)
+  imageBitmapClock = imageBitmapClock + 1
+  local entry = {bitmap = bitmap, used = imageBitmapClock}
+  imageBitmapCache[key] = entry
+  trimImageBitmapCache()
+  return entry
+end
+
+-- One candidate path -> its imageBitmapCache record, decoding on a miss.
+local function loadImageEntryFor(rawImage)
+  local image = normalizeImagePath(rawImage)
+  if not image then return nil end
+
+  local entry = imageBitmapCache[image]
+  if entry then
+    imageBitmapClock = imageBitmapClock + 1
+    entry.used = imageBitmapClock
+    return entry
   end
 
+  local path = imagePathCache[image]
+  if path == nil then
+    for _, candidate in ipairs(imageCandidates(image)) do
+      if fileExists(candidate) then
+        path = normalizeImagePath(candidate)
+        break
+      end
+    end
+    imagePathCache[image] = path or false
+  elseif path == false then
+    path = nil
+  end
+
+  if path then
+    local bitmap = loadBitmap(path)
+    if bitmap then return cacheImageBitmap(image, bitmap) end
+  end
+  return nil
+end
+
+-- First of up to three candidates that resolves. An `or` chain rather than a
+-- loop over {image1, image2, image3}: that table was one allocation per call.
+loadImageEntry = function(image1, image2, image3)
+  return loadImageEntryFor(image1) or loadImageEntryFor(image2) or loadImageEntryFor(image3)
+end
+
+function context.utils.loadImage(image1, image2, image3)
+  local entry = loadImageEntry(image1, image2, image3)
+  if entry then return entry.bitmap end
   return nil
 end
 
