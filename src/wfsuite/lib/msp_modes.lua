@@ -48,10 +48,12 @@ local function parseBoxNames(buf)
     chars = {}
   end
 
+  -- Bounded on #buf, not on readU8() returning nil: lib/mspcodec.lua's reads
+  -- decode a byte past the end as 0, so a nil-terminated loop never ends.
   buf.offset = 1
-  while true do
+  local total = #buf
+  while (buf.offset or 1) <= total do
     local byte = mspcodec.readU8(buf)
-    if byte == nil then break end
     if byte == 59 or byte == 0 then
       flush()
     elseif byte >= 32 and byte <= 126 then
@@ -65,9 +67,9 @@ end
 local function parseBoxIds(buf)
   local ids = {}
   buf.offset = 1
-  while true do
+  local total = #buf
+  while (buf.offset or 1) <= total do
     local id = mspcodec.readU8(buf)
-    if id == nil then break end
     ids[#ids + 1] = id
   end
   return ids
@@ -76,13 +78,14 @@ end
 local function parseModeRanges(buf)
   local ranges = {}
   buf.offset = 1
-  while true do
+  local total = #buf
+  -- Only whole 4-byte entries: a trailing partial entry is dropped, as the
+  -- nil checks this replaced used to drop it.
+  while (buf.offset or 1) + 3 <= total do
     local modeId = mspcodec.readU8(buf)
-    if modeId == nil then break end
     local auxChannelIndex = mspcodec.readU8(buf)
     local startStep = mspcodec.readS8(buf)
     local endStep = mspcodec.readS8(buf)
-    if auxChannelIndex == nil or startStep == nil or endStep == nil then break end
     ranges[#ranges + 1] = {
       id = modeId,
       auxChannelIndex = auxChannelIndex,
@@ -95,12 +98,14 @@ end
 local function parseModeRangesExtra(buf)
   local extras = {}
   buf.offset = 1
-  local count = mspcodec.readU8(buf) or 0
+  local total = #buf
+  local count = mspcodec.readU8(buf)
   for _ = 1, count do
+    -- A count larger than the payload stops at the last whole 3-byte entry.
+    if (buf.offset or 1) + 2 > total then break end
     local modeId = mspcodec.readU8(buf)
     local modeLogic = mspcodec.readU8(buf)
     local linkedTo = mspcodec.readU8(buf)
-    if modeId == nil or modeLogic == nil or linkedTo == nil then break end
     extras[#extras + 1] = {id = modeId, modeLogic = modeLogic, linkedTo = linkedTo}
   end
   return extras
