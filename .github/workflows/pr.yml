@@ -96,6 +96,14 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/msp_battery/verify_msp_battery.lua
 
+      # The ESC forward-programming and servo BUS tiles are gated by guards
+      # that read the FC once. A timeout or bus error used to latch them shut
+      # until the menu was reopened; they now retry after a backoff. That
+      # retry reaches neither a build nor a package step, so it is pinned here.
+      - name: Check a failed ESC/servo guard read is retried
+        if: success() || failure()
+        run: lua5.4 bin/esc_guard/verify_esc_guard_retry.lua
+
       # The system tool's UI subtree (menu_container, header, tile_grid,
       # navigation, both menu guards and their MSP codecs, memstats) loads on
       # first create(), not at boot. Nothing reaches that from a build step.

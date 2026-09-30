@@ -17,7 +17,7 @@ TODO: Explain what this page controls and when a pilot would use it.
 
 *Configuration* → *Setup* → *Servos* → *BUS Output*
 
-Requires a running background task and a flight controller connection. Only available when servo bus output is configured.
+Requires a running background task and a flight controller connection. Only available when servo bus output is configured. If that check cannot reach the flight controller, it is retried every 5 seconds.
 
 ## Settings
 
