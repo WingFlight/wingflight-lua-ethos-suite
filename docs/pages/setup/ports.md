@@ -31,6 +31,10 @@ Requires a running background task and a flight controller connection.
 
 ## Notes
 
+- A *Save* or *Reload* confirmation that is still on screen when you leave the
+  page (Back, or closing the tool) is closed with the page, rather than staying
+  up over the next screen with an OK button that no longer does anything.
+
 TODO: Verify persistence, reboot behaviour, profile scope and any restrictions in
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than
 firmware defaults; wire values may need scaling before display.

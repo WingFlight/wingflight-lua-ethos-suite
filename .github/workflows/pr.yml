@@ -104,6 +104,15 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/esc_guard/verify_esc_guard_retry.lua
 
+      # Leaving a page -- Back, or closing the tool -- ran its dialog teardown
+      # on a form Ethos may already have stopped updating, and a save/reload
+      # confirmation still up outlived the page with an OK button that did
+      # nothing. The pages are loaded for real here under a form whose writes
+      # raise once teardown starts.
+      - name: Check the dialog teardown when a page is left
+        if: success() || failure()
+        run: lua5.4 bin/dialog_lifecycle/verify_dialog_lifecycle.lua
+
       # The system tool's UI subtree (menu_container, header, tile_grid,
       # navigation, both menu guards and their MSP codecs, memstats) loads on
       # first create(), not at boot. Nothing reaches that from a build step.

@@ -27,6 +27,10 @@ Requires a running background task and a flight controller connection. Hidden un
 
 ## Notes
 
+- Leaving the page, or closing the tool, while its progress dialog is up closes
+  the dialog without writing to a screen Ethos has already stopped updating --
+  the header refocus it would otherwise do afterwards is skipped.
+
 TODO: Verify persistence, reboot behaviour, profile scope and any restrictions in
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than
 firmware defaults; wire values may need scaling before display.
