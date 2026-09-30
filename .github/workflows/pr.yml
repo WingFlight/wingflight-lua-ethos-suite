@@ -60,6 +60,16 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/perf/verify_clock_budgets.lua
 
+      # A disconnect must drop the MSP request queue -- including mid-flight,
+      # which takes a different branch through the reset -- so the next
+      # handshake is not queued FIFO behind a backlog no FC can answer. And
+      # completing a message must not force a full GC cycle, which section 9
+      # of the lifecycle doc measured as buying nothing. Both need a session
+      # task and a collector that can be observed.
+      - name: Check the MSP queue on disconnect and the per-message GC
+        if: success() || failure()
+        run: lua5.4 bin/msp_gc/verify_msp_disconnect.lua
+
       # The system tool's UI subtree (menu_container, header, tile_grid,
       # navigation, both menu guards and their MSP codecs, memstats) loads on
       # first create(), not at boot. Nothing reaches that from a build step.
