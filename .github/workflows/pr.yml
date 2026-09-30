@@ -70,6 +70,15 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/msp_gc/verify_msp_disconnect.lua
 
+      # clearCaches()'s images branch had no caller, so every decoded
+      # dashboard bitmap survived theme reloads, model changes and widget
+      # close. This checks the reload now releases them, that the bitmap map
+      # is LRU-bounded, and that the paint-path draw memo neither pins a
+      # bitmap nor allocates per draw.
+      - name: Check the dashboard image caches
+        if: success() || failure()
+        run: lua5.4 bin/dashboard/verify_image_caches.lua
+
       # The system tool's UI subtree (menu_container, header, tile_grid,
       # navigation, both menu guards and their MSP codecs, memstats) loads on
       # first create(), not at boot. Nothing reaches that from a build step.

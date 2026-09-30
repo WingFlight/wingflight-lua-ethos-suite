@@ -176,6 +176,64 @@ image/theme/render caches, gated behind flags (`{renders=, theme=,
 images=, liveSources=}`) so a theme switch only clears what actually
 needs to change.
 
+**A gated flag with no caller is an unmanaged cache, not a no-op.**
+`clearCaches()` is a pure option-dispatch table, so an option nobody
+requests fails silently: nothing errors, nothing is logged, and the whole
+cache class simply stays resident. That is exactly what happened to the
+`images` flag (ported from rotorflight/rotorflight-lua-ethos-suite#2414) --
+the branch existed, and `widgets/dashboard.lua`'s `clearThemeCache()` only
+ever passed `{theme = true}`, so every decoded dashboard bitmap survived
+every theme switch, model change and widget close for the rest of the
+session. When adding a flag here, the call site is part of the change; a
+flag nothing requests is indistinguishable from a flag that does not work.
+
+Four caches hold decoded bitmaps (or records pointing at them), and all
+have a release path that `clearCaches({images = true})` drives:
+
+| Cache | Held by | Released by |
+| --- | --- | --- |
+| `imageBitmapCache` (context.lua) | the context module, as `{bitmap, used}` records | `clearCaches({images = true})`, plus an LRU ceiling of `IMAGE_BITMAP_CACHE_MAX` (32) entries |
+| `imageCache` (context.lua) | `drawImageInRect()`'s per-draw memo, `[fallback][path]` | its values are **weak** references to the records above, so an LRU eviction releases them too; also cleared by `images` |
+| `_imgCache` (`objects/image/model.lua`) | the object module, keyed by craft name | a clearer registered via `utils.registerImageCacheClearer()`, run by the same `images` branch |
+| `session.dialImageCache` (`objects/dial/image.lua`) | the session table, keyed by dial panel | `clearCaches({images = true})` |
+
+In addition, `imagePathCache` (context.lua) caches resolved string paths and
+negative probe results (`path or false`) so missing images are not repeatedly
+probed against the filesystem; it is cleared by the same `images` branch.
+
+The LRU ceiling exists because the bitmap cache's key space is open-ended --
+every distinct model photo, dial panel and per-box `image` parameter mints a
+new key -- so clearing on lifecycle events alone still lets path churn within
+one session accumulate. An evicted bitmap is not freed on the spot; the
+handle simply becomes garbage once nothing references it, and the next
+`loadImage()` re-decodes it.
+
+`drawImageInRect()` keeps its own memo because it runs on paint. Upstream
+dropped that memo and called `loadImage()` per draw, which re-normalises the
+path (several `gsub` passes) every frame; here the memo stays, holds the LRU
+record weakly so it cannot pin a bitmap, and re-stamps the record on a hit so
+an image drawn every frame is never the one evicted. It is keyed in two
+levels rather than by a `"path|fallback"` string because that concatenation
+exceeds Lua's 40-byte short-string limit and so allocated a fresh string on
+every draw.
+
+`objects/image/model.lua` needs a registry rather than a lookup because the
+engine `loadfile()`s object modules on demand and holds them in its own
+`objectsByType` map, so a clearer has to be a closure the module registers
+over its own local cache. The engine never evicts that map, so a given
+object module registers exactly one clearer per session.
+
+`bin/dashboard/verify_image_caches.lua` pins all of this against the
+collector (weak references to stub bitmaps), including an end-to-end theme
+reload over the real `settings.update` bus event.
+
+**Not yet measured on hardware.** What is established here is the retention
+path: the bitmaps were reachable from a live reference, and they no longer
+are. How many kilobytes that is worth on a real radio is not established --
+quantifying it needs a `live` vs `churn` split around
+`collectgarbage("count")` (a `live` figure after a full collect measures
+true retention, `churn` measures the sawtooth).
+
 ## 8. Closures survive `form.clear()` — pool them
 
 Live testing showed Ethos retains some `form` callback/widget allocations
@@ -409,4 +467,5 @@ the Lua side can be converted into bytes of headroom.
 | RAM climbs *and* stale/duplicate event behavior appears over time | Module subscribes to the bus at load time, never cached | Self-cache (§3/§4) — non-negotiable |
 | A page's own live-data callback keeps firing after leaving the page | Page subscribed in open(), never unsubscribed in close() | Pair subscribe/unsubscribe (§5) |
 | A long-lived cache table keeps growing across the whole session | Cache never cleared, or cleared by reassignment while something else still holds the old table | Clear in place (§7) |
+| A cache class grows across the whole session although a `clearCaches`-style option exists for it | The option is gated and no call site ever requests it -- a silent failure by construction | Request the option at the lifecycle call site, and bound the cache if its key space is open-ended (§7) |
 | RAM grows on menu/page rebuild despite everything above being clean | Likely Ethos's own `form` widget retention (§9) | Don't force `collectgarbage()` — it won't help; this needs a different kind of fix (or may be a platform limit) |
