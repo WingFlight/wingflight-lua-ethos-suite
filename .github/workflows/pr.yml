@@ -113,6 +113,18 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/dialog_lifecycle/verify_dialog_lifecycle.lua
 
+      # A page tags its data with the profile it was read for, and the tag was
+      # taken when the read finished rather than when it started. A pilot who
+      # switched profile while that read was in flight got the previous
+      # profile's values on screen, anchored to the new profile -- so nothing
+      # reloaded, and Save wrote the old profile's values into the new one.
+      # Only a switch inside an MSP round-trip reaches it, so the MSP answers
+      # are held here and the session.update lands while a read is in flight.
+      # 5 of its 17 checks go red on the pre-fix page_runtime.lua.
+      - name: Check a page's data stays tagged with the profile it came from
+        if: success() || failure()
+        run: lua5.4 bin/page_runtime/verify_profile_anchor.lua
+
       # A flight log is the pilot's evidence after a crash, and both ways it
       # could lose rows were silent: an io.open that failed emptied the buffer,
       # and a failed write() trimmed the rows it had just failed to persist.
