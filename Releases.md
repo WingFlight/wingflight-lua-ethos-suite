@@ -1,3 +1,20 @@
+# 0.0.30
+
+Require MSP API 22.13 (0.0.30 firmware). The firmware update resets every PID and thrust-vector profile to defaults, so note your tune before flashing.
+Add Snap Relax (strength, threshold, window, fade-out) to PID Controller, and Damping to Angle Mode.
+Rename PASSTHROUGH and MANUAL to SETUP and GYRO OFF on the Modes page and in the flight mode announcements.
+Remove Auto Hover and Horizon, matching the firmware.
+Set the F and B defaults to 75 and 35, matching the firmware.
+Add an arm-without-GPS-fix switch to GPS Navigation.
+
+Fix large pages such as Mixer Rules failing to load after a lost telemetry frame: a request is no longer resent while the FC is still replying.
+Fix every page hanging until the script was reloaded after an MSP request died part-way through sending.
+Fix a profile switch during a page load saving the previous profile's values into the new one.
+Name the GPS heading sensor GPS Course; sensors already named GPS Heading are renamed.
+Retry a failed ESC or servo bus check instead of greying out those tiles until the menu is reopened.
+Keep flight-log rows when the log file cannot be written, instead of dropping them.
+Cut memory churn and forced garbage collection on the dashboard and MSP paths, so Ethos is less likely to stop the suite for using too much RAM.
+
 # 0.0.29
 
 Require MSP API 22.10 (0.0.29 firmware). The firmware update resets every PID and thrust-vector profile to defaults, so note your tune before flashing.
