@@ -34,6 +34,13 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/tests/arming_flags.lua
 
+      # GPS Navigation writes MSP_GPS_RESCUE back from the FC's own reply with
+      # only the arming byte changed, so the fields the suite does not show are
+      # never overwritten, and the page still saves when the FC lacks the field.
+      - name: Check the GPS arm-without-fix toggle
+        if: success() || failure()
+        run: lua5.4 bin/tests/gps_arm_without_fix.lua
+
       # Settings and log headers are staged to a temp file before replacing the
       # live file, so a power loss during a save does not truncate the data the
       # suite owns on the SD card.

@@ -5,6 +5,10 @@
 -- GPS Rescue option. Same flat-record shape as failsafe_procedure.lua (see
 -- that file's own header comment for why this differs from
 -- failsafe.lua's per-channel indexed pattern) -- modeled directly on it.
+--
+-- Also edits gps_rescue_allow_arming_without_fix through MSP_GPS_RESCUE
+-- (lib/msp_gps_rescue.lua), so a pilot who cannot get a GPS lock at the field
+-- can still arm. That row stays disabled when the FC's reply lacks the field.
 
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local bus = requireModule("lib/bus.lua")
@@ -13,6 +17,7 @@ local header = requireModule("app/header.lua")
 local progressDialog = requireModule("app/progress_dialog.lua")
 local eeprom = requireModule("lib/msp_eeprom.lua")
 local gpsNavConfig = requireModule("lib/msp_gps_nav_config.lua")
+local gpsRescue = requireModule("lib/msp_gps_rescue.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.gps_nav_config.name)@"
 local MSG_LOADING_TITLE = "@i18n(app.msg_loading)@"
@@ -25,6 +30,11 @@ local MSG_RELOAD_TITLE = "@i18n(reload)@"
 local MSG_RELOAD_BODY = "@i18n(app.msg_reload_settings)@"
 local BTN_OK = "@i18n(app.btn_ok)@"
 local BTN_CANCEL = "@i18n(app.btn_cancel)@"
+
+local OFF_ON_OPTIONS = {
+  {"@i18n(app.modules.configuration.tbl_off)@", 0},
+  {"@i18n(app.modules.configuration.tbl_on)@", 1},
+}
 
 -- Values match TABLE_NAV_LOITER_DIRECTION (CW, CCW), 0-indexed.
 local LOITER_DIRECTION_OPTIONS = {
@@ -60,6 +70,10 @@ local function open(opts)
   local config = cloneConfig()
   local original = cloneConfig()
   local fields = {}
+  -- MSP_GPS_RESCUE record (lib/msp_gps_rescue.lua), nil until read or when the
+  -- FC does not report the field; armField is only enabled while it is set.
+  local rescue = nil
+  local armField = nil
 
   local function closeDialog(focusFn)
     if not dialog then return end
@@ -100,6 +114,9 @@ local function open(opts)
     for _, field in ipairs(fields) do
       field:enable(not busy and loaded)
     end
+    if armField then
+      armField:enable(not busy and loaded and rescue ~= nil)
+    end
   end
 
   local function goBack()
@@ -115,27 +132,40 @@ local function open(opts)
     loaded = false
     applyBusy(true)
     showProgress(MSG_LOADING_TITLE, MSG_LOADING_BODY)
+    local function fail()
+      if disposed then return end
+      applyBusy(false)
+      closeDialog(focusFn)
+    end
     bus.publish("msp.request", gpsNavConfig.buildReadMessage(function(data)
       if disposed then return end
       config = cloneConfig(data)
       original = cloneConfig(data)
-      loaded = true
-      dirty = false
-      applyBusy(false)
-      closeDialog(focusFn)
-      if form.invalidate then form.invalidate() end
-    end, function()
-      if disposed then return end
-      applyBusy(false)
-      closeDialog(focusFn)
-    end))
+      -- The nav settings are usable even if this second read fails, so a
+      -- failure here only leaves the arming row disabled.
+      local function finish(rescueData)
+        if disposed then return end
+        rescue = rescueData
+        loaded = true
+        dirty = false
+        applyBusy(false)
+        closeDialog(focusFn)
+        if form.invalidate then form.invalidate() end
+      end
+      bus.publish("msp.request", gpsRescue.buildReadMessage(finish, function() finish(nil) end))
+    end, fail))
   end
 
   local function saveData(focusFn)
     if disposed or not loaded then return end
     applyBusy(true)
     showProgress(MSG_SAVING_TITLE, MSG_SAVING_BODY)
-    bus.publish("msp.request", gpsNavConfig.buildWriteMessage(config, function()
+    local function fail()
+      if disposed then return end
+      applyBusy(false)
+      closeDialog(focusFn)
+    end
+    local function writeEeprom()
       if disposed then return end
       bus.publish("msp.request", eeprom.buildWriteMessage(function()
         if disposed then return end
@@ -143,16 +173,16 @@ local function open(opts)
         dirty = false
         applyBusy(false)
         closeDialog(focusFn)
-      end, function()
-        if disposed then return end
-        applyBusy(false)
-        closeDialog(focusFn)
-      end))
-    end, function()
+      end, fail))
+    end
+    bus.publish("msp.request", gpsNavConfig.buildWriteMessage(config, function()
       if disposed then return end
-      applyBusy(false)
-      closeDialog(focusFn)
-    end))
+      if rescue then
+        bus.publish("msp.request", gpsRescue.buildWriteMessage(rescue, writeEeprom, fail))
+      else
+        writeEeprom()
+      end
+    end, fail))
   end
 
   local function confirmSave(focusFn)
@@ -230,6 +260,17 @@ local function open(opts)
     fields[#fields + 1] = field
   end
 
+  do
+    local line = form.addLine("@i18n(app.modules.gps_nav_config.arm_without_fix)@")
+    armField = form.addChoiceField(line, nil, OFF_ON_OPTIONS,
+      function() return rescue and rescue.allow_arming_without_fix or 0 end,
+      function(value)
+        if not rescue then return end
+        markDirty()
+        rescue.allow_arming_without_fix = value
+      end)
+    armField:enable(false)
+  end
   addNumberRow("@i18n(app.modules.gps_nav_config.rth_altitude)@", 10, 500, "nav_rth_altitude", "m")
   addNumberRow("@i18n(app.modules.gps_nav_config.loiter_radius)@", 20, 500, "nav_loiter_radius", "m")
   addChoiceRow("@i18n(app.modules.gps_nav_config.loiter_direction)@", LOITER_DIRECTION_OPTIONS, "nav_loiter_direction")

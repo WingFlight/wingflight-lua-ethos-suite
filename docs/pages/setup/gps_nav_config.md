@@ -20,6 +20,7 @@ Requires a running background task and a flight controller connection.
 
 | Setting | What it does |
 | --- | --- |
+| Arm w/o GPS Fix | Off or On (`gps_rescue_allow_arming_without_fix`). When GPS Rescue or a GPS RTH switch is set up, the FC will not make its first arm after power-up without a GPS fix. On lifts that block. Without a fix at arming no home point is recorded, so for that flight a failsafe glides down motor-off and the RTH switch flies level without turning home. Greyed out when the FC does not report the setting. |
 | RTH Altitude | Return altitude setting, 10–500 m. |
 | Loiter Radius | Loiter circle radius, 20–500 m. |
 | Loiter Dir. | Clockwise or Counter-CW. |
@@ -33,7 +34,7 @@ Requires a running background task and a flight controller connection.
 
 ## Notes
 
-Save writes the complete navigation configuration and then commits to EEPROM. The page does not request a reboot or select a PID/rate profile.
+Save writes the complete navigation configuration, then the GPS Rescue configuration (`MSP_SET_GPS_RESCUE`, sent back exactly as read except for the arming setting), and then commits to EEPROM. The page does not request a reboot or select a PID/rate profile.
 
 Older firmware may omit the appended altitude-damping, navigation-throttle and turn-coordination fields. The page supplies fallback values, but older firmware ignores unsupported values on write. Seeing a control does not establish firmware support.
 

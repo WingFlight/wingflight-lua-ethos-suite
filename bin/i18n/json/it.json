@@ -1627,6 +1627,13 @@
           "max_length": 14,
           "reverse_text": false
         },
+        "arm_without_fix": {
+          "english": "Arm w/o GPS Fix",
+          "translation": "Arm w/o GPS Fix",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 15
+        },
         "rth_altitude": {
           "english": "RTH Altitude",
           "translation": "RTH Altitude",
@@ -9089,7 +9096,7 @@
       "translation": "GPS Rotta",
       "needs_translation": false,
       "reverse_text": false,
-      "max_length": 11
+      "max_length": 10
     },
     "sensor_gps_home_dir": {
       "english": "GPS Home Dir",

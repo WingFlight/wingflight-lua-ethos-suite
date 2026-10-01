@@ -1398,6 +1398,12 @@
           "needs_translation": false,
           "max_length": 14
         },
+        "arm_without_fix": {
+          "english": "Arm w/o GPS Fix",
+          "translation": "Arm w/o GPS Fix",
+          "needs_translation": false,
+          "max_length": 15
+        },
         "rth_altitude": {
           "english": "RTH Altitude",
           "translation": "RTH Altitude",
@@ -7806,7 +7812,7 @@
     },
     "sensor_gps_heading": {
       "english": "GPS Course",
-      "max_length": 11,
+      "max_length": 10,
       "needs_translation": false,
       "translation": "GPS Course"
     },
