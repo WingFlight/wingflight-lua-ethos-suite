@@ -351,6 +351,36 @@
           "translation": "Cutoff",
           "needs_translation": false,
           "max_length": 6
+        },
+        "snap_relax": {
+          "english": "Snap Relax",
+          "translation": "Snap Relax",
+          "needs_translation": false,
+          "max_length": 10
+        },
+        "strength": {
+          "english": "Strength",
+          "translation": "Strength",
+          "needs_translation": false,
+          "max_length": 8
+        },
+        "threshold": {
+          "english": "Threshold",
+          "translation": "Threshold",
+          "needs_translation": false,
+          "max_length": 9
+        },
+        "window": {
+          "english": "Window",
+          "translation": "Window",
+          "needs_translation": false,
+          "max_length": 6
+        },
+        "hold": {
+          "english": "Fade-out",
+          "translation": "Fade-out",
+          "needs_translation": false,
+          "max_length": 8
         }
       },
       "tail_rotor": {

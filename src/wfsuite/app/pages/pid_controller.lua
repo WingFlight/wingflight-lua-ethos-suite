@@ -82,6 +82,17 @@ local function open(opts)
     {title = "@i18n(app.modules.pid_controller.cutoff)@", spec = {key = "cross_axis_relax_cutoff"}},
   })
 
+  -- Snap relax: stops roll/pitch feedback fighting pop tops, pinwheels and snaps
+  fieldLayout.buildGroup(runtime, "@i18n(app.modules.pid_controller.snap_relax)@", {
+    {title = "@i18n(app.modules.pid_controller.strength)@", spec = {key = "snap_relax_strength"}},
+    {title = "@i18n(app.modules.pid_controller.threshold)@", spec = {key = "snap_relax_threshold"}},
+  })
+
+  fieldLayout.buildGroup(runtime, "", {
+    {title = "@i18n(app.modules.pid_controller.window)@", spec = {key = "snap_relax_window"}},
+    {title = "@i18n(app.modules.pid_controller.hold)@", spec = {key = "snap_relax_hold"}},
+  })
+
   runtime:loadInitial()
 end
 

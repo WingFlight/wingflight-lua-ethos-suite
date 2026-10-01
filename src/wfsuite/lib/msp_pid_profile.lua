@@ -76,6 +76,11 @@
 -- MSP API 22.13 appends angle_level_damping (LEVEL_FIELDS) after the SPA
 -- fields: percent of the measured roll/pitch rate taken off the ANGLE
 -- leveling command. Minimum API is 22.13, so it is always read/written.
+--
+-- Snap relax (SNAP_FIELDS) follows angle_level_damping: roll/pitch feedback
+-- relaxed against a fast roll + pitch + yaw stick input (pop top, pinwheel,
+-- snap). Strength and stick threshold in percent, entry window and fade-out
+-- in ms. Always read/written; the reply is 71 bytes with it.
 
 -- Self-caches via package.loaded (same mechanism lib/bus.lua uses) --
 -- multiple pages share this codec and each reloads fresh via loadfile() on
@@ -136,6 +141,14 @@ local LEVEL_FIELDS = {
   {"angle_level_damping", "U8"},
 }
 
+-- Snap relax, after the level damping byte on the wire.
+local SNAP_FIELDS = {
+  {"snap_relax_strength", "U8"},
+  {"snap_relax_threshold", "U8"},
+  {"snap_relax_window", "U16"},
+  {"snap_relax_hold", "U16"},
+}
+
 -- API 22.4 axis limits: raw zero inherits the corresponding legacy shared limit.
 local AXIS_LIMITS = {
   {"angle_roll_limit", "angle_level_limit", 90},
@@ -181,6 +194,10 @@ local SIMULATOR_RESPONSE = {
   0,    -- fw_spa_curve (off)
   150, 0, -- fw_spa_speed_max (U16 LE: 150 km/h)
   25,   -- angle_level_damping
+  100,  -- snap_relax_strength
+  60,   -- snap_relax_threshold
+  144, 1, -- snap_relax_window (U16 LE: 400 ms)
+  150, 0, -- snap_relax_hold (U16 LE: 150 ms)
 }
 
 -- Per-field {min, max, default, decimals, suffix}, sourced from this
@@ -224,6 +241,10 @@ local FIELD_META = {
   bounceback_2 = {min = 1, max = 10, default = 5},
   angle_level_strength = {min = 0, max = 200, default = 40},
   angle_level_damping = {min = 0, max = 100, default = 25, suffix = "%"},
+  snap_relax_strength = {min = 0, max = 100, default = 100, suffix = "%"},
+  snap_relax_threshold = {min = 20, max = 100, default = 60, suffix = "%"},
+  snap_relax_window = {min = 0, max = 1000, default = 400, suffix = "ms"},
+  snap_relax_hold = {min = 0, max = 1000, default = 150, suffix = "ms"},
   trainer_gain = {min = 25, max = 255, default = 75},
   atthold_gain = {min = 0, max = 250, default = 40},
   atthold_deadband = {min = 0, max = 100, default = 5, suffix = "%"},
@@ -290,6 +311,14 @@ function msp_pid_profile.decode(buf)
   for i = 1, #LEVEL_FIELDS do
     data[LEVEL_FIELDS[i][1]] = mspcodec.readU8(buf)
   end
+  for i = 1, #SNAP_FIELDS do
+    local name, wireType = SNAP_FIELDS[i][1], SNAP_FIELDS[i][2]
+    if wireType == "U16" then
+      data[name] = mspcodec.readU16(buf)
+    else
+      data[name] = mspcodec.readU8(buf)
+    end
+  end
   return data
 end
 
@@ -319,6 +348,14 @@ function msp_pid_profile.encode(data)
   for i = 1, #LEVEL_FIELDS do
     mspcodec.writeU8(payload, data[LEVEL_FIELDS[i][1]] or 0)
   end
+  for i = 1, #SNAP_FIELDS do
+    local name, wireType = SNAP_FIELDS[i][1], SNAP_FIELDS[i][2]
+    if wireType == "U16" then
+      mspcodec.writeU16(payload, data[name] or 0)
+    else
+      mspcodec.writeU8(payload, data[name] or 0)
+    end
+  end
   return payload
 end
 
@@ -329,8 +366,8 @@ function msp_pid_profile.buildReadMessage(onData, onError)
   return {
     command = READ_COMMAND,
     processReply = function(_, buf)
-      if #buf < 65 then
-        if onError then onError("MSP PID profile requires API 22.13 firmware") end
+      if #buf < 71 then
+        if onError then onError("MSP PID profile requires firmware with snap relax") end
         return
       end
       onData(msp_pid_profile.decode(buf))
