@@ -230,6 +230,25 @@ at the VM's own "C stack overflow", and that the memory log reports
 the smallest mainStackAvailable it has ever seen.
 '''
     ),
+    LuaStep(
+        name='Check the wakeup path allocates nothing per call',
+        script='bin/allocation_churn/verify_allocation_churn.lua',
+        rationale=r'''The dashboard wakeup path runs several times a second and session.update
+is published at up to 20 Hz, so a table rebuilt per call there is the
+sawtooth in the '[bgtask mem] lua=' log rather than a detail. Three such
+sites were removed: the subscriber copy in lib/bus.lua, the name table and
+its result table in getSensorStats(), and the per-call closure in
+transformValue(). Ported from rotorflight-lua-ethos-suite#2435.
+
+No build and no package step reaches this -- it needs the collector held off
+and a loop that calls the function thousands of times. Every allocation
+assertion is paired in both directions: the current code has to come out
+under the bound and the removed code over it. The same run pins what a
+pooled iteration copy can get wrong -- a handler unsubscribed long ago must
+not come back through a leftover slot -- and the one value the change
+alters, an rssi box reading its own min/max instead of link quality's.
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [
