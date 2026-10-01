@@ -552,15 +552,15 @@
     "needs_translation": false
   },
   {
-    "file": "events/mode/passthrough.wav",
-    "english": "Passthrough",
-    "translation": "Passthrough",
+    "file": "events/mode/setup.wav",
+    "english": "Setup",
+    "translation": "Setup",
     "needs_translation": false
   },
   {
-    "file": "events/mode/manual.wav",
-    "english": "Manual",
-    "translation": "Manual",
+    "file": "events/mode/gyrooff.wav",
+    "english": "Gyro off",
+    "translation": "Gyro off",
     "needs_translation": false
   },
   {
