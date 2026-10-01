@@ -5450,6 +5450,12 @@
           "needs_translation": false,
           "translation": "Ground Error Decay"
         },
+        "hold": {
+          "english": "Fade-out",
+          "max_length": 8,
+          "needs_translation": false,
+          "translation": "Fade-out"
+        },
         "hsi_offset_limit": {
           "english": "HSI Offset Limit",
           "max_length": 16,
@@ -5504,6 +5510,18 @@
           "needs_translation": false,
           "translation": "R"
         },
+        "snap_relax": {
+          "english": "Snap Relax",
+          "max_length": 10,
+          "needs_translation": false,
+          "translation": "Snap Relax"
+        },
+        "strength": {
+          "english": "Strength",
+          "max_length": 8,
+          "needs_translation": false,
+          "translation": "Strength"
+        },
         "tbl_off": {
           "english": "Off",
           "max_length": 3,
@@ -5522,11 +5540,23 @@
           "needs_translation": false,
           "translation": "RPY"
         },
+        "threshold": {
+          "english": "Threshold",
+          "max_length": 9,
+          "needs_translation": false,
+          "translation": "Threshold"
+        },
         "time": {
           "english": "Time",
           "max_length": 4,
           "needs_translation": false,
           "translation": "Time"
+        },
+        "window": {
+          "english": "Window",
+          "max_length": 6,
+          "needs_translation": false,
+          "translation": "Window"
         },
         "yaw": {
           "english": "Y",
