@@ -497,6 +497,70 @@ the dashboard's paint path, which is a plain nested call chain with no cycle
 in it. Until the meaning of `mainStackAvailable` is answered, no number from
 the Lua side can be converted into bytes of headroom.
 
+## 12. Nothing on a wakeup path builds a table per call
+
+The dashboard wakeup path runs several times a second and `session.update` is
+published at up to 20 Hz, so a table rebuilt per call there is the sawtooth in
+the `'[bgtask mem] lua='` log rather than a detail. Three allocations on those
+paths were measured at 184 B, 136 B and about 1 kB per call (desktop Lua 5.4),
+and all three were a lookup table, a result table or a closure rebuilt for
+values the file already had at module level:
+
+- a name-to-suffix table rebuilt inside `getSensorStats()`, while the
+  `STAT_SUFFIXES` constant above it already held it -- and the two had
+  drifted, so the rebuild read a different suffix for `rssi` than
+  `recordSensorStat()` wrote (an rssi stat box showed link quality's min/max)
+- a `compileTransform()` closure built, called on the next expression and thrown
+  away, for the boxes that do not cache their config
+- a copy of the subscriber list, made on every `publish()`
+
+Two rules follow, and both are about what the file already demonstrates:
+
+1. **A constant lookup table lives at module level, and in one place only.** Two
+   copies of the same mapping will disagree, and the disagreement stays invisible
+   until it returns the wrong number to a pilot.
+2. **Reuse a result object per key, not one for everything.**
+   `getSensorStats()` keeps one table per sensor name and overwrites its fields.
+   A single shared table would be cheaper still, but a caller that reads two
+   sensors before drawing would see the second one twice. The temperature path
+   in the same function already cached its result this way.
+
+For the publish copy, one pooled snapshot per nesting level replaces the
+per-publish table, indexed by the `publishDepth` that section 11 already keeps --
+so the pool cannot grow past `MAX_PUBLISH_DEPTH` entries and the guard and the
+pool share one counter. Two details are load-bearing, and
+`bin/allocation_churn/verify_allocation_churn.lua` pins both:
+
+- **each slot is cleared (`snapshot[i] = nil`) as it is read.** Leaving
+  handler references in the pooled snapshot would retain closures (and via
+  their upvalues, closed `PageRuntime` instances or widget trees) across
+  publishes. In PUC-Rio Lua, setting array entries to `nil` does not shrink
+  the table's allocated array, so refilling `1..count` on the next publish
+  still allocates nothing.
+- **the semantics of the copy are preserved exactly.** A handler unsubscribed by
+  another handler *during* a publish still gets its turn in that publish and
+  none in the next. Tombstoning the slot in the live list instead looks like the
+  obvious fix and is not this: it changes that behaviour, and its slots are never
+  reclaimed, so the subscriber list only grows -- and page open/close is what
+  unsubscribes here.
+
+### 12.1 Measuring this without fooling yourself
+
+`collectgarbage("count")` is the live heap **plus** whatever has not been
+collected yet, so a difference between two readings is an allocation figure only
+when no collection ran in between. Measured with the pause left alone, the numbers
+come out non-monotonic (6 subscribers reported cheaper than 3) because the
+collector ran mid-loop. So the harness pins the pause high, keeps a retained
+ballast array so the "double the live heap" trigger is out of reach, and asserts
+both directions on every run -- the current code under the bound and the removed
+code over it. A bound that both sides meet proves nothing, which is why the
+removed implementations are carried in the harness rather than only described.
+
+The same trap applies to parse cost. `loadfile()` without running the chunk
+measures the parser's transient allocations, not the prototype the radio keeps,
+and parsing two revisions of a file in one process shares every interned string
+between them, so a parse delta measured that way can fall while the source grows.
+
 ## Quick reference
 
 | Symptom | Likely cause | Fix |
@@ -511,3 +575,6 @@ the Lua side can be converted into bytes of headroom.
 | A long-lived cache table keeps growing across the whole session | Cache never cleared, or cleared by reassignment while something else still holds the old table | Clear in place (§7) |
 | A cache class grows across the whole session although a `clearCaches`-style option exists for it | The option is gated and no call site ever requests it -- a silent failure by construction | Request the option at the lifecycle call site, and bound the cache if its key space is open-ended (§7) |
 | RAM grows on menu/page rebuild despite everything above being clean | Likely Ethos's own `form` widget retention (§9) | Don't force `collectgarbage()` — it won't help; this needs a different kind of fix (or may be a platform limit) |
+| `lua=` in the background log sawtooths while the dashboard is up | A table, result object or closure rebuilt per call on a wakeup or publish path | Module-level constant, per-key result object, pooled iteration copy (§12) |
+| Heap grows *and* a stat box shows another sensor's numbers | Two copies of the same name-to-suffix mapping, disagreeing | One mapping, at module level (§12) |
+| An allocation measurement comes out smaller than the code change should allow | The collector ran inside the measurement window | Pin the pause, add ballast, assert the removed code over the bound too (§12.1) |
