@@ -83,6 +83,14 @@ column, where the joined list was cut off on small screens.
 '''
     ),
     LuaStep(
+        name='Check the GPS arm-without-fix toggle',
+        script='bin/tests/gps_arm_without_fix.lua',
+        rationale=r'''GPS Navigation writes MSP_GPS_RESCUE back from the FC's own reply with
+only the arming byte changed, so the fields the suite does not show are
+never overwritten, and the page still saves when the FC lacks the field.
+'''
+    ),
+    LuaStep(
         name='Check atomic storage writes',
         script='bin/storage/verify_atomic_writes.lua',
         rationale=r'''Settings and log headers are staged to a temp file before replacing the

@@ -5043,6 +5043,13 @@
           "reverse_text": false,
           "translation": "Altitude Gain"
         },
+        "arm_without_fix": {
+          "english": "Arm w/o GPS Fix",
+          "max_length": 15,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Arm w/o GPS Fix"
+        },
         "bearing_kp": {
           "english": "Bearing Gain",
           "max_length": 12,
@@ -9351,7 +9358,7 @@
     },
     "sensor_gps_heading": {
       "english": "GPS Course",
-      "max_length": 11,
+      "max_length": 10,
       "needs_translation": false,
       "reverse_text": false,
       "translation": "GPS Rotta"
