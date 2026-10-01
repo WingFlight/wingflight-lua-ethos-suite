@@ -249,6 +249,24 @@ not come back through a leftover slot -- and the one value the change
 alters, an rssi box reading its own min/max instead of link quality's.
 '''
     ),
+    LuaStep(
+        name='Check the collector pause and the forced collects',
+        script='bin/gc_pause/verify_gc_pause.lua',
+        rationale=r'''The collector's pause decides when a cycle starts: live * pause / 100.
+The default is 200, so the heap may reach twice what is live before anything
+is reclaimed at all, while Ethos kills a script whose heap passes its limit.
+main.lua lowers it to 120 -- but the one line has a foot-gun in it, and that
+is what this pins: `collectgarbage("setpause")` with the argument omitted
+does not read the pause, it SETS IT TO 0 ("collect constantly"). So the
+applied value is printed at boot instead of read back, and no file under
+src/ may call either setter without an explicit value. It also fixes the
+call before background_task.init(), keeps Queue:_finish() free of a forced
+collect, and keeps the teardown collects in Queue:clear() and the three ESC
+dispose paths. Ported from rotorflight-lua-ethos-suite#2441.
+
+Pass --self-test to prove every check can go red on a sabotaged copy.
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [
