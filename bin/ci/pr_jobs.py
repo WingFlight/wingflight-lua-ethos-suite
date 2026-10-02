@@ -287,6 +287,19 @@ Pass --self-test to prove the seven root checks go red against a copy of
 app/menu_container.lua with the pre-fix root branch put back.
 '''
     ),
+    LuaStep(
+        name='Check the Ethos instruction budget',
+        script='bin/perf/verify_instruction_budget.lua',
+        rationale=r'''Ethos aborts any Lua callback that runs 20000 VM instructions ("Max
+instructions count reached"), and nothing on the radio says how close one
+runs. This drives the real dashboard widget through every theme and flight
+state, and the real background task through boot, link up, steady CRSF with
+ELRS frames, an ELRS backlog and link down, counting instructions with a
+debug hook on desktop Lua. Any callback at or over the limit fails, so a
+theme with too many boxes, or a new per-tick cost, is caught here instead of
+as stalled frames or a dropped background tick in flight.
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [
