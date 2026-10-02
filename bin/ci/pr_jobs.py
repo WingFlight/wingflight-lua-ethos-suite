@@ -192,6 +192,18 @@ are held here and the session.update lands while a read is in flight.
 '''
     ),
     LuaStep(
+        name="Check the Tool button hands a page a callable focus function",
+        script='bin/page_runtime/verify_tool_focus.lua',
+        rationale=r'''Every page's onTool is function(focusFn), and calls focusFn() when its
+dialog closes or is cancelled. The header's Tool button called it as
+runtime:onTool(focus), so the page got the runtime table as focusFn and
+calibrating the accelerometer ended in "focusFn is not callable (a
+table value)". This presses the real page_runtime.lua's Tool button and
+closes the dialog the way the pages do; 4 of its 5 checks go red on the
+pre-fix page_runtime.lua.
+'''
+    ),
+    LuaStep(
         name='Check an unwritable card does not discard the log buffer',
         script='bin/logging/verify_log_flush_retry.lua',
         rationale=r'''A flight log is the pilot's evidence after a crash, and both ways it
