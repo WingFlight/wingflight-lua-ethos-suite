@@ -267,6 +267,26 @@ dispose paths. Ported from rotorflight-lua-ethos-suite#2441.
 Pass --self-test to prove every check can go red on a sabotaged copy.
 '''
     ),
+    LuaStep(
+        name='Check the root menu close key',
+        script='bin/tool_ui/verify_root_close_key.lua',
+        rationale=r'''Every screen but one installed a handler for the physical Back/Close key. The
+root menu installed none, on the stated assumption that Ethos's own default
+closes the tool on the first press. It does not -- that default takes two, the
+first dropping the form's input focus -- so the root menu had two ways out that
+disagreed with each other: the on-screen Menu button left in one press, the
+hardware RTN in two. Neither a build nor a package step reaches any of it.
+
+The harness drives the real tool.lua through registerSystemTool, create() and
+event() and asserts that RTN and EXIT reach goBack() at the root, that goBack()
+is the same path the back button takes, that a long ENTER, a model key and a
+touch event are still passed through untouched, and that RTN in a submenu pops
+one level without exiting. Ported from rotorflight-lua-ethos-suite#2442.
+
+Pass --self-test to prove the seven root checks go red against a copy of
+app/menu_container.lua with the pre-fix root branch put back.
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [
