@@ -53,6 +53,16 @@ local function suiteKey(info)
   return info.short_src:gsub("^.*src/wfsuite/", "") .. ":" .. info.linedefined
 end
 
+-- Optional emulation of the limit itself, for checking what the suite does
+-- when a callback is cut off. Ethos's exact semantics are not documented, so
+-- both plausible ones are offered:
+--   "once"  : one catchable error when a callback reaches LIMIT;
+--   "sticky": an error on every counted instruction from LIMIT until the
+--             callback returns, so recovery code inside it is cut off too.
+local enforceMode = nil
+local callbackDepth, callbackStart, enforcedFired = 0, 0, false
+function H.enforceLimit(mode) enforceMode = mode end
+
 local function hook()
   local f = getinfo(2, "f").func
   local suite = isSuite[f]
@@ -62,6 +72,12 @@ local function hook()
   end
   if not suite then return end
   count = count + 1
+  if enforceMode and callbackDepth > 0 and count - callbackStart >= H.LIMIT then
+    if enforceMode == "sticky" or not enforcedFired then
+      enforcedFired = true
+      error("Max instructions count reached", 0)
+    end
+  end
   if profiling then
     local key = suiteKey(getinfo(2, "S"))
     selfProfile[key] = (selfProfile[key] or 0) + 1
@@ -121,7 +137,11 @@ local seenErrors = {}
 -- Runs fn under pcall and returns the instructions it took.
 function H.measure(fn, ...)
   local c0 = count
+  -- The outermost measure() is one Ethos callback: the unit the limit applies to.
+  if callbackDepth == 0 then callbackStart, enforcedFired = count, false end
+  callbackDepth = callbackDepth + 1
   local ok, err = pcall(fn, ...)
+  callbackDepth = callbackDepth - 1
   if not ok then
     local msg = tostring(err)
     if not seenErrors[msg] then
