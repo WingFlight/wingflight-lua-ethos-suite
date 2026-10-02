@@ -50,12 +50,12 @@ local function cloneConfig(config)
     nav_min_sats = config and config.nav_min_sats or 8,
     nav_max_bank_angle = config and config.nav_max_bank_angle or 25,
     nav_max_pitch_angle = config and config.nav_max_pitch_angle or 15,
-    nav_bearing_kp = config and config.nav_bearing_kp or 200,
+    nav_bearing_kp = config and config.nav_bearing_kp or 120,
     nav_altitude_kp = config and config.nav_altitude_kp or 100,
     -- Appended MSP fields: nil when read from firmware that predates them, so fall back to
     -- the firmware defaults (older firmware ignores them on write).
     nav_altitude_kd = config and config.nav_altitude_kd or 200,
-    nav_throttle = config and config.nav_throttle or 60,
+    nav_throttle = config and config.nav_throttle or 65,
     nav_turn_coordination = config and config.nav_turn_coordination or 100,
   }
 end
