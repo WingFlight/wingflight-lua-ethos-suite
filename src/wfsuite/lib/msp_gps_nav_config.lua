@@ -39,10 +39,10 @@ local SIMULATOR_RESPONSE = {
   8,             -- nav_min_sats
   25,            -- nav_max_bank_angle
   15,            -- nav_max_pitch_angle
-  0xC8, 0x00,    -- nav_bearing_kp=200
+  0x78, 0x00,    -- nav_bearing_kp=120
   0x64, 0x00,    -- nav_altitude_kp=100
   0xC8, 0x00,    -- nav_altitude_kd=200
-  60,            -- nav_throttle
+  65,            -- nav_throttle
   100,           -- nav_turn_coordination
 }
 
@@ -91,10 +91,10 @@ function msp_gps_nav_config.buildWriteMessage(config, onWritten, onError)
   mspcodec.writeU8(payload, config.nav_min_sats or 8)
   mspcodec.writeU8(payload, config.nav_max_bank_angle or 25)
   mspcodec.writeU8(payload, config.nav_max_pitch_angle or 15)
-  mspcodec.writeU16(payload, config.nav_bearing_kp or 200)
+  mspcodec.writeU16(payload, config.nav_bearing_kp or 120)
   mspcodec.writeU16(payload, config.nav_altitude_kp or 100)
   mspcodec.writeU16(payload, config.nav_altitude_kd or 200)
-  mspcodec.writeU8(payload, config.nav_throttle or 60)
+  mspcodec.writeU8(payload, config.nav_throttle or 65)
   mspcodec.writeU8(payload, config.nav_turn_coordination or 100)
   return {
     command = WRITE_COMMAND,
