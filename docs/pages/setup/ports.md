@@ -34,6 +34,13 @@ Requires a running background task and a flight controller connection.
 - A *Save* or *Reload* confirmation that is still on screen when you leave the
   page (Back, or closing the tool) is closed with the page, rather than staying
   up over the next screen with an OK button that no longer does anything.
+- Building the list of functions each port can take no longer runs over Ethos's
+  per-callback instruction limit ("Max instructions count reached"). It
+  checked every function against every other port one bit at a time, which
+  measured ~32,000 instructions with four serial ports and ~324,000 with
+  twelve, all in the one wakeup that draws the page; it now costs ~3,400 and
+  ~12,000. The choices offered are unchanged. Measured off-device with
+  `bin/perf/measure_app_instructions.lua`.
 
 TODO: Verify persistence, reboot behaviour, profile scope and any restrictions in
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than

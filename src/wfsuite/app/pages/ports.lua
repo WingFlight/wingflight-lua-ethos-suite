@@ -95,16 +95,7 @@ local UART_NAMES = {
 }
 
 local function maskHasAny(mask, bits)
-  if bits == 0 then return false end
-  local bit = 1
-  while bits > 0 do
-    if bits % 2 == 1 and math.floor((mask or 0) / bit) % 2 == 1 then
-      return true
-    end
-    bits = math.floor(bits / 2)
-    bit = bit * 2
-  end
-  return false
+  return ((mask or 0) & bits) ~= 0
 end
 
 local function shallowCopy(tbl)
@@ -186,25 +177,31 @@ local function buildBaudChoiceTable(port)
   return tableData
 end
 
-local function functionAllowedForPort(def, portIndex, ports)
-  if def.id == 0 then return true end
+-- The functions every OTHER port's current function excludes, as one mask.
+-- render() builds every port's choice list in a single wakeup, so this is
+-- computed once per port rather than once per port per function: checking
+-- each function against each other port bit by bit cost ~32k instructions
+-- with 4 ports and ~324k with 12, over Ethos's 20000-per-callback limit
+-- (measured with bin/perf/measure_app_instructions.lua). Ported from
+-- rotorflight/rotorflight-lua-ethos-suite#2450.
+local function otherPortsExcl(portIndex, ports)
+  local excl = 0
   for i = 1, #ports do
-    if i ~= portIndex and maskHasAny(getPortExcl(ports[i].function_mask), def.id) then
-      return false
-    end
+    if i ~= portIndex then excl = excl | getPortExcl(ports[i].function_mask) end
   end
-  return true
+  return excl
 end
 
 local function buildFunctionChoiceTable(portIndex, ports)
   local port = ports[portIndex]
   if not port then return {} end
 
+  local excl = otherPortsExcl(portIndex, ports)
   local tableData = {}
   local seen = {}
   for i = 1, #PORT_FUNCTIONS do
     local def = PORT_FUNCTIONS[i]
-    if def.id == port.function_mask or (not def.hide and functionAllowedForPort(def, portIndex, ports)) then
+    if def.id == port.function_mask or (not def.hide and (def.id == 0 or not maskHasAny(excl, def.id))) then
       tableData[#tableData + 1] = {def.name, def.id}
       seen[def.id] = true
     end
