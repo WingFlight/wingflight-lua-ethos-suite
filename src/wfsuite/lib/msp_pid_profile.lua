@@ -197,7 +197,7 @@ local SIMULATOR_RESPONSE = {
   100,  -- snap_relax_strength
   60,   -- snap_relax_threshold
   144, 1, -- snap_relax_window (U16 LE: 400 ms)
-  150, 0, -- snap_relax_hold (U16 LE: 150 ms)
+  94, 1, -- snap_relax_hold (U16 LE: 350 = 0x015E -> 94, 1)
 }
 
 -- Per-field {min, max, default, decimals, suffix}, sourced from this
@@ -244,7 +244,7 @@ local FIELD_META = {
   snap_relax_strength = {min = 0, max = 100, default = 100, suffix = "%"},
   snap_relax_threshold = {min = 20, max = 100, default = 60, suffix = "%"},
   snap_relax_window = {min = 0, max = 1000, default = 400, suffix = "ms"},
-  snap_relax_hold = {min = 0, max = 1000, default = 150, suffix = "ms"},
+  snap_relax_hold = {min = 0, max = 1000, default = 350, suffix = "ms"},
   trainer_gain = {min = 25, max = 255, default = 75},
   atthold_gain = {min = 0, max = 250, default = 40},
   atthold_deadband = {min = 0, max = 100, default = 5, suffix = "%"},
