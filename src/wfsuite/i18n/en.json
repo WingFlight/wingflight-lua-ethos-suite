@@ -5426,6 +5426,12 @@
         }
       },
       "pid_controller": {
+        "angle": {
+          "english": "Angle",
+          "max_length": 5,
+          "needs_translation": false,
+          "translation": "Angle"
+        },
         "cross_axis_relax": {
           "english": "Cross Axis Relax",
           "max_length": 16,
@@ -5503,6 +5509,12 @@
           "max_length": 1,
           "needs_translation": false,
           "translation": "P"
+        },
+        "prop_hang": {
+          "english": "Prop Hang",
+          "max_length": 9,
+          "needs_translation": false,
+          "translation": "Prop Hang"
         },
         "roll": {
           "english": "R",

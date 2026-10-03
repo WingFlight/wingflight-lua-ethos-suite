@@ -6313,6 +6313,13 @@
         }
       },
       "pid_controller": {
+        "angle": {
+          "english": "Angle",
+          "max_length": 5,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Angle"
+        },
         "cross_axis_relax": {
           "english": "Cross Axis Relax",
           "max_length": 16,
@@ -6403,6 +6410,13 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "磷"
+        },
+        "prop_hang": {
+          "english": "Prop Hang",
+          "max_length": 9,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Prop Hang"
         },
         "roll": {
           "english": "R",
