@@ -444,6 +444,20 @@
           "needs_translation": true,
           "reverse_text": false,
           "max_length": 8
+        },
+        "prop_hang": {
+          "english": "Prop Hang",
+          "translation": "Prop Hang",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 9
+        },
+        "angle": {
+          "english": "Angle",
+          "translation": "Angle",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 5
         }
       },
       "tail_rotor": {

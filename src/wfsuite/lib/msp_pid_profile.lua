@@ -81,6 +81,12 @@
 -- relaxed against a fast roll + pitch + yaw stick input (pop top, pinwheel,
 -- snap). Strength and stick threshold in percent, entry window and fade-out
 -- in ms. Always read/written; the reply is 71 bytes with it.
+--
+-- Prop-hang relax (HANG_FIELDS) follows snap relax: roll I held back in a
+-- prop hang so the prop torque can roll the airframe. Strength in percent,
+-- angle from vertical in degrees, fade-out in ms. Optional: read only when
+-- the reply carries it (75 bytes), and written back only if it was read, so
+-- firmware without it keeps working. `has_prop_hang` records which.
 
 -- Self-caches via package.loaded (same mechanism lib/bus.lua uses) --
 -- multiple pages share this codec and each reloads fresh via loadfile() on
@@ -149,6 +155,13 @@ local SNAP_FIELDS = {
   {"snap_relax_hold", "U16"},
 }
 
+-- Prop-hang relax, after snap relax on the wire. Optional, see above.
+local HANG_FIELDS = {
+  {"prop_hang_strength", "U8"},
+  {"prop_hang_angle", "U8"},
+  {"prop_hang_fade", "U16"},
+}
+
 -- API 22.4 axis limits: raw zero inherits the corresponding legacy shared limit.
 local AXIS_LIMITS = {
   {"angle_roll_limit", "angle_level_limit", 90},
@@ -198,6 +211,9 @@ local SIMULATOR_RESPONSE = {
   60,   -- snap_relax_threshold
   144, 1, -- snap_relax_window (U16 LE: 400 ms)
   94, 1, -- snap_relax_hold (U16 LE: 350 = 0x015E -> 94, 1)
+  100,  -- prop_hang_strength
+  20,   -- prop_hang_angle
+  244, 1, -- prop_hang_fade (U16 LE: 500 = 0x01F4 -> 244, 1)
 }
 
 -- Per-field {min, max, default, decimals, suffix}, sourced from this
@@ -245,6 +261,9 @@ local FIELD_META = {
   snap_relax_threshold = {min = 20, max = 100, default = 60, suffix = "%"},
   snap_relax_window = {min = 0, max = 1000, default = 400, suffix = "ms"},
   snap_relax_hold = {min = 0, max = 1000, default = 350, suffix = "ms"},
+  prop_hang_strength = {min = 0, max = 100, default = 100, suffix = "%"},
+  prop_hang_angle = {min = 5, max = 45, default = 20, suffix = "°"},
+  prop_hang_fade = {min = 0, max = 2000, default = 500, suffix = "ms"},
   trainer_gain = {min = 25, max = 255, default = 75},
   atthold_gain = {min = 0, max = 250, default = 40},
   atthold_deadband = {min = 0, max = 100, default = 5, suffix = "%"},
@@ -319,6 +338,17 @@ function msp_pid_profile.decode(buf)
       data[name] = mspcodec.readU8(buf)
     end
   end
+  data.has_prop_hang = #buf - buf.offset + 1 >= 4
+  if data.has_prop_hang then
+    for i = 1, #HANG_FIELDS do
+      local name, wireType = HANG_FIELDS[i][1], HANG_FIELDS[i][2]
+      if wireType == "U16" then
+        data[name] = mspcodec.readU16(buf)
+      else
+        data[name] = mspcodec.readU8(buf)
+      end
+    end
+  end
   return data
 end
 
@@ -354,6 +384,16 @@ function msp_pid_profile.encode(data)
       mspcodec.writeU16(payload, data[name] or 0)
     else
       mspcodec.writeU8(payload, data[name] or 0)
+    end
+  end
+  if data.has_prop_hang then
+    for i = 1, #HANG_FIELDS do
+      local name, wireType = HANG_FIELDS[i][1], HANG_FIELDS[i][2]
+      if wireType == "U16" then
+        mspcodec.writeU16(payload, data[name] or 0)
+      else
+        mspcodec.writeU8(payload, data[name] or 0)
+      end
     end
   end
   return payload
