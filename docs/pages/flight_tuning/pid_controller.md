@@ -34,10 +34,10 @@ Requires a running background task and a flight controller connection.
 | Cross Axis Relax (P) | TODO: explain behaviour, displayed units, range and conditions. |
 | (Level) | TODO: explain behaviour, displayed units, range and conditions. |
 | (Cutoff) | TODO: explain behaviour, displayed units, range and conditions. |
-| Snap Relax (Strength) | Percent (0-100, default 100) of roll and pitch feedback taken off when it pushes against a pop top, pinwheel or snap. These start with roll, pitch and yaw slammed in together, and the airframe then rotates faster than the stick asks for. Feedback that helps the rotation, and yaw, are not touched. 0 turns it off. |
+| Snap Relax (Strength) | Percent (0-100, default 100) of roll, pitch and yaw feedback taken off when it pushes against a pop top, pinwheel or snap. These start with roll, pitch and yaw slammed in together, and the airframe then rotates faster than the stick asks for. Feedback that helps the rotation is not touched; yaw usually lags the stick, so the rudder is only relaxed if the airframe yaws faster than asked. 0 turns it off. |
 | Snap Relax (Threshold) | Stick deflection, percent (20-100, default 60), that roll, pitch and yaw must all reach to count as a snap. |
 | (Window) | Entry window in ms (0-1000, default 400): all three sticks must pass the threshold within this time of each other, so a slow build-up such as a rolling harrier does not count. |
-| (Fade-out) | Time in ms (0-1000, default 150) over which full feedback returns after any of the three sticks drops below the threshold. Reversing the stick against the snap brings full feedback back at once. |
+| (Fade-out) | Time in ms (0-1000, default 350) over which full feedback returns after any of the three sticks drops below the threshold. Reversing the stick against the snap brings full feedback back at once. |
 
 ## Notes
 
