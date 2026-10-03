@@ -1032,12 +1032,15 @@ if SELF_TEST then
   local fEnd = assert(sabotaged:find(fTail, cStart, true), "sabotage: the end of motorTimingFromUi not found")
   sabotaged = sabotaged:sub(1, cStart - 1) .. sabotaged:sub(fEnd + #fTail + 1)
 
-  -- (4) decode()'s two lines
-  local dKeep = "  data.timing_raw = data.timing" .. nl
-    .. "  data.timing = motorTimingToUi(data.timing)" .. nl
-    .. "  return data"
-  local dAt = assert(sabotaged:find(dKeep, 1, true), "sabotage: decode()'s timing split not found")
-  sabotaged = sabotaged:sub(1, dAt - 1) .. "  return data" .. sabotaged:sub(dAt + #dKeep)
+  -- (4) decode()'s two timing lines, cut one at a time: #2459 put the BEC
+  -- voltage's own raw copy between them, and that line has to stay.
+  for _, line in ipairs({
+    "  data.timing_raw = data.timing" .. nl,
+    "  data.timing = motorTimingToUi(data.timing)" .. nl,
+  }) do
+    local dAt = assert(sabotaged:find(line, 1, true), "sabotage: decode()'s timing split not found")
+    sabotaged = sabotaged:sub(1, dAt - 1) .. sabotaged:sub(dAt + #line)
+  end
 
   -- (5) encode()'s branch
   local eBranch = "    local value = data and data[field[1]] or 0" .. nl
