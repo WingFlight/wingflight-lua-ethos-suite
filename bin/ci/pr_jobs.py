@@ -342,6 +342,19 @@ rotorflight-lua-ethos-suite#2456. Pass --self-test to prove all 22 gate
 checks fail against the pre-fix codec.
 '''
     ),
+    LuaStep(
+        name='Check the YGE 12 V BEC ceiling and the HV-BEC bit',
+        script='bin/esc_parameters_yge/verify_yge_bec12v.lua',
+        rationale=r'''Seven of the 21 YGE models have an HV BEC that runs to 12.0 V, but BEC
+Voltage was capped at 8.4 V for all of them, and the flags byte's HV-BEC
+bit (bit 3) was never set. The ceiling now follows the model through one
+ESC_MODELS table (which also adds the missing 4691 Saphir 125v2), the row
+is hidden on the five Opto models that have no BEC, and beforeSave sets
+or clears bit 3 only when the pilot moved the voltage. Ported from
+rotorflight-lua-ethos-suite#2459. Pass --self-test to prove all 11 gate
+checks fail with the fix cut back out of the three files that carry it.
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [
