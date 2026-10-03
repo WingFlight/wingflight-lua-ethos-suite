@@ -31,6 +31,17 @@ TODO: Verify persistence, reboot behaviour, profile scope and any restrictions i
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than
 firmware defaults; wire values may need scaling before display.
 
+## Choosing the ESC
+
+If the flight controller reports more than one ESC, this page lists them and you
+pick the one to program. The list has one entry per ESC that is actually there.
+
+With a single ESC there is nothing to choose, so the list is skipped and the page
+goes straight to that ESC.
+
+If the flight controller does not say how many ESCs there are, all four entries are
+listed and only *ESC 1* can be opened. The page does not guess.
+
 ## Source
 
 [Page implementation](../../../src/wfsuite/app/pages/esc_forward_bluejay.lua). Menu conditions come from `app/tool.lua`.

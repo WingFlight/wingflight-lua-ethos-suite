@@ -355,6 +355,21 @@ rotorflight-lua-ethos-suite#2459. Pass --self-test to prove all 11 gate
 checks fail with the fix cut back out of the three files that carry it.
 '''
     ),
+    LuaStep(
+        name='Check the ESC selector offers only the ESCs that exist',
+        script='bin/esc_target_selector/verify_esc_target_selector.lua',
+        rationale=r'''Every 4-way forward-programming page opens on
+app/pages/esc_forward_4way.lua, which built all four ESC rows and greyed
+out the surplus, so a single-ESC model saw three dead lines. It now builds
+one row per ESC the FC reports, and skips the selector on exactly one ESC.
+A missing count or a failed read is "unknown", not "one ESC": the page
+keeps all four rows with only ESC 1 openable rather than entering
+pass-through on a twin-motor model unasked. No other harness loads this
+page (they stub it to avoid its os.clock() delays). Ported from
+rotorflight-lua-ethos-suite#2460. Pass --self-test to prove all 5 gate
+checks fail with the fix cut back out.
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [
