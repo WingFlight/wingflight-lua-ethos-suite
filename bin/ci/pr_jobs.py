@@ -328,6 +328,20 @@ Ported from rotorflight-lua-ethos-suite#2452. Pass --self-test to prove all
 30 gate checks fail when isCompatibleEsc() is replaced with return true.
 '''
     ),
+    LuaStep(
+        name='Check the YGE Motor Timing word is translated both ways',
+        script='bin/esc_parameters_yge/verify_esc_parameters_yge.lua',
+        rationale=r'''The YGE ESC spells its four automatic timing modes 16..19 and its six
+fixed advance angles 1..6, but lib/msp_esc_parameters_yge.lua handed the
+Motor Timing row's list position to and from the wire unchanged: an ESC
+reporting 17 (Auto Eff) showed Auto Norm, and picking 0 deg wrote 17. The
+FC passes the block through without looking, so drive the real page,
+field_layout and page_runtime against the codec's own simulator reply.
+Also pin that the flags byte's reserved bits survive a save. Ported from
+rotorflight-lua-ethos-suite#2456. Pass --self-test to prove all 22 gate
+checks fail against the pre-fix codec.
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [

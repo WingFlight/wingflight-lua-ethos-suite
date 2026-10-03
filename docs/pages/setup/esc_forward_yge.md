@@ -27,6 +27,12 @@ Requires a running background task and a flight controller connection. Lit only 
 
 ## Notes
 
+- *Motor Timing* is shown in the ESC's own terms, not as a list position: the
+  four automatic modes (*Auto Norm*, *Auto Eff*, *Auto Power*, *Auto Extr*) and
+  the six fixed advance angles (*0 deg* .. *30 deg*) are translated to and from
+  the word the ESC actually uses, and a row you did not touch is written back
+  with the word it was read with.
+
 TODO: Verify persistence, reboot behaviour, profile scope and any restrictions in
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than
 firmware defaults; wire values may need scaling before display.
