@@ -317,6 +317,17 @@ exactly that before this check covered the app: its function lists cost
 ~32k instructions with 4 serial ports and ~324k with 12, in one wakeup.
 '''
     ),
+    LuaStep(
+        name='Check the ESC forward-programming signature gate',
+        script='bin/esc_signature/verify_esc_signature.lua',
+        rationale=r'''AM32, BLHeli_S and Bluejay share one menu protocol ID. Drive their real
+pages and codecs to check that a mismatched ESC never builds an editor or
+sends MSP 218, while a matching ESC opens and saves successfully. Also
+require every ESC tile's codec to declare its expected signature.
+Ported from rotorflight-lua-ethos-suite#2452. Pass --self-test to prove all
+30 gate checks fail when isCompatibleEsc() is replaced with return true.
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [
