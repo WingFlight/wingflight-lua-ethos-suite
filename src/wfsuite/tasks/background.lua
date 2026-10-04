@@ -111,6 +111,9 @@ local simSensors -- tasks/sim_sensors.lua, loadfile'd (see runDeferredInit below
 local lastTaskStatusAt = nil
 local lastMemoryLogAt = nil
 local memoryLogsEnabled = false
+-- Loaded at the call site, not here: see the note in lib/stack_probe.lua for
+-- why it is not folded into lib/memstats.lua.
+local stackProbe
 
 -- Buffered here (see the header comment above) rather than handled inline,
 -- because mspQueue/session -- which the real handler needs -- don't exist
@@ -159,13 +162,21 @@ local function logMemoryUsage(now)
   lastMemoryLogAt = now
 
   local mem = system.getMemoryUsage and system.getMemoryUsage() or {}
+  -- Fed the RAW field, deliberately, not `or 0`: the minimum has to be able to
+  -- say "never reported" separately from "reported zero". See
+  -- lib/stack_probe.lua.
+  stackProbe = stackProbe or requireModule("lib/stack_probe.lua")
+  stackProbe.note(mem.mainStackAvailable)
+
   print(string.format(
-    "[bgtask mem] lua=%.1fKB ramAvail=%.1fKB luaRamAvail=%.1fKB bmpRamAvail=%.1fKB stackAvail=%.1fKB",
+    "[bgtask mem] lua=%.1fKB ramAvail=%.1fKB luaRamAvail=%.1fKB bmpRamAvail=%.1fKB stackAvail=%.1fKB %s %s",
     collectgarbage("count"),
     (mem.ramAvailable or 0) / 1024,
     (mem.luaRamAvailable or 0) / 1024,
     (mem.luaBitmapsRamAvailable or 0) / 1024,
-    (mem.mainStackAvailable or 0) / 1024
+    (mem.mainStackAvailable or 0) / 1024,
+    stackProbe.formatStackFields(bus.maxPublishDepth and bus.maxPublishDepth() or 0),
+    stackProbe.formatPaintFields()
   ))
 end
 
@@ -232,6 +243,10 @@ local function runDeferredInit()
 
   scheduler:clear()
   lastMemoryLogAt = nil
+  -- A reloaded task (a model switch reloads it) starts a fresh window rather
+  -- than reporting a minimum from its previous life. Guarded: on a first boot
+  -- that has never logged a line, the probe was never loaded.
+  if stackProbe then stackProbe.reset() end
   scheduler:add("transport_recheck", TRANSPORT_RECHECK_INTERVAL, checkTransportChange)
   scheduler:add("session", 0.05, function()
     session.wakeup(mspQueue, protocol, transport, simSensors)

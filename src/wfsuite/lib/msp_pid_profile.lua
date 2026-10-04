@@ -72,6 +72,21 @@
 -- the curve's right edge. The firmware keeps them in their own per-profile
 -- storage, but they travel in this message. Minimum API is 22.10, so they
 -- are always read/written like everything else here.
+--
+-- MSP API 22.13 appends angle_level_damping (LEVEL_FIELDS) after the SPA
+-- fields: percent of the measured roll/pitch rate taken off the ANGLE
+-- leveling command. Minimum API is 22.13, so it is always read/written.
+--
+-- Snap relax (SNAP_FIELDS) follows angle_level_damping: roll/pitch feedback
+-- relaxed against a fast roll + pitch + yaw stick input (pop top, pinwheel,
+-- snap). Strength and stick threshold in percent, entry window and fade-out
+-- in ms. Always read/written; the reply is 71 bytes with it.
+--
+-- Prop-hang relax (HANG_FIELDS) follows snap relax: roll I held back in a
+-- prop hang so the prop torque can roll the airframe. Strength in percent,
+-- angle from vertical in degrees, fade-out in ms. Optional: read only when
+-- the reply carries it (75 bytes), and written back only if it was read, so
+-- firmware without it keeps working. `has_prop_hang` records which.
 
 -- Self-caches via package.loaded (same mechanism lib/bus.lua uses) --
 -- multiple pages share this codec and each reloads fresh via loadfile() on
@@ -127,6 +142,26 @@ local SPA_FIELDS = {
   {"fw_spa_speed_max", "U16"},
 }
 
+-- API 22.13 ANGLE mode damping, after the SPA fields on the wire.
+local LEVEL_FIELDS = {
+  {"angle_level_damping", "U8"},
+}
+
+-- Snap relax, after the level damping byte on the wire.
+local SNAP_FIELDS = {
+  {"snap_relax_strength", "U8"},
+  {"snap_relax_threshold", "U8"},
+  {"snap_relax_window", "U16"},
+  {"snap_relax_hold", "U16"},
+}
+
+-- Prop-hang relax, after snap relax on the wire. Optional, see above.
+local HANG_FIELDS = {
+  {"prop_hang_strength", "U8"},
+  {"prop_hang_angle", "U8"},
+  {"prop_hang_fade", "U16"},
+}
+
 -- API 22.4 axis limits: raw zero inherits the corresponding legacy shared limit.
 local AXIS_LIMITS = {
   {"angle_roll_limit", "angle_level_limit", 90},
@@ -171,6 +206,14 @@ local SIMULATOR_RESPONSE = {
   100,  -- fw_spa_gain
   0,    -- fw_spa_curve (off)
   150, 0, -- fw_spa_speed_max (U16 LE: 150 km/h)
+  25,   -- angle_level_damping
+  100,  -- snap_relax_strength
+  60,   -- snap_relax_threshold
+  144, 1, -- snap_relax_window (U16 LE: 400 ms)
+  94, 1, -- snap_relax_hold (U16 LE: 350 = 0x015E -> 94, 1)
+  100,  -- prop_hang_strength
+  20,   -- prop_hang_angle
+  244, 1, -- prop_hang_fade (U16 LE: 500 = 0x01F4 -> 244, 1)
 }
 
 -- Per-field {min, max, default, decimals, suffix}, sourced from this
@@ -213,6 +256,14 @@ local FIELD_META = {
   bounceback_1 = {min = 1, max = 10, default = 5},
   bounceback_2 = {min = 1, max = 10, default = 5},
   angle_level_strength = {min = 0, max = 200, default = 40},
+  angle_level_damping = {min = 0, max = 100, default = 25, suffix = "%"},
+  snap_relax_strength = {min = 0, max = 100, default = 100, suffix = "%"},
+  snap_relax_threshold = {min = 20, max = 100, default = 60, suffix = "%"},
+  snap_relax_window = {min = 0, max = 1000, default = 400, suffix = "ms"},
+  snap_relax_hold = {min = 0, max = 1000, default = 350, suffix = "ms"},
+  prop_hang_strength = {min = 0, max = 100, default = 100, suffix = "%"},
+  prop_hang_angle = {min = 5, max = 45, default = 20, suffix = "°"},
+  prop_hang_fade = {min = 0, max = 2000, default = 500, suffix = "ms"},
   trainer_gain = {min = 25, max = 255, default = 75},
   atthold_gain = {min = 0, max = 250, default = 40},
   atthold_deadband = {min = 0, max = 100, default = 5, suffix = "%"},
@@ -224,9 +275,9 @@ local FIELD_META = {
   fw_spa_gain = {min = 25, max = 200, default = 100, suffix = "%"},
   fw_spa_curve = {min = 0, max = 8, default = 0},
   fw_spa_speed_max = {min = 10, max = 600, default = 150, suffix = "km/h"},
-  master_gain_0 = {min = 25, max = 1000, default = 100, suffix = "%"},
-  master_gain_1 = {min = 25, max = 1000, default = 100, suffix = "%"},
-  master_gain_2 = {min = 25, max = 1000, default = 100, suffix = "%"},
+  master_gain_0 = {min = 0, max = 200, default = 100, suffix = "%"},
+  master_gain_1 = {min = 0, max = 200, default = 100, suffix = "%"},
+  master_gain_2 = {min = 0, max = 200, default = 100, suffix = "%"},
   cross_axis_relax_strength = {min = 0, max = 100, default = 0, suffix = "%"},
   cross_axis_relax_level = {min = 10, max = 250, default = 100},
   cross_axis_relax_cutoff = {min = 1, max = 100, default = 10, suffix = "Hz"},
@@ -276,6 +327,28 @@ function msp_pid_profile.decode(buf)
       data[name] = mspcodec.readU8(buf)
     end
   end
+  for i = 1, #LEVEL_FIELDS do
+    data[LEVEL_FIELDS[i][1]] = mspcodec.readU8(buf)
+  end
+  for i = 1, #SNAP_FIELDS do
+    local name, wireType = SNAP_FIELDS[i][1], SNAP_FIELDS[i][2]
+    if wireType == "U16" then
+      data[name] = mspcodec.readU16(buf)
+    else
+      data[name] = mspcodec.readU8(buf)
+    end
+  end
+  data.has_prop_hang = #buf - buf.offset + 1 >= 4
+  if data.has_prop_hang then
+    for i = 1, #HANG_FIELDS do
+      local name, wireType = HANG_FIELDS[i][1], HANG_FIELDS[i][2]
+      if wireType == "U16" then
+        data[name] = mspcodec.readU16(buf)
+      else
+        data[name] = mspcodec.readU8(buf)
+      end
+    end
+  end
   return data
 end
 
@@ -302,6 +375,27 @@ function msp_pid_profile.encode(data)
       mspcodec.writeU8(payload, data[name] or 0)
     end
   end
+  for i = 1, #LEVEL_FIELDS do
+    mspcodec.writeU8(payload, data[LEVEL_FIELDS[i][1]] or 0)
+  end
+  for i = 1, #SNAP_FIELDS do
+    local name, wireType = SNAP_FIELDS[i][1], SNAP_FIELDS[i][2]
+    if wireType == "U16" then
+      mspcodec.writeU16(payload, data[name] or 0)
+    else
+      mspcodec.writeU8(payload, data[name] or 0)
+    end
+  end
+  if data.has_prop_hang then
+    for i = 1, #HANG_FIELDS do
+      local name, wireType = HANG_FIELDS[i][1], HANG_FIELDS[i][2]
+      if wireType == "U16" then
+        mspcodec.writeU16(payload, data[name] or 0)
+      else
+        mspcodec.writeU8(payload, data[name] or 0)
+      end
+    end
+  end
   return payload
 end
 
@@ -312,8 +406,8 @@ function msp_pid_profile.buildReadMessage(onData, onError)
   return {
     command = READ_COMMAND,
     processReply = function(_, buf)
-      if #buf < 64 then
-        if onError then onError("MSP PID profile requires API 22.10 firmware") end
+      if #buf < 71 then
+        if onError then onError("MSP PID profile requires firmware with snap relax") end
         return
       end
       onData(msp_pid_profile.decode(buf))

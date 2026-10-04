@@ -34,6 +34,13 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/tests/arming_flags.lua
 
+      # GPS Navigation writes MSP_GPS_RESCUE back from the FC's own reply with
+      # only the arming byte changed, so the fields the suite does not show are
+      # never overwritten, and the page still saves when the FC lacks the field.
+      - name: Check the GPS arm-without-fix toggle
+        if: success() || failure()
+        run: lua5.4 bin/tests/gps_arm_without_fix.lua
+
       # Settings and log headers are staged to a temp file before replacing the
       # live file, so a power loss during a save does not truncate the data the
       # suite owns on the SD card.
@@ -49,6 +56,247 @@ jobs:
       - name: Check the MSP queue after an aborted request
         if: success() || failure()
         run: lua5.4 bin/msp_queue/verify_msp_queue.lua
+
+      # Three drain loops run inside one background-task wakeup with no yield
+      # point in between; on a single-core MCU sharing time with Ethos's UI, their
+      # budget is UI latency. This drives them against a permanently full queue
+      # and a clock that charges real time per frame, so it measures the budgets
+      # instead of trusting them -- and checks that bounding the poll does not
+      # break reply assembly, which is what says how far a budget may be cut.
+      - name: Check the background task drain budgets
+        if: success() || failure()
+        run: lua5.4 bin/perf/verify_clock_budgets.lua
+
+      # A disconnect must drop the MSP request queue -- including mid-flight,
+      # which takes a different branch through the reset -- so the next
+      # handshake is not queued FIFO behind a backlog no FC can answer. And
+      # completing a message must not force a full GC cycle, which section 9
+      # of the lifecycle doc measured as buying nothing. Both need a session
+      # task and a collector that can be observed.
+      - name: Check the MSP queue on disconnect and the per-message GC
+        if: success() || failure()
+        run: lua5.4 bin/msp_gc/verify_msp_disconnect.lua
+
+      # clearCaches()'s images branch had no caller, so every decoded
+      # dashboard bitmap survived theme reloads, model changes and widget
+      # close. This checks the reload now releases them, that the bitmap map
+      # is LRU-bounded, and that the paint-path draw memo neither pins a
+      # bitmap nor allocates per draw.
+      - name: Check the dashboard image caches
+        if: success() || failure()
+        run: lua5.4 bin/dashboard/verify_image_caches.lua
+
+      # Ethos form widgets retain closures across form.clear(), so
+      # app/field_layout.lua pools accessor slots per page+field shape. This
+      # checks the pool is reused across visits, never shrunk on release,
+      # detaches dataRef/controlRef safely, and keeps two closures per slot.
+      - name: Check field layout slot pooling
+        if: success() || failure()
+        run: lua5.4 bin/field_layout/verify_field_layout.lua
+
+      # lib/mspcodec.lua's readU8 returned nil past the end of a payload where
+      # its siblings substituted 0, and the smartfuel decoder divided that nil
+      # by 1000 -- a short reply raised out of the background task. A radio
+      # only produces a short reply under conditions nobody can script, so the
+      # payload lengths are pinned here against wingflight-firmware's handler.
+      - name: Check a short MSP payload is reported, not decoded
+        if: success() || failure()
+        run: lua5.4 bin/msp_battery/verify_msp_battery.lua
+
+      # The ESC forward-programming and servo BUS tiles are gated by guards
+      # that read the FC once. A timeout or bus error used to latch them shut
+      # until the menu was reopened; they now retry after a backoff. That
+      # retry reaches neither a build nor a package step, so it is pinned here.
+      - name: Check a failed ESC/servo guard read is retried
+        if: success() || failure()
+        run: lua5.4 bin/esc_guard/verify_esc_guard_retry.lua
+
+      # Leaving a page -- Back, or closing the tool -- ran its dialog teardown
+      # on a form Ethos may already have stopped updating, and a save/reload
+      # confirmation still up outlived the page with an OK button that did
+      # nothing. The pages are loaded for real here under a form whose writes
+      # raise once teardown starts.
+      - name: Check the dialog teardown when a page is left
+        if: success() || failure()
+        run: lua5.4 bin/dialog_lifecycle/verify_dialog_lifecycle.lua
+
+      # A page tags its data with the profile it was read for, and the tag was
+      # taken when the read finished rather than when it started. A pilot who
+      # switched profile while that read was in flight got the previous
+      # profile's values on screen, anchored to the new profile -- so nothing
+      # reloaded, and Save wrote the old profile's values into the new one.
+      # Only a switch inside an MSP round-trip reaches it, so the MSP answers
+      # are held here and the session.update lands while a read is in flight.
+      # 5 of its 17 checks go red on the pre-fix page_runtime.lua.
+      - name: Check a page's data stays tagged with the profile it came from
+        if: success() || failure()
+        run: lua5.4 bin/page_runtime/verify_profile_anchor.lua
+
+      # Every page's onTool is function(focusFn), and calls focusFn() when its
+      # dialog closes or is cancelled. The header's Tool button called it as
+      # runtime:onTool(focus), so the page got the runtime table as focusFn and
+      # calibrating the accelerometer ended in "focusFn is not callable (a
+      # table value)". This presses the real page_runtime.lua's Tool button and
+      # closes the dialog the way the pages do; 4 of its 5 checks go red on the
+      # pre-fix page_runtime.lua.
+      - name: Check the Tool button hands a page a callable focus function
+        if: success() || failure()
+        run: lua5.4 bin/page_runtime/verify_tool_focus.lua
+
+      # A flight log is the pilot's evidence after a crash, and both ways it
+      # could lose rows were silent: an io.open that failed emptied the buffer,
+      # and a failed write() trimmed the rows it had just failed to persist.
+      # Only a card that cannot be written reaches either path, so the real
+      # logger is driven here with io.open and the handle's write() as seams.
+      - name: Check an unwritable card does not discard the log buffer
+        if: success() || failure()
+        run: lua5.4 bin/logging/verify_log_flush_retry.lua
+
+      # The system tool's UI subtree (menu_container, header, tile_grid,
+      # navigation, both menu guards and their MSP codecs, memstats) loads on
+      # first create(), not at boot. Nothing reaches that from a build step.
+      - name: Check the tool's UI is not loaded at boot
+        if: success() || failure()
+        run: lua5.4 bin/tool_ui/verify_tool_ui_lazy.lua
+
+      # Deferring that load must not add MSP traffic or accumulate anything
+      # per open/close cycle. This counts msp.request at bus.publish over
+      # three tool cycles plus 100 wakeups inside a guarded menu, and goes red
+      # if a guard stops latching (309 requests instead of 6).
+      - name: Check the tool adds no MSP requests across cycles
+        if: success() || failure()
+        run: lua5.4 bin/tool_ui/verify_no_extra_msp.lua
+
+      # The bus is the only channel between the tool, the dashboard and the
+      # background task, and publish() calls its handlers synchronously -- a
+      # handler that publishes back into the same topic recurses, and in the
+      # reference Lua VM every Lua-to-Lua call is one C stack level. This
+      # drives a real cycle and asserts it terminates at the guard rather than
+      # at the VM's own "C stack overflow", and that the memory log reports
+      # the smallest mainStackAvailable it has ever seen.
+      - name: Check bus publish is bounded and the stack minimum is tracked
+        if: success() || failure()
+        run: lua5.4 bin/stack/verify_stack_bounds.lua
+
+      # The dashboard wakeup path runs several times a second and session.update
+      # is published at up to 20 Hz, so a table rebuilt per call there is the
+      # sawtooth in the '[bgtask mem] lua=' log rather than a detail. Three such
+      # sites were removed: the subscriber copy in lib/bus.lua, the name table and
+      # its result table in getSensorStats(), and the per-call closure in
+      # transformValue(). Ported from rotorflight-lua-ethos-suite#2435.
+      #
+      # No build and no package step reaches this -- it needs the collector held off
+      # and a loop that calls the function thousands of times. Every allocation
+      # assertion is paired in both directions: the current code has to come out
+      # under the bound and the removed code over it. The same run pins what a
+      # pooled iteration copy can get wrong -- a handler unsubscribed long ago must
+      # not come back through a leftover slot -- and the one value the change
+      # alters, an rssi box reading its own min/max instead of link quality's.
+      - name: Check the wakeup path allocates nothing per call
+        if: success() || failure()
+        run: lua5.4 bin/allocation_churn/verify_allocation_churn.lua
+
+      # The collector's pause decides when a cycle starts: live * pause / 100.
+      # The default is 200, so the heap may reach twice what is live before anything
+      # is reclaimed at all, while Ethos kills a script whose heap passes its limit.
+      # main.lua lowers it to 120 -- but the one line has a foot-gun in it, and that
+      # is what this pins: `collectgarbage("setpause")` with the argument omitted
+      # does not read the pause, it SETS IT TO 0 ("collect constantly"). So the
+      # applied value is printed at boot instead of read back, and no file under
+      # src/ may call either setter without an explicit value. It also fixes the
+      # call before background_task.init(), keeps Queue:_finish() free of a forced
+      # collect, and keeps the teardown collects in Queue:clear() and the three ESC
+      # dispose paths. Ported from rotorflight-lua-ethos-suite#2441.
+      #
+      # Pass --self-test to prove every check can go red on a sabotaged copy.
+      - name: Check the collector pause and the forced collects
+        if: success() || failure()
+        run: lua5.4 bin/gc_pause/verify_gc_pause.lua
+
+      # Every screen but one installed a handler for the physical Back/Close key. The
+      # root menu installed none, on the stated assumption that Ethos's own default
+      # closes the tool on the first press. It does not -- that default takes two, the
+      # first dropping the form's input focus -- so the root menu had two ways out that
+      # disagreed with each other: the on-screen Menu button left in one press, the
+      # hardware RTN in two. Neither a build nor a package step reaches any of it.
+      #
+      # The harness drives the real tool.lua through registerSystemTool, create() and
+      # event() and asserts that RTN and EXIT reach goBack() at the root, that goBack()
+      # is the same path the back button takes, that a long ENTER, a model key and a
+      # touch event are still passed through untouched, and that RTN in a submenu pops
+      # one level without exiting. Ported from rotorflight-lua-ethos-suite#2442.
+      #
+      # Pass --self-test to prove the seven root checks go red against a copy of
+      # app/menu_container.lua with the pre-fix root branch put back.
+      - name: Check the root menu close key
+        if: success() || failure()
+        run: lua5.4 bin/tool_ui/verify_root_close_key.lua
+
+      # Ethos aborts any Lua callback that runs 20000 VM instructions ("Max
+      # instructions count reached"), and nothing on the radio says how close one
+      # runs. This drives the real dashboard widget through every theme and flight
+      # state, and the real background task through boot, link up, steady CRSF with
+      # ELRS frames, an ELRS backlog and link down, and the real system tool through
+      # every menu and every page (opened cold, read replies served by the MSP
+      # codecs' simulator fixtures), counting instructions with a debug hook on
+      # desktop Lua. Any callback at or over the limit fails, so a theme with too
+      # many boxes, a new per-tick cost, or a page that builds its form in one
+      # oversized pass is caught here instead of as stalled frames, a dropped
+      # background tick in flight, or a page that never draws. The Ports page did
+      # exactly that before this check covered the app: its function lists cost
+      # ~32k instructions with 4 serial ports and ~324k with 12, in one wakeup.
+      - name: Check the Ethos instruction budget
+        if: success() || failure()
+        run: lua5.4 bin/perf/verify_instruction_budget.lua
+
+      # AM32, BLHeli_S and Bluejay share one menu protocol ID. Drive their real
+      # pages and codecs to check that a mismatched ESC never builds an editor or
+      # sends MSP 218, while a matching ESC opens and saves successfully. Also
+      # require every ESC tile's codec to declare its expected signature.
+      # Ported from rotorflight-lua-ethos-suite#2452. Pass --self-test to prove all
+      # 30 gate checks fail when isCompatibleEsc() is replaced with return true.
+      - name: Check the ESC forward-programming signature gate
+        if: success() || failure()
+        run: lua5.4 bin/esc_signature/verify_esc_signature.lua
+
+      # The YGE ESC spells its four automatic timing modes 16..19 and its six
+      # fixed advance angles 1..6, but lib/msp_esc_parameters_yge.lua handed the
+      # Motor Timing row's list position to and from the wire unchanged: an ESC
+      # reporting 17 (Auto Eff) showed Auto Norm, and picking 0 deg wrote 17. The
+      # FC passes the block through without looking, so drive the real page,
+      # field_layout and page_runtime against the codec's own simulator reply.
+      # Also pin that the flags byte's reserved bits survive a save. Ported from
+      # rotorflight-lua-ethos-suite#2456. Pass --self-test to prove all 22 gate
+      # checks fail against the pre-fix codec.
+      - name: Check the YGE Motor Timing word is translated both ways
+        if: success() || failure()
+        run: lua5.4 bin/esc_parameters_yge/verify_esc_parameters_yge.lua
+
+      # Seven of the 21 YGE models have an HV BEC that runs to 12.0 V, but BEC
+      # Voltage was capped at 8.4 V for all of them, and the flags byte's HV-BEC
+      # bit (bit 3) was never set. The ceiling now follows the model through one
+      # ESC_MODELS table (which also adds the missing 4691 Saphir 125v2), the row
+      # is hidden on the five Opto models that have no BEC, and beforeSave sets
+      # or clears bit 3 only when the pilot moved the voltage. Ported from
+      # rotorflight-lua-ethos-suite#2459. Pass --self-test to prove all 11 gate
+      # checks fail with the fix cut back out of the three files that carry it.
+      - name: Check the YGE 12 V BEC ceiling and the HV-BEC bit
+        if: success() || failure()
+        run: lua5.4 bin/esc_parameters_yge/verify_yge_bec12v.lua
+
+      # Every 4-way forward-programming page opens on
+      # app/pages/esc_forward_4way.lua, which built all four ESC rows and greyed
+      # out the surplus, so a single-ESC model saw three dead lines. It now builds
+      # one row per ESC the FC reports, and skips the selector on exactly one ESC.
+      # A missing count or a failed read is "unknown", not "one ESC": the page
+      # keeps all four rows with only ESC 1 openable rather than entering
+      # pass-through on a twin-motor model unasked. No other harness loads this
+      # page (they stub it to avoid its os.clock() delays). Ported from
+      # rotorflight-lua-ethos-suite#2460. Pass --self-test to prove all 5 gate
+      # checks fail with the fix cut back out.
+      - name: Check the ESC selector offers only the ESCs that exist
+        if: success() || failure()
+        run: lua5.4 bin/esc_target_selector/verify_esc_target_selector.lua
 
   # Per-language PR builds (mirrors push.yml behavior)
   create-zip:
@@ -161,3 +409,27 @@ jobs:
           python bin/docs/verify_documentation_rule.py \
             --base '${{ github.event.pull_request.base.sha }}' \
             --body-file pr-body.txt
+
+  # pr.yml is rendered from bin/ci/pr_jobs.py, so two pull requests that each
+  # add a harness add a registry entry rather than colliding on the same lines
+  # of this file. This job is the other half of that: a registry edited without
+  # regenerating leaves the two disagreeing, and it also pins the shape a bad
+  # merge produced upstream twice -- every job needs a runs-on and a step.
+  pr-workflow-drift:
+    name: The pull request workflow matches its registry
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Prove the check can go red
+        run: python bin/ci/verify_pr_workflow.py --self-test
+
+      - name: Check pr.yml against the registry
+        run: python bin/ci/verify_pr_workflow.py

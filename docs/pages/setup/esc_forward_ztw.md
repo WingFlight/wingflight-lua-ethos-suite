@@ -17,7 +17,7 @@ TODO: Explain what this page controls and when a pilot would use it.
 
 *Configuration* → *Setup* → *ESC & Motors* → *ESC Prog.* → *ZTW*
 
-Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 7).
+Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 7). If that read fails, it is retried every 5 seconds.
 
 ## Settings
 
@@ -30,6 +30,17 @@ Requires a running background task and a flight controller connection. Lit only 
 TODO: Verify persistence, reboot behaviour, profile scope and any restrictions in
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than
 firmware defaults; wire values may need scaling before display.
+
+## Choosing the ESC
+
+If the flight controller reports more than one ESC, this page lists them and you
+pick the one to program. The list has one entry per ESC that is actually there.
+
+With a single ESC there is nothing to choose, so the list is skipped and the page
+goes straight to that ESC.
+
+If the flight controller does not say how many ESCs there are, all four entries are
+listed and only *ESC 1* can be opened. The page does not guess.
 
 ## Source
 

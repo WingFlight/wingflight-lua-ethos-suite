@@ -409,6 +409,55 @@
           "needs_translation": false,
           "max_length": 6,
           "reverse_text": false
+        },
+        "snap_relax": {
+          "english": "Snap Relax",
+          "translation": "Snap Relax",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 10
+        },
+        "strength": {
+          "english": "Strength",
+          "translation": "Strength",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 8
+        },
+        "threshold": {
+          "english": "Threshold",
+          "translation": "Threshold",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 9
+        },
+        "window": {
+          "english": "Window",
+          "translation": "Window",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 6
+        },
+        "hold": {
+          "english": "Fade-out",
+          "translation": "Fade-out",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 8
+        },
+        "prop_hang": {
+          "english": "Prop Hang",
+          "translation": "Prop Hang",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 9
+        },
+        "angle": {
+          "english": "Angle",
+          "translation": "Angle",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 5
         }
       },
       "tail_rotor": {
@@ -993,6 +1042,13 @@
           "needs_translation": true,
           "translation": "Bank",
           "reverse_text": false
+        },
+        "damping": {
+          "english": "Damping",
+          "translation": "Damping",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 7
         },
         "pitch": {
           "english": "Pitch",
@@ -1619,6 +1675,13 @@
           "needs_translation": true,
           "max_length": 14,
           "reverse_text": false
+        },
+        "arm_without_fix": {
+          "english": "Arm w/o GPS Fix",
+          "translation": "Arm w/o GPS Fix",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 15
         },
         "rth_altitude": {
           "english": "RTH Altitude",
@@ -9388,11 +9451,11 @@
       "max_length": 8
     },
     "sensor_gps_heading": {
-      "english": "GPS Heading",
-      "translation": "GPS Overskrift",
+      "english": "GPS Course",
+      "translation": "GPS Kurs",
       "needs_translation": false,
       "reverse_text": false,
-      "max_length": 11
+      "max_length": 10
     },
     "sensor_gps_home_dir": {
       "english": "GPS Home Dir",

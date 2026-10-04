@@ -11,7 +11,9 @@
 --
 -- Owns: the loading/saving dialog (a nil-safe form.openProgressDialog
 -- wrapper -- form.openProgressDialog() can return nil, which used to
--- crash), busy-state on the header's Save/Reload buttons, the full
+-- crash), the handles of the message modals so dispose() can close them
+-- (openMessageDialog()), busy-state on the header's Save/Reload buttons,
+-- the full
 -- load/save/reload/confirm cycle, the profile-switch-triggered
 -- auto-reload (deferred to the page's own wakeup tick, since
 -- form.openProgressDialog() only works reliably called from there, not
@@ -258,12 +260,18 @@ function PageRuntime.new(config)
   self.busy = false
   self.fields = {}
   self.activeDialog = nil
+  -- Handles of the message modals this page has opened, so dispose() has
+  -- something to close -- see openMessageDialog()'s own comment. Created
+  -- lazily there, so a page that never confirms anything never allocates it.
+  self.messageDialogs = nil
   self.headerHandle = nil
   self.lastProfile = nil
-  -- The profile that was active when data was last (re)loaded -- nil
-  -- until the first loadData() completes, so the initial session.update
-  -- replay (see lib/bus.lua's subscribe()) only anchors lastProfile
-  -- without triggering a spurious reload before the page has loaded once.
+  -- The profile the data currently behind this page was read for -- captured
+  -- when the read was issued, not when it finished (see loadData()'s
+  -- profileAtReadStart). nil until the first loadData() completes, so the
+  -- initial session.update replay (see lib/bus.lua's subscribe()) only
+  -- anchors lastProfile without triggering a spurious reload before the page
+  -- has loaded once.
   self.loadedProfile = nil
   -- Set by onSessionUpdate/the event handler, consumed by the wakeup
   -- handler wired in buildChrome() -- see that method's comment for why
@@ -363,17 +371,76 @@ end
 -- `focusFn` should be whichever button the pilot actually pressed to
 -- trigger this dialog; when nothing specific triggered it (the page's
 -- initial load), it defaults to focusMenu.
+--
+-- Reachable on two paths: the live one, where a read or save finished and the
+-- page is still up (loadData()/performSave()'s finish callbacks), and the
+-- teardown one -- dispose() sets self.disposed at the top of its own body and
+-- only calls this afterwards, so everything below sees disposed == true there.
+--
+-- That difference decides what is safe to touch. dispose() is reached from
+-- app/tool.lua's close() via buildChrome()'s setCleanupHandler, and on real
+-- Ethos the tool close callback can run after form mutation has already been
+-- forbidden. updateSaveEnabled() ends in the header's saveButton:enable() and
+-- the focus call in menuButton:focus(), so both are form writes and neither
+-- belongs on the teardown path -- hence the early return below rather than a
+-- pcall around them. Only the dialog itself is still closed there, because
+-- leaving a progress dialog on screen while the page underneath it
+-- disappears is the worse of the two. Ported from
+-- rotorflight/rotorflight-lua-ethos-suite#2430.
 function PageRuntime:closeDialog(focusFn)
   local dialog = self.activeDialog
   if not dialog then return end
-  dialog:value(100)
-  dialog:close()
   self.activeDialog = nil
+  pcall(function()
+    dialog:value(100)
+    dialog:close()
+  end)
+  if self.disposed then return end
   self:updateSaveEnabled()
   if focusFn then
     focusFn()
   elseif self.headerHandle then
     self.headerHandle.focusMenu()
+  end
+end
+
+-- form.openDialog() hands back a handle nobody else owns, and without storing
+-- it a modal outlives the page: Back or a tool close leaves "Save to FC?" on
+-- screen over a page that is gone, with an OK button whose action reaches a
+-- disposed runtime and does nothing -- no way out but the dialog's own OK.
+-- (The load-error modal already kept its handle as loadErrorDialog, since it
+-- also gates reloads; this covers the other four.)
+--
+-- Stored and closed duck-typed on purpose: if a radio hands back something
+-- without :close, closeMessageDialogs() skips it and the behaviour is exactly
+-- what it was before -- this cannot make the orphan case worse, only better
+-- where the handle is closable. Every modal this page opened is kept, not
+-- only the ones still up: nothing here can tell whether Ethos already closed
+-- one when its button returned true, and a second :close() on a closed handle
+-- is swallowed by the pcall below. The list is bounded by the page -- these
+-- call sites are only reached from a save, a reload, or a profile switch --
+-- and the table dies with the runtime at dispose().
+function PageRuntime:openMessageDialog(args)
+  local handle = form.openDialog(args)
+  local dialogs = self.messageDialogs
+  if not dialogs then
+    dialogs = {}
+    self.messageDialogs = dialogs
+  end
+  dialogs[#dialogs + 1] = handle
+  return handle
+end
+
+-- dispose() only. Drops the list before closing anything, so a handle is
+-- never closed twice even if a close() callback re-enters.
+function PageRuntime:closeMessageDialogs()
+  local dialogs = self.messageDialogs
+  self.messageDialogs = nil
+  if not dialogs then return end
+  for _, handle in ipairs(dialogs) do
+    if type(handle) == "table" and type(handle.close) == "function" then
+      pcall(function() handle:close() end)
+    end
   end
 end
 
@@ -483,6 +550,13 @@ function PageRuntime:loadData(focusFn)
   end
   self:showDialog(MSG_LOADING_TITLE, MSG_LOADING_BODY)
 
+  -- Captured here, before the first MSP request is issued, and not in the
+  -- success branch below. A profile switch that lands while this read is in
+  -- flight advances self.lastProfile, so anchoring afterwards names the profile
+  -- the page is NOT showing -- and the anchor is the whole mechanism: once it
+  -- equals lastProfile, onSessionUpdate() below sees nothing to reload.
+  local profileAtReadStart = self.lastProfile
+
   local self_ = self
   local function readSource(index)
     if self_.disposed then return end
@@ -490,9 +564,9 @@ function PageRuntime:loadData(focusFn)
       self_:queueUiAction(function()
         self_:log("loadData: read succeeded")
         self_.loaded = true
-        -- Anchor to whatever profile is active *now* -- see loadedProfile's
-        -- declaration above for why this is what unblocks reload-on-change.
-        self_.loadedProfile = self_.lastProfile
+        -- The profile this data actually came from -- see
+        -- profileAtReadStart's own comment and loadedProfile's declaration.
+        self_.loadedProfile = profileAtReadStart
         for _, field in pairs(self_.fields) do
           field:enable(true)
         end
@@ -506,6 +580,19 @@ function PageRuntime:loadData(focusFn)
         self_:closeDialog(focusFn)
         if self_.onLoaded then
           self_.pendingOnLoaded = true
+        end
+        -- The profile moved while this read was in flight. onSessionUpdate()
+        -- could not arm the reload itself: it needs loadedProfile to be set and
+        -- loaded to be true, and during this window both were false. Arming the
+        -- same flag here closes that gap, and the wakeup tick picks it up in the
+        -- same pass -- loaded is true and the dialog is closed by now, which is
+        -- exactly what that dispatch tests for. The stale values above are
+        -- therefore never painted: the re-read re-disables the fields before
+        -- the frame is drawn.
+        if self_.lastProfile ~= profileAtReadStart then
+          self_:log("profile moved during the read: " .. tostring(profileAtReadStart)
+            .. " -> " .. tostring(self_.lastProfile) .. " -- reloading")
+          self_.pendingReload = true
         end
       end)
       return
@@ -677,7 +764,7 @@ function PageRuntime:confirmSave(focusFn)
   if self.extraSaveMessage then
     message = message .. "\n\n" .. self.extraSaveMessage
   end
-  form.openDialog({
+  self:openMessageDialog({
     title = MSG_SAVE_TITLE,
     message = message,
     buttons = {
@@ -700,7 +787,9 @@ end
 function PageRuntime:closeLoadError()
   local dialog = self.loadErrorDialog
   self.loadErrorDialog = nil
-  if dialog then dialog:close() end
+  -- Also reached from dispose(), where the form may already refuse writes
+  -- (see closeDialog()); a raise here would abort the rest of the teardown.
+  if dialog then pcall(function() dialog:close() end) end
 end
 
 function PageRuntime:showLoadError(focusFn)
@@ -734,7 +823,7 @@ end
 function PageRuntime:showSaveError(focusFn)
   if self.disposed then return end
 
-  form.openDialog({
+  self:openMessageDialog({
     title = MSG_SAVE_FAILED_TITLE,
     message = MSG_SAVE_FAILED_BODY,
     buttons = {
@@ -757,7 +846,7 @@ end
 function PageRuntime:showSaveArmed(focusFn)
   if self.disposed then return end
 
-  form.openDialog({
+  self:openMessageDialog({
     title = MSG_SAVE_ARMED_TITLE,
     message = MSG_SAVE_ARMED_BODY,
     buttons = {
@@ -790,7 +879,7 @@ function PageRuntime:confirmReload(focusFn)
   end
 
   local controlRef = self.controlRef
-  form.openDialog({
+  self:openMessageDialog({
     title = MSG_RELOAD_TITLE,
     message = MSG_RELOAD_BODY,
     buttons = {
@@ -897,6 +986,9 @@ function PageRuntime:dispose()
   if self.opts and self.opts.setCleanupHandler then
     self.opts.setCleanupHandler(nil)
   end
+  -- Modals first: they are what the pilot is looking at, and unlike the
+  -- progress dialog below they are the ones nothing else would ever close.
+  self:closeMessageDialogs()
   self:closeDialog()
   self:closeLoadError()
 
@@ -940,6 +1032,7 @@ function PageRuntime:dispose()
   self.headerHandle = nil
   self.sessionHandler = nil
   self.activeDialog = nil
+  self.messageDialogs = nil
   self.onLoaded = nil
   self.beforeSave = nil
   self.onTool = nil
@@ -1047,7 +1140,11 @@ function PageRuntime:buildChrome()
     onTool = self.onTool and function()
       local runtime = controlRef.runtime
       if runtime and runtime.onTool then
-        runtime:onTool(runtime.headerHandle.focusTool)
+        -- Plain call, not runtime:onTool(): every page's onTool is
+        -- function(focusFn), so a method call handed it the runtime table
+        -- as focusFn and the first focusFn() ("focusFn is not callable")
+        -- threw from closeDialog() or the dialog's Cancel button.
+        runtime.onTool(runtime.headerHandle.focusTool)
       end
     end or nil,
   })
@@ -1164,6 +1261,10 @@ function PageRuntime:loadInitial()
   memstats.print(self.logTag .. " fields built")
   if self.initialData then
     self.loaded = true
+    -- self.lastProfile, not a captured value: no read is in flight here, the
+    -- page was handed a finished table, so the profile active now is the one it
+    -- was built from. loadData() needs the capture precisely because there the
+    -- two can differ.
     self.loadedProfile = self.lastProfile
     for _, field in pairs(self.fields) do
       field:enable(true)

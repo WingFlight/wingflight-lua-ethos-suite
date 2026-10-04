@@ -42,13 +42,25 @@ local PAGE_TITLE = "@i18n(app.modules.pid_controller.name)@"
 -- the physical Back key -- see app/page_runtime.lua's buildChrome()).
 -- opts.setEventHandler/opts.setWakeupHandler: see app/menu_container.lua
 -- and app/tool.lua for how Ethos's event()/wakeup() reach a page.
+-- Prop-hang relax is optional on the wire (see lib/msp_pid_profile.lua), so
+-- its fields stay disabled on firmware that doesn't send it.
+local HANG_KEYS = {"prop_hang_strength", "prop_hang_angle", "prop_hang_fade"}
+
 local function open(opts)
-  local runtime = pageRuntime.new({
+  local runtime
+  runtime = pageRuntime.new({
     pageTitle = PAGE_TITLE,
     logTag = "pidctrl",
     mspModule = pidProfile,
     opts = opts,
     unloadPackageKeys = {"wfsuite.lib.msp_pid_profile"},
+    onLoaded = function()
+      if runtime.data.has_prop_hang then return end
+      for _, key in ipairs(HANG_KEYS) do
+        local field = runtime.fields[key]
+        if field then field:enable(false) end
+      end
+    end,
   })
 
   form.clear()
@@ -80,6 +92,27 @@ local function open(opts)
   fieldLayout.buildGroup(runtime, "", {
     {title = "@i18n(app.modules.pid_controller.level)@", spec = {key = "cross_axis_relax_level"}},
     {title = "@i18n(app.modules.pid_controller.cutoff)@", spec = {key = "cross_axis_relax_cutoff"}},
+  })
+
+  -- Snap relax: stops roll/pitch/yaw feedback fighting pop tops, pinwheels and snaps
+  fieldLayout.buildGroup(runtime, "@i18n(app.modules.pid_controller.snap_relax)@", {
+    {title = "@i18n(app.modules.pid_controller.strength)@", spec = {key = "snap_relax_strength"}},
+    {title = "@i18n(app.modules.pid_controller.threshold)@", spec = {key = "snap_relax_threshold"}},
+  })
+
+  fieldLayout.buildGroup(runtime, "", {
+    {title = "@i18n(app.modules.pid_controller.window)@", spec = {key = "snap_relax_window"}},
+    {title = "@i18n(app.modules.pid_controller.hold)@", spec = {key = "snap_relax_hold"}},
+  })
+
+  -- Prop-hang relax: lets the prop torque roll the airframe in a prop hang (roll only)
+  fieldLayout.buildGroup(runtime, "@i18n(app.modules.pid_controller.prop_hang)@", {
+    {title = "@i18n(app.modules.pid_controller.strength)@", spec = {key = "prop_hang_strength"}},
+    {title = "@i18n(app.modules.pid_controller.angle)@", spec = {key = "prop_hang_angle"}},
+  })
+
+  fieldLayout.buildGroup(runtime, "", {
+    {title = "@i18n(app.modules.pid_controller.hold)@", spec = {key = "prop_hang_fade"}},
   })
 
   runtime:loadInitial()

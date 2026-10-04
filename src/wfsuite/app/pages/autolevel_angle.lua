@@ -3,6 +3,7 @@ local autolevel = assert(loadfile("app/pages/autolevel.lua"))()
 
 local function buildFields(runtime, fieldLayout)
   fieldLayout.buildSingle(runtime, "@i18n(app.modules.autolevel.gain)@", {key = "angle_level_strength"})
+  fieldLayout.buildSingle(runtime, "@i18n(app.modules.autolevel.damping)@", {key = "angle_level_damping"})
   fieldLayout.buildSingle(runtime, "@i18n(app.modules.autolevel.bank)@", {key = "angle_roll_limit"})
   fieldLayout.buildSingle(runtime, "@i18n(app.modules.autolevel.pitch)@", {key = "angle_pitch_limit"})
 end

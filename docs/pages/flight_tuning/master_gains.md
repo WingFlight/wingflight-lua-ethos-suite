@@ -24,8 +24,10 @@ Requires a running background task and a flight controller connection.
 | Setting | What it does |
 | --- | --- |
 | TODO | Inspect the page and its helpers; automatic extraction found no controls. |
+| Gain (per axis) | Master gain, 0-200 % (default 100): scales that axis's P, I and D, so how hard it pushes back against a gust or bump. 0 % turns the stabilizer off on that axis; the sticks still move the surfaces. Also an in-flight adjustment function per axis, so a pot can turn it down to 0 %. |
 | Decay (per axis) | How long that axis holds on to a correction after a gust or bump before letting it go (I-term decay time), in seconds (0.01-1.00, default 0.60). Longer feels more locked in; shorter feels freer and suits 3D flying. Master Gain sets how hard the axis pushes back, I-term Decay sets for how long. Also an in-flight adjustment function per axis. |
-| Gain (Speed) | GPS speed attenuation, 25-200 % (default 100): scales Roll, Pitch and Yaw P and D with GPS speed, on top of Throttle, so the model does not wobble in a fast dive with the throttle closed. Only active with a Speed curve assigned on *Gain Curves* and a GPS fix. GPS speed is not airspeed: wind shifts it. |
+| Gain (Throttle) | Throttle attenuation, 25-200 % (default 100): scales Roll, Pitch and Yaw P, D, F and B with throttle, optionally shaped by a Throttle curve on *Gain Curves*. Prop wash makes the surfaces stronger as throttle rises, so lowering gain at high throttle keeps both the damping and the roll and pitch rate the same at any throttle. Throttle and Speed together never go below 25 %; MANUAL is not affected. |
+| Gain (Speed) | GPS speed attenuation, 25-200 % (default 100): scales Roll, Pitch and Yaw P, D, F and B with GPS speed, on top of Throttle, so the model does not wobble or over-rotate in a fast dive with the throttle closed. Only active with a Speed curve assigned on *Gain Curves* and a GPS fix. GPS speed is not airspeed: wind shifts it. |
 | Relax (per axis) | I-term Relax, 1-10 (default 5): how strongly the axis stops a fast roll, loop or snap from bouncing back when you centre the stick. Higher = more relax, so less bounce-back; lower keeps more hold through long, sustained rolls and loops. Most airframes end up between 5 and 9; raise it a step at a time if the model bounces back. Also an in-flight adjustment function per axis. |
 
 ## Notes

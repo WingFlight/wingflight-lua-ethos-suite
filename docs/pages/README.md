@@ -37,7 +37,7 @@ is there. The rule is in [.agents/rules/documentation.md](../../.agents/rules/do
 | Attitude / Heading Hold | [flight_tuning/thrust_vector_hold.md](flight_tuning/thrust_vector_hold.md) | Requires a running background task and a flight controller connection. | draft |
 | PID Bandwidth | [flight_tuning/pid_bandwidth.md](flight_tuning/pid_bandwidth.md) | Requires a running background task and a flight controller connection. | draft |
 | Acro Trainer | [flight_tuning/autolevel_trainer.md](flight_tuning/autolevel_trainer.md) | Requires a running background task and a flight controller connection. | draft |
-| Angle Mode | [flight_tuning/autolevel_angle.md](flight_tuning/autolevel_angle.md) | Requires a running background task and a flight controller connection. | draft |
+| Angle Mode | [flight_tuning/autolevel_angle.md](flight_tuning/autolevel_angle.md) | Requires a running background task and a flight controller connection. | reviewed |
 | Att Hold | [flight_tuning/autolevel_attitude_hold.md](flight_tuning/autolevel_attitude_hold.md) | Requires a running background task and a flight controller connection. | draft |
 | Rates | [flight_tuning/rates_advanced.md](flight_tuning/rates_advanced.md) | Requires a running background task and a flight controller connection. | draft |
 
@@ -57,7 +57,7 @@ is there. The rule is in [.agents/rules/documentation.md](../../.agents/rules/do
 | Curves | [setup/curves.md](setup/curves.md) | Requires a running background task and a flight controller connection. | reviewed |
 | GPS Navigation | [setup/gps_nav_config.md](setup/gps_nav_config.md) | Requires a running background task and a flight controller connection. | reviewed |
 | PWM Output | [setup/servos_pwm.md](setup/servos_pwm.md) | Requires a running background task and a flight controller connection. | draft |
-| BUS Output | [setup/servos_bus.md](setup/servos_bus.md) | Requires a running background task and a flight controller connection. Only available when servo bus output is configured. | draft |
+| BUS Output | [setup/servos_bus.md](setup/servos_bus.md) | Requires a running background task and a flight controller connection. Only available when servo bus output is configured. If that check cannot reach the flight controller, it is retried every 5 seconds. | draft |
 | Modes | [setup/modes.md](setup/modes.md) | Requires a running background task and a flight controller connection. | draft |
 | Adjustments | [setup/adjustments.md](setup/adjustments.md) | Requires a running background task and a flight controller connection. | draft |
 | Channel Fallback | [setup/failsafe.md](setup/failsafe.md) | Requires a running background task and a flight controller connection. | draft |
@@ -75,16 +75,16 @@ is there. The rule is in [.agents/rules/documentation.md](../../.agents/rules/do
 | Throttle | [setup/esc_motors_throttle.md](setup/esc_motors_throttle.md) | Requires a running background task and a flight controller connection. | draft |
 | Telemetry | [setup/esc_motors_telemetry.md](setup/esc_motors_telemetry.md) | Requires a running background task and a flight controller connection. | draft |
 | RPM | [setup/esc_motors_rpm.md](setup/esc_motors_rpm.md) | Requires a running background task and a flight controller connection. | draft |
-| Hobbywing V5 | [setup/esc_forward_hw5.md](setup/esc_forward_hw5.md) | Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 3). | draft |
-| AM32 | [setup/esc_forward_am32.md](setup/esc_forward_am32.md) | Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 1). | draft |
-| BLHeli_S | [setup/esc_forward_blheli_s.md](setup/esc_forward_blheli_s.md) | Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 1). | draft |
-| Bluejay | [setup/esc_forward_bluejay.md](setup/esc_forward_bluejay.md) | Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 1). | draft |
-| FLYROTOR | [setup/esc_forward_flyrotor.md](setup/esc_forward_flyrotor.md) | Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 10). | draft |
-| OMP | [setup/esc_forward_omp.md](setup/esc_forward_omp.md) | Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 6). | draft |
-| Scorpion | [setup/esc_forward_scorpion.md](setup/esc_forward_scorpion.md) | Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 4). | draft |
-| XDFLY | [setup/esc_forward_xdfly.md](setup/esc_forward_xdfly.md) | Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 12). | draft |
-| YGE | [setup/esc_forward_yge.md](setup/esc_forward_yge.md) | Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 9). | draft |
-| ZTW | [setup/esc_forward_ztw.md](setup/esc_forward_ztw.md) | Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 7). | draft |
+| Hobbywing V5 | [setup/esc_forward_hw5.md](setup/esc_forward_hw5.md) | Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 3). If that read fails, it is retried every 5 seconds. | draft |
+| AM32 | [setup/esc_forward_am32.md](setup/esc_forward_am32.md) | Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 1). If that read fails, it is retried every 5 seconds. | draft |
+| BLHeli_S | [setup/esc_forward_blheli_s.md](setup/esc_forward_blheli_s.md) | Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 1). If that read fails, it is retried every 5 seconds. | draft |
+| Bluejay | [setup/esc_forward_bluejay.md](setup/esc_forward_bluejay.md) | Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 1). If that read fails, it is retried every 5 seconds. | draft |
+| FLYROTOR | [setup/esc_forward_flyrotor.md](setup/esc_forward_flyrotor.md) | Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 10). If that read fails, it is retried every 5 seconds. | draft |
+| OMP | [setup/esc_forward_omp.md](setup/esc_forward_omp.md) | Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 6). If that read fails, it is retried every 5 seconds. | draft |
+| Scorpion | [setup/esc_forward_scorpion.md](setup/esc_forward_scorpion.md) | Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 4). If that read fails, it is retried every 5 seconds. | draft |
+| XDFLY | [setup/esc_forward_xdfly.md](setup/esc_forward_xdfly.md) | Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 12). If that read fails, it is retried every 5 seconds. | draft |
+| YGE | [setup/esc_forward_yge.md](setup/esc_forward_yge.md) | Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 9). If that read fails, it is retried every 5 seconds. | draft |
+| ZTW | [setup/esc_forward_ztw.md](setup/esc_forward_ztw.md) | Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 7). If that read fails, it is retried every 5 seconds. | draft |
 
 ## System → Tools
 

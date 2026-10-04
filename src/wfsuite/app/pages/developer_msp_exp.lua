@@ -60,12 +60,26 @@ local function open(opts)
     end
   end
 
+  -- dialog is a RAW form.openProgressDialog() handle here, not the
+  -- app/progress_dialog.lua wrapper, so value()/close() below reach the form
+  -- directly -- which is what makes the pcall the whole point of this one.
+  --
+  -- goBack() sets disposed before it calls this, and it is installed as the
+  -- page's setCleanupHandler, so app/tool.lua's close() reaches it through a
+  -- context where Ethos may already have forbidden form mutation. The dialog
+  -- is still closed there; only the focus call is skipped, since
+  -- headerHandle.focusMenu() is a form write. Ported from
+  -- rotorflight/rotorflight-lua-ethos-suite#2430.
   local function closeDialog(focusFn)
     if dialog then
-      dialog:value(100)
-      dialog:close()
+      local handle = dialog
       dialog = nil
+      pcall(function()
+        handle:value(100)
+        handle:close()
+      end)
     end
+    if disposed then return end
     if focusFn then focusFn() end
   end
 

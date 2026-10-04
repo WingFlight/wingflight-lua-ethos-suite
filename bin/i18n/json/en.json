@@ -351,6 +351,48 @@
           "translation": "Cutoff",
           "needs_translation": false,
           "max_length": 6
+        },
+        "snap_relax": {
+          "english": "Snap Relax",
+          "translation": "Snap Relax",
+          "needs_translation": false,
+          "max_length": 10
+        },
+        "strength": {
+          "english": "Strength",
+          "translation": "Strength",
+          "needs_translation": false,
+          "max_length": 8
+        },
+        "threshold": {
+          "english": "Threshold",
+          "translation": "Threshold",
+          "needs_translation": false,
+          "max_length": 9
+        },
+        "window": {
+          "english": "Window",
+          "translation": "Window",
+          "needs_translation": false,
+          "max_length": 6
+        },
+        "hold": {
+          "english": "Fade-out",
+          "translation": "Fade-out",
+          "needs_translation": false,
+          "max_length": 8
+        },
+        "prop_hang": {
+          "english": "Prop Hang",
+          "translation": "Prop Hang",
+          "needs_translation": false,
+          "max_length": 9
+        },
+        "angle": {
+          "english": "Angle",
+          "translation": "Angle",
+          "needs_translation": false,
+          "max_length": 5
         }
       },
       "tail_rotor": {
@@ -853,6 +895,12 @@
           "max_length": 4,
           "needs_translation": false,
           "translation": "Bank"
+        },
+        "damping": {
+          "english": "Damping",
+          "max_length": 7,
+          "needs_translation": false,
+          "translation": "Damping"
         },
         "pitch": {
           "english": "Pitch",
@@ -1391,6 +1439,12 @@
           "translation": "GPS Navigation",
           "needs_translation": false,
           "max_length": 14
+        },
+        "arm_without_fix": {
+          "english": "Arm w/o GPS Fix",
+          "translation": "Arm w/o GPS Fix",
+          "needs_translation": false,
+          "max_length": 15
         },
         "rth_altitude": {
           "english": "RTH Altitude",
@@ -8065,10 +8119,10 @@
       "translation": "GPS HDOP"
     },
     "sensor_gps_heading": {
-      "english": "GPS Heading",
-      "max_length": 11,
+      "english": "GPS Course",
+      "max_length": 10,
       "needs_translation": false,
-      "translation": "GPS Heading"
+      "translation": "GPS Course"
     },
     "sensor_gps_home_dir": {
       "english": "GPS Home Dir",

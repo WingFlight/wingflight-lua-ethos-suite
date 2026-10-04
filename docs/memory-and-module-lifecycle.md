@@ -34,6 +34,11 @@ this section is about *whether to defer registering a whole subsystem at
 all*; §2 is about the mechanics of what happens when the same file is
 `loadfile()`'d more than once regardless.
 
+**Scope of the rule:** it covers *registration* -- whether a subsystem's
+callbacks are wired up eagerly or behind a proxy. It does not cover *when a
+subsystem loads the UI subtree underneath it*. That narrower case is §10,
+and deferring it is worth doing.
+
 ## 2. `loadfile()` has no `require()`-style caching
 
 `require()` caches by module name: the second call to `require("foo")`
@@ -171,6 +176,64 @@ image/theme/render caches, gated behind flags (`{renders=, theme=,
 images=, liveSources=}`) so a theme switch only clears what actually
 needs to change.
 
+**A gated flag with no caller is an unmanaged cache, not a no-op.**
+`clearCaches()` is a pure option-dispatch table, so an option nobody
+requests fails silently: nothing errors, nothing is logged, and the whole
+cache class simply stays resident. That is exactly what happened to the
+`images` flag (ported from rotorflight/rotorflight-lua-ethos-suite#2414) --
+the branch existed, and `widgets/dashboard.lua`'s `clearThemeCache()` only
+ever passed `{theme = true}`, so every decoded dashboard bitmap survived
+every theme switch, model change and widget close for the rest of the
+session. When adding a flag here, the call site is part of the change; a
+flag nothing requests is indistinguishable from a flag that does not work.
+
+Four caches hold decoded bitmaps (or records pointing at them), and all
+have a release path that `clearCaches({images = true})` drives:
+
+| Cache | Held by | Released by |
+| --- | --- | --- |
+| `imageBitmapCache` (context.lua) | the context module, as `{bitmap, used}` records | `clearCaches({images = true})`, plus an LRU ceiling of `IMAGE_BITMAP_CACHE_MAX` (32) entries |
+| `imageCache` (context.lua) | `drawImageInRect()`'s per-draw memo, `[fallback][path]` | its values are **weak** references to the records above, so an LRU eviction releases them too; also cleared by `images` |
+| `_imgCache` (`objects/image/model.lua`) | the object module, keyed by craft name | a clearer registered via `utils.registerImageCacheClearer()`, run by the same `images` branch |
+| `session.dialImageCache` (`objects/dial/image.lua`) | the session table, keyed by dial panel | `clearCaches({images = true})` |
+
+In addition, `imagePathCache` (context.lua) caches resolved string paths and
+negative probe results (`path or false`) so missing images are not repeatedly
+probed against the filesystem; it is cleared by the same `images` branch.
+
+The LRU ceiling exists because the bitmap cache's key space is open-ended --
+every distinct model photo, dial panel and per-box `image` parameter mints a
+new key -- so clearing on lifecycle events alone still lets path churn within
+one session accumulate. An evicted bitmap is not freed on the spot; the
+handle simply becomes garbage once nothing references it, and the next
+`loadImage()` re-decodes it.
+
+`drawImageInRect()` keeps its own memo because it runs on paint. Upstream
+dropped that memo and called `loadImage()` per draw, which re-normalises the
+path (several `gsub` passes) every frame; here the memo stays, holds the LRU
+record weakly so it cannot pin a bitmap, and re-stamps the record on a hit so
+an image drawn every frame is never the one evicted. It is keyed in two
+levels rather than by a `"path|fallback"` string because that concatenation
+exceeds Lua's 40-byte short-string limit and so allocated a fresh string on
+every draw.
+
+`objects/image/model.lua` needs a registry rather than a lookup because the
+engine `loadfile()`s object modules on demand and holds them in its own
+`objectsByType` map, so a clearer has to be a closure the module registers
+over its own local cache. The engine never evicts that map, so a given
+object module registers exactly one clearer per session.
+
+`bin/dashboard/verify_image_caches.lua` pins all of this against the
+collector (weak references to stub bitmaps), including an end-to-end theme
+reload over the real `settings.update` bus event.
+
+**Not yet measured on hardware.** What is established here is the retention
+path: the bitmaps were reachable from a live reference, and they no longer
+are. How many kilobytes that is worth on a real radio is not established --
+quantifying it needs a `live` vs `churn` split around
+`collectgarbage("count")` (a `live` figure after a full collect measures
+true retention, `churn` measures the sawtooth).
+
 ## 8. Closures survive `form.clear()` — pool them
 
 Live testing showed Ethos retains some `form` callback/widget allocations
@@ -179,6 +242,48 @@ cannot fix retained widget objects, but does avoid *adding* fresh
 retained closures on every repeat visit. `app/field_layout.lua` pools
 field getter/setter closures by page+field shape for exactly this reason
 — see its own header comment for the full reasoning.
+
+### 8a. But do not shrink the pool on the way out
+
+Ported from rotorflight/rotorflight-lua-ethos-suite#2416.
+
+The natural next step after "the pool is a permanent table" is to drop each
+entry when its page is released, on the reasoning that a slot whose
+`dataRef` and `controlRef` are both nil is dead weight. **That is a
+regression, not a saving**, and it is worth writing down because the
+argument for it is very plausible.
+
+The retained widget is what holds the closure alive. Evicting the pool
+entry does not free the closure -- it only guarantees the *next* visit to
+that page builds a fresh set, while the old widget keeps the old one. So
+eviction converts a bounded, one-time pool into closure sets that grow
+linearly with the number of page visits, which is the exact thing §8's
+pooling exists to prevent.
+
+Upstream measured this by replaying every page's real field inventory
+(rotorflight's page set, not wingflight's) through `app/field_layout.lua`
+on Lua 5.4, opening each page, building every field and releasing the
+runtime:
+
+| Full tours of the page set | Pooled (current) | Evict-on-release |
+|---|---|---|
+| 1 | 195 entries built | 195 built |
+| 2 | 195 | 390 |
+| 5 | 195 | 975 |
+| 20 | 195 | 3900 |
+
+The shape carries over even though wingflight's numbers differ: the pool is
+*bounded by construction*, not merely slow to grow. It is keyed by field
+shape, and every field shape in the app is a literal in some page's source,
+so it saturates on the first tour and never grows again.
+
+The real lever on this pool is therefore its **per-entry cost**, not its
+size. Every entry is a slot table plus its key string plus two closures
+(it was three -- the plain setter is now one shared function per field
+kind). `field_layout.poolStats()` returns `(count, live)` so the pool's size
+and its detached tail can be checked on a radio instead of estimated;
+`bin/field_layout/verify_field_layout.lua` pins the pooling, the detach on
+`releaseRuntime()`, and the two-closure shape.
 
 ## 9. A dead end: don't reach for `collectgarbage()` without new evidence
 
@@ -206,13 +311,344 @@ case.** A targeted fix (self-caching, subscription cleanup, in-place
 clearing) that actually reduces *live references* is the only kind of
 fix that can work here.
 
+### 9.1 Tuning the collector is a different lever from forcing it
+
+§9 rules out `collectgarbage("collect")` as a *fix*, because a complete cycle
+can only reclaim what is genuinely unreachable. **That ruling is untouched by
+this subsection.** Configuring the incremental collector changes *when* a cycle
+starts, not *what* is collectable: a cycle triggered at 120% of live instead of
+200% reclaims exactly the same objects, sooner. Nothing here makes retained
+memory collectable.
+
+The pause exists because the two ends of the range are both bad. A cycle starts
+once the heap has reached `live * pause / 100`, and the default is 200 — so with
+400 KB live, the heap is allowed to reach roughly 1.2 MB before the collector
+begins reclaiming at all. Ethos kills a script whose Lua heap passes its limit
+(rotorflight-lua-ethos-suite#2295, *"Lua has used too much RAM, it has been Killed"*). A pause tuned for a
+general-purpose host therefore begins its work after the point at which the radio
+has already given up.
+
+`main.lua` sets it to **120** in `init()`, before `background_task.init()`, and
+prints what it applied:
+
+    [boot] gc: pause=120% of live heap before a cycle starts (Lua default 200)
+
+### 9.2 `collectgarbage("setpause")` is not a getter
+
+This is the whole reason the applied value is printed rather than read back:
+
+    collectgarbage("setpause", n)   -- sets the pause, RETURNS THE PREVIOUS one
+    collectgarbage("setpause")     -- sets the pause to 0, returns the previous
+
+Measured on Lua 5.3.6 and 5.4, and asserted by
+`bin/gc_pause/verify_gc_pause.lua` rather than left to a comment, because
+`main.lua` cites the behaviour. Pause 0 means "collect as constantly as
+possible" — the exact opposite of the intent. So: the applied value is kept in a
+local and printed, no file under `src/` may call either setter without an
+explicit argument, and the call is `pcall`'d because a Lua without the mode
+string would otherwise abort the boot. A guard that fails says so.
+
+### 9.3 What the value is *not*
+
+- **Not measured.** Nothing in this repository states Ethos's Lua heap limit, so
+  there is no number to derive a pause from, and no on-device run measures what a
+  lower pause costs the background task's instruction budget
+  (`tasks/scheduler.lua`). It is one line to change and one line to revert, which
+  is what makes it worth trying.
+- **Not a fix for the allocation rate.** It moves the collector's onset earlier;
+  it does not allocate less. The churn itself still has to be reduced (§12).
+- **Not covering the boot burst.** The eager `loadfile()` chain at
+  `main.lua:53/57/61` parses before `init()` runs, at the default pause. What it
+  leaves behind is live code, which no pause setting makes smaller — so this is a
+  creep measure, not a boot-peak measure.
+- **`setstepmul` is deliberately untouched.** It is the second knob, it trades
+  collector throughput against step size, and there is no measurement here of
+  jitter it would fix.
+
+### 9.4 How to decide it, without writing a line of code
+
+The metric that matters is the **peak `lua=` in the `[bgtask mem]` log over a
+30-minute flight** — and it is already logged, by `tasks/background.lua`. So the
+measurement is a procedure, not a feature: run the same session twice, once with
+the pause at the default and once at 120, and compare the peaks. The `[boot]` line
+above records which of the two a given log came from.
+
+A separate `live` figure, against which `churn` could be split, would need a
+forced full collect — and the one place that could show it,
+`app/pages/diagnostics_rfstatus.lua`, computes its memory text from a `wakeup`
+handler. A forced collect there would be precisely the hot-path forced collect
+this subsection is about. That is why there is no live/churn split in the
+diagnostics page: the number it would add is not worth a full cycle on every
+tick of that page.
+
+
+## 10. Deferring a subsystem's UI subtree is not §1
+
+`app/tool.lua` still registers eagerly at boot (§1), but everything the tool
+only needs once it is open -- `app/navigation.lua`, `app/menu_container.lua`
+(and through it `app/close_key.lua`, `app/header.lua`, `app/tile_grid.lua`),
+`app/esc_protocol_guard.lua`, `app/servo_bus_guard.lua` (and their
+`lib/msp_esc_sensor_config.lua`/`lib/msp_serial_config.lua` codecs), and
+`lib/memstats.lua` -- is loaded through `ensureX()` helpers from `create()`,
+not at module scope. Only `lib/bus.lua` stays eager, because the tool's
+`bus.subscribe()` calls have to be live from boot.
+
+Two rules keep that deferral intact:
+
+- **Nothing on the boot path may call an `ensureX()`.** `close()` nil-checks
+  `memstats` and `nav` instead of ensuring them: if they are absent the tool
+  was never opened, and ensuring them there would load the very modules the
+  deferral exists to keep out.
+- **A module the subtree loads must not be required at module scope by
+  something that loads at boot.** `menu_container.lua` requires `memstats` at
+  its call site for the same reason.
+
+The same change in rotorflight-lua-ethos-suite (#2421) measured **−60.4 kB**
+of resting Lua heap on an X18RS, connected with the tool closed. The saving
+is in the **resting** state, not the peak: with the tool open the modules
+are loaded either way, so a pilot who keeps the tool open gets nothing back.
+Wingflight had already deferred most of this subtree before that port; the
+port added the `close()` nil-checks and the `menu_container.lua` change.
+
+Two harnesses pin it, both run in the PR workflow:
+
+- `bin/tool_ui/verify_tool_ui_lazy.lua` -- none of the modules above are in
+  `package.loaded` before `create()` (including after a `close()` with no
+  `create()`), all are after, and neither `close()` nor a second `create()`
+  loads anything more.
+- `bin/tool_ui/verify_no_extra_msp.lua` -- counts `msp.request` at
+  `bus.publish` over three tool cycles through both guarded menus, with 100
+  wakeups inside one. It answers every request as a live FC would; without
+  that, a guard's `pending` flag hides a broken `attempted` latch and the
+  harness cannot go red.
+
+**A measurement trap from that work:** an A/B between two builds captured
+under different radio state gives a spectacularly wrong number (−523.5 kB
+upstream, of which 463.1 kB was Lua deleted off the card between runs). If
+the numbers do not decompose, add a third measurement, and compare
+`bmpRamAvail` between runs -- if it differs, the screen state differs and the
+comparison is void.
+
+## 11. The C stack is a second budget, and it has exactly one unbounded term
+
+Ported from rotorflight/rotorflight-lua-ethos-suite#2426.
+
+The heap is the budget everyone watches. It is not the only one. Ethos runs
+FreeRTOS, and a Lua script runs inside one of those tasks. In the reference Lua
+VM every Lua-to-Lua call consumes one C stack level, so a call chain that
+grows without bound does not raise a catchable Lua error -- it walks the stack
+pointer down past the end of the task's stack array and into whatever the
+linker placed below it. On the radio that is `ioMutex`, and the result is a
+hardfault caught by the watchdog, not an exception.
+
+That is why the two failure modes have to be kept apart. A heap exhaustion
+says *"Lua has used too much RAM, it has been Killed"*. A stack overflow says
+nothing at all until the radio resets. Any change that trades one for the other
+-- or claims to fix an EM by reducing heap -- has to say which one it measured.
+
+### 11.0 Where the two budgets physically live
+
+From the Ethos linker script and the firmware author, on the X18RS:
+
+| Region | Origin | Size | Holds |
+|---|---|---|---|
+| ITCMRAM | `0x00000000` | 64 K | **unused** |
+| **DTCMRAM** | `0x20000000` | 128 K | **all variables and all stacks** |
+| RAM_D1 | `0x24000000` | 512 K | the model allocator (used by the mixer) |
+| RAM_D2 | `0x30000000` | 288 K | **the model backup, loaded in case of an EM** |
+| RAM_D3 | `0x38000000` | 64 K | peripherals that need BDMA |
+| **SDRAM** | `0xD0000000` | 8 MB | **everything else: the Lua heap and the bitmap arena** |
+
+Two consequences that are easy to get wrong:
+
+- **The stack and the Lua heap are in different memories.** The Main task's
+  stack is a static array in DTCMRAM; the Lua heap is in SDRAM. Exhausting one
+  cannot corrupt the other, and a heap reduction cannot buy stack headroom.
+  `system.getMemoryUsage()`'s `mainStackAvailable` is derived as
+  `4 * STACK_AVAILABLE_WORDS(mainStack, MAIN_STACK_SIZE)` -- a macro over that
+  DTCMRAM array, not a heap figure and not a FreeRTOS call.
+- **The Lua heap and the bitmap arena share one 8 MB region.** `luaRamAvailable`
+  and `luaBitmapsRamAvailable` are two compile-time maxima carved out of the
+  same SDRAM, not two separately reserved pools. They compete: a script that
+  grows the Lua heap eats bitmap headroom, and the failure surfaces as a
+  *bitmap* error. Treat them as one budget with two views.
+
+An EM is a **designed, survivable recovery**, not a dead radio: the model lives
+in RAM_D1 and its backup in RAM_D2, and the backup is loaded on EM. That is also
+why a Main-stack overflow is survivable at all -- the corruption hits a mutex in
+DTCMRAM, while the model and its backup sit in entirely different regions.
+
+The layout inside DTCMRAM is what makes the failure sharp, though:
+
+```
+0x20000000  …  unknown .bss  …  0x20005c14
+0x20005c14  audioStack   4 096 B
+0x20006c14  audioTaskId       4 B
+0x20006c18  ioMutex           4 B   <- first casualty of a downward overflow
+0x20006c1c  mainStack    20 480 B   <- grows down, into the three above
+0x2000BC1C  …  82 916 B of DTCMRAM above the stack  …
+```
+
+A FreeRTOS stack pointer starts at the top of its array and grows downward, so
+an exhausted Main task reaches `ioMutex` first. **There is no guard region
+between them -- that adjacency is link order, not design** -- and 27 676 B of
+DTCMRAM lies below `mainStack`, all of it shared with the program's variables.
+A full 20 KB overflow does not corrupt one mutex; it walks into everything the
+firmware keeps in that 128 K.
+
+### 11.1 The bound
+
+`lib/bus.lua` is the only channel the system tool, the dashboard widget and the
+background task use to talk to each other, and `publish()` invokes its
+handlers **synchronously**, inside its own loop. A handler is allowed to
+publish again -- two or three levels of that is ordinary. A handler that
+publishes to a topic whose handler publishes back to the first one is not
+ordinary, and nothing in the bus stopped it.
+
+`MAX_PUBLISH_DEPTH` in `lib/bus.lua` stops it. The limit is deliberately far
+above legitimate nesting and far below anything that could threaten a stack:
+its job is to make the worst case **finite**, not to be the last level before an
+overflow. The real budget is not known -- what
+`system.getMemoryUsage().mainStackAvailable` counts is an open question, raised
+with the Ethos firmware author in
+[rotorflight/rotorflight-lua-ethos-suite#2420](https://github.com/rotorflight/rotorflight-lua-ethos-suite/issues/2420).
+
+The guard **raises**, on purpose. The error unwinds exactly one level, into the
+`pcall()` of the publish that invoked the offending handler, so the cycle is
+cut, the existing handler-error branch above it reports it, and every
+`publish()` still decrements on the way out. A silently dropped publish would
+be indistinguishable from a bus that works.
+
+`bus.maxPublishDepth()` publishes the deepest chain actually observed, so the
+constant can be set from a measurement later instead of from a judgement.
+
+### 11.2 The extremes, and why not an instantaneous reading
+
+`lib/stack_probe.lua` keeps the **smallest** and **largest** value of
+`system.getMemoryUsage().mainStackAvailable` seen since the task started. The
+question the radio is being asked is how close it has *ever* come to the edge,
+and an instantaneous reading cannot answer that -- it is one moment, and the
+interesting moment is the worst one. The maximum sits beside it because a
+single fixed call site has a fixed depth: a minimum of 0 next to a maximum of
+9 000 says the Main task reached the edge; a maximum that also reads 0 says the
+call site itself sits deep.
+
+That still cannot say how deep the call site is, so there is a second channel:
+`widgets/dashboard.lua` samples the same field at the top of `paint()`, at most
+once a second, and `notePaint()` records it separately. Both channels appear on
+the background task's `[bgtask mem]` line (`stackMin=… stackMax=… pubMax=…
+paintNow=… paintMin=… paintMax=…`), which prints only with the developer
+**memory logs** setting on. The paint sample is gated on the same setting, so
+with it off `system.getMemoryUsage()` is never called from `paint()` and
+`lib/stack_probe.lua` is never loaded.
+
+It lives in its own small module rather than in `lib/memstats.lua` because
+that module is loaded lazily, inside the tool's own lifecycle (see section 10),
+and the callers here are the background task and the dashboard, which run from
+boot. Routing it through `memstats` would mean loading `memstats` at boot --
+permanently retained code for a module that does nothing in most sessions,
+which is exactly the cost section 10 removed.
+
+`note()` deliberately ignores a missing or non-numeric field instead of
+coercing it. The print lines use `or 0`, and feeding that fallback into a
+minimum would pin the reported figure at 0 for the rest of the session -- a
+confident-looking number that means only "this firmware did not report the
+field". `formatStackFields()` renders that case as `-` instead, and prints the
+raw bytes rather than `%.1fKB`, because 0 B and 51 B both round to `0.0KB`.
+
+`bin/stack/verify_stack_bounds.lua` drives the real bus through a handler
+cycle and asserts it stops at the guard, not at the VM's own "stack
+overflow", and pins the exact rendered fields.
+
+### 11.3 What this does not tell you
+
+Measuring the deepest *publish* nesting is not measuring C stack depth. It
+bounds the one recursive term in this suite; it says nothing about the depth of
+the dashboard's paint path, which is a plain nested call chain with no cycle
+in it. Until the meaning of `mainStackAvailable` is answered, no number from
+the Lua side can be converted into bytes of headroom.
+
+## 12. Nothing on a wakeup path builds a table per call
+
+The dashboard wakeup path runs several times a second and `session.update` is
+published at up to 20 Hz, so a table rebuilt per call there is the sawtooth in
+the `'[bgtask mem] lua='` log rather than a detail. Three allocations on those
+paths were measured at 184 B, 136 B and about 1 kB per call (desktop Lua 5.4),
+and all three were a lookup table, a result table or a closure rebuilt for
+values the file already had at module level:
+
+- a name-to-suffix table rebuilt inside `getSensorStats()`, while the
+  `STAT_SUFFIXES` constant above it already held it -- and the two had
+  drifted, so the rebuild read a different suffix for `rssi` than
+  `recordSensorStat()` wrote (an rssi stat box showed link quality's min/max)
+- a `compileTransform()` closure built, called on the next expression and thrown
+  away, for the boxes that do not cache their config
+- a copy of the subscriber list, made on every `publish()`
+
+Two rules follow, and both are about what the file already demonstrates:
+
+1. **A constant lookup table lives at module level, and in one place only.** Two
+   copies of the same mapping will disagree, and the disagreement stays invisible
+   until it returns the wrong number to a pilot.
+2. **Reuse a result object per key, not one for everything.**
+   `getSensorStats()` keeps one table per sensor name and overwrites its fields.
+   A single shared table would be cheaper still, but a caller that reads two
+   sensors before drawing would see the second one twice. The temperature path
+   in the same function already cached its result this way.
+
+For the publish copy, one pooled snapshot per nesting level replaces the
+per-publish table, indexed by the `publishDepth` that section 11 already keeps --
+so the pool cannot grow past `MAX_PUBLISH_DEPTH` entries and the guard and the
+pool share one counter. Two details are load-bearing, and
+`bin/allocation_churn/verify_allocation_churn.lua` pins both:
+
+- **each slot is cleared (`snapshot[i] = nil`) as it is read.** Leaving
+  handler references in the pooled snapshot would retain closures (and via
+  their upvalues, closed `PageRuntime` instances or widget trees) across
+  publishes. In PUC-Rio Lua, setting array entries to `nil` does not shrink
+  the table's allocated array, so refilling `1..count` on the next publish
+  still allocates nothing.
+- **the semantics of the copy are preserved exactly.** A handler unsubscribed by
+  another handler *during* a publish still gets its turn in that publish and
+  none in the next. Tombstoning the slot in the live list instead looks like the
+  obvious fix and is not this: it changes that behaviour, and its slots are never
+  reclaimed, so the subscriber list only grows -- and page open/close is what
+  unsubscribes here.
+
+### 12.1 Measuring this without fooling yourself
+
+`collectgarbage("count")` is the live heap **plus** whatever has not been
+collected yet, so a difference between two readings is an allocation figure only
+when no collection ran in between. Measured with the pause left alone, the numbers
+come out non-monotonic (6 subscribers reported cheaper than 3) because the
+collector ran mid-loop. So the harness pins the pause high, keeps a retained
+ballast array so the "double the live heap" trigger is out of reach, and asserts
+both directions on every run -- the current code under the bound and the removed
+code over it. A bound that both sides meet proves nothing, which is why the
+removed implementations are carried in the harness rather than only described.
+
+The same trap applies to parse cost. `loadfile()` without running the chunk
+measures the parser's transient allocations, not the prototype the radio keeps,
+and parsing two revisions of a file in one process shares every interned string
+between them, so a parse delta measured that way can fall while the source grows.
+
 ## Quick reference
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | Considering deferring/proxying a top-level subsystem's registration to save startup RAM | Already tried and reverted -- measured worse retained-RAM growth | Don't, without new on-device evidence (§1) |
+| A rarely opened page or tool pulls a big UI subtree in at boot | Modules required at module scope, retained for the session by the `requireModule` cache | Load at the point of use via `ensureX()`; nil-check, don't ensure, in `close()` (§10) |
+| Radio resets or EMs with no "Lua has used too much RAM" message | C stack exhaustion, not heap -- e.g. a bus handler cycle | Check `stackMin`/`paintMin`/`pubMax` on the memory log line; `bus.publish` stops cycles at `MAX_PUBLISH_DEPTH` (§11) |
+| An A/B between two builds gives an implausibly large delta | The runs had different radio state | Add a third measurement; compare `bmpRamAvail` first (§10) |
 | RAM climbs on every visit to the same page | Module reloaded fresh via `loadfile()`, rebuilding module-level tables | Self-cache (§3) |
 | RAM climbs *and* stale/duplicate event behavior appears over time | Module subscribes to the bus at load time, never cached | Self-cache (§3/§4) — non-negotiable |
 | A page's own live-data callback keeps firing after leaving the page | Page subscribed in open(), never unsubscribed in close() | Pair subscribe/unsubscribe (§5) |
 | A long-lived cache table keeps growing across the whole session | Cache never cleared, or cleared by reassignment while something else still holds the old table | Clear in place (§7) |
+| A cache class grows across the whole session although a `clearCaches`-style option exists for it | The option is gated and no call site ever requests it -- a silent failure by construction | Request the option at the lifecycle call site, and bound the cache if its key space is open-ended (§7) |
 | RAM grows on menu/page rebuild despite everything above being clean | Likely Ethos's own `form` widget retention (§9) | Don't force `collectgarbage()` — it won't help; this needs a different kind of fix (or may be a platform limit) |
+| The heap peaks past Ethos's limit before the collector starts reclaiming | The pause is 200, so a cycle only begins at twice the live heap (§9.1) | `main.lua` sets it to 120 and prints what it applied — judge it by the peak `lua=` (§9.4) |
+| The collector is running flat out on a radio | `collectgarbage("setpause")` was called without a value, which sets the pause to **0** (§9.2) | Print the applied value; never read it back — the setter returns the previous one |
+| Lowering the pause did not reduce memory use | It moves the collector's onset earlier; it does not allocate less (§9.3) | Reduce the churn itself (§12) — the two are complementary, not alternatives |
+| `lua=` in the background log sawtooths while the dashboard is up | A table, result object or closure rebuilt per call on a wakeup or publish path | Module-level constant, per-key result object, pooled iteration copy (§12) |
+| Heap grows *and* a stat box shows another sensor's numbers | Two copies of the same name-to-suffix mapping, disagreeing | One mapping, at module level (§12) |
+| An allocation measurement comes out smaller than the code change should allow | The collector ran inside the measurement window | Pin the pause, add ballast, assert the removed code over the bound too (§12.1) |

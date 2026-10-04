@@ -686,6 +686,12 @@
           "needs_translation": false,
           "translation": "Bank"
         },
+        "damping": {
+          "english": "Damping",
+          "max_length": 7,
+          "needs_translation": false,
+          "translation": "Damping"
+        },
         "deadband": {
           "english": "Deadband",
           "max_length": 8,
@@ -4328,6 +4334,12 @@
           "needs_translation": false,
           "translation": "Altitude Gain"
         },
+        "arm_without_fix": {
+          "english": "Arm w/o GPS Fix",
+          "max_length": 15,
+          "needs_translation": false,
+          "translation": "Arm w/o GPS Fix"
+        },
         "bearing_kp": {
           "english": "Bearing Gain",
           "max_length": 12,
@@ -5414,6 +5426,12 @@
         }
       },
       "pid_controller": {
+        "angle": {
+          "english": "Angle",
+          "max_length": 5,
+          "needs_translation": false,
+          "translation": "Angle"
+        },
         "cross_axis_relax": {
           "english": "Cross Axis Relax",
           "max_length": 16,
@@ -5437,6 +5455,12 @@
           "max_length": 18,
           "needs_translation": false,
           "translation": "Ground Error Decay"
+        },
+        "hold": {
+          "english": "Fade-out",
+          "max_length": 8,
+          "needs_translation": false,
+          "translation": "Fade-out"
         },
         "hsi_offset_limit": {
           "english": "HSI Offset Limit",
@@ -5486,11 +5510,29 @@
           "needs_translation": false,
           "translation": "P"
         },
+        "prop_hang": {
+          "english": "Prop Hang",
+          "max_length": 9,
+          "needs_translation": false,
+          "translation": "Prop Hang"
+        },
         "roll": {
           "english": "R",
           "max_length": 1,
           "needs_translation": false,
           "translation": "R"
+        },
+        "snap_relax": {
+          "english": "Snap Relax",
+          "max_length": 10,
+          "needs_translation": false,
+          "translation": "Snap Relax"
+        },
+        "strength": {
+          "english": "Strength",
+          "max_length": 8,
+          "needs_translation": false,
+          "translation": "Strength"
         },
         "tbl_off": {
           "english": "Off",
@@ -5510,11 +5552,23 @@
           "needs_translation": false,
           "translation": "RPY"
         },
+        "threshold": {
+          "english": "Threshold",
+          "max_length": 9,
+          "needs_translation": false,
+          "translation": "Threshold"
+        },
         "time": {
           "english": "Time",
           "max_length": 4,
           "needs_translation": false,
           "translation": "Time"
+        },
+        "window": {
+          "english": "Window",
+          "max_length": 6,
+          "needs_translation": false,
+          "translation": "Window"
         },
         "yaw": {
           "english": "Y",
@@ -8295,10 +8349,10 @@
       "translation": "GPS HDOP"
     },
     "sensor_gps_heading": {
-      "english": "GPS Heading",
-      "max_length": 11,
+      "english": "GPS Course",
+      "max_length": 10,
       "needs_translation": false,
-      "translation": "GPS Heading"
+      "translation": "GPS Course"
     },
     "sensor_gps_home_dir": {
       "english": "GPS Home Dir",

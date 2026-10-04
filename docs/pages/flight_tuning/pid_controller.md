@@ -34,6 +34,13 @@ Requires a running background task and a flight controller connection.
 | Cross Axis Relax (P) | TODO: explain behaviour, displayed units, range and conditions. |
 | (Level) | TODO: explain behaviour, displayed units, range and conditions. |
 | (Cutoff) | TODO: explain behaviour, displayed units, range and conditions. |
+| Snap Relax (Strength) | Percent (0-100, default 100) of roll, pitch and yaw feedback taken off when it pushes against a pop top, pinwheel or snap. These start with roll, pitch and yaw slammed in together, and the airframe then rotates faster than the stick asks for. Feedback that helps the rotation is not touched; yaw usually lags the stick, so the rudder is only relaxed if the airframe yaws faster than asked. 0 turns it off. |
+| Snap Relax (Threshold) | Stick deflection, percent (20-100, default 60), that roll, pitch and yaw must all reach to count as a snap. |
+| (Window) | Entry window in ms (0-1000, default 400): all three sticks must pass the threshold within this time of each other, so a slow build-up such as a rolling harrier does not count. |
+| (Fade-out) | Time in ms (0-1000, default 350) over which full feedback returns after any of the three sticks drops below the threshold. Reversing the stick against the snap brings full feedback back at once. |
+| Prop Hang (Strength) | Percent (0-100, default 100) of the roll I-term held back in a prop hang, so the prop torque can roll the model instead of the gyro holding it still. P and the stick still work. Roll only. Needs an altitude estimate (a barometer) to tell a hang from an up-line. Firmware without prop-hang relax leaves these fields disabled. 0 turns it off. |
+| (Angle) | Degrees (5-45, default 20) the nose can be from straight up and still count as a hang. The model must also be climbing or sinking at no more than 2 m/s, for half a second. |
+| (Fade-out) | Time in ms (0-2000, default 500) over which the roll I-term comes back after the hang ends. |
 
 ## Notes
 
