@@ -68,9 +68,9 @@ local FIELDS = {
 -- tv_pid.c's PG_RESET_TEMPLATE).
 local SIMULATOR_RESPONSE = {
   0,    -- tv_profile_index (profile 0)
-  120, 0, 60, 0,  0, 0,  75, 0,  35, 0,  -- roll_p/i/d/f/b
-  120, 0, 60, 0,  0, 0,  75, 0,  35, 0,  -- pitch_p/i/d/f/b
-  250, 0, 60, 0,  0, 0,  75, 0,  35, 0,  -- yaw_p/i/d/f/b
+  150, 0, 75, 0,  0, 0,  75, 0,  35, 0,  -- roll_p/i/d/f/b
+  150, 0, 75, 0,  0, 0,  75, 0,  35, 0,  -- pitch_p/i/d/f/b
+  54, 1,  75, 0,  0, 0,  75, 0,  35, 0,  -- yaw_p/i/d/f/b
   100, 0, 100, 0, 100, 0, -- master_gain_0/1/2
   60, 60, 60,   -- iterm_decay_time_0/1/2 (0.60s, decimals=2)
   35,   -- iterm_decay_limit
@@ -94,18 +94,18 @@ local SIMULATOR_RESPONSE = {
 -- same raw wire domain as `min`/`max`, matching iterm_decay_time_0's
 -- decimals=2 display (seconds) over its actual 1-100 (0.01 s) range.
 local FIELD_META = {
-  roll_p = {min = 0, max = 1000, default = 120},
-  roll_i = {min = 0, max = 1000, default = 60},
+  roll_p = {min = 0, max = 1000, default = 150},
+  roll_i = {min = 0, max = 1000, default = 75},
   roll_d = {min = 0, max = 1000, default = 0},
   roll_f = {min = 0, max = 1000, default = 75},
   roll_b = {min = 0, max = 1000, default = 35},
-  pitch_p = {min = 0, max = 1000, default = 120},
-  pitch_i = {min = 0, max = 1000, default = 60},
+  pitch_p = {min = 0, max = 1000, default = 150},
+  pitch_i = {min = 0, max = 1000, default = 75},
   pitch_d = {min = 0, max = 1000, default = 0},
   pitch_f = {min = 0, max = 1000, default = 75},
   pitch_b = {min = 0, max = 1000, default = 35},
-  yaw_p = {min = 0, max = 1000, default = 250},
-  yaw_i = {min = 0, max = 1000, default = 60},
+  yaw_p = {min = 0, max = 1000, default = 310},
+  yaw_i = {min = 0, max = 1000, default = 75},
   yaw_d = {min = 0, max = 1000, default = 0},
   yaw_f = {min = 0, max = 1000, default = 75},
   yaw_b = {min = 0, max = 1000, default = 35},
