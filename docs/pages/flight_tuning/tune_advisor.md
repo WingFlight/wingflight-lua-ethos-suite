@@ -21,8 +21,9 @@ ten seconds of rolls and pitch inputs with the stick centred after each one.
 
 *Configuration* → *Flight Tuning* → *Tune Advisor*
 
-Requires a running background task and a flight controller connection. Firmware from before the Tune Advisor
-shows "Needs newer firmware". The page refreshes every 2 seconds.
+Requires a running background task and a flight controller connection. The page refreshes every 2 seconds.
+Firmware from before the Tune Advisor shows "Needs newer firmware" and the page stops asking; Reload asks again.
+When the link drops for a moment, the last measurements stay on screen until the next answer.
 
 ## Settings
 
