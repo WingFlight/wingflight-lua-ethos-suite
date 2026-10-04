@@ -68,15 +68,15 @@ local FIELDS = {
 -- tv_pid.c's PG_RESET_TEMPLATE).
 local SIMULATOR_RESPONSE = {
   0,    -- tv_profile_index (profile 0)
-  150, 0, 75, 0,  0, 0,  75, 0,  35, 0,  -- roll_p/i/d/f/b
-  150, 0, 75, 0,  0, 0,  75, 0,  35, 0,  -- pitch_p/i/d/f/b
-  54, 1,  75, 0,  0, 0,  75, 0,  35, 0,  -- yaw_p/i/d/f/b
+  105, 0, 45, 0,  0, 0,  75, 0,  35, 0,  -- roll_p/i/d/f/b
+  105, 0, 45, 0,  0, 0,  75, 0,  35, 0,  -- pitch_p/i/d/f/b
+  190, 0, 45, 0,  0, 0,  75, 0,  35, 0,  -- yaw_p/i/d/f/b
   100, 0, 100, 0, 100, 0, -- master_gain_0/1/2
   60, 60, 60,   -- iterm_decay_time_0/1/2 (0.60s, decimals=2)
   35,   -- iterm_decay_limit
   22, 22, 22,   -- iterm_relax_level_0/1/2
   5, 5, 5,      -- bounceback_0/1/2
-  45, 45, 60,   -- error_limit_0/1/2
+  20, 20, 30,   -- error_limit_0/1/2
   15, 15, 20,   -- dterm_cutoff_0/1/2
   15, 15, 20,   -- bterm_cutoff_0/1/2
   50, 50, 100,  -- gyro_cutoff_0/1/2
@@ -94,18 +94,18 @@ local SIMULATOR_RESPONSE = {
 -- same raw wire domain as `min`/`max`, matching iterm_decay_time_0's
 -- decimals=2 display (seconds) over its actual 1-100 (0.01 s) range.
 local FIELD_META = {
-  roll_p = {min = 0, max = 1000, default = 150},
-  roll_i = {min = 0, max = 1000, default = 75},
+  roll_p = {min = 0, max = 1000, default = 105},
+  roll_i = {min = 0, max = 1000, default = 45},
   roll_d = {min = 0, max = 1000, default = 0},
   roll_f = {min = 0, max = 1000, default = 75},
   roll_b = {min = 0, max = 1000, default = 35},
-  pitch_p = {min = 0, max = 1000, default = 150},
-  pitch_i = {min = 0, max = 1000, default = 75},
+  pitch_p = {min = 0, max = 1000, default = 105},
+  pitch_i = {min = 0, max = 1000, default = 45},
   pitch_d = {min = 0, max = 1000, default = 0},
   pitch_f = {min = 0, max = 1000, default = 75},
   pitch_b = {min = 0, max = 1000, default = 35},
-  yaw_p = {min = 0, max = 1000, default = 310},
-  yaw_i = {min = 0, max = 1000, default = 75},
+  yaw_p = {min = 0, max = 1000, default = 190},
+  yaw_i = {min = 0, max = 1000, default = 45},
   yaw_d = {min = 0, max = 1000, default = 0},
   yaw_f = {min = 0, max = 1000, default = 75},
   yaw_b = {min = 0, max = 1000, default = 35},
@@ -122,9 +122,9 @@ local FIELD_META = {
   bounceback_0 = {min = 1, max = 10, default = 5},
   bounceback_1 = {min = 1, max = 10, default = 5},
   bounceback_2 = {min = 1, max = 10, default = 5},
-  error_limit_0 = {min = 0, max = 180, default = 45, suffix = "°"},
-  error_limit_1 = {min = 0, max = 180, default = 45, suffix = "°"},
-  error_limit_2 = {min = 0, max = 180, default = 60, suffix = "°"},
+  error_limit_0 = {min = 0, max = 180, default = 20, suffix = "°"},
+  error_limit_1 = {min = 0, max = 180, default = 20, suffix = "°"},
+  error_limit_2 = {min = 0, max = 180, default = 30, suffix = "°"},
   dterm_cutoff_0 = {min = 0, max = 250, default = 15},
   dterm_cutoff_1 = {min = 0, max = 250, default = 15},
   dterm_cutoff_2 = {min = 0, max = 250, default = 20},
