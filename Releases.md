@@ -1,3 +1,11 @@
+# 0.0.32
+
+Use with the 0.0.32 firmware (MSP API 22.13). The firmware update resets every PID, thrust-vector and rate profile to defaults, so note your tune and rates before flashing.
+Add a Tune Advisor page under Configuration > Flight Tuning: pick Roll, Pitch or Yaw to see how the model follows the sticks and its bounce-back after a stop, with up to three suggested changes named by page and setting, and why. The Tool button clears the statistics. Older firmware shows "Needs newer firmware".
+Reset P, I and F to the new firmware defaults on the PID and thrust vector PID pages: roll and pitch P 105, I 45; yaw P 190, I 45; F 65.
+
+Fix SmartFuel's Save button disabling itself a second after a value was edited.
+
 # 0.0.31
 
 Use with the 0.0.31 firmware (MSP API 22.13). The firmware update resets every PID and thrust-vector profile to defaults, so note your tune before flashing.
