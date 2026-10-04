@@ -178,7 +178,7 @@ local SIMULATOR_RESPONSE = {
   1,    -- pid_mode
   60, 60, 60,   -- iterm_decay_time_0/1/2 (0.60s, decimals=2)
   35,   -- iterm_decay_limit
-  20, 20, 30,   -- error_limit_0/1/2 (roll, pitch, yaw)
+  45, 45, 60,   -- error_limit_0/1/2 (roll, pitch, yaw)
   50, 50, 100,  -- gyro_cutoff_0/1/2
   15, 15, 20,   -- dterm_cutoff_0/1/2
   22, 22, 22,   -- iterm_relax_level_0/1/2
@@ -240,9 +240,9 @@ local FIELD_META = {
   iterm_decay_time_1 = {min = 1, max = 100, default = 60, decimals = 2, suffix = "s"},
   iterm_decay_time_2 = {min = 1, max = 100, default = 60, decimals = 2, suffix = "s"},
   iterm_decay_limit = {min = 0, max = 250, default = 35, suffix = "°/s"},
-  error_limit_0 = {min = 0, max = 180, default = 20, suffix = "°"},
-  error_limit_1 = {min = 0, max = 180, default = 20, suffix = "°"},
-  error_limit_2 = {min = 0, max = 180, default = 30, suffix = "°"},
+  error_limit_0 = {min = 0, max = 180, default = 45, suffix = "°"},
+  error_limit_1 = {min = 0, max = 180, default = 45, suffix = "°"},
+  error_limit_2 = {min = 0, max = 180, default = 60, suffix = "°"},
   gyro_cutoff_0 = {min = 0, max = 250, default = 50},
   gyro_cutoff_1 = {min = 0, max = 250, default = 50},
   gyro_cutoff_2 = {min = 0, max = 250, default = 100},

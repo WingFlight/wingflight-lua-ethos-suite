@@ -46,9 +46,9 @@ local FIELDS = {
 -- (see tasks/msp/queue.lua) -- one U16 pair per FIELDS entry, in order.
 -- Values are the firmware's defaults (src/main/pg/pid.c resetPidProfile()).
 local SIMULATOR_RESPONSE = {
-  105, 0, 45, 0, 0, 0, 75, 0,
-  105, 0, 45, 0, 0, 0, 75, 0,
-  190, 0, 45, 0, 0, 0, 75, 0,
+  105, 0, 45, 0, 0, 0, 65, 0,
+  105, 0, 45, 0, 0, 0, 65, 0,
+  190, 0, 45, 0, 0, 0, 65, 0,
   35, 0, 35, 0, 35, 0,
 }
 
@@ -64,15 +64,15 @@ local FIELD_META = {
   roll_p = {min = 0, max = 1000, default = 105},
   roll_i = {min = 0, max = 1000, default = 45},
   roll_d = {min = 0, max = 1000, default = 0},
-  roll_f = {min = 50, max = 1000, default = 75},
+  roll_f = {min = 50, max = 1000, default = 65},
   pitch_p = {min = 0, max = 1000, default = 105},
   pitch_i = {min = 0, max = 1000, default = 45},
   pitch_d = {min = 0, max = 1000, default = 0},
-  pitch_f = {min = 50, max = 1000, default = 75},
+  pitch_f = {min = 50, max = 1000, default = 65},
   yaw_p = {min = 0, max = 1000, default = 190},
   yaw_i = {min = 0, max = 1000, default = 45},
   yaw_d = {min = 0, max = 1000, default = 0},
-  yaw_f = {min = 50, max = 1000, default = 75},
+  yaw_f = {min = 50, max = 1000, default = 65},
   roll_b = {min = 0, max = 1000, default = 35},
   pitch_b = {min = 0, max = 1000, default = 35},
   yaw_b = {min = 0, max = 1000, default = 35},
