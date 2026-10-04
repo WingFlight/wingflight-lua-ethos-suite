@@ -1,3 +1,18 @@
+# 0.0.31
+
+Use with the 0.0.31 firmware (MSP API 22.13). The firmware update resets every PID and thrust-vector profile to defaults, so note your tune before flashing.
+Add Prop-Hang Relax (strength, angle, fade-out) to PID Controller.
+Limit master gain to 0-200% on Master Gains, Thrust Vector Master Gains and Adjustments (was 25-1000%). 0% turns the stabilizer off on that axis.
+Reset P and I to the new firmware defaults on the PID and thrust vector PID pages: roll and pitch P 150, I 75; yaw P 310, I 75.
+Set the snap relax hold default to 350 ms, and say that snap relax covers yaw.
+Match the firmware's GPS nav defaults: bearing gain 120, throttle 65%.
+Show the YGE Motor Timing setting correctly, and let YGE models with an HV BEC set BEC Voltage up to 12.0 V.
+Show only the ESCs the model has on 4-way forward programming, and skip the ESC picker when there is only one.
+
+Fix the Tool button's dialogs (for example accelerometer calibration) failing on Cancel or close.
+Stop Ethos aborting the dashboard, the background task or the Ports page with "Max instructions count reached".
+Close the root menu with one press of the physical Back key.
+
 # 0.0.30
 
 Require MSP API 22.13 (0.0.30 firmware). The firmware update resets every PID and thrust-vector profile to defaults, so note your tune before flashing.
