@@ -421,6 +421,19 @@ firmware without the command asked once) and the aggregate (only the
 newest tune, counts added, ratios weighted).
 '''
     ),
+    LuaStep(
+        name='Check that a biased XDFly word never reaches 0xFFFF',
+        script='bin/esc_xdfly_bias/verify_xdfly_bias.lua',
+        rationale=r'''Three XDFly words (gov_p, gov_i, motor_poles) are stored one below the
+value shown, and encode() subtracted that bias without clamping. A 0, or
+an absent key, packed -1, which mspcodec.writeU16 masks to 0xFFFF -- the
+word the ESC answers a write it refused. The codec now clamps at 0, as
+the EdgeTX suite does; OMP and ZTW delegate their writes to this codec,
+so all three vendors are covered. Latent today (the page's floors equal
+the biases). Ported from rotorflight-lua-ethos-suite#2468. Pass
+--self-test to prove every gate check fails with the clamp cut out.
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [
