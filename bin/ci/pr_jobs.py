@@ -576,6 +576,48 @@ the u32 at byte 57.
 Ported from rotorflight-lua-edgetx-suite#2469.
 '''
     ),
+    # Appended after the xdfly-bias port, so this entry is a pure addition rather than
+    # a re-registration of any step above.
+    LuaStep(
+        name="Check that the Throttle Protocol list follows the firmware's enum",
+        script='bin/motor_protocol/verify_motor_protocol.lua',
+        rationale=r'''The Throttle Protocol row offered BRUSHED, which is not a protocol. The
+firmware removed the support and kept slot 4 as a placeholder so the numbers after it
+would not move -- wingflight-firmware src/main/drivers/motor.h:34 still carries
+"// BRUSHED" on PWM_TYPE_RESERVED, and checkMotorProtocolEnabled()
+(drivers/motor.c:155-177) has no case for it, so a FC configured with 4 reports the
+motor output as not enabled. It is dropped from the menu outright: keeping it visible
+when the FC already reports 4 would need the form rebuilt after the payload arrives,
+and field_layout has no re-spec path (buildSingle calls addLine, so a second call
+would put a second row on the screen). Round-trip integrity is preserved and checked --
+decoding slot 4 and saving back commits 4 unchanged.
+
+WHAT IS NOT CLAIMED. This port is not the upstream change verbatim, and the difference
+is the point. Upstream's list had no SRXL2, so its DISABLED entry sat on 10 -- which
+is SRXL2 -- and selecting DISABLED armed a serial ESC link instead of switching the
+motor output off. THIS LIST CARRIED SRXL2 AND HAD DISABLED ON 11 ALREADY, so there
+was no wrong wire value here and the "picking DISABLED writes 11" case is a check, not
+a gate. Nor is a version gate: upstream needed one because SRXL2 requires API 12.10 and
+that suite's floor is 12.09, while this suite's floor is 22.13
+(lib/msp_api_version.lua:26), past every protocol's introduction. A gate that cannot
+refuse anything is a second thing to keep true.
+
+What did survive is five bare `10` literals in the two ESC pages, used as the fallback
+for a motor_pwm_protocol the FC never sent -- and 10 is SRXL2. Measured, not assumed:
+on this side those literals produced the row state the right constants produce, so no
+row was wrongly enabled. What they made possible is worse: the row-state test had to
+grow to cover SRXL2, and at that point a literal 10 would have silently turned
+DISABLED's row state into SRXL2's. All five now read motorConfig.DISABLED_PROTOCOL.
+
+3 of its 25 checks are gates. Pass --self-test to prove that: it restores BRUSHED in
+the codec and the row-state test in the page, and requires all three to go red by
+name. The splice is verified before use, and it also asserts that SRXL2 is STILL
+offered and DISABLED is still 11 -- otherwise a botched splice could reproduce UPSTREAM's
+pre-fix state and the self-test would pass for the wrong reason.
+
+Ported from rotorflight-lua-ethos-suite#2465.
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [

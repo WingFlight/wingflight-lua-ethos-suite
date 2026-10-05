@@ -23,12 +23,51 @@ Requires a running background task and a flight controller connection.
 
 | Setting | What it does |
 | --- | --- |
-| Throttle Protocol | TODO: explain behaviour, displayed units, range and conditions. |
+| Throttle Protocol | Which signal the FC uses to command the ESCs. The list follows the flight controller's own enum - see below. |
 | Update frequency | TODO: explain behaviour, displayed units, range and conditions. |
 | Motor Stop PWM Value | TODO: explain behaviour, displayed units, range and conditions. |
 | 0% Throttle PWM Value | TODO: explain behaviour, displayed units, range and conditions. |
 | 100% Throttle PWM value | TODO: explain behaviour, displayed units, range and conditions. |
 | Unsynced ESC Update | TODO: explain behaviour, displayed units, range and conditions. |
+
+## Throttle Protocol
+
+Every value on this row comes from the flight controller's own enum
+(`drivers/motor.h`), not from a table in the transmitter suite:
+
+| Protocol | Value |
+| --- | --- |
+| PWM | 0 |
+| ONESHOT125 | 1 |
+| ONESHOT42 | 2 |
+| MULTISHOT | 3 |
+| DSHOT150 | 5 |
+| DSHOT300 | 6 |
+| DSHOT600 | 7 |
+| PROSHOT | 8 |
+| CASTLE | 9 |
+| SRXL2 | 10 |
+| DISABLED | 11 |
+
+`DISABLED` switches the motor output off. It is the last entry in the enum.
+
+**The firmware decides what is actually supported by how it was built**, not by its
+version number: DSHOT, CASTLE and SRXL2 are each behind a build flag
+(`USE_DSHOT`, `USE_TELEMETRY_CASTLE`, `USE_SRXL2_ESC`). Nothing in the protocol tells the
+transmitter which flags are set, so if a protocol turns out to be unavailable on your
+flight controller the firmware says so when you try to arm.
+
+`BRUSHED` is **not** offered. That slot was removed from the firmware years ago and
+kept as a placeholder so the numbers after it would not move; a flight controller
+configured with it reports the motor output as not enabled.
+
+> A pilot whose flight controller still has the old reserved value stored sees a
+> Throttle Protocol row that names nothing. Nothing is lost by saving - the value comes
+> back unchanged - but it cannot be read on that row.
+
+The *PWM Rate* and throttle-window rows apply to the protocols that have a PWM rate and a
+throttle window. They are greyed out for the bidirectional serial protocols (CASTLE and
+SRXL2), where those numbers mean nothing.
 
 ## Notes
 
