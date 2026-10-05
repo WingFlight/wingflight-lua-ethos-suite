@@ -225,6 +225,22 @@ function PageRuntime.new(config)
   -- the original's own resolveArmedState() fallback.
   self.isArmed = nil
 
+  -- MSP_API_VERSION's minor, from the snapshot tasks/session.lua already publishes
+  -- on "session.update" (its flush() carries apiVersionMajor/apiVersionMinor).
+  -- nil until the first update arrives.
+  --
+  -- Here so that a page can ask what the FC speaks without reaching into
+  -- tasks/session.lua: nothing outside tasks/ is given a reference to that module's
+  -- private session table BY DESIGN, and no page requires a tasks/* module -- the bus
+  -- is how every other subsystem learns about connection state. So this is a number
+  -- copied out of a snapshot the page was already being handed.
+  --
+  -- Used so far by exactly one thing: app/pages/esc_motors_throttle.lua, which passes
+  -- it to motorConfig.protocolChoices(). On this suite's 22.13 floor that call does
+  -- not filter anything today; the field exists so the page does not have to be
+  -- rewritten when a protocol arrives that does need gating.
+  self.apiVersionMinor = nil
+
   -- Self-caught bug, found live: for multi-source pages, self.data[key]
   -- sub-tables didn't exist until that source's first read completed --
   -- but Ethos calls a just-built field's getValue() on its very first
@@ -928,6 +944,9 @@ function PageRuntime:onSessionUpdate(update)
   if self.disposed then return end
 
   self.isArmed = update.isArmed
+  -- See the declaration above: tasks/session.lua's snapshot carries it, and the
+  -- subscription this handler already exists for is the only sanctioned way in.
+  self.apiVersionMinor = update.apiVersionMinor
   self:updateSaveEnabled()
 
   local previous = self.lastProfile
