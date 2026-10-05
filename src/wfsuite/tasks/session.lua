@@ -114,6 +114,7 @@ local session = {
   gpsFixType = nil, -- 0 = no fix, 1 = fix, 2 = fix + home captured -- see
                      -- tasks/audio_events.lua's announceGpsFix().
   navBlocked = nil, -- lib/system_status.lua NAV_BLOCKED: LOITER/RTH switched on but can't fly
+  gpsSats = nil, -- "GPS Sats" telemetry sensor; nil until the FC broadcasts it
   mspTransport = nil,
   telemetrySlots = nil, -- 40-entry S.Port sensor-slot array, see lib/msp_telemetry_config.lua
   pidProfile = nil,
@@ -418,6 +419,7 @@ local function flush()
     systemConfig = systemStatusCodec.copy(session.systemConfig),
     gpsFixType = session.gpsFixType,
     navBlocked = session.navBlocked,
+    gpsSats = session.gpsSats,
     mspTransport = session.mspTransport,
     pidProfile = session.pidProfile,
     rateProfile = session.rateProfile,
@@ -892,6 +894,7 @@ local function setConnected(value, mspQueue, protocol)
     session.systemConfig = nil
     session.gpsFixType = nil
     session.navBlocked = nil
+    session.gpsSats = nil
     gpsSeenHealthy = false
     session.telemetrySlots = nil
     session.pidProfile = nil
@@ -1098,6 +1101,19 @@ local function updateFlightMode(protocol)
   local flightModeFlags = telemetrySensors.getValue(protocol, "flight_mode")
   if flightModeFlags ~= session.flightModeFlags then
     session.flightModeFlags = flightModeFlags
+    publish()
+  end
+end
+
+-- Satellite count for the dashboard's info panel. Read on the profile
+-- cadence: it changes slowly, and a model without GPS only costs the miss
+-- backoff in lib/telemetry_sensors.lua.
+local function updateGpsSats(protocol)
+  if not telemetrySensors then return end
+  local sats = telemetrySensors.getValue(protocol, "gps_sats")
+  if sats ~= nil then sats = math.floor(sats) end
+  if sats ~= session.gpsSats then
+    session.gpsSats = sats
     publish()
   end
 end
@@ -1394,6 +1410,7 @@ local function wakeup(mspQueue, protocol, transport, simSensors)
       updateProfiles(sensorProtocol)
       updateGovernor(sensorProtocol)
       updateFlightMode(sensorProtocol)
+      updateGpsSats(sensorProtocol)
     end
 
     if shouldRunScheduled("adjustment", ADJUSTMENT_INTERVAL, now) then

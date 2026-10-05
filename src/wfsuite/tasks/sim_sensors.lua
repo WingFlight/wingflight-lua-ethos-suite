@@ -69,6 +69,7 @@ local SENSORS = {
   flight_mode      = {uid = 0x5028, name = "Flight Mode",      unit = nil,                dec = 0,   min = 0,     max = 65536},
   system_status    = {uid = 0x5031, name = "System Status",    unit = nil,                dec = 0,   min = 0,     max = 2147483647},
   system_config    = {uid = 0x5032, name = "System Config",    unit = nil,                dec = 0,   min = 0,     max = 2147483647},
+  gps_sats         = {uid = 0x5033, name = "GPS Sats",         unit = nil,                dec = 0,   min = 0,     max = 50},
 }
 
 -- The packed system_status/system_config words (lib/system_status.lua) are
