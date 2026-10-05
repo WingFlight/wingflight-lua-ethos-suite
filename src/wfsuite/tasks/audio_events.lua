@@ -38,6 +38,15 @@ local timerPreLastBeep = nil
 -- lib/system_alerts.lua rule id -> {reported, pending, since}: the state last
 -- announced, and a change waiting out the rule's debounce.
 local alertState = {}
+-- Setup state (system_status overrideActive): a setup tool such as the
+-- Configurator wizard is holding the model and may force a mode (ANGLE,
+-- PASSTHROUGH). "Setup" is spoken once instead of the forced mode, and
+-- flight-mode callouts pause until it ends. flightModeHeld keeps
+-- previous.flightModeFlags at the mode from before, so leaving setup only
+-- speaks if the real mode differs.
+local SETUP_SETTLE_SECONDS = 1.0
+local pendingModeSince = nil
+local flightModeHeld = false
 
 local SPEAK_WAV_SECONDS = 0.45
 -- Minimum gap between "control limit" callouts while the surfaces keep
@@ -70,8 +79,8 @@ local FLIGHT_MODE_PRIORITY = {
   {bit = 6, file = "gpsrescue.wav"},    -- GPS_RESCUE_MODE_BIT
   {bit = 13, file = "rth.wav"},         -- RTH_MODE_BIT
   {bit = 12, file = "gpsloiter.wav"},   -- LOITER_MODE_BIT
-  {bit = 7, file = "setup.wav"},        -- PASSTHROUGH_MODE_BIT (SETUP)
-  {bit = 10, file = "gyrooff.wav"},     -- MANUAL_MODE_BIT (GYRO OFF)
+  {bit = 7, file = "passthrough.wav"},  -- PASSTHROUGH_MODE_BIT
+  {bit = 10, file = "manual.wav"},      -- MANUAL_MODE_BIT
   {bit = 5, file = "atthold.wav"},      -- ATTHOLD_MODE_BIT
   {bit = 11, file = "autotrim.wav"},    -- AUTOTRIM_MODE_BIT
   {bit = 1, file = "angle.wav"},        -- ANGLE_MODE_BIT
@@ -435,16 +444,47 @@ end
 -- Trainer, etc.) is useful information before arming too, matching this
 -- project's own last-known-good telemetry.lua, which never checked
 -- isArmed for this announcement either.
+local function inSetup()
+  return session.systemStatus ~= nil and session.systemStatus.overrideActive == true
+end
+
 local function announceFlightMode()
+  flightModeHeld = false
   if not events.flight_mode then return end
   if session.connected ~= true then return end
+
+  local setup = inSetup()
+  if setup and previous.setup ~= true then
+    pendingModeSince = nil
+    playFlightMode("setup.wav")
+  end
+  if setup then
+    flightModeHeld = true
+    return
+  end
 
   local value = tonumber(session.flightModeFlags)
   local last = tonumber(previous.flightModeFlags)
   if value == nil or last == nil then return end
   local blocked = tonumber(session.navBlocked) or 0
   local lastBlocked = tonumber(previous.navBlocked) or 0
-  if value == last and blocked == lastBlocked then return end
+  if value == last and blocked == lastBlocked then
+    pendingModeSince = nil
+    return
+  end
+
+  -- Disarmed, a mode change may be a setup tool forcing it, and the setup
+  -- bit comes in a separate telemetry sensor that can arrive a moment later.
+  -- Wait for it before speaking. Armed, setup can't happen: speak at once.
+  if session.isArmed ~= true then
+    local now = os.clock()
+    if pendingModeSince == nil then pendingModeSince = now end
+    if now - pendingModeSince < SETUP_SETTLE_SECONDS then
+      flightModeHeld = true
+      return
+    end
+  end
+  pendingModeSince = nil
   value = effectiveFlightMode(value, blocked)
   last = effectiveFlightMode(last, lastBlocked)
 
@@ -888,8 +928,11 @@ local function rememberCurrent()
   previous.tvProfile = session.tvProfile
   previous.batteryProfile = session.batteryProfile
   previous.governorState = session.governorState
-  previous.flightModeFlags = session.flightModeFlags
-  previous.navBlocked = session.navBlocked
+  if not flightModeHeld then
+    previous.flightModeFlags = session.flightModeFlags
+    previous.navBlocked = session.navBlocked
+  end
+  previous.setup = inSetup()
   previous.gpsFixType = session.gpsFixType
   previous.adjFunction = session.adjFunction
   previous.adjValue = session.adjValue
@@ -914,12 +957,16 @@ function audio_events.wakeup()
     for key in pairs(rollingSamples) do rollingSamples[key] = nil end
     for key in pairs(lastAlertAt) do lastAlertAt[key] = nil end
     clearAlertState()
+    pendingModeSince = nil
+    flightModeHeld = false
     rememberCurrent()
     return
   end
 
   if not initialized then
     initialized = true
+    pendingModeSince = nil
+    flightModeHeld = false
     rememberCurrent()
     -- Force a fresh "no fix" baseline here, unlike every other field
     -- rememberCurrent() just captured: a fix acquired while the link was
