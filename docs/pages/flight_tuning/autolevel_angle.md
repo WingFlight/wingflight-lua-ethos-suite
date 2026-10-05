@@ -15,7 +15,7 @@ settings.
 
 ## Where to find it
 
-*Configuration* → *Flight Tuning* → *Advanced* → *Flight Modes* → *Angle Mode*
+*Configuration* → *Flight Tuning* → *Flight Modes* → *Angle Mode*
 
 Requires a running background task and a flight controller connection. The
 values belong to the current PID profile.

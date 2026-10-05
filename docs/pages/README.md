@@ -28,36 +28,27 @@ is there. The rule is in [.agents/rules/documentation.md](../../.agents/rules/do
 | Tune Advisor | [flight_tuning/tune_advisor.md](flight_tuning/tune_advisor.md) | Requires a running background task and a flight controller connection. | reviewed |
 | Filters | [flight_tuning/filters.md](flight_tuning/filters.md) | Requires a running background task and a flight controller connection. | draft |
 | PID Controller | [flight_tuning/pid_controller.md](flight_tuning/pid_controller.md) | Requires a running background task and a flight controller connection. | draft |
+| PID Bandwidth | [flight_tuning/pid_bandwidth.md](flight_tuning/pid_bandwidth.md) | Requires a running background task and a flight controller connection. | draft |
 | Gain Curves | [flight_tuning/gain_curves.md](flight_tuning/gain_curves.md) | Requires a running background task and a flight controller connection. | draft |
+| Rate Response | [flight_tuning/rates_advanced.md](flight_tuning/rates_advanced.md) | Requires a running background task and a flight controller connection. | draft |
+| Acro Trainer | [flight_tuning/autolevel_trainer.md](flight_tuning/autolevel_trainer.md) | Requires a running background task and a flight controller connection. | draft |
+| Angle Mode | [flight_tuning/autolevel_angle.md](flight_tuning/autolevel_angle.md) | Requires a running background task and a flight controller connection. | reviewed |
+| Att Hold | [flight_tuning/autolevel_attitude_hold.md](flight_tuning/autolevel_attitude_hold.md) | Requires a running background task and a flight controller connection. | draft |
 | PIDs | [flight_tuning/thrust_vector_pids.md](flight_tuning/thrust_vector_pids.md) | Requires a running background task and a flight controller connection. | draft |
 | Flight Feel | [flight_tuning/thrust_vector_master_gains.md](flight_tuning/thrust_vector_master_gains.md) | Requires a running background task and a flight controller connection. | draft |
 | Gain Curves | [flight_tuning/thrust_vector_gain_curves.md](flight_tuning/thrust_vector_gain_curves.md) | Requires a running background task and a flight controller connection. | draft |
 | PID Controller | [flight_tuning/thrust_vector_pid_controller.md](flight_tuning/thrust_vector_pid_controller.md) | Requires a running background task and a flight controller connection. | draft |
 | PID Bandwidth | [flight_tuning/thrust_vector_pid_bandwidth.md](flight_tuning/thrust_vector_pid_bandwidth.md) | Requires a running background task and a flight controller connection. | draft |
 | Attitude / Heading Hold | [flight_tuning/thrust_vector_hold.md](flight_tuning/thrust_vector_hold.md) | Requires a running background task and a flight controller connection. | draft |
-| PID Bandwidth | [flight_tuning/pid_bandwidth.md](flight_tuning/pid_bandwidth.md) | Requires a running background task and a flight controller connection. | draft |
-| Acro Trainer | [flight_tuning/autolevel_trainer.md](flight_tuning/autolevel_trainer.md) | Requires a running background task and a flight controller connection. | draft |
-| Angle Mode | [flight_tuning/autolevel_angle.md](flight_tuning/autolevel_angle.md) | Requires a running background task and a flight controller connection. | reviewed |
-| Att Hold | [flight_tuning/autolevel_attitude_hold.md](flight_tuning/autolevel_attitude_hold.md) | Requires a running background task and a flight controller connection. | draft |
-| Rates | [flight_tuning/rates_advanced.md](flight_tuning/rates_advanced.md) | Requires a running background task and a flight controller connection. | draft |
 
 ## Configuration → Setup
 
 | Page | File | Conditions | Status |
 | --- | --- | --- | --- |
 | Configuration | [setup/configuration.md](setup/configuration.md) | Requires a running background task and a flight controller connection. | draft |
+| Ports | [setup/ports.md](setup/ports.md) | Requires a running background task and a flight controller connection. | draft |
 | Radio Config | [setup/radio_config.md](setup/radio_config.md) | Requires a running background task and a flight controller connection. | draft |
 | Telemetry | [setup/telemetry.md](setup/telemetry.md) | Requires a running background task and a flight controller connection. | draft |
-| Accelerometer | [setup/accelerometer.md](setup/accelerometer.md) | Requires a running background task and a flight controller connection. | draft |
-| Alignment | [setup/alignment.md](setup/alignment.md) | Requires a running background task and a flight controller connection. | draft |
-| Ports | [setup/ports.md](setup/ports.md) | Requires a running background task and a flight controller connection. | draft |
-| Governor | [setup/governor.md](setup/governor.md) | Requires a running background task and a flight controller connection. | reviewed |
-| Mixer | [setup/mixer_config.md](setup/mixer_config.md) | Requires a running background task and a flight controller connection. | reviewed |
-| Mixer Rules | [setup/mixer_rules.md](setup/mixer_rules.md) | Requires a running background task and a flight controller connection. | reviewed |
-| Curves | [setup/curves.md](setup/curves.md) | Requires a running background task and a flight controller connection. | reviewed |
-| GPS Navigation | [setup/gps_nav_config.md](setup/gps_nav_config.md) | Requires a running background task and a flight controller connection. | reviewed |
-| PWM Output | [setup/servos_pwm.md](setup/servos_pwm.md) | Requires a running background task and a flight controller connection. | draft |
-| BUS Output | [setup/servos_bus.md](setup/servos_bus.md) | Requires a running background task and a flight controller connection. Only available when servo bus output is configured. If that check cannot reach the flight controller, it is retried every 5 seconds. | draft |
 | Modes | [setup/modes.md](setup/modes.md) | Requires a running background task and a flight controller connection. | draft |
 | Adjustments | [setup/adjustments.md](setup/adjustments.md) | Requires a running background task and a flight controller connection. | draft |
 | Channel Fallback | [setup/failsafe.md](setup/failsafe.md) | Requires a running background task and a flight controller connection. | draft |
@@ -68,6 +59,14 @@ is there. The rule is in [.agents/rules/documentation.md](../../.agents/rules/do
 | Logging | [setup/blackbox_logging.md](setup/blackbox_logging.md) | Requires a running background task and a flight controller connection. | draft |
 | Status | [setup/blackbox_status.md](setup/blackbox_status.md) | Requires a running background task and a flight controller connection. | draft |
 | Stats | [setup/stats.md](setup/stats.md) | Requires a running background task and a flight controller connection. | draft |
+| Accelerometer | [setup/accelerometer.md](setup/accelerometer.md) | Requires a running background task and a flight controller connection. | draft |
+| Alignment | [setup/alignment.md](setup/alignment.md) | Requires a running background task and a flight controller connection. | draft |
+| GPS Navigation | [setup/gps_nav_config.md](setup/gps_nav_config.md) | Requires a running background task and a flight controller connection. | reviewed |
+| Mixer | [setup/mixer_config.md](setup/mixer_config.md) | Requires a running background task and a flight controller connection. | reviewed |
+| Mixer Rules | [setup/mixer_rules.md](setup/mixer_rules.md) | Requires a running background task and a flight controller connection. | reviewed |
+| Curves | [setup/curves.md](setup/curves.md) | Requires a running background task and a flight controller connection. | reviewed |
+| PWM Output | [setup/servos_pwm.md](setup/servos_pwm.md) | Requires a running background task and a flight controller connection. | draft |
+| BUS Output | [setup/servos_bus.md](setup/servos_bus.md) | Requires a running background task and a flight controller connection. Only available when servo bus output is configured. If that check cannot reach the flight controller, it is retried every 5 seconds. | draft |
 | Battery | [setup/power_battery.md](setup/power_battery.md) | Requires a running background task and a flight controller connection. | draft |
 | Alerts | [setup/power_alerts.md](setup/power_alerts.md) | Requires a running background task and a flight controller connection. | draft |
 | Sources | [setup/power_source.md](setup/power_source.md) | Requires a running background task and a flight controller connection. | draft |
@@ -85,6 +84,7 @@ is there. The rule is in [.agents/rules/documentation.md](../../.agents/rules/do
 | XDFLY | [setup/esc_forward_xdfly.md](setup/esc_forward_xdfly.md) | Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 12). If that read fails, it is retried every 5 seconds. | draft |
 | YGE | [setup/esc_forward_yge.md](setup/esc_forward_yge.md) | Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 9). If that read fails, it is retried every 5 seconds. | draft |
 | ZTW | [setup/esc_forward_ztw.md](setup/esc_forward_ztw.md) | Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 7). If that read fails, it is retried every 5 seconds. | draft |
+| Governor | [setup/governor.md](setup/governor.md) | Requires a running background task and a flight controller connection. | reviewed |
 
 ## System → Tools
 

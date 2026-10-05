@@ -15,7 +15,7 @@ TODO: Explain what this page controls and when a pilot would use it.
 
 ## Where to find it
 
-*Configuration* → *Flight Tuning* → *Advanced* → *PID Controller*
+*Configuration* → *Flight Tuning* → *PID Controller*
 
 Requires a running background task and a flight controller connection.
 

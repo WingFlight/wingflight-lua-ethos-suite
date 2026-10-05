@@ -15,7 +15,7 @@ Assigns a gain curve to each axis's Flight Feel Gain, to Throttle and to Speed. 
 
 ## Where to find it
 
-*Configuration* → *Flight Tuning* → *Advanced* → *Gain Curves*
+*Configuration* → *Flight Tuning* → *Gain Curves*
 
 Requires a running background task and a flight controller connection.
 

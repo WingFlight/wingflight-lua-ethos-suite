@@ -15,7 +15,7 @@ Assigns a gain curve to each axis's thrust-vector Flight Feel Gain, from the sam
 
 ## Where to find it
 
-*Configuration* → *Flight Tuning* → *Advanced* → *Thrust Vector* → *Gain Curves*
+*Configuration* → *Flight Tuning* → *Thrust Vector* → *Gain Curves*
 
 Requires a running background task and a flight controller connection.
 

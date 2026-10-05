@@ -146,38 +146,36 @@ local ROOT_ENTRIES = {
 -- {menuId -> {title=, entries={...}}} -- see app/menu_container.lua's
 -- menuId handling.
 local MENUS = {
-  -- Setup has started growing real entries (Configuration, Radio Config,
-  -- Telemetry, Accelerometer, Alignment, Ports, Mixer, Servos, Controls,
-  -- Power, ESC & Motors, Governor) -- see
-  -- ROOT_ENTRIES' own comment for why the other 4 root tiles
-  -- (Tools/Logs/Settings/Developer) stay empty placeholders for now too.
+  -- Setup is one screen of tiles sorted under group labels, the same way
+  -- ROOT_ENTRIES groups the root menu (see app/menu_container.lua). The
+  -- first group's label becomes the screen header in place of "Setup".
   setup_menu = {
     title = "@i18n(app.modules.hardware_setup.name)@",
     entries = {
-      {title = "@i18n(app.modules.configuration.name)@", icon = lcd.loadMask("app/gfx/configuration.png"), script = "app/pages/configuration.lua"},
-      {title = "@i18n(app.modules.radio_config.name)@", icon = lcd.loadMask("app/gfx/radio_config.png"), script = "app/pages/radio_config.lua"},
-      {title = "@i18n(app.modules.telemetry.name)@", icon = lcd.loadMask("app/gfx/telemetry.png"), script = "app/pages/telemetry.lua"},
-      {title = "@i18n(app.modules.accelerometer.name)@", icon = lcd.loadMask("app/gfx/accelerometer.png"), script = "app/pages/accelerometer.lua"},
-      {title = "@i18n(app.modules.alignment.name)@", icon = lcd.loadMask("app/gfx/alignment.png"), script = "app/pages/alignment.lua"},
-      {title = "@i18n(app.modules.ports.name)@", icon = lcd.loadMask("app/gfx/ports.png"), script = "app/pages/ports.lua"},
-      {title = "@i18n(app.modules.governor.name)@", icon = lcd.loadMask("app/gfx/governor.png"), script = "app/pages/governor.lua"},
-      {title = "@i18n(app.modules.mixer.name)@", icon = lcd.loadMask("app/gfx/mixer_config.png"), script = "app/pages/mixer_config.lua"},
+      {title = "@i18n(app.modules.configuration.name)@", icon = lcd.loadMask("app/gfx/configuration.png"), script = "app/pages/configuration.lua", group = "@i18n(app.menu_section_board_radio)@"},
+      {title = "@i18n(app.modules.ports.name)@", icon = lcd.loadMask("app/gfx/ports.png"), script = "app/pages/ports.lua", group = "@i18n(app.menu_section_board_radio)@"},
+      {title = "@i18n(app.modules.radio_config.name)@", icon = lcd.loadMask("app/gfx/radio_config.png"), script = "app/pages/radio_config.lua", group = "@i18n(app.menu_section_board_radio)@"},
+      {title = "@i18n(app.modules.telemetry.name)@", icon = lcd.loadMask("app/gfx/telemetry.png"), script = "app/pages/telemetry.lua", group = "@i18n(app.menu_section_board_radio)@"},
+      {title = "@i18n(app.menu_section_controls)@", icon = lcd.loadMask("app/gfx/controls.png"), menuId = "controls_menu", group = "@i18n(app.menu_section_board_radio)@"},
+      {title = "@i18n(app.modules.accelerometer.name)@", icon = lcd.loadMask("app/gfx/accelerometer.png"), script = "app/pages/accelerometer.lua", group = "@i18n(app.menu_section_sensors_gps)@"},
+      {title = "@i18n(app.modules.alignment.name)@", icon = lcd.loadMask("app/gfx/alignment.png"), script = "app/pages/alignment.lua", group = "@i18n(app.menu_section_sensors_gps)@"},
+      {title = "@i18n(app.modules.gps_nav_config.name)@", icon = lcd.loadMask("app/gfx/gps_nav_config.png"), script = "app/pages/gps_nav_config.lua", group = "@i18n(app.menu_section_sensors_gps)@"},
+      {title = "@i18n(app.modules.mixer.name)@", icon = lcd.loadMask("app/gfx/mixer_config.png"), script = "app/pages/mixer_config.lua", group = "@i18n(app.menu_section_mixer_servos)@"},
       -- The actual mixer rule table (MSP_MIXER_RULES/MSP_SET_MIXER_RULE)
       -- -- distinct from Mixer above (MSP_MIXER_INPUT, per-axis gain
       -- scaling only). Sits right before Curves since a rule's own Curve
       -- field references that page's Mixer-category pool.
-      {title = "@i18n(app.modules.mixer_rules.name)@", icon = lcd.loadMask("app/gfx/mixer_rules.png"), script = "app/pages/mixer_rules.lua"},
+      {title = "@i18n(app.modules.mixer_rules.name)@", icon = lcd.loadMask("app/gfx/mixer_rules.png"), script = "app/pages/mixer_rules.lua", group = "@i18n(app.menu_section_mixer_servos)@"},
       -- Covers both the Mixer and Gain curve pools (MSP_MIXER_CURVES /
       -- MSP_GAIN_CURVES) -- sits beside Mixer rather than under Advanced
       -- since it's shape-editing for a mixer-adjacent concept, not a PID
       -- tuning field itself (PID Controller only picks WHICH slot is
       -- assigned; this is where the slot's shape gets edited).
-      {title = "@i18n(app.modules.curves.name)@", icon = lcd.loadMask("app/gfx/curves.png"), script = "app/pages/curves.lua"},
-      {title = "@i18n(app.modules.gps_nav_config.name)@", icon = lcd.loadMask("app/gfx/gps_nav_config.png"), script = "app/pages/gps_nav_config.lua"},
-      {title = "@i18n(app.modules.servos.name)@", icon = lcd.loadMask("app/gfx/servos.png"), menuId = "servos_menu"},
-      {title = "@i18n(app.menu_section_controls)@", icon = lcd.loadMask("app/gfx/controls.png"), menuId = "controls_menu"},
-      {title = "@i18n(app.modules.power.name)@", icon = lcd.loadMask("app/gfx/power.png"), menuId = "power_menu"},
-      {title = "@i18n(app.modules.esc_motors.name)@", icon = lcd.loadMask("app/gfx/esc_motors.png"), menuId = "esc_motors_menu"},
+      {title = "@i18n(app.modules.curves.name)@", icon = lcd.loadMask("app/gfx/curves.png"), script = "app/pages/curves.lua", group = "@i18n(app.menu_section_mixer_servos)@"},
+      {title = "@i18n(app.modules.servos.name)@", icon = lcd.loadMask("app/gfx/servos.png"), menuId = "servos_menu", group = "@i18n(app.menu_section_mixer_servos)@"},
+      {title = "@i18n(app.modules.power.name)@", icon = lcd.loadMask("app/gfx/power.png"), menuId = "power_menu", group = "@i18n(app.menu_section_power_motors)@"},
+      {title = "@i18n(app.modules.esc_motors.name)@", icon = lcd.loadMask("app/gfx/esc_motors.png"), menuId = "esc_motors_menu", group = "@i18n(app.menu_section_power_motors)@"},
+      {title = "@i18n(app.modules.governor.name)@", icon = lcd.loadMask("app/gfx/governor.png"), script = "app/pages/governor.lua", group = "@i18n(app.menu_section_power_motors)@"},
     },
   },
   servos_menu = {
@@ -327,22 +325,34 @@ local MENUS = {
   -- surfaced). Wingflight's own Throttle Range Governor is a different
   -- concept entirely and gets its own entry once ported. This used to be
   -- ROOT_ENTRIES itself, flattened onto the tool's true root -- see that
-  -- variable's own comment above for why it moved one level deeper. No
-  -- `group` needed on these entries any more (unlike when they lived at
-  -- the root) -- this menu's own `title` below already becomes the screen
-  -- header when opened via `menuId`.
+  -- variable's own comment above for why it moved one level deeper. Its
+  -- entries carry `group` labels; the first ("Flight Tuning") becomes the
+  -- screen header.
   flight_tuning_menu = {
     title = "@i18n(app.menu_section_flight_tuning)@",
     entries = {
-      {title = "@i18n(app.modules.pids.name)@", icon = lcd.loadMask("app/gfx/pids.png"), script = "app/pages/pids.lua"},
-      {title = "@i18n(app.modules.rates.name)@", icon = lcd.loadMask("app/gfx/rates.png"), script = "app/pages/rates.lua"},
+      {title = "@i18n(app.modules.pids.name)@", icon = lcd.loadMask("app/gfx/pids.png"), script = "app/pages/pids.lua", group = "@i18n(app.menu_section_flight_tuning)@"},
+      {title = "@i18n(app.modules.rates.name)@", icon = lcd.loadMask("app/gfx/rates.png"), script = "app/pages/rates.lua", group = "@i18n(app.menu_section_flight_tuning)@"},
       -- Flight Feel (Master Gain, I-term Decay, I-term Relax) is where pilots start
       -- tuning, so it sits beside PIDs and Rates rather than under Advanced
       -- (see app/pages/master_gains.lua's own header).
-      {title = "@i18n(app.modules.master_gains.name)@", icon = lcd.loadMask("app/gfx/master_gains.png"), script = "app/pages/master_gains.lua"},
+      {title = "@i18n(app.modules.master_gains.name)@", icon = lcd.loadMask("app/gfx/master_gains.png"), script = "app/pages/master_gains.lua", group = "@i18n(app.menu_section_flight_tuning)@"},
       -- Reads what the FC measured in flight and suggests changes to the pages above.
-      {title = "@i18n(app.modules.tune_advisor.name)@", icon = lcd.loadMask("app/gfx/tune_advisor.png"), script = "app/pages/tune_advisor.lua"},
-      {title = "@i18n(app.menu_section_advanced)@", icon = lcd.loadMask("app/gfx/advanced.png"), menuId = "advanced_menu"},
+      {title = "@i18n(app.modules.tune_advisor.name)@", icon = lcd.loadMask("app/gfx/tune_advisor.png"), script = "app/pages/tune_advisor.lua", group = "@i18n(app.menu_section_flight_tuning)@"},
+      -- Advanced used to be a submenu of its own; it is now a group on this
+      -- screen so every tuning page is one tap from Flight Tuning.
+      {title = "@i18n(app.modules.filters.name)@", icon = lcd.loadMask("app/gfx/filters.png"), script = "app/pages/filters.lua", group = "@i18n(app.menu_section_advanced)@"},
+      {title = "@i18n(app.modules.pid_controller.name)@", icon = lcd.loadMask("app/gfx/pid_controller.png"), script = "app/pages/pid_controller.lua", group = "@i18n(app.menu_section_advanced)@"},
+      {title = "@i18n(app.modules.pid_bandwidth.name)@", icon = lcd.loadMask("app/gfx/pid_bandwidth.png"), script = "app/pages/pid_bandwidth.lua", group = "@i18n(app.menu_section_advanced)@"},
+      -- Gain curve assignment, split off Flight Feel as an advanced shaping
+      -- tool (see app/pages/gain_curves.lua).
+      {title = "@i18n(app.modules.gain_curves.name)@", icon = lcd.loadMask("app/gfx/curves.png"), script = "app/pages/gain_curves.lua", group = "@i18n(app.menu_section_advanced)@"},
+      {title = "@i18n(app.modules.rates_advanced.name)@", icon = lcd.loadMask("app/gfx/rates_advanced.png"), script = "app/pages/rates_advanced.lua", group = "@i18n(app.menu_section_advanced)@"},
+      {title = "@i18n(app.modules.autolevel.name)@", icon = lcd.loadMask("app/gfx/autolevel.png"), menuId = "autolevel_menu", group = "@i18n(app.menu_section_advanced)@"},
+      -- FEATURE_THRUST_VECTOR (see app/pages/configuration.lua) is opt-in
+      -- and off by default, but this entry is unconditional, like Flight
+      -- Modes above, which is reachable whichever mode is engaged.
+      {title = "@i18n(app.modules.thrust_vector.name)@", icon = lcd.loadMask("app/gfx/thrust_vector.png"), menuId = "thrust_vector_menu", group = "@i18n(app.menu_section_advanced)@"},
     },
   },
   thrust_vector_menu = {
@@ -362,40 +372,6 @@ local MENUS = {
       {title = "@i18n(app.modules.autolevel.acro_trainer)@", icon = lcd.loadMask("app/gfx/autolevel_trainer.png"), script = "app/pages/autolevel_trainer.lua"},
       {title = "@i18n(app.modules.autolevel.angle_mode)@", icon = lcd.loadMask("app/gfx/autolevel_angle.png"), script = "app/pages/autolevel_angle.lua"},
       {title = "@i18n(app.modules.autolevel.att_hold)@", icon = lcd.loadMask("app/gfx/autolevel_attitude_hold.png"), script = "app/pages/autolevel_attitude_hold.lua"},
-    },
-  },
-  -- Matches the original's own app/modules/manifest.lua `advanced_menu`,
-  -- minus Main Rotor, Tail Rotor and Rescue -- all three heli-only, no
-  -- wingflight equivalent (fixed-wing has no collective pitch, tail
-  -- rotor, or autorotation-rescue mode; MSP_RESCUE_PROFILE and the heli
-  -- fields main_rotor.lua/tail_rotor.lua exposed on MSP_PID_PROFILE are
-  -- either gone from wingflight-firmware entirely or wire-present-but-
-  -- dead -- see lib/msp_pid_profile.lua's header). Relative order still
-  -- matches the manifest's own ordering for what remains.
-  advanced_menu = {
-    title = "@i18n(app.menu_section_advanced)@",
-    entries = {
-      {title = "@i18n(app.modules.filters.name)@", icon = lcd.loadMask("app/gfx/filters.png"), script = "app/pages/filters.lua"},
-      {title = "@i18n(app.modules.pid_controller.name)@", icon = lcd.loadMask("app/gfx/pid_controller.png"), script = "app/pages/pid_controller.lua"},
-      -- Gain curve assignment, split off Flight Feel as an advanced shaping
-      -- tool (see app/pages/gain_curves.lua).
-      {title = "@i18n(app.modules.gain_curves.name)@", icon = lcd.loadMask("app/gfx/curves.png"), script = "app/pages/gain_curves.lua"},
-      -- FEATURE_THRUST_VECTOR (see app/pages/configuration.lua) is opt-in
-      -- and off by default, but this entry is unconditional -- same
-      -- convention every other Advanced entry already follows regardless
-      -- of whether its own mode/feature is currently active (e.g.
-      -- Autolevel is always reachable even when neither Auto Hover nor
-      -- Att Hold is the engaged flight mode).
-      {title = "@i18n(app.modules.thrust_vector.name)@", icon = lcd.loadMask("app/gfx/thrust_vector.png"), menuId = "thrust_vector_menu"},
-      {title = "@i18n(app.modules.pid_bandwidth.name)@", icon = lcd.loadMask("app/gfx/pid_bandwidth.png"), script = "app/pages/pid_bandwidth.lua"},
-      {title = "@i18n(app.modules.autolevel.name)@", icon = lcd.loadMask("app/gfx/autolevel.png"), menuId = "autolevel_menu"},
-      -- Links straight to the page now, not a submenu: Cyclic Behaviour
-      -- (cyclic_ring/cyclic_polarity) and Rate Table (rates_type) were
-      -- both wire-present-but-dead heli-only concepts on wingflight-
-      -- firmware (see lib/msp_rc_tuning.lua's own header) and are gone,
-      -- leaving Advanced as the only surviving entry -- a one-item
-      -- submenu is just an extra tap for nothing.
-      {title = "@i18n(app.modules.rates_advanced.name)@", icon = lcd.loadMask("app/gfx/rates_advanced.png"), script = "app/pages/rates_advanced.lua"},
     },
   },
 }
