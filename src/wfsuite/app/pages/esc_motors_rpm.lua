@@ -11,10 +11,9 @@ local PAGE_TITLE = "@i18n(app.modules.esc_motors.rpm)@"
 local function isDshotProtocol(protocol)
   -- The fallback is DISABLED read from the codec, not a bare `10` -- ten is SRXL2 in
   -- the firmware's enum (lib/msp_motor_config.lua has the transcription), so the old
-  -- literal meant "assume SRXL2" where it meant "assume DISABLED". The range below is
-  -- 5..8, so on this page the two disagree: SRXL2 is not a DShot protocol and DISABLED
-  -- is not either, which is why the row was enabled for a protocol that has no DShot
-  -- telemetry at all. A named constant cannot drift from the enum on its own.
+  -- literal meant "assume SRXL2" where it meant "assume DISABLED". Neither is in the
+  -- 5..8 DShot range below, so the row state was the same either way; a named
+  -- constant cannot drift from the enum on its own.
   protocol = tonumber(protocol) or motorConfig.DISABLED_PROTOCOL
   return protocol >= 5 and protocol <= 8
 end

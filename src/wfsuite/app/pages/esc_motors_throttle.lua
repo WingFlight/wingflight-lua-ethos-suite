@@ -15,13 +15,10 @@ local UNSYNCED = "use_unsynced_pwm"
 
 -- The Throttle Protocol values are named, not inlined.
 --
--- This file used to spell DISABLED as a bare `10` in four places (here twice, in
--- pwmFieldsEnabled(), and in esc_motors_rpm.lua). Ten is SRXL2 in the firmware's enum
--- -- lib/msp_motor_config.lua's header has the transcription -- so every one of those
--- fallbacks enabled the PWM rows for a bidirectional serial protocol that has no PWM
--- rate and no throttle window. The bug was silent because the rows still appeared and
--- still accepted a value; they were simply enabled for the wrong protocol. A named
--- constant cannot drift from the enum on its own.
+-- "No protocol known" used to be a bare `10` here and in esc_motors_rpm.lua. Ten is
+-- SRXL2 in the firmware's enum (lib/msp_motor_config.lua has the transcription), not
+-- DISABLED. It gave the right row state only because the old pwmFieldsEnabled()
+-- happened to disable both; a named constant cannot drift from the enum on its own.
 local DISABLED = motorConfig.DISABLED_PROTOCOL
 local CASTLE = motorConfig.CASTLE_PROTOCOL
 local SRXL2 = motorConfig.SRXL2_PROTOCOL
@@ -32,8 +29,9 @@ end
 
 -- Whether the PWM-rate and throttle-window rows apply.
 --
--- 0..4 are the protocols with a PWM rate and a throttle window; 9 and 10 are the two
--- bidirectional serial ones. 4 is PWM_TYPE_RESERVED, not a protocol -- see
+-- 0..4 are the pulse protocols. CASTLE (9) and SRXL2 (10) are driven as standard 1 ms
+-- PWM too (wingflight-firmware drivers/pwm_output.c, motorPwmDevInit()), so they have
+-- a PWM rate and a throttle window as well. 4 is PWM_TYPE_RESERVED, not a protocol -- see
 -- lib/msp_motor_config.lua -- so it is only reachable when the FC already reports it,
 -- and then the row state it produces is the truth about that FC rather than an offer.
 local function pwmFieldsEnabled(protocol)

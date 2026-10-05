@@ -65,9 +65,12 @@ configured with it reports the motor output as not enabled.
 > Throttle Protocol row that names nothing. Nothing is lost by saving - the value comes
 > back unchanged - but it cannot be read on that row.
 
-The *PWM Rate* and throttle-window rows apply to the protocols that have a PWM rate and a
-throttle window. They are greyed out for the bidirectional serial protocols (CASTLE and
-SRXL2), where those numbers mean nothing.
+*Update frequency* and the three throttle-window rows (*Motor Stop PWM Value*,
+*0% Throttle PWM Value*, *100% Throttle PWM value*) apply to PWM, ONESHOT125, ONESHOT42,
+MULTISHOT, CASTLE and SRXL2, which the firmware drives as pulses - CASTLE and SRXL2 as
+standard 1 ms PWM. They are greyed out for the digital protocols (DSHOT150, DSHOT300,
+DSHOT600, PROSHOT) and for DISABLED. *Unsynced ESC Update* applies to ONESHOT125,
+ONESHOT42 and MULTISHOT only.
 
 ## Notes
 
