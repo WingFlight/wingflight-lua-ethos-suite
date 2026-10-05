@@ -8641,27 +8641,6 @@
           "max_length": 11,
           "reverse_text": false
         },
-        "data_fmt": {
-          "english": "%dm %02ds, %s",
-          "translation": "%dm %02ds, %s",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 13
-        },
-        "collecting": {
-          "english": "collecting",
-          "translation": "collecting",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 10
-        },
-        "paused": {
-          "english": "paused",
-          "translation": "paused",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 6
-        },
         "unsupported": {
           "english": "Needs newer firmware",
           "translation": "Needs newer firmware",
@@ -8670,11 +8649,11 @@
           "reverse_text": false
         },
         "clear_prompt": {
-          "english": "Clear the collected flight data?",
-          "translation": "Clear the collected flight data?",
+          "english": "Erase the saved flights?",
+          "translation": "Erase the saved flights?",
           "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 32
+          "max_length": 24,
+          "reverse_text": false
         },
         "response": {
           "english": "Response",
@@ -8824,11 +8803,11 @@
           "reverse_text": false
         },
         "why_more": {
-          "english": "Data builds up while you fly in rate mode.",
-          "translation": "Data builds up while you fly in rate mode.",
+          "english": "Each flight in rate mode is saved when you disarm.",
+          "translation": "Each flight in rate mode is saved when you disarm.",
           "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 42
+          "max_length": 50,
+          "reverse_text": false
         },
         "why_uneven": {
           "english": "The response varies too much to judge. Common in 3D.",
@@ -8906,6 +8885,20 @@
           "needs_translation": true,
           "reverse_text": false,
           "max_length": 37
+        },
+        "data_flights_fmt": {
+          "english": "%dm %02ds, %d/%d flights",
+          "translation": "%dm %02ds, %d/%d flights",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 24
+        },
+        "no_aircraft": {
+          "english": "Connect to a model first",
+          "translation": "Connect to a model first",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 24
         }
       }
     },
