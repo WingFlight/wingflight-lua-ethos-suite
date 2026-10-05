@@ -32,10 +32,9 @@ local WRITE_COMMAND = 222
 -- The list this file used to carry had SRXL2, and its numbers happened to match the
 -- enum -- but BRUSHED sat on slot 4, which is not a protocol at all (see
 -- RESERVED_BRUSHED below), so the list offered a value the firmware reports as not
--- enabled. The names are constants rather than inlined for the same reason: there were
--- four bare `10`s across this file and the two pages that read it, and on this side a
--- bare `10` read as SRXL2 while it was meant as DISABLED -- so the pages' fallback for
--- a field the FC never answered enabled the PWM rows for a protocol that has none.
+-- enabled. The names are constants rather than inlined for the same reason: the two
+-- pages that read this file spelled their "no protocol known" fallback as a bare `10`,
+-- which is SRXL2, while it was meant as DISABLED.
 local DISABLED = 11
 local CASTLE = 9
 local SRXL2 = 10
