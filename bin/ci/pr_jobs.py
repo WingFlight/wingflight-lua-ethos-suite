@@ -421,6 +421,31 @@ firmware without the command asked once) and the aggregate (only the
 newest tune, counts added, ratios weighted).
 '''
     ),
+    LuaStep(
+        name='Check the Hobbywing V5 OPTO layout',
+        script='bin/esc_hw5_opto/verify_hw5_opto.lua',
+        rationale=r'''The HW5 codec chose its field layout by a profile key, and only one OPTO
+profile existed, so every other OPTO model fell through to the default
+layout: an OPTO ESC has no BEC byte, so every field from item 5 up was
+read and written one byte off, on a page that looked normal. The layout
+is now chosen by variant (OPTO found in the firmware string or either
+model string), and an OPTO model gets no BEC Voltage row. Ported from
+rotorflight-lua-ethos-suite#2463. Pass --self-test to prove all 12 gate
+checks fail on the pre-fix codec.
+'''
+    ),
+    LuaStep(
+        name='Check the Hobbywing V5 Startup Time conversion',
+        script='bin/esc_hw5_startup/verify_hw5_startup.lua',
+        rationale=r'''Startup Time is declared 4..25 s, but decode() handed the page the raw
+byte, which runs 0..21, so the shortest start-up showed "0s" on a row
+that begins at 4. The codec now adds 4 on read and takes it off on
+write (clamped to 21), matching the EdgeTX page the HW5 layouts come
+from, so a save writes back the byte the ESC sent. Ported from
+rotorflight-lua-ethos-suite#2464. Pass --self-test to prove all 6 gate
+checks fail on the pre-fix codec.
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [
