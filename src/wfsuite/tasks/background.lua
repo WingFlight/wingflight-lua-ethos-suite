@@ -86,7 +86,7 @@
 
 local bus, settingsStore, debugLog, mspCommon, mspTransportSelect, Scheduler,
       telemetrySensors, mspQueue, session, logging, audioEvents, audioSwitches,
-      scheduler
+      scheduler, overrideKeepalive
 
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 
@@ -371,6 +371,9 @@ local function taskInit()
   pendingMspRequests = {}
   bus = requireModule("lib/bus.lua")
   bus.subscribe("msp.request", onMspRequestReceived)
+  -- Re-sends timed bench overrides (servo/mode) so they lapse on the FC if
+  -- the radio goes away. Idle (one next() check) when nothing is held.
+  overrideKeepalive = requireModule("lib/override_keepalive.lua")
 end
 
 local function taskWakeup()
@@ -395,6 +398,7 @@ local function taskWakeup()
   mspQueue:processQueue()
   scheduler:wakeup()
   local now = os.clock()
+  overrideKeepalive.tick(now)
   logMemoryUsage(now)
   if not lastTaskStatusAt or (now - lastTaskStatusAt) >= TASK_STATUS_INTERVAL then
     publishTaskStatus(now)

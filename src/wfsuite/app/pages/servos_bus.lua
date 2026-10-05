@@ -89,12 +89,22 @@ local function unpackFlags(data)
   data.geometry = (flags == 2 or flags == 3) and 1 or 0
 end
 
+-- Overrides go through the codec's hold/release so that, on firmware with
+-- timed overrides (API 22.14+), they lapse if the radio or link goes away.
 local function publishOverrideAll(value)
-  bus.publish("msp.request", servoOverride.buildWriteAllMessage(value))
+  if value == servoOverride.OVERRIDE_OFF then
+    servoOverride.releaseAll()
+  else
+    servoOverride.holdAll(value)
+  end
 end
 
 local function publishOverride(index, value)
-  bus.publish("msp.request", servoOverride.buildWriteMessage(index, value))
+  if value == servoOverride.OVERRIDE_OFF then
+    servoOverride.release(index)
+  else
+    servoOverride.hold(index, value)
+  end
 end
 
 local openList
