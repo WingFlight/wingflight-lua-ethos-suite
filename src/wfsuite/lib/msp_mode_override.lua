@@ -18,7 +18,7 @@
 --          count x U8 permanent box id. Replaces the whole override.
 --          Timeout 0 clears it; count 0 holds the setup state (a setup tool
 --          in charge, arming blocked, radios show SETUP) with no mode forced. Refused while armed, for more than 4 modes, or for a
---          mode other than ANGLE, ATT HOLD, SETUP or GYRO OFF.
+--          mode other than ANGLE, ATT HOLD, PASSTHROUGH or MANUAL.
 --   read:  U16 ms left before it lapses, U8 count, count x U8 permanent box id.
 --
 -- Self-caches via package.loaded (same mechanism lib/bus.lua uses).
@@ -45,7 +45,7 @@ local msp_mode_override = {
   BOX_ANGLE = 1,
   BOX_ATTHOLD = 6,
   BOX_PASSTHROUGH = 12,
-  BOX_GYRO_OFF = 59,
+  BOX_MANUAL = 59,
   DEFAULT_TIMEOUT_MS = DEFAULT_TIMEOUT_MS,
 }
 

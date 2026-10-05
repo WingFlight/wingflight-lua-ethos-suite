@@ -80,7 +80,7 @@ local FLIGHT_MODE_PRIORITY = {
   {bit = 13, file = "rth.wav"},         -- RTH_MODE_BIT
   {bit = 12, file = "gpsloiter.wav"},   -- LOITER_MODE_BIT
   {bit = 7, file = "passthrough.wav"},  -- PASSTHROUGH_MODE_BIT
-  {bit = 10, file = "gyrooff.wav"},     -- MANUAL_MODE_BIT (GYRO OFF)
+  {bit = 10, file = "manual.wav"},      -- MANUAL_MODE_BIT
   {bit = 5, file = "atthold.wav"},      -- ATTHOLD_MODE_BIT
   {bit = 11, file = "autotrim.wav"},    -- AUTOTRIM_MODE_BIT
   {bit = 1, file = "angle.wav"},        -- ANGLE_MODE_BIT

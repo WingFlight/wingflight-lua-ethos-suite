@@ -564,9 +564,9 @@
     "needs_translation": false
   },
   {
-    "file": "events/mode/gyrooff.wav",
-    "english": "Gyro off",
-    "translation": "Gyro off",
+    "file": "events/mode/manual.wav",
+    "english": "Manual",
+    "translation": "Manual",
     "needs_translation": false
   },
   {
