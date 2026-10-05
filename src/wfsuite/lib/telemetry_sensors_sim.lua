@@ -55,6 +55,9 @@ return {
   flight_mode = {
     {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5028},
   },
+  gps_sats = {
+    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5033},
+  },
   adj_f = {
     {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5010},
   },

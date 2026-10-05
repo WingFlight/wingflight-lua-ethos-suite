@@ -60,6 +60,10 @@ return {
   flight_mode = {
     {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x1201},
   },
+  -- wingflight-firmware telemetry/crsf.c GPS_SATS.
+  gps_sats = {
+    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x1121},
+  },
   adj_f = {
     {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x1221},
   },

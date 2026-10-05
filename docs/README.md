@@ -5,6 +5,9 @@ Each entry is marked **draft** or **reviewed**. Drafts are scaffolds, not comple
 operating instructions. Reviewed means checked against the current Lua source;
 it does not imply testing on a radio or every firmware version.
 
+The dashboard widget's toolbar and info panel are described in
+[Dashboard controls](dashboard-controls.md).
+
 ## Contributor guides
 
 - [System architecture](system-architecture.md)
