@@ -15,8 +15,9 @@
 -- Wire layout verified against wingflight-firmware's own serializer
 -- (src/main/msp/msp.c, MSP2_WING_MODE_OVERRIDE / MSP2_WING_SET_MODE_OVERRIDE):
 --   write: U16 timeout ms (FC clamps to 500-30000), U8 count,
---          count x U8 permanent box id. count 0 clears. Replaces the whole
---          override. Refused while armed, for more than 4 modes, or for a
+--          count x U8 permanent box id. Replaces the whole override.
+--          Timeout 0 clears it; count 0 holds the setup state (a setup tool
+--          in charge, arming blocked, radios show SETUP) with no mode forced. Refused while armed, for more than 4 modes, or for a
 --          mode other than ANGLE, ATT HOLD, SETUP or GYRO OFF.
 --   read:  U16 ms left before it lapses, U8 count, count x U8 permanent box id.
 --
@@ -43,7 +44,7 @@ local msp_mode_override = {
   -- you force.
   BOX_ANGLE = 1,
   BOX_ATTHOLD = 6,
-  BOX_SETUP = 12,
+  BOX_PASSTHROUGH = 12,
   BOX_GYRO_OFF = 59,
   DEFAULT_TIMEOUT_MS = DEFAULT_TIMEOUT_MS,
 }
@@ -99,7 +100,8 @@ end
 
 -- Keeps a set of modes forced while a page needs them:
 --
---   modeOverride.hold({modeOverride.BOX_SETUP}, onRefused)   -- page opens
+--   modeOverride.hold({}, onRefused)                         -- setup state only
+--   modeOverride.hold({modeOverride.BOX_PASSTHROUGH}, onRefused)
 --   modeOverride.release()                                   -- page closes (always)
 --
 -- Returns false without sending on firmware older than API 22.14. Re-sent
@@ -122,7 +124,7 @@ end
 function msp_mode_override.release()
   if not keepalive.isActive(HOLD_KEY) then return end
   keepalive.clear(HOLD_KEY)
-  bus.publish("msp.request", msp_mode_override.buildWriteMessage(EMPTY, DEFAULT_TIMEOUT_MS))
+  bus.publish("msp.request", msp_mode_override.buildWriteMessage(EMPTY, 0))
 end
 
 function msp_mode_override.isHeld()

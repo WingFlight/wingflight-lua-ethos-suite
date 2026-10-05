@@ -63,10 +63,12 @@ local function session(minor, connected)
 end
 
 -- Wire format
-local p = modeOverride.encode({modeOverride.BOX_SETUP}, 3000)
+local p = modeOverride.encode({modeOverride.BOX_PASSTHROUGH}, 3000)
 check("mode write: U16 timeout, U8 count, ids", bytes(p) == "184,11,1,12", bytes(p))
 p = modeOverride.encode({}, 10000)
-check("mode write: empty list clears", bytes(p) == "16,39,0", bytes(p))
+check("mode write: empty list holds the setup state", bytes(p) == "16,39,0", bytes(p))
+p = modeOverride.encode({}, 0)
+check("mode write: timeout 0 clears", bytes(p) == "0,0,0", bytes(p))
 local msg = modeOverride.buildWriteMessage({modeOverride.BOX_ANGLE}, 500)
 check("mode write is an MSPv2 write", msg.command == 0x5F1B and msg.isWrite == true)
 local data = modeOverride.decode({0x10, 0x27, 2, 1, 12, offset = 4})
@@ -84,7 +86,7 @@ session(13)
 sent = {}
 servoOverride.holdAll(servoOverride.OVERRIDE_CENTER)
 check("22.13: servo override sent untimed", #sent == 1 and bytes(sent[1].payload) == "0,0")
-check("22.13: modes can't be forced", modeOverride.hold({modeOverride.BOX_SETUP}) == false and #sent == 1)
+check("22.13: modes can't be forced", modeOverride.hold({modeOverride.BOX_PASSTHROUGH}) == false and #sent == 1)
 clock = 110
 keepalive.tick(clock)
 check("22.13: nothing re-sent", #sent == 1)
@@ -94,7 +96,7 @@ servoOverride.releaseAll()
 session(14)
 sent = {}
 local refused
-check("22.14: mode hold accepted", modeOverride.hold({modeOverride.BOX_SETUP}, function(r) refused = r end))
+check("22.14: mode hold accepted", modeOverride.hold({modeOverride.BOX_PASSTHROUGH}, function(r) refused = r end))
 check("mode hold sends at once", #sent == 1 and bytes(sent[1].payload) == "16,39,1,12")
 servoOverride.hold(3, servoOverride.OVERRIDE_CENTER)
 check("servo hold sends timed", #sent == 2 and bytes(sent[2].payload) == "3,0,0,16,39", bytes(sent[2].payload))
@@ -116,7 +118,7 @@ lastOf(modeOverride.WRITE_COMMAND).errorHandler("max_retries")
 check("a link error keeps the holds", modeOverride.isHeld() and refused == nil)
 
 modeOverride.release()
-check("mode release clears on the FC", bytes(last().payload) == "16,39,0" and not modeOverride.isHeld())
+check("mode release clears on the FC", bytes(last().payload) == "0,0,0" and not modeOverride.isHeld())
 servoOverride.releaseAll()
 check("servo release all sends OFF untimed", bytes(last().payload) == "209,7")
 local before = #sent
@@ -131,6 +133,11 @@ before = #sent
 clock = 300
 keepalive.tick(clock)
 check("a refused hold stops refreshing", #sent == before)
+
+modeOverride.hold({})
+check("an empty hold keeps the setup state with nothing forced",
+  modeOverride.isHeld() and bytes(lastOf(modeOverride.WRITE_COMMAND).payload) == "16,39,0")
+modeOverride.release()
 
 print(string.format("%d checks, %d failed", checks, failures))
 os.exit(failures == 0 and 0 or 1)
