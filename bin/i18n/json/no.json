@@ -10126,6 +10126,139 @@
         "max_length": 3,
         "reverse_text": false
       },
+      "info_armed": {
+        "english": "Armed",
+        "translation": "Armed",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 5
+      },
+      "info_arming": {
+        "english": "Arming",
+        "translation": "Arming",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 6
+      },
+      "info_blocked": {
+        "english": "Blocked",
+        "translation": "Blocked",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 7
+      },
+      "info_controller": {
+        "english": "Controller",
+        "translation": "Controller",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 10
+      },
+      "info_fix": {
+        "english": "Fix",
+        "translation": "Fix",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 3
+      },
+      "info_fix_home": {
+        "english": "Home set",
+        "translation": "Home set",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 8
+      },
+      "info_fix_none": {
+        "english": "No fix",
+        "translation": "No fix",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 6
+      },
+      "info_fix_ok": {
+        "english": "Fix",
+        "translation": "Fix",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 3
+      },
+      "info_gps": {
+        "english": "GPS",
+        "translation": "GPS",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 3
+      },
+      "info_gps_lost": {
+        "english": "Not responding",
+        "translation": "Not responding",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 14
+      },
+      "info_link": {
+        "english": "Link",
+        "translation": "Link",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 4
+      },
+      "info_mode": {
+        "english": "Flight mode",
+        "translation": "Flight mode",
+        "needs_translation": true,
+        "max_length": 11,
+        "reverse_text": false
+      },
+      "info_not_connected": {
+        "english": "Not connected",
+        "translation": "Not connected",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 13
+      },
+      "info_pack": {
+        "english": "Pack",
+        "translation": "Pack",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 4
+      },
+      "info_profiles_fmt": {
+        "english": "PID %d  Rate %d  Batt %d",
+        "translation": "PID %d  Rate %d  Batt %d",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 24
+      },
+      "info_ready": {
+        "english": "Ready",
+        "translation": "Ready",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 5
+      },
+      "info_sats": {
+        "english": "Satellites",
+        "translation": "Satellites",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 10
+      },
+      "info_used": {
+        "english": "Used",
+        "translation": "Used",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 4
+      },
+      "info_used_fmt": {
+        "english": "%d%% used",
+        "translation": "%d%% used",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 9
+      },
       "link_max": {
         "english": "Link Max",
         "translation": "Link Maks",
@@ -10139,6 +10272,83 @@
         "needs_translation": false,
         "max_length": 8,
         "reverse_text": false
+      },
+      "mode_angle": {
+        "english": "Angle",
+        "translation": "Angle",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 5
+      },
+      "mode_att_hold": {
+        "english": "Att Hold",
+        "translation": "Att Hold",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 8
+      },
+      "mode_autotrim": {
+        "english": "Autotrim",
+        "translation": "Autotrim",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 8
+      },
+      "mode_failsafe": {
+        "english": "Failsafe",
+        "translation": "Failsafe",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 8
+      },
+      "mode_gps_rescue": {
+        "english": "GPS Rescue",
+        "translation": "GPS Rescue",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 10
+      },
+      "mode_loiter": {
+        "english": "Loiter",
+        "translation": "Loiter",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 6
+      },
+      "mode_manual": {
+        "english": "Manual",
+        "translation": "Manual",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 6
+      },
+      "mode_normal": {
+        "english": "Normal",
+        "translation": "Normal",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 6
+      },
+      "mode_passthrough": {
+        "english": "Passthrough",
+        "translation": "Passthrough",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 11
+      },
+      "mode_rth": {
+        "english": "RTH",
+        "translation": "RTH",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 3
+      },
+      "mode_trainer": {
+        "english": "Trainer",
+        "translation": "Trainer",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 7
       },
       "startup_no_link": {
         "english": "No telemetry link detected",

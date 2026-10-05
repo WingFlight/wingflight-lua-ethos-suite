@@ -67,6 +67,10 @@ return {
   flight_mode = {
     {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5121},
   },
+  -- wingflight-firmware telemetry/smartport.c GPS_SATS.
+  gps_sats = {
+    {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x0860},
+  },
   adj_f = {
     {category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5110},
   },
