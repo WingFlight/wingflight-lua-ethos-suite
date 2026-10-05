@@ -371,6 +371,26 @@ checks fail with the fix cut back out.
 '''
     ),
     LuaStep(
+        name='Check that unedited ESC bytes survive a save',
+        script='bin/esc_raw_bytes/verify_esc_raw_bytes.lua',
+        rationale=r'''The Bluejay and AM32 forward-programming codecs built the write payload
+from the parsed fields alone, and the flight controller merges nothing:
+MSP_SET_ESC_PARAMETERS (wingflight-firmware msp.c:3565-3576) copies the
+66 (Bluejay) or 50 (AM32) bytes sent over the ESC's block and commits
+them. So every byte encode() did not reproduce was a byte the ESC was
+told changed: Bluejay rewrote 655 of the possible startup-power,
+PWM-frequency and PWM-threshold values on a save with nothing edited,
+and AM32 248 of 256 timing-advance values (two firmware generations
+number the same positions differently). encode() now starts from the
+ESC's own bytes and writes a field only when the pilot moved it; a
+write with no ESC bytes behind it is refused rather than sent as zeros.
+The exhaustive check runs every byte position against all 256 values
+through the real codecs, pages and page runtime. Ported from
+rotorflight-lua-ethos-suite#2461. Pass --self-test to prove all 14 gate
+checks fail with the pre-fix codecs spliced back in.
+'''
+    ),
+    LuaStep(
         name='Check that a short FlyRotor block is refused, not zero-filled',
         script='bin/esc_flyrotor_payload/verify_flyrotor_payload.lua',
         rationale=r'''The FlyRotor block is 56 bytes by the flight controller's own compiled

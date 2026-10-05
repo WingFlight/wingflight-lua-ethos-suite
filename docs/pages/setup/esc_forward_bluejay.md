@@ -19,6 +19,25 @@ TODO: Explain what this page controls and when a pilot would use it.
 
 Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 1). If that read fails, it is retried every 5 seconds.
 
+## What Save writes
+
+Save writes the ESC's whole 66-byte parameter block, and only the rows you moved
+are changed in it.
+
+The block carries more than this page has a row for: vendor bytes, reserved flags
+and legacy encodings that a configurator app wrote. Those are read back from the
+ESC and sent straight back out again, byte for byte, so a save that changed one
+row leaves every other byte exactly as the ESC reported it. A row the page *does*
+show is handled the same way — if you did not move it, its byte goes back
+unchanged, even where the number on screen is not a direct copy of the byte.
+
+Two rows are one decision: *96→48 % Threshold* must not sit above
+*48→24 % Threshold*. Lowering *48→24 %* pulls *96→48 %* down with it, and
+*96→48 %* is capped at *48→24 %*.
+
+The bytes beyond those 66 are the flight controller's own business and are left
+alone.
+
 ## Settings
 
 | Setting | What it does |
