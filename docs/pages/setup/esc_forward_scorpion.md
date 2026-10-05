@@ -31,6 +31,16 @@ TODO: Verify persistence, reboot behaviour, profile scope and any restrictions i
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than
 firmware defaults; wire values may need scaling before display.
 
+- The line under the title names the model, the firmware version and the ESC's own
+  **serial number**, so two ESCs of the same model can be told apart. An ESC that
+  reports `0` for it shows no serial at all: a printed `S/N 0` would read like data
+  and identify nothing.
+- The middle part of that line used to read `FW` followed by eight hex digits. It
+  was not a firmware version: those bytes are the ESC's motor-startup sound and the
+  lower half of its serial number. The firmware version is the plain number after it,
+  and it was always there — so nothing that meant anything moved, and a number with
+  no meaning behind it is gone.
+
 ## Choosing the ESC
 
 If the flight controller reports more than one ESC, this page lists them and you

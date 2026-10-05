@@ -442,8 +442,84 @@ byte, which runs 0..21, so the shortest start-up showed "0s" on a row
 that begins at 4. The codec now adds 4 on read and takes it off on
 write (clamped to 21), matching the EdgeTX page the HW5 layouts come
 from, so a save writes back the byte the ESC sent. Ported from
-rotorflight-lua-ethos-suite#2464. Pass --self-test to prove all 6 gate
+rotorflight-lua-edgetx-suite#2464. Pass --self-test to prove all 6 gate
 checks fail on the pre-fix codec.
+'''
+    ),
+    LuaStep(
+        name='Check the YGE ESCs can be told apart by their serial number',
+        script='bin/esc_parameters_yge/verify_yge_serial.lua',
+        rationale=r'''lib/msp_esc_parameters_yge.lua decodes the ESC's own serial number -- WIRE_FIELDS
+carries {"serial_number", "u32"} -- and summaryFor() printed two parts, the model
+label and the firmware version. A pilot with four YGE ESCs had no way to tell them
+apart on the screen. The EdgeTX suite shows it as the `S/N:` part of its subheader
+(rotorflight-lua-edgetx-suite src/rfsuite/ui/controls.lua:335-356).
+
+Both decisions follow the sibling suite rather than argue for themselves, which its
+getEscVersion() settles in one line:
+
+    local sn = getUInt(buffer, {29, 30, 31, 32})
+    return sn ~= 0 and tostring(sn) or ""
+
+Decimal, and nothing printed for a zero -- "S/N 0" would read like data and
+identify nothing. Those indices also settle the offset, which looks two bytes out
+from here and is not: that page carries `local mspHeaderBytes = 2` and its getUInt
+adds it to every index, so 29 + 2 = 31, which is where serial_number starts in this
+suite. Verified here against the shipped fixture, not against a comment.
+
+The serial is display only. encode() writes every WIRE_FIELD from the table
+page_runtime hands it, and the page drops the module on dispose, so the number is
+neither written nor held; the harness pins the first half by pressing the pilot's
+own Save and reading the wire.
+
+3 of the harness's 12 checks go red without the fix. Four that looked like gates
+are checks instead, and the harness says which: a codec that shows no serial at all
+also shows no "S/N 0", raises nothing on a nil, and already wrote the ESC's own
+serial bytes back unchanged.
+
+Ported from rotorflight-lua-edgetx-suite#2469.
+'''
+    ),
+    LuaStep(
+        name='Check the Scorpion ESCs can be told apart, and the word labelled FW was not one',
+        script='bin/esc_parameters_scorpion/verify_scorpion_serial.lua',
+        rationale=r'''Bytes 57..62 of the Scorpion block were carried as three anonymous U16s named
+padding_1, padding_2 and padding_3, and the summary line read two byte offsets out of
+the raw block by hand:
+
+    return string.format("%s / FW %08X / v%d", model,
+      uintFromRaw(data, {55, 56, 57, 58}),
+      uintFromRaw(data, {61, 62}))
+
+The sibling suite names those bytes, and the widths add up exactly -- 4 + 2 = the 6
+bytes the three U16s occupied:
+
+    rotorflight-lua-edgetx-suite src/rfsuite/tasks/msp/api/esc_parameters_scorpion.lua
+    ... {"motor_startup_sound","U16"}, {"serial_number","U32"},
+        {"firmware_version","U16"}, {"soft_start_time","U16"}, ...
+
+So "FW %08X" was assembled from motor_startup_sound (55-56) and the LOW HALF of
+serial_number (57-58) -- a number with nothing behind it, shown on the page since
+the codec was written. Nothing that meant anything goes away with it: the version
+was already on the line as "v%d" from bytes 61-62, which that list calls
+firmware_version. That page has NO header compensation, unlike the YGE one, so its
+byte numbers and this suite's are the same numbers.
+
+The reference prints the serial in decimal and nothing for a zero, so both decisions
+follow it. uintFromRaw had no caller left afterwards and is removed rather than left
+defined: an unused helper in a codec is an invitation to reach for byte offsets
+again, which is how the FW word came to be labelled wrong.
+
+4 of the harness's 14 checks go red without the change. Two that look like gates are
+checks instead, and the harness says which: the field-list parity check compares two
+transcriptions and never reads the codec, and "two ESCs that differ only in serial do
+not render the same line" was ALREADY true before the change, because the word
+labelled FW was built from bytes that include the low half of the serial -- true for
+the wrong reason, which makes it useless as a gate. The gate that ties the naming
+claim to the code is the fixture round-trip: the serial the codec decodes has to be
+the u32 at byte 57.
+
+Ported from rotorflight-lua-edgetx-suite#2469.
 '''
     ),
 ]
