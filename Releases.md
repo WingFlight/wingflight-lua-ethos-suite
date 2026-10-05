@@ -1,3 +1,19 @@
+# 0.0.33
+
+Use with the 0.0.33 firmware (MSP API 22.14). Flashing keeps your settings.
+Let go of servos held for centring on the PWM and bus servo pages if the radio or link goes away (0.0.33 firmware).
+Announce "Setup" while a setup tool holds the model, instead of the modes it forces, and pause flight-mode callouts until it ends. The SETUP ACTIVE alert replaces TEST OVERRIDE ACTIVE.
+Announce the raw-stick mode as "Passthrough" and GYRO OFF as "Manual", matching the firmware.
+
+Save the Tune Advisor statistics to the radio on each disarm, and base the Tune Advisor page on the last 5 flights flown on the current tune. Clear also erases the saved flights.
+Add a slide-down info panel to the dashboard (slide down, or the toolbar's Info tile): link, flight mode, arming and its reasons, profiles, BEC voltage, blackbox and battery, plus GPS fix and satellites when the model has a GPS.
+Sort the Setup and Flight Tuning tiles under group labels. Flight Tuning's Advanced pages move into an Advanced group on the Flight Tuning screen, and the advanced rates page is renamed Rate Response.
+Show the ESC serial number on the YGE and Scorpion pages. Scorpion no longer shows a meaningless FW number.
+Remove BRUSHED from the Throttle Protocol list.
+
+Fix ESC forward-programming saves changing settings the pilot did not touch: Bluejay and AM32 write back the ESC's own bytes, and a short FlyRotor or YGE parameter block is refused instead of being written with zeros.
+Fix Hobbywing V5 OPTO models reading and writing every setting from item 5 one byte off, and Startup Time showing 0-21 instead of 4-25 s.
+
 # 0.0.32
 
 Use with the 0.0.32 firmware (MSP API 22.13). The firmware update resets every PID, thrust-vector and rate profile to defaults, so note your tune and rates before flashing.
