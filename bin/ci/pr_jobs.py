@@ -391,6 +391,26 @@ checks fail with the pre-fix codecs spliced back in.
 '''
     ),
     LuaStep(
+        name='Check that a short FlyRotor block is refused, not zero-filled',
+        script='bin/esc_flyrotor_payload/verify_flyrotor_payload.lua',
+        rationale=r'''The FlyRotor block is 56 bytes by the flight controller's own compiled
+page table (wingflight-firmware esc_sensor.c:1933-1934, four pages of
+22 + 12 + 10 + 10 plus the 2-byte header), and the FC hands it over only
+once every page is cached, so a shorter reply is a truncated read, not
+a smaller layout. lib/mspcodec.lua reads past the end as 0, and the
+codec did not check the length: a 40-byte reply opened an editor whose
+unseen ADV and OTHER settings were zero, and Save wrote those zeros to
+the ESC (flyParamCommit writes every page that differs). decode() now
+refuses a short block, encode() refuses a table that is not a decoded
+one, and the length guard is summed from the same widths as the layout.
+The layout is walked against the firmware page table and the round trip
+is exhaustive (56 positions x 256 values). Ported from
+rotorflight-lua-ethos-suite#2462 (open upstream at the time of the
+port). Pass --self-test to prove all 8 gate checks fail with the
+pre-fix codec spliced back in.
+'''
+    ),
+    LuaStep(
         name='Check the Tune Advisor history on disarm',
         script='bin/tests/tune_history.lua',
         rationale=r'''The FC keeps its tune advisor statistics in RAM; the radio saves each
