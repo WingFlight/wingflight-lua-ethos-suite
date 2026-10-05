@@ -1400,11 +1400,11 @@
       },
       "rates_advanced": {
         "name": {
-          "english": "Rates",
-          "max_length": 5,
-          "needs_translation": false,
-          "translation": "תעריפים",
-          "reverse_text": true
+          "english": "Rate Response",
+          "max_length": 13,
+          "needs_translation": true,
+          "translation": "Rate Response",
+          "reverse_text": false
         },
         "menu_advanced": {
           "english": "Advanced",
@@ -8908,6 +8908,34 @@
       "needs_translation": false,
       "reverse_text": true,
       "max_length": 8
+    },
+    "menu_section_board_radio": {
+      "english": "Board & Radio",
+      "translation": "Board & Radio",
+      "needs_translation": true,
+      "reverse_text": false,
+      "max_length": 13
+    },
+    "menu_section_sensors_gps": {
+      "english": "Sensors & GPS",
+      "translation": "Sensors & GPS",
+      "needs_translation": true,
+      "reverse_text": false,
+      "max_length": 13
+    },
+    "menu_section_mixer_servos": {
+      "english": "Mixer & Servos",
+      "translation": "Mixer & Servos",
+      "needs_translation": true,
+      "reverse_text": false,
+      "max_length": 14
+    },
+    "menu_section_power_motors": {
+      "english": "Power & Motors",
+      "translation": "Power & Motors",
+      "needs_translation": true,
+      "reverse_text": false,
+      "max_length": 14
     },
     "curve_none": {
       "english": "None",

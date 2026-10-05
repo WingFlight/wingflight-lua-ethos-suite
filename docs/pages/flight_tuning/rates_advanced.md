@@ -1,12 +1,12 @@
 ---
-title: "Rates"
-sidebar_label: "Rates"
+title: "Rate Response"
+sidebar_label: "Rate Response"
 sidebar_position: 70
 documentation_status: draft
 source: app/pages/rates_advanced.lua
 ---
 
-# Rates
+# Rate Response
 
 > Draft scaffold. Extracted labels may be incomplete or out of order. Behaviour,
 > displayed units, defaults and save effects require source review.
@@ -15,7 +15,7 @@ TODO: Explain what this page controls and when a pilot would use it.
 
 ## Where to find it
 
-*Configuration* → *Flight Tuning* → *Advanced* → *Rates*
+*Configuration* → *Flight Tuning* → *Rate Response*
 
 Requires a running background task and a flight controller connection.
 

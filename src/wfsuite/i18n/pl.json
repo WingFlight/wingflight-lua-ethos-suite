@@ -319,6 +319,13 @@
       "reverse_text": false,
       "translation": "Zaawans"
     },
+    "menu_section_board_radio": {
+      "english": "Board & Radio",
+      "max_length": 13,
+      "needs_translation": true,
+      "reverse_text": false,
+      "translation": "Board & Radio"
+    },
     "menu_section_controls": {
       "english": "Controls",
       "max_length": 8,
@@ -332,6 +339,27 @@
       "needs_translation": false,
       "reverse_text": false,
       "translation": "Strojenie lotu"
+    },
+    "menu_section_mixer_servos": {
+      "english": "Mixer & Servos",
+      "max_length": 14,
+      "needs_translation": true,
+      "reverse_text": false,
+      "translation": "Mixer & Servos"
+    },
+    "menu_section_power_motors": {
+      "english": "Power & Motors",
+      "max_length": 14,
+      "needs_translation": true,
+      "reverse_text": false,
+      "translation": "Power & Motors"
+    },
+    "menu_section_sensors_gps": {
+      "english": "Sensors & GPS",
+      "max_length": 13,
+      "needs_translation": true,
+      "reverse_text": false,
+      "translation": "Sensors & GPS"
     },
     "menu_section_tools": {
       "english": "Tools",
@@ -7217,11 +7245,11 @@
           "translation": "Zaawansowane"
         },
         "name": {
-          "english": "Rates",
-          "max_length": 5,
-          "needs_translation": false,
+          "english": "Rate Response",
+          "max_length": 13,
+          "needs_translation": true,
           "reverse_text": false,
-          "translation": "Stawki"
+          "translation": "Rate Response"
         },
         "pitch": {
           "english": "Pitch",

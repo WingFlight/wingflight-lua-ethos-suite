@@ -15,7 +15,7 @@ TODO: Explain what this page controls and when a pilot would use it.
 
 ## Where to find it
 
-*Configuration* → *Flight Tuning* → *Advanced* → *Thrust Vector* → *PID Bandwidth*
+*Configuration* → *Flight Tuning* → *Thrust Vector* → *PID Bandwidth*
 
 Requires a running background task and a flight controller connection.
 

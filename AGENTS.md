@@ -91,8 +91,10 @@ from the pre-rewrite architecture (see Section 11).
 
 Rules:
 - Edit `app/tool.lua`'s `MENUS` table directly.
-- Don't leave a single-entry submenu: link straight to the page instead
-  (see `advanced_menu`'s "Rates Advanced" entry for the pattern).
+- Don't leave a single-entry submenu: link straight to the page instead.
+- To sort a crowded screen, give its entries a `group` label rather than
+  adding submenus (see `setup_menu` and `flight_tuning_menu`). The first
+  group's label becomes the screen header.
 - `docs/menu-structure.md` describes the current static menu;
   `docs/pages/README.md` is the generated page documentation index.
 
