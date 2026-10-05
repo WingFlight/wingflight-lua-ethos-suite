@@ -421,6 +421,22 @@ firmware without the command asked once) and the aggregate (only the
 newest tune, counts added, ratios weighted).
 '''
     ),
+    LuaStep(
+        name='Check the Throttle Protocol list against the firmware enum',
+        script='bin/motor_protocol/verify_motor_protocol.lua',
+        rationale=r'''The protocol values are transcribed from wingflight-firmware's
+drivers/motor.h enum and named in lib/msp_motor_config.lua. The Throttle
+and ESC RPM pages fell back to a bare 10 for "no protocol known" -- and
+10 is SRXL2 -- so they now read DISABLED (11) from the codec. BRUSHED is
+a reserved slot the firmware does not accept, so it is no longer
+offered, and SRXL2 now enables the PWM-rate and throttle-window rows as
+CASTLE does (both are driven as 1 ms PWM). SRXL2 needs no version gate
+here: it arrived at API 22.2 and the suite's floor is 22.13. Port of
+rotorflight-lua-ethos-suite#2465, adapted: that suite also had DISABLED
+itself on 10, which wingflight's list never did. Pass --self-test to
+prove all 4 gate checks fail on wingflight's pre-fix code.
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [

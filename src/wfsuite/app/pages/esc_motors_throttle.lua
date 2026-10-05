@@ -13,18 +13,32 @@ local MINTHROTTLE = "minthrottle"
 local MAXTHROTTLE = "maxthrottle"
 local UNSYNCED = "use_unsynced_pwm"
 
+-- The Throttle Protocol values are named, not inlined: "no protocol known" used
+-- to be a bare 10 here and in esc_motors_rpm.lua, and 10 is SRXL2 (see the enum in
+-- lib/msp_motor_config.lua).
+local DISABLED = motorConfig.DISABLED_PROTOCOL
+local CASTLE = motorConfig.CASTLE_PROTOCOL
+local SRXL2 = motorConfig.SRXL2_PROTOCOL
+
+local function protocolOf(runtime)
+  return tonumber(runtime.data.motor_pwm_protocol) or DISABLED
+end
+
+-- Whether the PWM-rate and throttle-window rows apply: 0..4, and the two
+-- protocols the firmware drives as standard 1 ms PWM -- CASTLE and SRXL2
+-- (pwmMotorConfig() in wingflight-firmware drivers/pwm_output.c). SRXL2 was
+-- missing here. 4 is PWM_TYPE_RESERVED, only reachable when the FC already
+-- reports it.
 local function pwmFieldsEnabled(protocol)
-  protocol = tonumber(protocol or 10) or 10
-  return protocol <= 4 or protocol == 9
+  return protocol <= 4 or protocol == CASTLE or protocol == SRXL2
 end
 
 local function unsyncedEnabled(protocol)
-  protocol = tonumber(protocol or 10) or 10
   return protocol >= 1 and protocol <= 4
 end
 
 local function refreshProtocolFields(runtime)
-  local protocol = tonumber(runtime.data.motor_pwm_protocol or 10) or 10
+  local protocol = protocolOf(runtime)
   local pwmEnabled = runtime.loaded and pwmFieldsEnabled(protocol) and not runtime.activeDialog
   local unsynced = runtime.loaded and unsyncedEnabled(protocol) and not runtime.activeDialog
   if runtime.data.use_unsynced_pwm == nil then runtime.data.use_unsynced_pwm = 0 end
@@ -52,7 +66,7 @@ local function open(opts)
       refreshProtocolFields(runtime)
     end,
     onWakeup = function(rt)
-      local protocol = tonumber(rt.data.motor_pwm_protocol or 10) or 10
+      local protocol = protocolOf(rt)
       if protocol ~= lastProtocol then
         lastProtocol = protocol
         refreshProtocolFields(rt)

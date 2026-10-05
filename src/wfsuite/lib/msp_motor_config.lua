@@ -10,19 +10,59 @@ local mspcodec = requireModule("lib/mspcodec.lua")
 local READ_COMMAND = 131
 local WRITE_COMMAND = 222
 
+-- The wire values, transcribed from the firmware's own enum -- wingflight-firmware
+-- src/main/drivers/motor.h:
+--
+--   typedef enum {
+--       PWM_TYPE_STANDARD = 0,
+--       PWM_TYPE_ONESHOT125,        1
+--       PWM_TYPE_ONESHOT42,         2
+--       PWM_TYPE_MULTISHOT,         3
+--       PWM_TYPE_RESERVED,  // BRUSHED   4   <- a reserved slot, see RESERVED_BRUSHED
+--       PWM_TYPE_DSHOT150,          5
+--       PWM_TYPE_DSHOT300,          6
+--       PWM_TYPE_DSHOT600,          7
+--       PWM_TYPE_PROSHOT1000,       8
+--       PWM_TYPE_CASTLE_LINK,       9
+--       PWM_TYPE_SRXL2,            10
+--       PWM_TYPE_DISABLED,         11
+--       PWM_TYPE_MAX
+--   } motorPwmProtocolTypes_e;
+--
+-- The values the pages test are named rather than inlined: the pages used to
+-- spell "no protocol known" as a bare 10, a number carried over from a list
+-- without SRXL2 -- and 10 is SRXL2. (Rotorflight's suite also had DISABLED itself
+-- on 10, so selecting it wrote SRXL2; this list already had SRXL2, so only the
+-- page fallbacks were wrong here. rotorflight-lua-ethos-suite#2465.)
+local DISABLED = 11
+local CASTLE = 9
+local SRXL2 = 10
+local RESERVED_BRUSHED = 4
+
+-- SRXL2 is offered unconditionally. It reached wingflight-firmware at API 22.2
+-- (f69ec2928, "Add support for Spektrum SRXL2 ESC", #51), and this suite refuses
+-- to operate below 22.13 (lib/msp_api_version.lua), so every FC that can reach
+-- this page has it. Rotorflight gates it on its own API 12.10; that gate has no
+-- counterpart here. As with DSHOT and CASTLE, the firmware's real gate is a build
+-- flag (USE_SRXL2_ESC in checkMotorProtocolEnabled(), drivers/motor.c) that no MSP
+-- message reports, so a target built without it refuses SRXL2 at arm time.
+--
+-- BRUSHED is not a protocol. Slot 4 is PWM_TYPE_RESERVED, kept so the numbers
+-- after it would not move, and checkMotorProtocolEnabled() has no case for it, so
+-- it is not offered. A FC already storing 4 keeps it: the field returns the
+-- stored value unchanged and a save with the row untouched writes 4 back.
 local PROTOCOL_CHOICES = {
   {"PWM", 0},
   {"ONESHOT125", 1},
   {"ONESHOT42", 2},
   {"MULTISHOT", 3},
-  {"BRUSHED", 4},
   {"DSHOT150", 5},
   {"DSHOT300", 6},
   {"DSHOT600", 7},
   {"PROSHOT", 8},
-  {"CASTLE", 9},
-  {"SRXL2", 10},
-  {"DISABLED", 11},
+  {"CASTLE", CASTLE},
+  {"SRXL2", SRXL2},
+  {"DISABLED", DISABLED},
 }
 
 local ON_OFF_CHOICES = {
@@ -121,6 +161,10 @@ local msp_motor_config = {
   WRITE_COMMAND = WRITE_COMMAND,
   FIELD_META = FIELD_META,
   PROTOCOL_CHOICES = PROTOCOL_CHOICES,
+  DISABLED_PROTOCOL = DISABLED,
+  CASTLE_PROTOCOL = CASTLE,
+  SRXL2_PROTOCOL = SRXL2,
+  RESERVED_BRUSHED_PROTOCOL = RESERVED_BRUSHED,
   ON_OFF_CHOICES = ON_OFF_CHOICES,
 }
 
