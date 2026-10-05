@@ -71,7 +71,7 @@ local clock = 0
 os.clock = function() return clock end
 
 local MCU = "abc123"
-local HISTORY = "LOGS:/wfsuite/telemetry/" .. MCU .. "/tune/history.csv"
+local HISTORY = "LOGS:/wfsuite/tune/" .. MCU .. "/history.csv"
 
 local handlers, requests
 local function load()
@@ -135,10 +135,14 @@ do
   local _, commas = r[1]:gsub(",", "")
   local _, rowCommas = r[2]:gsub(",", "")
   check("rows have as many columns as the header", commas == rowCommas, commas .. " vs " .. rowCommas)
-  check("the folder is named for the Logs page", #iniWrites == 1
+  check("the aircraft is named beside its history", #iniWrites == 1
+    and iniWrites[1][1] == "LOGS:/wfsuite/tune/" .. MCU .. "/logs.ini"
     and iniWrites[1][2].model.name == "Wing")
-  check("the history is not listed as a flight log",
-    files["LOGS:/wfsuite/telemetry/" .. MCU .. "/history.csv"] == nil)
+  local inTelemetry = nil
+  for path in pairs(files) do
+    if path:find("/telemetry/", 1, true) then inTelemetry = path end
+  end
+  check("nothing lands among the flight logs", inTelemetry == nil, inTelemetry)
 
   update({isArmed = false})
   check("a disarm is captured once", #requests == 0, #requests .. " requests")

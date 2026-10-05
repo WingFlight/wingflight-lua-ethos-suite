@@ -54,8 +54,9 @@ The suggestions follow these rules:
   so they can be improved without a firmware update.
 - The measurements live in the flight controller's memory and are lost at power-off. So the radio keeps a
   copy: each time you disarm, the background task reads all three axes and adds them to
-  `LOGS:/wfsuite/telemetry/<aircraft>/tune/history.csv` on the radio's SD card, one row per axis, in the
-  same aircraft folder as the flight logs. This happens whether or not this page is open. A flight with
+  `LOGS:/wfsuite/tune/<aircraft>/history.csv` on the radio's SD card, one row per axis. `<aircraft>` is the
+  same flight controller ID that names the flight log folders, and a `logs.ini` beside the history holds the
+  model name. This happens whether or not this page is open. Clear does not touch the history. A flight with
   no new rate flight adds nothing. The figures in each row are the flight controller's running totals, so
   a change in P, F, B, Relax or RC Rate, or a drop in `flight_seconds`, marks where a new set of
   measurements began. A disarm while the link is down is saved once the radio reconnects, provided the
