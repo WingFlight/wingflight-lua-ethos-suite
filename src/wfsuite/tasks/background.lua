@@ -326,6 +326,10 @@ local loadSteps = {
     logging = assert(loadfile("tasks/logging.lua"))(bus, settingsStore, debugLog)
   end,
   function()
+    -- Event-driven off "session.update": no handle or scheduler job to keep
+    assert(loadfile("tasks/tune_history.lua"))(bus)
+  end,
+  function()
     audioEvents = assert(loadfile("tasks/audio_events.lua"))(bus, settingsStore)
   end,
   function()
