@@ -370,6 +370,17 @@ rotorflight-lua-ethos-suite#2460. Pass --self-test to prove all 5 gate
 checks fail with the fix cut back out.
 '''
     ),
+    LuaStep(
+        name='Check the Tune Advisor history on disarm',
+        script='bin/tests/tune_history.lua',
+        rationale=r'''The FC keeps its tune advisor statistics in RAM; the radio saves each
+flight on disarm, clears the FC, and the page combines the last 5 flights
+on the current tune. Pins the capture (one flight per disarm, then a
+clear; 5 flights kept; a disarm during a link loss captured on reconnect;
+firmware without the command asked once) and the aggregate (only the
+newest tune, counts added, ratios weighted).
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [
