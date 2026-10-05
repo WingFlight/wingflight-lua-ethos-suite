@@ -19,6 +19,26 @@ TODO: Explain what this page controls and when a pilot would use it.
 
 Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 1). If that read fails, it is retried every 5 seconds.
 
+## What Save writes
+
+Save writes the ESC's whole 50-byte parameter block, and only the rows you moved
+are changed in it.
+
+The block carries more than this page has a row for: the governor's PID terms, the
+EEPROM bookkeeping and reserved bytes that a vendor tool wrote. Those are read
+back from the ESC and sent straight back out again, byte for byte, so a save that
+changed one row leaves every other byte exactly as the ESC reported it. A row the
+page *does* show is handled the same way — if you did not move it, its byte goes
+back unchanged, even where the number on screen is not a direct copy of the byte.
+
+*Timing Advance* is the one worth calling out. Two generations of AM32 firmware
+number the same four positions differently — `0..3` and `10, 18, 26, 34, 42` — and
+the suite writes back whichever one your ESC reported, so a save on newer firmware
+does not quietly re-time your motor on older numbering.
+
+The bytes beyond those 50 are the flight controller's own business and are left
+alone.
+
 ## Settings
 
 | Setting | What it does |

@@ -298,6 +298,25 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/esc_target_selector/verify_esc_target_selector.lua
 
+      # The Bluejay and AM32 forward-programming codecs built the write payload
+      # from the parsed fields alone, and the flight controller merges nothing:
+      # MSP_SET_ESC_PARAMETERS (wingflight-firmware msp.c:3565-3576) copies the
+      # 66 (Bluejay) or 50 (AM32) bytes sent over the ESC's block and commits
+      # them. So every byte encode() did not reproduce was a byte the ESC was
+      # told changed: Bluejay rewrote 655 of the possible startup-power,
+      # PWM-frequency and PWM-threshold values on a save with nothing edited,
+      # and AM32 248 of 256 timing-advance values (two firmware generations
+      # number the same positions differently). encode() now starts from the
+      # ESC's own bytes and writes a field only when the pilot moved it; a
+      # write with no ESC bytes behind it is refused rather than sent as zeros.
+      # The exhaustive check runs every byte position against all 256 values
+      # through the real codecs, pages and page runtime. Ported from
+      # rotorflight-lua-ethos-suite#2461. Pass --self-test to prove all 14 gate
+      # checks fail with the pre-fix codecs spliced back in.
+      - name: Check that unedited ESC bytes survive a save
+        if: success() || failure()
+        run: lua5.4 bin/esc_raw_bytes/verify_esc_raw_bytes.lua
+
       # The FC keeps its tune advisor statistics in RAM; the radio saves each
       # flight on disarm, clears the FC, and the page combines the last 5 flights
       # on the current tune. Pins the capture (one flight per disarm, then a
