@@ -27,6 +27,11 @@ Requires a running background task and a flight controller connection. Lit only 
 
 ## Notes
 
+- The line under the title names the model, the firmware version and the ESC's
+  own **serial number**, so two ESCs of the same model can be told apart. An ESC
+  that reports `0` for it shows no serial at all: a printed `S/N 0` would read
+  like data and identify nothing. Ported from rotorflight-lua-ethos-suite#2469.
+
 TODO: Verify persistence, reboot behaviour, profile scope and any restrictions in
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than
 firmware defaults; wire values may need scaling before display.

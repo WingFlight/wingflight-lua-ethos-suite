@@ -284,6 +284,77 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/esc_parameters_yge/verify_yge_bec12v.lua
 
+      # WIRE_FIELDS carries {"serial_number", "u32"} and the block is 58 bytes,
+      # so the block already held the ESC's own serial -- and summaryFor printed two
+      # parts, the model label and the firmware version. A pilot with four YGE ESCs
+      # had no way to tell them apart on the screen. The line now names the serial
+      # too, which is the whole of #2455.
+      #
+      # Three of the harness's 12 checks go red without the fix, and the third is the
+      # one worth reading first: two ESCs that differ only in serial number must not
+      # render the same line. That cannot be satisfied by a number written into the
+      # codec. The other nine are registered as checks rather than gates on purpose --
+      # four of them were gates in the first version, and the self-test said what that
+      # was worth: a codec showing no serial at all also shows no "S/N 0" and raises
+      # nothing on a nil, so those four asserted the fix without being able to detect
+      # it.
+      #
+      # Two decisions look arguable and are not, because the sibling suite settles
+      # both. rotorflight-lua-edgetx-suite .../escmfg/yge/init.lua's getEscVersion()
+      # is
+      #
+      #     local sn = getUInt(buffer, {29, 30, 31, 32})
+      #     return sn ~= 0 and tostring(sn) or ""
+      #
+      # -- decimal, and nothing for a zero. So a serial of 0 is left out ("S/N 0"
+      # would read like data and identify nothing) and the base is decimal. Those
+      # indices also settle an offset that looks two bytes wrong and is not: that page
+      # carries `local mspHeaderBytes = 2` and its getUInt adds it to every index, so
+      # 29 + 2 = 31, which is where serial_number starts here.
+      #
+      # Ported from rotorflight-lua-ethos-suite#2469. Pass --self-test to prove all 3
+      # gate checks fail with the serial number cut back out.
+      - name: Check the YGE serial number in the summary line
+        if: success() || failure()
+        run: lua5.4 bin/esc_parameters_yge/verify_yge_serial.lua
+
+      # Bytes 57..62 of the Scorpion block were carried as three anonymous
+      # U16s named padding_1, padding_2 and padding_3, and the summary line read two
+      # byte offsets out of the raw block by hand:
+      #
+      #     return string.format("%s / FW %08X / v%d", model,
+      #       uintFromRaw(data, {55, 56, 57, 58}),
+      #       uintFromRaw(data, {61, 62}))
+      #
+      # The sibling suite names those bytes, and the widths add up exactly -- 4 + 2 =
+      # the 6 bytes the three U16s occupied:
+      #
+      #     rotorflight-lua-edgetx-suite src/rfsuite/tasks/msp/api/esc_parameters_scorpion.lua
+      #     ... {"motor_startup_sound","U16"}, {"serial_number","U32"},
+      #         {"firmware_version","U16"}, {"soft_start_time","U16"}, ...
+      #
+      # So "FW %08X" was assembled from motor_startup_sound (55-56) and the LOW HALF
+      # of serial_number (57-58). The page has been showing that number since the codec
+      # was written. Nothing that meant anything goes away with it: the version was
+      # already on the line as "v%d" from bytes 61-62, which that list calls
+      # firmware_version.
+      #
+      # 4 of the harness's 14 checks go red without the change. Two that look like
+      # gates are deliberately not: the field-list parity check compares two
+      # transcriptions and never reads the codec, and "two ESCs that differ only in
+      # serial do not render the same line" was ALREADY true, because the word labelled
+      # FW was built from bytes including the low half of the serial -- true for the
+      # wrong reason, which makes it useless as a gate. The gate that ties the naming
+      # claim to the code is the fixture round-trip: the serial the codec decodes has
+      # to be the u32 at byte 57, read out of the shipped fixture and out of the page's
+      # own decoded table.
+      #
+      # Ported from rotorflight-lua-ethos-suite#2469. Pass --self-test to prove all 4
+      # gate checks fail with the change cut back out.
+      - name: Check the Scorpion serial number and the field names
+        if: success() || failure()
+        run: lua5.4 bin/esc_parameters_scorpion/verify_scorpion_serial.lua
+
       # Every 4-way forward-programming page opens on
       # app/pages/esc_forward_4way.lua, which built all four ESC rows and greyed
       # out the surplus, so a single-ESC model saw three dead lines. It now builds

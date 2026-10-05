@@ -36,6 +36,11 @@ Requires a running background task and a flight controller connection. Lit only 
   at **8.4 V** on the ones that do not. The ceiling follows the ESC that answered;
   an ESC this page has no entry for is treated as an 8.4 V one.
 - The *BEC Voltage* row is **hidden** on an Opto model, which has no BEC.
+- The line under the title names the model, the firmware version and the ESC's
+  own **serial number**, so two ESCs of the same model can be told apart --
+  which is what you want when one of four behaves differently. An ESC that
+  reports `0` for it shows no serial at all: a printed `S/N 0` would read like
+  data and identify nothing. Ported from rotorflight-lua-ethos-suite#2469.
 
 ### 12 V BEC and the HV-BEC flag
 
