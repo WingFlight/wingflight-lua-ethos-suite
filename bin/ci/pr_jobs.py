@@ -411,6 +411,60 @@ pre-fix codec spliced back in.
 '''
     ),
     LuaStep(
+        name='Check that the biased ESC words never reach 0xFFFF',
+        script='bin/esc_xdfly_bias/verify_xdfly_bias.lua',
+        rationale=r'''Three of the twenty-one XDFly block's words are stored one below the number
+the page shows (FIELD_OFFSETS: gov_p 1, gov_i 1, motor_poles 1), and encode()
+subtracted the bias without clamping the result. A value of 0 therefore packed
+0 - 1 = -1, and mspcodec.writeU16 MASKS rather than clamps -- toByte() is
+math_floor(value) % 256 (lib/mspcodec.lua:87-89) -- so both bytes came out 0xFF.
+
+0xFFFF is not an arbitrary number here. It is what the ESC answers a write it
+refused, and the firmware says so: wingflight-firmware
+src/main/sensors/esc_sensor.c:3819 -- "when setting a param and the ESC responds
+with 0xFFFF, setting the param was not successful".
+
+WHAT IS NOT CLAIMED. The page cannot produce a value below the bias:
+FIELD_META's min equals the bias for all three fields, and field_layout.lua
+hands that straight to form.addNumberField, so this is a latent defect, not an
+observed one. Two things keep it worth fixing rather than documenting:
+`data and data[key] or 0` packs 0 for an ABSENT key, which lands on 0xFFFF by
+itself, and encode() is a library function that every writer reaches, not the
+widget alone.
+
+OMP and ZTW are driven too. Both requireModule() this codec and delegate
+buildWriteMessage to it (omp:8/:43-46, ztw:8/:43-46), so a clamp landing in only
+the XDFLY file would leave two vendors broken -- and pass 2 of the self-test has
+to seed the base key with the sabotaged codec before loading them, or
+requireModule() re-reads the repaired file off disk and both vendor gates stay
+green.
+
+8 of its 22 checks are gates. Pass --self-test to prove that: it cuts the clamp out
+of encode() and requires all eight to go red, comparing verdicts BY NAME. It
+verifies its own cut five ways first. Two of those verifications exist because
+this file got it wrong first, and both failures were silent -- pass 2 ran the
+FIXED codec twice and reported every gate green:
+  * "  for i = 1, #EDIT_FIELDS do" appears in decode() AND in encode(), so a cut
+    anchored on the loop alone replaced the wrong one and left the clamp standing.
+  * the codec's own self-cache guard is keyed "wfsuite.lib.msp_esc_parameters_xdfly",
+    so loading the sabotaged copy under a different key cleared nothing and the
+    guard returned the fixed module.
+
+Three checks are deliberately NOT gates, and the file says which: the
+FIELD_OFFSETS round-trip over the legal range (the pre-fix code got that right),
+the whole-block sweep, and the two vendors' signature bytes. The sweep is the
+subtle one: without the clamp, -1 masks to 0xFFFF inside the SAME two bytes the
+clamp writes, so it cannot tell the defect from the fix. A gate that cannot fail
+is worse than no check at all.
+
+Ported from rotorflight-lua-ethos-suite#2468. NOT ported with it: the EdgeTX half.
+This repository's own EdgeTX sibling carries the same bias table and no clamp
+either (wingflight-lua-edgetx src/SCRIPTS/WF/MSP/mspEscXdfly.lua:151-152, and
+its writeU16 masks with bit32.band at MSP/mspHelper.lua:37-41), which is a
+separate piece of work in another repository.
+'''
+    ),
+    LuaStep(
         name='Check the Tune Advisor history on disarm',
         script='bin/tests/tune_history.lua',
         rationale=r'''The FC keeps its tune advisor statistics in RAM; the radio saves each

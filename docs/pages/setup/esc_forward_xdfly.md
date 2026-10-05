@@ -31,6 +31,16 @@ TODO: Verify persistence, reboot behaviour, profile scope and any restrictions i
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than
 firmware defaults; wire values may need scaling before display.
 
+Three of this ESC's words are stored one below the number shown here — *Governor
+P-Gain*, *Governor I-Gain* and *Motor Poles* — and the page translates to and from
+the ESC's own number. A value below that offset is now written as the offset
+rather than as a negative number. It matters because **0xFFFF is what the ESC
+answers a write it refused**: a negative word reaches the ESC as 0xFFFF, so the
+save would come back looking like a refusal rather than like the value. The rows
+cannot produce such a value today — their lowest selectable value is the offset
+itself — so this is a guard on the wire format, not a change you can see on this
+page. OMP and ZTW use the same block and get the same guard.
+
 ## Choosing the ESC
 
 If the flight controller reports more than one ESC, this page lists them and you

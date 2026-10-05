@@ -141,7 +141,22 @@ local function encode(data)
   for i = 1, #EDIT_FIELDS do
     local key = EDIT_FIELDS[i]
     local value = data and data[key] or 0
-    mspcodec.writeU16(payload, value - (FIELD_OFFSETS[key] or 0))
+    -- A biased word is never taken below zero. 0xFFFF is what the ESC answers a
+    -- write it refused, and mspcodec.writeU16 masks rather than clamps (toByte()
+    -- is math_floor(value) % 256), so an unclamped 0 on gov_p, gov_i or
+    -- motor_poles -- the three fields with a positive bias -- subtracts down to
+    -- -1 and packs 0xFFFF, which reads back as a refusal rather than as the
+    -- value. The widget's floor in FIELD_META currently equals the bias and so
+    -- hides this, but encode() is a library function that every writer reaches,
+    -- and `data and data[key] or 0` packs 0 for an absent key on its own.
+    -- The sibling EdgeTX suite has the same bias table and no clamp either
+    -- (src/SCRIPTS/WF/MSP/mspEscXdfly.lua:151-152, and its writeU16 masks with
+    -- bit32.band at MSP/mspHelper.lua:37-41), so this is a fix on both sides
+    -- rather than a divergence from it. Upstream rotorflight's EdgeTX suite
+    -- clamps the equivalent subtraction, which is where the rule comes from.
+    local wire = value - (FIELD_OFFSETS[key] or 0)
+    if wire < 0 then wire = 0 end
+    mspcodec.writeU16(payload, wire)
   end
   mspcodec.writeU32(payload, data and data.activefields or 0)
   return payload
