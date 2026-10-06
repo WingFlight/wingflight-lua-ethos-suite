@@ -175,6 +175,20 @@
       "reverse_text": false,
       "max_length": 74
     },
+    "msg_restarting": {
+      "english": "Restarting...",
+      "translation": "Restarting...",
+      "needs_translation": true,
+      "reverse_text": false,
+      "max_length": 13
+    },
+    "msg_restarting_fc": {
+      "english": "Restarting flight controller...",
+      "translation": "Restarting flight controller...",
+      "needs_translation": true,
+      "reverse_text": false,
+      "max_length": 31
+    },
     "menu_section_flight_tuning": {
       "english": "Flight Tuning",
       "translation": "Strojenie lotu",
