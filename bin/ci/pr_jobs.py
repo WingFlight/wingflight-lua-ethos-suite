@@ -761,6 +761,22 @@ unconditionally.
 Ported from rotorflight-lua-ethos-suite#2475, which closes rotorflight #2453.
 '''
     ),
+    LuaStep(
+        name='Check full-width ESC summary line rendering',
+        script='bin/esc_summary/verify_esc_summary.lua',
+        rationale=r'''app/pages/esc_forward_vendor.lua rendered mspModule.summaryFor(data, pageTitle)
+using form.addLine(summary). In Ethos, form.addLine() splits a line into two columns
+(label on left, widgets on right), hard-clipping the label at ~32 characters on
+standard screens (480x320). A 37-character summary line (such as "YGE Saphir 125 /
+1.03576 / S/N 100770", introduced when decoding serial numbers) had its 33rd character
+(digit '0') sliced vertically on the column boundary into a 'C' and the rest of the
+serial number cut off.
+
+The summary is now rendered via escError.addTextLine(summary), which creates an empty
+line and spans form.addStaticText across the full display width (x = 0, w =
+lcd.getWindowSize()).
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [
