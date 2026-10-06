@@ -593,6 +593,32 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/esc_parameters_yge/verify_yge_block_length.lua
 
+      # #154 replaced four copies of a helper that accepted either base at once, and shipped
+      # without a harness, so nothing ran against the fix that removed it. That helper
+      # tested `>= 1 and <= 6` first and decremented, then tested `>= 0 and <= 5` -- two
+      # overlapping ranges, so the first one swallowed every internal index of 1..5.
+      # Selecting pack 5 wrote pack 4's index to the FC, and normalize(0) == normalize(1)
+      # == 0, so a real 1 -> 2 pack change read as "no change" and the dashboard widget's
+      # already-selected guard dropped it.
+      #
+      # Two properties are pinned here that a cheaper-looking rewrite would lose: index0()
+      # is injective over 0..5, so two different packs never normalise to the same value,
+      # and the round trip internal index -> label -> sensor reading -> internal index is
+      # lossless for all six packs, which is what keeps the announced pack number equal to
+      # the reading the FC reports.
+      #
+      # The harness runs on the pre-fix sources and reports 26 of 37 checks red, the
+      # call-site sweep naming the four files that still carried their own copy. The sweep
+      # is the half worth keeping: the module itself would still pass a value-level test
+      # while a local copy of the old helper crept back in beside it.
+      #
+      # Not claimed: the pack number on the radio. Only the arithmetic and the call sites
+      # are checked here, on Desktop Lua. Nothing in this harness ran on a transmitter, and
+      # no pack swap was driven against a flight controller.
+      - name: Check the battery profile index bases
+        if: success() || failure()
+        run: lua5.4 bin/battery_profile/verify_battery_profile_index.lua
+
   # Per-language PR builds (mirrors push.yml behavior)
   create-zip:
     name: Build PR ZIP (${{ matrix.lang }})
