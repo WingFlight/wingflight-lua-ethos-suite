@@ -452,20 +452,6 @@
           "reverse_text": false,
           "max_length": 9
         },
-        "roll_yaw": {
-          "english": "Roll-Yaw",
-          "translation": "Roll-Yaw",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 8
-        },
-        "coupling": {
-          "english": "Coupling",
-          "translation": "Coupling",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 8
-        },
         "angle": {
           "english": "Angle",
           "translation": "Angle",
