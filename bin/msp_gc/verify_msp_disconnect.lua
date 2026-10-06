@@ -90,6 +90,7 @@ local function loadSession(opts)
     ["lib/msp_dataflash_summary.lua"] = { buildReadMessage = builder() },
     ["lib/msp_flight_stats.lua"] = { buildReadMessage = builder() },
     ["lib/msp_eeprom.lua"] = {},
+    ["lib/battery_profile_index.lua"] = { fromTelemetrySensor = function() return nil end, index0 = function() return nil end },
     ["lib/smartfuel_reserve.lua"] = {},
     ["lib/smartfuel_calc.lua"] = { new = function() return { reset = noop, update = function() return nil end } end },
     ["lib/diy_sensor.lua"] = { new = function() return { reset = noop, set = noop } end },
