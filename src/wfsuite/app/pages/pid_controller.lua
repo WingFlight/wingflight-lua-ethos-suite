@@ -45,6 +45,7 @@ local PAGE_TITLE = "@i18n(app.modules.pid_controller.name)@"
 -- Prop-hang relax is optional on the wire (see lib/msp_pid_profile.lua), so
 -- its fields stay disabled on firmware that doesn't send it.
 local HANG_KEYS = {"prop_hang_strength", "prop_hang_angle", "prop_hang_fade"}
+-- Roll-yaw coupling is optional on the wire the same way.
 
 local function open(opts)
   local runtime
@@ -55,6 +56,10 @@ local function open(opts)
     opts = opts,
     unloadPackageKeys = {"wfsuite.lib.msp_pid_profile"},
     onLoaded = function()
+      if not runtime.data.has_roll_yaw then
+        local field = runtime.fields.roll_yaw_coupling
+        if field then field:enable(false) end
+      end
       if runtime.data.has_prop_hang then return end
       for _, key in ipairs(HANG_KEYS) do
         local field = runtime.fields[key]
@@ -113,6 +118,11 @@ local function open(opts)
 
   fieldLayout.buildGroup(runtime, "", {
     {title = "@i18n(app.modules.pid_controller.hold)@", spec = {key = "prop_hang_fade"}},
+  })
+
+  -- Roll-yaw coupling: yaw the airframe makes by itself in a roll, left alone by the yaw loop
+  fieldLayout.buildGroup(runtime, "@i18n(app.modules.pid_controller.roll_yaw)@", {
+    {title = "@i18n(app.modules.pid_controller.coupling)@", spec = {key = "roll_yaw_coupling"}},
   })
 
   runtime:loadInitial()
