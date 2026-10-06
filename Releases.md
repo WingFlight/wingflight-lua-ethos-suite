@@ -13,6 +13,8 @@ Remove BRUSHED from the Throttle Protocol list.
 
 Fix ESC forward-programming saves changing settings the pilot did not touch: Bluejay and AM32 write back the ESC's own bytes, and a short FlyRotor or YGE parameter block is refused instead of being written with zeros.
 Fix Hobbywing V5 OPTO models reading and writing every setting from item 5 one byte off, and Startup Time showing 0-21 instead of 4-25 s.
+Fix the info panel's blackbox usage going negative once the log passed about 21 MB.
+Fix choosing a battery pack on the dashboard activating a different pack on the flight controller, and SmartFuel and the pack announcement using another pack's capacity and cell settings.
 
 # 0.0.32
 
