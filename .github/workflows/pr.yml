@@ -690,6 +690,19 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/esc_summary/verify_esc_summary.lua
 
+      # A save that restarts the flight controller used to close its save dialog and
+      # report the save done the moment MSP_REBOOT went out -- while the board was still
+      # booting -- and a page left open kept showing pre-restart values. The page now
+      # holds a "Restarting..." dialog until the link drops and the FC answers a fresh
+      # handshake, then re-reads.
+      #
+      # Wingflight has no Rotorflight heli governor page, so this pins the shared
+      # pipeline only: the wait state machine needs a link that drops and returns and a
+      # handshake that answers, which no build step reaches.
+      # Ported from rotorflight-lua-ethos-suite#2361.
+      - name: Check the save-and-reboot pipeline
+        if: success() || failure()
+        run: lua5.4 bin/reboot_policy/verify_reboot_policy.lua
       # EEPROM_WRITE is refused by the FC while the model is armed, but the per-page
       # MSP_SET_* writes already landed and the FC commits them on disarm. app/page_runtime.lua
       # turned that benign refusal into a modal form.openDialog() that seized the whole form

@@ -777,6 +777,19 @@ line and spans form.addStaticText across the full display width (x = 0, w =
 lcd.getWindowSize()).
 '''
     ),
+    LuaStep(
+        name='Check the save-and-reboot pipeline',
+        script='bin/reboot_policy/verify_reboot_policy.lua',
+        rationale=r'''A save that restarts the flight controller used to close its save dialog and
+report the save done the moment MSP_REBOOT went out -- while the board was still
+booting -- and a page left open kept showing pre-restart values. The page now
+holds a "Restarting..." dialog until the link drops and the FC answers a fresh
+handshake, then re-reads.
+
+Wingflight has no Rotorflight heli governor page, so this pins the shared
+pipeline only: the wait state machine needs a link that drops and returns and a
+handshake that answers, which no build step reaches.
+Ported from rotorflight-lua-ethos-suite#2361.
     # Ported from rotorflight-lua-ethos-suite PR #2485 (Issue #2303).
     LuaStep(
         name='An armed save is reported without a modal',
