@@ -777,6 +777,20 @@ line and spans form.addStaticText across the full display width (x = 0, w =
 lcd.getWindowSize()).
 '''
     ),
+    # Ported from rotorflight-lua-ethos-suite PR #2485 (Issue #2303).
+    LuaStep(
+        name='An armed save is reported without a modal',
+        script='bin/armed_save/verify_armed_save.lua',
+        rationale=r'''EEPROM_WRITE is refused by the FC while the model is armed, but the per-page
+MSP_SET_* writes already landed and the FC commits them on disarm. app/page_runtime.lua
+turned that benign refusal into a modal form.openDialog() that seized the whole form
+until OK was pressed; app/header.lua now draws a transient footer banner instead
+(2.5 s, haptic), page_runtime draws it from the paint handler and closes it from the
+wakeup tick. The new localSettings flag keeps a local-storage page out of the armed
+gate. 3 of its 17 checks are gates and go red on the pre-fix files; --self-test proves
+that. Ported from rotorflight-lua-ethos-suite #2485 (Issue #2303).
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [

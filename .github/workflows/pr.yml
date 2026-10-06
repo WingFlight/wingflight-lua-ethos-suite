@@ -690,6 +690,18 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/esc_summary/verify_esc_summary.lua
 
+      # EEPROM_WRITE is refused by the FC while the model is armed, but the per-page
+      # MSP_SET_* writes already landed and the FC commits them on disarm. app/page_runtime.lua
+      # turned that benign refusal into a modal form.openDialog() that seized the whole form
+      # until OK was pressed; app/header.lua now draws a transient footer banner instead
+      # (2.5 s, haptic), page_runtime draws it from the paint handler and closes it from the
+      # wakeup tick. The new localSettings flag keeps a local-storage page out of the armed
+      # gate. 3 of its 17 checks are gates and go red on the pre-fix files; --self-test proves
+      # that. Ported from rotorflight-lua-ethos-suite #2485 (Issue #2303).
+      - name: An armed save is reported without a modal
+        if: success() || failure()
+        run: lua5.4 bin/armed_save/verify_armed_save.lua
+
   # Per-language PR builds (mirrors push.yml behavior)
   create-zip:
     name: Build PR ZIP (${{ matrix.lang }})
