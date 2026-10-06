@@ -35,6 +35,7 @@ local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("
 local handshake = requireModule("lib/msp_handshake.lua")
 local mspApiVersion = requireModule("lib/msp_api_version.lua")
 local mspBattery = requireModule("lib/msp_battery.lua")
+local batteryProfileIndex = requireModule("lib/battery_profile_index.lua")
 local dataflashSummary = requireModule("lib/msp_dataflash_summary.lua")
 local modelPreferences = requireModule("lib/model_preferences.lua")
 local flightStats = requireModule("lib/msp_flight_stats.lua")
@@ -271,19 +272,13 @@ local function copyBatteryConfig(config)
   }
 end
 
-local function normalizeBatteryProfile(value)
-  local profile = tonumber(value)
-  if profile == nil then return nil end
-  profile = math.floor(profile)
-  if profile >= 1 and profile <= 6 then return profile - 1 end
-  if profile >= 0 and profile <= 5 then return profile end
-  return nil
-end
-
 local function batteryProfileCapacity(config, profile)
   if type(config) ~= "table" then return nil end
   local capacity = tonumber(config.batteryCapacity)
-  local active = normalizeBatteryProfile(profile)
+  -- session.batteryProfile is the internal 0-based index (config.profiles is
+  -- profiles[0]..profiles[5]): validate, never re-base. See
+  -- lib/battery_profile_index.lua.
+  local active = batteryProfileIndex.index0(profile)
   local profiles = config.profiles
   if active ~= nil and type(profiles) == "table" then
     local profileCapacity = tonumber(profiles[active])
@@ -304,7 +299,7 @@ end
 -- changes. No-op on older firmware (profileCells == nil).
 local function applyActiveProfileCells(config, profile)
   if type(config) ~= "table" or type(config.profileCells) ~= "table" then return false end
-  local active = normalizeBatteryProfile(profile)
+  local active = batteryProfileIndex.index0(profile)
   local cells = active ~= nil and config.profileCells[active] or nil
   if not cells then return false end
   if config.cellCount == cells.cellCount
@@ -1019,7 +1014,10 @@ local function updateProfiles(protocol)
     session.rateProfile = config.rateProfile
     session.tvProfile = config.tvProfile
 
-    local batteryProfile = normalizeBatteryProfile(config.batteryProfile)
+    -- The only 1-based battery profile value in the suite: the FC packs it as
+    -- getCurrentBatteryProfileIndex() + 1. Converted here, once, so
+    -- session.batteryProfile is 0-based everywhere else.
+    local batteryProfile = batteryProfileIndex.fromTelemetrySensor(config.batteryProfile)
     if batteryProfile ~= session.batteryProfile then
       session.batteryProfile = batteryProfile
       if applyActiveProfileCells(session.batteryConfig, batteryProfile) then localSmartFuel:reset() end
@@ -1034,8 +1032,10 @@ local function updateProfiles(protocol)
   end
 end
 
+-- Callers pass the 0-based index they just wrote via MSP 176
+-- (widgets/dashboard.lua's writeBatteryProfile()), so validate, never re-base.
 local function setBatteryProfile(value)
-  local batteryProfile = normalizeBatteryProfile(value)
+  local batteryProfile = batteryProfileIndex.index0(value)
   if batteryProfile == nil then return end
   if batteryProfile == session.batteryProfile then return end
   session.batteryProfile = batteryProfile

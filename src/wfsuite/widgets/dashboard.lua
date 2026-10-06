@@ -6,6 +6,7 @@
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local bus = requireModule("lib/bus.lua")
 local settingsStore = requireModule("lib/settings_store.lua")
+local batteryProfileIndex = requireModule("lib/battery_profile_index.lua")
 local flightmode = requireModule("widgets/dashboard/flightmode.lua")
 
 -- dataflashErase/dataflashSummary/batteryProfileMsp are loadfile()'d lazily,
@@ -566,15 +567,6 @@ local function canOpenSystemTool()
     and ensureEthosVersion().atLeast({26, 1, 0})
 end
 
-local function normalizeBatteryProfile(value)
-  local profile = tonumber(value)
-  if profile == nil then return nil end
-  profile = math.floor(profile)
-  if profile >= 1 and profile <= 6 then return profile - 1 end
-  if profile >= 0 and profile <= 5 then return profile end
-  return nil
-end
-
 local function capacityValue(value)
   if type(value) == "number" then return value end
   if type(value) == "string" then return tonumber(value:match("(%d+)")) end
@@ -599,9 +591,16 @@ local function buildBatteryProfileList(widget)
   end
 
   if #profileList == 0 then
+    -- Fallback for a 1-based *list* of {name = ...} entries: the ipairs
+    -- position i is 1-based, so its 0-based index is i - 1. A declared index
+    -- is already 0-based and is only validated.
     for i, profile in ipairs(profilesRaw) do
       if type(profile) == "table" and profile.name then
-        local idx = normalizeBatteryProfile(profile.idx or profile.index or profile.profile or i) or (i - 1)
+        local declared = profile.idx or profile.index or profile.profile
+        local idx = i - 1
+        if declared ~= nil then
+          idx = batteryProfileIndex.index0(declared) or idx
+        end
         profileList[#profileList + 1] = {name = profile.name, idx = idx}
       end
     end
@@ -1272,10 +1271,13 @@ end
 
 local function writeBatteryProfile(widget, profileIndex, profileName)
   if not widget or widget.connected ~= true or widget.batteryActive == true then return end
-  profileIndex = normalizeBatteryProfile(profileIndex)
+  -- profile.idx is already the 0-based index MSP 176 wants: validate, never
+  -- re-base (see lib/battery_profile_index.lua). Re-basing here made picking
+  -- pack 3 activate pack 2 on the flight controller.
+  profileIndex = batteryProfileIndex.index0(profileIndex)
   if profileIndex == nil then return end
 
-  if normalizeBatteryProfile(widget.batteryProfile) == profileIndex then
+  if batteryProfileIndex.index0(widget.batteryProfile) == profileIndex then
     showBatteryInfo("@i18n(widgets.battery.msg_battery_selected)@ " .. tostring(profileName))
     return
   end
@@ -1326,14 +1328,14 @@ local function chooseBatteryProfile(widget)
   local buttons = {}
   local message = "@i18n(widgets.battery.msg_select_battery)@\n\n"
   for _, profile in ipairs(profileList) do
-    local label = tostring((profile.idx or 0) + 1)
+    local label = tostring(batteryProfileIndex.label(profile.idx) or 1)
     message = message .. label .. " - " .. tostring(profile.name) .. "\n"
   end
 
   for i = #profileList, 1, -1 do
     local profile = profileList[i]
     table.insert(buttons, {
-      label = "  " .. tostring((profile.idx or 0) + 1) .. "  ",
+      label = "  " .. tostring(batteryProfileIndex.label(profile.idx) or 1) .. "  ",
       action = function()
         writeBatteryProfile(widget, profile.idx, profile.name)
         return true
