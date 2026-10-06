@@ -231,6 +231,28 @@ if a guard stops latching (309 requests instead of 6).
 '''
     ),
     LuaStep(
+        name='Check that repeated tool cycles retain no Lua memory',
+        script='bin/tool_ui/verify_tool_lifecycle_retention.lua',
+        rationale=r'''Ported from rotorflight-lua-ethos-suite#2425, which measured ~30 kB of Lua
+heap retained per tool open/close cycle on an X18RS and left the live
+reference unidentified. This drives the same cycle -- open the tool, drill
+into the ESC menus, open an ESC vendor page, let its editor build, return,
+close -- through the real tool.lua, menu_container, page_runtime and
+field_layout, and after every cycle counts the tables and strings reachable
+from _G and package.loaded. That is the sharp check: an exact integer any
+live Lua reference would move. It also pins the live bus subscribers, the
+wfsuite.* entries in package.loaded, the field_layout pool, the form-widget
+count and the post-collect heap.
+
+The object counts are flat: the suite's own Lua tree retains nothing per
+cycle, so the ~30 kB is not reachable from Lua -- consistent with
+docs/memory-and-module-lifecycle.md section 8, where Ethos's own form widget
+system retains widget/callback allocations past form.clear() outside Lua's GC
+graph. The harness stays as the regression guard. Pass --self-test to prove
+that: it plants that failure mode and requires the census checks to go red.
+'''
+    ),
+    LuaStep(
         name='Check bus publish is bounded and the stack minimum is tracked',
         script='bin/stack/verify_stack_bounds.lua',
         rationale=r'''The bus is the only channel between the tool, the dashboard and the
