@@ -789,6 +789,29 @@ until OK was pressed; app/header.lua now draws a transient footer banner instead
 wakeup tick. The new localSettings flag keeps a local-storage page out of the armed
 gate. 3 of its 17 checks are gates and go red on the pre-fix files; --self-test proves
 that. Ported from rotorflight-lua-ethos-suite #2485 (Issue #2303).
+    LuaStep(
+        name='Post-connect reads wait for a verified API_VERSION',
+        script='bin/handshake_gate/verify_handshake_gate.lua',
+        rationale=r'''tasks/session.lua's runHandshake() queued its whole identity/config burst in one
+call, ahead of any API-version verdict: MSP_FC_VERSION, MSP_UID, MSP_NAME, the RTC
+sync and the battery/smartfuel/rx-map reads all went on the wire before
+MSP_API_VERSION had even been answered, let alone checked. The MSP queue is
+single-in-flight, so one unanswerable request at its head starves every page read
+behind it for its full retry budget.
+
+The handshake is now phased: API_VERSION is the only request allowed to run
+unverified, its own success callback resumes the handshake the moment the verdict
+is in, and nothing else is queued until that verdict is a verified "yes" (this
+suite's family is major 22, minor >= 13, so an incompatible or too-old FC stops
+after the version read). The UI banner for that case already existed. No build step
+reaches any of this -- it needs a queue, a clock and an FC that answers, or does
+not -- so it is pinned here.
+
+Ported from rotorflight-lua-ethos-suite PR #2486 (issue #2362).
+
+5 of the harness's 12 checks are gates on the queue contents, proven by --self-test:
+it neuters the gate's condition in a copy of session.lua and requires the central
+check (no identity read before the verdict) to go red.
 '''
     ),
 ]

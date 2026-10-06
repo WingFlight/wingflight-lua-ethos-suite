@@ -645,6 +645,13 @@ local function runHandshake(mspQueue, protocol)
         playConnectBeep()
       end
       publish()
+      -- Phased handshake (issue #2362, ported from rotorflight-lua-ethos-suite):
+      -- the identity/config reads below are held back until this verdict is a
+      -- verified "yes" (see the gate a few lines down). Now that API_VERSION has
+      -- answered, resume the handshake in the same turn rather than waiting for
+      -- wakeup()'s own 2s retry tick. On an incompatible FC this call lands on
+      -- the gate and sends nothing further.
+      runHandshake(mspQueue, protocol)
     end, function(reason)
       handshakeInFlight.apiVersion = false
       if reason ~= "cleared" then
@@ -654,6 +661,23 @@ local function runHandshake(mspQueue, protocol)
     if queued == false then
       handshakeInFlight.apiVersion = false
     end
+  end
+
+  -- Phased handshake (issue #2362, ported from rotorflight-lua-ethos-suite).
+  -- Every read below is a post-connect read that only makes sense once the FC
+  -- has proven it speaks this suite's own MSP dialect. `session.apiVersionSupported`
+  -- is nil until MSP_API_VERSION has been answered, and false when the answer was
+  -- an incompatible family, or this family with a minor below the floor -- see
+  -- lib/msp_api_version.lua's isSupported(). This function used to queue the whole
+  -- identity/config burst unconditionally, in one call: on an incompatible FC that
+  -- put FC_VERSION, UID, NAME, the RTC sync and the battery/smartfuel/rx-map reads
+  -- on the wire ahead of any verdict, and because the queue is single-in-flight,
+  -- one unanswerable request at its head starves every page read behind it for
+  -- seconds. API_VERSION above is the one request allowed to run unverified; it is
+  -- cheap, and its own success callback resumes this function the moment the
+  -- verdict is in. Nothing below is queued until the verdict is a verified "yes".
+  if session.apiVersionSupported ~= true then
+    return
   end
 
   if not session.handshake.fcVariant and not handshakeInFlight.fcVariant then
