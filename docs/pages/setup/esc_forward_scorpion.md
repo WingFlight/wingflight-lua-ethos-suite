@@ -40,6 +40,10 @@ firmware defaults; wire values may need scaling before display.
   lower half of its serial number. The firmware version is the plain number after it,
   and it was always there — so nothing that meant anything moved, and a number with
   no meaning behind it is gone.
+- A save sends the whole parameter block the flight controller asks for — 84 bytes
+  for a Scorpion, the same length the EdgeTX suite uses. The two `stick` words at the
+  end (bytes 77..84) have no row on this page: they are read from the ESC and written
+  back unchanged, so a save cannot overwrite them.
 
 ## Choosing the ESC
 
