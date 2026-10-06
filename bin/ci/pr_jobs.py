@@ -678,6 +678,33 @@ port); the two YGE codecs differ in four lines, all of them the namespace.
 '''
     ),
     LuaStep(
+        name='Check the battery profile index bases',
+        script='bin/battery_profile/verify_battery_profile_index.lua',
+        rationale=r'''#154 replaced four copies of a helper that accepted either base at once, and shipped
+without a harness, so nothing ran against the fix that removed it. That helper
+tested `>= 1 and <= 6` first and decremented, then tested `>= 0 and <= 5` -- two
+overlapping ranges, so the first one swallowed every internal index of 1..5.
+Selecting pack 5 wrote pack 4's index to the FC, and normalize(0) == normalize(1)
+== 0, so a real 1 -> 2 pack change read as "no change" and the dashboard widget's
+already-selected guard dropped it.
+
+Two properties are pinned here that a cheaper-looking rewrite would lose: index0()
+is injective over 0..5, so two different packs never normalise to the same value,
+and the round trip internal index -> label -> sensor reading -> internal index is
+lossless for all six packs, which is what keeps the announced pack number equal to
+the reading the FC reports.
+
+The harness runs on the pre-fix sources and reports 26 of 37 checks red, the
+call-site sweep naming the four files that still carried their own copy. The sweep
+is the half worth keeping: the module itself would still pass a value-level test
+while a local copy of the old helper crept back in beside it.
+
+Not claimed: the pack number on the radio. Only the arithmetic and the call sites
+are checked here, on Desktop Lua. Nothing in this harness ran on a transmitter, and
+no pack swap was driven against a flight controller.
+'''
+    ),
+    LuaStep(
         name='Check the Bluejay LED Control row',
         script='bin/bluejay_led_control/verify_bluejay_led_control.lua',
         rationale=r'''app/pages/esc_forward_bluejay.lua declared an LED Control row and gated it on
@@ -785,6 +812,20 @@ so MSP 217/218 answer `$M!` with a zero-length payload and the wire path cannot 
 exercised there. The 84 comes from the firmware source's own table.
 
 Ported from rotorflight-lua-ethos-suite#2479, which closes rotorflight #2457.
+    LuaStep(
+        name='Check full-width ESC summary line rendering',
+        script='bin/esc_summary/verify_esc_summary.lua',
+        rationale=r'''app/pages/esc_forward_vendor.lua rendered mspModule.summaryFor(data, pageTitle)
+using form.addLine(summary). In Ethos, form.addLine() splits a line into two columns
+(label on left, widgets on right), hard-clipping the label at ~32 characters on
+standard screens (480x320). A 37-character summary line (such as "YGE Saphir 125 /
+1.03576 / S/N 100770", introduced when decoding serial numbers) had its 33rd character
+(digit '0') sliced vertically on the column boundary into a 'C' and the rest of the
+serial number cut off.
+
+The summary is now rendered via escError.addTextLine(summary), which creates an empty
+line and spans form.addStaticText across the full display width (x = 0, w =
+lcd.getWindowSize()).
 '''
     ),
 ]
