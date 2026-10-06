@@ -231,6 +231,28 @@ if a guard stops latching (309 requests instead of 6).
 '''
     ),
     LuaStep(
+        name='Check that repeated tool cycles retain no Lua memory',
+        script='bin/tool_ui/verify_tool_lifecycle_retention.lua',
+        rationale=r'''Ported from rotorflight-lua-ethos-suite#2425, which measured ~30 kB of Lua
+heap retained per tool open/close cycle on an X18RS and left the live
+reference unidentified. This drives the same cycle -- open the tool, drill
+into the ESC menus, open an ESC vendor page, let its editor build, return,
+close -- through the real tool.lua, menu_container, page_runtime and
+field_layout, and after every cycle counts the tables and strings reachable
+from _G and package.loaded. That is the sharp check: an exact integer any
+live Lua reference would move. It also pins the live bus subscribers, the
+wfsuite.* entries in package.loaded, the field_layout pool, the form-widget
+count and the post-collect heap.
+
+The object counts are flat: the suite's own Lua tree retains nothing per
+cycle, so the ~30 kB is not reachable from Lua -- consistent with
+docs/memory-and-module-lifecycle.md section 8, where Ethos's own form widget
+system retains widget/callback allocations past form.clear() outside Lua's GC
+graph. The harness stays as the regression guard. Pass --self-test to prove
+that: it plants that failure mode and requires the census checks to go red.
+'''
+    ),
+    LuaStep(
         name='Check bus publish is bounded and the stack minimum is tracked',
         script='bin/stack/verify_stack_bounds.lua',
         rationale=r'''The bus is the only channel between the tool, the dashboard and the
@@ -808,6 +830,53 @@ before. Both mutations turn their gate red under --self-test (a loosened bound, 
 fixture on 209), so neither gate can pass by being unable to fail.
 
 Ported from rotorflight-lua-ethos-suite#2480, which closes rotorflight #2454.
+        name='Check the save-and-reboot pipeline',
+        script='bin/reboot_policy/verify_reboot_policy.lua',
+        rationale=r'''A save that restarts the flight controller used to close its save dialog and
+report the save done the moment MSP_REBOOT went out -- while the board was still
+booting -- and a page left open kept showing pre-restart values. The page now
+holds a "Restarting..." dialog until the link drops and the FC answers a fresh
+handshake, then re-reads.
+
+Wingflight has no Rotorflight heli governor page, so this pins the shared
+pipeline only: the wait state machine needs a link that drops and returns and a
+handshake that answers, which no build step reaches.
+Ported from rotorflight-lua-ethos-suite#2361.
+    # Ported from rotorflight-lua-ethos-suite PR #2485 (Issue #2303).
+    LuaStep(
+        name='An armed save is reported without a modal',
+        script='bin/armed_save/verify_armed_save.lua',
+        rationale=r'''EEPROM_WRITE is refused by the FC while the model is armed, but the per-page
+MSP_SET_* writes already landed and the FC commits them on disarm. app/page_runtime.lua
+turned that benign refusal into a modal form.openDialog() that seized the whole form
+until OK was pressed; app/header.lua now draws a transient footer banner instead
+(2.5 s, haptic), page_runtime draws it from the paint handler and closes it from the
+wakeup tick. The new localSettings flag keeps a local-storage page out of the armed
+gate. 3 of its 17 checks are gates and go red on the pre-fix files; --self-test proves
+that. Ported from rotorflight-lua-ethos-suite #2485 (Issue #2303).
+    LuaStep(
+        name='Post-connect reads wait for a verified API_VERSION',
+        script='bin/handshake_gate/verify_handshake_gate.lua',
+        rationale=r'''tasks/session.lua's runHandshake() queued its whole identity/config burst in one
+call, ahead of any API-version verdict: MSP_FC_VERSION, MSP_UID, MSP_NAME, the RTC
+sync and the battery/smartfuel/rx-map reads all went on the wire before
+MSP_API_VERSION had even been answered, let alone checked. The MSP queue is
+single-in-flight, so one unanswerable request at its head starves every page read
+behind it for its full retry budget.
+
+The handshake is now phased: API_VERSION is the only request allowed to run
+unverified, its own success callback resumes the handshake the moment the verdict
+is in, and nothing else is queued until that verdict is a verified "yes" (this
+suite's family is major 22, minor >= 13, so an incompatible or too-old FC stops
+after the version read). The UI banner for that case already existed. No build step
+reaches any of this -- it needs a queue, a clock and an FC that answers, or does
+not -- so it is pinned here.
+
+Ported from rotorflight-lua-ethos-suite PR #2486 (issue #2362).
+
+5 of the harness's 12 checks are gates on the queue contents, proven by --self-test:
+it neuters the gate's condition in a copy of session.lua and requires the central
+check (no identity read before the verdict) to go red.
 '''
     ),
 ]
