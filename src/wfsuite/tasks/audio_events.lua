@@ -4,6 +4,7 @@
 -- for itself, passed in as this chunk's args rather than loadfile()'d again
 -- here -- see the equivalent note atop tasks/session.lua for why.
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
+local batteryProfileIndex = requireModule("lib/battery_profile_index.lua")
 local systemAlerts = requireModule("lib/system_alerts.lua")
 local systemStatusCodec = requireModule("lib/system_status.lua")
 local engineType = requireModule("lib/engine_type.lua")
@@ -362,15 +363,6 @@ local function announceProfile(key, enabled, file)
   playNumber(math.floor(value))
 end
 
-local function normalizeBatteryProfile(value)
-  local profile = tonumber(value)
-  if profile == nil then return nil end
-  profile = math.floor(profile)
-  if profile >= 1 and profile <= 6 then return profile - 1 end
-  if profile >= 0 and profile <= 5 then return profile end
-  return nil
-end
-
 local function extractCapacityValue(value)
   if type(value) == "number" then return value end
   if type(value) == "string" then return tonumber(value:match("(%d+)")) end
@@ -385,8 +377,9 @@ end
 local function batteryProfileCapacity(profile)
   local profiles = session.batteryConfig and session.batteryConfig.profiles
   if type(profiles) ~= "table" then return nil end
+  -- profiles is 0..5 (lib/msp_battery.lua): no profile + 1 retry, which
+  -- could only ever answer with a neighbouring pack's capacity.
   local value = profiles[profile]
-  if value == nil then value = profiles[profile + 1] end
   value = extractCapacityValue(value)
   if value and value > 0 then return value end
   return nil
@@ -399,7 +392,6 @@ local function batteryProfileCellCount(profile)
   local profileCells = config.profileCells
   if type(profileCells) == "table" then
     local cells = profileCells[profile]
-    if cells == nil then cells = profileCells[profile + 1] end
     if type(cells) == "table" then
       cells = cells.cellCount
     end
@@ -414,8 +406,9 @@ end
 
 local function announceBatteryProfile()
   if not events.battery_profile then return end
-  local value = normalizeBatteryProfile(session.batteryProfile)
-  local last = normalizeBatteryProfile(previous.batteryProfile)
+  -- Both already the internal 0-based index (see lib/battery_profile_index.lua).
+  local value = batteryProfileIndex.index0(session.batteryProfile)
+  local last = batteryProfileIndex.index0(previous.batteryProfile)
   if value == nil or last == nil or value == last then return end
 
   local capacity = batteryProfileCapacity(value)
