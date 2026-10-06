@@ -87,12 +87,6 @@
 -- angle from vertical in degrees, fade-out in ms. Optional: read only when
 -- the reply carries it (75 bytes), and written back only if it was read, so
 -- firmware without it keeps working. `has_prop_hang` records which.
---
--- Roll-yaw coupling follows prop-hang relax: one signed byte, the percent of
--- the roll rate the airframe yaws by itself in a roll (positive against the
--- roll), which the yaw loop then leaves alone. Optional the same way: read
--- only when the reply carries it (76 bytes), written back only if it was
--- read. `has_roll_yaw` records which.
 
 -- Self-caches via package.loaded (same mechanism lib/bus.lua uses) --
 -- multiple pages share this codec and each reloads fresh via loadfile() on
@@ -220,7 +214,6 @@ local SIMULATOR_RESPONSE = {
   100,  -- prop_hang_strength
   20,   -- prop_hang_angle
   244, 1, -- prop_hang_fade (U16 LE: 500 = 0x01F4 -> 244, 1)
-  0,    -- roll_yaw_coupling (S8, off)
 }
 
 -- Per-field {min, max, default, decimals, suffix}, sourced from this
@@ -271,7 +264,6 @@ local FIELD_META = {
   prop_hang_strength = {min = 0, max = 100, default = 100, suffix = "%"},
   prop_hang_angle = {min = 5, max = 45, default = 20, suffix = "°"},
   prop_hang_fade = {min = 0, max = 2000, default = 500, suffix = "ms"},
-  roll_yaw_coupling = {min = -100, max = 100, default = 0, suffix = "%"},
   trainer_gain = {min = 25, max = 255, default = 75},
   atthold_gain = {min = 0, max = 250, default = 40},
   atthold_deadband = {min = 0, max = 100, default = 5, suffix = "%"},
@@ -357,10 +349,6 @@ function msp_pid_profile.decode(buf)
       end
     end
   end
-  data.has_roll_yaw = data.has_prop_hang and #buf - buf.offset + 1 >= 1
-  if data.has_roll_yaw then
-    data.roll_yaw_coupling = mspcodec.readS8(buf)
-  end
   return data
 end
 
@@ -407,9 +395,6 @@ function msp_pid_profile.encode(data)
         mspcodec.writeU8(payload, data[name] or 0)
       end
     end
-  end
-  if data.has_prop_hang and data.has_roll_yaw then
-    mspcodec.writeS8(payload, data.roll_yaw_coupling or 0)
   end
   return payload
 end

@@ -6348,13 +6348,6 @@
           "reverse_text": false,
           "translation": "Angle"
         },
-        "coupling": {
-          "english": "Coupling",
-          "max_length": 8,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "Coupling"
-        },
         "cross_axis_relax": {
           "english": "Cross Axis Relax",
           "max_length": 16,
@@ -6459,13 +6452,6 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "R"
-        },
-        "roll_yaw": {
-          "english": "Roll-Yaw",
-          "max_length": 8,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "Roll-Yaw"
         },
         "snap_relax": {
           "english": "Snap Relax",
