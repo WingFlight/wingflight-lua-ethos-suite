@@ -39,6 +39,9 @@ Available without a flight controller connection; the background task must be ru
   is detected: one reading later than before, not silenced.
 - Percentage callouts are unchanged: one per step of the callout range, as the
   reading falls past it.
+- **Battery profile** announces the newly selected pack as "Battery, 2200
+  milliamp hours, 4 cells". The cell count is left out when the profile has none
+  set (auto-detect).
 
 TODO: Verify persistence, reboot behaviour, profile scope and any restrictions in
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than
