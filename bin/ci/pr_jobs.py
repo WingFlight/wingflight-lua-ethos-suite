@@ -812,6 +812,8 @@ so MSP 217/218 answer `$M!` with a zero-length payload and the wire path cannot 
 exercised there. The 84 comes from the firmware source's own table.
 
 Ported from rotorflight-lua-ethos-suite#2479, which closes rotorflight #2457.
+'''
+    ),
     LuaStep(
         name='Check full-width ESC summary line rendering',
         script='bin/esc_summary/verify_esc_summary.lua',

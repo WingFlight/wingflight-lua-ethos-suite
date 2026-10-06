@@ -724,6 +724,7 @@ jobs:
       - name: Check the Scorpion block is the length the flight controller asks for
         if: success() || failure()
         run: lua5.4 bin/esc_parameters_scorpion/verify_scorpion_block_length.lua
+
       # app/pages/esc_forward_vendor.lua rendered mspModule.summaryFor(data, pageTitle)
       # using form.addLine(summary). In Ethos, form.addLine() splits a line into two columns
       # (label on left, widgets on right), hard-clipping the label at ~32 characters on
