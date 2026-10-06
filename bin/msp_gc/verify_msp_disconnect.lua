@@ -99,6 +99,15 @@ local function loadSession(opts)
     ["tasks/flight_timer.lua"] = flightTimer,
     ["tasks/elrs_sensors.lua"] = { wakeup = noop, reset = noop },
     ["lib/system_status.lua"] = status,
+    -- #154 moved the profile index out of session.lua into this module, and
+    -- session.lua's own require line moved with it, so the stub below rejected
+    -- the new path and this harness died on load instead of testing the
+    -- disconnect behaviour it exists for. The real file is pure validation with
+    -- no Ethos dependency; the functions have to be there because session.lua
+    -- calls index0() on this table, and they answer nil, which is what the
+    -- module answers for a profile it has not been given yet.
+    ["lib/battery_profile_index.lua"] = { index0 = function() return nil end,
+      fromTelemetrySensor = function() return nil end, label = function() return nil end },
   }
   package.loaded["wfsuite.lib.require"] = function(path)
     return assert(modules[path], "unexpected dependency: " .. tostring(path))
