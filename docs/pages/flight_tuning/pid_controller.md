@@ -41,6 +41,7 @@ Requires a running background task and a flight controller connection.
 | Prop Hang (Strength) | Percent (0-100, default 100) of the roll I-term held back in a prop hang, so the prop torque can roll the model instead of the gyro holding it still. P and the stick still work. Roll only. Needs an altitude estimate (a barometer) to tell a hang from an up-line. Firmware without prop-hang relax leaves these fields disabled. 0 turns it off. |
 | (Angle) | Degrees (5-45, default 20) the nose can be from straight up and still count as a hang. The model must also be climbing or sinking at no more than 2 m/s, for half a second. |
 | (Fade-out) | Time in ms (0-2000, default 500) over which the roll I-term comes back after the hang ends. |
+| Roll-Yaw (Coupling) | Percent of the roll rate (-100 to 100, default 0) the model yaws by itself when it rolls. The gyro leaves that yaw alone instead of fighting it with the rudder, so rolls track like they do in MANUAL. The stick and gust hold still work. Positive is yaw against the roll, the usual case. Firmware without it leaves the field disabled. 0 turns it off. |
 
 ## Notes
 
