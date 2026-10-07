@@ -904,6 +904,18 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/motor_override/verify_motor_override.lua
 
+      # System Status and System Config are separate telemetry sensors, and a pilot may
+      # select only one. Reboot required and Blackbox full come from System Config alone,
+      # but lib/system_alerts.lua returned "nothing active" whenever System Status was
+      # missing, so neither banner nor callout ever showed on such a model. Rules are now
+      # evaluated against whichever words are present, with an empty table for the other;
+      # the check pins that, and that no rule reads true against an empty table.
+      # --self-test gates topBanner() on System Status again and requires the config-only
+      # check to go red. Ported from rotorflight-lua-ethos-suite PR #2488's review.
+      - name: FC status alerts fire from whichever packed word is present
+        if: success() || failure()
+        run: lua5.4 bin/system_status/verify_system_alerts.lua
+
   # Per-language PR builds (mirrors push.yml behavior)
   create-zip:
     name: Build PR ZIP (${{ matrix.lang }})
