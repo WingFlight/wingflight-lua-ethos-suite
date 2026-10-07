@@ -1,3 +1,15 @@
+# 0.0.34
+
+Use with the 0.0.34 firmware (MSP API 22.14). Flashing keeps your settings.
+Rename the mixer's per-axis Gain column to Throw, matching the Configurator's Axis Throw.
+Hold the page with a Restarting dialog while a save reboots the flight controller, and re-read it once the board is back.
+Show a short banner instead of a blocking dialog when a save is refused because the model is armed.
+Wait for the flight controller's API version to be confirmed before the other connection reads, so an unanswered request no longer stalls the pages behind it.
+Say "cells" after the cell count in the battery profile announcement.
+Remove the Bluejay LED row, which no ESC reply could enable.
+Fix Scorpion ESC saves sending a 76-byte parameter block instead of the 84 bytes the ESC reports.
+Fix the ESC forward-programming summary line being cut off on smaller screens.
+
 # 0.0.33
 
 Use with the 0.0.33 firmware (MSP API 22.14). Flashing keeps your settings.
