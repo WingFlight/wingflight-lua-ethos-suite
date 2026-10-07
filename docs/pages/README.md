@@ -8,7 +8,7 @@ sidebar_label: Pages
 Reference documentation for each configuration and settings page reachable
 within the WFSuite Ethos system tool.
 
-**Coverage:** 79 reachable pages in navigation hierarchy. Drafts require review.
+**Coverage:** 80 reachable pages in navigation hierarchy. Drafts require review.
 
 The *Conditions* column names what hides, greys out or locks a page; the sentences
 and structure follow [_template.md](../_template.md).
@@ -71,6 +71,7 @@ is there. The rule is in [.agents/rules/documentation.md](../../.agents/rules/do
 | Alerts | [setup/power_alerts.md](setup/power_alerts.md) | Requires a running background task and a flight controller connection. | draft |
 | Sources | [setup/power_source.md](setup/power_source.md) | Requires a running background task and a flight controller connection. | draft |
 | SmartFuel | [setup/power_smartfuel.md](setup/power_smartfuel.md) | Requires a running background task and a flight controller connection. | draft |
+| Motor Override | [setup/motor_override.md](setup/motor_override.md) | Requires a running background task and a flight controller connection. | reviewed |
 | Throttle | [setup/esc_motors_throttle.md](setup/esc_motors_throttle.md) | Requires a running background task and a flight controller connection. | draft |
 | Telemetry | [setup/esc_motors_telemetry.md](setup/esc_motors_telemetry.md) | Requires a running background task and a flight controller connection. | draft |
 | RPM | [setup/esc_motors_rpm.md](setup/esc_motors_rpm.md) | Requires a running background task and a flight controller connection. | draft |
