@@ -5476,11 +5476,11 @@
           "translation": "Povolte přepsání průchozího mixéru, abyste mohli pohybovat tyčemi při nastavování geometrie vlnění. \r\n\r\nAktuální změny z této stránky se odesílají do letového kontroléru."
         },
         "gain": {
-          "english": "Gain",
-          "max_length": 4,
-          "needs_translation": false,
+          "english": "Throw",
+          "max_length": 5,
+          "needs_translation": true,
           "reverse_text": false,
-          "translation": "Zisk"
+          "translation": "Throw"
         },
         "geo_correction": {
           "english": "Geo Correction",

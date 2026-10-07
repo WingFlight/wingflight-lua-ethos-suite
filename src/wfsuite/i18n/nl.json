@@ -5476,11 +5476,11 @@
           "translation": "Schakel de passthrough-mixer-override in, zodat u de stokken kunt bewegen terwijl u de swash-geometrie aanpast. \r\n\r\nLive wijzigingen vanaf deze pagina worden naar de vluchtcontroller verzonden."
         },
         "gain": {
-          "english": "Gain",
-          "max_length": 4,
-          "needs_translation": false,
+          "english": "Throw",
+          "max_length": 5,
+          "needs_translation": true,
           "reverse_text": false,
-          "translation": "Gain"
+          "translation": "Throw"
         },
         "geo_correction": {
           "english": "Geo Correction",

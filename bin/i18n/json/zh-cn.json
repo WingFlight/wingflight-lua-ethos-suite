@@ -3458,11 +3458,11 @@
           "max_length": 159
         },
         "gain": {
-          "english": "Gain",
-          "translation": "增益",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 4
+          "english": "Throw",
+          "translation": "Throw",
+          "needs_translation": true,
+          "max_length": 5,
+          "reverse_text": false
         },
         "geo_correction": {
           "english": "Geo Correction",

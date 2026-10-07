@@ -5476,11 +5476,11 @@
           "translation": "启用透传混控覆盖，以便在调整斜盘几何结构时可以移动遥控器摇杆。\n此页面上的实时更改将直接发送至飞控。"
         },
         "gain": {
-          "english": "Gain",
-          "max_length": 4,
-          "needs_translation": false,
+          "english": "Throw",
+          "max_length": 5,
+          "needs_translation": true,
           "reverse_text": false,
-          "translation": "增益"
+          "translation": "Throw"
         },
         "geo_correction": {
           "english": "Geo Correction",

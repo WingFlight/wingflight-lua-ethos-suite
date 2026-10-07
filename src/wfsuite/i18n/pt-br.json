@@ -5476,11 +5476,11 @@
           "translation": "Ativa override do mixer para mover os sticks ao ajustar a geometria do prato. Alterações ao vivo são enviadas ao controlador de voo."
         },
         "gain": {
-          "english": "Gain",
-          "max_length": 4,
-          "needs_translation": false,
+          "english": "Throw",
+          "max_length": 5,
+          "needs_translation": true,
           "reverse_text": false,
-          "translation": "Ganh"
+          "translation": "Throw"
         },
         "geo_correction": {
           "english": "Geo Correction",

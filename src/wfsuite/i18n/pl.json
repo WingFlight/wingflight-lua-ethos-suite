@@ -5476,11 +5476,11 @@
           "translation": "Włącz obejście miksera przelotowego, aby móc przesuwać drążki podczas dostosowywania geometrii obrotu. \r\n\r\nZmiany na żywo z tej strony są wysyłane do kontrolera lotu."
         },
         "gain": {
-          "english": "Gain",
-          "max_length": 4,
-          "needs_translation": false,
+          "english": "Throw",
+          "max_length": 5,
+          "needs_translation": true,
           "reverse_text": false,
-          "translation": "Gain"
+          "translation": "Throw"
         },
         "geo_correction": {
           "english": "Geo Correction",

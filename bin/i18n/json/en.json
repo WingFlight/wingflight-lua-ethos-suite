@@ -2971,10 +2971,10 @@
           "translation": "Enable passthrough mixer override so you can move the sticks while adjusting swash geometry. \r\n\r\nLive changes from this page are sent to the flight controller."
         },
         "gain": {
-          "english": "Gain",
-          "translation": "Gain",
+          "english": "Throw",
+          "translation": "Throw",
           "needs_translation": false,
-          "max_length": 4
+          "max_length": 5
         },
         "geo_correction": {
           "english": "Geo Correction",

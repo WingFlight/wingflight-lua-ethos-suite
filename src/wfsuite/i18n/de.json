@@ -5476,11 +5476,11 @@
           "translation": "Passthrough-Mischer-Override aktivieren, damit Sie die Sticks bewegen können, während Sie die Taumelscheiben-Geometrie anpassen. \r\n\r\nLive-Änderungen von dieser Seite werden an den Flugcontroller gesendet."
         },
         "gain": {
-          "english": "Gain",
-          "max_length": 4,
-          "needs_translation": false,
+          "english": "Throw",
+          "max_length": 5,
+          "needs_translation": true,
           "reverse_text": false,
-          "translation": "Gewi"
+          "translation": "Throw"
         },
         "geo_correction": {
           "english": "Geo Correction",

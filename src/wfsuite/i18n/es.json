@@ -5476,11 +5476,11 @@
           "translation": "Activar bypass del mixer para mover sticks al ajustar geometría del plato. Los cambios de esta página se envían al controlador de vuelo."
         },
         "gain": {
-          "english": "Gain",
-          "max_length": 4,
-          "needs_translation": false,
+          "english": "Throw",
+          "max_length": 5,
+          "needs_translation": true,
           "reverse_text": false,
-          "translation": "Gana"
+          "translation": "Throw"
         },
         "geo_correction": {
           "english": "Geo Correction",
