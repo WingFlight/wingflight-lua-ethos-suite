@@ -530,9 +530,10 @@ local function announceGpsFix()
 end
 
 -- FC status callouts from lib/system_alerts.lua's rules. A condition already
--- present when the status first arrives becomes the baseline silently (the
--- dashboard banner shows it); after that each change is announced once it has
--- held for the rule's debounce. Not armed-gated: a backup RX that isn't linked
+-- present when the words its rule reads first arrive becomes the baseline
+-- silently (the dashboard banner shows it), and a rule is left alone until
+-- those words arrive; after that each change is announced once it has held
+-- for the rule's debounce. Not armed-gated: a backup RX that isn't linked
 -- matters most on the bench.
 local function announceSystemAlerts(now)
   local status = session.systemStatus
@@ -542,7 +543,7 @@ local function announceSystemAlerts(now)
 
   for i = 1, #rules do
     local rule = rules[i]
-    if rule.enterSound or rule.exitSound then
+    if (rule.enterSound or rule.exitSound) and systemAlerts.hasWords(rule, status, config) then
       local active = systemAlerts.isActive(rule, status, config)
       local state = alertState[rule.id]
       if state == nil then

@@ -12,6 +12,9 @@
 --   text       banner text, or nil for a callout-only rule
 --   active     function(status, config) -> bool; both are always tables
 --              (an empty one for a word the FC is not sending)
+--   word       "config" for a rule that reads only system_config, "both" for
+--              one that reads both; nil means it reads system_status (see
+--              hasWords())
 --   setting    events.<setting> switch for the callouts
 --   enterSound / exitSound  events/alerts/<file> played when the
 --              condition starts / clears (nil = silent)
@@ -84,6 +87,7 @@ local RULES = {
     id = "rx_backup_down",
     level = LEVEL.WARNING,
     text = "@i18n(widgets.dashboard.alert_rx_backup_down)@",
+    word = "both",
     active = function(s, c) return c.rxBackupConfigured == true and s.rxBackupLinkUp == false end,
     setting = "status_rx_backup",
     enterSound = "rxbackuplost.wav",
@@ -130,12 +134,14 @@ local RULES = {
     id = "reboot_required",
     level = LEVEL.WARNING,
     text = "@i18n(widgets.dashboard.alert_reboot_required)@",
+    word = "config",
     active = function(_, c) return c.rebootRequired == true end,
   },
   {
     id = "blackbox_full",
     level = LEVEL.WARNING,
     text = "@i18n(widgets.dashboard.alert_blackbox_full)@",
+    word = "config",
     active = function(_, c) return c.blackboxFull == true end,
     setting = "status_blackbox",
     enterSound = "bbfull.wav",
@@ -146,6 +152,17 @@ local systemAlerts = {
   LEVEL = LEVEL,
   RULES = RULES,
 }
+
+-- Whether the words a rule reads have arrived. The callouts wait for them
+-- before recording a rule's starting state: otherwise, with System Status
+-- arriving first, a Blackbox that is already full would be recorded as "not
+-- full" and then announced as new when System Config arrives.
+function systemAlerts.hasWords(rule, status, config)
+  local word = rule.word
+  if word == "config" then return config ~= nil end
+  if word == "both" then return status ~= nil and config ~= nil end
+  return status ~= nil
+end
 
 -- The two words are separate sensors and a model may select only one, so
 -- each rule is evaluated against whichever words are present: the

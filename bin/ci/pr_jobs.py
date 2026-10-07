@@ -1009,9 +1009,11 @@ select only one. Reboot required and Blackbox full come from System Config alone
 but lib/system_alerts.lua returned "nothing active" whenever System Status was
 missing, so neither banner nor callout ever showed on such a model. Rules are now
 evaluated against whichever words are present, with an empty table for the other;
-the check pins that, and that no rule reads true against an empty table.
---self-test gates topBanner() on System Status again and requires the config-only
-check to go red. Ported from rotorflight-lua-ethos-suite PR #2488's review.
+the check pins that, and that no rule reads true against an empty table. The
+callouts also wait for the words a rule reads before recording its starting
+state, so a Blackbox already full when System Config arrives after System Status
+is not announced as new. --self-test reverts each fix and requires its check to
+go red. Ported from rotorflight-lua-ethos-suite PR #2488's review.
 '''
     ),
 ]
