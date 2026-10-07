@@ -1782,7 +1782,7 @@ end
 local statusBannerRule, statusBannerCount, statusBannerText = nil, 0, nil
 
 local function drawStatusBanner(widget, w, h)
-  if widget.systemStatus == nil then return false end
+  if widget.systemStatus == nil and widget.systemConfig == nil then return false end
   local alerts = ensureSystemAlerts()
   local rule, count = alerts.topBanner(widget.systemStatus, widget.systemConfig)
   if rule == nil then return false end

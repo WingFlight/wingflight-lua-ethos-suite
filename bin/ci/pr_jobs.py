@@ -1001,6 +1001,19 @@ is byte-identical for this command: MSP_MOTOR_OVERRIDE 194 / MSP_SET_MOTOR_OVERR
 and the same armed guard.
 '''
     ),
+    LuaStep(
+        name='FC status alerts fire from whichever packed word is present',
+        script='bin/system_status/verify_system_alerts.lua',
+        rationale=r'''System Status and System Config are separate telemetry sensors, and a pilot may
+select only one. Reboot required and Blackbox full come from System Config alone,
+but lib/system_alerts.lua returned "nothing active" whenever System Status was
+missing, so neither banner nor callout ever showed on such a model. Rules are now
+evaluated against whichever words are present, with an empty table for the other;
+the check pins that, and that no rule reads true against an empty table.
+--self-test gates topBanner() on System Status again and requires the config-only
+check to go red. Ported from rotorflight-lua-ethos-suite PR #2488's review.
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [

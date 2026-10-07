@@ -536,8 +536,8 @@ end
 -- matters most on the bench.
 local function announceSystemAlerts(now)
   local status = session.systemStatus
-  if status == nil then return end
   local config = session.systemConfig
+  if status == nil and config == nil then return end
   local rules = systemAlerts.RULES
 
   for i = 1, #rules do
