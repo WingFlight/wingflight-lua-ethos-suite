@@ -9,7 +9,7 @@
 -- each rule individually -- see @i18n(app.modules.mixer.axis_gain_help)@.
 --
 -- Each axis's single wire field (`rate`, signed S16) is *split* into two
--- widgets here: Gain (0-200%, |rate|/10) and Invert (rate's sign) --
+-- widgets here: Throw (0-200%, |rate|/10) and Invert (rate's sign) --
 -- matches this project's own last-known-good app/modules/mixer/mixer.lua
 -- and tasks/scheduler/msp/api/MIXER_INPUT_ROLL.lua's parseRead()/
 -- buildWritePayload() exactly (gain = min(200, |rate|//10), invert =

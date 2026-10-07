@@ -5476,11 +5476,11 @@
           "translation": "Activer bypass du mixer pour bouger les sticks lors du réglage plateau. Les modif. de cette page sont envoyées au contrôleur de vol."
         },
         "gain": {
-          "english": "Gain",
-          "max_length": 4,
-          "needs_translation": false,
+          "english": "Throw",
+          "max_length": 5,
+          "needs_translation": true,
           "reverse_text": false,
-          "translation": "Gain"
+          "translation": "Throw"
         },
         "geo_correction": {
           "english": "Geo Correction",

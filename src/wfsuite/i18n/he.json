@@ -5476,11 +5476,11 @@
           "translation": "אפשר ביטול מיקסר מעבר כדי שתוכל להזיז את המקלות תוך התאמת גיאומטריית הסוואש. \r\n\r\nשינויים חיים מדף זה נשלחים לבקר הטיסה."
         },
         "gain": {
-          "english": "Gain",
-          "max_length": 4,
-          "needs_translation": false,
-          "reverse_text": true,
-          "translation": "הגבר"
+          "english": "Throw",
+          "max_length": 5,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Throw"
         },
         "geo_correction": {
           "english": "Geo Correction",
