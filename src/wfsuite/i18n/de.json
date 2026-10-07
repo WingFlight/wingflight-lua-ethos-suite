@@ -2058,6 +2058,83 @@
           "reverse_text": false,
           "translation": "Motor-Stopp PWM-Wert"
         },
+        "motor": {
+          "english": "Motor",
+          "max_length": 5,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Motor"
+        },
+        "motor_override": {
+          "english": "Motor Override",
+          "max_length": 14,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Motor-Override"
+        },
+        "motor_override_armed": {
+          "english": "Disarm before driving a motor.",
+          "max_length": 30,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Vor dem Motorsteuern entschärfen."
+        },
+        "motor_override_disable": {
+          "english": "Disable motor override",
+          "max_length": 22,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Motor-Override deaktivieren"
+        },
+        "motor_override_disable_msg": {
+          "english": "Return control of the motor to the flight controller.",
+          "max_length": 53,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Motorsteuerung an den Flugcontroller zurückgeben."
+        },
+        "motor_override_disconnected": {
+          "english": "Link lost. Override released.",
+          "max_length": 29,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Verbindung weg. Override aus."
+        },
+        "motor_override_enable": {
+          "english": "Enable motor override",
+          "max_length": 21,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Motor-Override aktivieren"
+        },
+        "motor_override_enable_msg": {
+          "english": "The flight controller drives the motor directly. Remove the propeller, secure the model and stand clear.",
+          "max_length": 104,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Der Flugcontroller steuert den Motor direkt. Propeller abnehmen, Modell sichern und Abstand halten."
+        },
+        "motor_override_note": {
+          "english": "Propeller off and the model secured.",
+          "max_length": 36,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Propeller ab und Modell gesichert."
+        },
+        "motor_override_note_2": {
+          "english": "The motor turns with the throttle.",
+          "max_length": 34,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Der Motor dreht mit dem Gas."
+        },
+        "motor_override_throttle": {
+          "english": "Throttle",
+          "max_length": 8,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Gas"
+        },
         "motor_pole_count": {
           "english": "Motor Pole Count",
           "max_length": 16,

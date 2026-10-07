@@ -883,6 +883,9 @@ before. Both mutations turn their gate red under --self-test (a loosened bound, 
 fixture on 209), so neither gate can pass by being unable to fail.
 
 Ported from rotorflight-lua-ethos-suite#2480, which closes rotorflight #2454.
+'''
+    ),
+    LuaStep(
         name='Check the save-and-reboot pipeline',
         script='bin/reboot_policy/verify_reboot_policy.lua',
         rationale=r'''A save that restarts the flight controller used to close its save dialog and
@@ -895,6 +898,8 @@ Wingflight has no Rotorflight heli governor page, so this pins the shared
 pipeline only: the wait state machine needs a link that drops and returns and a
 handshake that answers, which no build step reaches.
 Ported from rotorflight-lua-ethos-suite#2361.
+'''
+    ),
     # Ported from rotorflight-lua-ethos-suite PR #2485 (Issue #2303).
     LuaStep(
         name='An armed save is reported without a modal',
@@ -907,6 +912,8 @@ until OK was pressed; app/header.lua now draws a transient footer banner instead
 wakeup tick. The new localSettings flag keeps a local-storage page out of the armed
 gate. 3 of its 17 checks are gates and go red on the pre-fix files; --self-test proves
 that. Ported from rotorflight-lua-ethos-suite #2485 (Issue #2303).
+'''
+    ),
     LuaStep(
         name='Post-connect reads wait for a verified API_VERSION',
         script='bin/handshake_gate/verify_handshake_gate.lua',
@@ -930,6 +937,68 @@ Ported from rotorflight-lua-ethos-suite PR #2486 (issue #2362).
 5 of the harness's 12 checks are gates on the queue contents, proven by --self-test:
 it neuters the gate's condition in a copy of session.lua and requires the central
 check (no identity read before the verdict) to go red.
+'''
+    ),
+    LuaStep(
+        name='Motor override is confirmed, kept alive, armed-guarded and released',
+        script='bin/motor_override/verify_motor_override.lua',
+        rationale=r'''Drives one motor directly from the radio via MSP_SET_MOTOR_OVERRIDE (195), so a
+direction check, an ESC calibration or a motor swap can be done from the radio
+instead of on a bench with the Configurator. Three of its four interlocks are the
+firmware's own deadlines rather than UI state, and each is a place where a page
+that gets it wrong leaves a motor turning that the pilot cannot see or stop.
+
+A SINGLE WRITE IS NOT "THE MOTOR IS ON". MOTOR_OVERRIDE_TIMEOUT is 1000000 us --
+1.0 s (flight/motors.h:22-27) -- and motors.c:298-300 resets EVERY override once
+it passes. One write therefore means "the motor turns for one more second". The
+page re-sends the current value at 4 Hz while the override is engaged and keeps
+one write in flight; a write per wheel click would look like it worked and stop
+the motor whenever the pilot stopped scrolling.
+
+This is NOT lib/override_keepalive.lua's timed override. That path exists for
+servo, mixer and mode overrides, which carry their own timeout in the payload
+from API 22.14 on a 10 s window refreshed every 3 s. MSP_SET_MOTOR_OVERRIDE
+carries no timeout field at all -- the firmware supplies its own one-second one
+-- so a 3 s refresh would let the motor lapse between sends. The page owns its
+own 250 ms heartbeat for that reason, and this is the first harness here to pin
+a refresh rate against a firmware deadline rather than against a value.
+
+AN ARMED CRAFT CANNOT BE OVERRIDDEN AT ALL. motors.c:114-120:
+`if (!ARMING_FLAG(ARMED) && motor < motorCount)`. The switch is disabled rather
+than shown as a control that would quietly do nothing, and an override already
+running when the model arms is handed straight back -- with the zeros actually
+written, since the page cannot know whether its last write arrived.
+
+THE WRITE NAMES ONE MOTOR (msp.c:3055-3063), so leaving has to name them all.
+Back, a page switch, the tool closing and the built page's Back button all run
+the same release, and the built page's button goes through the same function
+rather than a second copy of it.
+
+THE SAFETY NOTE IS DRAWN ACROSS THE LINE. form.addStaticText(line, nil, text)
+puts the text in the line's VALUE column -- the narrow right-hand slot -- and
+clips it there; that is how this note first shipped in the Rotorflight sister
+suite and why it arrives cut off at the right edge. The harness's form stub
+keeps the rect it is handed and three checks assert both note lines and the
+notice span the line (x = 0, w = window). 480 px carries about 37 characters, so
+the note is two short lines.
+
+10 of the harness's 56 checks are gates, proven by --self-test: it splices an
+EdgeTX-only constant back in (FONT_S's EdgeTX name SMLSIZE, which is exactly the
+crash the sister suite shipped), the full-width text rect back to nil, the
+keep-alive interval, both places the armed guard is enforced (the disabled switch
+AND the refusal to open the confirm), the every-motor release, the session-driven
+release, the Back-button teardown and the session unsubscribe out of a copy of
+the page, and requires each to go red. The splices assert they applied, because a
+pattern that has moved must fail the run rather than pass silently. The remaining
+checks are controls: a page that is not overriding writes nothing at all over
+five seconds, the throttle and the motor selector are locked while overriding, a
+cancel leaves the page as it was, and a newly selected motor starts at zero
+instead of inheriting its predecessor's throttle.
+
+Ported from rotorflight-lua-ethos-suite PR #2487 (issue #2307). The firmware here
+is byte-identical for this command: MSP_MOTOR_OVERRIDE 194 / MSP_SET_MOTOR_OVERRIDE
+195 (msp/msp_protocol.h:249-250), MAX_SUPPORTED_MOTORS 4, the same 1.0 s deadline
+and the same armed guard.
 '''
     ),
 ]
