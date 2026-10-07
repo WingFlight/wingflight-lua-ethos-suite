@@ -8,9 +8,10 @@ source: app/pages/motor_override.lua
 
 # Motor Override
 
-> **Remove the propeller and secure the model first.** The flight controller drives
-> the motor directly here, with no throttle stick, no mix and no arming check in
-> between. Anything still attached turns.
+> **Remove the propeller and secure the model first.** Here the flight controller
+> drives the motor directly: no throttle stick and no mix sit between the value on
+> this page and the output. It still refuses the write while the model is armed, so
+> disarm first. Anything still attached turns.
 
 Drives one motor directly, so a direction check, an ESC calibration or a motor
 swap can be done from the radio instead of on a bench with the Configurator.
