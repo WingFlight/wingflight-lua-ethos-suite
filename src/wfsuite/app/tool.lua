@@ -317,10 +317,13 @@ local MENUS = {
   -- expansion panels; on a 480x320 radio that meant scrolling past every unrelated
   -- event to change one, and it built every widget for every event at once. It is
   -- a menu of category pages now, each of which builds only its own fields on open.
-  --
-  -- The FC status entry is the "Status alerts" panel, kept as its own tile for the
-  -- reasons on settings_audio_events_status.lua: it is the only category that
-  -- needs a live flight controller, and that boundary is drawn deliberately.
+  -- The Link entry is issue #2311's telemetry lost/recovered pair. A Link tile
+  -- used to be offered by nothing on purpose: settings.events had no link key
+  -- and tasks/audio_events.lua answered a down link by clearing its alert state
+  -- and returning -- it announced nothing about the link, so there was nothing
+  -- for a toggle to switch. That is no longer true, and the announcement is
+  -- gated on the model having been armed when the link went, which is what
+  -- keeps a bench power-down silent.
   --
   -- Every entry carries offline = true: the whole subtree is local settings with
   -- no MSP read, which is why it was reachable without a flight controller before
@@ -333,6 +336,7 @@ local MENUS = {
       {title = "@i18n(app.modules.settings.fuel)@", icon = lcd.loadMask("app/gfx/power_smartfuel.png"), script = "app/pages/settings_audio_events_fuel.lua", offline = true},
       {title = "@i18n(app.modules.settings.audio_event_state)@", icon = lcd.loadMask("app/gfx/governor.png"), script = "app/pages/settings_audio_events_state.lua", offline = true},
       {title = "@i18n(app.modules.settings.status_alerts)@", icon = lcd.loadMask("app/gfx/diagnostics_info.png"), script = "app/pages/settings_audio_events_status.lua", offline = true},
+      {title = "@i18n(app.modules.settings.link)@", icon = lcd.loadMask("app/gfx/diagnostics_elrs_link.png"), script = "app/pages/settings_audio_events_link.lua", offline = true},
       {title = "@i18n(app.modules.settings.model_announcement)@", icon = lcd.loadMask("app/gfx/beepers.png"), script = "app/pages/settings_audio_events_announcement.lua", offline = true},
     },
   },

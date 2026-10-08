@@ -2493,6 +2493,20 @@
           "reverse_text": false,
           "max_length": 17
         },
+        "link": {
+          "english": "Link",
+          "translation": "Link",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 4
+        },
+        "telemetry_lost": {
+          "english": "Telemetry lost",
+          "translation": "Telemetry lost",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 14
+        },
         "alert_repeat_interval": {
           "english": "Repeat interval",
           "translation": "Re intervalo de repetição",

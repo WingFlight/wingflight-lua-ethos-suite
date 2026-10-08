@@ -62,6 +62,12 @@ local DEFAULTS = {
     -- What the low-voltage callout speaks: 0 alert tone only, 1 total pack
     -- voltage, 2 average cell voltage.
     voltage_callout = 0,
+    -- The telemetry link going away and coming back. Gated by the model having
+    -- been armed at the moment the link went -- see tasks/audio_events.lua's
+    -- announceTelemetryLost(). The armed gate is what keeps bench work and
+    -- a bench power-down silent, so what is left is a link loss with the rotors
+    -- turning -- the one event here a pilot must not have to notice himself.
+    telemetry_lost = true,
     pid_profile = true,
     rate_profile = true,
     tv_profile = true,
@@ -196,6 +202,7 @@ local function normalizeEvents(values)
   events.voltage_repeat_interval = clampNumber(events.voltage_repeat_interval, DEFAULTS.events.voltage_repeat_interval, 5, 120)
   events.voltage_hold = clampNumber(events.voltage_hold, DEFAULTS.events.voltage_hold, 0, 10)
   events.voltage_callout = clampNumber(events.voltage_callout, DEFAULTS.events.voltage_callout, 0, 2)
+  events.telemetry_lost = coerceBool(events.telemetry_lost, DEFAULTS.events.telemetry_lost)
   events.pid_profile = coerceBool(events.pid_profile, DEFAULTS.events.pid_profile)
   events.rate_profile = coerceBool(events.rate_profile, DEFAULTS.events.rate_profile)
   events.tv_profile = coerceBool(events.tv_profile, DEFAULTS.events.tv_profile)

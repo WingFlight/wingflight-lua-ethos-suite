@@ -34,6 +34,8 @@
 --  10. an unassigned number field returns out of bounds -> case 6
 --  11. a low-voltage sag fires before the hold time    -> case 7
 --  12. the voltage callout speaks a wrong value/unit  -> case 7
+--  13. a telemetry loss fires without being armed      -> case 8
+--  14. a recovered link announces without a prior loss -> case 8
 
 local function scriptDir()
   local src = debug.getinfo(1, "S").source
@@ -88,6 +90,7 @@ local CATEGORIES = {
   {key = "fuel",         file = "settings_audio_events_fuel.lua"},
   {key = "state",        file = "settings_audio_events_state.lua"},
   {key = "status",       file = "settings_audio_events_status.lua"},
+  {key = "link",         file = "settings_audio_events_link.lua"},
   {key = "announcement", file = "settings_audio_events_announcement.lua"},
 }
 
@@ -881,6 +884,221 @@ end
 out("")
 out("case 7: the low-voltage hold filter and spoken callout")
 voltageChecks()
+
+-- ── case 8: the telemetry link, gated by the armed state (issue #2311) ──────
+--
+-- The link announcement is the one event whose callout depends on the state
+-- *before* the event, and the two halves are gated on each other. Nothing in the
+-- build or the package step reaches tasks/audio_events.lua's
+-- announceTelemetryLost()/announceTelemetryRecovered(), and both failure modes
+-- are quiet in the direction that costs the pilot something: drop the armed gate
+-- and every bench power-down shouts, drop the pending flag and a model that was
+-- told it lost the link is never told it got it back.
+--
+-- Pinned:
+--   * a link loss while armed is announced once, with the haptic, and never
+--     again while the link stays down;
+--   * a link loss while disarmed says nothing at all -- the bench case the
+--     issue was filed about;
+--   * the link coming back is announced once, and only for a loss that was
+--     announced;
+--   * a model that answers again after the recovery window gets no recovery;
+--   * telemetry_lost = false keeps both halves silent;
+--   * nothing is announced for a link that was already down at startup.
+--
+-- The last check strips the armed gate from a copy of the task and requires a
+-- disarmed loss to fire there. If it stops turning red, the instrument has gone
+-- blind.
+
+local function linkChecks()
+  local realIoOpen = io.open
+  local savedSystem, savedClock = _G.system, os.clock
+  local audioSource = readFile(AUDIO_PATH)
+  local scriptFiles = {}
+
+  io.open = function(path, mode)
+    if scriptFiles[path] then
+      return {close = function() end}
+    end
+    return nil
+  end
+
+  local TELEMETRY_LOST_FILE = "SCRIPTS:/wfsuite/audio/en/default/events/alerts/telemetrylost.wav"
+  local TELEMETRY_OK_FILE = "SCRIPTS:/wfsuite/audio/en/default/events/alerts/telemetryok.wav"
+
+  local function newLinkRig(events, source)
+    local handlers = {}
+    local played, spoken, haptics = {}, {}, {}
+
+    local busStub = {
+      subscribe = function(topic, fn) handlers[topic] = fn end,
+      publish = function() end,
+    }
+    local storeStub = {
+      load = function() return {events = events} end,
+      audioEvents = function(s) return s.events or {} end,
+      audioTimer = function() return {} end,
+    }
+
+    _G.system = {
+      playFile = function(path) played[#played + 1] = path end,
+      playNumber = function(value, unit, decimals)
+        spoken[#spoken + 1] = {value = value, unit = unit, decimals = decimals}
+      end,
+      playHaptic = function() haptics[#haptics + 1] = true end,
+      getAudioVoice = function() return "en/default" end,
+    }
+
+    local clock = 0
+    os.clock = function() return clock end
+
+    local chunk = assert(load(source or audioSource, "@" .. AUDIO_PATH))
+    local audio = chunk(busStub, storeStub)
+
+    local rig = {spoken = spoken, haptics = haptics}
+    function rig.setClock(t) clock = t end
+    function rig.step(snapshot)
+      handlers["session.update"](snapshot)
+      handlers["settings.update"]({events = events})
+      audio.wakeup()
+    end
+    function rig.count(file)
+      local n = 0
+      for _, path in ipairs(played) do
+        if path:find(file, 1, true) then n = n + 1 end
+      end
+      return n
+    end
+    function rig.lastPlayed() return played[#played] end
+    function rig.noSounds() scriptFiles = {} end
+
+    rig.noSounds()
+    return rig
+  end
+
+  -- Armed, and the link goes. The first wakeup only initializes the task, so the
+  -- loss is on the second connected tick's successor.
+  do
+    local rig = newLinkRig({telemetry_lost = true})
+    rig.setClock(0); rig.step({connected = true, isArmed = true}) -- initialize
+    rig.setClock(1); rig.step({connected = true, isArmed = true}) -- armed tick
+    rig.setClock(2); rig.step({connected = false})                -- link lost
+    check("a link loss while armed buzzes",
+      #rig.haptics == 1, #rig.haptics .. " haptic(s)")
+    check("with no telemetrylost.wav in the pack, no file is played",
+      rig.count(".wav") == 0, rig.count(".wav") .. " file(s) played")
+    rig.setClock(3); rig.step({connected = false})                -- still down
+    check("a loss that stands is not announced again",
+      #rig.haptics == 1, #rig.haptics .. " haptic(s)")
+  end
+
+  -- A pack that carries the words plays them: the dedicated file on the way
+  -- out, and its pair on the way back in.
+  do
+    local rig = newLinkRig({telemetry_lost = true})
+    scriptFiles[TELEMETRY_LOST_FILE] = true
+    scriptFiles[TELEMETRY_OK_FILE] = true
+    rig.setClock(0); rig.step({connected = true, isArmed = true})
+    rig.setClock(1); rig.step({connected = true, isArmed = true})
+    rig.setClock(2); rig.step({connected = false})
+    check("a pack that carries telemetrylost.wav plays it",
+      (rig.lastPlayed() or ""):find("telemetrylost.wav", 1, true) ~= nil,
+      tostring(rig.lastPlayed()))
+    rig.setClock(3); rig.step({connected = true, isArmed = true}) -- back
+    check("the link coming back plays telemetryok.wav",
+      rig.count("telemetryok.wav") == 1, "telemetryok.wav played " .. rig.count("telemetryok.wav") .. "x")
+    check("the recovery buzzes once",
+      #rig.haptics == 2, #rig.haptics .. " haptic(s)")
+    rig.setClock(4); rig.step({connected = true, isArmed = true})
+    check("the recovery is not announced again",
+      rig.count("telemetryok.wav") == 1, "telemetryok.wav played " .. rig.count("telemetryok.wav") .. "x")
+  end
+
+  -- The bench case from the issue: disarmed, pack unplugged. Nothing at all --
+  -- no file, no haptic -- and no recovery either, because nothing was lost.
+  do
+    local rig = newLinkRig({telemetry_lost = true})
+    rig.setClock(0); rig.step({connected = true, isArmed = false})
+    rig.setClock(1); rig.step({connected = true, isArmed = false})
+    rig.setClock(2); rig.step({connected = false})
+    check("a link loss while disarmed is silent",
+      #rig.haptics == 0 and rig.count(".wav") == 0,
+      #rig.haptics .. " haptic(s), " .. rig.count(".wav") .. " file(s)")
+    rig.setClock(3); rig.step({connected = true, isArmed = false})
+    check("a model that was never told it lost the link is not told it recovered",
+      rig.count("telemetryok.wav") == 0 and #rig.haptics == 0,
+      #rig.haptics .. " haptic(s), " .. rig.count(".wav") .. " file(s)")
+  end
+
+  -- The window: a model that answers again long after the loss is a new flight.
+  do
+    local rig = newLinkRig({telemetry_lost = true})
+    scriptFiles[TELEMETRY_LOST_FILE] = true
+    scriptFiles[TELEMETRY_OK_FILE] = true
+    rig.setClock(0); rig.step({connected = true, isArmed = true})
+    rig.setClock(1); rig.step({connected = true, isArmed = true})
+    rig.setClock(2); rig.step({connected = false})
+    rig.setClock(200); rig.step({connected = true, isArmed = true})
+    check("a link back after the recovery window gets no recovery callout",
+      rig.count("telemetryok.wav") == 0, "telemetryok.wav played " .. rig.count("telemetryok.wav") .. "x")
+  end
+
+  -- The setting off keeps both halves silent.
+  do
+    local rig = newLinkRig({telemetry_lost = false})
+    rig.setClock(0); rig.step({connected = true, isArmed = true})
+    rig.setClock(1); rig.step({connected = true, isArmed = true})
+    rig.setClock(2); rig.step({connected = false})
+    check("telemetry_lost = false keeps the loss silent",
+      #rig.haptics == 0, #rig.haptics .. " haptic(s)")
+    rig.setClock(3); rig.step({connected = true, isArmed = true})
+    check("telemetry_lost = false keeps the recovery silent",
+      #rig.haptics == 0, #rig.haptics .. " haptic(s)")
+  end
+
+  -- A task that starts on a down link has no `previous` to read an edge from.
+  do
+    local rig = newLinkRig({telemetry_lost = true})
+    rig.setClock(0); rig.step({connected = false})
+    rig.setClock(1); rig.step({connected = false})
+    check("a link that was already down at startup is not a loss",
+      #rig.haptics == 0, #rig.haptics .. " haptic(s)")
+  end
+
+  -- Can-fail: strip the armed gate and require a disarmed loss to fire. If this
+  -- stops turning red, the checks above prove nothing.
+  local source = audioSource
+  local stripped = source:gsub("if previous.isArmed ~= true then return end", "", 1)
+  check("the armed gate could be located in announceTelemetryLost()", stripped ~= source)
+  local rig = newLinkRig({telemetry_lost = true}, stripped)
+  rig.setClock(0); rig.step({connected = true, isArmed = false})
+  rig.setClock(1); rig.step({connected = true, isArmed = false})
+  rig.setClock(2); rig.step({connected = false})
+  check("without the armed gate a disarmed loss fires (this check can go red)",
+    #rig.haptics == 1, #rig.haptics .. " haptic(s)")
+
+  -- Can-fail the other way round: read the armed state off the session instead
+  -- of the snapshot. The session clears isArmed in the same step that clears
+  -- connected, so this copy answers with an empty value and has to stay quiet --
+  -- and it is what the real code would do if the announcement ran after
+  -- rememberCurrent() instead of before it.
+  local stale = source:gsub("if previous.isArmed ~= true then return end",
+    "if session.isArmed ~= true then return end", 1)
+  check("the armed gate could be re-pointed at the session", stale ~= source)
+  local quiet = newLinkRig({telemetry_lost = true}, stale)
+  quiet.setClock(0); quiet.step({connected = true, isArmed = true})
+  quiet.setClock(1); quiet.step({connected = true, isArmed = true})
+  quiet.setClock(2); quiet.step({connected = false})
+  check("a gate reading the session's armed state says nothing (this check can go red)",
+    #quiet.haptics == 0, #quiet.haptics .. " haptic(s)")
+
+  io.open = realIoOpen
+  _G.system, os.clock = savedSystem, savedClock
+end
+
+out("")
+out("case 8: the telemetry link, gated by the armed state")
+linkChecks()
 
 out("")
 out(string.rep("-", 60))
