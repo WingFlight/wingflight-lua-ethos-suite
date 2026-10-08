@@ -55,6 +55,13 @@ local DEFAULTS = {
     flight_mode = true,
     voltage = true,
     voltage_repeat_interval = 10,
+    -- Seconds a low pack reading must hold before the alarm fires, so a
+    -- momentary voltage sag under load is not called out. 0 disables the
+    -- filter; default 2.0.
+    voltage_hold = 2.0,
+    -- What the low-voltage callout speaks: 0 alert tone only, 1 total pack
+    -- voltage, 2 average cell voltage.
+    voltage_callout = 0,
     pid_profile = true,
     rate_profile = true,
     tv_profile = true,
@@ -187,6 +194,8 @@ local function normalizeEvents(values)
   events.flight_mode = coerceBool(events.flight_mode, DEFAULTS.events.flight_mode)
   events.voltage = coerceBool(events.voltage, DEFAULTS.events.voltage)
   events.voltage_repeat_interval = clampNumber(events.voltage_repeat_interval, DEFAULTS.events.voltage_repeat_interval, 5, 120)
+  events.voltage_hold = clampNumber(events.voltage_hold, DEFAULTS.events.voltage_hold, 0, 10)
+  events.voltage_callout = clampNumber(events.voltage_callout, DEFAULTS.events.voltage_callout, 0, 2)
   events.pid_profile = coerceBool(events.pid_profile, DEFAULTS.events.pid_profile)
   events.rate_profile = coerceBool(events.rate_profile, DEFAULTS.events.rate_profile)
   events.tv_profile = coerceBool(events.tv_profile, DEFAULTS.events.tv_profile)
