@@ -1014,6 +1014,25 @@ the check pins that, and that no rule reads true against an empty table.
 check to go red. Ported from rotorflight-lua-ethos-suite PR #2488's review.
 '''
     ),
+    LuaStep(
+        name='Audio events stay reachable after the split into categories',
+        script='bin/audio_events/verify_audio_events.lua',
+        rationale=r'''Nothing in the build or package step can see a page that stopped offering a setting.
+The failure mode that matters here is quiet -- a key that no page edits any more simply
+loses its toggle, and the pilot finds out in the air. So the load-bearing check is the
+coverage one: every key in DEFAULTS.events is edited by exactly one category page.
+
+The check also pins the runtime boundaries of the split:
+* each category builds only its own fields when opened, not the whole set
+* the shared helper frees its state on teardown, and field callbacks cannot mutate
+  the settings store after the page has been closed
+* dirty-tracking arms Save only when a value changed, and disarms after saving
+* unassigned number fields return defaults scaled within declared bounds
+* tool.lua reaches the six category pages and the old monolithic page is gone
+
+Ported from rotorflight-lua-ethos-suite PR #2508 (issue #2308).
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [

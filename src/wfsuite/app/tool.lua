@@ -307,9 +307,33 @@ local MENUS = {
   settings_audio_menu = {
     title = "@i18n(app.modules.settings.name)@ / @i18n(app.modules.settings.audio)@",
     entries = {
-      {title = "@i18n(app.modules.settings.txt_audio_events)@", icon = lcd.loadMask("app/gfx/settings_audio_events.png"), script = "app/pages/settings_audio_events.lua", offline = true},
+      {title = "@i18n(app.modules.settings.txt_audio_events)@", icon = lcd.loadMask("app/gfx/settings_audio_events.png"), menuId = "settings_audio_events_menu", offline = true},
       {title = "@i18n(app.modules.settings.txt_audio_switches)@", icon = lcd.loadMask("app/gfx/settings_audio_switches.png"), script = "app/pages/settings_audio_switches.lua", offline = true},
       {title = "@i18n(app.modules.settings.txt_audio_timer)@", icon = lcd.loadMask("app/gfx/settings_audio_timer.png"), script = "app/pages/settings_audio_timer.lua", offline = true},
+    },
+  },
+  -- Ported from rotorflight-lua-ethos-suite PR #2508 (issue #2308). This was one
+  -- page, settings_audio_events.lua, holding every settings.events key as a run of
+  -- expansion panels; on a 480x320 radio that meant scrolling past every unrelated
+  -- event to change one, and it built every widget for every event at once. It is
+  -- a menu of category pages now, each of which builds only its own fields on open.
+  --
+  -- The FC status entry is the "Status alerts" panel, kept as its own tile for the
+  -- reasons on settings_audio_events_status.lua: it is the only category that
+  -- needs a live flight controller, and that boundary is drawn deliberately.
+  --
+  -- Every entry carries offline = true: the whole subtree is local settings with
+  -- no MSP read, which is why it was reachable without a flight controller before
+  -- and must stay reachable now.
+  settings_audio_events_menu = {
+    title = "@i18n(app.modules.settings.name)@ / @i18n(app.modules.settings.audio)@ / @i18n(app.modules.settings.txt_audio_events)@",
+    entries = {
+      {title = "@i18n(app.modules.settings.voltage)@", icon = lcd.loadMask("app/gfx/power_battery.png"), script = "app/pages/settings_audio_events_voltage.lua", offline = true},
+      {title = "@i18n(app.modules.settings.esc_temperature)@", icon = lcd.loadMask("app/gfx/esc_motors.png"), script = "app/pages/settings_audio_events_esc.lua", offline = true},
+      {title = "@i18n(app.modules.settings.fuel)@", icon = lcd.loadMask("app/gfx/power_smartfuel.png"), script = "app/pages/settings_audio_events_fuel.lua", offline = true},
+      {title = "@i18n(app.modules.settings.audio_event_state)@", icon = lcd.loadMask("app/gfx/governor.png"), script = "app/pages/settings_audio_events_state.lua", offline = true},
+      {title = "@i18n(app.modules.settings.status_alerts)@", icon = lcd.loadMask("app/gfx/diagnostics_info.png"), script = "app/pages/settings_audio_events_status.lua", offline = true},
+      {title = "@i18n(app.modules.settings.model_announcement)@", icon = lcd.loadMask("app/gfx/beepers.png"), script = "app/pages/settings_audio_events_announcement.lua", offline = true},
     },
   },
   developer_menu = {

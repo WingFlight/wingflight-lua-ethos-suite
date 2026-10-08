@@ -8,7 +8,7 @@ sidebar_label: Pages
 Reference documentation for each configuration and settings page reachable
 within the WFSuite Ethos system tool.
 
-**Coverage:** 80 reachable pages in navigation hierarchy. Drafts require review.
+**Coverage:** 85 reachable pages in navigation hierarchy. Drafts require review.
 
 The *Conditions* column names what hides, greys out or locks a page; the sentences
 and structure follow [_template.md](../_template.md).
@@ -118,7 +118,12 @@ is there. The rule is in [.agents/rules/documentation.md](../../.agents/rules/do
 | Preflight | [settings/settings_activelook_preflight.md](settings/settings_activelook_preflight.md) | Available without a flight controller connection; the background task must be running. | draft |
 | Inflight | [settings/settings_activelook_inflight.md](settings/settings_activelook_inflight.md) | Available without a flight controller connection; the background task must be running. | draft |
 | Postflight | [settings/settings_activelook_postflight.md](settings/settings_activelook_postflight.md) | Available without a flight controller connection; the background task must be running. | draft |
-| Events | [settings/settings_audio_events.md](settings/settings_audio_events.md) | Available without a flight controller connection; the background task must be running. | draft |
+| Voltage | [settings/settings_audio_events_voltage.md](settings/settings_audio_events_voltage.md) | Available without a flight controller connection; the background task must be running. | reviewed |
+| ESC temperature | [settings/settings_audio_events_esc.md](settings/settings_audio_events_esc.md) | Available without a flight controller connection; the background task must be running. | reviewed |
+| Fuel | [settings/settings_audio_events_fuel.md](settings/settings_audio_events_fuel.md) | Available without a flight controller connection; the background task must be running. | reviewed |
+| State callouts | [settings/settings_audio_events_state.md](settings/settings_audio_events_state.md) | Available without a flight controller connection; the background task must be running. | reviewed |
+| FC status | [settings/settings_audio_events_status.md](settings/settings_audio_events_status.md) | Available without a flight controller connection; the background task must be running. | reviewed |
+| Model announcement | [settings/settings_audio_events_announcement.md](settings/settings_audio_events_announcement.md) | Available without a flight controller connection; the background task must be running. | reviewed |
 | Switches | [settings/settings_audio_switches.md](settings/settings_audio_switches.md) | Available without a flight controller connection; the background task must be running. | draft |
 | Timer | [settings/settings_audio_timer.md](settings/settings_audio_timer.md) | Available without a flight controller connection; the background task must be running. | draft |
 | Developer | [settings/developer_settings.md](settings/developer_settings.md) | Available without a flight controller connection; the background task must be running. | draft |
