@@ -969,7 +969,8 @@ local function newMainPowerRig(events, source)
     return loadfile(name)()
   end
 
-  _G.UNIT_VOLTS = "V"
+  _G.UNIT_VOLT = "V"
+  _G.UNIT_VOLTS = nil
   _G.system = {
     playFile = function(path) played[#played + 1] = path end,
     playNumber = function(value, unit, decimals)
