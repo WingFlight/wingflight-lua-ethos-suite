@@ -972,7 +972,8 @@ local function newMainPowerRig(events, source)
     return loadfile(name)()
   end
 
-  _G.UNIT_VOLTS = "V"
+  _G.UNIT_VOLT = "V"
+  _G.UNIT_VOLTS = nil
   _G.system = {
     playFile = function(path) played[#played + 1] = path end,
     playNumber = function(value, unit, decimals)
@@ -989,9 +990,9 @@ local function newMainPowerRig(events, source)
 
   local rig = {spoken = spoken, haptics = haptics}
   function rig.setClock(t) clock = t end
-  function rig.step(snapshot)
+  function rig.step(snapshot, newEvents)
     handlers["session.update"](snapshot)
-    handlers["settings.update"]({events = events})
+    handlers["settings.update"]({events = newEvents or events})
     audio.wakeup()
   end
   function rig.count(file)
@@ -1132,6 +1133,34 @@ local function mainPowerChecks()
   rig.setClock(1); rig.step({connected = true, voltage = 0, becVoltage = 5.0})
   check("without the pack-seen latch a never-measured pack fires (this check can go red)",
     rig.count("lowbat.wav") == 1, "lowbat.wav played " .. rig.count("lowbat.wav") .. "x")
+
+  -- The latch must be seeded from the first connected wakeup too. That wakeup
+  -- returns before any announcement runs, so a pack that was already reading
+  -- when the link came up is otherwise never recorded -- and a loss the instant
+  -- after goes unannounced for the whole episode.
+  do
+    local rig = newMainPowerRig({main_power_lost = true})
+    rig.setClock(0); rig.step({connected = true, voltage = 22.2, becVoltage = 5.0}) -- connects
+    rig.setClock(1); rig.step({connected = true, voltage = 0, becVoltage = 5.0})    -- gone
+    check("a pack already reading when the link came up counts as seen",
+      rig.count("lowbat.wav") == 1, "lowbat.wav played " .. rig.count("lowbat.wav") .. "x")
+  end
+
+  -- Switching the alert off must also drop the repeat deadline: a loss
+  -- announced, then switched off and back on, must not wait out the old clock
+  -- before it speaks again.
+  do
+    local rig = newMainPowerRig({main_power_lost = true})
+    rig.setClock(0); rig.step({connected = true, voltage = 22.2, becVoltage = 5.0})
+    rig.setClock(1); rig.step({connected = true, voltage = 22.2, becVoltage = 5.0})
+    rig.setClock(2); rig.step({connected = true, voltage = 0, becVoltage = 5.0})       -- fire
+    rig.setClock(3); rig.step({connected = true, voltage = 0, becVoltage = 5.0},
+      {main_power_lost = false})                                                       -- off
+    rig.setClock(4); rig.step({connected = true, voltage = 0, becVoltage = 5.0},
+      {main_power_lost = true})                                                        -- on again
+    check("a deadline from before the setting was switched off does not mute the alert",
+      rig.count("lowbat.wav") == 2, "lowbat.wav played " .. rig.count("lowbat.wav") .. "x")
+  end
 end
 
 out("")

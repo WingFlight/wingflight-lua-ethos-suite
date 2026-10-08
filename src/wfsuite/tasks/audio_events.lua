@@ -811,14 +811,23 @@ end
 -- announceVoltage(). Not armed-gated, for the same reason it is not there:
 -- the pack-seen latch already keeps a bench setup with no pack attached quiet,
 -- and a pack that goes while the model sits on the ground is still a fault.
+-- The latch's one writer. Called on every wakeup the main-power alert runs --
+-- including when the alert itself is switched off, because the latch answers
+-- "has this connection ever seen a pack" and an alert enabled later in the same
+-- session has to be able to answer that -- and once more from wakeup()'s
+-- initialisation branch, which returns before any announcement would run.
+-- Without that, a pack already reading when the link came up is never recorded,
+-- and a loss the instant after goes unannounced for the whole episode.
+local function notePackVoltage()
+  local voltage = tonumber(session.voltage)
+  if voltage and voltage > MAIN_POWER_LOST_VOLTS then packVoltageSeen = true end
+end
+
 local function mainPowerLost()
   local voltage = tonumber(session.voltage)
   if voltage == nil then return false end
 
-  if voltage > MAIN_POWER_LOST_VOLTS then
-    packVoltageSeen = true
-    return false
-  end
+  if voltage > MAIN_POWER_LOST_VOLTS then return false end
 
   if not packVoltageSeen then return false end
 
@@ -833,10 +842,15 @@ end
 -- spoken on the way in: it is the reading that still means something, and it
 -- says how much is left of whatever is keeping the receiver alive.
 local function announceMainPowerLost(now)
+  -- Recorded whether or not the alert is enabled, so switching it on later in
+  -- the same session does not lose the episode that had already started.
+  notePackVoltage()
+
   if not events.main_power_lost then
-    -- Forget an episode the pilot switched the alert off in, so switching it
-    -- back on does not announce a recovery for a loss that was never spoken.
+    -- Forget the whole episode, not just its "back" half: an alert switched off
+    -- and back on must not wait out a repeat deadline set before it was off.
     mainPowerLostActive = false
+    lastAlertAt.main_power = nil
     return
   end
   if session.connected ~= true then return end
@@ -852,7 +866,7 @@ local function announceMainPowerLost(now)
       -- on the way in below.
       local path = firstResolvedSound(MAIN_POWER_OK_SOUNDS)
       if path then system.playFile(path) end
-      playNumber(math.floor((voltage * 10) + 0.5), UNIT_VOLTS, 1)
+      playNumber(math.floor((voltage * 10) + 0.5), UNIT_VOLT, 1)
     end
     return
   end
@@ -866,7 +880,7 @@ local function announceMainPowerLost(now)
   mainPowerLostActive = true
   if path then system.playFile(path) end
   local bec = tonumber(session.becVoltage)
-  if bec then playNumber(math.floor((bec * 10) + 0.5), UNIT_VOLTS, 1) end
+  if bec then playNumber(math.floor((bec * 10) + 0.5), UNIT_VOLT, 1) end
   haptic()
 end
 
@@ -1242,6 +1256,10 @@ function audio_events.wakeup()
     initialized = true
     pendingModeSince = nil
     flightModeHeld = false
+    -- And the main-power latch, for the same kind of reason: this branch
+    -- returns before any announcement runs, so a pack already reading when the
+    -- link came up would never be recorded as seen at all.
+    notePackVoltage()
     rememberCurrent()
     -- The first connected tick after a link loss. Nothing else runs on it --
     -- this is the branch that keeps the first evaluation after a connect from
