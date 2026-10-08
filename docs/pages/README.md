@@ -8,7 +8,7 @@ sidebar_label: Pages
 Reference documentation for each configuration and settings page reachable
 within the WFSuite Ethos system tool.
 
-**Coverage:** 85 reachable pages in navigation hierarchy. Drafts require review.
+**Coverage:** 86 reachable pages in navigation hierarchy. Drafts require review.
 
 The *Conditions* column names what hides, greys out or locks a page; the sentences
 and structure follow [_template.md](../_template.md).
@@ -123,6 +123,7 @@ is there. The rule is in [.agents/rules/documentation.md](../../.agents/rules/do
 | Fuel | [settings/settings_audio_events_fuel.md](settings/settings_audio_events_fuel.md) | Available without a flight controller connection; the background task must be running. | reviewed |
 | State callouts | [settings/settings_audio_events_state.md](settings/settings_audio_events_state.md) | Available without a flight controller connection; the background task must be running. | reviewed |
 | FC status | [settings/settings_audio_events_status.md](settings/settings_audio_events_status.md) | Available without a flight controller connection; the background task must be running. | reviewed |
+| Link | [settings/settings_audio_events_link.md](settings/settings_audio_events_link.md) | Available without a flight controller connection; the background task must be running. | reviewed |
 | Model callout | [settings/settings_audio_events_announcement.md](settings/settings_audio_events_announcement.md) | Available without a flight controller connection; the background task must be running. | reviewed |
 | Switches | [settings/settings_audio_switches.md](settings/settings_audio_switches.md) | Available without a flight controller connection; the background task must be running. | draft |
 | Timer | [settings/settings_audio_timer.md](settings/settings_audio_timer.md) | Available without a flight controller connection; the background task must be running. | draft |

@@ -68,6 +68,12 @@ local DEFAULTS = {
     -- pack, and it needs both a pack voltage and a BEC voltage to be readable
     -- at all.
     main_power_lost = false,
+    -- The telemetry link going away and coming back. Gated by the model having
+    -- been armed at the moment the link went -- see tasks/audio_events.lua's
+    -- announceTelemetryLost(). The armed gate is what keeps bench work and
+    -- a bench power-down silent, so what is left is a link loss with the rotors
+    -- turning -- the one event here a pilot must not have to notice himself.
+    telemetry_lost = true,
     pid_profile = true,
     rate_profile = true,
     tv_profile = true,
@@ -203,6 +209,7 @@ local function normalizeEvents(values)
   events.voltage_hold = clampNumber(events.voltage_hold, DEFAULTS.events.voltage_hold, 0, 10)
   events.voltage_callout = clampNumber(events.voltage_callout, DEFAULTS.events.voltage_callout, 0, 2)
   events.main_power_lost = coerceBool(events.main_power_lost, DEFAULTS.events.main_power_lost)
+  events.telemetry_lost = coerceBool(events.telemetry_lost, DEFAULTS.events.telemetry_lost)
   events.pid_profile = coerceBool(events.pid_profile, DEFAULTS.events.pid_profile)
   events.rate_profile = coerceBool(events.rate_profile, DEFAULTS.events.rate_profile)
   events.tv_profile = coerceBool(events.tv_profile, DEFAULTS.events.tv_profile)
