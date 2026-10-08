@@ -62,6 +62,12 @@ local DEFAULTS = {
     -- What the low-voltage callout speaks: 0 alert tone only, 1 total pack
     -- voltage, 2 average cell voltage.
     voltage_callout = 0,
+    -- Announce a main pack that has gone while the FC stays alive on a BEC or
+    -- a backup battery (upstream Issue #2310). Off by default: it only means
+    -- anything for a model carrying a backup guard or a separate receiver
+    -- pack, and it needs both a pack voltage and a BEC voltage to be readable
+    -- at all.
+    main_power_lost = false,
     -- The telemetry link going away and coming back. Gated by the model having
     -- been armed at the moment the link went -- see tasks/audio_events.lua's
     -- announceTelemetryLost(). The armed gate is what keeps bench work and
@@ -202,6 +208,7 @@ local function normalizeEvents(values)
   events.voltage_repeat_interval = clampNumber(events.voltage_repeat_interval, DEFAULTS.events.voltage_repeat_interval, 5, 120)
   events.voltage_hold = clampNumber(events.voltage_hold, DEFAULTS.events.voltage_hold, 0, 10)
   events.voltage_callout = clampNumber(events.voltage_callout, DEFAULTS.events.voltage_callout, 0, 2)
+  events.main_power_lost = coerceBool(events.main_power_lost, DEFAULTS.events.main_power_lost)
   events.telemetry_lost = coerceBool(events.telemetry_lost, DEFAULTS.events.telemetry_lost)
   events.pid_profile = coerceBool(events.pid_profile, DEFAULTS.events.pid_profile)
   events.rate_profile = coerceBool(events.rate_profile, DEFAULTS.events.rate_profile)

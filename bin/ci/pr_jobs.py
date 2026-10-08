@@ -1032,6 +1032,14 @@ The check also pins the runtime boundaries of the split:
 * the low-voltage hold filter, spoken callouts, and the telemetry link announcements
   behave as specified and are armed-gated
 
+And the task behaviour is driven against the real tasks/audio_events.lua with the bus, the
+settings store, system audio, os.clock and the packaged sound paths stubbed -- the
+main-power alert: a pack that has read a voltage and then goes, with a BEC still up, fires,
+speaks the BEC voltage and buzzes; a pack that is never measured, or one with no BEC
+reading, stays silent; the alert repeats only after its interval; and the pack coming back
+speaks once. A copy of the task with the pack-seen latch stripped is loaded and required to
+fire, so the instrument is proven able to go red.
+
 Ported from rotorflight-lua-ethos-suite PR #2508 (issue #2308), PR #2509 (issue #2309), and PR #2513 (issue #2311).
 '''
     ),
