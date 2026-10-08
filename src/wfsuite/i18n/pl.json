@@ -419,7 +419,7 @@
           "max_length": 46,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Automatyczne wykrywanie aktywne: przełącz żądany kanał AUX"
+          "translation": "Autowykrywanie aktywne: przełącz żądany kanał AUX"
         },
         "confirm_use_current": {
           "english": "Use current value",
@@ -894,7 +894,7 @@
           "max_length": 20,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "ACC kalibracja nie powiodła się"
+          "translation": "Błąd kalibracji ACC"
         },
         "field_armed": {
           "english": "Armed",
@@ -929,7 +929,7 @@
           "max_length": 20,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Krytycznie niski poziom baterii"
+          "translation": "Krytycznie niska bateria"
         },
         "field_bat_low": {
           "english": "Battery low",
@@ -1027,14 +1027,14 @@
           "max_length": 10,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "ESC Światło ostrzegawcze"
+          "translation": "Sygnał ESC"
         },
         "name": {
           "english": "Beepers",
           "max_length": 7,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Sygnały dźwiękowe"
+          "translation": "Sygnały"
         }
       },
       "blackbox": {
@@ -1064,7 +1064,7 @@
           "max_length": 13,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Wbudowana lampa błyskowa"
+          "translation": "Pamięć flash"
         },
         "device_sdcard": {
           "english": "SD Card",
@@ -1379,7 +1379,7 @@
           "max_length": 8,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Czarna skrzynka"
+          "translation": "Blackbox"
         },
         "no_card": {
           "english": "No card",
@@ -1681,7 +1681,7 @@
           "max_length": 15,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Wymagane ponowne uruchomienie"
+          "translation": "Wymagany restart"
         },
         "servo_count": {
           "english": "Servos",
@@ -2042,14 +2042,14 @@
           "max_length": 23,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Wartość PWM przepustnicy 100%."
+          "translation": "PWM przepustnicy 100%"
         },
         "min_throttle": {
           "english": "0% Throttle PWM Value",
           "max_length": 21,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "0% przepustnicy PWM Wartość"
+          "translation": "PWM przepustnicy 0%"
         },
         "mincommand": {
           "english": "Motor Stop PWM Value",
@@ -2231,7 +2231,7 @@
           "max_length": 19,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Niezsynchronizowana aktualizacja ESC"
+          "translation": "Niesynchr. aktualizacja ESC"
         },
         "use_dshot_telemetry": {
           "english": "DShot RPM Telemetry",
@@ -2515,7 +2515,7 @@
               "max_length": 22,
               "needs_translation": false,
               "reverse_text": false,
-              "translation": "Zabezpieczenie przed zablokowaniem wirnika"
+              "translation": "Ochrona przed blokadą"
             },
             "tbl_brake_active": {
               "english": "Active Brake",
@@ -2613,7 +2613,7 @@
               "max_length": 22,
               "needs_translation": false,
               "reverse_text": false,
-              "translation": "Zmienna PWM Częstotliwość"
+              "translation": "Zmienna częstotl. PWM"
             }
           },
           "blheli_s": {
@@ -2706,7 +2706,7 @@
               "max_length": 16,
               "needs_translation": false,
               "reverse_text": false,
-              "translation": "Maksymalna przepustnica PPM"
+              "translation": "Maks. przepustnica PPM"
             },
             "ppmminthrottle": {
               "english": "PPM Min Throttle",
@@ -2799,7 +2799,7 @@
               "max_length": 17,
               "needs_translation": false,
               "reverse_text": false,
-              "translation": "Maksymalna moc rozruchowa"
+              "translation": "Maks. moc rozruchu"
             },
             "minstartuppower": {
               "english": "Min Startup Power",
@@ -3053,7 +3053,7 @@
               "max_length": 18,
               "needs_translation": false,
               "reverse_text": false,
-              "translation": "Automatyczne przyspieszenie awaryjne"
+              "translation": "Przysp. auto bailout"
             },
             "soft_start": {
               "english": "Soft Start Time",
@@ -3104,7 +3104,7 @@
               "max_length": 12,
               "needs_translation": false,
               "reverse_text": false,
-              "translation": "Automatyczne ponowne uruchomienie"
+              "translation": "Auto restart"
             },
             "bec_voltage": {
               "english": "BEC Voltage",
@@ -4019,7 +4019,7 @@
           "max_length": 9,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Programowanie Esc"
+          "translation": "Prog. ESC"
         },
         "open": {
           "english": "Open",
@@ -4143,11 +4143,11 @@
           "translation": "Kolektyw"
         },
         "menu_channel_fallback": {
-          "english": "Channel Fallback",
-          "max_length": 16,
+          "english": "Ch. Fallback",
+          "max_length": 12,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "Channel Fallback"
+          "translation": "Ch. Fallback"
         },
         "name": {
           "english": "Failsafe",
@@ -5246,7 +5246,7 @@
           "max_length": 5,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Organizować coś"
+          "translation": "Ustawienia"
         }
       },
       "info": {
@@ -6079,7 +6079,7 @@
           "max_length": 46,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Automatyczne wykrywanie aktywne: przełącz żądany kanał AUX"
+          "translation": "Autowykrywanie aktywne: przełącz żądany kanał AUX"
         },
         "load_error": {
           "english": "Load error:",
@@ -6224,11 +6224,11 @@
       },
       "msp_exp": {
         "name": {
-          "english": "MSP Experimental",
-          "max_length": 16,
+          "english": "MSP Exp.",
+          "max_length": 8,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "MSP Eksperymentalne"
+          "translation": "MSP eksp."
         }
       },
       "msp_speed": {
@@ -6393,7 +6393,7 @@
           "max_length": 13,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Szerokość pasma PID"
+          "translation": "Pasmo PID"
         },
         "pitch": {
           "english": "P",
@@ -6982,7 +6982,7 @@
           "max_length": 16,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Szybkość opadania ładunków"
+          "translation": "Spadek naładowania"
         },
         "smartfuel_name": {
           "english": "SmartFuel",
@@ -7105,7 +7105,7 @@
           "max_length": 12,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Konfiguracja radia"
+          "translation": "Konfig. radia"
         },
         "pitch_deadband": {
           "english": "Pitch",
@@ -7361,14 +7361,14 @@
           "max_length": 21,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Odcięcie wzmocnienia wartości zadanej"
+          "translation": "Cutoff boostu zadanej"
         },
         "setpoint_boost_gain": {
           "english": "Setpoint Boost Gain",
           "max_length": 19,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Wzmocnienie wzmocnienia wartości zadanej"
+          "translation": "Wzmocnienie boostu"
         },
         "tbl_off": {
           "english": "Off",
@@ -7629,11 +7629,11 @@
           "translation": "Up"
         },
         "name": {
-          "english": "Serial Rx (Backup)",
-          "max_length": 18,
+          "english": "Rx Backup",
+          "max_length": 9,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "Serial Rx (Backup)"
+          "translation": "Rx Backup"
         },
         "not_configured": {
           "english": "No port is assigned the backup RX function.",
@@ -7747,7 +7747,7 @@
           "max_length": 10,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "PWM Dane wyjściowe"
+          "translation": "Wyjście PWM"
         },
         "rate": {
           "english": "Rate",
@@ -7896,7 +7896,7 @@
           "max_length": 14,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Objaśnienia stanowe"
+          "translation": "Kom. stanu"
         },
         "battery_profile_event": {
           "english": "Battery profile",
@@ -8109,11 +8109,11 @@
           "translation": "Ustawienia"
         },
         "esc_temperature": {
-          "english": "ESC temperature",
-          "max_length": 15,
+          "english": "ESC temp",
+          "max_length": 8,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Temperatura ESC"
+          "translation": "Temp. ESC"
         },
         "esc_threshold": {
           "english": "ESC threshold",
@@ -8242,11 +8242,11 @@
           "translation": "Dzienniki pamięci"
         },
         "model_announcement": {
-          "english": "Model announcement",
-          "max_length": 18,
+          "english": "Model callout",
+          "max_length": 13,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Model announcement"
+          "translation": "Kom. modelu"
         },
         "name": {
           "english": "Settings",
@@ -8400,7 +8400,7 @@
           "max_length": 13,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Alarm przekroczenia limitu czasu"
+          "translation": "Alarm po upływie"
         },
         "timer_elapsed_beep": {
           "english": "Beep",
@@ -8421,7 +8421,7 @@
           "max_length": 10,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Wiele sygnałów dźwiękowych"
+          "translation": "Wiele sygnałów"
         },
         "timer_elapsed_seconds": {
           "english": "Seconds",
@@ -8519,7 +8519,7 @@
           "max_length": 5,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Regulator czasowy"
+          "translation": "Timer"
         },
         "txt_developer": {
           "english": "Developer",
@@ -8550,11 +8550,11 @@
           "translation": "Save confirm"
         },
         "txt_show_battery_profile_connect": {
-          "english": "Show battery profile on connect",
-          "max_length": 31,
+          "english": "Battery profile on connect",
+          "max_length": 26,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "Show battery profile on connect"
+          "translation": "Battery profile on connect"
         },
         "txt_syncname": {
           "english": "Sync model name",
@@ -8747,11 +8747,11 @@
           "translation": "Gyro Cutoff"
         },
         "hold": {
-          "english": "Attitude / Heading Hold",
-          "max_length": 23,
+          "english": "Att/Hdg Hold",
+          "max_length": 12,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "Attitude / Heading Hold"
+          "translation": "Att/Hdg Hold"
         },
         "iterm_relax_level": {
           "english": "Iterm Relax Level",

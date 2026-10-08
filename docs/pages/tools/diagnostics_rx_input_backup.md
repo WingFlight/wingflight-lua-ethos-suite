@@ -1,12 +1,12 @@
 ---
-title: "Serial Rx (Backup)"
-sidebar_label: "Serial Rx (Backup)"
+title: "Rx Backup"
+sidebar_label: "Rx Backup"
 sidebar_position: 40
 documentation_status: draft
 source: app/pages/diagnostics_rx_input_backup.lua
 ---
 
-# Serial Rx (Backup)
+# Rx Backup
 
 > Draft scaffold. Extracted labels may be incomplete or out of order. Behaviour,
 > displayed units, defaults and save effects require source review.
@@ -15,7 +15,7 @@ TODO: Explain what this page controls and when a pilot would use it.
 
 ## Where to find it
 
-*System* → *Tools* → *Diagnostics* → *Serial Rx (Backup)*
+*System* → *Tools* → *Diagnostics* → *Rx Backup*
 
 Requires a running background task and a flight controller connection.
 

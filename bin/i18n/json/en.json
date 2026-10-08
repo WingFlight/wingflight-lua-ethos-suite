@@ -2089,10 +2089,10 @@
           "max_length": 16
         },
         "esc_temperature": {
-          "english": "ESC temperature",
-          "translation": "ESC temperature",
+          "english": "ESC temp",
+          "translation": "ESC temp",
           "needs_translation": false,
-          "max_length": 15
+          "max_length": 8
         },
         "esc_threshold": {
           "english": "ESC threshold",
@@ -2209,10 +2209,10 @@
           "max_length": 15
         },
         "model_announcement": {
-          "english": "Model announcement",
-          "translation": "Model announcement",
+          "english": "Model callout",
+          "translation": "Model callout",
           "needs_translation": false,
-          "max_length": 18
+          "max_length": 13
         },
         "timer_alerting": {
           "english": "Timer audio",
@@ -2431,10 +2431,10 @@
           "translation": "Sync model name"
         },
         "txt_show_battery_profile_connect": {
-          "english": "Show battery profile on connect",
-          "max_length": 31,
+          "english": "Battery profile on connect",
+          "max_length": 26,
           "needs_translation": false,
-          "translation": "Show battery profile on connect"
+          "translation": "Battery profile on connect"
         },
         "temperature_unit": {
           "english": "Temperature Unit",
@@ -2525,10 +2525,10 @@
           "max_length": 11
         },
         "hold": {
-          "english": "Attitude / Heading Hold",
-          "translation": "Attitude / Heading Hold",
+          "english": "Att/Hdg Hold",
+          "translation": "Att/Hdg Hold",
           "needs_translation": false,
-          "max_length": 23
+          "max_length": 12
         },
         "iterm_relax_level": {
           "english": "Iterm Relax Level",
@@ -3585,10 +3585,10 @@
           "max_length": 10
         },
         "menu_channel_fallback": {
-          "english": "Channel Fallback",
-          "translation": "Channel Fallback",
+          "english": "Ch. Fallback",
+          "translation": "Ch. Fallback",
           "needs_translation": false,
-          "max_length": 16
+          "max_length": 12
         },
         "name": {
           "english": "Failsafe",
@@ -5111,10 +5111,10 @@
           "max_length": 2
         },
         "name": {
-          "english": "Serial Rx (Backup)",
-          "translation": "Serial Rx (Backup)",
+          "english": "Rx Backup",
+          "translation": "Rx Backup",
           "needs_translation": false,
-          "max_length": 18
+          "max_length": 9
         },
         "not_configured": {
           "english": "No port is assigned the backup RX function.",
@@ -6927,10 +6927,10 @@
       },
       "msp_exp": {
         "name": {
-          "english": "MSP Experimental",
-          "max_length": 16,
+          "english": "MSP Exp.",
+          "max_length": 8,
           "needs_translation": false,
-          "translation": "MSP Experimental"
+          "translation": "MSP Exp."
         }
       },
       "msp_speed": {

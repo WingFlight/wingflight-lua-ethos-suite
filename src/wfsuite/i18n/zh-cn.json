@@ -4143,11 +4143,11 @@
           "translation": "总螺距"
         },
         "menu_channel_fallback": {
-          "english": "Channel Fallback",
-          "max_length": 16,
+          "english": "Ch. Fallback",
+          "max_length": 12,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "Channel Fallback"
+          "translation": "Ch. Fallback"
         },
         "name": {
           "english": "Failsafe",
@@ -6224,8 +6224,8 @@
       },
       "msp_exp": {
         "name": {
-          "english": "MSP Experimental",
-          "max_length": 16,
+          "english": "MSP Exp.",
+          "max_length": 8,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "MSP实验"
@@ -7629,11 +7629,11 @@
           "translation": "Up"
         },
         "name": {
-          "english": "Serial Rx (Backup)",
-          "max_length": 18,
+          "english": "Rx Backup",
+          "max_length": 9,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "Serial Rx (Backup)"
+          "translation": "Rx Backup"
         },
         "not_configured": {
           "english": "No port is assigned the backup RX function.",
@@ -8109,8 +8109,8 @@
           "translation": "设定"
         },
         "esc_temperature": {
-          "english": "ESC temperature",
-          "max_length": 15,
+          "english": "ESC temp",
+          "max_length": 8,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "ESC 温度"
@@ -8242,8 +8242,8 @@
           "translation": "内存日志"
         },
         "model_announcement": {
-          "english": "Model announcement",
-          "max_length": 18,
+          "english": "Model callout",
+          "max_length": 13,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "模型播报"
@@ -8550,11 +8550,11 @@
           "translation": "保存确认"
         },
         "txt_show_battery_profile_connect": {
-          "english": "Show battery profile on connect",
-          "max_length": 31,
+          "english": "Battery profile on connect",
+          "max_length": 26,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "Show battery profile on connect"
+          "translation": "Battery profile on connect"
         },
         "txt_syncname": {
           "english": "Sync model name",
@@ -8747,11 +8747,11 @@
           "translation": "Gyro Cutoff"
         },
         "hold": {
-          "english": "Attitude / Heading Hold",
-          "max_length": 23,
+          "english": "Att/Hdg Hold",
+          "max_length": 12,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "Attitude / Heading Hold"
+          "translation": "Att/Hdg Hold"
         },
         "iterm_relax_level": {
           "english": "Iterm Relax Level",

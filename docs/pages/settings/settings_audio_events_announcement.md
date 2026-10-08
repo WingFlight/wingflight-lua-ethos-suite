@@ -1,18 +1,18 @@
 ---
-title: "Model announcement"
-sidebar_label: "Model announcement"
+title: "Model callout"
+sidebar_label: "Model callout"
 sidebar_position: 60
 documentation_status: reviewed
 source: app/pages/settings_audio_events_announcement.lua
 ---
 
-# Model announcement
+# Model callout
 
 Plays a custom model greeting WAV file on connection.
 
 ## Where to find it
 
-*System* → *Settings* → *Audio* → *Events* → *Model announcement*
+*System* → *Settings* → *Audio* → *Events* → *Model callout*
 
 Available without a flight controller connection; the background task must be running.
 
@@ -20,7 +20,7 @@ Available without a flight controller connection; the background task must be ru
 
 | Setting | What it does |
 | --- | --- |
-| *Model announcement* | When enabled, plays `SD:/audio/<model_name>.wav` once per connect if recorded on the SD card. |
+| *Model callout* | When enabled, plays `SD:/audio/<model_name>.wav` once per connect if recorded on the SD card. |
 
 ## Notes
 

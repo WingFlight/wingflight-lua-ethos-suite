@@ -2431,8 +2431,8 @@
           "reverse_text": true
         },
         "esc_temperature": {
-          "english": "ESC temperature",
-          "max_length": 15,
+          "english": "ESC temp",
+          "max_length": 8,
           "needs_translation": false,
           "translation": "טמפרטורת ESC",
           "reverse_text": true
@@ -2571,11 +2571,11 @@
           "reverse_text": true
         },
         "model_announcement": {
-          "english": "Model announcement",
+          "english": "Model callout",
           "translation": "הודעת דגם",
           "needs_translation": false,
           "reverse_text": true,
-          "max_length": 18
+          "max_length": 13
         },
         "timer_alerting": {
           "english": "Timer audio",
@@ -2830,11 +2830,11 @@
           "max_length": 15
         },
         "txt_show_battery_profile_connect": {
-          "english": "Show battery profile on connect",
-          "translation": "Show battery profile on connect",
+          "english": "Battery profile on connect",
+          "translation": "Battery profile on connect",
           "needs_translation": true,
           "reverse_text": false,
-          "max_length": 31
+          "max_length": 26
         },
         "temperature_unit": {
           "english": "Temperature Unit",
@@ -2939,10 +2939,10 @@
           "reverse_text": false
         },
         "hold": {
-          "english": "Attitude / Heading Hold",
-          "max_length": 23,
+          "english": "Att/Hdg Hold",
+          "max_length": 12,
           "needs_translation": true,
-          "translation": "Attitude / Heading Hold",
+          "translation": "Att/Hdg Hold",
           "reverse_text": false
         },
         "iterm_relax_level": {
@@ -4173,10 +4173,10 @@
           "max_length": 10
         },
         "menu_channel_fallback": {
-          "english": "Channel Fallback",
-          "max_length": 16,
+          "english": "Ch. Fallback",
+          "max_length": 12,
           "needs_translation": true,
-          "translation": "Channel Fallback",
+          "translation": "Ch. Fallback",
           "reverse_text": false
         },
         "name": {
@@ -5949,10 +5949,10 @@
           "reverse_text": false
         },
         "name": {
-          "english": "Serial Rx (Backup)",
-          "max_length": 18,
+          "english": "Rx Backup",
+          "max_length": 9,
           "needs_translation": true,
-          "translation": "Serial Rx (Backup)",
+          "translation": "Rx Backup",
           "reverse_text": false
         },
         "not_configured": {
@@ -8063,8 +8063,8 @@
       },
       "msp_exp": {
         "name": {
-          "english": "MSP Experimental",
-          "max_length": 16,
+          "english": "MSP Exp.",
+          "max_length": 8,
           "needs_translation": false,
           "translation": "MSP ניסיוני",
           "reverse_text": true

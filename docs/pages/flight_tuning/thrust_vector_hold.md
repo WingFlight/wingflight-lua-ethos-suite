@@ -1,12 +1,12 @@
 ---
-title: "Attitude / Heading Hold"
-sidebar_label: "Attitude / Heading Hold"
+title: "Att/Hdg Hold"
+sidebar_label: "Att/Hdg Hold"
 sidebar_position: 50
 documentation_status: draft
 source: app/pages/thrust_vector_hold.lua
 ---
 
-# Attitude / Heading Hold
+# Att/Hdg Hold
 
 > Draft scaffold. Extracted labels may be incomplete or out of order. Behaviour,
 > displayed units, defaults and save effects require source review.
@@ -15,7 +15,7 @@ TODO: Explain what this page controls and when a pilot would use it.
 
 ## Where to find it
 
-*Configuration* → *Flight Tuning* → *Thrust Vector* → *Attitude / Heading Hold*
+*Configuration* → *Flight Tuning* → *Thrust Vector* → *Att/Hdg Hold*
 
 Requires a running background task and a flight controller connection.
 
@@ -23,8 +23,8 @@ Requires a running background task and a flight controller connection.
 
 | Setting | What it does |
 | --- | --- |
-| Attitude / Heading Hold (Gain) | TODO: explain behaviour, displayed units, range and conditions. |
-| Attitude / Heading Hold (Deadband) | TODO: explain behaviour, displayed units, range and conditions. |
+| Att/Hdg Hold (Gain) | TODO: explain behaviour, displayed units, range and conditions. |
+| Att/Hdg Hold (Deadband) | TODO: explain behaviour, displayed units, range and conditions. |
 | Rate | TODO: explain behaviour, displayed units, range and conditions. |
 
 ## Notes

@@ -2431,11 +2431,11 @@
           "max_length": 16
         },
         "esc_temperature": {
-          "english": "ESC temperature",
+          "english": "ESC temp",
           "translation": "ESC 温度",
           "needs_translation": false,
           "reverse_text": false,
-          "max_length": 15
+          "max_length": 8
         },
         "esc_threshold": {
           "english": "ESC threshold",
@@ -2571,11 +2571,11 @@
           "max_length": 15
         },
         "model_announcement": {
-          "english": "Model announcement",
+          "english": "Model callout",
           "translation": "模型播报",
           "needs_translation": false,
           "reverse_text": false,
-          "max_length": 18
+          "max_length": 13
         },
         "timer_alerting": {
           "english": "Timer audio",
@@ -2830,11 +2830,11 @@
           "max_length": 15
         },
         "txt_show_battery_profile_connect": {
-          "english": "Show battery profile on connect",
-          "translation": "Show battery profile on connect",
+          "english": "Battery profile on connect",
+          "translation": "Battery profile on connect",
           "needs_translation": true,
           "reverse_text": false,
-          "max_length": 31
+          "max_length": 26
         },
         "temperature_unit": {
           "english": "Temperature Unit",
@@ -2939,11 +2939,11 @@
           "max_length": 11
         },
         "hold": {
-          "english": "Attitude / Heading Hold",
-          "translation": "Attitude / Heading Hold",
+          "english": "Att/Hdg Hold",
+          "translation": "Att/Hdg Hold",
           "needs_translation": true,
           "reverse_text": false,
-          "max_length": 23
+          "max_length": 12
         },
         "iterm_relax_level": {
           "english": "Iterm Relax Level",
@@ -4173,11 +4173,11 @@
           "max_length": 10
         },
         "menu_channel_fallback": {
-          "english": "Channel Fallback",
-          "translation": "Channel Fallback",
+          "english": "Ch. Fallback",
+          "translation": "Ch. Fallback",
           "needs_translation": true,
           "reverse_text": false,
-          "max_length": 16
+          "max_length": 12
         },
         "name": {
           "english": "Failsafe",
@@ -5949,11 +5949,11 @@
           "max_length": 2
         },
         "name": {
-          "english": "Serial Rx (Backup)",
-          "translation": "Serial Rx (Backup)",
+          "english": "Rx Backup",
+          "translation": "Rx Backup",
           "needs_translation": true,
           "reverse_text": false,
-          "max_length": 18
+          "max_length": 9
         },
         "not_configured": {
           "english": "No port is assigned the backup RX function.",
@@ -8063,11 +8063,11 @@
       },
       "msp_exp": {
         "name": {
-          "english": "MSP Experimental",
+          "english": "MSP Exp.",
           "translation": "MSP实验",
           "needs_translation": false,
           "reverse_text": false,
-          "max_length": 16
+          "max_length": 8
         }
       },
       "msp_speed": {

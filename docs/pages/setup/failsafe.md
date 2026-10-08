@@ -1,12 +1,12 @@
 ---
-title: "Channel Fallback"
-sidebar_label: "Channel Fallback"
+title: "Ch. Fallback"
+sidebar_label: "Ch. Fallback"
 sidebar_position: 10
 documentation_status: draft
 source: app/pages/failsafe.lua
 ---
 
-# Channel Fallback
+# Ch. Fallback
 
 > Draft scaffold. Extracted labels may be incomplete or out of order. Behaviour,
 > displayed units, defaults and save effects require source review.
@@ -15,7 +15,7 @@ TODO: Explain what this page controls and when a pilot would use it.
 
 ## Where to find it
 
-*Configuration* → *Setup* → *Controls* → *Failsafe* → *Channel Fallback*
+*Configuration* → *Setup* → *Controls* → *Failsafe* → *Ch. Fallback*
 
 Requires a running background task and a flight controller connection.
 
