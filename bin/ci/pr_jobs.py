@@ -1028,9 +1028,11 @@ The check also pins the runtime boundaries of the split:
   the settings store after the page has been closed
 * dirty-tracking arms Save only when a value changed, and disarms after saving
 * unassigned number fields return defaults scaled within declared bounds
-* tool.lua reaches the six category pages and the old monolithic page is gone
+* tool.lua reaches the category pages and the old monolithic page is gone
+* the low-voltage hold filter, spoken callouts, and the telemetry link announcements
+  behave as specified and are armed-gated
 
-Ported from rotorflight-lua-ethos-suite PR #2508 (issue #2308).
+Ported from rotorflight-lua-ethos-suite PR #2508 (issue #2308), PR #2509 (issue #2309), and PR #2513 (issue #2311).
 '''
     ),
 ]
