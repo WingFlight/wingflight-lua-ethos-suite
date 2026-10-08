@@ -1836,7 +1836,7 @@
         },
         "disable_servo_override": {
           "english": "Disable servo override",
-          "translation": "Servo-Überschreibung deaktivieren",
+          "translation": "Servo-Override aus",
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 22
@@ -2348,7 +2348,7 @@
         },
         "audio_event_state": {
           "english": "State callouts",
-          "translation": "Staatliche Aufrufe",
+          "translation": "Statusansagen",
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 14
@@ -2431,11 +2431,11 @@
           "max_length": 16
         },
         "esc_temperature": {
-          "english": "ESC temperature",
+          "english": "ESC temp",
           "translation": "ESC-Temperatur",
           "needs_translation": false,
           "reverse_text": false,
-          "max_length": 15
+          "max_length": 8
         },
         "esc_threshold": {
           "english": "ESC threshold",
@@ -2571,11 +2571,11 @@
           "max_length": 15
         },
         "model_announcement": {
-          "english": "Model announcement",
-          "translation": "Modellankündigung",
+          "english": "Model callout",
+          "translation": "Modellansage",
           "needs_translation": false,
           "reverse_text": false,
-          "max_length": 18
+          "max_length": 13
         },
         "timer_alerting": {
           "english": "Timer audio",
@@ -2830,11 +2830,11 @@
           "max_length": 15
         },
         "txt_show_battery_profile_connect": {
-          "english": "Show battery profile on connect",
-          "translation": "Show battery profile on connect",
+          "english": "Battery profile on connect",
+          "translation": "Battery profile on connect",
           "needs_translation": true,
           "reverse_text": false,
-          "max_length": 31
+          "max_length": 26
         },
         "temperature_unit": {
           "english": "Temperature Unit",
@@ -2939,11 +2939,11 @@
           "max_length": 11
         },
         "hold": {
-          "english": "Attitude / Heading Hold",
-          "translation": "Attitude / Heading Hold",
+          "english": "Att/Hdg Hold",
+          "translation": "Att/Hdg Hold",
           "needs_translation": true,
           "reverse_text": false,
-          "max_length": 23
+          "max_length": 12
         },
         "iterm_relax_level": {
           "english": "Iterm Relax Level",
@@ -2970,7 +2970,7 @@
         },
         "name": {
           "english": "Accelerometer",
-          "translation": "Beschleunigungssensor",
+          "translation": "Beschl.-Sensor",
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 13
@@ -4173,11 +4173,11 @@
           "max_length": 10
         },
         "menu_channel_fallback": {
-          "english": "Channel Fallback",
-          "translation": "Channel Fallback",
+          "english": "Ch. Fallback",
+          "translation": "Ch. Fallback",
           "needs_translation": true,
           "reverse_text": false,
-          "max_length": 16
+          "max_length": 12
         },
         "name": {
           "english": "Failsafe",
@@ -4332,7 +4332,7 @@
         },
         "field_acc_calibration_fail": {
           "english": "ACC calibration fail",
-          "translation": "ACC-Kalibrierung fehlgeschlagen",
+          "translation": "ACC-Kalibrierfehler",
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 20
@@ -5003,7 +5003,7 @@
         },
         "name": {
           "english": "Power",
-          "translation": "Stromversorgung",
+          "translation": "Energie",
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 5
@@ -5422,7 +5422,7 @@
       "profile_select": {
         "name": {
           "english": "Select Profile",
-          "translation": "Profil auswählen",
+          "translation": "Profil wählen",
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 14
@@ -5949,11 +5949,11 @@
           "max_length": 2
         },
         "name": {
-          "english": "Serial Rx (Backup)",
-          "translation": "Serial Rx (Backup)",
+          "english": "Rx Backup",
+          "translation": "Rx Backup",
           "needs_translation": true,
           "reverse_text": false,
-          "max_length": 18
+          "max_length": 9
         },
         "not_configured": {
           "english": "No port is assigned the backup RX function.",
@@ -6970,7 +6970,7 @@
             },
             "current_gain": {
               "english": "Current Gain",
-              "translation": "Verstärkungswert für den Stromsensor",
+              "translation": "Stromsensor-Verstärkung",
               "needs_translation": false,
               "reverse_text": false,
               "max_length": 12
@@ -7005,7 +7005,7 @@
             },
             "gov_i": {
               "english": "Governor I",
-              "translation": "Integralwert für den Governor",
+              "translation": "Governor I",
               "needs_translation": false,
               "reverse_text": false,
               "max_length": 10
@@ -7033,14 +7033,14 @@
             },
             "low_voltage_protection": {
               "english": "Low Voltage Limit",
-              "translation": "Spannung, bei der die Leistung reduziert wird",
+              "translation": "Unterspannungsgrenze",
               "needs_translation": false,
               "reverse_text": false,
               "max_length": 17
             },
             "motor_direction": {
               "english": "Motor Direction",
-              "translation": "Motordrehrichtung (CCW/CW)",
+              "translation": "Motordrehrichtung",
               "needs_translation": false,
               "reverse_text": false,
               "max_length": 15
@@ -7366,7 +7366,7 @@
             },
             "gov_p": {
               "english": "Gov-P",
-              "translation": "Proportionalwert für den Governor",
+              "translation": "Governor P",
               "needs_translation": false,
               "reverse_text": false,
               "max_length": 5
@@ -7401,7 +7401,7 @@
             },
             "motor_direction": {
               "english": "Motor Direction",
-              "translation": "Motordrehrichtung (CCW/CW)",
+              "translation": "Motordrehrichtung",
               "needs_translation": false,
               "reverse_text": false,
               "max_length": 15
@@ -7657,7 +7657,7 @@
             },
             "gov_p": {
               "english": "Gov-P",
-              "translation": "Proportionalwert für den Governor",
+              "translation": "Governor P",
               "needs_translation": false,
               "reverse_text": false,
               "max_length": 5
@@ -7692,7 +7692,7 @@
             },
             "motor_direction": {
               "english": "Motor Direction",
-              "translation": "Motordrehrichtung (CCW/CW)",
+              "translation": "Motordrehrichtung",
               "needs_translation": false,
               "reverse_text": false,
               "max_length": 15
@@ -7813,7 +7813,7 @@
             },
             "gov_p": {
               "english": "Gov-P",
-              "translation": "Proportionalwert für den Governor",
+              "translation": "Governor P",
               "needs_translation": false,
               "reverse_text": false,
               "max_length": 5
@@ -7969,7 +7969,7 @@
             },
             "gov_p": {
               "english": "Gov-P",
-              "translation": "Proportionalwert für den Governor",
+              "translation": "Governor P",
               "needs_translation": false,
               "reverse_text": false,
               "max_length": 5
@@ -8004,7 +8004,7 @@
             },
             "motor_direction": {
               "english": "Motor Direction",
-              "translation": "Motordrehrichtung (CCW/CW)",
+              "translation": "Motordrehrichtung",
               "needs_translation": false,
               "reverse_text": false,
               "max_length": 15
@@ -8063,17 +8063,17 @@
       },
       "msp_exp": {
         "name": {
-          "english": "MSP Experimental",
-          "translation": "MSP Experimentell",
+          "english": "MSP Exp.",
+          "translation": "MSP Exp.",
           "needs_translation": false,
           "reverse_text": false,
-          "max_length": 16
+          "max_length": 8
         }
       },
       "msp_speed": {
         "avg_query_time": {
           "english": "Average query time",
-          "translation": "Durchschnittliche Anfragezeit",
+          "translation": "Mittl. Anfragezeit",
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 18
@@ -8101,7 +8101,7 @@
         },
         "name": {
           "english": "MSP Speed",
-          "translation": "MSP-Geschwindigkeit",
+          "translation": "MSP-Tempo",
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 9

@@ -1,12 +1,12 @@
 ---
-title: "MSP Experimental"
-sidebar_label: "MSP Experimental"
+title: "MSP Exp."
+sidebar_label: "MSP Exp."
 sidebar_position: 20
 documentation_status: draft
 source: app/pages/developer_msp_exp.lua
 ---
 
-# MSP Experimental
+# MSP Exp.
 
 > Draft scaffold. Extracted labels may be incomplete or out of order. Behaviour,
 > displayed units, defaults and save effects require source review.
@@ -15,7 +15,7 @@ TODO: Explain what this page controls and when a pilot would use it.
 
 ## Where to find it
 
-*System* → *Tools* → *Developer* → *MSP Experimental*
+*System* → *Tools* → *Developer* → *MSP Exp.*
 
 Requires a running background task and a flight controller connection. Hidden until *System* → *Settings* → *Developer* mode is active.
 

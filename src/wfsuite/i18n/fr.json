@@ -659,7 +659,7 @@
           "max_length": 13,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "CW Retournement à 0 degré"
+          "translation": "CW 0 retourné"
         },
         "mag_cw_180": {
           "english": "CW 180 deg",
@@ -673,7 +673,7 @@
           "max_length": 15,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "CW Retournement à 180 degrés"
+          "translation": "CW 180 retourné"
         },
         "mag_cw_270": {
           "english": "CW 270 deg",
@@ -687,7 +687,7 @@
           "max_length": 15,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "CW Retournement à 270 degrés"
+          "translation": "CW 270 retourné"
         },
         "mag_cw_90": {
           "english": "CW 90 deg",
@@ -701,7 +701,7 @@
           "max_length": 14,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "CW Retournement à 90 degrés"
+          "translation": "CW 90 retourné"
         },
         "mag_default": {
           "english": "Default",
@@ -2000,7 +2000,7 @@
           "max_length": 22,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Correction de consommation"
+          "translation": "Correction conso."
         },
         "current_correction": {
           "english": "Current Correction",
@@ -2182,7 +2182,7 @@
           "max_length": 3,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Tours par Minute"
+          "translation": "Tr/min"
         },
         "rpm_sensor_source": {
           "english": "RPM Sensor",
@@ -3025,7 +3025,7 @@
               "max_length": 23,
               "needs_translation": false,
               "reverse_text": false,
-              "translation": "Capteur de temperature moteur"
+              "translation": "Capteur temp. moteur"
             },
             "name": {
               "english": "FLYROTOR",
@@ -3549,7 +3549,7 @@
               "max_length": 15,
               "needs_translation": false,
               "reverse_text": false,
-              "translation": "Temps demarrage progressif"
+              "translation": "Durée démarrage doux"
             }
           },
           "xdfly": {
@@ -4143,11 +4143,11 @@
           "translation": "Collectif"
         },
         "menu_channel_fallback": {
-          "english": "Channel Fallback",
-          "max_length": 16,
+          "english": "Ch. Fallback",
+          "max_length": 12,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "Channel Fallback"
+          "translation": "Ch. Fallback"
         },
         "name": {
           "english": "Failsafe",
@@ -6224,11 +6224,11 @@
       },
       "msp_exp": {
         "name": {
-          "english": "MSP Experimental",
-          "max_length": 16,
+          "english": "MSP Exp.",
+          "max_length": 8,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "MSP Expérimental"
+          "translation": "MSP exp."
         }
       },
       "msp_speed": {
@@ -6393,7 +6393,7 @@
           "max_length": 13,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Bande passante PID"
+          "translation": "Bande PID"
         },
         "pitch": {
           "english": "P",
@@ -7040,7 +7040,7 @@
           "max_length": 14,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Selectionner le profil"
+          "translation": "Choix du profil"
         },
         "pid_profile": {
           "english": "PID profile",
@@ -7629,11 +7629,11 @@
           "translation": "Up"
         },
         "name": {
-          "english": "Serial Rx (Backup)",
-          "max_length": 18,
+          "english": "Rx Backup",
+          "max_length": 9,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "Serial Rx (Backup)"
+          "translation": "Rx Backup"
         },
         "not_configured": {
           "english": "No port is assigned the backup RX function.",
@@ -7691,7 +7691,7 @@
           "max_length": 22,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Desactiver remplacement servo"
+          "translation": "Désact. forçage servo"
         },
         "disable_servo_override_msg": {
           "english": "Return control of the servos to the flight controller.",
@@ -7931,7 +7931,7 @@
           "max_length": 9,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Tableau de bord"
+          "translation": "Tab. de bord"
         },
         "dashboard_display_panel": {
           "english": "Display",
@@ -8109,11 +8109,11 @@
           "translation": "Paramètres"
         },
         "esc_temperature": {
-          "english": "ESC temperature",
-          "max_length": 15,
+          "english": "ESC temp",
+          "max_length": 8,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Temperature ESC"
+          "translation": "Temp. ESC"
         },
         "esc_threshold": {
           "english": "ESC threshold",
@@ -8183,7 +8183,7 @@
           "max_length": 7,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Par defaut (uniquement a 10%)"
+          "translation": "Par défaut"
         },
         "fuel_callout_percent": {
           "english": "Callout percent",
@@ -8242,11 +8242,11 @@
           "translation": "Journaux de mémoire"
         },
         "model_announcement": {
-          "english": "Model announcement",
-          "max_length": 18,
+          "english": "Model callout",
+          "max_length": 13,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Annonce modèle"
+          "translation": "Annonce mod."
         },
         "name": {
           "english": "Settings",
@@ -8550,11 +8550,11 @@
           "translation": "Confirmer"
         },
         "txt_show_battery_profile_connect": {
-          "english": "Show battery profile on connect",
-          "max_length": 31,
+          "english": "Battery profile on connect",
+          "max_length": 26,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "Show battery profile on connect"
+          "translation": "Battery profile on connect"
         },
         "txt_syncname": {
           "english": "Sync model name",
@@ -8747,11 +8747,11 @@
           "translation": "Gyro Cutoff"
         },
         "hold": {
-          "english": "Attitude / Heading Hold",
-          "max_length": 23,
+          "english": "Att/Hdg Hold",
+          "max_length": 12,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "Attitude / Heading Hold"
+          "translation": "Att/Hdg Hold"
         },
         "iterm_relax_level": {
           "english": "Iterm Relax Level",

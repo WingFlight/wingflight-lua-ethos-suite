@@ -987,7 +987,7 @@
       "pid_bandwidth": {
         "name": {
           "english": "PID Bandwidth",
-          "translation": "Bande passante PID",
+          "translation": "Bande PID",
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 13
@@ -1836,7 +1836,7 @@
         },
         "disable_servo_override": {
           "english": "Disable servo override",
-          "translation": "Desactiver remplacement servo",
+          "translation": "Désact. forçage servo",
           "needs_translation": false,
           "max_length": 22,
           "reverse_text": false
@@ -2152,7 +2152,7 @@
         },
         "dashboard": {
           "english": "Dashboard",
-          "translation": "Tableau de bord",
+          "translation": "Tab. de bord",
           "needs_translation": false,
           "max_length": 9,
           "reverse_text": false
@@ -2431,10 +2431,10 @@
           "reverse_text": false
         },
         "esc_temperature": {
-          "english": "ESC temperature",
-          "translation": "Temperature ESC",
+          "english": "ESC temp",
+          "translation": "Temp. ESC",
           "needs_translation": false,
-          "max_length": 15,
+          "max_length": 8,
           "reverse_text": false
         },
         "esc_threshold": {
@@ -2516,7 +2516,7 @@
         },
         "fuel_callout_default": {
           "english": "Default",
-          "translation": "Par defaut (uniquement a 10%)",
+          "translation": "Par défaut",
           "needs_translation": false,
           "max_length": 7,
           "reverse_text": false
@@ -2571,11 +2571,11 @@
           "reverse_text": false
         },
         "model_announcement": {
-          "english": "Model announcement",
-          "translation": "Annonce modèle",
+          "english": "Model callout",
+          "translation": "Annonce mod.",
           "needs_translation": false,
           "reverse_text": false,
-          "max_length": 18
+          "max_length": 13
         },
         "timer_alerting": {
           "english": "Timer audio",
@@ -2830,11 +2830,11 @@
           "max_length": 15
         },
         "txt_show_battery_profile_connect": {
-          "english": "Show battery profile on connect",
-          "translation": "Show battery profile on connect",
+          "english": "Battery profile on connect",
+          "translation": "Battery profile on connect",
           "needs_translation": true,
           "reverse_text": false,
-          "max_length": 31
+          "max_length": 26
         },
         "temperature_unit": {
           "english": "Temperature Unit",
@@ -2939,10 +2939,10 @@
           "reverse_text": false
         },
         "hold": {
-          "english": "Attitude / Heading Hold",
-          "translation": "Attitude / Heading Hold",
+          "english": "Att/Hdg Hold",
+          "translation": "Att/Hdg Hold",
           "needs_translation": true,
-          "max_length": 23,
+          "max_length": 12,
           "reverse_text": false
         },
         "iterm_relax_level": {
@@ -3035,7 +3035,7 @@
         },
         "mag_cw_0_flip": {
           "english": "CW 0 deg flip",
-          "translation": "CW Retournement à 0 degré",
+          "translation": "CW 0 retourné",
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 13
@@ -3049,7 +3049,7 @@
         },
         "mag_cw_180_flip": {
           "english": "CW 180 deg flip",
-          "translation": "CW Retournement à 180 degrés",
+          "translation": "CW 180 retourné",
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 15
@@ -3063,7 +3063,7 @@
         },
         "mag_cw_270_flip": {
           "english": "CW 270 deg flip",
-          "translation": "CW Retournement à 270 degrés",
+          "translation": "CW 270 retourné",
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 15
@@ -3077,7 +3077,7 @@
         },
         "mag_cw_90_flip": {
           "english": "CW 90 deg flip",
-          "translation": "CW Retournement à 90 degrés",
+          "translation": "CW 90 retourné",
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 14
@@ -4173,10 +4173,10 @@
           "max_length": 10
         },
         "menu_channel_fallback": {
-          "english": "Channel Fallback",
-          "translation": "Channel Fallback",
+          "english": "Ch. Fallback",
+          "translation": "Ch. Fallback",
           "needs_translation": true,
-          "max_length": 16,
+          "max_length": 12,
           "reverse_text": false
         },
         "name": {
@@ -5096,7 +5096,7 @@
       "esc_motors": {
         "consumption_correction": {
           "english": "Consumption Correction",
-          "translation": "Correction de consommation",
+          "translation": "Correction conso.",
           "needs_translation": false,
           "max_length": 22,
           "reverse_text": false
@@ -5278,7 +5278,7 @@
         },
         "rpm": {
           "english": "RPM",
-          "translation": "Tours par Minute",
+          "translation": "Tr/min",
           "needs_translation": false,
           "max_length": 3,
           "reverse_text": false
@@ -5422,7 +5422,7 @@
       "profile_select": {
         "name": {
           "english": "Select Profile",
-          "translation": "Selectionner le profil",
+          "translation": "Choix du profil",
           "needs_translation": false,
           "max_length": 14,
           "reverse_text": false
@@ -5949,10 +5949,10 @@
           "reverse_text": false
         },
         "name": {
-          "english": "Serial Rx (Backup)",
-          "translation": "Serial Rx (Backup)",
+          "english": "Rx Backup",
+          "translation": "Rx Backup",
           "needs_translation": true,
-          "max_length": 18,
+          "max_length": 9,
           "reverse_text": false
         },
         "not_configured": {
@@ -7061,7 +7061,7 @@
             },
             "motor_temp_sensor": {
               "english": "Motor Temperture Sensor",
-              "translation": "Capteur de temperature moteur",
+              "translation": "Capteur temp. moteur",
               "needs_translation": false,
               "max_length": 23,
               "reverse_text": false
@@ -7585,7 +7585,7 @@
             },
             "soft_start_time": {
               "english": "Soft Start Time",
-              "translation": "Temps demarrage progressif",
+              "translation": "Durée démarrage doux",
               "needs_translation": false,
               "max_length": 15,
               "reverse_text": false
@@ -8063,10 +8063,10 @@
       },
       "msp_exp": {
         "name": {
-          "english": "MSP Experimental",
-          "translation": "MSP Expérimental",
+          "english": "MSP Exp.",
+          "translation": "MSP exp.",
           "needs_translation": false,
-          "max_length": 16,
+          "max_length": 8,
           "reverse_text": false
         }
       },

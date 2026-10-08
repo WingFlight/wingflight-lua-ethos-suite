@@ -39,7 +39,7 @@ is there. The rule is in [.agents/rules/documentation.md](../../.agents/rules/do
 | Gain Curves | [flight_tuning/thrust_vector_gain_curves.md](flight_tuning/thrust_vector_gain_curves.md) | Requires a running background task and a flight controller connection. | draft |
 | PID Controller | [flight_tuning/thrust_vector_pid_controller.md](flight_tuning/thrust_vector_pid_controller.md) | Requires a running background task and a flight controller connection. | draft |
 | PID Bandwidth | [flight_tuning/thrust_vector_pid_bandwidth.md](flight_tuning/thrust_vector_pid_bandwidth.md) | Requires a running background task and a flight controller connection. | draft |
-| Attitude / Heading Hold | [flight_tuning/thrust_vector_hold.md](flight_tuning/thrust_vector_hold.md) | Requires a running background task and a flight controller connection. | draft |
+| Att/Hdg Hold | [flight_tuning/thrust_vector_hold.md](flight_tuning/thrust_vector_hold.md) | Requires a running background task and a flight controller connection. | draft |
 
 ## Configuration → Setup
 
@@ -51,7 +51,7 @@ is there. The rule is in [.agents/rules/documentation.md](../../.agents/rules/do
 | Telemetry | [setup/telemetry.md](setup/telemetry.md) | Requires a running background task and a flight controller connection. | draft |
 | Modes | [setup/modes.md](setup/modes.md) | Requires a running background task and a flight controller connection. | draft |
 | Adjustments | [setup/adjustments.md](setup/adjustments.md) | Requires a running background task and a flight controller connection. | draft |
-| Channel Fallback | [setup/failsafe.md](setup/failsafe.md) | Requires a running background task and a flight controller connection. | draft |
+| Ch. Fallback | [setup/failsafe.md](setup/failsafe.md) | Requires a running background task and a flight controller connection. | draft |
 | Stage 2 | [setup/failsafe_procedure.md](setup/failsafe_procedure.md) | Requires a running background task and a flight controller connection. | reviewed |
 | Configuration | [setup/beepers_configuration.md](setup/beepers_configuration.md) | Requires a running background task and a flight controller connection. | draft |
 | ESC Beacon | [setup/beepers_dshot.md](setup/beepers_dshot.md) | Requires a running background task and a flight controller connection. | draft |
@@ -96,10 +96,10 @@ is there. The rule is in [.agents/rules/documentation.md](../../.agents/rules/do
 | Status | [tools/diagnostics_rfstatus.md](tools/diagnostics_rfstatus.md) | Requires a running background task and a flight controller connection. | draft |
 | ELRS Telemetry | [tools/diagnostics_elrs_link.md](tools/diagnostics_elrs_link.md) | Requires a running background task and a flight controller connection. | draft |
 | FBL Status | [tools/diagnostics_fblstatus.md](tools/diagnostics_fblstatus.md) | Requires a running background task and a flight controller connection. | draft |
-| Serial Rx (Backup) | [tools/diagnostics_rx_input_backup.md](tools/diagnostics_rx_input_backup.md) | Requires a running background task and a flight controller connection. | draft |
+| Rx Backup | [tools/diagnostics_rx_input_backup.md](tools/diagnostics_rx_input_backup.md) | Requires a running background task and a flight controller connection. | draft |
 | Info | [tools/diagnostics_info.md](tools/diagnostics_info.md) | Requires a running background task and a flight controller connection. | draft |
 | MSP Speed | [tools/developer_msp_speed.md](tools/developer_msp_speed.md) | Requires a running background task and a flight controller connection. Hidden until *System* → *Settings* → *Developer* mode is active. | draft |
-| MSP Experimental | [tools/developer_msp_exp.md](tools/developer_msp_exp.md) | Requires a running background task and a flight controller connection. Hidden until *System* → *Settings* → *Developer* mode is active. | draft |
+| MSP Exp. | [tools/developer_msp_exp.md](tools/developer_msp_exp.md) | Requires a running background task and a flight controller connection. Hidden until *System* → *Settings* → *Developer* mode is active. | draft |
 
 ## System → Logs
 
@@ -119,11 +119,11 @@ is there. The rule is in [.agents/rules/documentation.md](../../.agents/rules/do
 | Inflight | [settings/settings_activelook_inflight.md](settings/settings_activelook_inflight.md) | Available without a flight controller connection; the background task must be running. | draft |
 | Postflight | [settings/settings_activelook_postflight.md](settings/settings_activelook_postflight.md) | Available without a flight controller connection; the background task must be running. | draft |
 | Voltage | [settings/settings_audio_events_voltage.md](settings/settings_audio_events_voltage.md) | Available without a flight controller connection; the background task must be running. | reviewed |
-| ESC temperature | [settings/settings_audio_events_esc.md](settings/settings_audio_events_esc.md) | Available without a flight controller connection; the background task must be running. | reviewed |
+| ESC temp | [settings/settings_audio_events_esc.md](settings/settings_audio_events_esc.md) | Available without a flight controller connection; the background task must be running. | reviewed |
 | Fuel | [settings/settings_audio_events_fuel.md](settings/settings_audio_events_fuel.md) | Available without a flight controller connection; the background task must be running. | reviewed |
 | State callouts | [settings/settings_audio_events_state.md](settings/settings_audio_events_state.md) | Available without a flight controller connection; the background task must be running. | reviewed |
 | FC status | [settings/settings_audio_events_status.md](settings/settings_audio_events_status.md) | Available without a flight controller connection; the background task must be running. | reviewed |
-| Model announcement | [settings/settings_audio_events_announcement.md](settings/settings_audio_events_announcement.md) | Available without a flight controller connection; the background task must be running. | reviewed |
+| Model callout | [settings/settings_audio_events_announcement.md](settings/settings_audio_events_announcement.md) | Available without a flight controller connection; the background task must be running. | reviewed |
 | Switches | [settings/settings_audio_switches.md](settings/settings_audio_switches.md) | Available without a flight controller connection; the background task must be running. | draft |
 | Timer | [settings/settings_audio_timer.md](settings/settings_audio_timer.md) | Available without a flight controller connection; the background task must be running. | draft |
 | Developer | [settings/developer_settings.md](settings/developer_settings.md) | Available without a flight controller connection; the background task must be running. | draft |

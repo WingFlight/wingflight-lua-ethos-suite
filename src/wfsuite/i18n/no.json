@@ -2231,7 +2231,7 @@
           "max_length": 19,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Usynkronisert ESC Oppdatering"
+          "translation": "Usynk. ESC-oppdatering"
         },
         "use_dshot_telemetry": {
           "english": "DShot RPM Telemetry",
@@ -2515,7 +2515,7 @@
               "max_length": 22,
               "needs_translation": false,
               "reverse_text": false,
-              "translation": "Rotorbeskyttelse som sitter fast"
+              "translation": "Fastlåst rotor-vern"
             },
             "tbl_brake_active": {
               "english": "Active Brake",
@@ -4019,7 +4019,7 @@
           "max_length": 9,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Esc programmering"
+          "translation": "ESC-prog."
         },
         "open": {
           "english": "Open",
@@ -4143,11 +4143,11 @@
           "translation": "Kollektiv"
         },
         "menu_channel_fallback": {
-          "english": "Channel Fallback",
-          "max_length": 16,
+          "english": "Ch. Fallback",
+          "max_length": 12,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "Channel Fallback"
+          "translation": "Ch. Fallback"
         },
         "name": {
           "english": "Failsafe",
@@ -6224,11 +6224,11 @@
       },
       "msp_exp": {
         "name": {
-          "english": "MSP Experimental",
-          "max_length": 16,
+          "english": "MSP Exp.",
+          "max_length": 8,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "MSP Eksperimentell"
+          "translation": "MSP eksp."
         }
       },
       "msp_speed": {
@@ -7361,7 +7361,7 @@
           "max_length": 21,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Settpunkt forsterkning cutoff"
+          "translation": "Settpunkt-boost cutoff"
         },
         "setpoint_boost_gain": {
           "english": "Setpoint Boost Gain",
@@ -7629,11 +7629,11 @@
           "translation": "Up"
         },
         "name": {
-          "english": "Serial Rx (Backup)",
-          "max_length": 18,
+          "english": "Rx Backup",
+          "max_length": 9,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "Serial Rx (Backup)"
+          "translation": "Rx Backup"
         },
         "not_configured": {
           "english": "No port is assigned the backup RX function.",
@@ -7896,7 +7896,7 @@
           "max_length": 14,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Statlige meldinger"
+          "translation": "Statusmeldinger"
         },
         "battery_profile_event": {
           "english": "Battery profile",
@@ -8109,8 +8109,8 @@
           "translation": "Innstill"
         },
         "esc_temperature": {
-          "english": "ESC temperature",
-          "max_length": 15,
+          "english": "ESC temp",
+          "max_length": 8,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "ESC temperatur"
@@ -8242,11 +8242,11 @@
           "translation": "Minnelogger"
         },
         "model_announcement": {
-          "english": "Model announcement",
-          "max_length": 18,
+          "english": "Model callout",
+          "max_length": 13,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "Modellkunngjøring"
+          "translation": "Modellmelding"
         },
         "name": {
           "english": "Settings",
@@ -8550,11 +8550,11 @@
           "translation": "Lagre bekref"
         },
         "txt_show_battery_profile_connect": {
-          "english": "Show battery profile on connect",
-          "max_length": 31,
+          "english": "Battery profile on connect",
+          "max_length": 26,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "Show battery profile on connect"
+          "translation": "Battery profile on connect"
         },
         "txt_syncname": {
           "english": "Sync model name",
@@ -8747,11 +8747,11 @@
           "translation": "Gyro Cutoff"
         },
         "hold": {
-          "english": "Attitude / Heading Hold",
-          "max_length": 23,
+          "english": "Att/Hdg Hold",
+          "max_length": 12,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "Attitude / Heading Hold"
+          "translation": "Att/Hdg Hold"
         },
         "iterm_relax_level": {
           "english": "Iterm Relax Level",

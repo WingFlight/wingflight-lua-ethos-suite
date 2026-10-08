@@ -987,7 +987,7 @@
       "pid_bandwidth": {
         "name": {
           "english": "PID Bandwidth",
-          "translation": "Šířka pásma PID",
+          "translation": "Pásmo PID",
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 13
@@ -1464,7 +1464,7 @@
         },
         "setpoint_boost_cutoff": {
           "english": "Setpoint Boost Cutoff",
-          "translation": "Vypnutí zesílení nastavené hodnoty",
+          "translation": "Cutoff zesílení žádané",
           "needs_translation": false,
           "max_length": 21,
           "reverse_text": false
@@ -2029,7 +2029,7 @@
       "radio_config": {
         "name": {
           "english": "Radio Config",
-          "translation": "Konfigurace rádia",
+          "translation": "Konfig. rádia",
           "needs_translation": false,
           "max_length": 12,
           "reverse_text": false
@@ -2194,7 +2194,7 @@
         },
         "activelook_preflight": {
           "english": "Preflight",
-          "translation": "Předletová příprava",
+          "translation": "Před letem",
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 9
@@ -2431,10 +2431,10 @@
           "reverse_text": false
         },
         "esc_temperature": {
-          "english": "ESC temperature",
+          "english": "ESC temp",
           "translation": "Teplota ESC",
           "needs_translation": false,
-          "max_length": 15,
+          "max_length": 8,
           "reverse_text": false
         },
         "esc_threshold": {
@@ -2571,11 +2571,11 @@
           "reverse_text": false
         },
         "model_announcement": {
-          "english": "Model announcement",
-          "translation": "Oznámení modelu",
+          "english": "Model callout",
+          "translation": "Hlášení modelu",
           "needs_translation": false,
           "reverse_text": false,
-          "max_length": 18
+          "max_length": 13
         },
         "timer_alerting": {
           "english": "Timer audio",
@@ -2586,7 +2586,7 @@
         },
         "timer_elapsed_alert_mode": {
           "english": "Elapsed alert",
-          "translation": "Upozornění na vypršení časovače",
+          "translation": "Upozornění po uplynutí",
           "needs_translation": false,
           "max_length": 13,
           "reverse_text": false
@@ -2830,11 +2830,11 @@
           "max_length": 15
         },
         "txt_show_battery_profile_connect": {
-          "english": "Show battery profile on connect",
-          "translation": "Show battery profile on connect",
+          "english": "Battery profile on connect",
+          "translation": "Battery profile on connect",
           "needs_translation": true,
           "reverse_text": false,
-          "max_length": 31
+          "max_length": 26
         },
         "temperature_unit": {
           "english": "Temperature Unit",
@@ -2939,10 +2939,10 @@
           "reverse_text": false
         },
         "hold": {
-          "english": "Attitude / Heading Hold",
-          "translation": "Attitude / Heading Hold",
+          "english": "Att/Hdg Hold",
+          "translation": "Att/Hdg Hold",
           "needs_translation": true,
-          "max_length": 23,
+          "max_length": 12,
           "reverse_text": false
         },
         "iterm_relax_level": {
@@ -3049,7 +3049,7 @@
         },
         "mag_cw_180_flip": {
           "english": "CW 180 deg flip",
-          "translation": "CW překlopení o 180 stupňů",
+          "translation": "CW 180 překlopení",
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 15
@@ -3063,7 +3063,7 @@
         },
         "mag_cw_270_flip": {
           "english": "CW 270 deg flip",
-          "translation": "CW překlopení o 270 stupňů",
+          "translation": "CW 270 překlopení",
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 15
@@ -3077,7 +3077,7 @@
         },
         "mag_cw_90_flip": {
           "english": "CW 90 deg flip",
-          "translation": "CW překlopení o 90 stupňů",
+          "translation": "CW 90 překlopení",
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 14
@@ -3708,7 +3708,7 @@
         },
         "auto_detect_active": {
           "english": "Auto-detect active: toggle desired AUX channel",
-          "translation": "Automatická detekce je aktivní: přepne požadovaný kanál AUX",
+          "translation": "Automatická detekce: přepněte požadovaný kanál AUX",
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 46
@@ -3871,7 +3871,7 @@
         },
         "auto_detect_active_toggle": {
           "english": "Auto-detect active: toggle desired AUX channel",
-          "translation": "Automatická detekce je aktivní: přepne požadovaný kanál AUX",
+          "translation": "Automatická detekce: přepněte požadovaný kanál AUX",
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 46
@@ -4173,10 +4173,10 @@
           "max_length": 10
         },
         "menu_channel_fallback": {
-          "english": "Channel Fallback",
-          "translation": "Channel Fallback",
+          "english": "Ch. Fallback",
+          "translation": "Ch. Fallback",
           "needs_translation": true,
-          "max_length": 16,
+          "max_length": 12,
           "reverse_text": false
         },
         "name": {
@@ -5152,7 +5152,7 @@
         },
         "mincommand": {
           "english": "Motor Stop PWM Value",
-          "translation": "Hodnota PWM zastavení motoru",
+          "translation": "PWM zastavení motoru",
           "needs_translation": false,
           "max_length": 20,
           "reverse_text": false
@@ -5327,7 +5327,7 @@
         },
         "unsynced": {
           "english": "Unsynced ESC Update",
-          "translation": "Nesynchronizovaná aktualizace ESC",
+          "translation": "Nesynchr. aktualizace ESC",
           "needs_translation": false,
           "max_length": 19,
           "reverse_text": false
@@ -5949,10 +5949,10 @@
           "reverse_text": false
         },
         "name": {
-          "english": "Serial Rx (Backup)",
-          "translation": "Serial Rx (Backup)",
+          "english": "Rx Backup",
+          "translation": "Rx Backup",
           "needs_translation": true,
-          "max_length": 18,
+          "max_length": 9,
           "reverse_text": false
         },
         "not_configured": {
@@ -6828,7 +6828,7 @@
             },
             "lowrpmpowerprotection": {
               "english": "Low RPM Power Protection",
-              "translation": "Ochrana napájení při nízkých otáčkách",
+              "translation": "Ochrana nízkých otáček",
               "needs_translation": false,
               "reverse_text": false,
               "max_length": 24
@@ -6905,7 +6905,7 @@
             },
             "threshold96to48": {
               "english": "96kHz -> 48kHz Threshold",
-              "translation": "96 kHz -> 48 kHz prahová hodnota",
+              "translation": "Práh 96kHz -> 48kHz",
               "needs_translation": false,
               "reverse_text": false,
               "max_length": 24
@@ -8055,7 +8055,7 @@
         },
         "name": {
           "english": "ESC Prog.",
-          "translation": "Programování Esc",
+          "translation": "Program. ESC",
           "needs_translation": false,
           "max_length": 9,
           "reverse_text": false
@@ -8063,10 +8063,10 @@
       },
       "msp_exp": {
         "name": {
-          "english": "MSP Experimental",
-          "translation": "MSP Experimentální",
+          "english": "MSP Exp.",
+          "translation": "MSP exp.",
           "needs_translation": false,
-          "max_length": 16,
+          "max_length": 8,
           "reverse_text": false
         }
       },

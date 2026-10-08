@@ -72,7 +72,7 @@
     },
     "btn_cancel": {
       "english": "CANCEL",
-      "translation": "Configure the motor and speed controller features.",
+      "translation": "ANNULLA",
       "needs_translation": false,
       "max_length": 6,
       "reverse_text": false
@@ -987,7 +987,7 @@
       "pid_bandwidth": {
         "name": {
           "english": "PID Bandwidth",
-          "translation": "Larghezza di banda PID",
+          "translation": "Banda PID",
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 13
@@ -1080,7 +1080,7 @@
         },
         "acro_trainer": {
           "english": "Acro Trainer",
-          "translation": "Allenamento acrobatico",
+          "translation": "Trainer acro",
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 12
@@ -2292,7 +2292,7 @@
         },
         "txt_audio_timer": {
           "english": "Timer",
-          "translation": "Temporizzatore",
+          "translation": "Timer",
           "needs_translation": false,
           "max_length": 5,
           "reverse_text": false
@@ -2431,10 +2431,10 @@
           "reverse_text": false
         },
         "esc_temperature": {
-          "english": "ESC temperature",
-          "translation": "ESC Temperatura",
+          "english": "ESC temp",
+          "translation": "Temp. ESC",
           "needs_translation": false,
-          "max_length": 15,
+          "max_length": 8,
           "reverse_text": false
         },
         "esc_threshold": {
@@ -2571,11 +2571,11 @@
           "reverse_text": false
         },
         "model_announcement": {
-          "english": "Model announcement",
-          "translation": "Annuncio modello",
+          "english": "Model callout",
+          "translation": "Annuncio mod.",
           "needs_translation": false,
           "reverse_text": false,
-          "max_length": 18
+          "max_length": 13
         },
         "timer_alerting": {
           "english": "Timer audio",
@@ -2830,11 +2830,11 @@
           "max_length": 15
         },
         "txt_show_battery_profile_connect": {
-          "english": "Show battery profile on connect",
-          "translation": "Show battery profile on connect",
+          "english": "Battery profile on connect",
+          "translation": "Battery profile on connect",
           "needs_translation": true,
           "reverse_text": false,
-          "max_length": 31
+          "max_length": 26
         },
         "temperature_unit": {
           "english": "Temperature Unit",
@@ -2939,10 +2939,10 @@
           "reverse_text": false
         },
         "hold": {
-          "english": "Attitude / Heading Hold",
-          "translation": "Attitude / Heading Hold",
+          "english": "Att/Hdg Hold",
+          "translation": "Att/Hdg Hold",
           "needs_translation": true,
-          "max_length": 23,
+          "max_length": 12,
           "reverse_text": false
         },
         "iterm_relax_level": {
@@ -3049,7 +3049,7 @@
         },
         "mag_cw_180_flip": {
           "english": "CW 180 deg flip",
-          "translation": "CW Capovolgimento di 180 gradi",
+          "translation": "CW 180 capovolto",
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 15
@@ -3063,7 +3063,7 @@
         },
         "mag_cw_270_flip": {
           "english": "CW 270 deg flip",
-          "translation": "CW Capovolgimento di 270 gradi",
+          "translation": "CW 270 capovolto",
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 15
@@ -3077,7 +3077,7 @@
         },
         "mag_cw_90_flip": {
           "english": "CW 90 deg flip",
-          "translation": "CW Capovolgimento di 90 gradi",
+          "translation": "CW 90 capovolto",
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 14
@@ -4173,10 +4173,10 @@
           "max_length": 10
         },
         "menu_channel_fallback": {
-          "english": "Channel Fallback",
-          "translation": "Channel Fallback",
+          "english": "Ch. Fallback",
+          "translation": "Ch. Fallback",
           "needs_translation": true,
-          "max_length": 16,
+          "max_length": 12,
           "reverse_text": false
         },
         "name": {
@@ -5327,7 +5327,7 @@
         },
         "unsynced": {
           "english": "Unsynced ESC Update",
-          "translation": "Unsynced ESC Aggiornamento",
+          "translation": "Agg. ESC non sincr.",
           "needs_translation": false,
           "max_length": 19,
           "reverse_text": false
@@ -5422,7 +5422,7 @@
       "profile_select": {
         "name": {
           "english": "Select Profile",
-          "translation": "Seleziona Profilo",
+          "translation": "Scegli profilo",
           "needs_translation": false,
           "max_length": 14,
           "reverse_text": false
@@ -5949,10 +5949,10 @@
           "reverse_text": false
         },
         "name": {
-          "english": "Serial Rx (Backup)",
-          "translation": "Serial Rx (Backup)",
+          "english": "Rx Backup",
+          "translation": "Rx Backup",
           "needs_translation": true,
-          "max_length": 18,
+          "max_length": 9,
           "reverse_text": false
         },
         "not_configured": {
@@ -8063,10 +8063,10 @@
       },
       "msp_exp": {
         "name": {
-          "english": "MSP Experimental",
-          "translation": "MSP Sperimentale",
+          "english": "MSP Exp.",
+          "translation": "MSP sperim.",
           "needs_translation": false,
-          "max_length": 16,
+          "max_length": 8,
           "reverse_text": false
         }
       },
