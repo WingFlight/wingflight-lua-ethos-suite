@@ -32,6 +32,8 @@
 --   8. the old monolithic page is still reachable     -> case 5
 --   9. a menu entry points at a page that is not there -> case 5
 --  10. an unassigned number field returns out of bounds -> case 6
+--  11. a low-voltage sag fires before the hold time    -> case 7
+--  12. the voltage callout speaks a wrong value/unit  -> case 7
 
 local function scriptDir()
   local src = debug.getinfo(1, "S").source
@@ -624,7 +626,263 @@ do
   end
 end
 
--- ── case 7: the main-power alert (issue #2310) ─────────────────────────────
+-- ── case 7: the low-voltage hold filter and spoken callout ─────────────────
+--
+-- This behaviour lives in tasks/audio_events.lua's announceVoltage(), which
+-- neither the build nor the package step exercises. The failure is quiet and
+-- the pilot finds out in the air: either the alarm sounds on a momentary
+-- voltage sag under full throttle, or it stops speaking the reading it used
+-- to. So the real task is loaded here with the bus, settings store, system
+-- audio and os.clock stubbed, and driven one wakeup at a time against a
+-- controllable clock.
+--
+-- Pinned:
+--   * a reading below the threshold that has not held for events.voltage_hold
+--     seconds stays silent, and a recovery restarts the hold;
+--   * once it has held, the alarm fires, and repeats only after the repeat
+--     interval;
+--   * voltage_callout speaks the pack total (tenths), the average cell
+--     (hundredths) or nothing, per its value, with Ethos's UNIT_VOLT.
+--
+-- A check that cannot fail proves nothing, so the last check loads a copy of
+-- the task with the hold guard stripped and requires the sag to fire there.
+-- If that check ever stops turning red, the instrument has gone blind.
+
+local AUDIO_PATH = SUITE .. "/tasks/audio_events.lua"
+
+-- A fresh rig per scenario: the task's own upvalues (the hold start and the
+-- last-alert clock) must not carry between them. `source` overrides the file
+-- the module is loaded from, which is what the can-fail check uses. The task
+-- takes bus and settingsStore as chunk args (see its header), so the stubs
+-- are passed in rather than injected through requireModule.
+local function newVoltageRig(events, source)
+  local handlers = {}
+  local played, spoken = {}, {}
+
+  local busStub = {
+    subscribe = function(topic, fn) handlers[topic] = fn end,
+    publish = function() end,
+  }
+  local storeStub = {
+    load = function() return {events = events} end,
+    audioEvents = function(s) return s.events or {} end,
+    audioTimer = function() return {} end,
+  }
+
+  -- The Ethos constant; the radio speaks "volts" only when playNumber() gets
+  -- it. A misspelt global (UNIT_VOLTS) would arrive here as nil.
+  _G.UNIT_VOLT = "V"
+  local savedSystem, savedClock = _G.system, os.clock
+  _G.system = {
+    playFile = function(path) played[#played + 1] = path end,
+    playNumber = function(value, unit, decimals)
+      spoken[#spoken + 1] = {value = value, unit = unit, decimals = decimals}
+    end,
+    playHaptic = function() end,
+    getAudioVoice = function() return "en/default" end,
+  }
+
+  local clock = 0
+  os.clock = function() return clock end
+
+  local chunk = assert(load(source or readFile(AUDIO_PATH), "@" .. AUDIO_PATH))
+  local audio = chunk(busStub, storeStub)
+
+  local rig = {spoken = spoken}
+  function rig.setClock(t) clock = t end
+  -- 20.4 V over 6 cells is 3.40 V/cell, below the 3.50 V warning threshold;
+  -- 22.2 V is 3.70, above it. The first step after connecting only seeds the
+  -- module's state, so each scenario steps once at clock 0 before measuring.
+  function rig.step(voltage, config, newEvents)
+    if newEvents ~= nil then events = newEvents end
+    local batt = {cellCount = 6, vbatWarningCell = 3.5}
+    if config == false then
+      batt = nil
+    elseif type(config) == "table" then
+      batt = config
+    end
+    handlers["session.update"]({
+      connected = true,
+      voltage = voltage,
+      batteryConfig = batt,
+    })
+    handlers["settings.update"]({events = events})
+    audio.wakeup()
+  end
+  function rig.countLow()
+    local n = 0
+    for _, path in ipairs(played) do
+      if path:find("lowvoltage.wav", 1, true) then n = n + 1 end
+    end
+    return n
+  end
+  function rig.restore()
+    _G.system, os.clock = savedSystem, savedClock
+  end
+  return rig
+end
+
+local function voltageChecks()
+  local function base(overrides)
+    local e = {voltage = true, voltage_hold = 2.0, voltage_callout = 0, voltage_repeat_interval = 10}
+    for k, v in pairs(overrides or {}) do e[k] = v end
+    return e
+  end
+
+  -- The sag: below the threshold but not yet held -> silent; then a reading
+  -- that holds -> fires.
+  do
+    local rig = newVoltageRig(base())
+    rig.setClock(0); rig.step(20.4)   -- seed
+    rig.setClock(1); rig.step(20.4)   -- hold starts, 0 < 2
+    rig.setClock(2.9); rig.step(20.6) -- 1.9 < 2
+    check("a low reading held for less than the hold time stays silent",
+      rig.countLow() == 0, "lowvoltage.wav played " .. rig.countLow() .. "x")
+    rig.setClock(3.0); rig.step(20.4) -- 2.0 >= 2 -> fire
+    check("a low reading held for the hold time fires", rig.countLow() == 1,
+      "lowvoltage.wav played " .. rig.countLow() .. "x")
+    rig.restore()
+  end
+
+  -- A recovery between two dips restarts the hold.
+  do
+    local rig = newVoltageRig(base())
+    rig.setClock(0); rig.step(20.4)   -- seed
+    rig.setClock(1); rig.step(20.4)   -- hold starts
+    rig.setClock(1.5); rig.step(22.2) -- recovered -> hold cleared
+    check("a recovery between two dips does not fire", rig.countLow() == 0)
+    rig.setClock(3); rig.step(20.4)   -- hold restarts at 3, 0 < 2
+    rig.setClock(4); rig.step(20.4)   -- 1 < 2
+    check("a fresh dip after a recovery still waits out the hold",
+      rig.countLow() == 0, "lowvoltage.wav played " .. rig.countLow() .. "x")
+    rig.setClock(5); rig.step(20.4)   -- 2 >= 2 -> fire
+    check("the fresh dip fires once it has held", rig.countLow() == 1,
+      "lowvoltage.wav played " .. rig.countLow() .. "x")
+    rig.restore()
+  end
+
+  -- A missing voltage reading or battery configuration during a dip clears
+  -- the hold.
+  for _, gap in ipairs({
+    {label = "telemetry dropout", voltage = nil, config = nil},
+    {label = "missing batteryConfig", voltage = 20.4, config = false},
+  }) do
+    local rig = newVoltageRig(base())
+    rig.setClock(0); rig.step(20.4)   -- seed
+    rig.setClock(1); rig.step(20.4)   -- hold starts
+    rig.setClock(1.5); rig.step(gap.voltage, gap.config) -- hold cleared
+    check(gap.label .. " during a dip does not fire", rig.countLow() == 0)
+    rig.setClock(3.0); rig.step(20.4) -- dip resumes; hold restarts at 3.0
+    rig.setClock(4.0); rig.step(20.4) -- 1.0 < 2
+    check("a dip after " .. gap.label .. " still waits out the full hold",
+      rig.countLow() == 0, "lowvoltage.wav played " .. rig.countLow() .. "x")
+    rig.setClock(5.0); rig.step(20.4) -- 2.0 >= 2 -> fires
+    check("a dip after " .. gap.label .. " fires once the hold has elapsed",
+      rig.countLow() == 1, "lowvoltage.wav played " .. rig.countLow() .. "x")
+    rig.restore()
+  end
+
+  -- Disabling and re-enabling the alert clears any partial hold.
+  do
+    local rig = newVoltageRig(base())
+    rig.setClock(0); rig.step(20.4)   -- seed
+    rig.setClock(1); rig.step(20.4)   -- hold starts
+    rig.setClock(1.5); rig.step(20.4, nil, base({voltage = false}))
+    check("a disabled alert does not fire", rig.countLow() == 0)
+    rig.setClock(3.0); rig.step(20.4, nil, base()) -- re-enabled, hold restarts
+    rig.setClock(4.0); rig.step(20.4) -- 1.0 < 2
+    check("a re-enabled alert still waits out the full hold",
+      rig.countLow() == 0, "lowvoltage.wav played " .. rig.countLow() .. "x")
+    rig.setClock(5.0); rig.step(20.4) -- 2.0 >= 2 -> fires
+    check("a re-enabled alert fires once the hold has elapsed",
+      rig.countLow() == 1, "lowvoltage.wav played " .. rig.countLow() .. "x")
+    rig.restore()
+  end
+
+  -- hold = 0 disables the filter and fires on the first low reading.
+  do
+    local rig = newVoltageRig(base({voltage_hold = 0}))
+    rig.setClock(0); rig.step(20.4)   -- seed
+    rig.setClock(1); rig.step(20.4)
+    check("hold = 0 fires on the first low reading", rig.countLow() == 1,
+      "lowvoltage.wav played " .. rig.countLow() .. "x")
+    rig.restore()
+  end
+
+  -- The callout: pack total, average cell, or nothing.
+  local function lastSpoken(callout)
+    local rig = newVoltageRig(base({voltage_hold = 0, voltage_callout = callout}))
+    rig.setClock(0); rig.step(20.4)
+    rig.setClock(1); rig.step(20.4)
+    rig.restore()
+    return rig.spoken[#rig.spoken], #rig.spoken
+  end
+  local function describe(n)
+    return n and string.format("%s %s %s", n.value, tostring(n.unit), tostring(n.decimals)) or "nothing spoken"
+  end
+  do
+    local n = lastSpoken(1)
+    check("callout = 1 speaks the pack total in tenths of a volt",
+      n ~= nil and n.value == 204 and n.unit == "V" and n.decimals == 1, describe(n))
+    n = lastSpoken(2)
+    check("callout = 2 speaks the average cell in hundredths of a volt",
+      n ~= nil and n.value == 340 and n.unit == "V" and n.decimals == 2, describe(n))
+    local _, count = lastSpoken(0)
+    check("callout = 0 speaks nothing", count == 0, count .. " number(s) spoken")
+  end
+
+  -- The repeat interval still governs a standing low reading.
+  do
+    local rig = newVoltageRig(base({voltage_hold = 0}))
+    rig.setClock(0); rig.step(20.4)   -- seed
+    rig.setClock(1); rig.step(20.4)   -- fire
+    rig.setClock(5); rig.step(20.4)   -- within 10s
+    check("a standing low reading is not repeated before the interval",
+      rig.countLow() == 1, "lowvoltage.wav played " .. rig.countLow() .. "x")
+    rig.setClock(11); rig.step(20.4)  -- 10s after the first
+    check("a standing low reading repeats after the interval",
+      rig.countLow() == 2, "lowvoltage.wav played " .. rig.countLow() .. "x")
+    rig.restore()
+  end
+
+  -- Settings normalisation clamps voltage_hold to 0..10 and voltage_callout
+  -- to 0..2.
+  do
+    local savedStore = package.loaded["wfsuite.lib.settings_store"]
+    package.loaded["wfsuite.lib.settings_store"] = nil
+    local store = assert(loadfile("lib/settings_store.lua"))()
+    package.loaded["wfsuite.lib.settings_store"] = savedStore
+
+    local lower = store.audioEvents({events = {voltage_hold = -5, voltage_callout = -2}})
+    check("a negative voltage_hold is clamped to 0", lower.voltage_hold == 0,
+      "got " .. tostring(lower.voltage_hold))
+    check("a negative voltage_callout is clamped to 0", lower.voltage_callout == 0,
+      "got " .. tostring(lower.voltage_callout))
+
+    local upper = store.audioEvents({events = {voltage_hold = 25, voltage_callout = 99}})
+    check("voltage_hold > 10 is clamped to 10", upper.voltage_hold == 10,
+      "got " .. tostring(upper.voltage_hold))
+    check("voltage_callout > 2 is clamped to 2", upper.voltage_callout == 2,
+      "got " .. tostring(upper.voltage_callout))
+  end
+
+  -- Can-fail: strip the hold guard and require the sag to fire.
+  local source = readFile(AUDIO_PATH)
+  local stripped = source:gsub("if %(now %- lowVoltageHoldStart%) < hold then return end", "", 1)
+  check("the hold guard could be located in announceVoltage()", stripped ~= source)
+  local rig = newVoltageRig(base(), stripped)
+  rig.setClock(0); rig.step(20.4)
+  rig.setClock(1); rig.step(20.4)
+  check("without the hold guard the sag fires (this check can go red)",
+    rig.countLow() == 1, "lowvoltage.wav played " .. rig.countLow() .. "x")
+  rig.restore()
+end
+
+out("")
+out("case 7: the low-voltage hold filter and spoken callout")
+voltageChecks()
+
+-- ── case 8: the main-power alert (issue #2310) ─────────────────────────────
 --
 -- A pack that goes while the FC stays alive on a BEC or a backup battery.
 -- Nothing in the build or the package step exercises tasks/audio_events.lua's
@@ -632,14 +890,13 @@ end
 -- latch a model whose pack is simply not measured alarms on every flight, and
 -- without the BEC guard a pack that goes on the ground does too.
 --
--- The real task is loaded here with the bus, the settings store, system audio
--- and os.clock stubbed, and driven one wakeup at a time against a controllable
--- clock. Not loadfile()'d like the pages above: the task takes the bus and the
--- settings store as its own chunk arguments, exactly the way tasks/background.lua
--- calls it. The pack the sound resolves from is stated to the task through an
--- io.open shim below -- every packaged sound path is "SCRIPTS:/...", which does
--- not exist in a checkout, so a resolver that only plays files it can open
--- would otherwise be untestable here.
+-- Same shape as case 7 above, and it reuses its AUDIO_PATH: the real task is
+-- loaded with the bus, the settings store, system audio and os.clock stubbed,
+-- and driven one wakeup at a time against a controllable clock. The pack the
+-- sound resolves from is stated to the task through an io.open shim below --
+-- every packaged sound path is "SCRIPTS:/...", which does not exist in a
+-- checkout, so a resolver that only plays files it can open would otherwise be
+-- untestable here.
 --
 -- Pinned:
 --   * a pack that has read a voltage and then goes, with a BEC still up,
@@ -656,8 +913,6 @@ end
 -- pack-seen latch from a copy of the task and requires a never-measured pack
 -- to fire there. If that check ever stops turning red, the instrument has gone
 -- blind.
-
-local AUDIO_PATH = SUITE .. "/tasks/audio_events.lua"
 
 -- io.open is answered for the "SCRIPTS:" paths in `scriptFiles` and left to the
 -- real filesystem for everything else (the harness's own readFile() shares it).
@@ -688,6 +943,9 @@ local function newMainPowerRig(events, source)
     ["SCRIPTS:/wfsuite/audio/en/default/events/alerts/battery.wav"] = true,
   }
 
+  -- The bus and the store the task takes as chunk args, and the module-level
+  -- dependencies announceMainPowerLost() does not touch but the chunk pulls in
+  -- when it is loaded.
   local busStub = {
     subscribe = function(topic, fn) handlers[topic] = fn end,
     publish = function() end,
@@ -697,9 +955,6 @@ local function newMainPowerRig(events, source)
     audioEvents = function(s) return s.events or {} end,
     audioTimer = function() return {} end,
   }
-
-  -- The module-level dependencies announceMainPowerLost() does not touch but
-  -- the chunk pulls in when it is loaded.
   package.loaded["wfsuite.lib.require"] = function(name)
     if name == "lib/battery_profile_index.lua" then
       return {index0 = function(v) return v end}
@@ -725,7 +980,7 @@ local function newMainPowerRig(events, source)
   }
 
   local clock = 0
-  _G.os.clock = function() return clock end
+  os.clock = function() return clock end
 
   local audio = assert(load(source or readFile(AUDIO_PATH), "@" .. AUDIO_PATH))(busStub, storeStub)
 
@@ -877,7 +1132,7 @@ local function mainPowerChecks()
 end
 
 out("")
-out("case 7: the main-power alert")
+out("case 8: the main-power alert")
 mainPowerChecks()
 
 -- Put the globals the rigs replaced back, so nothing after this case -- the
