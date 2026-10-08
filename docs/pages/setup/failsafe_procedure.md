@@ -33,7 +33,7 @@ Requires a running background task and a flight controller connection.
 The delay fields display counts of 0.1 seconds: a value of 10 means one second.
 Save writes the complete failsafe configuration and commits to EEPROM; the page does not request a reboot or select a PID/rate profile.
 
-See [Ch. Fallback](failsafe.md) for Stage 1 and [GPS Navigation](gps_nav_config.md) for GPS Rescue navigation parameters. Actual procedure support depends on the connected Wingflight firmware.
+See [Ch. Fallback](failsafe.md) for Stage 1 and [GPS Nav](gps_nav_config.md) for GPS Rescue navigation parameters. Actual procedure support depends on the connected Wingflight firmware.
 
 ## Source
 

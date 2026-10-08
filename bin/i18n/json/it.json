@@ -1684,10 +1684,10 @@
       },
       "gps_nav_config": {
         "name": {
-          "english": "GPS Navigation",
-          "translation": "GPS Navigation",
+          "english": "GPS Nav",
+          "translation": "GPS Nav",
           "needs_translation": true,
-          "max_length": 14,
+          "max_length": 7,
           "reverse_text": false
         },
         "arm_without_fix": {

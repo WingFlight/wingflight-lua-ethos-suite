@@ -4479,10 +4479,10 @@
           "translation": "Min Satellites"
         },
         "name": {
-          "english": "GPS Navigation",
-          "max_length": 14,
+          "english": "GPS Nav",
+          "max_length": 7,
           "needs_translation": false,
-          "translation": "GPS Navigation"
+          "translation": "GPS Nav"
         },
         "rth_altitude": {
           "english": "RTH Altitude",

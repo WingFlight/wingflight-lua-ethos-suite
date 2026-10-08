@@ -1,18 +1,18 @@
 ---
-title: "GPS Navigation"
-sidebar_label: "GPS Navigation"
+title: "GPS Nav"
+sidebar_label: "GPS Nav"
 sidebar_position: 110
 documentation_status: reviewed
 source: app/pages/gps_nav_config.lua
 ---
 
-# GPS Navigation
+# GPS Nav
 
 Set the navigation parameters used by fixed-wing RTH, Loiter and the failsafe GPS Rescue procedure.
 
 ## Where to find it
 
-*Configuration* → *Setup* → *GPS Navigation*
+*Configuration* → *Setup* → *GPS Nav*
 
 Requires a running background task and a flight controller connection.
 
