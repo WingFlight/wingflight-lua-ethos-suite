@@ -10,7 +10,8 @@ simulators/*
 deploy.json
 *.pyc
 *.pyc
-.claude
+.claude/*
+!.claude/settings.json
 bin/updater/src/wfsuite_updater_work
 bin/updater/src/build
 bin/updater/src/build_embed
