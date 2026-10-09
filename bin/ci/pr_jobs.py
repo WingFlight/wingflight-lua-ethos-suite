@@ -1043,6 +1043,23 @@ fire, so the instrument is proven able to go red.
 Ported from rotorflight-lua-ethos-suite PR #2508 (issue #2308), PR #2509 (issue #2309), and PR #2513 (issue #2311).
 '''
     ),
+    LuaStep(
+        name='Failing MSP callbacks and transport errors do not escape into the background task',
+        script='bin/msp_queue/verify_queue_callback_guard.lua',
+        rationale=r'''A page's processReply/errorHandler and the transport's pushFrame()/popFrame() run
+inside the background task's wakeup. An unhandled error there leaves the task
+through taskWakeup(), skipping the scheduler (session, audio events, flight record)
+for the rest of that tick -- and every tick if it repeats. Both boundaries are now
+called under pcall, the error is rate-limited to once a second per site, the message
+in flight is retired with an error to its page, and the TX buffer is handed back so
+subsequent MSP traffic is not locked out.
+
+The harness pins all four paths (processReply, errorHandler, Queue:clear(), transport error)
+and proves under mutation that stripping each guard lets the error escape.
+
+Ported from rotorflight-lua-ethos-suite PR #2516 (issue #2363).
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [

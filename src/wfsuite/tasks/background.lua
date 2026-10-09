@@ -399,7 +399,12 @@ local function taskWakeup()
     return
   end
 
-  mspQueue:processQueue()
+  -- Queue:wakeup() is processQueue() under pcall: an error from a page's reply
+  -- callback or from the transport is printed and the message retired, instead
+  -- of skipping scheduler:wakeup() below for this tick -- and for every tick, if
+  -- it repeats (issue #2363). The scheduler guards each subtask the same way
+  -- (tasks/scheduler.lua).
+  mspQueue:wakeup()
   scheduler:wakeup()
   local now = os.clock()
   overrideKeepalive.tick(now)
