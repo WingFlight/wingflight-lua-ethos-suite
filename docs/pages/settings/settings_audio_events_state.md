@@ -28,13 +28,14 @@ Available without a flight controller connection; the background task must be ru
 | *Rate profile* | Calls out changes to the active Rate profile index. |
 | *Thrust vector profile* | Calls out changes to the active Thrust Vectoring profile index. |
 | *Battery profile* | Announces the selected battery profile (capacity and cell count). |
-| *Adjustment function* | Calls out the selected in-flight adjustment function when switched. |
-| *Adjustment value* | Calls out the current adjustment value when changed. |
+| *Adjustment function* | Calls out the name of the in-flight adjustment function being changed, followed by its value. |
+| *Adjustment value* | Calls out the value an in-flight adjustment has settled on. |
 
 ## Notes
 
 - Changes are saved to the radio's settings store, not to the flight controller.
 - These events are triggered on transition edges rather than periodically.
+- **Adjustments** are called out once the value has stopped changing for about a third of a second. A burst of trim clicks therefore says one number, the one the model ended up with, rather than each step. Nothing is said while the value is still moving. A change that settles while the previous callout is still playing is called out after it.
 
 ## Source
 
