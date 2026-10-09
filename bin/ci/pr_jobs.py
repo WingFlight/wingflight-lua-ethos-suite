@@ -1044,45 +1044,27 @@ Ported from rotorflight-lua-ethos-suite PR #2508 (issue #2308), PR #2509 (issue 
 '''
     ),
     LuaStep(
-        name='Failing MSP callbacks and transport errors do not escape into the background task',
-        script='bin/msp_queue/verify_queue_callback_guard.lua',
-        rationale=r'''A page's processReply/errorHandler and the transport's pushFrame()/popFrame() run
-inside the background task's wakeup. An unhandled error there leaves the task
-through taskWakeup(), skipping the scheduler (session, audio events, flight record)
-for the rest of that tick -- and every tick if it repeats. Both boundaries are now
-called under pcall, the error is rate-limited to once a second per site, the message
-in flight is retired with an error to its page, and the TX buffer is handed back so
-subsequent MSP traffic is not locked out.
+        name='In-flight adjustments settle before they are spoken',
+        script='bin/adj_voice/verify_adj_voice.lua',
+        rationale=r'''An in-flight adjustment is announced from tasks/audio_events.lua's
+announceAdjustment(). It used to speak the first step of a burst and drop every step that
+landed while that announcement was still playing, so three clicks on a trim switch
+announced a value the model no longer had. Nothing in the build or the package step
+reaches it, and the failure is quiet: the pilot hears a plausible number.
 
-The harness pins all four paths (processReply, errorHandler, Queue:clear(), transport error)
-and proves under mutation that stripping each guard lets the error escape.
+The real task is driven one wakeup at a time, every 0.25 s -- the interval
+tasks/background.lua schedules it at -- against a controllable clock. A burst of steps has
+to say one number, and it has to be the last one. Nothing is spoken until the value has
+stood still for the settle window. A function change says the name once and then the
+settled value. A step that settles while an announcement is still playing is spoken
+afterwards, not dropped. adj_v = false keeps a value-only change silent, function 0 says
+nothing, and a change still waiting when the link drops is not spoken later.
 
-Ported from rotorflight-lua-ethos-suite PR #2516 (issue #2363).
-''',
-    ),
-    LuaStep(
-        name='A stalled background tick rebuilds the queue and the scheduler',
-        script='bin/queue_watchdog/verify_queue_watchdog.lua',
-        rationale=r'''A reply callback or a subtask can raise on every tick, and when it raises ahead of the
-heartbeat publish the tick never completes. Ethos does not stop the task for it: the task is
-called again and goes on failing, silent, with only a log line to say why. The per-call guards
-of the step above keep one failure from skipping the rest of a tick; they cannot help when the
-same failure repeats, because by then there is nothing left to skip into.
+A copy of the task with the settle guard removed is loaded, and the first step of the
+burst has to be spoken there. If that ever stops turning red, the instrument has gone blind.
 
-So the real lib/task_watchdog.lua is driven against a controllable clock: a task that has not
-started a tick is not due, a tick that started and finished holds it closed until the
-threshold, only the threshold opens it, a later tick does not postpone the stall, a beat after
-that closes it again, and every revival is counted. The wiring is pinned by reading
-tasks/background.lua: the stall check runs before the queue is used, the start before the queue
-and the beat after the scheduler ran, and the revival rebuilds queue and scheduler, clears the
-old queue first so waiting pages are told, registers the subtasks through the one path
-runDeferredInit() uses, and does not re-subscribe the bus handlers -- a duplicate handler per
-revival is worse than the stall. Can-fail copies: the watchdog with the threshold blown open,
-background.lua with the beat moved ahead of the scheduler, and one without the clear of the old
-queue.
-
-Ported from rotorflight-lua-ethos-suite PR #2516 (issue #2363).
-''',
+Ported from rotorflight-lua-ethos-suite PR #2515 (issue #2315).
+'''
     ),
 ]
 
