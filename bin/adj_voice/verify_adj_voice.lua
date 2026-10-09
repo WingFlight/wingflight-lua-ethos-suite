@@ -237,6 +237,16 @@ do
 end
 
 do
+  local rig = newAdjRig({adj_f = false, adj_v = true})
+  -- Function changes from 14 to 15, value stays at initial 50.
+  rig.setClock(0.50); rig.step({connected = true, adjFunction = 15, adjValue = 50})
+  rig.setClock(1.50); rig.step({connected = true, adjFunction = 15, adjValue = 50})
+  check("adj_f = false keeps a function change silent when value is unchanged",
+    #rig.spoken == 0 and rig.count("adjfunctions/") == 0,
+    rig.count("adjfunctions/") .. " word(s), spoke " .. spokenValues(rig))
+end
+
+do
   local rig = newAdjRig({adj_f = true, adj_v = true})
   rig.setClock(0.50); rig.step({connected = true, adjFunction = 0, adjValue = 0})
   rig.setClock(1.50); rig.step({connected = true, adjFunction = 0, adjValue = 0})
