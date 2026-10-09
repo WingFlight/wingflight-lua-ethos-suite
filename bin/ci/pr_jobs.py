@@ -1061,6 +1061,9 @@ os.stat().mtime table). --self-test proves that stripping the quoting, either ha
 hook, the sort or the filter turns each gate red.
 
 Ported from rotorflight-lua-ethos-suite PR #2517 (issue #2323).
+'''
+    ),
+    LuaStep(
         name='In-flight adjustments settle before they are spoken',
         script='bin/adj_voice/verify_adj_voice.lua',
         rationale=r'''An in-flight adjustment is announced from tasks/audio_events.lua's

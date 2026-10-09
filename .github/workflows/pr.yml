@@ -962,6 +962,7 @@ jobs:
       - name: Check the recorded craft names and the known-models list
         if: success() || failure()
         run: lua5.4 bin/known_models/verify_known_models.lua
+
       # An in-flight adjustment is announced from tasks/audio_events.lua's
       # announceAdjustment(). It used to speak the first step of a burst and drop every step that
       # landed while that announcement was still playing, so three clicks on a trim switch
