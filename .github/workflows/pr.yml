@@ -960,6 +960,29 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/msp_queue/verify_queue_callback_guard.lua
 
+      # A reply callback or a subtask can raise on every tick, and when it raises ahead of the
+      # heartbeat publish the tick never completes. Ethos does not stop the task for it: the task is
+      # called again and goes on failing, silent, with only a log line to say why. The per-call guards
+      # of the step above keep one failure from skipping the rest of a tick; they cannot help when the
+      # same failure repeats, because by then there is nothing left to skip into.
+      #
+      # So the real lib/task_watchdog.lua is driven against a controllable clock: a task that has not
+      # started a tick is not due, a tick that started and finished holds it closed until the
+      # threshold, only the threshold opens it, a later tick does not postpone the stall, a beat after
+      # that closes it again, and every revival is counted. The wiring is pinned by reading
+      # tasks/background.lua: the stall check runs before the queue is used, the start before the queue
+      # and the beat after the scheduler ran, and the revival rebuilds queue and scheduler, clears the
+      # old queue first so waiting pages are told, registers the subtasks through the one path
+      # runDeferredInit() uses, and does not re-subscribe the bus handlers -- a duplicate handler per
+      # revival is worse than the stall. Can-fail copies: the watchdog with the threshold blown open,
+      # background.lua with the beat moved ahead of the scheduler, and one without the clear of the old
+      # queue.
+      #
+      # Ported from rotorflight-lua-ethos-suite PR #2516 (issue #2363).
+      - name: A stalled background tick rebuilds the queue and the scheduler
+        if: success() || failure()
+        run: lua5.4 bin/queue_watchdog/verify_queue_watchdog.lua
+
   # Per-language PR builds (mirrors push.yml behavior)
   create-zip:
     name: Build PR ZIP (${{ matrix.lang }})

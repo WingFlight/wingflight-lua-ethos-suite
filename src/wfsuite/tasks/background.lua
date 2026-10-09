@@ -86,12 +86,16 @@
 
 local bus, settingsStore, debugLog, mspCommon, mspTransportSelect, Scheduler,
       telemetrySensors, mspQueue, session, logging, audioEvents, audioSwitches,
-      scheduler, overrideKeepalive
+      scheduler, overrideKeepalive, taskWatchdog, watchdog
 
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 
 local TASK_STATUS_INTERVAL = 0.5
 local MEMORY_LOG_INTERVAL = 5
+-- The same 3 s the tool waits for a heartbeat (app/tool.lua's
+-- TASK_STATUS_TIMEOUT): the pipeline is rebuilt at the moment the task would
+-- otherwise start being reported as missing.
+local WATCHDOG_STALL_SECONDS = 3
 -- Cheap: a couple of model.getModule()/:enable() field reads, no loadfile
 -- -- see checkTransportChange() below for why this can be polled instead
 -- of driven off a specific model/module-change event.
@@ -152,6 +156,7 @@ local function publishTaskStatus(now)
     running = true,
     protocol = protocol,
     updatedAt = lastTaskStatusAt,
+    revivals = watchdog.revivals,
   })
 end
 
@@ -222,31 +227,18 @@ end
 
 -- Everything taskInit() used to do synchronously, now deferred until
 -- loadSteps (below) finishes -- see the header comment for why.
-local function runDeferredInit()
-  transport, protocol, moduleNumber = mspTransportSelect.select()
-  mspCommon.setTransport(transport)
-  session.setTelemetrySensors(telemetrySensors)
-  logging.setTelemetrySensors(telemetrySensors)
-  audioSwitches.setTelemetrySensors(telemetrySensors)
-  local initialSettings = settingsStore.load()
-  logging.setSettings(initialSettings)
-  audioEvents.setSettings(initialSettings)
-  audioSwitches.setSettings(initialSettings)
-  onSettingsUpdate(initialSettings)
-  bus.subscribe("settings.update", onSettingsUpdate)
+-- Printing an error must not be able to raise: an error object with a
+-- __tostring metamethod that raises would turn a report into a second failure.
+local function errorText(err)
+  local ok, text = pcall(tostring, err)
+  if ok and type(text) == "string" then return text end
+  return "<error of type " .. type(err) .. ">"
+end
 
-  mspRequestsReady = true
-  for i = 1, #pendingMspRequests do
-    handleMspRequest(pendingMspRequests[i])
-  end
-  pendingMspRequests = {}
-
+-- The one registration path, shared by runDeferredInit() and by the revival
+-- below.
+local function registerSubtasks()
   scheduler:clear()
-  lastMemoryLogAt = nil
-  -- A reloaded task (a model switch reloads it) starts a fresh window rather
-  -- than reporting a minimum from its previous life. Guarded: on a first boot
-  -- that has never logged a line, the probe was never loaded.
-  if stackProbe then stackProbe.reset() end
   scheduler:add("transport_recheck", TRANSPORT_RECHECK_INTERVAL, checkTransportChange)
   scheduler:add("session", 0.05, function()
     session.wakeup(mspQueue, protocol, transport, simSensors)
@@ -269,6 +261,54 @@ local function runDeferredInit()
       simSensors.wakeup()
     end)
   end
+end
+
+-- The tick stopped completing while the task is still being called (issue
+-- #2363): the transport is kept, queue and scheduler are rebuilt on top of it.
+-- No bus.subscribe here -- those belong to the task's lifetime, not to the
+-- pipeline, and re-subscribing would make every revival a duplicate handler.
+local function revivePipeline(now)
+  watchdog:noteRevival()
+  -- Whoever is waiting has to be told: a page whose reply is dropped would
+  -- otherwise wait for it forever.
+  local cleared, clearErr = pcall(mspQueue.clear, mspQueue)
+  if not cleared then
+    print("[bgtask] old queue clear failed: " .. errorText(clearErr))
+  end
+  mspQueue = requireModule("tasks/msp/queue.lua").new(mspCommon, debugLog)
+  scheduler = Scheduler.new()
+  registerSubtasks()
+  watchdog:beat()
+  publishTaskStatus(now)
+  print("[bgtask] pipeline rebuilt after a stalled tick (revival " ..
+    watchdog.revivals .. ")")
+end
+
+local function runDeferredInit()
+  transport, protocol, moduleNumber = mspTransportSelect.select()
+  mspCommon.setTransport(transport)
+  session.setTelemetrySensors(telemetrySensors)
+  logging.setTelemetrySensors(telemetrySensors)
+  audioSwitches.setTelemetrySensors(telemetrySensors)
+  local initialSettings = settingsStore.load()
+  logging.setSettings(initialSettings)
+  audioEvents.setSettings(initialSettings)
+  audioSwitches.setSettings(initialSettings)
+  onSettingsUpdate(initialSettings)
+  bus.subscribe("settings.update", onSettingsUpdate)
+
+  mspRequestsReady = true
+  for i = 1, #pendingMspRequests do
+    handleMspRequest(pendingMspRequests[i])
+  end
+  pendingMspRequests = {}
+
+  lastMemoryLogAt = nil
+  -- A reloaded task (a model switch reloads it) starts a fresh window rather
+  -- than reporting a minimum from its previous life. Guarded: on a first boot
+  -- that has never logged a line, the probe was never loaded.
+  if stackProbe then stackProbe.reset() end
+  registerSubtasks()
 
   -- Published last, once mspQueue/msp.request/scheduler jobs are all
   -- actually live -- see the header comment on why other subsystems
@@ -312,6 +352,10 @@ local loadSteps = {
   function()
     Scheduler = requireModule("tasks/scheduler.lua")
     scheduler = Scheduler.new()
+  end,
+  function()
+    taskWatchdog = requireModule("lib/task_watchdog.lua")
+    watchdog = taskWatchdog.new(WATCHDOG_STALL_SECONDS)
   end,
   function()
     telemetrySensors = requireModule("lib/telemetry_sensors.lua")
@@ -399,6 +443,9 @@ local function taskWakeup()
     return
   end
 
+  local now = os.clock()
+  if watchdog:due(now) then revivePipeline(now) end
+  watchdog:start(now)
   -- Queue:wakeup() is processQueue() under pcall: an error from a page's reply
   -- callback or from the transport is printed and the message retired, instead
   -- of skipping scheduler:wakeup() below for this tick -- and for every tick, if
@@ -406,7 +453,8 @@ local function taskWakeup()
   -- (tasks/scheduler.lua).
   mspQueue:wakeup()
   scheduler:wakeup()
-  local now = os.clock()
+  -- Only a tick that got this far ran its whole pipeline.
+  watchdog:beat()
   overrideKeepalive.tick(now)
   logMemoryUsage(now)
   if not lastTaskStatusAt or (now - lastTaskStatusAt) >= TASK_STATUS_INTERVAL then
