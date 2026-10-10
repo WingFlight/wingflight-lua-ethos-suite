@@ -1061,6 +1061,9 @@ os.stat().mtime table). --self-test proves that stripping the quoting, either ha
 hook, the sort or the filter turns each gate red.
 
 Ported from rotorflight-lua-ethos-suite PR #2517 (issue #2323).
+'''
+    ),
+    LuaStep(
         name='Check the Battery tile picker',
         script='bin/battery_picker/verify_battery_picker.lua',
         rationale=r'''Issue #2357: the Battery tile opened form.openDialog with one button per
