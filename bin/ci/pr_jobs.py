@@ -1061,6 +1061,22 @@ os.stat().mtime table). --self-test proves that stripping the quoting, either ha
 hook, the sort or the filter turns each gate red.
 
 Ported from rotorflight-lua-ethos-suite PR #2517 (issue #2323).
+        name='Check the Battery tile picker',
+        script='bin/battery_picker/verify_battery_picker.lua',
+        rationale=r'''Issue #2357: the Battery tile opened form.openDialog with one button per
+battery profile. Ethos lays a dialog's buttons out in one row, so six profiles
+overflowed a 480x320 screen. The pack choice is now painted by
+widgets/dashboard/battery_picker.lua as a grid: three across at 400 px and wider,
+every cell at least 44 px in both directions.
+
+No build and no package step reaches this -- it is a touch and rotary path
+through a running widget. The harness drives the real widgets/dashboard.lua
+through the descriptor the radio calls: the picker opens by itself once per
+connection, the Battery tile opens it from the toolbar, and a tap or Enter writes
+the pack under the cursor as the msp.request the old dialog sent. Exit, Return, a
+tap outside the grid and choosing the active pack change nothing. It counts
+form.openDialog calls with the picker's title and requires none. --self-test
+puts back one row of six and requires the three-across check to go red.
 '''
     ),
     LuaStep(
