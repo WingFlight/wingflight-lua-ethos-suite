@@ -1061,6 +1061,9 @@ os.stat().mtime table). --self-test proves that stripping the quoting, either ha
 hook, the sort or the filter turns each gate red.
 
 Ported from rotorflight-lua-ethos-suite PR #2517 (issue #2323).
+'''
+    ),
+    LuaStep(
         name='Check the Battery tile picker',
         script='bin/battery_picker/verify_battery_picker.lua',
         rationale=r'''Issue #2357: the Battery tile opened form.openDialog with one button per
@@ -1100,6 +1103,20 @@ A copy of the task with the settle guard removed is loaded, and the first step o
 burst has to be spoken there. If that ever stops turning red, the instrument has gone blind.
 
 Ported from rotorflight-lua-ethos-suite PR #2515 (issue #2315).
+'''
+    ),
+    LuaStep(
+        name='Accelerometer calibration waits for the flight controller before it saves',
+        script='bin/acc_calibration_wait/verify_acc_calibration_wait.lua',
+        rationale=r'''MSP_ACC_CALIBRATION is acknowledged as soon as it arrives, but the flight
+controller calibrates afterwards: it sets ARMING_DISABLED_CALIBRATING (bit 12 of
+arming_disable_flags) while it runs. The accelerometer page used to save to the EEPROM
+and play the beep on the acknowledgement, before the calibration had finished.
+
+lib/acc_calibration_wait.lua decides from MSP_STATUS polls: done once the bit has been
+seen set and is clear again, timeout after 15 seconds. A bit never seen set counts as
+done after 3 seconds (stated in the module). The harness drives the real module with a
+simulated clock; --self-test catches a naive rule that reports done on the first clear poll.
 '''
     ),
 ]
