@@ -420,6 +420,16 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/tests/tune_history.lua
 
+      # The Tune Advisor's Save writes its suggested changes to the FC. Pins
+      # what reaches the FC: only the advised fields change, and nothing is
+      # written unless every read is complete (a short reply would decode as a
+      # tune of zeros), the FC still holds the tune the flights were flown on
+      # (same values and profiles) and the model is disarmed; a failed write is
+      # never committed to EEPROM; each stage is shown to the pilot.
+      - name: Check the Tune Advisor Apply
+        if: success() || failure()
+        run: lua5.4 bin/tests/tune_advisor_apply.lua
+
       # The HW5 codec chose its field layout by a profile key, and only one OPTO
       # profile existed, so every other OPTO model fell through to the default
       # layout: an OPTO ESC has no BEC byte, so every field from item 5 up was

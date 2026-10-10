@@ -140,7 +140,7 @@ do
   local r = lines()
   check("a header and one row per axis are written", #r == 4
     and r[1]:match("^date,flight_seconds,axis,")
-    and r[2]:match(",147,roll,50,100,0,5,70,")
+    and r[2]:match(",147,roll,105,100,35,5,18,")
     and r[3]:match(",pitch,") and r[4]:match(",yaw,"), table.concat(r, "\n"))
   local _, commas = r[1]:gsub(",", "")
   local _, rowCommas = r[2]:gsub(",", "")
@@ -219,7 +219,7 @@ do
   fly(80, 80)
   local flights = tuneHistory.read(MCU)
   check("the history reads back as flights", #flights == 3 and flights[3].seconds == 80
-    and flights[3].axes[1].F == 80 and flights[3].axes[3].P == 80, #flights .. " flights")
+    and flights[3].axes[1].F == 80 and flights[3].axes[3].P == 190, #flights .. " flights")
 
   local a, used, seconds = tuneHistory.aggregate(flights, 1)
   local one = flights[3].axes[1]

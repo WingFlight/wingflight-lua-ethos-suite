@@ -498,6 +498,17 @@ newest tune, counts added, ratios weighted).
 '''
     ),
     LuaStep(
+        name='Check the Tune Advisor Apply',
+        script='bin/tests/tune_advisor_apply.lua',
+        rationale=r'''The Tune Advisor's Save writes its suggested changes to the FC. Pins
+what reaches the FC: only the advised fields change, and nothing is
+written unless every read is complete (a short reply would decode as a
+tune of zeros), the FC still holds the tune the flights were flown on
+(same values and profiles) and the model is disarmed; a failed write is
+never committed to EEPROM; each stage is shown to the pilot.
+'''
+    ),
+    LuaStep(
         name='Check the Hobbywing V5 OPTO layout',
         script='bin/esc_hw5_opto/verify_hw5_opto.lua',
         rationale=r'''The HW5 codec chose its field layout by a profile key, and only one OPTO
