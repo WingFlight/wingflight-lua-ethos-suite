@@ -1105,6 +1105,20 @@ burst has to be spoken there. If that ever stops turning red, the instrument has
 Ported from rotorflight-lua-ethos-suite PR #2515 (issue #2315).
 '''
     ),
+    LuaStep(
+        name='Accelerometer calibration waits for the flight controller before it saves',
+        script='bin/acc_calibration_wait/verify_acc_calibration_wait.lua',
+        rationale=r'''MSP_ACC_CALIBRATION is acknowledged as soon as it arrives, but the flight
+controller calibrates afterwards: it sets ARMING_DISABLED_CALIBRATING (bit 12 of
+arming_disable_flags) while it runs. The accelerometer page used to save to the EEPROM
+and play the beep on the acknowledgement, before the calibration had finished.
+
+lib/acc_calibration_wait.lua decides from MSP_STATUS polls: done once the bit has been
+seen set and is clear again, timeout after 15 seconds. A bit never seen set counts as
+done after 3 seconds (stated in the module). The harness drives the real module with a
+simulated clock; --self-test catches a naive rule that reports done on the first clear poll.
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [
