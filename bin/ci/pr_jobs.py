@@ -1044,6 +1044,23 @@ Ported from rotorflight-lua-ethos-suite PR #2508 (issue #2308), PR #2509 (issue 
 '''
     ),
     LuaStep(
+        name='Check the recorded craft names and the known-models list',
+        script='bin/known_models/verify_known_models.lua',
+        rationale=r'''tasks/session.lua records the name the flight controller reported (MSP_NAME) next
+to its preferences (lib/model_preferences.lua, `[craft] name`), and
+lib/known_models.lua lists every store on the card without a connection.
+
+The name sits inside quotes on disk, because lib/ini.lua reads "007", "0x10" and "1e3"
+back as numbers and "true" as a boolean, so a bare name would not survive a round
+trip. The UID and the NAME arrive in separate replies and either may come first; both
+hooks write, and a name that has not changed writes nothing.
+
+The harness drives the real ini, model_preferences, known_models and session modules
+against an in-memory card that behaves as Ethos does (descending listFiles order,
+os.stat().mtime table). --self-test proves that stripping the quoting, either handshake
+hook, the sort or the filter turns each gate red.
+
+Ported from rotorflight-lua-ethos-suite PR #2517 (issue #2323).
         name='Check the Battery tile picker',
         script='bin/battery_picker/verify_battery_picker.lua',
         rationale=r'''Issue #2357: the Battery tile opened form.openDialog with one button per

@@ -116,6 +116,7 @@
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local pageRuntime = requireModule("app/page_runtime.lua")
 local fieldLayout = requireModule("app/field_layout.lua")
+local bus = requireModule("lib/bus.lua")
 local mspName = requireModule("lib/msp_name.lua")
 local advancedConfig = requireModule("lib/msp_advanced_config.lua")
 local featureConfig = requireModule("lib/msp_feature_config.lua")
@@ -206,6 +207,14 @@ local function open(opts)
         buildFields()
       end
     end,
+    onSaved = function(self_)
+      local craft = self_.data.craftName
+      local name = craft and craft.name
+      if name and name ~= "" then
+        if type(name) ~= "string" then name = tostring(name) end
+        bus.publish("craft.name.saved", name:sub(1, mspName.MAX_NAME_LENGTH))
+      end
+    end,
   })
 
   form.clear()
@@ -247,7 +256,11 @@ local function open(opts)
       function(value)
         markDirty()
         local craftName = dataRef.data.craftName
-        if craftName then craftName.name = value or "" end
+        if craftName then
+          local name = value or ""
+          if type(name) ~= "string" then name = tostring(name) end
+          craftName.name = name:sub(1, mspName.MAX_NAME_LENGTH)
+        end
       end)
     runtime:registerField("craftName:name", nameField)
 
