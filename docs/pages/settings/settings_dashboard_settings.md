@@ -31,6 +31,18 @@ TODO: Verify persistence, reboot behaviour, profile scope and any restrictions i
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than
 firmware defaults; wire values may need scaling before display.
 
+## KSE5
+
+**KSE5** sets the value at which each of its rings is full. A zero or missing
+value falls back to the default.
+
+- **RPM → Max**: 500 to 20000 rpm, default 3000.
+- **Current → Max**: 10 to 500 A, default 150. The ring turns to the warning
+  colour above 70 % of this value and to the critical colour above 90 %.
+- **ESC Temp → Max**: 40 to 150 °C, default 100, with the same colour steps.
+
+Values are stored in the `dashboard.kse5` section of `settings.ini`.
+
 ## Source
 
 [Page implementation](../../../src/wfsuite/app/pages/settings_dashboard_settings.lua). Menu conditions come from `app/tool.lua`.
