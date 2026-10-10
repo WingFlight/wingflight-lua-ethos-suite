@@ -42,15 +42,17 @@ local msp_tune_advisor = {
 
 -- Simulator fixture, one reply per axis: the roll numbers of a real log (a
 -- 3D airframe with F hot and the usual stop bounce), pitch too irregular to
--- judge, yaw quiet.
+-- judge, yaw quiet. The tune (P, F, B, relax, rate) is the other fixtures'
+-- (lib/msp_pid_tuning.lua, msp_pid_profile.lua, msp_rc_tuning.lua), so the
+-- Tune Advisor's Apply finds the FC still on the tune that was flown.
 local SIM_AXES = {
-  {p = 50, f = 100, relax = 5, rate = 70, ffCount = 1491, ff = 1.53, corr = 0.97, lag = 90,
+  {p = 105, f = 65, b = 35, relax = 5, rate = 18, ffCount = 1491, ff = 1.53, corr = 0.97, lag = 90,
    sp = {{1.52, 1341}, {1.54, 163}, {1.03, 50}}, thr = {{1.24, 385}, {1.54, 763}, {1.73, 356}},
    full = {87, 25, 0.38, 395}, rel = {35, 18, 0.15, 1.47, 0.020, 0.003}},
-  {p = 50, f = 100, relax = 5, rate = 70, ffCount = 1172, ff = 0.79, corr = 0.78, lag = 70,
+  {p = 105, f = 65, b = 35, relax = 5, rate = 18, ffCount = 1172, ff = 0.79, corr = 0.78, lag = 70,
    sp = {{1.06, 999}, {0.45, 194}, {0, 54}}, thr = {{0.28, 446}, {1.27, 629}, {1.59, 118}},
    full = {105, 72, 0, 23}, rel = {10, 2, 0.09, 1.33, 0.019, 0.011}},
-  {p = 80, f = 100, relax = 5, rate = 70, ffCount = 404, ff = 0.27, corr = 0.84, lag = 250,
+  {p = 190, f = 65, b = 35, relax = 5, rate = 18, ffCount = 404, ff = 0.27, corr = 0.84, lag = 250,
    sp = {{0.26, 300}, {0.30, 109}, {0, 0}}, thr = {{0.29, 409}, {0, 0}, {0, 0}},
    full = {29, 29, 0.09, 42}, rel = {0, 0, 0, 0, 0, 0}},
 }
@@ -65,7 +67,7 @@ local function buildSimulatorResponse(axis)
   mspcodec.writeU8(buf, axis - 1)
   mspcodec.writeU16(buf, a.p)
   mspcodec.writeU16(buf, a.f)
-  mspcodec.writeU16(buf, 0)
+  mspcodec.writeU16(buf, a.b)
   mspcodec.writeU8(buf, a.relax)
   mspcodec.writeU8(buf, a.rate)
   mspcodec.writeU16(buf, a.ffCount)
