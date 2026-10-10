@@ -962,6 +962,7 @@ jobs:
       - name: Check the recorded craft names and the known-models list
         if: success() || failure()
         run: lua5.4 bin/known_models/verify_known_models.lua
+
       # Issue #2357: the Battery tile opened form.openDialog with one button per
       # battery profile. Ethos lays a dialog's buttons out in one row, so six profiles
       # overflowed a 480x320 screen. The pack choice is now painted by
