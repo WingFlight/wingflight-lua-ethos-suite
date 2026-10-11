@@ -1140,6 +1140,16 @@ lib/rate_curve_scale.lua now takes each field's maximum from those limits, for t
 and for the value stored from the page. --self-test puts back the flat 255 ceiling.
 '''
     ),
+    LuaStep(
+        name='Check the port labels and the board info parser',
+        script='bin/port_labels/verify_port_labels.lua',
+        rationale=r'''Issue #2359: the Ports page reads MSP_BOARD_INFO and shows a silkscreen
+label for each UART when the board has one. No WingFlight board has label data yet,
+so the lookup must answer nil and the page shows the plain UART name. The check
+also drives the lookup logic with injected entries, and it covers truncated replies,
+since mspcodec reads past the end of a buffer as 0.
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [
