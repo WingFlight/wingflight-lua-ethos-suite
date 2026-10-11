@@ -27,6 +27,10 @@ Requires a running background task and a flight controller connection.
 
 ## Notes
 
+- The largest value of each field is set by the firmware, not by the page: RC Rate
+  up to 200, Shape and RC Expo up to 100 (`src/main/fc/rc_rates.h:25-27`). A value saved
+  above the limit is cut to the limit at the next boot.
+
 TODO: Verify persistence, reboot behaviour, profile scope and any restrictions in
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than
 firmware defaults; wire values may need scaling before display.

@@ -51,6 +51,20 @@ local DECIMALS = {
   expo = {main = 0, col = 0},
 }
 
+-- The largest raw byte the firmware keeps per role (issue #2350, ported from
+-- rotorflight-lua-ethos-suite). wingflight-firmware has one limit per field, for
+-- every rate table, in src/main/fc/rc_rates.h:25-27 (CONTROL_RATE_CONFIG_RC_RATES_MAX,
+-- _SUPER_RATE_MAX, _RC_EXPO_MAX). validateAndFixRatesSettings() in
+-- src/main/config/config.c:197-206 clamps each stored value to it at load time.
+-- Roles map to the MSP fields: rcRate -> rcRates_N, srate -> rates_N (sRates),
+-- expo -> rcExpo_N. MSP_SET_RC_TUNING itself does not clamp, so a value above the
+-- limit is only cut at the next boot.
+local RAW_LIMITS = {
+  rcRate = 200,
+  srate = 100,
+  expo = 100,
+}
+
 -- Default raw wire bytes per axis (1 = roll, 2 = pitch, 3 = yaw), carried
 -- over from the pre-rewrite project's own ratetables/wingflight.lua
 -- defaults (see `git show 0a94e6f7` in this repo's history) -- RC Rate
@@ -97,15 +111,20 @@ function rate_curve_scale.fromDisplayInt(displayInt, role, axisClass)
   local scale = 10 ^ decimalsFor(role, axisClass)
   local raw = math.floor((displayInt or 0) / scale * 100 / divisor + 0.5)
   if raw < 0 then return 0 end
-  if raw > 255 then return 255 end
+  if raw > RAW_LIMITS[role] then return RAW_LIMITS[role] end
   return raw
 end
 
+-- The largest raw byte the firmware accepts for a role (see RAW_LIMITS above).
+function rate_curve_scale.rawMaxFor(role)
+  return RAW_LIMITS[role]
+end
+
 -- Display-domain bounds AND decimals for a field's widget. Min is always
--- 0; max is derived from the same divisor the live conversion uses, so
--- it can never drift out of sync with it.
+-- 0; max is the firmware limit converted with the same divisor the live
+-- conversion uses, so it can never drift out of sync with it.
 function rate_curve_scale.displayBounds(role, axisClass)
-  return 0, rate_curve_scale.toDisplayInt(255, role, axisClass), decimalsFor(role, axisClass)
+  return 0, rate_curve_scale.toDisplayInt(RAW_LIMITS[role], role, axisClass), decimalsFor(role, axisClass)
 end
 
 function rate_curve_scale.displayStep(role, axisClass)

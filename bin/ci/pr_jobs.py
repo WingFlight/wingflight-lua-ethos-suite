@@ -1130,6 +1130,16 @@ done after 3 seconds (stated in the module). The harness drives the real module 
 simulated clock; --self-test catches a naive rule that reports done on the first clear poll.
 '''
     ),
+    LuaStep(
+        name='Check the rate limits follow the firmware maxima',
+        script='bin/rate_limits/verify_rate_limits.lua',
+        rationale=r'''The rates page offered every rate field up to 255. wingflight-firmware keeps one
+limit per field (src/main/fc/rc_rates.h:25-27) and clamps stored values to it at load
+(config.c:197-206), so a value the page stored above the limit was cut at the next boot.
+lib/rate_curve_scale.lua now takes each field's maximum from those limits, for the display
+and for the value stored from the page. --self-test puts back the flat 255 ceiling.
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [
