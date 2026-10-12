@@ -8,6 +8,7 @@ local batteryProfileIndex = requireModule("lib/battery_profile_index.lua")
 local systemAlerts = requireModule("lib/system_alerts.lua")
 local systemStatusCodec = requireModule("lib/system_status.lua")
 local engineType = requireModule("lib/engine_type.lua")
+local mainPower = requireModule("lib/main_power.lua")
 
 local bus, settingsStore = ...
 
@@ -22,10 +23,6 @@ local initialized = false
 local adjWavs = nil
 
 local lastAlertAt = {}
--- Whether the pack has read a real voltage at any point in the current run.
--- The main-power test below needs it: a model whose pack is not measured at
--- all would otherwise look exactly like one whose pack has gone.
-local packVoltageSeen = false
 -- True between a main-power alert actually playing and the pack coming back,
 -- so the recovery is only announced for an episode that was announced lost.
 local mainPowerLostActive = false
@@ -84,7 +81,7 @@ local CONTROL_LIMIT_REPEAT_SECONDS = 3
 -- inside the window. The same number and the same test the EdgeTX suite uses
 -- (lib/audio.lua, MAIN_POWER_LOST_VOLTS / Audio.mainPowerLost), and the same
 -- test the Rotorflight Ethos suite gained with its own main-power alert.
-local MAIN_POWER_LOST_VOLTS = 1.0
+local MAIN_POWER_LOST_VOLTS = mainPower.THRESHOLD_VOLTS
 -- How often a main-power alert repeats while the pack stays gone.
 local MAIN_POWER_REPEAT_SECONDS = 10
 -- The sound each main-power announcement would like the sound packs to gain,
@@ -207,6 +204,7 @@ local AUDIO_SESSION_KEYS = {
   "batteryConfig",
   "tempEsc",
   "becVoltage",
+  "mainPowerLost",
   "fuelPercent",
   "adjFunction",
   "adjValue",
@@ -809,40 +807,17 @@ end
 -- pack voltage is the one sensor with nothing behind it. Nothing else in this
 -- file would notice the machine is flying on its backup.
 --
--- Three things have to be true together, and the second is what keeps a model
--- whose pack is not measured at all quiet: the pack reads as gone rather than
--- merely low, it has read a real voltage at some point this connection, and a
--- BEC voltage is there beside it -- without one there is no evidence anything
--- is still powered. The same test as the EdgeTX suite's lib/audio.lua
--- (Audio.mainPowerLost); decoding "gone" as total voltage rather than per
--- cell is the other half of why this is its own function and not a branch of
--- announceVoltage(). Not armed-gated, for the same reason it is not there:
--- the pack-seen latch already keeps a bench setup with no pack attached quiet,
--- and a pack that goes while the model sits on the ground is still a fault.
--- The latch's one writer. Called on every wakeup the main-power alert runs --
--- including when the alert itself is switched off, because the latch answers
--- "has this connection ever seen a pack" and an alert enabled later in the same
--- session has to be able to answer that -- and once more from wakeup()'s
--- initialisation branch, which returns before any announcement would run.
--- Without that, a pack already reading when the link came up is never recorded,
--- and a loss the instant after goes unannounced for the whole episode.
-local function notePackVoltage()
-  local voltage = tonumber(session.voltage)
-  if voltage and voltage > MAIN_POWER_LOST_VOLTS then packVoltageSeen = true end
-end
-
+-- The test itself is lib/main_power.lua: three things true together (the pack
+-- reads gone, it has read a real voltage this connection, a BEC voltage is
+-- there beside it). tasks/session.lua evaluates it on every voltage change and
+-- publishes session.mainPowerLost, so the audio alert and the dashboard banner
+-- cannot disagree, and the pack-seen latch lives with the session, where it sees
+-- every reading -- including those that arrive while the alert is switched off,
+-- and the ones before the first wakeup (Rotorflight Ethos suite #2358).
+-- Not armed-gated: a pack that goes while the model sits on the ground is still
+-- a fault, and the latch keeps a bench setup with no pack attached quiet.
 local function mainPowerLost()
-  local voltage = tonumber(session.voltage)
-  if voltage == nil then return false end
-
-  if voltage > MAIN_POWER_LOST_VOLTS then return false end
-
-  if not packVoltageSeen then return false end
-
-  local bec = tonumber(session.becVoltage)
-  if bec == nil or bec <= 0 then return false end
-
-  return true
+  return session.mainPowerLost == true
 end
 
 -- Announced again every MAIN_POWER_REPEAT_SECONDS while the pack stays gone,
@@ -850,10 +825,6 @@ end
 -- spoken on the way in: it is the reading that still means something, and it
 -- says how much is left of whatever is keeping the receiver alive.
 local function announceMainPowerLost(now)
-  -- Recorded whether or not the alert is enabled, so switching it on later in
-  -- the same session does not lose the episode that had already started.
-  notePackVoltage()
-
   if not events.main_power_lost then
     -- Forget the whole episode, not just its "back" half: an alert switched off
     -- and back on must not wait out a repeat deadline set before it was off.
@@ -1263,7 +1234,6 @@ function audio_events.wakeup()
     adjChangedAt = nil
     resetTimerAudio()
     speakingUntil = 0
-    packVoltageSeen = false
     mainPowerLostActive = false
     lowVoltageHoldStart = nil
     -- connectionLostAt is deliberately NOT cleared here: it has to outlive the
@@ -1286,10 +1256,6 @@ function audio_events.wakeup()
     initialized = true
     pendingModeSince = nil
     flightModeHeld = false
-    -- And the main-power latch, for the same kind of reason: this branch
-    -- returns before any announcement runs, so a pack already reading when the
-    -- link came up would never be recorded as seen at all.
-    notePackVoltage()
     rememberCurrent()
     -- The first connected tick after a link loss. Nothing else runs on it --
     -- this is the branch that keeps the first evaluation after a connect from
@@ -1345,7 +1311,6 @@ function audio_events.reset()
   adjChangedAt = nil
   resetTimerAudio()
   speakingUntil = 0
-  packVoltageSeen = false
   mainPowerLostActive = false
   connectionLostAt = nil
   lowVoltageHoldStart = nil

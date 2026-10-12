@@ -109,6 +109,8 @@ local function loadSession(opts)
     -- module answers for a profile it has not been given yet.
     ["lib/battery_profile_index.lua"] = { index0 = function() return nil end,
       fromTelemetrySensor = function() return nil end, label = function() return nil end },
+    -- session.lua publishes the main-power flag through this pure module (#2358 port).
+    ["lib/main_power.lua"] = assert(loadfile(SUITE .. "/lib/main_power.lua"))(),
   }
   package.loaded["wfsuite.lib.require"] = function(path)
     return assert(modules[path], "unexpected dependency: " .. tostring(path))

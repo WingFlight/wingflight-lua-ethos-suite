@@ -161,6 +161,13 @@
       "reverse_text": false,
       "max_length": 120
     },
+    "msg_main_power_lost_banner": {
+      "english": "MAIN POWER LOST",
+      "max_length": 27,
+      "needs_translation": false,
+      "reverse_text": false,
+      "translation": "HLAVNÍ BATERIE ODPOJENA"
+    },
     "msg_background_task_missing_title": {
       "english": "Background task not running",
       "translation": "Úloha Background není spuštěna",
