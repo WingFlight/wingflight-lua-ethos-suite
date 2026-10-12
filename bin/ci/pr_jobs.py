@@ -1140,6 +1140,23 @@ lib/rate_curve_scale.lua now takes each field's maximum from those limits, for t
 and for the value stored from the page. --self-test puts back the flat 255 ceiling.
 '''
     ),
+    LuaStep(
+        name='Memory bursts in dashboard settings and diagnostics status',
+        script='bin/memory_bursts/verify_memory_bursts.lua',
+        rationale=r'''On ETHOS radios near the 2048 kB heap ceiling, allocation bursts and rapid UI churn
+trigger OS-level FreeRTOS watchdog timeouts or Emergency Mode resets.
+
+Two hotspots are mitigated:
+1. app/pages/settings_dashboard_settings.lua probed theme presence by loadfile()ing
+   all themes' configure.lua chunks synchronously in a single tick. It now tests
+   file presence via io.open() without compiling bytecode chunks.
+2. app/pages/diagnostics_rfstatus.lua ran unthrottled on every wakeup tick (20-30 Hz)
+   and session tick, creating rapid garbage collection and C++ UI churn. Updates
+   are now rate-limited to 1.0 s, while connection state changes update immediately.
+
+Ported from rotorflight-lua-ethos-suite PR #2531 (issues #2295, #2530), closing issue #190.
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [
