@@ -913,8 +913,8 @@ voltageChecks()
 --   * main_power_lost = false keeps it silent.
 --
 -- A check that cannot fail proves nothing, so the last check strips the
--- pack-seen latch from a copy of the task and requires a never-measured pack
--- to fire there. If that check ever stops turning red, the instrument has gone
+-- pack-seen latch from a copy of the shared test (lib/main_power.lua) and
+-- requires a never-measured pack to fire there. If that check ever stops turning red, the instrument has gone
 -- blind.
 
 -- io.open is answered for the "SCRIPTS:" paths in `scriptFiles` and left to the
@@ -934,7 +934,12 @@ io.open = function(path, mode)
   return realIoOpen(path, mode)
 end
 
-local function newMainPowerRig(events, source)
+-- The main power test lives in lib/main_power.lua and the session publishes its result
+-- (Rotorflight Ethos suite #2358); the rig loads the same module and derives the flag the
+-- way the session does. `evaluate` lets a can-fail case substitute a modified test.
+local mainPowerLib = assert(loadfile("lib/main_power.lua"))()
+
+local function newMainPowerRig(events, source, evaluate)
   local handlers = {}
   local played, spoken, haptics = {}, {}, {}
 
@@ -966,6 +971,8 @@ local function newMainPowerRig(events, source)
         isActive = function() return false end}
     elseif name == "lib/system_status.lua" then
       return {AUTOTRIM = 1, BATTERY = {NOT_PRESENT = 0, INIT = 1}}
+    elseif name == "lib/main_power.lua" then
+      return assert(loadfile("lib/main_power.lua"))()
     elseif name == "lib/engine_type.lua" then
       return {isElectric = function() return true end}
     end
@@ -990,7 +997,16 @@ local function newMainPowerRig(events, source)
 
   local rig = {spoken = spoken, haptics = haptics}
   function rig.setClock(t) clock = t end
+  -- One latch per connection, as in tasks/session.lua: a link that drops clears it.
+  local latch = mainPowerLib.newLatch()
+  local evaluateFlag = evaluate or mainPowerLib.evaluate
   function rig.step(snapshot, newEvents)
+    if snapshot.connected ~= true then
+      latch.packSeen = false
+      snapshot.mainPowerLost = false
+    else
+      snapshot.mainPowerLost = evaluateFlag(tonumber(snapshot.voltage), tonumber(snapshot.becVoltage), latch)
+    end
     handlers["session.update"](snapshot)
     handlers["settings.update"]({events = newEvents or events})
     audio.wakeup()
@@ -1123,12 +1139,14 @@ local function mainPowerChecks()
       rig.count("lowbat.wav") == 0, "lowbat.wav played " .. rig.count("lowbat.wav") .. "x")
   end
 
-  -- Can-fail: strip the pack-seen latch and require a never-measured pack to
-  -- fire. If this stops turning red, the checks above prove nothing.
-  local source = readFile(AUDIO_PATH)
-  local stripped = source:gsub("if not packVoltageSeen then return false end", "", 1)
-  check("the pack-seen latch could be located in mainPowerLost()", stripped ~= source)
-  local rig = newMainPowerRig({main_power_lost = true}, stripped)
+  -- Can-fail: strip the pack-seen latch from the shared test and require a
+  -- never-measured pack to fire. If this stops turning red, the checks above prove
+  -- nothing.
+  local libSource = readFile(SUITE .. "/lib/main_power.lua")
+  local strippedLib = libSource:gsub("if not latch.packSeen then return false end", "", 1)
+  check("the pack-seen latch could be located in main_power.evaluate()", strippedLib ~= libSource)
+  local strippedEvaluate = assert(load(strippedLib, "@main_power_stripped"))().evaluate
+  local rig = newMainPowerRig({main_power_lost = true}, nil, strippedEvaluate)
   rig.setClock(0); rig.step({connected = true, voltage = 0, becVoltage = 5.0})
   rig.setClock(1); rig.step({connected = true, voltage = 0, becVoltage = 5.0})
   check("without the pack-seen latch a never-measured pack fires (this check can go red)",

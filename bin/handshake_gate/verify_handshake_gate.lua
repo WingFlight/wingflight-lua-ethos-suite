@@ -117,6 +117,7 @@ local REAL = {
   ["lib/mspcodec.lua"] = true,
   ["lib/msp_api_version.lua"] = true,
   ["lib/msp_handshake.lua"] = true,
+  ["lib/main_power.lua"] = true,
   ["lib/msp_battery.lua"] = true,
   ["lib/msp_rx_map.lua"] = true,
   ["lib/msp_telemetry_config.lua"] = true,

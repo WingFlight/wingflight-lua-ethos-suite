@@ -1157,6 +1157,20 @@ Two hotspots are mitigated:
 Ported from rotorflight-lua-ethos-suite PR #2531 (issues #2295, #2530), closing issue #190.
 '''
     ),
+    LuaStep(
+        name='Check the main power lost test and its audio equivalence',
+        script='bin/main_power/verify_main_power.lua',
+        rationale=r'''Main power lost: the flight pack is gone while the receiver still runs on backup
+power. The test lives in lib/main_power.lua; tasks/session.lua evaluates it on every
+voltage change and publishes session.mainPowerLost, so the audio alert and the dashboard
+footer banner read one flag. Ported from rotorflight-lua-ethos-suite PR #2533 (issue #2358).
+
+The harness checks the threshold, the latch (a pack never seen this connection stays
+quiet), recovery, and that the shared test gives the same answer as the function it
+replaced in tasks/audio_events.lua on wingflight master, for a fixed set of readings.
+A mutated threshold turns it red.
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [

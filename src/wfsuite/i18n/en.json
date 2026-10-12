@@ -8032,6 +8032,12 @@
       "needs_translation": false,
       "translation": "Loading data from flight controller..."
     },
+    "msg_main_power_lost_banner": {
+      "english": "MAIN POWER LOST",
+      "max_length": 27,
+      "needs_translation": false,
+      "translation": "MAIN POWER LOST"
+    },
     "msg_please_disarm_to_save_warning": {
       "english": "The flight controller rejected the save while armed. Your changes are safe and will be written to flash when you disarm.",
       "max_length": 120,

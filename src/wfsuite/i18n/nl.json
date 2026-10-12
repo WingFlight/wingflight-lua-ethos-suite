@@ -9346,6 +9346,13 @@
       "reverse_text": false,
       "translation": "Laden data van vliegcontroller..."
     },
+    "msg_main_power_lost_banner": {
+      "english": "MAIN POWER LOST",
+      "max_length": 27,
+      "needs_translation": false,
+      "reverse_text": false,
+      "translation": "HOOFDVOEDING UITGEVALLEN"
+    },
     "msg_please_disarm_to_save_warning": {
       "english": "The flight controller rejected the save while armed. Your changes are safe and will be written to flash when you disarm.",
       "max_length": 120,
