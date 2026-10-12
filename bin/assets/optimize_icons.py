@@ -87,21 +87,31 @@ def main():
         return 1
 
     off_spec = []
+    errors = []
     for path in paths:
         with Image.open(path) as img:
             if is_in_spec(img):
                 continue
-            off_spec.append((path, f"{img.size[0]}x{img.size[1]} {img.mode}"))
-            if not args.check:
-                fit_to_canvas(img, path).save(path, format="PNG", optimize=True)
+            desc = f"{img.size[0]}x{img.size[1]} {img.mode}"
+            if args.check:
+                off_spec.append((path, desc))
+            else:
+                # One refused icon (alpha channel) must not stop the run for the rest.
+                try:
+                    fit_to_canvas(img, path).save(path, format="PNG", optimize=True)
+                    off_spec.append((path, desc))
+                except ValueError as exc:
+                    errors.append(str(exc))
 
     rel = lambda p: p.relative_to(REPO_ROOT).as_posix()
     verb = "off-spec" if args.check else "rescaled"
     for path, desc in off_spec:
         print(f"{verb}: {rel(path)} {desc}")
-    print(f"{len(paths)} icons, {len(off_spec)} {verb}")
+    for message in errors:
+        print(f"error: {message}", file=sys.stderr)
+    print(f"{len(paths)} icons, {len(off_spec)} {verb}, {len(errors)} refused")
 
-    return 1 if (args.check and off_spec) else 0
+    return 1 if (errors or (args.check and off_spec)) else 0
 
 
 if __name__ == "__main__":
