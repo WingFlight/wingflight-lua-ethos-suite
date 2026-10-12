@@ -1141,6 +1141,16 @@ and for the value stored from the page. --self-test puts back the flat 255 ceili
 '''
     ),
     LuaStep(
+        name='Check the port labels and the board info parser',
+        script='bin/port_labels/verify_port_labels.lua',
+        rationale=r'''Issue #2359: the Ports page reads MSP_BOARD_INFO and shows a silkscreen
+label for each UART when the board has one. No WingFlight board has label data yet,
+so the lookup must answer nil and the page shows the plain UART name. The check
+also drives the lookup logic with injected entries, and it covers truncated replies,
+since mspcodec reads past the end of a buffer as 0.
+'''
+    ),
+    LuaStep(
         name='Memory bursts in dashboard settings and diagnostics status',
         script='bin/memory_bursts/verify_memory_bursts.lua',
         rationale=r'''On ETHOS radios near the 2048 kB heap ceiling, allocation bursts and rapid UI churn

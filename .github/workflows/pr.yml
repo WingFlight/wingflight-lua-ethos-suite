@@ -1035,6 +1035,15 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/rate_limits/verify_rate_limits.lua
 
+      # Issue #2359: the Ports page reads MSP_BOARD_INFO and shows a silkscreen
+      # label for each UART when the board has one. No WingFlight board has label data yet,
+      # so the lookup must answer nil and the page shows the plain UART name. The check
+      # also drives the lookup logic with injected entries, and it covers truncated replies,
+      # since mspcodec reads past the end of a buffer as 0.
+      - name: Check the port labels and the board info parser
+        if: success() || failure()
+        run: lua5.4 bin/port_labels/verify_port_labels.lua
+
       # On ETHOS radios near the 2048 kB heap ceiling, allocation bursts and rapid UI churn
       # trigger OS-level FreeRTOS watchdog timeouts or Emergency Mode resets.
       #

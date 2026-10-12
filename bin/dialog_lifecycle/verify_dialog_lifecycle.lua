@@ -306,6 +306,15 @@ package.loaded["wfsuite.lib.settings_store"] = {
   save = function() end,
   DEFAULTS = { general = {}, developer = {} },
 }
+-- The Ports page reads MSP_BOARD_INFO before the serial config (#2359). This bus stub
+-- answers reads inline with a message that carries onData, so the board read is answered
+-- with an empty board, as on a board without label data. The real parser is covered by
+-- bin/port_labels/verify_port_labels.lua.
+package.loaded["wfsuite.lib.msp_board_info"] = {
+  buildReadMessage = function(onData, onError)
+    return { onData = onData, onError = onError, data = {} }
+  end,
+}
 package.loaded["wfsuite.lib.msp_serial_config"] = {
   buildReadMessage = function(onData, onError)
     return { onData = onData, onError = onError, data = { ports = {} } }
