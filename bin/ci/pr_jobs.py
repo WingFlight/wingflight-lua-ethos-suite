@@ -1150,6 +1150,23 @@ also drives the lookup logic with injected entries, and it covers truncated repl
 since mspcodec reads past the end of a buffer as 0.
 '''
     ),
+    LuaStep(
+        name='Memory bursts in dashboard settings and diagnostics status',
+        script='bin/memory_bursts/verify_memory_bursts.lua',
+        rationale=r'''On ETHOS radios near the 2048 kB heap ceiling, allocation bursts and rapid UI churn
+trigger OS-level FreeRTOS watchdog timeouts or Emergency Mode resets.
+
+Two hotspots are mitigated:
+1. app/pages/settings_dashboard_settings.lua probed theme presence by loadfile()ing
+   all themes' configure.lua chunks synchronously in a single tick. It now tests
+   file presence via io.open() without compiling bytecode chunks.
+2. app/pages/diagnostics_rfstatus.lua ran unthrottled on every wakeup tick (20-30 Hz)
+   and session tick, creating rapid garbage collection and C++ UI churn. Updates
+   are now rate-limited to 1.0 s, while connection state changes update immediately.
+
+Ported from rotorflight-lua-ethos-suite PR #2531 (issues #2295, #2530), closing issue #190.
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [
@@ -1296,6 +1313,42 @@ r'''  # The rule in .agents/rules/documentation.md asks that a change a pilot ca
           python bin/docs/verify_documentation_rule.py \
             --base '${{ github.event.pull_request.base.sha }}' \
             --body-file pr-body.txt
+'''
+    ,
+    # i18n-tags
+r'''  # A tag that does not resolve is shown on the radio as the raw text "@i18n(...)@",
+  # and a hardcoded English label draws perfectly in every language, so neither
+  # shows up in a build. check-tags.py fails when a @i18n tag in src/ has no key in
+  # en.json. check_translations.py counts the literals that never reach the translator
+  # and fails when that count grows past its baseline (71 on master, 2026-10-11): the
+  # count is a ratchet, not a target, so the existing strings are reported rather than
+  # blocking. --self-test proves the detector finds and keeps quiet where it should.
+  i18n-tags:
+    name: i18n tags resolve and no new hardcoded labels
+    runs-on: ubuntu-latest
+    # Read-only token: the checkers run code from the pull request.
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Prove the translation check can go red
+        run: python bin/i18n/check_translations.py --self-test
+
+      - name: Check every @i18n tag resolves against en.json
+        run: python bin/i18n/check-tags.py
+
+      - name: Check the untranslated-literal ratchet
+        run: python bin/i18n/check_translations.py
 '''
     ,
     # pr-workflow-drift
