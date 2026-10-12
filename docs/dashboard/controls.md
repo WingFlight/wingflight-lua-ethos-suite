@@ -111,7 +111,10 @@ more than one is active, the banner adds a count, for example
 | TEST OVERRIDE ACTIVE | Warning | A servo, motor or mixer override from a setup tool is on. |
 | REBOOT REQUIRED | Warning | A saved setting only takes effect after a reboot. Needs **System Config**. |
 | BLACKBOX FULL | Warning | The blackbox storage is full. Needs **System Config**. |
+| MAIN POWER LOST | Critical | The flight pack has gone (under 1.0 V) while the receiver still runs on a BEC or backup battery. Needs the **Voltage** and **BEC voltage** telemetry sensors, and only shows once the pack has read a real voltage on this connection. |
 
-The "background task not running" and "unsupported firmware" banners take
-priority over these. With older firmware, or without either sensor, there is
-no status banner, and the rest of the dashboard works as before.
+In priority order, the footer shows: "background task not running", then MAIN
+POWER LOST, then "unsupported firmware", then the status banners above. MAIN
+POWER LOST does not depend on the System Status or System Config sensors. With older firmware, or without either
+of those sensors, there is no status banner, and the rest of the dashboard works
+as before.
