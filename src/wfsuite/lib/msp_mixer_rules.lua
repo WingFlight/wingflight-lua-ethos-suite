@@ -78,11 +78,39 @@ local function defaultRule()
   }
 end
 
--- All RULE_COUNT slots unused (all-zero, matching defaultRule()) -- the
--- simulator's whole-pool fixture, 32 * 14 = 448 zero bytes.
+-- The simulator's whole-pool fixture: the firmware's reset defaults
+-- (pg/mixer.c pgResetFn_mixerRules(), a two-aileron glider), so the Mixer
+-- Rules page and the Setup Wizard have a real mix to show. Then the
+-- remaining slots unused, 32 * 14 = 448 bytes in all.
+--   oper, input, output, offset, weight, weightNeg: S1 left aileron (roll
+--   +1000), S2 right aileron (roll -1000), S3 elevator (pitch), S4 rudder
+--   (yaw), Motor 1 (output 27) from throttle.
+local SIMULATOR_DEFAULT_RULES = {
+  {1, 1, 1, 1000, 1000},
+  {1, 1, 2, -1000, -1000},
+  {1, 2, 3, 1000, 1000},
+  {1, 3, 4, 1000, 1000},
+  {1, 4, 27, 1000, 1000},
+}
 local SIMULATOR_RESPONSE_POOL = {}
-for _ = 1, RULE_COUNT * 14 do
-  SIMULATOR_RESPONSE_POOL[#SIMULATOR_RESPONSE_POOL + 1] = 0
+do
+  local function add(byte) SIMULATOR_RESPONSE_POOL[#SIMULATOR_RESPONSE_POOL + 1] = byte end
+  for i = 1, RULE_COUNT do
+    local r = SIMULATOR_DEFAULT_RULES[i]
+    if r then
+      local payload = {}
+      mspcodec.writeU8(payload, r[1])
+      mspcodec.writeU8(payload, r[2])
+      mspcodec.writeU8(payload, r[3])
+      mspcodec.writeS16(payload, 0)
+      mspcodec.writeS16(payload, r[4])
+      mspcodec.writeS16(payload, r[5])
+      for _ = 1, 5 do mspcodec.writeU8(payload, 0) end -- speed, curve, condition, role
+      for b = 1, #payload do add(payload[b]) end
+    else
+      for _ = 1, 14 do add(0) end
+    end
+  end
 end
 
 local msp_mixer_rules = {

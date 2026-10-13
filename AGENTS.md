@@ -244,11 +244,16 @@ firmware) rather than rotorflight (helicopter firmware). Status:
   See `HANDOVER.md`'s "Done" list for what each actually covers.
 - **Still to port**: Throttle Range Governor
   (`MSP2_WING_GOVERNOR_CONFIG`) -- see HANDOVER.md for current priority
-  order. (`lib/msp_mixer_override.lua`, inherited from the rewrite base,
-  is wire-verified correct against `MSP_SET_MIXER_OVERRIDE` but still
-  wired to no page -- not confirmed relevant to wingflight's own
-  manual/passthrough concept, or worth building a page for, until
-  someone actually needs it.)
+  order.
+- **Setup Wizard** (`app/pages/setup_wizard.lua` and one
+  `app/pages/setup_wizard_<step>.lua` per step) is the radio's copy of
+  wingflight-configurator's `src/tabs/setup_wizard/`, ported a step at a
+  time. When a step changes in either repository, check the other.
+  `lib/setup_wizard_surfaces.lua` ports the configurator's `surfaces.js`;
+  `bin/tests/setup_wizard_surfaces.lua` carries the configurator's own
+  test cases for it, so add a case there whenever one is added on the
+  configurator side. The wizard holds mixer inputs with
+  `lib/msp_mixer_override.lua`'s timed `hold()`/`release()`.
 - **Phase 3 MSP audit: complete.** Every `lib/msp_*.lua` file has now
   been checked field-by-field against wingflight-firmware's `msp.c` --
   zero wire-format bugs found (see HANDOVER.md's "Done" list, item 11,

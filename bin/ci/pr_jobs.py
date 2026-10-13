@@ -1221,6 +1221,36 @@ build: 125, 212 and 124 in lib/msp_servo_config.lua, 213 in lib/msp_servo_center
 pin to go red every time, after the unmodified modules have passed.
 '''
     ),
+    LuaStep(
+        name='Check the timed bench overrides',
+        script='bin/tests/mode_override.lua',
+        rationale=r'''The Setup Wizard holds the setup state, mixer inputs and servos with
+timed overrides (API 22.14) and relies on lib/override_keepalive.lua to keep
+them alive and to stop sending once they are released, so a radio that is
+switched off lets the flight controller drop them. This pins the wire format
+of the mode, servo and mixer override writes against msp.c and the keepalive's
+refresh and release behaviour.
+'''
+    ),
+    LuaStep(
+        name='Check the Setup Wizard surface maths',
+        script='bin/tests/setup_wizard_surfaces.lua',
+        rationale=r'''lib/setup_wizard_surfaces.lua is a port of the configurator's
+src/tabs/setup_wizard/surfaces.js. The harness runs the configurator's own
+test cases against it, so the two copies cannot drift apart unnoticed.
+'''
+    ),
+    LuaStep(
+        name='Check the Setup Wizard page',
+        script='bin/tests/setup_wizard_page.lua',
+        rationale=r'''The wizard moves the control surfaces from the radio. This drives the real
+page and its Direction step against the simulator's default glider mix and
+checks what reaches the wire: the setup state held on open and released on
+every way out, the checked axis held timed and released on Stop, nothing
+moved while armed, Wrong and Invert axis written live, and Discard writing
+back what was loaded.
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [

@@ -139,5 +139,40 @@ check("an empty hold keeps the setup state with nothing forced",
   modeOverride.isHeld() and bytes(lastOf(modeOverride.WRITE_COMMAND).payload) == "16,39,0")
 modeOverride.release()
 
+-- Mixer override: U8 input, S16 value, optional U16 timeout (msp.c
+-- MSP_SET_MIXER_OVERRIDE), held the same way as a servo override.
+local mixerOverride = requireModule("lib/msp_mixer_override.lua")
+p = mixerOverride.encode(2, -150, 10000)
+check("mixer write: negative value, trailing timeout", bytes(p) == "2,106,255,16,39", bytes(p))
+p = mixerOverride.encode(13, mixerOverride.OVERRIDE_OFF)
+check("mixer write: untimed OFF", bytes(p) == "13,197,9", bytes(p))
+
+session(13)
+sent = {}
+mixerOverride.hold(1, 250)
+check("22.13: mixer override sent untimed", #sent == 1 and bytes(sent[1].payload) == "1,250,0", bytes(sent[1].payload))
+clock = 400
+keepalive.tick(clock)
+check("22.13: mixer override not re-sent", #sent == 1)
+mixerOverride.release(1)
+
+session(14)
+sent = {}
+mixerOverride.hold(1, 250)
+mixerOverride.hold(3, 0)
+check("22.14: mixer holds sent timed", #sent == 2 and bytes(sent[1].payload) == "1,250,0,16,39")
+mixerOverride.hold(1, -250)
+check("re-holding an input replaces its value", bytes(last().payload) == "1,6,255,16,39", bytes(last().payload))
+clock = 410
+keepalive.tick(clock)
+check("mixer holds refreshed once each", #sent == 5, #sent)
+mixerOverride.release(1)
+mixerOverride.release(3)
+check("mixer release sends OFF untimed", bytes(last().payload) == "3,197,9")
+before = #sent
+clock = 500
+keepalive.tick(clock)
+check("released mixer holds are not re-sent", #sent == before)
+
 print(string.format("%d checks, %d failed", checks, failures))
 os.exit(failures == 0 and 0 or 1)

@@ -379,8 +379,9 @@
         },
         "msg_calibration_timeout": {
           "english": "The calibration did not finish. Try again.",
-          "max_length": 46,
+          "max_length": 42,
           "needs_translation": false,
+          "reverse_text": false,
           "translation": "A calibração não terminou. Tente novamente."
         },
         "name": {
@@ -8647,6 +8648,379 @@
           "translation": "Hold time"
         }
       },
+      "setup_wizard": {
+        "armed": {
+          "english": "Armed: surfaces can't be moved.",
+          "max_length": 31,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Armed: surfaces can't be moved."
+        },
+        "back": {
+          "english": "Back",
+          "max_length": 4,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Back"
+        },
+        "bypass_manual": {
+          "english": "Switch MANUAL mode off.",
+          "max_length": 23,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Switch MANUAL mode off."
+        },
+        "bypass_passthrough": {
+          "english": "Switch PASSTHROUGH mode off.",
+          "max_length": 28,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Switch PASSTHROUGH mode off."
+        },
+        "dir_all_wrong": {
+          "english": "All moved wrong?",
+          "max_length": 16,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "All moved wrong?"
+        },
+        "dir_check": {
+          "english": "Check",
+          "max_length": 5,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Check"
+        },
+        "dir_check_flap": {
+          "english": "Flaps down",
+          "max_length": 10,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Flaps down"
+        },
+        "dir_check_pitch": {
+          "english": "Pitch up",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Pitch up"
+        },
+        "dir_check_roll": {
+          "english": "Roll right",
+          "max_length": 10,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Roll right"
+        },
+        "dir_check_yaw": {
+          "english": "Yaw right",
+          "max_length": 9,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Yaw right"
+        },
+        "dir_correct": {
+          "english": "OK",
+          "max_length": 2,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "OK"
+        },
+        "dir_done": {
+          "english": "Done",
+          "max_length": 4,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Done"
+        },
+        "dir_expect_flap": {
+          "english": "Flaps: both trailing edges go down.",
+          "max_length": 35,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Flaps: both trailing edges go down."
+        },
+        "dir_expect_pitch": {
+          "english": "Elevator, elevons and V-tail: trailing edges go up.",
+          "max_length": 51,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Elevator, elevons and V-tail: trailing edges go up."
+        },
+        "dir_expect_roll": {
+          "english": "The right aileron or elevon goes up and the left one goes down.",
+          "max_length": 63,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "The right aileron or elevon goes up and the left one goes down."
+        },
+        "dir_expect_yaw": {
+          "english": "Rudder and V-tail: trailing edges move to the right, seen from behind.",
+          "max_length": 70,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Rudder and V-tail: trailing edges move to the right, seen from behind."
+        },
+        "dir_fixed": {
+          "english": "Fixed",
+          "max_length": 5,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Fixed"
+        },
+        "dir_flap_follow_hint": {
+          "english": "A flap that follows the ailerons gets its direction from the flap check. If it moves the wrong way here, reverse its roll rule in Mixer Rules.",
+          "max_length": 142,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "A flap that follows the ailerons gets its direction from the flap check. If it moves the wrong way here, reverse its roll rule in Mixer Rules."
+        },
+        "dir_flap_radio": {
+          "english": "This makes a positive flap channel move the flaps down. If your flap switch then works the wrong way round, reverse the flap channel on the radio.",
+          "max_length": 146,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "This makes a positive flap channel move the flaps down. If your flap switch then works the wrong way round, reverse the flap channel on the radio."
+        },
+        "dir_half": {
+          "english": "Half stick (50%)",
+          "max_length": 16,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Half stick (50%)"
+        },
+        "dir_hands_off": {
+          "english": "Hands off the sticks: on this step the wizard moves the surfaces itself. Press Move and watch the model.",
+          "max_length": 104,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Hands off the sticks: on this step the wizard moves the surfaces itself. Press Move and watch the model."
+        },
+        "dir_identify": {
+          "english": "Wiggle",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Wiggle"
+        },
+        "dir_invert": {
+          "english": "Invert axis",
+          "max_length": 11,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Invert axis"
+        },
+        "dir_large": {
+          "english": "Large (35%)",
+          "max_length": 11,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Large (35%)"
+        },
+        "dir_medium": {
+          "english": "Medium (25%)",
+          "max_length": 12,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Medium (25%)"
+        },
+        "dir_mixed_hint": {
+          "english": "A surface with Wrong greyed out also works another axis, so reversing its servo would break that one. If every surface is wrong, invert the axis. If only one is, change its mix in Mixer Rules.",
+          "max_length": 192,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "A surface with Wrong greyed out also works another axis, so reversing its servo would break that one. If every surface is wrong, invert the axis. If only one is, change its mix in Mixer Rules."
+        },
+        "dir_move": {
+          "english": "Move",
+          "max_length": 4,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Move"
+        },
+        "dir_movement": {
+          "english": "Test movement",
+          "max_length": 13,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Test movement"
+        },
+        "dir_small": {
+          "english": "Small (15%)",
+          "max_length": 11,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Small (15%)"
+        },
+        "dir_stop": {
+          "english": "Stop",
+          "max_length": 4,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Stop"
+        },
+        "dir_surfaces": {
+          "english": "Surfaces",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Surfaces"
+        },
+        "dir_wrong": {
+          "english": "Wrong",
+          "max_length": 5,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Wrong"
+        },
+        "disconnected": {
+          "english": "No link to the flight controller.",
+          "max_length": 33,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "No link to the flight controller."
+        },
+        "leave_body": {
+          "english": "Save the wizard's changes to the flight controller, or discard them?",
+          "max_length": 68,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Save the wizard's changes to the flight controller, or discard them?"
+        },
+        "leave_discard": {
+          "english": "Discard",
+          "max_length": 7,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Discard"
+        },
+        "leave_save": {
+          "english": "Save",
+          "max_length": 4,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Save"
+        },
+        "leave_title": {
+          "english": "Unsaved changes",
+          "max_length": 15,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Unsaved changes"
+        },
+        "missing_servos_fmt": {
+          "english": "Servo %s is mixed but this board has no output for it, so the wizard leaves it out.",
+          "max_length": 83,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Servo %s is mixed but this board has no output for it, so the wizard leaves it out."
+        },
+        "name": {
+          "english": "Setup Wizard",
+          "max_length": 12,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Setup Wizard"
+        },
+        "needs_firmware": {
+          "english": "The Setup Wizard needs flight controller firmware with MSP API 22.14 or newer, which can hold the surfaces safely. Update the firmware, or use the Configurator.",
+          "max_length": 160,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "The Setup Wizard needs flight controller firmware with MSP API 22.14 or newer, which can hold the surfaces safely. Update the firmware, or use the Configurator."
+        },
+        "next": {
+          "english": "Next",
+          "max_length": 4,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Next"
+        },
+        "no_surfaces": {
+          "english": "No control surfaces are mixed yet. Set up the mix in Mixer Rules or with the Configurator's Setup Wizard, then come back.",
+          "max_length": 121,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "No control surfaces are mixed yet. Set up the mix in Mixer Rules or with the Configurator's Setup Wizard, then come back."
+        },
+        "refused": {
+          "english": "Disarm: the FC refused setup mode.",
+          "max_length": 34,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Disarm: the FC refused setup mode."
+        },
+        "step_direction": {
+          "english": "Direction",
+          "max_length": 9,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Direction"
+        },
+        "surface_aileron": {
+          "english": "Aileron",
+          "max_length": 7,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Aileron"
+        },
+        "surface_elevator": {
+          "english": "Elevator",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Elevator"
+        },
+        "surface_elevon": {
+          "english": "Elevon",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Elevon"
+        },
+        "surface_flap": {
+          "english": "Flap",
+          "max_length": 4,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Flap"
+        },
+        "surface_flaperon": {
+          "english": "Flaperon",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Flaperon"
+        },
+        "surface_label_fmt": {
+          "english": "S%d %s",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "S%d %s"
+        },
+        "surface_mixed": {
+          "english": "Mixed",
+          "max_length": 5,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Mixed"
+        },
+        "surface_rudder": {
+          "english": "Rudder",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Rudder"
+        },
+        "surface_ruddervator": {
+          "english": "V-tail",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "V-tail"
+        }
+      },
       "stats": {
         "flightcount": {
           "english": "Flight Count",
@@ -9348,7 +9722,7 @@
     },
     "msg_main_power_lost_banner": {
       "english": "MAIN POWER LOST",
-      "max_length": 27,
+      "max_length": 15,
       "needs_translation": false,
       "reverse_text": false,
       "translation": "ENERGIA PRINCIPAL PERDIDA"

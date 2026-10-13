@@ -163,7 +163,7 @@
     },
     "msg_main_power_lost_banner": {
       "english": "MAIN POWER LOST",
-      "max_length": 27,
+      "max_length": 15,
       "needs_translation": false,
       "reverse_text": false,
       "translation": "UTRATA ZASILANIA GŁÓWNEGO"
@@ -3047,9 +3047,10 @@
         },
         "msg_calibration_timeout": {
           "english": "The calibration did not finish. Try again.",
-          "max_length": 46,
+          "max_length": 42,
           "needs_translation": false,
-          "translation": "Kalibracja nie zakończyła się. Spróbuj znowu."
+          "translation": "Kalibracja nie zakończyła się. Spróbuj znowu.",
+          "reverse_text": false
         },
         "name": {
           "english": "Accelerometer",
@@ -9164,6 +9165,379 @@
           "needs_translation": true,
           "reverse_text": false,
           "max_length": 94
+        }
+      },
+      "setup_wizard": {
+        "name": {
+          "english": "Setup Wizard",
+          "translation": "Setup Wizard",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 12
+        },
+        "step_direction": {
+          "english": "Direction",
+          "translation": "Direction",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 9
+        },
+        "back": {
+          "english": "Back",
+          "translation": "Back",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 4
+        },
+        "next": {
+          "english": "Next",
+          "translation": "Next",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 4
+        },
+        "surface_label_fmt": {
+          "english": "S%d %s",
+          "translation": "S%d %s",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 6
+        },
+        "surface_aileron": {
+          "english": "Aileron",
+          "translation": "Aileron",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 7
+        },
+        "surface_flaperon": {
+          "english": "Flaperon",
+          "translation": "Flaperon",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 8
+        },
+        "surface_elevator": {
+          "english": "Elevator",
+          "translation": "Elevator",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 8
+        },
+        "surface_rudder": {
+          "english": "Rudder",
+          "translation": "Rudder",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 6
+        },
+        "surface_elevon": {
+          "english": "Elevon",
+          "translation": "Elevon",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 6
+        },
+        "surface_ruddervator": {
+          "english": "V-tail",
+          "translation": "V-tail",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 6
+        },
+        "surface_flap": {
+          "english": "Flap",
+          "translation": "Flap",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 4
+        },
+        "surface_mixed": {
+          "english": "Mixed",
+          "translation": "Mixed",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 5
+        },
+        "refused": {
+          "english": "Disarm: the FC refused setup mode.",
+          "translation": "Disarm: the FC refused setup mode.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 34
+        },
+        "disconnected": {
+          "english": "No link to the flight controller.",
+          "translation": "No link to the flight controller.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 33
+        },
+        "armed": {
+          "english": "Armed: surfaces can't be moved.",
+          "translation": "Armed: surfaces can't be moved.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 31
+        },
+        "bypass_passthrough": {
+          "english": "Switch PASSTHROUGH mode off.",
+          "translation": "Switch PASSTHROUGH mode off.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 28
+        },
+        "bypass_manual": {
+          "english": "Switch MANUAL mode off.",
+          "translation": "Switch MANUAL mode off.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 23
+        },
+        "missing_servos_fmt": {
+          "english": "Servo %s is mixed but this board has no output for it, so the wizard leaves it out.",
+          "translation": "Servo %s is mixed but this board has no output for it, so the wizard leaves it out.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 83
+        },
+        "needs_firmware": {
+          "english": "The Setup Wizard needs flight controller firmware with MSP API 22.14 or newer, which can hold the surfaces safely. Update the firmware, or use the Configurator.",
+          "translation": "The Setup Wizard needs flight controller firmware with MSP API 22.14 or newer, which can hold the surfaces safely. Update the firmware, or use the Configurator.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 160
+        },
+        "no_surfaces": {
+          "english": "No control surfaces are mixed yet. Set up the mix in Mixer Rules or with the Configurator's Setup Wizard, then come back.",
+          "translation": "No control surfaces are mixed yet. Set up the mix in Mixer Rules or with the Configurator's Setup Wizard, then come back.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 121
+        },
+        "leave_title": {
+          "english": "Unsaved changes",
+          "translation": "Unsaved changes",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 15
+        },
+        "leave_body": {
+          "english": "Save the wizard's changes to the flight controller, or discard them?",
+          "translation": "Save the wizard's changes to the flight controller, or discard them?",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 68
+        },
+        "leave_save": {
+          "english": "Save",
+          "translation": "Save",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 4
+        },
+        "leave_discard": {
+          "english": "Discard",
+          "translation": "Discard",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 7
+        },
+        "dir_hands_off": {
+          "english": "Hands off the sticks: on this step the wizard moves the surfaces itself. Press Move and watch the model.",
+          "translation": "Hands off the sticks: on this step the wizard moves the surfaces itself. Press Move and watch the model.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 104
+        },
+        "dir_movement": {
+          "english": "Test movement",
+          "translation": "Test movement",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 13
+        },
+        "dir_small": {
+          "english": "Small (15%)",
+          "translation": "Small (15%)",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 11
+        },
+        "dir_medium": {
+          "english": "Medium (25%)",
+          "translation": "Medium (25%)",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 12
+        },
+        "dir_large": {
+          "english": "Large (35%)",
+          "translation": "Large (35%)",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 11
+        },
+        "dir_half": {
+          "english": "Half stick (50%)",
+          "translation": "Half stick (50%)",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 16
+        },
+        "dir_check": {
+          "english": "Check",
+          "translation": "Check",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 5
+        },
+        "dir_check_flap": {
+          "english": "Flaps down",
+          "translation": "Flaps down",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 10
+        },
+        "dir_check_pitch": {
+          "english": "Pitch up",
+          "translation": "Pitch up",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 8
+        },
+        "dir_check_roll": {
+          "english": "Roll right",
+          "translation": "Roll right",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 10
+        },
+        "dir_check_yaw": {
+          "english": "Yaw right",
+          "translation": "Yaw right",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 9
+        },
+        "dir_expect_flap": {
+          "english": "Flaps: both trailing edges go down.",
+          "translation": "Flaps: both trailing edges go down.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 35
+        },
+        "dir_expect_pitch": {
+          "english": "Elevator, elevons and V-tail: trailing edges go up.",
+          "translation": "Elevator, elevons and V-tail: trailing edges go up.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 51
+        },
+        "dir_expect_roll": {
+          "english": "The right aileron or elevon goes up and the left one goes down.",
+          "translation": "The right aileron or elevon goes up and the left one goes down.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 63
+        },
+        "dir_expect_yaw": {
+          "english": "Rudder and V-tail: trailing edges move to the right, seen from behind.",
+          "translation": "Rudder and V-tail: trailing edges move to the right, seen from behind.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 70
+        },
+        "dir_surfaces": {
+          "english": "Surfaces",
+          "translation": "Surfaces",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 8
+        },
+        "dir_move": {
+          "english": "Move",
+          "translation": "Move",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 4
+        },
+        "dir_stop": {
+          "english": "Stop",
+          "translation": "Stop",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 4
+        },
+        "dir_identify": {
+          "english": "Wiggle",
+          "translation": "Wiggle",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 6
+        },
+        "dir_correct": {
+          "english": "OK",
+          "translation": "OK",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 2
+        },
+        "dir_wrong": {
+          "english": "Wrong",
+          "translation": "Wrong",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 5
+        },
+        "dir_done": {
+          "english": "Done",
+          "translation": "Done",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 4
+        },
+        "dir_fixed": {
+          "english": "Fixed",
+          "translation": "Fixed",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 5
+        },
+        "dir_all_wrong": {
+          "english": "All moved wrong?",
+          "translation": "All moved wrong?",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 16
+        },
+        "dir_invert": {
+          "english": "Invert axis",
+          "translation": "Invert axis",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 11
+        },
+        "dir_flap_radio": {
+          "english": "This makes a positive flap channel move the flaps down. If your flap switch then works the wrong way round, reverse the flap channel on the radio.",
+          "translation": "This makes a positive flap channel move the flaps down. If your flap switch then works the wrong way round, reverse the flap channel on the radio.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 146
+        },
+        "dir_mixed_hint": {
+          "english": "A surface with Wrong greyed out also works another axis, so reversing its servo would break that one. If every surface is wrong, invert the axis. If only one is, change its mix in Mixer Rules.",
+          "translation": "A surface with Wrong greyed out also works another axis, so reversing its servo would break that one. If every surface is wrong, invert the axis. If only one is, change its mix in Mixer Rules.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 192
+        },
+        "dir_flap_follow_hint": {
+          "english": "A flap that follows the ailerons gets its direction from the flap check. If it moves the wrong way here, reverse its roll rule in Mixer Rules.",
+          "translation": "A flap that follows the ailerons gets its direction from the flap check. If it moves the wrong way here, reverse its roll rule in Mixer Rules.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 142
         }
       }
     },

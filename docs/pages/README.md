@@ -8,7 +8,7 @@ sidebar_label: Pages
 Reference documentation for each configuration and settings page reachable
 within the WFSuite Ethos system tool.
 
-**Coverage:** 86 reachable pages in navigation hierarchy. Drafts require review.
+**Coverage:** 87 reachable pages in navigation hierarchy. Drafts require review.
 
 The *Conditions* column names what hides, greys out or locks a page; the sentences
 and structure follow [_template.md](../_template.md).
@@ -62,6 +62,7 @@ is there. The rule is in [.agents/rules/documentation.md](../../.agents/rules/do
 | Accelerometer | [setup/accelerometer.md](setup/accelerometer.md) | Requires a running background task and a flight controller connection. | draft |
 | Alignment | [setup/alignment.md](setup/alignment.md) | Requires a running background task and a flight controller connection. | draft |
 | GPS Navigation | [setup/gps_nav_config.md](setup/gps_nav_config.md) | Requires a running background task and a flight controller connection. | reviewed |
+| Setup Wizard | [setup/setup_wizard.md](setup/setup_wizard.md) | Requires a running background task and a flight controller connection. | reviewed |
 | Mixer | [setup/mixer_config.md](setup/mixer_config.md) | Requires a running background task and a flight controller connection. | reviewed |
 | Mixer Rules | [setup/mixer_rules.md](setup/mixer_rules.md) | Requires a running background task and a flight controller connection. | reviewed |
 | Curves | [setup/curves.md](setup/curves.md) | Requires a running background task and a flight controller connection. | reviewed |

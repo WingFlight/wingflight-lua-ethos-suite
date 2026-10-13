@@ -1111,6 +1111,33 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/servo_config_commands/verify_servo_config_commands.lua
 
+      # The Setup Wizard holds the setup state, mixer inputs and servos with
+      # timed overrides (API 22.14) and relies on lib/override_keepalive.lua to keep
+      # them alive and to stop sending once they are released, so a radio that is
+      # switched off lets the flight controller drop them. This pins the wire format
+      # of the mode, servo and mixer override writes against msp.c and the keepalive's
+      # refresh and release behaviour.
+      - name: Check the timed bench overrides
+        if: success() || failure()
+        run: lua5.4 bin/tests/mode_override.lua
+
+      # lib/setup_wizard_surfaces.lua is a port of the configurator's
+      # src/tabs/setup_wizard/surfaces.js. The harness runs the configurator's own
+      # test cases against it, so the two copies cannot drift apart unnoticed.
+      - name: Check the Setup Wizard surface maths
+        if: success() || failure()
+        run: lua5.4 bin/tests/setup_wizard_surfaces.lua
+
+      # The wizard moves the control surfaces from the radio. This drives the real
+      # page and its Direction step against the simulator's default glider mix and
+      # checks what reaches the wire: the setup state held on open and released on
+      # every way out, the checked axis held timed and released on Stop, nothing
+      # moved while armed, Wrong and Invert axis written live, and Discard writing
+      # back what was loaded.
+      - name: Check the Setup Wizard page
+        if: success() || failure()
+        run: lua5.4 bin/tests/setup_wizard_page.lua
+
   # Per-language PR builds (mirrors push.yml behavior)
   create-zip:
     name: Build PR ZIP (${{ matrix.lang }})
