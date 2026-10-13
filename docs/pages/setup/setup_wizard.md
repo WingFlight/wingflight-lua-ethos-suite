@@ -33,30 +33,42 @@ on older firmware the page explains that and does nothing else.
 
 ## Layout
 
-The title shows the current step. The line below it is a notice, empty unless
-something stops the wizard moving the surfaces (see below). At the bottom, **Back**
-and **Next** move between steps; **Next** saves any changes first, as *Save and
-continue* does in the Configurator. **Save** in the header writes the changes to
-the flight controller's EEPROM.
+The title shows the current step. Below it, a notice line appears only when
+something stops the wizard moving the surfaces (see below). Each step then asks
+one thing per screen: a picture, a sentence and one or two big buttons along the
+bottom. **Save** in the header writes the changes to the flight controller's
+EEPROM at any time.
 
 ## Direction step
 
-Checks that every surface moves the right way. The wizard holds one axis at a
-time with mixer overrides, and you say for each surface whether it moved the
-right way.
+Checks that every surface moves the right way. The wizard moves the surfaces
+itself and asks whether they moved the way the picture shows.
 
-| Setting | What it does |
+The picture is the model **seen from behind**, as you see it standing behind it,
+drawn from the mix: wing, flaps, tailplane or V-tail, and fin. The surfaces the
+check moves are highlighted, with arrows for the way they should go.
+
+| Screen | What happens |
 | --- | --- |
-| Test movement | How far the wizard moves the axis: Small (15 %), Medium (25 %), Large (35 %) or Half stick (50 %). Start small. Changing it while the surfaces are held moves them to the new size at once. |
-| Check | Which axis to check: *Flaps down*, *Pitch up*, *Roll right* or *Yaw right*. Only the checks for axes the mix uses are offered. The line below says how the surfaces should move. |
-| Surfaces: Move / Stop | **Move** holds the selected axis at the test movement; **Stop** lets the surfaces go. Every other axis is held at zero meanwhile, and the flap channel at flaps up. |
-| *S1 Aileron* … | One row per surface the check moves. The value is the servo's live output in µs, or *Done* / *Fixed* once you have answered. **Wiggle** moves just that servo back and forth so you can see which surface the row is. **OK** marks it right. **Wrong** reverses that servo. |
-| All moved wrong? / Invert axis | Inverts the axis (negates its Axis Throw in the mixer) instead of reversing each servo. Use it when every surface on the axis went the wrong way. |
+| Start | Says what is about to happen. **Start** begins with the first check. |
+| A check | One per axis the mix uses, in this order: *Flaps down*, *Pitch up*, *Roll right*, *Yaw right*. The wizard holds every other axis at centre and the flaps up, and flicks the checked axis between centre and the test movement, so the surfaces keep moving. **Like this** goes on to the next check. **Not like this** asks what was wrong. **Move 25 %** steps the test movement through 25, 35, 50 and 15 % of full stick. |
+| All of them / Only some | Asked when the check moves more than one surface. **All of them** fixes the axis as a whole. **Only some** goes through the surfaces one at a time. |
+| Servo *n* is wiggling | Only that servo moves, back and forth. **Yes** if it is one that moved the wrong way, **No** if not. Focus starts on **No**. |
+| Can't fix | A wrong surface that also works another axis is left alone, and the screen says to change its mix in Mixer Rules. |
+| Directions checked | What the wizard changed. **Check again** starts over; **Save and finish** writes EEPROM and leaves the wizard (or **Save and continue** goes on to the next step, once there is one). |
 
-**Wrong** is greyed out for a surface that also works another axis (an elevon on
-the roll check, say). Reversing its servo would break the other axis. If every
-surface is wrong, invert the axis instead; if only one is, change its mix in Mixer
-Rules. A flap that follows the ailerons gets its direction from the flap check.
+How the wizard fixes a surface, as in the Configurator:
+
+- **One surface wrong, on its own axis** (an aileron on the roll check, the elevator
+  on the pitch check): its servo is reversed.
+- **Every surface wrong**: the axis is inverted (its Axis Throw in the mixer is
+  negated). That keeps surfaces that also work another axis right. The flap
+  channel has no axis to invert, so each flap servo is reversed instead.
+- **A wrong surface that also works another axis** (an elevon on the roll check,
+  say) cannot be reversed without breaking the other axis, so the wizard explains
+  and leaves it.
+
+After a fix the same check runs again, so you can see it is right.
 
 Signs follow the stabilized mixer inputs: roll + is right roll, pitch + is stick
 forward (nose down), and yaw + is yaw left, since the firmware negates RC yaw once.
@@ -96,7 +108,8 @@ them on the flight controller, unsaved, as other pages do.
 ## Source
 
 [Page implementation](../../../src/wfsuite/app/pages/setup_wizard.lua) and the
-[Direction step](../../../src/wfsuite/app/pages/setup_wizard_direction.lua). Surface
+[Direction step](../../../src/wfsuite/app/pages/setup_wizard_direction.lua), with its
+pictures drawn by [app/setup_wizard_art.lua](../../../src/wfsuite/app/setup_wizard_art.lua). Surface
 detection is [lib/setup_wizard_surfaces.lua](../../../src/wfsuite/lib/setup_wizard_surfaces.lua),
 a port of the Configurator's `src/tabs/setup_wizard/surfaces.js`. Menu conditions
 come from `app/tool.lua`.

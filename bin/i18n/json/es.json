@@ -9182,27 +9182,6 @@
           "reverse_text": false,
           "max_length": 9
         },
-        "back": {
-          "english": "Back",
-          "translation": "Back",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 4
-        },
-        "next": {
-          "english": "Next",
-          "translation": "Next",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 4
-        },
-        "surface_label_fmt": {
-          "english": "S%d %s",
-          "translation": "S%d %s",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 6
-        },
         "surface_aileron": {
           "english": "Aileron",
           "translation": "Aileron",
@@ -9343,55 +9322,6 @@
           "reverse_text": false,
           "max_length": 7
         },
-        "dir_hands_off": {
-          "english": "Hands off the sticks: on this step the wizard moves the surfaces itself. Press Move and watch the model.",
-          "translation": "Hands off the sticks: on this step the wizard moves the surfaces itself. Press Move and watch the model.",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 104
-        },
-        "dir_movement": {
-          "english": "Test movement",
-          "translation": "Test movement",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 13
-        },
-        "dir_small": {
-          "english": "Small (15%)",
-          "translation": "Small (15%)",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 11
-        },
-        "dir_medium": {
-          "english": "Medium (25%)",
-          "translation": "Medium (25%)",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 12
-        },
-        "dir_large": {
-          "english": "Large (35%)",
-          "translation": "Large (35%)",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 11
-        },
-        "dir_half": {
-          "english": "Half stick (50%)",
-          "translation": "Half stick (50%)",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 16
-        },
-        "dir_check": {
-          "english": "Check",
-          "translation": "Check",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 5
-        },
         "dir_check_flap": {
           "english": "Flaps down",
           "translation": "Flaps down",
@@ -9448,76 +9378,6 @@
           "reverse_text": false,
           "max_length": 70
         },
-        "dir_surfaces": {
-          "english": "Surfaces",
-          "translation": "Surfaces",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 8
-        },
-        "dir_move": {
-          "english": "Move",
-          "translation": "Move",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 4
-        },
-        "dir_stop": {
-          "english": "Stop",
-          "translation": "Stop",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 4
-        },
-        "dir_identify": {
-          "english": "Wiggle",
-          "translation": "Wiggle",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 6
-        },
-        "dir_correct": {
-          "english": "OK",
-          "translation": "OK",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 2
-        },
-        "dir_wrong": {
-          "english": "Wrong",
-          "translation": "Wrong",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 5
-        },
-        "dir_done": {
-          "english": "Done",
-          "translation": "Done",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 4
-        },
-        "dir_fixed": {
-          "english": "Fixed",
-          "translation": "Fixed",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 5
-        },
-        "dir_all_wrong": {
-          "english": "All moved wrong?",
-          "translation": "All moved wrong?",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 16
-        },
-        "dir_invert": {
-          "english": "Invert axis",
-          "translation": "Invert axis",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 11
-        },
         "dir_flap_radio": {
           "english": "This makes a positive flap channel move the flaps down. If your flap switch then works the wrong way round, reverse the flap channel on the radio.",
           "translation": "This makes a positive flap channel move the flaps down. If your flap switch then works the wrong way round, reverse the flap channel on the radio.",
@@ -9525,19 +9385,215 @@
           "reverse_text": false,
           "max_length": 146
         },
-        "dir_mixed_hint": {
-          "english": "A surface with Wrong greyed out also works another axis, so reversing its servo would break that one. If every surface is wrong, invert the axis. If only one is, change its mix in Mixer Rules.",
-          "translation": "A surface with Wrong greyed out also works another axis, so reversing its servo would break that one. If every surface is wrong, invert the axis. If only one is, change its mix in Mixer Rules.",
+        "dir_intro_title": {
+          "english": "Surface directions",
+          "translation": "Surface directions",
           "needs_translation": true,
           "reverse_text": false,
-          "max_length": 192
+          "max_length": 18
         },
-        "dir_flap_follow_hint": {
-          "english": "A flap that follows the ailerons gets its direction from the flap check. If it moves the wrong way here, reverse its roll rule in Mixer Rules.",
-          "translation": "A flap that follows the ailerons gets its direction from the flap check. If it moves the wrong way here, reverse its roll rule in Mixer Rules.",
+        "dir_intro": {
+          "english": "Hands off the sticks. The wizard moves each control surface in turn. Watch the model and say whether it moves the way the picture shows.",
+          "translation": "Hands off the sticks. The wizard moves each control surface in turn. Watch the model and say whether it moves the way the picture shows.",
           "needs_translation": true,
           "reverse_text": false,
-          "max_length": 142
+          "max_length": 136
+        },
+        "dir_start": {
+          "english": "Start",
+          "translation": "Start",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 5
+        },
+        "dir_q_match": {
+          "english": "Do the highlighted surfaces move like the arrows?",
+          "translation": "Do the highlighted surfaces move like the arrows?",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 49
+        },
+        "dir_from_behind": {
+          "english": "Seen from behind",
+          "translation": "Seen from behind",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 16
+        },
+        "dir_move_fmt": {
+          "english": "Move %d%%",
+          "translation": "Move %d%%",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 9
+        },
+        "dir_like": {
+          "english": "Like this",
+          "translation": "Like this",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 9
+        },
+        "dir_unlike": {
+          "english": "Not like this",
+          "translation": "Not like this",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 13
+        },
+        "dir_q_all": {
+          "english": "Did all the highlighted surfaces move the wrong way?",
+          "translation": "Did all the highlighted surfaces move the wrong way?",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 52
+        },
+        "dir_all": {
+          "english": "All of them",
+          "translation": "All of them",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 11
+        },
+        "dir_some": {
+          "english": "Only some",
+          "translation": "Only some",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 9
+        },
+        "dir_identify_fmt": {
+          "english": "Servo %d (%s) is wiggling now, %d of %d. Did it move the wrong way?",
+          "translation": "Servo %d (%s) is wiggling now, %d of %d. Did it move the wrong way?",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 67
+        },
+        "dir_yes": {
+          "english": "Yes",
+          "translation": "Yes",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 3
+        },
+        "dir_no": {
+          "english": "No",
+          "translation": "No",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 2
+        },
+        "dir_cant_fix_fmt": {
+          "english": "Servo %s also works another axis, so reversing it would break that one. Change its mix in Mixer Rules.",
+          "translation": "Servo %s also works another axis, so reversing it would break that one. Change its mix in Mixer Rules.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 102
+        },
+        "dir_continue": {
+          "english": "Continue",
+          "translation": "Continue",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 8
+        },
+        "dir_status_reversed_fmt": {
+          "english": "Servo %s reversed. Check again:",
+          "translation": "Servo %s reversed. Check again:",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 31
+        },
+        "dir_status_inverted": {
+          "english": "Axis inverted. Check again:",
+          "translation": "Axis inverted. Check again:",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 27
+        },
+        "dir_status_none": {
+          "english": "Nothing changed. Check again:",
+          "translation": "Nothing changed. Check again:",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 29
+        },
+        "dir_done_title": {
+          "english": "Directions checked",
+          "translation": "Directions checked",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 18
+        },
+        "dir_done_ok": {
+          "english": "Every surface moves the right way.",
+          "translation": "Every surface moves the right way.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 34
+        },
+        "dir_done_changes": {
+          "english": "The wizard changed:",
+          "translation": "The wizard changed:",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 19
+        },
+        "dir_change_servo_fmt": {
+          "english": "servo %d reversed",
+          "translation": "servo %d reversed",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 17
+        },
+        "dir_change_axis_fmt": {
+          "english": "%s inverted",
+          "translation": "%s inverted",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 11
+        },
+        "dir_axis_pitch": {
+          "english": "pitch",
+          "translation": "pitch",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 5
+        },
+        "dir_axis_roll": {
+          "english": "roll",
+          "translation": "roll",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 4
+        },
+        "dir_axis_yaw": {
+          "english": "yaw",
+          "translation": "yaw",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 3
+        },
+        "dir_again": {
+          "english": "Check again",
+          "translation": "Check again",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 11
+        },
+        "dir_save_finish": {
+          "english": "Save and finish",
+          "translation": "Save and finish",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 15
+        },
+        "dir_save_next": {
+          "english": "Save and continue",
+          "translation": "Save and continue",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 17
         }
       }
     },

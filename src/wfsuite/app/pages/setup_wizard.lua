@@ -137,9 +137,9 @@ local function addTextLine(text)
   return form.addStaticText(line, {x = 0, y = y, w = windowWidth(), h = h}, text, LEFT)
 end
 
-local function wrapLines(text, maxW)
+local function wrapLines(text, maxW, font)
   local out, line = {}, ""
-  lcd.font(FONT_STD)
+  lcd.font(font or FONT_STD)
   for word in text:gmatch("%S+") do
     local candidate = (line == "") and word or (line .. " " .. word)
     if line == "" or lcd.getTextSize(candidate) <= maxW then
@@ -264,6 +264,7 @@ local function open(opts)
   wiz = {
     addTextLine = addTextLine,
     addWrapped = addWrapped,
+    wrapLines = wrapLines,
     lineMetrics = lineMetrics,
     windowWidth = windowWidth,
     FORM_RIGHT_PADDING = FORM_RIGHT_PADDING,
@@ -274,6 +275,22 @@ local function open(opts)
   function wiz.surfaces() return surfaces end
   function wiz.missingServos() return missingServos end
   function wiz.canMove() return canMove() end
+
+  -- Redraw the step's picture.
+  function wiz.invalidate()
+    if lcd.invalidate then lcd.invalidate() end
+  end
+
+  -- One axis only (or "flap"), for a step that has already held the rest
+  -- with holdAxes() and now moves one back and forth: one write per move
+  -- instead of four, which a telemetry link has room for.
+  function wiz.holdAxis(axis, value)
+    if not canMove() then return false end
+    local input = AXIS_INPUT[axis]
+    heldInputs[input] = true
+    mixerOverride.hold(input, math.floor(value * 1000 + 0.5))
+    return true
+  end
 
   -- values: {roll =, pitch =, yaw =, flap =} as fractions of full input
   -- (+-1). The flap channel only when asked for: other steps leave it on
@@ -317,11 +334,6 @@ local function open(opts)
     markChanged()
   end
 
-  function wiz.surfaceLabel(surface)
-    return string.format("@i18n(app.modules.setup_wizard.surface_label_fmt)@", surface.servo + 1,
-      wiz.kindName(surface.kind))
-  end
-
   local KIND_NAMES = {
     aileron = "@i18n(app.modules.setup_wizard.surface_aileron)@",
     flaperon = "@i18n(app.modules.setup_wizard.surface_flaperon)@",
@@ -345,6 +357,8 @@ local function open(opts)
 
   local goBack
   local requestSave
+  local leaveWizard
+  local openStep
 
   local function noticeText()
     if refused then return "@i18n(app.modules.setup_wizard.refused)@" end
@@ -370,7 +384,7 @@ local function open(opts)
     releaseAll()
   end
 
-  local function openStep(index)
+  openStep = function(index)
     closeStep()
     stepIndex = index
     local factory = assert(loadfile(STEPS[index].script))()
@@ -378,37 +392,17 @@ local function open(opts)
     rebuildWanted = true
   end
 
-  local function buildStepNav()
-    local line = form.addLine("")
-    local y, h = lineMetrics(line)
-    local width = windowWidth()
-    local wBtn = math.floor(width * 0.22)
-    local xNext = width - FORM_RIGHT_PADDING - wBtn
-    local prev = form.addButton(line, {x = 0, y = y, w = wBtn, h = h}, {
-      text = "@i18n(app.modules.setup_wizard.back)@",
-      options = FONT_S + CENTERED,
-      press = function()
-        if stepIndex > 1 then openStep(stepIndex - 1) end
-      end,
-    })
-    form.addStaticText(line, {x = wBtn + 6, y = y, w = xNext - wBtn - 12, h = h},
-      string.format("%d / %d", stepIndex, #STEPS), CENTERED)
-    local nxt = form.addButton(line, {x = xNext, y = y, w = wBtn, h = h}, {
-      text = "@i18n(app.modules.setup_wizard.next)@",
-      options = FONT_S + CENTERED,
-      press = function()
-        if stepIndex >= #STEPS then return end
-        local target = stepIndex + 1
-        -- Save and continue, as the configurator does.
-        if pending then
-          requestSave(function() openStep(target) end)
-        else
-          openStep(target)
-        end
-      end,
-    })
-    if prev and prev.enable then prev:enable(stepIndex > 1) end
-    if nxt and nxt.enable then nxt:enable(stepIndex < #STEPS) end
+  -- A step's last screen offers this: save, then the next step, or leave the
+  -- wizard after the last one (as the configurator's Save and continue).
+  function wiz.isLastStep() return stepIndex >= #STEPS end
+
+  function wiz.finishStep()
+    if stepIndex < #STEPS then
+      local target = stepIndex + 1
+      requestSave(function() openStep(target) end)
+    else
+      requestSave(function() leaveWizard() end)
+    end
   end
 
   local function buildMessagePage(text)
@@ -429,8 +423,9 @@ local function open(opts)
       addWrapped(string.format("@i18n(app.modules.setup_wizard.missing_servos_fmt)@",
         table.concat(missingServos, ", ")))
     end
+    -- The step has the rest of the screen, from form.height() down.
     local focus = step and step.build() or nil
-    buildStepNav()
+    if lcd.invalidate then lcd.invalidate() end
     if focus and focus.focus then
       focus:focus()
     elseif headerHandle.focusMenu then
@@ -566,12 +561,14 @@ local function open(opts)
     headerHandle = nil
     noticeField = nil
     if opts.setWakeupHandler then opts.setWakeupHandler(nil) end
+    if opts.setPaintHandler then opts.setPaintHandler(nil) end
   end
 
   local function leave()
     dispose()
     if opts.onBack then opts.onBack() end
   end
+  leaveWizard = leave
 
   local function askLeave()
     openMessage("@i18n(app.modules.setup_wizard.leave_title)@", "@i18n(app.modules.setup_wizard.leave_body)@", {
@@ -754,6 +751,14 @@ local function open(opts)
   end
 
   if opts.setWakeupHandler then opts.setWakeupHandler(wakeup) end
+
+  -- Steps draw their pictures below the form, from paint.
+  if opts.setPaintHandler then
+    opts.setPaintHandler(function()
+      if disposed or rebuildWanted then return end
+      if step and step.paint then step.paint() end
+    end)
+  end
 
   -- A model that arms or a link that drops lets go of everything the step
   -- holds. The setup state itself stays held: the flight controller refuses
