@@ -43,7 +43,11 @@ Requires a running background task and a flight controller connection.
   `bin/perf/measure_app_instructions.lua`.
 - Changes are written to the flight controller EEPROM upon Save. Afterwards the page reads the
   ports back, so the rows show what the flight controller holds, not what was sent
-  (Issue #2497 in rotorflight-lua-ethos-suite).
+  (Issue #2497 in rotorflight-lua-ethos-suite). Two consequences of that read-back:
+  the reboot now waits for the answer, and a board that answers with no ports leaves
+  the rows as they were sent. If the board stays silent the MSP queue retries five
+  times at 0.8 s before the page gives up and reboots anyway, so the save dialog can
+  stay up for about four seconds longer than before on a bad link.
 
 TODO: Verify persistence, reboot behaviour, profile scope and any restrictions in
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than
