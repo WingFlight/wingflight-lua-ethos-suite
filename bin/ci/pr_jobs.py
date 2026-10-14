@@ -1221,6 +1221,20 @@ build: 125, 212 and 124 in lib/msp_servo_config.lua, 213 in lib/msp_servo_center
 pin to go red every time, after the unmodified modules have passed.
 '''
     ),
+    LuaStep(
+        name='Check the dashboard bar after telemetry loss',
+        script='bin/bar_disconnect/verify_bar_disconnect.lua',
+        rationale=r'''Ported from rotorflight-lua-ethos-suite PR #2542 (issue #2534): the bar gauge kept
+its last valid reading whenever its sensor dropped out, so a fuel bar stayed at 85% after
+the pack was unplugged before flight. The last reading is now held only in postflight, as
+text/telemetry does; before and during flight a dropped sensor shows the loading dots.
+
+No build and no package step reaches this -- it is a render path through a running
+widget. The harness drives the real bar gauge (render.wakeup) with a fake telemetry
+source and the flight mode. Against unpatched master the two dropout-before-flight
+checks fail.
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [
