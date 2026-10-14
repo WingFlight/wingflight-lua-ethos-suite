@@ -129,7 +129,7 @@ function render.wakeup(box)
     local displayValue
     local unit = cfg.manualUnit
 
-    if type(value) == "number" then
+    if type(value) == "number" and telemetryActive then
         displayValue = tostring(floor(value))
     elseif holdLastValue and box._lastValidValue ~= nil then
         displayValue = tostring(floor(box._lastValidValue))

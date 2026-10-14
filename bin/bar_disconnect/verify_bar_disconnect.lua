@@ -230,7 +230,10 @@ local wbox = {source = "current"}
 
 local function wakeWatts()
     local ok, err = pcall(watts.wakeup, wbox)
-    if not ok then print("        watts wakeup error: " .. tostring(err)) end
+    if not ok then
+        print("        watts wakeup error: " .. tostring(err))
+        return nil
+    end
     return wbox._currentDisplayValue
 end
 
@@ -249,6 +252,21 @@ wfsuite.flightmode.current = "inflight"
 sensors.current = nil
 check("watts, inflight: a dropped sensor keeps the last 84",
     wakeWatts() == "84", "display=" .. tostring(wbox._currentDisplayValue))
+
+-- 7. Watts with a stats source (min/max/avg) also shows loading dots when disconnected before flight
+wbox = {source = "max"}
+wfsuite.tasks.telemetry.sensorStats = {
+    voltage = {max = 16.8},
+    current = {max = 5},
+}
+wfsuite.flightmode.current = "preflight"
+wattsSession.isConnected = true
+wattsSession.telemetryState = true
+check("watts max, connected: shows 84", wakeWatts() == "84", "display=" .. tostring(wbox._currentDisplayValue))
+
+wattsSession.telemetryState = false
+check("watts max, disconnected before flight: shows loading dots",
+    LOADING[wakeWatts()] == true, "display=" .. tostring(wbox._currentDisplayValue))
 
 wattsSession.isConnected, wattsSession.telemetryState = savedIsConnected, savedTelemetryState
 
