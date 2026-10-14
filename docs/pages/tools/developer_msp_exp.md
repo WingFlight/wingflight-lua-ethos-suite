@@ -30,6 +30,9 @@ Requires a running background task and a flight controller connection. Hidden un
 - Leaving the page, or closing the tool, while its progress dialog is up closes
   the dialog without writing to a screen Ethos has already stopped updating --
   the header refocus it would otherwise do afterwards is skipped.
+- If the settings file cannot be written, a *Save failed* dialog is shown and the page
+  stays unsaved, so *Save* remains available for a second attempt (rotorflight-lua-ethos-suite
+  Issue #2500).
 
 TODO: Verify persistence, reboot behaviour, profile scope and any restrictions in
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than
