@@ -1111,6 +1111,24 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/servo_config_commands/verify_servo_config_commands.lua
 
+      # Ported from rotorflight-lua-ethos-suite PR #2544 (issue #2500):
+      # settingsStore.save() returns false when the INI file cannot be written, and ten
+      # local settings pages threw that value away. They published settings.update and
+      # cleared their dirty flag anyway, so the Save button went dark and the setting was
+      # gone at the next start, with no message. Each page now checks the result and
+      # reports a refusal through app/settings_save.lua, keeping its dirty state and
+      # publishing nothing.
+      #
+      # No build and no package step reaches this -- it is a save path through a running
+      # page. The harness drives the real settings_general page with the real bus and the
+      # real helper, against a store stub whose save() is refused or accepted, and presses
+      # Save the way the pilot does. Against unpatched wingflight-lua-ethos-suite master the
+      # refused-save checks fail. The other settings pages carry the same three-line change
+      # and are covered by review, not by this harness.
+      - name: Check that a refused settings save is reported
+        if: success() || failure()
+        run: lua5.4 bin/settings_save/verify_settings_save.lua
+
   # Per-language PR builds (mirrors push.yml behavior)
   create-zip:
     name: Build PR ZIP (${{ matrix.lang }})
