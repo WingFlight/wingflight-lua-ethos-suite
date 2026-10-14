@@ -86,7 +86,6 @@ local function open(opts)
         -- once no dialog is open -- the model type is on the flight controller
         -- either way, so the save itself is not aborted.
         localSaveRefused = true
-        savedModelType = modelType
         return
       end
       savedModelType = modelType
@@ -104,6 +103,7 @@ local function open(opts)
     onWakeup = function(rt)
       if localSaveRefused and not rt.activeDialog then
         localSaveRefused = false
+        rt:setDirty(true)
         settingsSave.reportFailure()
       end
       local enabled = tuningActive(rt)

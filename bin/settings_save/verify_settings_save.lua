@@ -83,12 +83,15 @@ end
 -- ---------------------------------------------------------------------------
 
 lcd = anything()
+lcd.getWindowSize = function() return 480, 320 end
+lcd.invalidate = function() end
 system = anything()
 model = anything()
 
 local dialogs = {}
 local developerSetter = nil
 local numberSetters = {}
+local choiceSetters = {}
 form = anything()
 form.clear = function() end
 form.openDialog = function(opts) dialogs[#dialogs + 1] = opts end
@@ -100,6 +103,11 @@ form.addNumberField = function(_, _, _, _, getter, setter)
   numberSetters[#numberSetters + 1] = setter
   return anything()
 end
+form.addChoiceField = function(_, _, _, getter, setter)
+  choiceSetters[#choiceSetters + 1] = setter
+  return anything()
+end
+form.addExpansionPanel = function() return anything() end
 
 local headerOpts = nil
 local saveEnabledCalls = {}
@@ -116,7 +124,7 @@ local function deepcopy(v)
 end
 
 local store = {saveCalls = 0, saveResult = true}
-store.load = function() return {developer = {developer_mode = false}} end
+store.load = function() return {developer = {developer_mode = false}, dashboard = {}} end
 store.clone = deepcopy
 local function deepsame(a, b)
   if type(a) ~= "table" or type(b) ~= "table" then return a == b end
@@ -182,7 +190,7 @@ check("an accepted save shows no failure dialog", not failureDialogOpened())
 -- ---------------------------------------------------------------------------
 
 local prefsStore = {saveCalls = 0, saveResult = true}
-prefsStore.load = function() return {general = {flightcount = 3}}, "/tmp/model.ini" end
+prefsStore.load = function() return {general = {flightcount = 3}, dashboard = {}}, "/tmp/model.ini" end
 prefsStore.stats = function(p) return {flightcount = p.general.flightcount or 0} end
 prefsStore.setStats = function(p, s) p.general = p.general or {}; p.general.flightcount = s.flightcount; return p end
 prefsStore.save = function() prefsStore.saveCalls = prefsStore.saveCalls + 1; return prefsStore.saveResult end
@@ -220,6 +228,92 @@ check("stats: an accepted save publishes once", statsPublished == 1, "published=
 check("stats: an accepted save darkens the Save button",
       saveEnabledCalls[#saveEnabledCalls] == false, tostring(saveEnabledCalls[#saveEnabledCalls]))
 check("stats: an accepted save shows no failure dialog", not failureDialogOpened())
+
+-- ---------------------------------------------------------------------------
+-- settings_dashboard_theme: skip writing unchanged model preferences when
+-- only global settings changed, and keep Save enabled on model save failure.
+-- ---------------------------------------------------------------------------
+
+local themePage = requireModule("app/pages/settings_dashboard_theme.lua")
+
+local function runThemeSave(changeModel, prefsSaveResult)
+  dialogs, saveEnabledCalls, choiceSetters = {}, {}, {}
+  store.saveCalls, store.saveResult = 0, true
+  prefsStore.saveCalls, prefsStore.saveResult = 0, prefsSaveResult
+  headerOpts = nil
+  local wakeupFn
+  local opts = {
+    onBack = function() end,
+    setWakeupHandler = function(fn) wakeupFn = fn end,
+  }
+  themePage.open(opts)
+  bus.publish("session.update", {connected = true, mcuId = "0x123456"})
+  if wakeupFn then wakeupFn() end
+  if changeModel then
+    choiceSetters[4](2)
+  else
+    choiceSetters[1](2)
+  end
+  headerOpts.onSave()
+  local confirm = dialogs[#dialogs]
+  if confirm and confirm.buttons and confirm.buttons[1] then
+    confirm.buttons[1].action()
+  end
+end
+
+print("theme page, global edit only (model write skipped)")
+runThemeSave(false, false)
+check("theme: global store was saved", store.saveCalls == 1, "saveCalls=" .. store.saveCalls)
+check("theme: model preferences save was skipped", prefsStore.saveCalls == 0, "prefsSaveCalls=" .. prefsStore.saveCalls)
+check("theme: save darkens the Save button",
+      saveEnabledCalls[#saveEnabledCalls] == false, tostring(saveEnabledCalls[#saveEnabledCalls]))
+check("theme: no failure dialog shown", not failureDialogOpened())
+
+print("theme page, model edit with refused save")
+runThemeSave(true, false)
+check("theme: model preferences were asked to save", prefsStore.saveCalls == 1, "prefsSaveCalls=" .. prefsStore.saveCalls)
+check("theme: a refused model save keeps the Save button lit",
+      saveEnabledCalls[#saveEnabledCalls] == true, tostring(saveEnabledCalls[#saveEnabledCalls]))
+check("theme: a refused model save shows the save-failed dialog", failureDialogOpened())
+
+-- ---------------------------------------------------------------------------
+-- developer_msp_exp: when saving a detected byte count fails, report failure
+-- and do NOT reopen the page recursively.
+-- ---------------------------------------------------------------------------
+
+local mspPage = requireModule("app/pages/developer_msp_exp.lua")
+
+local function runMspExpSave(saveResult)
+  dialogs, saveEnabledCalls = {}, {}
+  store.saveCalls, store.saveResult = 0, saveResult
+  headerOpts = nil
+  local lastMspRequest = nil
+  local clearCalls = 0
+  local origClear = form.clear
+  form.clear = function() clearCalls = clearCalls + 1 end
+  local un = bus.subscribe("msp.request", function(msg) lastMspRequest = msg end)
+  local wakeupFn
+  local opts = {
+    onBack = function() end,
+    setWakeupHandler = function(fn) wakeupFn = fn end,
+  }
+  mspPage.open(opts)
+  if lastMspRequest and lastMspRequest.processReply then
+    lastMspRequest.processReply(nil, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12})
+  end
+  if wakeupFn then wakeupFn() end
+  bus.unsubscribe("msp.request", un)
+  form.clear = origClear
+  return clearCalls
+end
+
+print("msp exp page, byte count detected with refused save")
+local clears = runMspExpSave(false)
+check("msp exp: store was asked to save detected byte count", store.saveCalls == 1, "saveCalls=" .. store.saveCalls)
+check("msp exp: a refused save reports failure", failureDialogOpened())
+check("msp exp: a refused save does not reopen the page", clears == 1, "clearCalls=" .. clears)
+check("msp exp: reload is enabled after refused save",
+      saveEnabledCalls[#saveEnabledCalls] == true, tostring(saveEnabledCalls[#saveEnabledCalls]))
 
 print(string.format("\n%d checks, %d failed", checks, failures))
 os.exit(failures == 0 and 0 or 1)

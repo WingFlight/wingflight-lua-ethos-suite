@@ -135,10 +135,10 @@
     },
     "msg_save_failed_title": {
       "english": "Save failed",
-      "translation": "Salvataggio",
+      "max_length": 11,
       "needs_translation": false,
       "reverse_text": false,
-      "max_length": 11
+      "translation": "Salvataggio non riuscito"
     },
     "msg_save_failed_body": {
       "english": "Settings were not saved to the flight controller. Please try again.",
@@ -146,6 +146,13 @@
       "needs_translation": false,
       "reverse_text": false,
       "max_length": 67
+    },
+    "msg_save_failed_local_body": {
+      "english": "Settings were not saved to the radio. Please try again.",
+      "max_length": 67,
+      "needs_translation": false,
+      "reverse_text": false,
+      "translation": "Le impostazioni non sono state salvate sulla radio. Riprova."
     },
     "msg_save_not_commited": {
       "english": "Save not committed",

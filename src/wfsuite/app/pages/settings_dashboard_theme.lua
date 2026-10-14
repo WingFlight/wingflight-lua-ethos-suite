@@ -276,16 +276,19 @@ local function open(opts)
     if modelEnabled() and modelPrefs and modelPath then
       modelDashboard = normalizeDashboard(modelDashboard, true)
       if modelDashboard.use_same_theme then copyPreflightToAll(modelDashboard, true, pathById, idByPath, fallbackId) end
-      if hasModelDashboardOverride(modelDashboard) then
-        modelPrefs.dashboard = modelDashboard
-      else
-        modelDashboard = normalizeDashboard(nil, true)
-        modelPrefs.dashboard = nil
-      end
-      if modelPreferences.save(modelPath, modelPrefs) then
-        originalModelDashboard = tableClone.shallow(modelDashboard)
-      else
-        modelFailed = true
+      local modelDirty = not sameSection(modelDashboard, normalizeDashboard(originalModelDashboard, true))
+      if modelDirty then
+        if hasModelDashboardOverride(modelDashboard) then
+          modelPrefs.dashboard = modelDashboard
+        else
+          modelDashboard = normalizeDashboard(nil, true)
+          modelPrefs.dashboard = nil
+        end
+        if modelPreferences.save(modelPath, modelPrefs) then
+          originalModelDashboard = tableClone.shallow(modelDashboard)
+        else
+          modelFailed = true
+        end
       end
     end
 

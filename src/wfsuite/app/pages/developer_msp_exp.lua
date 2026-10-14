@@ -192,10 +192,15 @@ local function open(opts)
       for i = 1, 16 do values[i] = bytes[i] or 0 end
       if #bytes > 0 and #bytes ~= totalBytes then
         settings.developer.mspexpbytes = #bytes
-        local saved = settingsStore.save(settings)
+        if not settingsStore.save(settings) then
+          closeDialog(headerHandle and headerHandle.focusReload)
+          settingsSave.reportFailure()
+          updateSaveEnabled()
+          applyValues()
+          return
+        end
         closeDialog()
         open(opts)
-        if not saved then settingsSave.reportFailure() end
         return
       end
       closeDialog(headerHandle and headerHandle.focusReload)
