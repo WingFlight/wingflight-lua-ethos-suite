@@ -152,6 +152,9 @@ local MENUS = {
   setup_menu = {
     title = "@i18n(app.modules.hardware_setup.name)@",
     entries = {
+      -- Guided setup of a whole model, step by step (app/pages/setup_wizard.lua),
+      -- first because it is where a new model starts.
+      {title = "@i18n(app.modules.setup_wizard.name)@", icon = lcd.loadMask("app/gfx/setup_wizard.png"), script = "app/pages/setup_wizard.lua", group = "@i18n(app.menu_section_board_radio)@"},
       {title = "@i18n(app.modules.configuration.name)@", icon = lcd.loadMask("app/gfx/configuration.png"), script = "app/pages/configuration.lua", group = "@i18n(app.menu_section_board_radio)@"},
       {title = "@i18n(app.modules.ports.name)@", icon = lcd.loadMask("app/gfx/ports.png"), script = "app/pages/ports.lua", group = "@i18n(app.menu_section_board_radio)@"},
       {title = "@i18n(app.modules.radio_config.name)@", icon = lcd.loadMask("app/gfx/radio_config.png"), script = "app/pages/radio_config.lua", group = "@i18n(app.menu_section_board_radio)@"},
@@ -160,9 +163,6 @@ local MENUS = {
       {title = "@i18n(app.modules.accelerometer.name)@", icon = lcd.loadMask("app/gfx/accelerometer.png"), script = "app/pages/accelerometer.lua", group = "@i18n(app.menu_section_sensors_gps)@"},
       {title = "@i18n(app.modules.alignment.name)@", icon = lcd.loadMask("app/gfx/alignment.png"), script = "app/pages/alignment.lua", group = "@i18n(app.menu_section_sensors_gps)@"},
       {title = "@i18n(app.modules.gps_nav_config.name)@", icon = lcd.loadMask("app/gfx/gps_nav_config.png"), script = "app/pages/gps_nav_config.lua", group = "@i18n(app.menu_section_sensors_gps)@"},
-      -- Guided setup, step by step (app/pages/setup_wizard.lua). Only the
-      -- servo steps are ported so far, hence this group.
-      {title = "@i18n(app.modules.setup_wizard.name)@", icon = lcd.loadMask("app/gfx/setup_wizard.png"), script = "app/pages/setup_wizard.lua", group = "@i18n(app.menu_section_mixer_servos)@"},
       {title = "@i18n(app.modules.mixer.name)@", icon = lcd.loadMask("app/gfx/mixer_config.png"), script = "app/pages/mixer_config.lua", group = "@i18n(app.menu_section_mixer_servos)@"},
       -- The actual mixer rule table (MSP_MIXER_RULES/MSP_SET_MIXER_RULE)
       -- -- distinct from Mixer above (MSP_MIXER_INPUT, per-axis gain

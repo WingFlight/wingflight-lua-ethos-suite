@@ -248,11 +248,15 @@ firmware) rather than rotorflight (helicopter firmware). Status:
 - **Setup Wizard** (`app/pages/setup_wizard.lua` and one
   `app/pages/setup_wizard_<step>.lua` per step) is the radio's copy of
   wingflight-configurator's `src/tabs/setup_wizard/`, ported a step at a
-  time. When a step changes in either repository, check the other.
-  `lib/setup_wizard_surfaces.lua` ports the configurator's `surfaces.js`;
-  `bin/tests/setup_wizard_surfaces.lua` carries the configurator's own
-  test cases for it, so add a case there whenever one is added on the
-  configurator side. The wizard holds mixer inputs with
+  time; every step but ESC telemetry is here. Screens are built by
+  `app/setup_wizard_ui.lua` and pictures drawn by `app/setup_wizard_art.lua`.
+  When a step changes in either repository, check the other.
+  `lib/setup_wizard_surfaces.lua`, `_controls.lua`, `_styles.lua` and
+  `_mix.lua` port the configurator's `surfaces.js`, `receiver.js`/
+  `modeRanges.js`/`trimGain.js`, `styles.js` and `Mixer.buildWizardRules()`;
+  `bin/tests/setup_wizard_*.lua` carry the configurator's own test cases
+  (and the JS builder's output for the mixes), so add a case there
+  whenever one is added on the configurator side. The wizard holds mixer inputs with
   `lib/msp_mixer_override.lua`'s timed `hold()`/`release()`.
 - **Phase 3 MSP audit: complete.** Every `lib/msp_*.lua` file has now
   been checked field-by-field against wingflight-firmware's `msp.c` --

@@ -39,9 +39,25 @@ local ARROWS = {
   flap = {outer = {"down", "down"}, inner = {"down", "down"}},
 }
 
+local FLIP = {up = "down", down = "up", right = "left", left = "right"}
+
 -- What to draw for this mix, and which of it the check moves.
 -- surfaces: wiz.surfaces(); axis: "pitch" | "roll" | "yaw" | "flap" | nil.
-function art.layout(surfaces, axis)
+-- flip: every arrow the other way (the stick the other way, or the gyro
+-- pushing back against a movement).
+function art.layout(surfaces, axis, flip)
+  local l = art.baseLayout(surfaces, axis)
+  if flip then
+    for key, dirs in pairs(l.arrows) do
+      local flipped = {}
+      for i = 1, #dirs do flipped[i] = FLIP[dirs[i]] end
+      l.arrows[key] = flipped
+    end
+  end
+  return l
+end
+
+function art.baseLayout(surfaces, axis)
   local kinds = {}
   local flapRoll = false
   for i = 1, #surfaces do
@@ -84,10 +100,15 @@ local function arrow(x, y, dir, size, thick)
     local baseY = tipY - sign * h
     lcd.drawFilledRectangle(x - floor(thick / 2), min(y, baseY), thick, math.abs(baseY - y) + 1)
     lcd.drawFilledTriangle(x, tipY, x - h, baseY, x + h, baseY)
-  else
+  elseif dir == "right" then
     local tipX = x + size
     local baseX = tipX - h
     lcd.drawFilledRectangle(x, y - floor(thick / 2), baseX - x + 1, thick)
+    lcd.drawFilledTriangle(tipX, y, baseX, y - h, baseX, y + h)
+  else -- left
+    local tipX = x - size
+    local baseX = tipX + h
+    lcd.drawFilledRectangle(baseX, y - floor(thick / 2), x - baseX + 1, thick)
     lcd.drawFilledTriangle(tipX, y, baseX, y - h, baseX, y + h)
   end
 end
@@ -176,19 +197,25 @@ function art.draw(l, x, y, w, h, colors)
     local midX, midY = floor(0.22 * s), floor((stabY + tipY) / 2)
     for side = 1, 2 do
       local dir = l.arrows.vtail[side]
+      local ax = (side == 1) and (cx - tipX) or (cx + tipX)
       if dir == "right" then
         -- From each tip, clear of the arms.
-        local ax = (side == 1) and (cx - tipX) or (cx + tipX)
         arrow(ax + floor(s * 0.04), tipY, dir, size, thick)
+      elseif dir == "left" then
+        arrow(ax - floor(s * 0.04), tipY, dir, size, thick)
+      elseif dir == "down" then
+        arrow(ax, tipY + floor(s * 0.06), dir, size, thick)
       else
-        local ax = (side == 1) and (cx - midX) or (cx + midX)
+        ax = (side == 1) and (cx - midX) or (cx + midX)
         arrow(ax, midY - floor(s * 0.06), dir, size, thick)
       end
     end
   end
   if l.fin and l.arrows.fin then
     local finTop = wingY + floor(FIN_TOP * s)
-    arrow(cx + t, floor((finTop + stabY) / 2) - floor(s * 0.08), "right", size, thick)
+    local dir = l.arrows.fin[1]
+    local fy = floor((finTop + stabY) / 2) - floor(s * 0.08)
+    arrow(dir == "left" and (cx - t) or (cx + t), fy, dir, size, thick)
   end
 end
 

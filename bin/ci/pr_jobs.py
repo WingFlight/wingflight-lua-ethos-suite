@@ -1244,11 +1244,29 @@ test cases against it, so the two copies cannot drift apart unnoticed.
         name='Check the Setup Wizard page',
         script='bin/tests/setup_wizard_page.lua',
         rationale=r'''The wizard moves the control surfaces from the radio. This drives the real
-page and its Direction step against the simulator's default glider mix and
-checks what reaches the wire: the setup state held on open and released on
-every way out, the checked axis held timed and released on Stop, nothing
-moved while armed, Wrong and Invert axis written live, and Discard writing
-back what was loaded.
+page and every step against the simulator's default glider mix and checks
+what reaches the wire: the setup state held on open and released on every
+way out, overrides and probes timed, nothing moved while armed, each step's
+writes (alignment, RX map, mix, servo configs, motor protocol and a spin
+that stops by itself, throws, mode and adjustment ranges, rates), Discard
+writing back what was loaded, a restart that reopens the same step, and no
+form built from an MSP reply.
+'''
+    ),
+    LuaStep(
+        name='Check the Setup Wizard radio controls and styles',
+        script='bin/tests/setup_wizard_controls.lua',
+        rationale=r'''lib/setup_wizard_controls.lua and lib/setup_wizard_styles.lua port the
+configurator's receiver.js, modeRanges.js, trimGain.js and styles.js. The
+harness runs the configurator's own test cases against them.
+'''
+    ),
+    LuaStep(
+        name='Check the Setup Wizard airframe mixes',
+        script='bin/tests/setup_wizard_mix.lua',
+        rationale=r'''lib/setup_wizard_mix.lua ports the configurator's Mixer.buildWizardRules().
+The expected rules are the JS builder's own output for each airframe, so a
+change on either side shows up here.
 '''
     ),
 ]

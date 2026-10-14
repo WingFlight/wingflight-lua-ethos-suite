@@ -1,37 +1,42 @@
 -- Setup -> Setup Wizard.
 --
 -- The radio's own copy of wingflight-configurator's Setup Wizard
--- (src/tabs/setup_wizard/SetupWizard.svelte), one step at a time. This file is
--- the shell: it loads what the steps need, holds the flight controller in its
--- setup state while the wizard is open, owns every override a step asks for,
--- and saves or reverts the step's changes. Each step is its own file
--- (app/pages/setup_wizard_<step>.lua), loaded when it opens and dropped when it
--- closes, and talks to the shell only through the `wiz` table below -- the
--- counterpart of the configurator's setContext("setupWizard", ...).
+-- (src/tabs/setup_wizard/SetupWizard.svelte). It asks the same questions and
+-- fixes things by the same rules, but as a guided sequence for a radio
+-- screen: one question per screen, a picture, and big answer buttons (see
+-- app/setup_wizard_ui.lua and app/setup_wizard_art.lua).
 --
--- Not every configurator step comes to the radio. The radio talks to the
+-- This file is the shell: it loads what every step needs, holds the flight
+-- controller in its setup state while the wizard is open, owns every
+-- override a step asks for, and saves, reverts or restarts. Each step is its
+-- own file (app/pages/setup_wizard_<step>.lua), loaded when it opens and
+-- dropped when it closes, and talks to the shell only through the `wiz` table
+-- below -- the counterpart of the configurator's setContext("setupWizard").
+--
+-- Two configurator steps stay in the Configurator. The radio talks to the
 -- flight controller through the receiver, so receiver protocol setup and the
--- ESC telemetry port stay in the Configurator. The steps here assume a mix is
--- already set up (Mixer Rules, or the Configurator's wizard) until the
--- Airframe step is ported.
+-- ESC telemetry port can't be done from it: the Receiver step here only
+-- checks the sticks and the channel order.
 --
 -- Safety, as in the configurator:
 --   * The wizard needs timed overrides (API 22.14). Everything it holds -- the
---     setup state, mixer and servo overrides -- is sent with a timeout and
---     re-sent by lib/override_keepalive.lua, so a radio that is switched off or
---     a link that drops lets the flight controller drop it by itself (10 s).
---     On older firmware the page explains that and stops.
---   * The setup state blocks arming while the wizard is open, and the
---     flight controller ignores overrides while armed anyway: an armed model
---     releases everything and the page says why.
+--     setup state, forced modes, mixer and servo overrides, servo probes --
+--     is sent with a timeout and re-sent by lib/override_keepalive.lua, so a
+--     radio that is switched off or a link that drops lets the flight
+--     controller drop it by itself (10 s). On older firmware the page
+--     explains that and stops.
+--   * The setup state blocks arming while the wizard is open, and the flight
+--     controller ignores overrides while armed anyway: an armed model releases
+--     everything and the page says why.
 --   * Every way out (Back, the close key, a step change, closing the tool)
 --     releases every override the page may have set.
 --
 -- Changes a step makes are sent to the flight controller straight away, so
--- the surface moves; Save writes them to EEPROM. Leaving with unsaved changes
--- asks whether to save or discard them; discard writes back what the page
--- loaded. Closing the tool cannot ask, so it leaves them in RAM, unsaved, as
--- every other page does.
+-- the surface moves; Save writes them to EEPROM. Every change is registered
+-- with wiz.change() first, so Discard can write back what was there.
+-- Leaving with unsaved changes asks whether to save or discard them. Closing
+-- the tool cannot ask, so it leaves them in RAM, unsaved, as every other page
+-- does.
 
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local bus = requireModule("lib/bus.lua")
@@ -41,13 +46,17 @@ local progressDialog = requireModule("app/progress_dialog.lua")
 local keepalive = requireModule("lib/override_keepalive.lua")
 local status = requireModule("lib/msp_status.lua")
 local eeprom = requireModule("lib/msp_eeprom.lua")
+local reboot = requireModule("lib/msp_reboot.lua")
 local mixerRules = requireModule("lib/msp_mixer_rules.lua")
 local mixerInput = requireModule("lib/msp_mixer_input.lua")
+local mixerConfig = requireModule("lib/msp_mixer_config.lua")
 local servoConfig = requireModule("lib/msp_servo_config.lua")
 local servoRead = requireModule("lib/msp_servo.lua")
 local servoOverride = requireModule("lib/msp_servo_override.lua")
+local servoProbe = requireModule("lib/msp_servo_probe.lua")
 local mixerOverride = requireModule("lib/msp_mixer_override.lua")
 local modeOverride = requireModule("lib/msp_mode_override.lua")
+local rcChannels = requireModule("lib/msp_rc_channels.lua")
 local surfacesLib = requireModule("lib/setup_wizard_surfaces.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.setup_wizard.name)@"
@@ -59,15 +68,36 @@ local MSG_SAVE_FAILED_TITLE = "@i18n(app.msg_save_failed_title)@"
 local MSG_SAVE_FAILED_BODY = "@i18n(app.msg_save_failed_body)@"
 local MSG_LOAD_FAILED_TITLE = "@i18n(app.msg_load_failed_title)@"
 local MSG_LOAD_FAILED_BODY = "@i18n(app.msg_load_failed_body)@"
+local MSG_RESTARTING = "@i18n(app.msg_restarting_fc)@"
 local BTN_OK = "@i18n(app.btn_ok)@"
 local BTN_CANCEL = "@i18n(app.btn_cancel)@"
 
 -- Order is the procedure, as in the configurator's STEPS: each step relies
--- on the ones before it.
+-- on the ones before it. needsSurfaces: the step works on the mixed control
+-- surfaces, so it waits for the Airframe step.
 local STEPS = {
-  {key = "direction", title = "@i18n(app.modules.setup_wizard.step_direction)@",
-    script = "app/pages/setup_wizard_direction.lua"},
+  {key = "sensors", title = "@i18n(app.modules.setup_wizard.step_sensors)@"},
+  {key = "receiver", title = "@i18n(app.modules.setup_wizard.step_receiver)@"},
+  {key = "airframe", title = "@i18n(app.modules.setup_wizard.step_airframe)@"},
+  {key = "servotype", title = "@i18n(app.modules.setup_wizard.step_servotype)@", needsSurfaces = true},
+  {key = "motor", title = "@i18n(app.modules.setup_wizard.step_motor)@"},
+  {key = "centre", title = "@i18n(app.modules.setup_wizard.step_centre)@", needsSurfaces = true},
+  {key = "direction", title = "@i18n(app.modules.setup_wizard.step_direction)@", needsSurfaces = true},
+  {key = "limits", title = "@i18n(app.modules.setup_wizard.step_limits)@", needsSurfaces = true},
+  {key = "throws", title = "@i18n(app.modules.setup_wizard.step_throws)@", needsSurfaces = true},
+  {key = "travel", title = "@i18n(app.modules.setup_wizard.step_travel)@", needsSurfaces = true},
+  {key = "gyro", title = "@i18n(app.modules.setup_wizard.step_gyro)@", needsSurfaces = true},
+  {key = "trimgain", title = "@i18n(app.modules.setup_wizard.step_trimgain)@"},
+  {key = "modes", title = "@i18n(app.modules.setup_wizard.step_modes)@"},
+  {key = "style", title = "@i18n(app.modules.setup_wizard.step_style)@"},
+  {key = "finish", title = "@i18n(app.modules.setup_wizard.step_finish)@"},
 }
+
+-- Where the wizard was, for the next time it opens in this session (the
+-- configurator keeps it in localStorage). Survives a flight controller
+-- restart, which the page itself sits through.
+local memory = package.loaded["wfsuite.setup_wizard.memory"] or {stepKey = nil}
+package.loaded["wfsuite.setup_wizard.memory"] = memory
 
 -- PWM servos only: mixer output N drives servo config N - 1 and servo
 -- override N - 1 directly. Bus servos use another index scheme and are left
@@ -79,10 +109,13 @@ local PWM_SERVO_SLOTS = 8
 local HELD_INPUTS = {1, 2, 3, surfacesLib.FLAP_INPUT}
 local AXIS_INPUT = {roll = 1, pitch = 2, yaw = 3, flap = surfacesLib.FLAP_INPUT}
 
--- Live servo outputs, while a step shows them: four reads a second, one at a
--- time, and a read that has not answered within a second is given up.
-local POLL_INTERVAL = 0.25
+-- Live values, while a step shows them: one read at a time, and a read that
+-- has not answered within a second is given up.
+local POLL_INTERVAL = {servo = 0.25, rc = 0.2}
 local POLL_GIVE_UP = 1.0
+
+-- Give-up bound for a restart, as app/page_runtime.lua's.
+local REBOOT_TIMEOUT_SECONDS = 20
 
 -- Flight mode bits of the "flight_mode" telemetry sensor
 -- (tasks/audio_events.lua): modes that put the sticks on the surfaces.
@@ -91,30 +124,28 @@ local MANUAL_BIT = 10
 
 local FORM_RIGHT_PADDING = 8
 
-local function copyRecord(t)
+local function copyDeep(t)
+  if type(t) ~= "table" then return t end
   local out = {}
-  for k, v in pairs(t) do out[k] = v end
+  for k, v in pairs(t) do out[k] = copyDeep(v) end
   return out
-end
-
-local function sameRecord(a, b)
-  for k, v in pairs(a) do
-    if b[k] ~= v then return false end
-  end
-  for k in pairs(b) do
-    if a[k] == nil then return false end
-  end
-  return true
 end
 
 local function hasBit(flags, bit)
   return flags ~= nil and ((math.floor(flags) >> bit) & 1) == 1
 end
 
+local function stepIndexOf(key)
+  for i, s in ipairs(STEPS) do
+    if s.key == key then return i end
+  end
+  return nil
+end
+
 ---------------------------------------------------------------------------
 -- Text helpers shared with the steps. Ethos static text does not wrap, so
--- longer instructions are wrapped here into full-width lines, measured in
--- the static text's own font (as app/header.lua does).
+-- longer text is wrapped here, measured in the font it is drawn in (as
+-- app/header.lua does).
 ---------------------------------------------------------------------------
 
 local function windowWidth()
@@ -168,33 +199,40 @@ local function open(opts)
   local loaded = false
   local loadFailed = false
   local unsupported = false
-  local stage = "status"
   local outstanding = 0
 
   local servoCount = 0
+  local motorCount = 0
   local rules = nil
   local inputCodecs = {roll = mixerInput.roll(), pitch = mixerInput.pitch(), yaw = mixerInput.yaw()}
   local rateKeys = {roll = "rate_stabilized_roll", pitch = "rate_stabilized_pitch", yaw = "rate_stabilized_yaw"}
   local inputs = {}        -- axis -> decoded mixer input record (sent back whole)
   local configs = {}       -- servo (0-based) -> decoded servo config
-  local snapshot = nil     -- {inputs = ..., configs = ...} as last loaded or saved
+  local mixConfig = nil    -- decoded MSP_MIXER_CONFIG
 
   local surfaces = {}
   local missingServos = {}
   local positions = {}     -- servo (0-based) -> live output, us
+  local rc = {}            -- MSP_RC, by function: rc[1] roll ... rc[5] AUX1
+  local rcRaw = {}         -- MSP_RX_CHANNELS, as the receiver sends them
 
   local pending = false    -- unsaved changes on the flight controller
+  local changes = {}       -- {key =, original =, restore =} in order made
+  local changeIndex = {}   -- key -> true
   local connected = nil
   local armed = nil
   local modeFlags = nil
+  local handshakeDone = nil
   local refused = false    -- the flight controller refused the setup state
+  local forcedMode = nil   -- permanent box id forced on top of the setup state
 
   local stepIndex = 1
   local step = nil         -- instance of STEPS[stepIndex]
+  local picking = false    -- the step list is showing
   local rebuildWanted = false
 
-  local pollInFlight = false
-  local lastPollAt = 0
+  local polls = {servo = {inFlight = false, at = 0}, rc = {inFlight = false, at = 0}}
+  local fetches = {}       -- {left =, failed =, onDone =} waiting for replies
 
   local headerHandle = nil
   local noticeField = nil
@@ -205,12 +243,15 @@ local function open(opts)
   local saveRequest = nil  -- {onSaved =} waiting for the next wakeup
   local saveResult = nil   -- "ok" | "failed", set by the EEPROM reply
   local afterSave = nil
+  local rebootWait = nil   -- {startedAt =, sawDisconnect =} while restarting
 
   local heldInputs = {}
   local heldServos = {}
+  local heldProbes = {}
 
   local sessionHandler = nil
   local wiz
+  local beginLoad
 
   -------------------------------------------------------------------------
   -- Overrides
@@ -236,9 +277,39 @@ local function open(opts)
     for servo in pairs(heldServos) do releaseServo(servo) end
   end
 
+  local function releaseProbe(servo)
+    if not heldProbes[servo] then return end
+    heldProbes[servo] = nil
+    servoProbe.release(servo)
+  end
+
+  local function releaseProbes()
+    for servo in pairs(heldProbes) do releaseProbe(servo) end
+  end
+
+  local function onRefused()
+    if disposed then return end
+    refused = true
+    releaseAxes()
+    releaseServos()
+    releaseProbes()
+    if step and step.released then step.released() end
+    rebuildWanted = true
+  end
+
+  -- The setup state, with forcedMode on top if a step asked for one.
+  local function holdModes()
+    modeOverride.hold(forcedMode and {forcedMode} or {}, onRefused)
+  end
+
   local function releaseAll()
     releaseAxes()
     releaseServos()
+    releaseProbes()
+    if forcedMode then
+      forcedMode = nil
+      if loaded and not unsupported then holdModes() end
+    end
   end
 
   -- Start from no overrides at all: one left on by another page would hold
@@ -250,16 +321,36 @@ local function open(opts)
 
   local function canMove()
     return loaded and not unsupported and not refused and connected ~= false and armed ~= true
+      and rebootWait == nil
   end
 
   -------------------------------------------------------------------------
-  -- The interface a step sees
+  -- Changes and their undo
   -------------------------------------------------------------------------
 
   local function markChanged()
     pending = true
     if headerHandle and headerHandle.setSaveEnabled then headerHandle.setSaveEnabled(true) end
   end
+
+  -- Registers what `key` was before the first change since the last save,
+  -- and how to put it back. Later changes to the same key keep the first.
+  local function change(key, original, restore)
+    if not changeIndex[key] then
+      changeIndex[key] = true
+      changes[#changes + 1] = {key = key, original = copyDeep(original), restore = restore}
+    end
+    markChanged()
+  end
+
+  local function recompute()
+    surfaces = surfacesLib.surfacesFromRules(rules, servoCount)
+    missingServos = surfacesLib.servosPastCount(rules, servoCount, PWM_SERVO_SLOTS)
+  end
+
+  -------------------------------------------------------------------------
+  -- The interface a step sees
+  -------------------------------------------------------------------------
 
   wiz = {
     addTextLine = addTextLine,
@@ -269,27 +360,28 @@ local function open(opts)
     windowWidth = windowWidth,
     FORM_RIGHT_PADDING = FORM_RIGHT_PADDING,
     positions = positions,
+    rc = rc,
+    rcRaw = rcRaw,
     configs = configs,
+    inputs = inputs,
+    BOX_ANGLE = modeOverride.BOX_ANGLE,
+    BOX_PASSTHROUGH = modeOverride.BOX_PASSTHROUGH,
   }
 
   function wiz.surfaces() return surfaces end
   function wiz.missingServos() return missingServos end
+  function wiz.servoCount() return servoCount end
+  function wiz.motorCount() return motorCount end
+  function wiz.rules() return rules end
+  function wiz.mixConfig() return mixConfig end
   function wiz.canMove() return canMove() end
+  function wiz.armed() return armed == true end
+  function wiz.change(key, original, restore) change(key, original, restore) end
+  function wiz.markChanged() markChanged() end
 
   -- Redraw the step's picture.
   function wiz.invalidate()
     if lcd.invalidate then lcd.invalidate() end
-  end
-
-  -- One axis only (or "flap"), for a step that has already held the rest
-  -- with holdAxes() and now moves one back and forth: one write per move
-  -- instead of four, which a telemetry link has room for.
-  function wiz.holdAxis(axis, value)
-    if not canMove() then return false end
-    local input = AXIS_INPUT[axis]
-    heldInputs[input] = true
-    mixerOverride.hold(input, math.floor(value * 1000 + 0.5))
-    return true
   end
 
   -- values: {roll =, pitch =, yaw =, flap =} as fractions of full input
@@ -307,6 +399,17 @@ local function open(opts)
     return true
   end
 
+  -- One axis only (or "flap"), for a step that has already held the rest
+  -- with holdAxes() and now moves one back and forth: one write per move
+  -- instead of four, which a telemetry link has room for.
+  function wiz.holdAxis(axis, value)
+    if not canMove() then return false end
+    local input = AXIS_INPUT[axis]
+    heldInputs[input] = true
+    mixerOverride.hold(input, math.floor(value * 1000 + 0.5))
+    return true
+  end
+
   wiz.releaseAxes = releaseAxes
 
   function wiz.holdServo(servo, raw)
@@ -318,20 +421,136 @@ local function open(opts)
   end
 
   wiz.releaseServo = releaseServo
+  wiz.releaseServos = releaseServos
 
-  -- Sends configs[servo] as it stands now.
-  function wiz.sendServo(servo)
+  -- Holds a servo at Mid + offsetUs regardless of its Min/Max (Limits step).
+  function wiz.probeServo(servo, offsetUs)
+    if not canMove() then return false end
+    heldProbes[servo] = true
+    return servoProbe.hold(servo, math.floor(offsetUs + 0.5))
+  end
+
+  wiz.releaseProbe = releaseProbe
+
+  -- Forces a mode on top of the setup state (wiz.BOX_ANGLE, wiz.BOX_PASSTHROUGH)
+  -- until the step closes or wiz.releaseMode().
+  function wiz.forceMode(boxId)
+    if not canMove() then return false end
+    forcedMode = boxId
+    holdModes()
+    return true
+  end
+
+  function wiz.releaseMode()
+    if not forcedMode then return end
+    forcedMode = nil
+    holdModes()
+  end
+
+  function wiz.forcedMode() return forcedMode end
+
+  -- Sends configs[servo] as it stands now. original: the config before the
+  -- caller changed it (a copy), for Discard.
+  function wiz.sendServo(servo, original)
+    change("servo_" .. servo, original or configs[servo], function(o)
+      configs[servo] = copyDeep(o)
+      bus.publish("msp.request", servoConfig.buildWriteMessage(servo, configs[servo]))
+    end)
     bus.publish("msp.request", servoConfig.buildWriteMessage(servo, configs[servo]))
-    markChanged()
+  end
+
+  -- Changes a servo's config with fn(config) and sends it, keeping what it
+  -- was for Discard. The way steps should change a servo.
+  function wiz.editServo(servo, fn)
+    local original = copyDeep(configs[servo])
+    fn(configs[servo])
+    wiz.sendServo(servo, original)
+  end
+
+  local function sendInput(axis)
+    bus.publish("msp.request", inputCodecs[axis].buildWriteMessage(inputs[axis]))
+  end
+
+  local function rememberInput(axis)
+    change("input_" .. axis, inputs[axis], function(o)
+      inputs[axis] = copyDeep(o)
+      sendInput(axis)
+    end)
   end
 
   function wiz.invertAxis(axis)
     local record = inputs[axis]
     if not record then return end
+    rememberInput(axis)
     local key = rateKeys[axis]
     record[key] = -(record[key] or 0)
-    bus.publish("msp.request", inputCodecs[axis].buildWriteMessage(record))
-    markChanged()
+    sendInput(axis)
+  end
+
+  -- Axis Throw, percent (0-200), and setting it keeping the sign.
+  function wiz.axisGainPercent(axis)
+    local record = inputs[axis]
+    return record and math.floor(math.abs(record[rateKeys[axis]] or 0) / 10 + 0.5) or 0
+  end
+
+  function wiz.setAxisGainPercent(axis, percent)
+    local record = inputs[axis]
+    if not record then return end
+    rememberInput(axis)
+    local sign = (record[rateKeys[axis]] or 0) < 0 and -1 or 1
+    record[rateKeys[axis]] = sign * percent * 10
+    sendInput(axis)
+  end
+
+  -- Axis Throw as multipliers, for lib/setup_wizard_surfaces.lua.
+  function wiz.axisGains()
+    local rates = {}
+    for axis, key in pairs(rateKeys) do rates[axis] = inputs[axis] and inputs[axis][key] or 1000 end
+    return surfacesLib.axisGainsFromRates(rates)
+  end
+
+  -- Replaces the whole mix (Airframe step): every rule slot and the model type.
+  function wiz.setMix(ruleTable, modelType)
+    change("mix", {rules = rules, modelType = mixConfig and mixConfig.model_type}, function(o)
+      rules = copyDeep(o.rules)
+      for i = 1, #rules do
+        bus.publish("msp.request", mixerRules.buildWriteMessage(i - 1, rules[i]))
+      end
+      if mixConfig then
+        mixConfig.model_type = o.modelType
+        bus.publish("msp.request", mixerConfig.buildWriteMessage(mixConfig))
+      end
+    end)
+    rules = ruleTable
+    for i = 1, #rules do
+      bus.publish("msp.request", mixerRules.buildWriteMessage(i - 1, rules[i]))
+    end
+    if mixConfig then
+      mixConfig.model_type = modelType
+      bus.publish("msp.request", mixerConfig.buildWriteMessage(mixConfig))
+    end
+    recompute()
+  end
+
+  -- Reads for a step: specs = {key = function(onData, onError) return msg end}.
+  -- onDone(results, failed) runs from the page's wakeup once every reply is
+  -- in (never from the reply itself, where Ethos forbids building a form).
+  function wiz.fetch(specs, onDone)
+    local f = {left = 0, failed = false, results = {}, onDone = onDone}
+    for _ in pairs(specs) do f.left = f.left + 1 end
+    fetches[#fetches + 1] = f
+    for key, build in pairs(specs) do
+      bus.publish("msp.request", build(function(data)
+        if disposed then return end
+        f.results[key] = data
+        f.left = f.left - 1
+      end, function()
+        if disposed then return end
+        f.failed = true
+        f.left = f.left - 1
+      end))
+    end
+    return f
   end
 
   local KIND_NAMES = {
@@ -347,8 +566,14 @@ local function open(opts)
 
   function wiz.kindName(kind) return KIND_NAMES[kind] or kind end
 
-  -- The step asks for its lines to be built again (on the next wakeup, never
-  -- from inside a field callback), then focus on `field` if it returns one.
+  -- "Servo 3 (Elevator)".
+  function wiz.surfaceName(surface)
+    return string.format("@i18n(app.modules.setup_wizard.servo_kind_fmt)@", surface.servo + 1,
+      KIND_NAMES[surface.kind] or surface.kind)
+  end
+
+  -- The step asks for its screen to be built again (on the next wakeup,
+  -- never from inside a field callback).
   function wiz.rebuild() rebuildWanted = true end
 
   -------------------------------------------------------------------------
@@ -361,10 +586,14 @@ local function open(opts)
   local openStep
 
   local function noticeText()
+    if rebootWait then return MSG_RESTARTING end
     if refused then return "@i18n(app.modules.setup_wizard.refused)@" end
     if connected == false then return "@i18n(app.modules.setup_wizard.disconnected)@" end
     if armed == true then return "@i18n(app.modules.setup_wizard.armed)@" end
-    if hasBit(modeFlags, PASSTHROUGH_BIT) then return "@i18n(app.modules.setup_wizard.bypass_passthrough)@" end
+    -- PASSTHROUGH forced by the wizard is meant; only the pilot's own is not.
+    if hasBit(modeFlags, PASSTHROUGH_BIT) and forcedMode ~= modeOverride.BOX_PASSTHROUGH then
+      return "@i18n(app.modules.setup_wizard.bypass_passthrough)@"
+    end
     if hasBit(modeFlags, MANUAL_BIT) then return "@i18n(app.modules.setup_wizard.bypass_manual)@" end
     return ""
   end
@@ -373,6 +602,11 @@ local function open(opts)
     headerHandle = header.build(title, {
       onBack = function() goBack() end,
       onSave = function() requestSave() end,
+      -- The tool button opens the step list.
+      onTool = loaded and not unsupported and function()
+        picking = true
+        rebuildWanted = true
+      end or nil,
     })
     if headerHandle.setSaveEnabled then headerHandle.setSaveEnabled(pending) end
     if headerHandle.setReloadEnabled then headerHandle.setReloadEnabled(false) end
@@ -386,16 +620,21 @@ local function open(opts)
 
   openStep = function(index)
     closeStep()
+    picking = false
     stepIndex = index
-    local factory = assert(loadfile(STEPS[index].script))()
-    step = factory.new(wiz)
+    memory.stepKey = STEPS[index].key
+    if not (STEPS[index].needsSurfaces and #surfaces == 0) then
+      local factory = assert(loadfile("app/pages/setup_wizard_" .. STEPS[index].key .. ".lua"))()
+      step = factory.new(wiz)
+    end
     rebuildWanted = true
   end
 
-  -- A step's last screen offers this: save, then the next step, or leave the
-  -- wizard after the last one (as the configurator's Save and continue).
+  function wiz.stepNumber() return stepIndex, #STEPS end
   function wiz.isLastStep() return stepIndex >= #STEPS end
 
+  -- A step's last screen: save, then the next step, or leave the wizard after
+  -- the last one (as the configurator's Save and continue).
   function wiz.finishStep()
     if stepIndex < #STEPS then
       local target = stepIndex + 1
@@ -405,6 +644,16 @@ local function open(opts)
     end
   end
 
+  -- On to the next step without saving (changes stay pending).
+  function wiz.skipStep()
+    if stepIndex < #STEPS then openStep(stepIndex + 1) end
+  end
+
+  function wiz.goToStep(key)
+    local index = stepIndexOf(key)
+    if index then openStep(index) end
+  end
+
   local function buildMessagePage(text)
     form.clear()
     buildHeader(PAGE_TITLE)
@@ -412,19 +661,62 @@ local function open(opts)
     if headerHandle.focusMenu then headerHandle.focusMenu() end
   end
 
+  -- The step list: one button per step.
+  local function buildPicker()
+    form.clear()
+    buildHeader(PAGE_TITLE)
+    local width, height = lcd.getWindowSize()
+    local gap = 6
+    local top = form.height() + gap
+    -- Two columns when every row still gets a usable height, else three.
+    local cols = 2
+    if width >= 700 or math.ceil(#STEPS / 2) * (30 + gap) > height - top then cols = 3 end
+    local rows = math.ceil(#STEPS / cols)
+    local h = math.max(30, math.floor((height - top - gap * rows) / rows))
+    if h > 48 then h = 48 end
+    local w = math.floor((width - FORM_RIGHT_PADDING - gap * (cols - 1)) / cols)
+    local focus
+    for i, s in ipairs(STEPS) do
+      local col, row = (i - 1) % cols, math.floor((i - 1) / cols)
+      local button = form.addButton(nil, {x = col * (w + gap), y = top + row * (h + gap), w = w, h = h}, {
+        text = string.format("%d. %s", i, s.title),
+        options = FONT_S + CENTERED,
+        press = function() openStep(i) end,
+      })
+      if i == stepIndex then focus = button end
+    end
+    if focus and focus.focus then focus:focus() end
+  end
+
   local function build()
     rebuildWanted = false
+    if picking then
+      buildPicker()
+      return
+    end
     form.clear()
-    buildHeader(PAGE_TITLE .. " / " .. STEPS[stepIndex].title)
+    buildHeader(PAGE_TITLE .. " / " .. string.format("%d. %s", stepIndex, STEPS[stepIndex].title))
     -- Only when there is something to say: a 320 px screen has no row to spare.
     local notice = noticeText()
     noticeField = (notice ~= "") and addTextLine(notice) or nil
-    if #missingServos > 0 then
+    if #missingServos > 0 and STEPS[stepIndex].needsSurfaces then
       addWrapped(string.format("@i18n(app.modules.setup_wizard.missing_servos_fmt)@",
         table.concat(missingServos, ", ")))
     end
+    if not step then
+      -- A step that needs control surfaces, on a model with none mixed yet.
+      addWrapped("@i18n(app.modules.setup_wizard.no_surfaces)@")
+      local width, height = lcd.getWindowSize()
+      local button = form.addButton(nil, {x = 0, y = height - 52, w = width - FORM_RIGHT_PADDING, h = 48}, {
+        text = "@i18n(app.modules.setup_wizard.go_airframe)@",
+        options = FONT_STD + CENTERED,
+        press = function() wiz.goToStep("airframe") end,
+      })
+      if button and button.focus then button:focus() end
+      return
+    end
     -- The step has the rest of the screen, from form.height() down.
-    local focus = step and step.build() or nil
+    local focus = step.build()
     if lcd.invalidate then lcd.invalidate() end
     if focus and focus.focus then
       focus:focus()
@@ -445,7 +737,7 @@ local function open(opts)
   end
 
   -------------------------------------------------------------------------
-  -- Dialogs, saving and leaving
+  -- Dialogs, saving, restarting and leaving
   -------------------------------------------------------------------------
 
   local function closeProgress()
@@ -475,29 +767,15 @@ local function open(opts)
     })
   end
 
-  local function takeSnapshot()
-    local s = {inputs = {}, configs = {}}
-    for axis, record in pairs(inputs) do s.inputs[axis] = copyRecord(record) end
-    for servo, config in pairs(configs) do s.configs[servo] = copyRecord(config) end
-    snapshot = s
-  end
-
-  -- Writes back whatever differs from the snapshot. The writes are queued and
-  -- go out from the background task, so the page can close straight after.
+  -- Writes back everything changed since the last save, newest first. The
+  -- writes are queued and go out from the background task, so the page can
+  -- close straight after.
   local function revert()
-    if not snapshot then return end
-    for axis, record in pairs(snapshot.inputs) do
-      if inputs[axis] and not sameRecord(inputs[axis], record) then
-        inputs[axis] = copyRecord(record)
-        bus.publish("msp.request", inputCodecs[axis].buildWriteMessage(inputs[axis]))
-      end
+    for i = #changes, 1, -1 do
+      changes[i].restore(changes[i].original)
     end
-    for servo, config in pairs(snapshot.configs) do
-      if configs[servo] and not sameRecord(configs[servo], config) then
-        configs[servo] = copyRecord(config)
-        bus.publish("msp.request", servoConfig.buildWriteMessage(servo, configs[servo]))
-      end
-    end
+    changes = {}
+    changeIndex = {}
     pending = false
   end
 
@@ -528,7 +806,8 @@ local function open(opts)
     afterSave = nil
     if result == "ok" then
       pending = false
-      takeSnapshot()
+      changes = {}
+      changeIndex = {}
       if headerHandle and headerHandle.setSaveEnabled then headerHandle.setSaveEnabled(false) end
       if done then done() end
     else
@@ -544,6 +823,39 @@ local function open(opts)
   requestSave = function(onSaved)
     if saving or not loaded or saveRequest then return end
     saveRequest = {onSaved = onSaved}
+  end
+
+  -- Settings that only apply after a restart (board alignment, servo rate,
+  -- ESC protocol): save, restart the flight controller, wait for it to come
+  -- back, and reopen the same step, as the configurator does.
+  local function startReboot()
+    closeStep()
+    rebootWait = {startedAt = os.clock(), sawDisconnect = false}
+    bus.publish("msp.request", reboot.buildWriteMessage())
+    rebuildWanted = true
+  end
+
+  function wiz.saveAndReboot()
+    if armed then return end
+    if pending then
+      requestSave(startReboot)
+    else
+      startReboot()
+    end
+  end
+
+  -- page_runtime.lua's two edges: the link must be seen to drop (or the
+  -- handshake reset), then come back with a fresh handshake.
+  local function updateReboot(now)
+    local wait = rebootWait
+    if not wait.sawDisconnect and (connected == false or handshakeDone == false) then
+      wait.sawDisconnect = true
+    end
+    local back = wait.sawDisconnect and connected == true and handshakeDone == true
+    if back or (now - wait.startedAt) >= REBOOT_TIMEOUT_SECONDS then
+      rebootWait = nil
+      beginLoad()
+    end
   end
 
   local function dispose()
@@ -592,6 +904,12 @@ local function open(opts)
 
   goBack = function()
     if disposed then return end
+    if picking and step then
+      -- Back from the step list returns to the step.
+      picking = false
+      rebuildWanted = true
+      return
+    end
     if pending and loaded then
       -- Opened from wakeup: a dialog opened inside a button callback is a
       -- failure this suite has hit on hardware (app/pages/motor_override.lua).
@@ -615,11 +933,15 @@ local function open(opts)
   end
 
   local function requestRest()
-    stage = "rest"
-    outstanding = 1 + 3 + servoCount
+    outstanding = 1 + 1 + 3 + servoCount
     bus.publish("msp.request", mixerRules.buildReadPoolMessage(function(pool)
       if disposed then return end
       rules = pool
+      answered()
+    end, failed))
+    bus.publish("msp.request", mixerConfig.buildReadMessage(function(data)
+      if disposed then return end
+      mixConfig = data
       answered()
     end, failed))
     for axis, codec in pairs(inputCodecs) do
@@ -640,47 +962,57 @@ local function open(opts)
 
   local function finishLoad()
     loaded = true
-    surfaces = surfacesLib.surfacesFromRules(rules, servoCount)
-    missingServos = surfacesLib.servosPastCount(rules, servoCount, PWM_SERVO_SLOTS)
-    takeSnapshot()
+    recompute()
     closeProgress()
     if not keepalive.supported() then
       unsupported = true
       buildMessagePage("@i18n(app.modules.setup_wizard.needs_firmware)@")
       return
     end
-    if #surfaces == 0 then
-      buildMessagePage("@i18n(app.modules.setup_wizard.no_surfaces)@")
-      return
-    end
     clearForeignOverrides()
     -- The whole wizard runs in the setup state: arming blocked, radios show
     -- SETUP. The flight controller refuses it while armed.
-    modeOverride.hold({}, function()
+    refused = false
+    forcedMode = nil
+    holdModes()
+    openStep(stepIndexOf(memory.stepKey) or 1)
+  end
+
+  -- The core reads every step relies on. Run on open and after a restart.
+  beginLoad = function()
+    loaded = false
+    outstanding = -1
+    if not dialog then
+      dialog = progressDialog.open({title = MSG_LOADING_TITLE, message = MSG_LOADING_BODY})
+    end
+    bus.publish("msp.request", status.buildReadMessage(function(data)
       if disposed then return end
-      refused = true
-      releaseAll()
-      if step and step.released then step.released() end
-      refreshNotice()
-    end)
-    openStep(1)
+      servoCount = math.min(tonumber(data and data.servo_count) or 0, PWM_SERVO_SLOTS)
+      motorCount = tonumber(data and data.motor_count) or 0
+      requestRest()
+    end, failed))
   end
 
   -------------------------------------------------------------------------
   -- Wakeup
   -------------------------------------------------------------------------
 
-  local function poll(now)
-    if not (step and step.livePositions) or not canMove() then return end
-    if pollInFlight and (now - lastPollAt) < POLL_GIVE_UP then return end
-    if (now - lastPollAt) < POLL_INTERVAL then return end
-    pollInFlight = true
-    lastPollAt = now
-    bus.publish("msp.request", servoRead.buildReadMessage(positions, function()
-      pollInFlight = false
-    end, function()
-      pollInFlight = false
-    end))
+  local function poll(kind, now)
+    local p = polls[kind]
+    if p.inFlight and (now - p.at) < POLL_GIVE_UP then return end
+    if (now - p.at) < POLL_INTERVAL[kind] then return end
+    p.inFlight = true
+    p.at = now
+    local function done() p.inFlight = false end
+    local msg
+    if kind == "servo" then
+      msg = servoRead.buildReadMessage(positions, done, done)
+    else
+      local raw = step.liveRc == "raw"
+      msg = rcChannels.buildReadMessage(raw and rcChannels.RX_CHANNELS_COMMAND or rcChannels.RC_COMMAND,
+        raw and rcRaw or rc, done, done)
+    end
+    bus.publish("msp.request", msg)
   end
 
   local function wakeup()
@@ -694,8 +1026,19 @@ local function open(opts)
       return
     end
 
+    local now = os.clock()
+
+    if rebootWait then
+      if rebuildWanted then
+        rebuildWanted = false
+        buildMessagePage(MSG_RESTARTING)
+      end
+      updateReboot(now)
+      return
+    end
+
     if not loaded then
-      if stage == "rest" and outstanding <= 0 then finishLoad() end
+      if outstanding == 0 then finishLoad() end
       return
     end
 
@@ -719,14 +1062,24 @@ local function open(opts)
       return
     end
 
-    if rebuildWanted and step then
+    for i = #fetches, 1, -1 do
+      local f = fetches[i]
+      if f.left <= 0 then
+        table.remove(fetches, i)
+        if f.onDone then f.onDone(f.results, f.failed) end
+      end
+    end
+
+    if rebuildWanted then
       build()
       return
     end
 
-    local now = os.clock()
-    poll(now)
-    if step and step.wakeup then step.wakeup(now) end
+    if step and not picking and canMove() then
+      if step.livePositions then poll("servo", now) end
+      if step.liveRc then poll("rc", now) end
+    end
+    if step and not picking and step.wakeup then step.wakeup(now) end
   end
 
   -------------------------------------------------------------------------
@@ -736,7 +1089,6 @@ local function open(opts)
   form.clear()
   buildHeader(PAGE_TITLE)
   form.addLine(MSG_LOADING_TITLE)
-  dialog = progressDialog.open({title = MSG_LOADING_TITLE, message = MSG_LOADING_BODY})
 
   if opts.setEventHandler then
     opts.setEventHandler(function(category, value)
@@ -755,36 +1107,36 @@ local function open(opts)
   -- Steps draw their pictures below the form, from paint.
   if opts.setPaintHandler then
     opts.setPaintHandler(function()
-      if disposed or rebuildWanted then return end
+      if disposed or rebuildWanted or picking or rebootWait then return end
       if step and step.paint then step.paint() end
     end)
   end
 
   -- A model that arms or a link that drops lets go of everything the step
   -- holds. The setup state itself stays held: the flight controller refuses
-  -- it while armed (the hold then stops, see finishLoad()) and lets it lapse
+  -- it while armed (the hold then stops, see onRefused()) and lets it lapse
   -- while nothing reaches it.
   sessionHandler = function(snapshotData)
     local nextConnected = snapshotData and snapshotData.connected == true
     local nextArmed = snapshotData and snapshotData.isArmed == true
     local nextFlags = snapshotData and snapshotData.flightModeFlags
+    local hs = snapshotData and snapshotData.handshake
+    handshakeDone = hs and hs.apiVersion == true
     if nextConnected == connected and nextArmed == armed and nextFlags == modeFlags then return end
     local lost = (connected ~= false and nextConnected == false) or (armed ~= true and nextArmed == true)
     connected, armed, modeFlags = nextConnected, nextArmed, nextFlags
     if not loaded then return end
     if lost then
-      releaseAll()
+      releaseAxes()
+      releaseServos()
+      releaseProbes()
       if step and step.released then step.released() end
     end
     refreshNotice()
   end
   bus.subscribe("session.update", sessionHandler)
 
-  bus.publish("msp.request", status.buildReadMessage(function(data)
-    if disposed then return end
-    servoCount = math.min(tonumber(data and data.servo_count) or 0, PWM_SERVO_SLOTS)
-    requestRest()
-  end, failed))
+  beginLoad()
 end
 
 return {open = open}

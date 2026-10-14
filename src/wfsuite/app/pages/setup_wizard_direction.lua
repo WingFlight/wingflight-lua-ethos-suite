@@ -34,6 +34,7 @@
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local surfacesLib = requireModule("lib/setup_wizard_surfaces.lua")
 local art = requireModule("app/setup_wizard_art.lua")
+local ui = requireModule("app/setup_wizard_ui.lua")
 
 local CHECKS = {
   {axis = "flap", sign = 1,
@@ -64,8 +65,6 @@ local FLICK_INTERVAL = 0.8
 -- Identify: the servo wiggles +-WIGGLE_RAW around its centre.
 local WIGGLE_RAW = 300
 local WIGGLE_INTERVAL = 0.3
-
-local BUTTON_GAP = 6
 
 -- Whether this check moves the surface. The flap check leaves out pitch
 -- surfaces carrying a Flap Compensation rule: that mix is tuned, not checked.
@@ -109,9 +108,7 @@ local function new(wiz)
   local inverted = {}          -- axis -> true when inverted an odd number of times
   local flapReversed = false
 
-  -- What paint draws, worked out when a screen is built.
-  local view = {top = 0, bottom = 0, title = nil, lines = {}, accentFrom = nil, picture = nil, caption = nil}
-  local buttons = {}
+  local scr = ui.new(wiz)
 
   -- Motion: "axis" flicks the checked axis, "servo" wiggles one servo.
   local motion, motionServo, phase, nextMoveAt = nil, nil, false, 0
@@ -148,9 +145,9 @@ local function new(wiz)
   end
 
   local function reverse(surface)
-    local config = wiz.configs[surface.servo]
-    config.flags = (config.flags or 0) ~ surfacesLib.SERVO_FLAG_REVERSE
-    wiz.sendServo(surface.servo)
+    wiz.editServo(surface.servo, function(config)
+      config.flags = (config.flags or 0) ~ surfacesLib.SERVO_FLAG_REVERSE
+    end)
     reversed[surface.servo] = not reversed[surface.servo] or nil
     if surface.kind == "flap" then flapReversed = true end
   end
@@ -219,70 +216,19 @@ local function new(wiz)
     end
   end
 
-  -------------------------------------------------------------------------
-  -- Building a screen: the answer buttons along the bottom, and what paint
-  -- draws between the header and them.
-  -------------------------------------------------------------------------
-
-  -- specs: {{text =, press =, weight =, primary =}, ...} left to right.
-  local function addButtons(specs)
-    local width, height = lcd.getWindowSize()
-    local h = math.max(36, math.floor(height * 0.15))
-    local y = height - h - 4
-    local total = 0
-    for i = 1, #specs do total = total + (specs[i].weight or 1) end
-    local free = width - wiz.FORM_RIGHT_PADDING - BUTTON_GAP * (#specs - 1)
-    local x, focus = 0, nil
-    buttons = {}
-    for i = 1, #specs do
-      local w = math.floor(free * (specs[i].weight or 1) / total)
-      local b = form.addButton(nil, {x = x, y = y, w = w, h = h}, {
-        text = specs[i].text,
-        options = (specs[i].small and FONT_S or FONT_STD) + CENTERED,
-        press = specs[i].press,
-      })
-      -- The field is Ethos userdata: the flag lives beside it.
-      buttons[#buttons + 1] = {field = b, needsMotion = specs[i].needsMotion}
-      if specs[i].primary then focus = b end
-      x = x + w + BUTTON_GAP
-    end
-    view.bottom = y - 4
-    return focus
-  end
-
-  local function setText(title, body, accent)
-    local width = lcd.getWindowSize()
-    view.title = title
-    view.lines = body and wiz.wrapLines(body, width - 16, FONT_S) or {}
-    view.accentFrom = nil
-    if accent then
-      view.accentFrom = #view.lines + 1
-      local extra = wiz.wrapLines(accent, width - 16, FONT_S)
-      for i = 1, #extra do view.lines[#view.lines + 1] = extra[i] end
-    end
-  end
-
-  local function refreshButtons()
-    local canMove = wiz.canMove()
-    for i = 1, #buttons do
-      if buttons[i].needsMotion and buttons[i].field then buttons[i].field:enable(canMove) end
-    end
-  end
-
   local function deflection() return DEFLECTIONS[deflectionIndex] end
 
   -- Returns the field to focus.
   function self.build()
-    view.top = form.height() + 4
-    view.picture, view.caption = nil, nil
+    scr:begin()
     local c = check()
     local focus
 
     if screen == "intro" then
       stopMotion()
-      setText("@i18n(app.modules.setup_wizard.dir_intro_title)@", "@i18n(app.modules.setup_wizard.dir_intro)@")
-      view.picture = art.layout(wiz.surfaces(), nil)
-      focus = addButtons({
+      scr:text("@i18n(app.modules.setup_wizard.dir_intro_title)@", "@i18n(app.modules.setup_wizard.dir_intro)@")
+      scr:picture(art.layout(wiz.surfaces(), nil))
+      focus = scr:buttons({
         {text = "@i18n(app.modules.setup_wizard.dir_start)@", primary = true, needsMotion = true,
           press = function() ci = 1; go("check") end},
       })
@@ -290,10 +236,9 @@ local function new(wiz)
     elseif screen == "check" then
       collectMoved()
       startAxisMotion()
-      setText(c.title, c.expect .. " " .. "@i18n(app.modules.setup_wizard.dir_q_match)@", status)
-      view.picture = art.layout(wiz.surfaces(), c.axis)
-      view.caption = "@i18n(app.modules.setup_wizard.dir_from_behind)@"
-      focus = addButtons({
+      scr:text(c.title, c.expect .. " " .. "@i18n(app.modules.setup_wizard.dir_q_match)@", status)
+      scr:picture(art.layout(wiz.surfaces(), c.axis), "@i18n(app.modules.setup_wizard.dir_from_behind)@")
+      focus = scr:buttons({
         {text = string.format("@i18n(app.modules.setup_wizard.dir_move_fmt)@", deflection()), weight = 0.6,
           small = true, needsMotion = true,
           press = function()
@@ -305,10 +250,9 @@ local function new(wiz)
       })
 
     elseif screen == "all" then
-      setText(c.title, "@i18n(app.modules.setup_wizard.dir_q_all)@")
-      view.picture = art.layout(wiz.surfaces(), c.axis)
-      view.caption = "@i18n(app.modules.setup_wizard.dir_from_behind)@"
-      focus = addButtons({
+      scr:text(c.title, "@i18n(app.modules.setup_wizard.dir_q_all)@")
+      scr:picture(art.layout(wiz.surfaces(), c.axis), "@i18n(app.modules.setup_wizard.dir_from_behind)@")
+      focus = scr:buttons({
         {text = "@i18n(app.modules.setup_wizard.dir_some)@", press = function()
           identifyIndex, wrongOnes = 1, {}
           go("identify")
@@ -319,11 +263,10 @@ local function new(wiz)
     elseif screen == "identify" then
       local surface = moved[identifyIndex]
       startServoMotion(surface.servo)
-      setText(c.title, string.format("@i18n(app.modules.setup_wizard.dir_identify_fmt)@", surface.servo + 1,
+      scr:text(c.title, string.format("@i18n(app.modules.setup_wizard.dir_identify_fmt)@", surface.servo + 1,
         wiz.kindName(surface.kind), identifyIndex, #moved))
-      view.picture = art.layout(wiz.surfaces(), c.axis)
-      view.caption = "@i18n(app.modules.setup_wizard.dir_from_behind)@"
-      focus = addButtons({
+      scr:picture(art.layout(wiz.surfaces(), c.axis), "@i18n(app.modules.setup_wizard.dir_from_behind)@")
+      focus = scr:buttons({
         -- Focus starts on No: a stray press must not reverse a servo.
         {text = "@i18n(app.modules.setup_wizard.dir_no)@", primary = true, needsMotion = true,
           press = function() answerIdentify(false) end},
@@ -333,8 +276,8 @@ local function new(wiz)
 
     elseif screen == "cantfix" then
       stopMotion()
-      setText(c.title, string.format("@i18n(app.modules.setup_wizard.dir_cant_fix_fmt)@", servoList(cantFix)))
-      focus = addButtons({
+      scr:text(c.title, string.format("@i18n(app.modules.setup_wizard.dir_cant_fix_fmt)@", servoList(cantFix)))
+      focus = scr:buttons({
         {text = "@i18n(app.modules.setup_wizard.dir_continue)@", primary = true, press = function() go("check") end},
       })
 
@@ -358,10 +301,10 @@ local function new(wiz)
       else
         body = "@i18n(app.modules.setup_wizard.dir_done_changes)@ " .. table.concat(changes, ", ") .. "."
       end
-      setText("@i18n(app.modules.setup_wizard.dir_done_title)@", body,
+      scr:text("@i18n(app.modules.setup_wizard.dir_done_title)@", body,
         flapReversed and "@i18n(app.modules.setup_wizard.dir_flap_radio)@" or nil)
-      view.picture = art.layout(wiz.surfaces(), nil)
-      focus = addButtons({
+      scr:picture(art.layout(wiz.surfaces(), nil))
+      focus = scr:buttons({
         {text = "@i18n(app.modules.setup_wizard.dir_again)@", press = function()
           ci, status = 1, nil
           go("check")
@@ -371,40 +314,10 @@ local function new(wiz)
       })
     end
 
-    refreshButtons()
     return focus
   end
 
-  function self.paint()
-    local colors = art.colors()
-    local width = lcd.getWindowSize()
-    local y = view.top
-    if view.title then
-      lcd.font(FONT_STD)
-      lcd.color(colors.text)
-      lcd.drawText(8, y, view.title, LEFT)
-      local _, th = lcd.getTextSize(view.title)
-      y = y + th + 2
-    end
-    lcd.font(FONT_S)
-    for i = 1, #view.lines do
-      lcd.color((view.accentFrom and i >= view.accentFrom) and colors.active or colors.text)
-      lcd.drawText(8, y, view.lines[i], LEFT)
-      local _, th = lcd.getTextSize(view.lines[i])
-      y = y + th
-    end
-    if view.picture then
-      local bottom = view.bottom
-      if view.caption then
-        lcd.font(FONT_XS)
-        local _, ch = lcd.getTextSize(view.caption)
-        lcd.color(colors.muted)
-        lcd.drawText(8, bottom - ch, view.caption, LEFT)
-        bottom = bottom - ch
-      end
-      art.draw(view.picture, 0, y + 4, width, bottom - y - 6, colors)
-    end
-  end
+  function self.paint() scr:paint() end
 
   local lastCanMove = nil
 
@@ -412,7 +325,7 @@ local function new(wiz)
     local canMove = wiz.canMove()
     if canMove ~= lastCanMove then
       lastCanMove = canMove
-      refreshButtons()
+      scr:refresh()
       if canMove and screen == "check" and motion == nil then startAxisMotion() end
       if canMove and screen == "identify" and motion == nil then startServoMotion(moved[identifyIndex].servo) end
     end
@@ -433,12 +346,11 @@ local function new(wiz)
   -- The shell let go of everything (armed, link lost, refused).
   function self.released()
     motion, motionServo = nil, nil
-    refreshButtons()
+    scr:refresh()
   end
 
   function self.leave()
     stopMotion()
-    buttons = {}
   end
 
   return self
