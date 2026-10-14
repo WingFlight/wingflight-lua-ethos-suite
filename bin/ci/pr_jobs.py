@@ -1221,6 +1221,24 @@ build: 125, 212 and 124 in lib/msp_servo_config.lua, 213 in lib/msp_servo_center
 pin to go red every time, after the unmodified modules have passed.
 '''
     ),
+    LuaStep(
+        name='Ports page reads the serial ports back after a save, and not the RX config',
+        script='bin/ports_readback/verify_ports_readback.lua',
+        rationale=r'''Ported from rotorflight-lua-ethos-suite PR #2547 (issue #2497, findings 1 and 2):
+the Ports page never read the board back after a save, so its rows showed what was
+sent; and it read MSP_RX_CONFIG on every open although the value was never used,
+which held up the loading dialog for one round trip. After an accepted EEPROM write
+the page now reads the serial ports back before it reboots, and the RX config read
+is gone.
+
+No build and no package step reaches this -- it is a read and write path through a
+running page. The harness drives the real ports page with the real bus and the real
+port-label library, and answers each message the way the FC would: a board that
+reports a different function than the one sent, a refused read-back, and the reboot
+that must wait for the read-back. Against unpatched wingflight-lua-ethos-suite master
+five of the seven checks fail.
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [

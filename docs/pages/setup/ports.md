@@ -41,6 +41,9 @@ Requires a running background task and a flight controller connection.
   twelve, all in the one wakeup that draws the page; it now costs ~3,400 and
   ~12,000. The choices offered are unchanged. Measured off-device with
   `bin/perf/measure_app_instructions.lua`.
+- Changes are written to the flight controller EEPROM upon Save. Afterwards the page reads the
+  ports back, so the rows show what the flight controller holds, not what was sent
+  (Issue #2497 in rotorflight-lua-ethos-suite).
 
 TODO: Verify persistence, reboot behaviour, profile scope and any restrictions in
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than
