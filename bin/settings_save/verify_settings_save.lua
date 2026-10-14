@@ -88,11 +88,16 @@ model = anything()
 
 local dialogs = {}
 local developerSetter = nil
+local numberSetters = {}
 form = anything()
 form.clear = function() end
 form.openDialog = function(opts) dialogs[#dialogs + 1] = opts end
 form.addBooleanField = function(_, _, getter, setter)
   if developerSetter == nil then developerSetter = setter end
+  return anything()
+end
+form.addNumberField = function(_, _, _, _, getter, setter)
+  numberSetters[#numberSetters + 1] = setter
   return anything()
 end
 
@@ -169,6 +174,52 @@ check("an accepted save publishes once", published == 1, "published=" .. publish
 check("an accepted save darkens the Save button",
       saveEnabledCalls[#saveEnabledCalls] == false, tostring(saveEnabledCalls[#saveEnabledCalls]))
 check("an accepted save shows no failure dialog", not failureDialogOpened())
+
+-- ---------------------------------------------------------------------------
+-- The same refusal on a page whose store is model_preferences, not
+-- settings_store: app/pages/stats.lua keeps the counters in the model's INI
+-- file. Same class of silent loss as #2500, same helper.
+-- ---------------------------------------------------------------------------
+
+local prefsStore = {saveCalls = 0, saveResult = true}
+prefsStore.load = function() return {general = {flightcount = 3}}, "/tmp/model.ini" end
+prefsStore.stats = function(p) return {flightcount = p.general.flightcount or 0} end
+prefsStore.setStats = function(p, s) p.general = p.general or {}; p.general.flightcount = s.flightcount; return p end
+prefsStore.save = function() prefsStore.saveCalls = prefsStore.saveCalls + 1; return prefsStore.saveResult end
+package.loaded["wfsuite.lib.model_preferences"] = prefsStore
+
+local statsPage = requireModule("app/pages/stats.lua")
+local statsPublished = 0
+bus.subscribe("model.stats.update", function() statsPublished = statsPublished + 1 end)
+
+local function runStatsSave(saveResult)
+  dialogs, saveEnabledCalls, numberSetters = {}, {}, {}
+  statsPublished, prefsStore.saveCalls, prefsStore.saveResult = 0, 0, saveResult
+  headerOpts = nil
+  statsPage.open({onBack = function() end})
+  bus.publish("session.update", {mcuId = "0x123456"})   -- the page loads its counters
+  numberSetters[1](42)                                  -- a real edit: the page is dirty
+  headerOpts.onSave()                                   -- the pilot presses Save
+  local confirm = dialogs[#dialogs]
+  if confirm and confirm.buttons and confirm.buttons[1] then
+    confirm.buttons[1].action()                         -- and confirms
+  end
+end
+
+print("stats page, refused save")
+runStatsSave(false)
+check("stats: the model preferences were asked to save", prefsStore.saveCalls == 1, "saveCalls=" .. prefsStore.saveCalls)
+check("stats: a refused save publishes nothing", statsPublished == 0, "published=" .. statsPublished)
+check("stats: a refused save keeps the Save button lit",
+      saveEnabledCalls[#saveEnabledCalls] == true, tostring(saveEnabledCalls[#saveEnabledCalls]))
+check("stats: a refused save shows the save-failed dialog", failureDialogOpened())
+
+print("stats page, accepted save")
+runStatsSave(true)
+check("stats: an accepted save publishes once", statsPublished == 1, "published=" .. statsPublished)
+check("stats: an accepted save darkens the Save button",
+      saveEnabledCalls[#saveEnabledCalls] == false, tostring(saveEnabledCalls[#saveEnabledCalls]))
+check("stats: an accepted save shows no failure dialog", not failureDialogOpened())
 
 print(string.format("\n%d checks, %d failed", checks, failures))
 os.exit(failures == 0 and 0 or 1)

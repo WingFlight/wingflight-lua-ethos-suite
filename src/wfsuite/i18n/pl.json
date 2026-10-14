@@ -9407,7 +9407,7 @@
       "max_length": 11,
       "needs_translation": false,
       "reverse_text": false,
-      "translation": "Zapis nieud"
+      "translation": "Zapis nieudany"
     },
     "msg_save_not_commited": {
       "english": "Save not committed",

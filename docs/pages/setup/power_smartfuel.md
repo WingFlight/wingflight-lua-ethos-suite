@@ -31,6 +31,8 @@ Requires a running background task and a flight controller connection.
 
 ## Notes
 
+- The model type is the one setting on this page that lives in the model's INI file; the tuning values go to the flight controller. If that file cannot be written, the save itself still goes through (the flight controller has the new model type) and a *Save failed* dialog follows once the saving dialog is closed, so the pilot learns that the radio did not keep its copy (rotorflight-lua-ethos-suite Issue #2500).
+
 TODO: Verify persistence, reboot behaviour, profile scope and any restrictions in
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than
 firmware defaults; wire values may need scaling before display.
