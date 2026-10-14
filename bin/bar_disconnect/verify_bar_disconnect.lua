@@ -260,6 +260,7 @@ wfsuite.tasks.telemetry.sensorStats = {
     current = {max = 5},
 }
 wfsuite.flightmode.current = "preflight"
+sensors.voltage, sensors.current = {16.8}, {5}
 wattsSession.isConnected = true
 wattsSession.telemetryState = true
 check("watts max, connected: shows 84", wakeWatts() == "84", "display=" .. tostring(wbox._currentDisplayValue))
@@ -267,6 +268,19 @@ check("watts max, connected: shows 84", wakeWatts() == "84", "display=" .. tostr
 wattsSession.telemetryState = false
 check("watts max, disconnected before flight: shows loading dots",
     LOADING[wakeWatts()] == true, "display=" .. tostring(wbox._currentDisplayValue))
+
+-- If telemetry link is connected, but a constituent live sensor drops before flight:
+wattsSession.telemetryState = true
+sensors.current = nil
+check("watts max, constituent sensor dropped before flight: shows loading dots",
+    LOADING[wakeWatts()] == true, "display=" .. tostring(wbox._currentDisplayValue))
+
+-- In flight, dropped constituent sensor keeps the last valid stats reading:
+wfsuite.flightmode.current = "inflight"
+sensors.current = {5}
+check("watts max, inflight restored: shows 84", wakeWatts() == "84", "display=" .. tostring(wbox._currentDisplayValue))
+sensors.current = nil
+check("watts max, inflight dropped sensor: keeps last value 84", wakeWatts() == "84", "display=" .. tostring(wbox._currentDisplayValue))
 
 wattsSession.isConnected, wattsSession.telemetryState = savedIsConnected, savedTelemetryState
 

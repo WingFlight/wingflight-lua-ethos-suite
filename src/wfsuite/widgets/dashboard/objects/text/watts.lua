@@ -93,6 +93,9 @@ function render.wakeup(box)
 
     local function statsWatts(kind)
         if not (vStats and iStats) then return nil end
+        local v = telemetry and telemetry.getSensor and telemetry.getSensor("voltage")
+        local i = telemetry and telemetry.getSensor and telemetry.getSensor("current")
+        if not (v and i) then return nil end
         if kind == "min" and vStats.min and iStats.min then return vStats.min * iStats.min end
         if kind == "max" and vStats.max and iStats.max then return vStats.max * iStats.max end
         if kind == "avg" and vStats.avg and iStats.avg then return vStats.avg * iStats.avg end
