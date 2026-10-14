@@ -153,7 +153,10 @@ local function openEditor(opts, listState, row)
               end
             else
               -- The live write below waits for the read; so must the override.
-              if not runtime.loaded then return true end
+              if not runtime.loaded then
+                if focusFn then focusFn() end
+                return true
+              end
               publishOverride(index, servoOverride.OVERRIDE_CENTER)
               inOverride = true
               inheritedOverride = false

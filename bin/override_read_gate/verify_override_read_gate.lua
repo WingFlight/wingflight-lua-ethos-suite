@@ -98,8 +98,14 @@ form.addButton = function(_, _, opts)
 end
 
 local lastHeaderOpts = nil
+local toolFocused = false
 package.loaded["wfsuite.app.header"] = {
-  build = function(_, opts) lastHeaderOpts = opts; return anything() end,
+  build = function(_, opts)
+    lastHeaderOpts = opts
+    local h = anything()
+    h.focusTool = function() toolFocused = true end
+    return h
+  end,
 }
 package.loaded["wfsuite.app.close_key"] = {shouldHandleClose = function() return true end}
 package.loaded["wfsuite.app.progress_dialog"] = {
@@ -208,6 +214,7 @@ local function resetScenario()
   dialogs = {}
   tiles = {}
   lastHeaderOpts = nil
+  toolFocused = false
   currentWake = nil
 end
 
@@ -241,10 +248,11 @@ end
 local function pressToolAndConfirm()
   local before = #dialogs
   if not lastHeaderOpts or not lastHeaderOpts.onTool then return nil, "no Tool handler registered" end
-  local ok, err = pcall(function() lastHeaderOpts.onTool(function() end) end)
+  local ok, err = pcall(function() lastHeaderOpts.onTool() end)
   if not ok then return nil, "Tool press raised: " .. tostring(err) end
   if #dialogs == before then return nil, "Tool press opened no dialog" end
   local d = dialogs[#dialogs]
+  toolFocused = false
   local okResult
   ok, err = pcall(function() okResult = d.buttons[1].action() end)
   if not ok then return nil, "OK press raised: " .. tostring(err) end
@@ -262,6 +270,7 @@ local function runScenarios(label, expectedWrites, openFn)
     countKind("override") == 0,
     "override messages sent: " .. countKind("override"))
   check("the dialog closes on OK", result == true, "action returned " .. tostring(result))
+  check("focus is restored when closing the dialog", toolFocused == true)
 
   print(label .. ": read succeeds, the override is written as before")
   opened, why = openFn("ok")
@@ -272,6 +281,7 @@ local function runScenarios(label, expectedWrites, openFn)
     countKind("override") == expectedWrites,
     "override messages sent: " .. countKind("override"))
   check("the dialog closes on OK", result == true, "action returned " .. tostring(result))
+  check("focus is restored when closing the dialog", toolFocused == true)
 end
 
 -- ---------------------------------------------------------------------------
