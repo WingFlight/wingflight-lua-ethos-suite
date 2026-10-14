@@ -506,7 +506,7 @@ function render.wakeup(box)
     -- momentary telemetry gap -- one missed appId, one dropped frame behind an
     -- obstacle -- must not blank a fuel gauge the pilot is flying on, and must
     -- not discard the reading it had. flightmode itself turns a disconnect
-    -- during a flight into "postflight" (flightmode.lua:103), so holding from
+    -- during a flight into "postflight" (flightmode.lua:124-126), so holding from
     -- "inflight" onwards also covers the link going away mid-flight.
     local mode = wfsuite.flightmode and wfsuite.flightmode.current or "preflight"
     local holdLastValue = mode ~= "preflight"

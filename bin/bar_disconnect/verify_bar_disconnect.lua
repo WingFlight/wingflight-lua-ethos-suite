@@ -4,11 +4,12 @@
 --     lua5.4 bin/bar_disconnect/verify_bar_disconnect.lua
 --
 -- Drives the real widgets/dashboard/objects/gauge/bar.lua (render.wakeup) with a
--- fake telemetry source. The claim: when the sensor drops out before flight, the bar
--- shows the loading state instead of the last percentage; once a flight is under way
--- the last reading is held, in flight as well as in postflight, so a momentary
--- telemetry gap does not blank a gauge the pilot is flying on. Against unpatched
--- master the preflight claims fail.
+-- fake telemetry source, and then the same rule on the real
+-- widgets/dashboard/objects/text/watts.lua. The claim: when the sensor drops out
+-- before flight, the reading shows the loading state instead of the last value;
+-- once a flight is under way the last reading is held, in flight as well as in
+-- postflight, so a momentary telemetry gap does not blank a gauge the pilot is
+-- flying on. Against unpatched master the preflight claims fail.
 
 -- Not established here: that a momentary loss in flight is short. The harness shows
 -- that the reading SURVIVES a drop in "inflight" and across a second drop; it does
@@ -214,6 +215,42 @@ wfsuite.flightmode.current = "postflight"
 sensors.smartfuel = nil
 c = wake()
 check("postflight: the last value 60 is kept for review", c.value == 60, "value=" .. tostring(c.value))
+
+-- 6. The watts text object follows the same rule (#2534). It reads two sensors
+--    and the context's session state, so both are set here and restored after.
+local wattsSession = wfsuite.session
+local savedIsConnected, savedTelemetryState = wattsSession.isConnected, wattsSession.telemetryState
+wattsSession.isConnected = true
+wattsSession.telemetryState = true
+
+local watts = requireModule("widgets/dashboard/objects/text/watts.lua")
+check("the watts text module loads", type(watts) == "table" and type(watts.wakeup) == "function")
+
+local wbox = {source = "current"}
+
+local function wakeWatts()
+    local ok, err = pcall(watts.wakeup, wbox)
+    if not ok then print("        watts wakeup error: " .. tostring(err)) end
+    return wbox._currentDisplayValue
+end
+
+wfsuite.flightmode.current = "preflight"
+sensors.voltage, sensors.current = {16.8}, {5}
+check("watts, connected: the text shows 84", wakeWatts() == "84", "display=" .. tostring(wbox._currentDisplayValue))
+
+sensors.current = nil
+check("watts, disconnected before flight: the text shows the loading state",
+    LOADING[wakeWatts()] == true, "display=" .. tostring(wbox._currentDisplayValue))
+
+sensors.current = {5}
+check("watts, reconnected: the text shows 84", wakeWatts() == "84", "display=" .. tostring(wbox._currentDisplayValue))
+
+wfsuite.flightmode.current = "inflight"
+sensors.current = nil
+check("watts, inflight: a dropped sensor keeps the last 84",
+    wakeWatts() == "84", "display=" .. tostring(wbox._currentDisplayValue))
+
+wattsSession.isConnected, wattsSession.telemetryState = savedIsConnected, savedTelemetryState
 
 print(string.format("\n%d checks, %d failed", checks, failures))
 os.exit(failures == 0 and 0 or 1)

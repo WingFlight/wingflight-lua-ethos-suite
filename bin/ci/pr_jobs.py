@@ -1226,13 +1226,14 @@ pin to go red every time, after the unmodified modules have passed.
         script='bin/bar_disconnect/verify_bar_disconnect.lua',
         rationale=r'''Ported from rotorflight-lua-ethos-suite PR #2542 (issue #2534): the bar gauge kept
 its last valid reading whenever its sensor dropped out, so a fuel bar stayed at 85% after
-the pack was unplugged before flight. The last reading is now held only in postflight, as
-text/telemetry does; before and during flight a dropped sensor shows the loading dots.
+the pack was unplugged before flight. Before the flight a dropped source now shows the
+loading dots; once a flight is under way the last reading is held, in flight as well as
+in postflight. The watts text object follows the same rule.
 
 No build and no package step reaches this -- it is a render path through a running
-widget. The harness drives the real bar gauge (render.wakeup) with a fake telemetry
-source and the flight mode. Against unpatched master the two dropout-before-flight
-checks fail.
+widget. The harness drives the real bar gauge and the real watts text object
+(render.wakeup) with a fake telemetry source and the flight mode. Against unpatched
+master the three dropout-before-flight checks fail.
 '''
     ),
 ]
