@@ -27,6 +27,10 @@ Available without a flight controller connection; the background task must be ru
 
 ## Notes
 
+- If the settings file cannot be written, a *Save failed* dialog is shown and the page
+  stays unsaved, so *Save* remains available for a second attempt (rotorflight-lua-ethos-suite
+  Issue #2500).
+
 TODO: Verify persistence, reboot behaviour, profile scope and any restrictions in
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than
 firmware defaults; wire values may need scaling before display.
