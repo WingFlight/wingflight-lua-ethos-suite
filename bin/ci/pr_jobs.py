@@ -1221,6 +1221,24 @@ build: 125, 212 and 124 in lib/msp_servo_config.lua, 213 in lib/msp_servo_center
 pin to go red every time, after the unmodified modules have passed.
 '''
     ),
+    LuaStep(
+        name='Servo override is switched on only after the page has read its values',
+        script='bin/override_read_gate/verify_override_read_gate.lua',
+        rationale=r'''Ported from rotorflight-lua-ethos-suite PR #2552 (Issue #2496):
+on the servo PWM and servo bus pages, the OK action of the override dialog switched
+the override on without the runtime-loaded check that the live write already applies.
+After a failed read, pressing Tool and OK still sent the override to the flight
+controller, and nothing the pilot changed left the radio until the override was
+switched off and on again.
+
+The enable branch now returns early until runtime.loaded is true. The disable branch
+is unchanged. Documents the behaviour on the PWM and BUS servo pages.
+
+The harness drives servos_pwm and servos_bus through the real page runtime: list,
+tile press, editor, Tool, OK. 18 checks. Against unpatched master the read-failed
+check fails on both pages.
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [
