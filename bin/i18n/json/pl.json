@@ -138,7 +138,7 @@
       "max_length": 11,
       "needs_translation": false,
       "reverse_text": false,
-      "translation": "Zapis nieudany"
+      "translation": "Błąd"
     },
     "msg_save_failed_body": {
       "english": "Settings were not saved to the flight controller. Please try again.",

@@ -9400,14 +9400,14 @@
       "max_length": 67,
       "needs_translation": false,
       "reverse_text": false,
-      "translation": "Einstellungen wurden nicht auf dem Radio gespeichert. Bitte erneut versuchen."
+      "translation": "Einstellungen nicht im Radio gespeichert. Bitte erneut versuchen."
     },
     "msg_save_failed_title": {
       "english": "Save failed",
       "max_length": 11,
       "needs_translation": false,
       "reverse_text": false,
-      "translation": "Speichern fehlgeschlagen"
+      "translation": "Fehler"
     },
     "msg_save_not_commited": {
       "english": "Save not committed",
