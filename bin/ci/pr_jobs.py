@@ -1221,6 +1221,24 @@ build: 125, 212 and 124 in lib/msp_servo_config.lua, 213 in lib/msp_servo_center
 pin to go red every time, after the unmodified modules have passed.
 '''
     ),
+    LuaStep(
+        name='Tune advisor reply is refused unless it is the layout this suite knows',
+        script='bin/tune_advisor_payload/verify_tune_advisor_payload.lua',
+        rationale=r'''The tune advisor decode() read the payload version byte and never compared it, and
+ran with no length guard. A reply of another layout decoded into plausible numbers, and
+tune_history saves them to the flight-history file. The codec now refuses a reply that is
+not 65 bytes (the length wingflight-firmware msp.c writes for MSP2_WING_TUNE_ADVISOR) or
+not payload version 1, and reports the reason through the error path.
+Ported from rotorflight-lua-ethos-suite PR #2556 (Issue #2493). The 67-byte length of the
+Rotorflight layout is not used here: the WingFlight reply is 65 bytes.
+
+No build and no package step reaches this -- it is a reply path through the codec. The
+harness drives the real codec through its read message with the simulator reply (65 bytes,
+payload version 1), a version-2 reply, a truncated reply and a longer reply. Against
+unpatched master the version-2, truncated and longer replies reach onData as decoded
+numbers.
+''',
+    ),
 ]
 
 VERBATIM_JOBS = [
