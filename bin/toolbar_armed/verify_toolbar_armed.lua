@@ -280,5 +280,32 @@ end
 check("disarmed: a confirmed Erase publishes its write", #requests == requestsStart + 1,
   "requests=" .. (#requests - requestsStart))
 
+-- 5. The once-per-connection startup prompt is deferred while armed, not lost
+--    (#202). The config can arrive with the model already armed -- the radio
+--    powered on next to an armed craft -- and chooseBatteryProfile() refuses
+--    then, so latching batteryDialogShown would drop the prompt for the rest of
+--    the connection. A fresh widget is needed: the latch is set by section 1-4.
+local deferred = descriptor.create()
+local function sessionFor(armedValue)
+  bus.publish("session.update", {
+    connected = true,
+    isArmed = armedValue,
+    batteryConfig = state.batteryConfig,
+    batteryProfile = state.batteryProfile,
+  })
+  descriptor.wakeup(deferred)
+end
+
+sessionFor(true)
+check("armed at startup: no picker opens while armed", deferred.batteryPicker == nil)
+check("armed at startup: the startup prompt is not latched",
+  deferred.batteryDialogShown ~= true, tostring(deferred.batteryDialogShown))
+
+sessionFor(false)
+check("disarmed again: the deferred startup prompt opens the picker",
+  deferred.batteryPicker ~= nil)
+check("disarmed again: the prompt latches once it has opened",
+  deferred.batteryDialogShown == true, tostring(deferred.batteryDialogShown))
+
 print(string.format("\n%d checks, %d failed", checks, failures))
 os.exit(failures == 0 and 0 or 1)

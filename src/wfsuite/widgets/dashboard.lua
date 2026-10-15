@@ -2293,10 +2293,18 @@ local function wakeup(widget)
   -- hidden just delays the prompt to whenever the dashboard is actually
   -- shown again -- batteryDialogShown/the conditions below are unaffected,
   -- so it still fires exactly once per connection either way.
+  --
+  -- Deferred while armed, for the same reason: chooseBatteryProfile() refuses
+  -- while armed (#2505), so entering this block would latch batteryDialogShown
+  -- and lose the once-per-connection prompt for the rest of the session.
+  -- Leaving the whole block undone keeps the latch unset, and the first
+  -- wakeup after disarm opens the picker. A yet-unreported arm state counts
+  -- as disarmed, exactly as it does in the guards above.
   if isVisible
       and widget.connected == true
       and not widget.batteryDialogShown
       and widget.batteryConfig
+      and widget.isArmed ~= true
       and settingsStore.batteryProfileStartupEnabled(widget.settingsSnapshot) then
     widget.batteryDialogShown = true
     if hasSelectableBatteryProfiles(widget) then

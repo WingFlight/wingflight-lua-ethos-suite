@@ -40,7 +40,8 @@ It opens in two ways:
 - from the **Battery** tile on the toolbar;
 - by itself, once each time the radio connects to an FC with more than one
   battery profile. This follows **Settings > General > Integration > Battery
-  profile on connect**, which is on by default.
+  profile on connect**, which is on by default. If the model is already armed
+  when the radio connects, it waits and opens as soon as the model is disarmed.
 
 To change the active pack, tap its cell, or turn the rotary to it and press
 Enter. The FC receives the change, and the picker closes.
@@ -58,7 +59,7 @@ dashboard), and updates live. The dashboard behind it is dimmed. Unlike the
 toolbar it does not time out. It closes when you:
 
 - press Exit, Return or Enter, slide up, or tap anywhere on the dashboard;
-- arm the model. It cannot be opened while armed.
+- arm the model. You can open it again while armed.
 
 When the toolbar is open, sliding down closes the toolbar first. Only one of the
 two is open at a time. Exit reaches the panel only while the dashboard widget
