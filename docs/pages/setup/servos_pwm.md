@@ -34,6 +34,8 @@ Requires a running background task and a flight controller connection.
 
 ## Notes
 
+- The list shows only the PWM outputs. When a SBUS or FBUS port is configured, the bus channels are not listed here; they are on the Bus page.
+
 TODO: Verify persistence, reboot behaviour, profile scope and any restrictions in
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than
 firmware defaults; wire values may need scaling before display.
