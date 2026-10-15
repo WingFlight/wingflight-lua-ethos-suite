@@ -26,6 +26,7 @@ local lastArmed = nil             -- last known arm state; a link loss (nil) kee
 local pending = false             -- a disarm has not been captured yet
 local clearPending = false        -- saved, the FC not cleared yet
 local busy = false                -- a request is out
+local refusedOnFc = false         -- the FC holds a flight this layout refused: no clear, it would erase that flight
 local retryAt = 0
 local capture = {mcuId = nil, modelName = nil, replies = {}}
 local lastSeconds = {}            -- by mcuId: flight_seconds of the last flight saved
@@ -79,6 +80,7 @@ local function onError(reason, refused)
   if refused then
     busy = false
     pending = false
+    refusedOnFc = true
     print("[tune_history] reply refused, flight not captured: " .. tostring(reason))
     return
   end
@@ -144,10 +146,11 @@ local function onSessionUpdate(snapshot)
 
   if pending then
     busy = true
+    refusedOnFc = false
     capture.mcuId = snapshot.mcuId
     capture.modelName = snapshotModelName(snapshot)
     requestAxis(1)
-  else
+  elseif not refusedOnFc then
     sendClear()
   end
 end
