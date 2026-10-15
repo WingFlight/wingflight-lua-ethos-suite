@@ -295,7 +295,10 @@ local function open(opts)
     bus.publish("settings.update", settingsStore.clone(settings))
     updateSaveEnabled()
     if modelFailed then
-      settingsSave.reportFailure(focusFn)
+      -- The global half is on disk by the line above; only the model's half was
+      -- refused, so the dialog names that half instead of the radio (see
+      -- app/settings_save.lua's header).
+      settingsSave.reportModelFailure(focusFn)
       return
     end
     if focusFn then focusFn() end

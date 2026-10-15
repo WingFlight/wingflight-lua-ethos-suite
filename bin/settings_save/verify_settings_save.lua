@@ -168,6 +168,18 @@ local function failureDialogOpened()
   return false
 end
 
+-- The model half of a combined save has its own text: the global half did reach
+-- the radio, so a page that only lost the model's half must not use the local
+-- text ("settings were not saved") there.
+local function modelFailureDialogOpened()
+  for _, d in ipairs(dialogs) do
+    if d.title == "@i18n(app.msg_save_failed_title)@" and d.message == "@i18n(app.msg_save_failed_model_body)@" then
+      return true
+    end
+  end
+  return false
+end
+
 print("refused save")
 runSave(false)
 check("the store was asked to save", store.saveCalls == 1, "saveCalls=" .. store.saveCalls)
@@ -274,7 +286,10 @@ runThemeSave(true, false)
 check("theme: model preferences were asked to save", prefsStore.saveCalls == 1, "prefsSaveCalls=" .. prefsStore.saveCalls)
 check("theme: a refused model save keeps the Save button lit",
       saveEnabledCalls[#saveEnabledCalls] == true, tostring(saveEnabledCalls[#saveEnabledCalls]))
-check("theme: a refused model save shows the save-failed dialog", failureDialogOpened())
+check("theme: a refused model save names the model, not the radio",
+      modelFailureDialogOpened())
+check("theme: a refused model save does not claim the global half was lost",
+      not failureDialogOpened())
 
 -- ---------------------------------------------------------------------------
 -- developer_msp_exp: when saving a detected byte count fails, report failure

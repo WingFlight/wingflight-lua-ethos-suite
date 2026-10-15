@@ -154,6 +154,13 @@
       "reverse_text": false,
       "translation": "Innstillinger ble ikke lagret på radioen. Prøv igjen."
     },
+    "msg_save_failed_model_body": {
+      "english": "The model's settings were not saved to the radio. Please try again.",
+      "max_length": 67,
+      "needs_translation": true,
+      "reverse_text": false,
+      "translation": "The model's settings were not saved to the radio. Please try again."
+    },
     "msg_save_not_commited": {
       "english": "Save not committed",
       "translation": "Ikke lagret",

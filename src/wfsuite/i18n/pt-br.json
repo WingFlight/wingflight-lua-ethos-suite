@@ -9402,6 +9402,13 @@
       "reverse_text": false,
       "translation": "As configurações não foram salvas no rádio. Tente novamente."
     },
+    "msg_save_failed_model_body": {
+      "english": "The model's settings were not saved to the radio. Please try again.",
+      "max_length": 67,
+      "needs_translation": true,
+      "reverse_text": false,
+      "translation": "The model's settings were not saved to the radio. Please try again."
+    },
     "msg_save_failed_title": {
       "english": "Save failed",
       "max_length": 11,
