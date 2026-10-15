@@ -27,6 +27,11 @@ Requires a running background task and a flight controller connection. Lit only 
 
 ## Notes
 
+- Every read is checked against this vendor's signature, Reload included: a reply that is
+  not this vendor's (or that carries no signature at all) is refused, the editor is not
+  loaded and the page cannot be saved, so another vendor's block in the slot is never
+  written back.
+
 TODO: Verify persistence, reboot behaviour, profile scope and any restrictions in
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than
 firmware defaults; wire values may need scaling before display.

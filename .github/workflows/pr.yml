@@ -1111,6 +1111,21 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/servo_config_commands/verify_servo_config_commands.lua
 
+      # Ported from rotorflight-lua-ethos-suite PR #2557 (Issue #2494): the ESC vendor page checked the codec signature only on its first read.
+      # The Reload path reads through the page runtime, which took the reply into the page's data
+      # without any check, so an ESC with another signature in the same slot built the editor from
+      # its parameters. The runtime now takes an optional validateRead (or validate on a source);
+      # a refused reply is a failed read, exactly as a read error is. The ESC page passes its
+      # signature check there.
+      #
+      # No build and no package step reaches this -- it is a reload path through the page runtime.
+      # The harness drives the real page_runtime through loadData(): a reply with another signature
+      # is refused and leaves the page unloaded, a reply with the page's signature loads it, and a
+      # read error is refused as before. Against unpatched master the refused reply loads the page.
+      - name: A page refuses a reply it does not know on every read, not only the first
+        if: success() || failure()
+        run: lua5.4 bin/runtime_read_validator/verify_runtime_read_validator.lua
+
   # Per-language PR builds (mirrors push.yml behavior)
   create-zip:
     name: Build PR ZIP (${{ matrix.lang }})
