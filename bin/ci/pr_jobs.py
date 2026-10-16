@@ -1443,6 +1443,19 @@ onTool are unchanged. Ported from rotorflight-lua-ethos-suite PR #2560
 (issue #2553).
 '''
     ),
+    LuaStep(
+        name='Check the adjustment names and their audio files in the English pack',
+        script='bin/adjfunctions_audio/verify_adjfunctions_audio.lua',
+        rationale=r'''Ported from rotorflight-lua-ethos-suite PR #2572 (issue #2501): the Adjustments page
+offers functions 76 to 82 that had no name in the audio table, so they were silent when they
+changed, and six names used words that had no audio file in the pack, so the value was spoken
+without its name.
+
+The harness reads the real name table and the real page list, and checks that every
+function 76 to 82 has a name, and that every word of every name in wavs.lua has an audio
+file in default, us and gb (checked in src/ and in bin/sound-generator/soundpack/en).
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [
