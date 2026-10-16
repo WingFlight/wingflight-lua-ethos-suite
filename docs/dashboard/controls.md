@@ -16,10 +16,13 @@ is dimmed.
 | Tile | Does | Greyed out when |
 | --- | --- | --- |
 | Reset | Resets the flight (timers and min/max stats) after a confirmation. | Never. |
-| Erase | Erases the blackbox dataflash after a confirmation. | Not connected. |
-| Battery | Opens the battery picker (below) to choose the active battery profile. | Not connected, or fewer than two battery profiles are set. |
+| Erase | Erases the blackbox dataflash after a confirmation. | Not connected, or armed. |
+| Battery | Opens the battery picker (below) to choose the active battery profile. | Not connected, armed, or fewer than two battery profiles are set. |
 | Info | Opens the info panel (below). | Never. |
 | Setup | Opens the WFSuite system tool. | Ethos is older than 26.1. |
+
+Erase and Battery write to the flight controller, so both are greyed out while the
+model is armed and do nothing when tapped. Arming also closes an open battery picker.
 
 ## Battery picker
 
@@ -37,7 +40,8 @@ It opens in two ways:
 - from the **Battery** tile on the toolbar;
 - by itself, once each time the radio connects to an FC with more than one
   battery profile. This follows **Settings > General > Integration > Battery
-  profile on connect**, which is on by default.
+  profile on connect**, which is on by default. If the model is already armed
+  when the radio connects, it waits and opens as soon as the model is disarmed.
 
 To change the active pack, tap its cell, or turn the rotary to it and press
 Enter. The FC receives the change, and the picker closes.
