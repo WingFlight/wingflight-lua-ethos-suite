@@ -5,6 +5,7 @@ local bus = requireModule("lib/bus.lua")
 local closeKey = requireModule("app/close_key.lua")
 local header = requireModule("app/header.lua")
 local modelPreferences = requireModule("lib/model_preferences.lua")
+local settingsSave = requireModule("app/settings_save.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.stats.name)@"
 local BTN_OK = "@i18n(app.btn_ok)@"
@@ -102,7 +103,12 @@ local function open(opts)
   local function save(focusFn)
     if disposed or not loaded or not mcuId then return end
     prefs = modelPreferences.setStats(prefs, current)
-    modelPreferences.save(prefsFile, prefs)
+    if not modelPreferences.save(prefsFile, prefs) then
+      -- The INI file could not be written (#2500): keep the page dirty, publish
+      -- nothing, and tell the pilot rather than losing the setting silently.
+      settingsSave.reportFailure(focusFn)
+      return
+    end
     original = copyStats(current)
     bus.publish("model.stats.update", {
       mcuId = mcuId,

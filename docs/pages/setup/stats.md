@@ -29,6 +29,8 @@ Requires a running background task and a flight controller connection.
 
 ## Notes
 
+- The counters are kept in the model's INI file, not on the flight controller. If that file cannot be written, a *Save failed* dialog is shown, the page stays dirty and nothing is published (rotorflight-lua-ethos-suite Issue #2500).
+
 TODO: Verify persistence, reboot behaviour, profile scope and any restrictions in
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than
 firmware defaults; wire values may need scaling before display.
