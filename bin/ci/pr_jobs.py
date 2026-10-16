@@ -1431,6 +1431,18 @@ fail: the bus layouts show 16 tiles and write cmd 212, and the first layout writ
 cmd 212 where the page now writes cmd 124.
 ''',
     ),
+    LuaStep(
+        name='Check the header Tool button enable state',
+        script='bin/tool_button_loaded/verify_tool_button_loaded.lua',
+        rationale=r'''Save is gated by the page runtime; Tool was not. A page with an onTool
+showed an enabled Tool button before its values had loaded, and on the servo
+override pages the dialog it opened could be confirmed against unread values.
+The runtime now drives the Tool button from the same loaded flag as Save,
+through a new setToolEnabled() on the header handle. Pages without an
+onTool are unchanged. Ported from rotorflight-lua-ethos-suite PR #2560
+(issue #2553).
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [

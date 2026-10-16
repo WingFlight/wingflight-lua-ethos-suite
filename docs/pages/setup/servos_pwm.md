@@ -34,6 +34,7 @@ Requires a running background task and a flight controller connection.
 
 ## Notes
 
+- The Tool button is disabled until the page has loaded its values.
 - In the servo editor, the Tool button's servo override can be switched on only after the page has read its values; until then, confirming the enable dialog does not enable an override (rotorflight-lua-ethos-suite PR #2552, Issue #2496).
 - The list shows only the PWM outputs. When a SBUS or FBUS port is configured, the bus channels are not listed here; they are on the Bus page.
 

@@ -1309,6 +1309,17 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/pwm_servo_write/verify_pwm_servo_write.lua
 
+      # Save is gated by the page runtime; Tool was not. A page with an onTool
+      # showed an enabled Tool button before its values had loaded, and on the servo
+      # override pages the dialog it opened could be confirmed against unread values.
+      # The runtime now drives the Tool button from the same loaded flag as Save,
+      # through a new setToolEnabled() on the header handle. Pages without an
+      # onTool are unchanged. Ported from rotorflight-lua-ethos-suite PR #2560
+      # (issue #2553).
+      - name: Check the header Tool button enable state
+        if: success() || failure()
+        run: lua5.4 bin/tool_button_loaded/verify_tool_button_loaded.lua
+
   # Per-language PR builds (mirrors push.yml behavior)
   create-zip:
     name: Build PR ZIP (${{ matrix.lang }})
