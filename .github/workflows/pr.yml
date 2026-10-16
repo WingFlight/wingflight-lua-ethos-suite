@@ -1111,6 +1111,172 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/servo_config_commands/verify_servo_config_commands.lua
 
+      # Ported from rotorflight-lua-ethos-suite PR #2542 (issue #2534): the bar gauge kept
+      # its last valid reading whenever its sensor dropped out, so a fuel bar stayed at 85% after
+      # the pack was unplugged before flight. Before the flight a dropped source now shows the
+      # loading dots; once a flight is under way the last reading is held, in flight as well as
+      # in postflight. The watts text object follows the same rule.
+      #
+      # No build and no package step reaches this -- it is a render path through a running
+      # widget. The harness drives the real bar gauge and the real watts text object
+      # (render.wakeup) with a fake telemetry source and the flight mode. Against unpatched
+      # master the three dropout-before-flight checks fail.
+      - name: Check the dashboard bar after telemetry loss
+        if: success() || failure()
+        run: lua5.4 bin/bar_disconnect/verify_bar_disconnect.lua
+
+      # Ported from rotorflight-lua-ethos-suite PR #2546 (issue #2498):
+      # the Select Profile page saves the rate, PID and Thrust Vector profile in turn. A
+      # refused write at any of the three steps left the progress dialog closed and nothing
+      # on screen, so the pilot saw the page return to normal with the change not saved.
+      #
+      # The WingFlight page reports a refusal at every step of the save chain (rate, PID,
+      # Thrust Vector) with the save-failed dialog and keeps the Save button lit, so a second
+      # attempt is possible. An accepted save shows no dialog and darkens the button.
+      #
+      # The harness drives the real page, bus and msp_select_profile codec, with stubs for
+      # the status read, the Thrust Vector read and write, the progress dialog and the header.
+      # Against wf/master three of its checks fail, one per refused step.
+      - name: Check the profile select page reports a refused save
+        if: success() || failure()
+        run: lua5.4 bin/profile_select/verify_profile_select.lua
+
+      # Ported from rotorflight-lua-ethos-suite PR #2541 (issue #2505):
+      # two dashboard toolbar items write to the flight controller, blackbox erase and
+      # battery profile, and neither their enable check nor their write path looked at the
+      # arm state. A battery picker open at arming, or an erase confirmation answered after
+      # arming, still wrote.
+      #
+      # No build and no package step reaches this -- it is a touch path through a running
+      # widget. The harness drives the real widgets/dashboard.lua through the descriptor the
+      # radio calls, and feeds the arm state through session.update the way the session does.
+      # While armed the Erase and Battery tiles are disabled, arming closes an open battery
+      # picker, and a confirmed erase answered after arming publishes no msp.request.
+      # Disarmed, the same paths publish their write again. The checks that depend on the
+      # toolbar being reachable assert that it is reachable first, so a run that cannot
+      # reach the tiles fails instead of passing vacuously. Run against unpatched
+      # wingflight-lua-ethos-suite master, 11 of 19 checks fail.
+      - name: Check the dashboard Erase and Battery tiles while armed
+        if: success() || failure()
+        run: lua5.4 bin/toolbar_armed/verify_toolbar_armed.lua
+
+      # Ported from rotorflight-lua-ethos-suite PR #2544 (issue #2500):
+      # settingsStore.save() returns false when the INI file cannot be written, and ten
+      # local settings pages threw that value away. They published settings.update and
+      # cleared their dirty flag anyway, so the Save button went dark and the setting was
+      # gone at the next start, with no message. Each page now checks the result and
+      # reports a refusal through app/settings_save.lua, keeping its dirty state and
+      # publishing nothing.
+      #
+      # No build and no package step reaches this -- it is a save path through a running
+      # page. The harness drives the real settings_general page with the real bus and the
+      # real helper, against a store stub whose save() is refused or accepted, and presses
+      # Save the way the pilot does. Against unpatched wingflight-lua-ethos-suite master the
+      # refused-save checks fail. The other settings pages carry the same three-line change
+      # and are covered by review, not by this harness.
+      - name: Check that a refused settings save is reported
+        if: success() || failure()
+        run: lua5.4 bin/settings_save/verify_settings_save.lua
+
+      # Ported from rotorflight-lua-ethos-suite PR #2547 (issue #2497, findings 1 and 2):
+      # the Ports page never read the board back after a save, so its rows showed what was
+      # sent; and it read MSP_RX_CONFIG on every open although the value was never used,
+      # which held up the loading dialog for one round trip. After an accepted EEPROM write
+      # the page now reads the serial ports back before it reboots, and the RX config read
+      # is gone.
+      #
+      # No build and no package step reaches this -- it is a read and write path through a
+      # running page. The harness drives the real ports page with the real bus and the real
+      # port-label library, and answers each message the way the FC would: a board that
+      # reports a different function than the one sent, a refused read-back, and the reboot
+      # that must wait for the read-back. Against unpatched wingflight-lua-ethos-suite master
+      # five of the seven checks fail.
+      - name: Ports page reads the serial ports back after a save, and not the RX config
+        if: success() || failure()
+        run: lua5.4 bin/ports_readback/verify_ports_readback.lua
+
+      # Ported from rotorflight-lua-ethos-suite PR #2549 (issue #2502):
+      # the Battery page had one profile selector, and the capacity and cell rows followed
+      # it. To edit the cells of profile 4 the pilot had to make profile 4 active, and saving
+      # then activated it. The page now has an Edit Battery choice that the capacity and cell
+      # rows follow; the saved profile stays on the active one.
+      #
+      # No build and no package step reaches this -- it is a save path through a running
+      # page. The harness drives the real power_battery page with the real page runtime and
+      # field layout, and answers every write the way the FC would. Against unpatched
+      # wingflight-lua-ethos-suite master the page has no Edit Battery choice, and saving a
+      # cell edit of profile 3 writes profile 3 as the active one; four of the fourteen
+      # checks fail.
+      - name: Editing another battery profile does not activate it on save
+        if: success() || failure()
+        run: lua5.4 bin/battery_edit_profile/verify_battery_edit_profile.lua
+
+      # Ported from rotorflight-lua-ethos-suite PR #2552 (Issue #2496):
+      # on the servo PWM and servo bus pages, the OK action of the override dialog switched
+      # the override on without the runtime-loaded check that the live write already applies.
+      # After a failed read, pressing Tool and OK still sent the override to the flight
+      # controller, and nothing the pilot changed left the radio until the override was
+      # switched off and on again.
+      #
+      # The enable branch now returns early until runtime.loaded is true. The disable branch
+      # is unchanged. Documents the behaviour on the PWM and BUS servo pages.
+      #
+      # The harness drives servos_pwm and servos_bus through the real page runtime: list,
+      # tile press, editor, Tool, OK. 18 checks. Against unpatched master the read-failed
+      # check fails on both pages.
+      - name: Servo override is switched on only after the page has read its values
+        if: success() || failure()
+        run: lua5.4 bin/override_read_gate/verify_override_read_gate.lua
+
+      # The tune advisor decode() read the payload version byte and never compared it, and
+      # ran with no length guard. A reply of another layout decoded into plausible numbers, and
+      # tune_history saves them to the flight-history file. The codec now refuses a reply that is
+      # not 65 bytes (the length wingflight-firmware msp.c writes for MSP2_WING_TUNE_ADVISOR) or
+      # not payload version 1, and reports the reason through the error path.
+      # Ported from rotorflight-lua-ethos-suite PR #2556 (Issue #2493). The 67-byte length of the
+      # Rotorflight layout is not used here: the WingFlight reply is 65 bytes.
+      #
+      # No build and no package step reaches this -- it is a reply path through the codec. The
+      # harness drives the real codec through its read message with the simulator reply (65 bytes,
+      # payload version 1), a version-2 reply, a truncated reply and a longer reply. Against
+      # unpatched master the version-2, truncated and longer replies reach onData as decoded
+      # numbers.
+      - name: Tune advisor reply is refused unless it is the layout this suite knows
+        if: success() || failure()
+        run: lua5.4 bin/tune_advisor_payload/verify_tune_advisor_payload.lua
+
+      # Ported from rotorflight-lua-ethos-suite PR #2557 (Issue #2494): the ESC vendor page checked the codec signature only on its first read.
+      # The Reload path reads through the page runtime, which took the reply into the page's data
+      # without any check, so an ESC with another signature in the same slot built the editor from
+      # its parameters. The runtime now takes an optional validateRead (or validate on a source);
+      # a refused reply is a failed read, exactly as a read error is. The ESC page passes its
+      # signature check there.
+      #
+      # No build and no package step reaches this -- it is a reload path through the page runtime.
+      # The harness drives the real page_runtime through loadData(): a reply with another signature
+      # is refused and leaves the page unloaded, a reply with the page's signature loads it, and a
+      # read error is refused as before. Against unpatched master the refused reply loads the page.
+      - name: A page refuses a reply it does not know on every read, not only the first
+        if: success() || failure()
+        run: lua5.4 bin/runtime_read_validator/verify_runtime_read_validator.lua
+
+      # Ported from rotorflight-lua-ethos-suite PR #2563 (issue #2548):
+      # isArmed goes nil on every disconnect, and a gate written as `isArmed == true`
+      # reads that nil as "disarmed". On a reconnect into an armed model the save button
+      # and the stats write then opened before the arm flags were read again. Neither
+      # the firmware nor the page could tell that from a real disarm.
+      #
+      # tasks/session.lua keeps a latch, armedUnconfirmed: set on an armed read, cleared
+      # only by a fresh disarmed read, untouched by a disconnect. app/page_runtime.lua's
+      # save gate and the reboot-after-save gate read it through armedOrUnconfirmed().
+      # The harness drives the real session.lua through session.wakeup() and the real
+      # page_runtime canSave(). Against unpatched master the latch and the
+      # disconnected-page checks fail. --self-test splices the latch and the gate back
+      # out and requires them to go red.
+      - name: A disconnected armed model is not writable until a fresh answer clears it
+        if: success() || failure()
+        run: lua5.4 bin/armed_unconfirmed/verify_armed_unconfirmed.lua
+
       # Ported from rotorflight-lua-ethos-suite PR #2564 (issue #2561):
       # The locale build regenerates src/wfsuite/i18n from bin/i18n/json/ and drops any
       # key that is missing from a source. Keys added directly to src/wfsuite/i18n/ would

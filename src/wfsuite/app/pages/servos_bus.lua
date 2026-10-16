@@ -187,6 +187,11 @@ local function openEditor(opts, listState, row)
                 if key ~= "mid" then field:enable(runtime.loaded) end
               end
             else
+              -- The live write below waits for the read; so must the override.
+              if not runtime.loaded then
+                if focusFn then focusFn() end
+                return true
+              end
               publishOverride(rwIndex, servoOverride.OVERRIDE_CENTER)
               inOverride = true
               inheritedOverride = false
