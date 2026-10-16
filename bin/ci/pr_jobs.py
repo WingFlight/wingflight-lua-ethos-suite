@@ -1310,6 +1310,23 @@ that must wait for the read-back. Against unpatched wingflight-lua-ethos-suite m
 five of the seven checks fail.
 '''
     ),
+    LuaStep(
+        name='Editing another battery profile does not activate it on save',
+        script='bin/battery_edit_profile/verify_battery_edit_profile.lua',
+        rationale=r'''Ported from rotorflight-lua-ethos-suite PR #2549 (issue #2502):
+the Battery page had one profile selector, and the capacity and cell rows followed
+it. To edit the cells of profile 4 the pilot had to make profile 4 active, and saving
+then activated it. The page now has an Edit Battery choice that the capacity and cell
+rows follow; the saved profile stays on the active one.
+
+No build and no package step reaches this -- it is a save path through a running
+page. The harness drives the real power_battery page with the real page runtime and
+field layout, and answers every write the way the FC would. Against unpatched
+wingflight-lua-ethos-suite master the page has no Edit Battery choice, and saving a
+cell edit of profile 3 writes profile 3 as the active one; four of the fourteen
+checks fail.
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [
