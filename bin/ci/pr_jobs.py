@@ -1236,6 +1236,23 @@ widget. The harness drives the real bar gauge and the real watts text object
 master the three dropout-before-flight checks fail.
 '''
     ),
+    LuaStep(
+        name='Check the profile select page reports a refused save',
+        script='bin/profile_select/verify_profile_select.lua',
+        rationale=r'''Ported from rotorflight-lua-ethos-suite PR #2546 (issue #2498):
+the Select Profile page saves the rate, PID and Thrust Vector profile in turn. A
+refused write at any of the three steps left the progress dialog closed and nothing
+on screen, so the pilot saw the page return to normal with the change not saved.
+
+The WingFlight page reports a refusal at every step of the save chain (rate, PID,
+Thrust Vector) with the save-failed dialog and keeps the Save button lit, so a second
+attempt is possible. An accepted save shows no dialog and darkens the button.
+
+The harness drives the real page, bus and msp_select_profile codec, with stubs for
+the status read, the Thrust Vector read and write, the progress dialog and the header.
+Against wf/master three of its checks fail, one per refused step.
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [
