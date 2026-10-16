@@ -9401,12 +9401,26 @@
       "reverse_text": false,
       "translation": "Einstellungen wurden nicht zum FC übertragen. Bitte versuchen Sie"
     },
+    "msg_save_failed_local_body": {
+      "english": "Settings were not saved to the radio. Please try again.",
+      "max_length": 67,
+      "needs_translation": false,
+      "reverse_text": false,
+      "translation": "Einstellungen nicht im Radio gespeichert. Bitte erneut versuchen."
+    },
+    "msg_save_failed_model_body": {
+      "english": "The model's settings were not saved to the radio. Please try again.",
+      "max_length": 67,
+      "needs_translation": true,
+      "reverse_text": false,
+      "translation": "The model's settings were not saved to the radio. Please try again."
+    },
     "msg_save_failed_title": {
       "english": "Save failed",
       "max_length": 11,
       "needs_translation": false,
       "reverse_text": false,
-      "translation": "Speichern"
+      "translation": "Fehler"
     },
     "msg_save_not_commited": {
       "english": "Save not committed",

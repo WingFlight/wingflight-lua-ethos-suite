@@ -237,8 +237,9 @@ local function removeTree(path)
   end
 end
 
-local LOG_SCRATCH = (os.getenv("TMPDIR") or os.getenv("TEMP") or os.getenv("TMP")
-  or (IS_WINDOWS and "." or "/tmp")) .. "/wfsuite_flight_record_logs"
+-- Unique per process: a shared path made two concurrent runs (e.g. two Lua
+-- sweeps in parallel) delete and inherit each other's files.
+local LOG_SCRATCH = os.tmpname() .. "_wfsuite_flight_record_logs"
 
 -- Loads logging.lua with its three chunk args stubbed, and LOGS:/ paths
 -- redirected to a scratch directory. Returns the module, the bus handlers it

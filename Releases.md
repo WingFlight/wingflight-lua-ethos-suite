@@ -1,3 +1,24 @@
+# 0.0.35
+
+Use with the 0.0.35 firmware (MSP API 22.14). Flashing keeps your settings.
+Add a Motor Override page (Setup > ESC & Motors) to spin a motor from the radio for a direction check or ESC calibration. It is refused while armed and the motor stops within a second if the link drops.
+Apply the Tune Advisor's suggested changes with Save, after a confirmation. Nothing is written unless the model is disarmed and the FC still holds the tune the flights were flown on.
+Add the KSE4 and KSE5 dashboard themes.
+Show MAIN POWER LOST in the dashboard footer, and announce a main pack that goes while the receiver stays powered.
+Announce telemetry lost and recovered, only when the model was armed as the link went.
+Hold the low-voltage alert for a set time (default 2 s) so a punch-out sag no longer triggers it, and optionally speak the pack or average cell voltage.
+Speak in-flight adjustments once they settle, so a burst of trim clicks announces the final value.
+Split Settings > Audio > Events into one page per category, with a new Link page.
+Drop the battery picker down from the top as a grid, and dim the dashboard behind overlays.
+Draw the header buttons as icons, and fit every page title and string on the X18.
+Remember each controller's name and list the known models offline.
+Widen the port label column on the Ports page.
+Limit each rate field to the firmware's maximum.
+Wait for the flight controller to finish the accelerometer calibration before saving it.
+Raise the Reboot required and Blackbox full alerts on models with only the System Config sensor.
+Log a sensor that is not sending as an empty field in the flight CSV, not as 0.
+Fix the dashboard sometimes staying on loading dots after boot, keep the background task running after a page or MSP error, and cut CPU and memory spikes on the dashboard.
+
 # 0.0.34
 
 Use with the 0.0.34 firmware (MSP API 22.14). Flashing keeps your settings.
