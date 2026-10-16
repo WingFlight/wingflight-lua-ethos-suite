@@ -8,7 +8,7 @@ sidebar_label: Pages
 Reference documentation for each configuration and settings page reachable
 within the WFSuite Ethos system tool.
 
-**Coverage:** 86 reachable pages in navigation hierarchy. Drafts require review.
+**Coverage:** 87 reachable pages in navigation hierarchy. Drafts require review.
 
 The *Conditions* column names what hides, greys out or locks a page; the sentences
 and structure follow [_template.md](../_template.md).
@@ -45,6 +45,7 @@ is there. The rule is in [.agents/rules/documentation.md](../../.agents/rules/do
 
 | Page | File | Conditions | Status |
 | --- | --- | --- | --- |
+| Setup Wizard | [setup/setup_wizard.md](setup/setup_wizard.md) | Requires a running background task and a flight controller connection. | reviewed |
 | Configuration | [setup/configuration.md](setup/configuration.md) | Requires a running background task and a flight controller connection. | draft |
 | Ports | [setup/ports.md](setup/ports.md) | Requires a running background task and a flight controller connection. | draft |
 | Radio Config | [setup/radio_config.md](setup/radio_config.md) | Requires a running background task and a flight controller connection. | draft |

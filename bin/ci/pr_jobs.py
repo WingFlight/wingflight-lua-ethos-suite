@@ -1221,6 +1221,54 @@ build: 125, 212 and 124 in lib/msp_servo_config.lua, 213 in lib/msp_servo_center
 pin to go red every time, after the unmodified modules have passed.
 '''
     ),
+    LuaStep(
+        name='Check the timed bench overrides',
+        script='bin/tests/mode_override.lua',
+        rationale=r'''The Setup Wizard holds the setup state, mixer inputs and servos with
+timed overrides (API 22.14) and relies on lib/override_keepalive.lua to keep
+them alive and to stop sending once they are released, so a radio that is
+switched off lets the flight controller drop them. This pins the wire format
+of the mode, servo and mixer override writes against msp.c and the keepalive's
+refresh and release behaviour.
+'''
+    ),
+    LuaStep(
+        name='Check the Setup Wizard surface maths',
+        script='bin/tests/setup_wizard_surfaces.lua',
+        rationale=r'''lib/setup_wizard_surfaces.lua is a port of the configurator's
+src/tabs/setup_wizard/surfaces.js. The harness runs the configurator's own
+test cases against it, so the two copies cannot drift apart unnoticed.
+'''
+    ),
+    LuaStep(
+        name='Check the Setup Wizard page',
+        script='bin/tests/setup_wizard_page.lua',
+        rationale=r'''The wizard moves the control surfaces from the radio. This drives the real
+page and every step against the simulator's default glider mix and checks
+what reaches the wire: the setup state held on open and released on every
+way out, overrides and probes timed, nothing moved while armed, each step's
+writes (alignment, RX map, mix, servo configs, motor protocol and a spin
+that stops by itself, throws, mode and adjustment ranges, rates), Discard
+writing back what was loaded, a restart that reopens the same step, and no
+form built from an MSP reply.
+'''
+    ),
+    LuaStep(
+        name='Check the Setup Wizard radio controls and styles',
+        script='bin/tests/setup_wizard_controls.lua',
+        rationale=r'''lib/setup_wizard_controls.lua and lib/setup_wizard_styles.lua port the
+configurator's receiver.js, modeRanges.js, trimGain.js and styles.js. The
+harness runs the configurator's own test cases against them.
+'''
+    ),
+    LuaStep(
+        name='Check the Setup Wizard airframe mixes',
+        script='bin/tests/setup_wizard_mix.lua',
+        rationale=r'''lib/setup_wizard_mix.lua ports the configurator's Mixer.buildWizardRules().
+The expected rules are the JS builder's own output for each airframe, so a
+change on either side shows up here.
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [

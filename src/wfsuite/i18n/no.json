@@ -379,8 +379,9 @@
         },
         "msg_calibration_timeout": {
           "english": "The calibration did not finish. Try again.",
-          "max_length": 46,
+          "max_length": 42,
           "needs_translation": false,
+          "reverse_text": false,
           "translation": "Kalibreringen ble ikke fullført. Prøv igjen."
         },
         "name": {
@@ -8647,6 +8648,2234 @@
           "translation": "Hold time"
         }
       },
+      "setup_wizard": {
+        "air_ail_independent": {
+          "english": "Two servos",
+          "max_length": 10,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Two servos"
+        },
+        "air_ail_single": {
+          "english": "One servo",
+          "max_length": 9,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "One servo"
+        },
+        "air_applied": {
+          "english": "Mix applied:",
+          "max_length": 12,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Mix applied:"
+        },
+        "air_apply": {
+          "english": "Apply",
+          "max_length": 5,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Apply"
+        },
+        "air_change": {
+          "english": "Change",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Change"
+        },
+        "air_current_fmt": {
+          "english": "%s: %s.",
+          "max_length": 7,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "%s: %s."
+        },
+        "air_custom": {
+          "english": "This model uses a custom mix from Mixer Rules. Choose a type to replace it, or keep it.",
+          "max_length": 87,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "This model uses a custom mix from Mixer Rules. Choose a type to replace it, or keep it."
+        },
+        "air_flaperons": {
+          "english": "Flaperons",
+          "max_length": 9,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Flaperons"
+        },
+        "air_flaps_one": {
+          "english": "1 servo",
+          "max_length": 7,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "1 servo"
+        },
+        "air_flaps_two": {
+          "english": "2 servos",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "2 servos"
+        },
+        "air_keep": {
+          "english": "Keep",
+          "max_length": 4,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Keep"
+        },
+        "air_motor_fmt": {
+          "english": "Motor %d",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Motor %d"
+        },
+        "air_no_surfaces": {
+          "english": "no control surfaces",
+          "max_length": 19,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "no control surfaces"
+        },
+        "air_none": {
+          "english": "None",
+          "max_length": 4,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "None"
+        },
+        "air_q_ailerons": {
+          "english": "Ailerons?",
+          "max_length": 9,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Ailerons?"
+        },
+        "air_q_diff": {
+          "english": "Steer with the motors (differential thrust)?",
+          "max_length": 44,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Steer with the motors (differential thrust)?"
+        },
+        "air_q_flaps": {
+          "english": "Flaps?",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Flaps?"
+        },
+        "air_q_follow": {
+          "english": "Should the flaps move with the ailerons too?",
+          "max_length": 44,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Should the flaps move with the ailerons too?"
+        },
+        "air_q_motors": {
+          "english": "How many motors?",
+          "max_length": 16,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "How many motors?"
+        },
+        "air_q_tail": {
+          "english": "What does the tail have?",
+          "max_length": 24,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "What does the tail have?"
+        },
+        "air_q_type": {
+          "english": "What kind of model is it?",
+          "max_length": 25,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "What kind of model is it?"
+        },
+        "air_q_wing_yaw": {
+          "english": "A rudder?",
+          "max_length": 9,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "A rudder?"
+        },
+        "air_review_fmt": {
+          "english": "This sets: %s.",
+          "max_length": 14,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "This sets: %s."
+        },
+        "air_tail_elevator": {
+          "english": "Elevator",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Elevator"
+        },
+        "air_tail_elevator_rudder": {
+          "english": "Elevator+rudder",
+          "max_length": 15,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Elevator+rudder"
+        },
+        "air_title": {
+          "english": "Airframe",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Airframe"
+        },
+        "air_too_few_fmt": {
+          "english": "It needs %d servo outputs and this board has %d. The surfaces past them won't move.",
+          "max_length": 83,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "It needs %d servo outputs and this board has %d. The surfaces past them won't move."
+        },
+        "air_tv_removed": {
+          "english": "The thrust vectoring rules are replaced too: set them up again in the Configurator.",
+          "max_length": 83,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "The thrust vectoring rules are replaced too: set them up again in the Configurator."
+        },
+        "air_type_custom": {
+          "english": "Custom",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Custom"
+        },
+        "air_type_delta": {
+          "english": "Delta wing",
+          "max_length": 10,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Delta wing"
+        },
+        "air_type_flying_wing": {
+          "english": "Flying wing",
+          "max_length": 11,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Flying wing"
+        },
+        "air_type_regular": {
+          "english": "Regular airplane",
+          "max_length": 16,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Regular airplane"
+        },
+        "air_type_trainer": {
+          "english": "Rudder-elevator",
+          "max_length": 15,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Rudder-elevator"
+        },
+        "air_type_vtail": {
+          "english": "V-tail airplane",
+          "max_length": 15,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "V-tail airplane"
+        },
+        "air_yaw_rudder": {
+          "english": "Rudder",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Rudder"
+        },
+        "armed": {
+          "english": "Armed: surfaces can't be moved.",
+          "max_length": 31,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Armed: surfaces can't be moved."
+        },
+        "axis_pitch": {
+          "english": "Pitch",
+          "max_length": 5,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Pitch"
+        },
+        "axis_roll": {
+          "english": "Roll",
+          "max_length": 4,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Roll"
+        },
+        "axis_throttle": {
+          "english": "Throttle",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Throttle"
+        },
+        "axis_yaw": {
+          "english": "Yaw",
+          "max_length": 3,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Yaw"
+        },
+        "btn_again": {
+          "english": "Again",
+          "max_length": 5,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Again"
+        },
+        "btn_back": {
+          "english": "Back",
+          "max_length": 4,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Back"
+        },
+        "btn_next": {
+          "english": "Next",
+          "max_length": 4,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Next"
+        },
+        "btn_no": {
+          "english": "No",
+          "max_length": 2,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "No"
+        },
+        "btn_save_restart": {
+          "english": "Save and restart",
+          "max_length": 16,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Save and restart"
+        },
+        "btn_skip": {
+          "english": "Skip",
+          "max_length": 4,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Skip"
+        },
+        "btn_start": {
+          "english": "Start",
+          "max_length": 5,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Start"
+        },
+        "btn_yes": {
+          "english": "Yes",
+          "max_length": 3,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Yes"
+        },
+        "bypass_manual": {
+          "english": "Switch MANUAL mode off.",
+          "max_length": 23,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Switch MANUAL mode off."
+        },
+        "bypass_passthrough": {
+          "english": "Switch PASSTHROUGH mode off.",
+          "max_length": 28,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Switch PASSTHROUGH mode off."
+        },
+        "cen_done": {
+          "english": "Every surface is at its center.",
+          "max_length": 31,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Every surface is at its center."
+        },
+        "cen_done_title": {
+          "english": "Centers set",
+          "max_length": 11,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Centers set"
+        },
+        "cen_far": {
+          "english": "Far from the servo's normal center. Move the horn instead, or this side loses travel.",
+          "max_length": 85,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Far from the servo's normal center. Move the horn instead, or this side loses travel."
+        },
+        "cen_flap": {
+          "english": "Flaps are held at flaps up: set them in line with the wing.",
+          "max_length": 59,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Flaps are held at flaps up: set them in line with the wing."
+        },
+        "cen_intro": {
+          "english": "The surfaces are held at center. Set the horn and linkage so the surface is close to neutral first, then fine-tune here.",
+          "max_length": 120,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "The surfaces are held at center. Set the horn and linkage so the surface is close to neutral first, then fine-tune here."
+        },
+        "cen_value_fmt": {
+          "english": "Center %d us (%s from normal).",
+          "max_length": 30,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Center %d us (%s from normal)."
+        },
+        "dir_again": {
+          "english": "Check again",
+          "max_length": 11,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Check again"
+        },
+        "dir_all": {
+          "english": "All of them",
+          "max_length": 11,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "All of them"
+        },
+        "dir_axis_pitch": {
+          "english": "pitch",
+          "max_length": 5,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "pitch"
+        },
+        "dir_axis_roll": {
+          "english": "roll",
+          "max_length": 4,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "roll"
+        },
+        "dir_axis_yaw": {
+          "english": "yaw",
+          "max_length": 3,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "yaw"
+        },
+        "dir_cant_fix_fmt": {
+          "english": "Servo %s also works another axis, so reversing it would break that one. Change its mix in Mixer Rules.",
+          "max_length": 102,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Servo %s also works another axis, so reversing it would break that one. Change its mix in Mixer Rules."
+        },
+        "dir_change_axis_fmt": {
+          "english": "%s inverted",
+          "max_length": 11,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "%s inverted"
+        },
+        "dir_change_servo_fmt": {
+          "english": "servo %d reversed",
+          "max_length": 17,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "servo %d reversed"
+        },
+        "dir_check_flap": {
+          "english": "Flaps down",
+          "max_length": 10,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Flaps down"
+        },
+        "dir_check_pitch": {
+          "english": "Pitch up",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Pitch up"
+        },
+        "dir_check_roll": {
+          "english": "Roll right",
+          "max_length": 10,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Roll right"
+        },
+        "dir_check_yaw": {
+          "english": "Yaw right",
+          "max_length": 9,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Yaw right"
+        },
+        "dir_continue": {
+          "english": "Continue",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Continue"
+        },
+        "dir_done_changes": {
+          "english": "The wizard changed:",
+          "max_length": 19,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "The wizard changed:"
+        },
+        "dir_done_ok": {
+          "english": "Every surface moves the right way.",
+          "max_length": 34,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Every surface moves the right way."
+        },
+        "dir_done_title": {
+          "english": "Directions checked",
+          "max_length": 18,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Directions checked"
+        },
+        "dir_expect_flap": {
+          "english": "Flaps: both trailing edges go down.",
+          "max_length": 35,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Flaps: both trailing edges go down."
+        },
+        "dir_expect_pitch": {
+          "english": "Elevator, elevons and V-tail: trailing edges go up.",
+          "max_length": 51,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Elevator, elevons and V-tail: trailing edges go up."
+        },
+        "dir_expect_roll": {
+          "english": "The right aileron or elevon goes up and the left one goes down.",
+          "max_length": 63,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "The right aileron or elevon goes up and the left one goes down."
+        },
+        "dir_expect_yaw": {
+          "english": "Rudder and V-tail: trailing edges move to the right, seen from behind.",
+          "max_length": 70,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Rudder and V-tail: trailing edges move to the right, seen from behind."
+        },
+        "dir_flap_radio": {
+          "english": "This makes a positive flap channel move the flaps down. If your flap switch then works the wrong way round, reverse the flap channel on the radio.",
+          "max_length": 146,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "This makes a positive flap channel move the flaps down. If your flap switch then works the wrong way round, reverse the flap channel on the radio."
+        },
+        "dir_from_behind": {
+          "english": "Seen from behind",
+          "max_length": 16,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Seen from behind"
+        },
+        "dir_identify_fmt": {
+          "english": "Servo %d (%s) is wiggling now, %d of %d. Did it move the wrong way?",
+          "max_length": 67,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Servo %d (%s) is wiggling now, %d of %d. Did it move the wrong way?"
+        },
+        "dir_intro": {
+          "english": "Hands off the sticks. The wizard moves each control surface in turn. Watch the model and say whether it moves the way the picture shows.",
+          "max_length": 136,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Hands off the sticks. The wizard moves each control surface in turn. Watch the model and say whether it moves the way the picture shows."
+        },
+        "dir_intro_title": {
+          "english": "Surface directions",
+          "max_length": 18,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Surface directions"
+        },
+        "dir_like": {
+          "english": "Like this",
+          "max_length": 9,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Like this"
+        },
+        "dir_move_fmt": {
+          "english": "Move %d%%",
+          "max_length": 9,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Move %d%%"
+        },
+        "dir_no": {
+          "english": "No",
+          "max_length": 2,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "No"
+        },
+        "dir_q_all": {
+          "english": "Did all the highlighted surfaces move the wrong way?",
+          "max_length": 52,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Did all the highlighted surfaces move the wrong way?"
+        },
+        "dir_q_match": {
+          "english": "Do the highlighted surfaces move like the arrows?",
+          "max_length": 49,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Do the highlighted surfaces move like the arrows?"
+        },
+        "dir_save_finish": {
+          "english": "Save and finish",
+          "max_length": 15,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Save and finish"
+        },
+        "dir_save_next": {
+          "english": "Save and continue",
+          "max_length": 17,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Save and continue"
+        },
+        "dir_some": {
+          "english": "Only some",
+          "max_length": 9,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Only some"
+        },
+        "dir_start": {
+          "english": "Start",
+          "max_length": 5,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Start"
+        },
+        "dir_status_inverted": {
+          "english": "Axis inverted. Check again:",
+          "max_length": 27,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Axis inverted. Check again:"
+        },
+        "dir_status_none": {
+          "english": "Nothing changed. Check again:",
+          "max_length": 29,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Nothing changed. Check again:"
+        },
+        "dir_status_reversed_fmt": {
+          "english": "Servo %s reversed. Check again:",
+          "max_length": 31,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Servo %s reversed. Check again:"
+        },
+        "dir_unlike": {
+          "english": "Not like this",
+          "max_length": 13,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Not like this"
+        },
+        "dir_yes": {
+          "english": "Yes",
+          "max_length": 3,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Yes"
+        },
+        "disconnected": {
+          "english": "No link to the flight controller.",
+          "max_length": 33,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "No link to the flight controller."
+        },
+        "fin_arm": {
+          "english": "ARM switch",
+          "max_length": 10,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "ARM switch"
+        },
+        "fin_before": {
+          "english": "Before the first flight: fit the propeller, check the surfaces follow the sticks and push against movement with PASSTHROUGH off, and do a range check.",
+          "max_length": 150,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Before the first flight: fit the propeller, check the surfaces follow the sticks and push against movement with PASSTHROUGH off, and do a range check."
+        },
+        "fin_button": {
+          "english": "Save and finish",
+          "max_length": 15,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Save and finish"
+        },
+        "fin_esc": {
+          "english": "ESC protocol",
+          "max_length": 12,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "ESC protocol"
+        },
+        "fin_intro": {
+          "english": "That's the setup done. Here is what the model has.",
+          "max_length": 50,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "That's the setup done. Here is what the model has."
+        },
+        "fin_model": {
+          "english": "Model",
+          "max_length": 5,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Model"
+        },
+        "fin_steps": {
+          "english": "Steps",
+          "max_length": 5,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Steps"
+        },
+        "fin_style": {
+          "english": "Flying style",
+          "max_length": 12,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Flying style"
+        },
+        "fin_surfaces": {
+          "english": "Surfaces",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Surfaces"
+        },
+        "fin_throws": {
+          "english": "Throw",
+          "max_length": 5,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Throw"
+        },
+        "fin_title": {
+          "english": "Finish",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Finish"
+        },
+        "go_airframe": {
+          "english": "Set up the airframe",
+          "max_length": 19,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Set up the airframe"
+        },
+        "gyr_done": {
+          "english": "The stabilizer pushes the right way on every axis.",
+          "max_length": 50,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "The stabilizer pushes the right way on every axis."
+        },
+        "gyr_done_title": {
+          "english": "Gyro checked",
+          "max_length": 12,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Gyro checked"
+        },
+        "gyr_intro": {
+          "english": "Now the stabilizer drives the surfaces. The wizard turns ANGLE mode on: tilt the model by hand and hold it, and the surfaces should push back toward level.",
+          "max_length": 155,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Now the stabilizer drives the surfaces. The wizard turns ANGLE mode on: tilt the model by hand and hold it, and the surfaces should push back toward level."
+        },
+        "gyr_no_angle": {
+          "english": "ANGLE mode isn't on: the surfaces may only react while the model moves.",
+          "max_length": 71,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "ANGLE mode isn't on: the surfaces may only react while the model moves."
+        },
+        "gyr_pitch": {
+          "english": "Lift the nose.",
+          "max_length": 14,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Lift the nose."
+        },
+        "gyr_roll": {
+          "english": "Roll the model so the right wing drops.",
+          "max_length": 39,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Roll the model so the right wing drops."
+        },
+        "gyr_title": {
+          "english": "Gyro direction",
+          "max_length": 14,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Gyro direction"
+        },
+        "gyr_to_sensors": {
+          "english": "Sensors step",
+          "max_length": 12,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Sensors step"
+        },
+        "gyr_wrong": {
+          "english": "If the surfaces were right in the Direction step but wrong here, the board orientation doesn't match how the board is mounted. Run the Sensors step again; don't reverse servos for this.",
+          "max_length": 185,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "If the surfaces were right in the Direction step but wrong here, the board orientation doesn't match how the board is mounted. Run the Sensors step again; don't reverse servos for this."
+        },
+        "gyr_yaw": {
+          "english": "Swing the nose to the right.",
+          "max_length": 28,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Swing the nose to the right."
+        },
+        "leave_body": {
+          "english": "Save the wizard's changes to the flight controller, or discard them?",
+          "max_length": 68,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Save the wizard's changes to the flight controller, or discard them?"
+        },
+        "leave_discard": {
+          "english": "Discard",
+          "max_length": 7,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Discard"
+        },
+        "leave_save": {
+          "english": "Save",
+          "max_length": 4,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Save"
+        },
+        "leave_title": {
+          "english": "Unsaved changes",
+          "max_length": 15,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Unsaved changes"
+        },
+        "lim_done": {
+          "english": "Every surface has its limits. A side you skipped keeps its old limit.",
+          "max_length": 69,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Every surface has its limits. A side you skipped keeps its old limit."
+        },
+        "lim_done_title": {
+          "english": "Limits set",
+          "max_length": 10,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Limits set"
+        },
+        "lim_flap": {
+          "english": "These are the flap end points: Max is full flap. The wizard sets the flap travel to land on them.",
+          "max_length": 97,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "These are the flap end points: Max is full flap. The wizard sets the flap travel to land on them."
+        },
+        "lim_intro": {
+          "english": "Find how far each servo can move before the surface or linkage binds. These limits protect the servo; throw is set later, in the Throws step.",
+          "max_length": 141,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Find how far each servo can move before the surface or linkage binds. These limits protect the servo; throw is set later, in the Throws step."
+        },
+        "lim_now_fmt": {
+          "english": "Now %d us from center. Limits: %d / %d us.",
+          "max_length": 42,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Now %d us from center. Limits: %d / %d us."
+        },
+        "lim_set_max": {
+          "english": "Set Max",
+          "max_length": 7,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Set Max"
+        },
+        "lim_set_min": {
+          "english": "Set Min",
+          "max_length": 7,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Set Min"
+        },
+        "lim_title": {
+          "english": "Binding limits",
+          "max_length": 14,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Binding limits"
+        },
+        "lim_todo_max": {
+          "english": "2 of 2: now press + until it binds, back off one step, then Set Max.",
+          "max_length": 68,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "2 of 2: now press + until it binds, back off one step, then Set Max."
+        },
+        "lim_todo_min": {
+          "english": "1 of 2: press - until the surface binds, back off one step, then Set Min.",
+          "max_length": 73,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "1 of 2: press - until the surface binds, back off one step, then Set Min."
+        },
+        "missing_servos_fmt": {
+          "english": "Servo %s is mixed but this board has no output for it, so the wizard leaves it out.",
+          "max_length": 83,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Servo %s is mixed but this board has no output for it, so the wizard leaves it out."
+        },
+        "mod_arm_missing": {
+          "english": "ARM isn't on a switch yet: without it the model can't be armed.",
+          "max_length": 63,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "ARM isn't on a switch yet: without it the model can't be armed."
+        },
+        "mod_arm_on": {
+          "english": "The ARM switch is on. Switch it off before you carry on.",
+          "max_length": 56,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "The ARM switch is on. Switch it off before you carry on."
+        },
+        "mod_assign": {
+          "english": "Assign",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Assign"
+        },
+        "mod_assigned_fmt": {
+          "english": "AUX %d, %d-%d",
+          "max_length": 13,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "AUX %d, %d-%d"
+        },
+        "mod_change": {
+          "english": "Change",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Change"
+        },
+        "mod_done_title": {
+          "english": "Mode switches",
+          "max_length": 13,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Mode switches"
+        },
+        "mod_flick": {
+          "english": "Flick the switch to the on position now...",
+          "max_length": 42,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Flick the switch to the on position now..."
+        },
+        "mod_help_arm": {
+          "english": "Arms the motor. Nothing else works without it.",
+          "max_length": 46,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Arms the motor. Nothing else works without it."
+        },
+        "mod_help_att_hold": {
+          "english": "Let go of a stick and the model holds its attitude on that axis.",
+          "max_length": 64,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Let go of a stick and the model holds its attitude on that axis."
+        },
+        "mod_help_auto_trim": {
+          "english": "Fly level with it on for a few seconds, then land and disarm: the trim is saved.",
+          "max_length": 80,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Fly level with it on for a few seconds, then land and disarm: the trim is saved."
+        },
+        "mod_help_manual": {
+          "english": "Stabilization off, with your rates kept. A good bail-out.",
+          "max_length": 57,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Stabilization off, with your rates kept. A good bail-out."
+        },
+        "mod_help_passthrough": {
+          "english": "A bench tool, not a flight mode: sticks straight to the surfaces. Put it on a switch you won't hit in flight.",
+          "max_length": 109,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "A bench tool, not a flight mode: sticks straight to the surfaces. Put it on a switch you won't hit in flight."
+        },
+        "mod_help_trainer": {
+          "english": "The stabilizer stops the model rolling or pitching past its limits.",
+          "max_length": 67,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "The stabilizer stops the model rolling or pitching past its limits."
+        },
+        "mod_intro": {
+          "english": "Put modes on switches: press Assign, then flick the switch to the position that turns the mode on. Only ARM is required; you can change modes later on the Modes page.",
+          "max_length": 166,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Put modes on switches: press Assign, then flick the switch to the position that turns the mode on. Only ARM is required; you can change modes later on the Modes page."
+        },
+        "mod_no_slot": {
+          "english": "Every mode slot is in use. Free one on the Modes page.",
+          "max_length": 54,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Every mode slot is in use. Free one on the Modes page."
+        },
+        "mod_not_assigned": {
+          "english": "No switch",
+          "max_length": 9,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "No switch"
+        },
+        "mod_off": {
+          "english": "Off",
+          "max_length": 3,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Off"
+        },
+        "mod_on_now": {
+          "english": "On now",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "On now"
+        },
+        "mod_optional": {
+          "english": "Optional",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Optional"
+        },
+        "mod_remove": {
+          "english": "Remove",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Remove"
+        },
+        "mod_required": {
+          "english": "Required",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Required"
+        },
+        "mod_title": {
+          "english": "Mode switches",
+          "max_length": 13,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Mode switches"
+        },
+        "mot_changed": {
+          "english": "The new protocol takes effect after a restart.",
+          "max_length": 46,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "The new protocol takes effect after a restart."
+        },
+        "mot_dshot300": {
+          "english": "DShot300",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "DShot300"
+        },
+        "mot_dshot300_help": {
+          "english": "digital, no calibration; BLHeli, Bluejay, AM32.",
+          "max_length": 47,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "digital, no calibration; BLHeli, Bluejay, AM32."
+        },
+        "mot_dshot600": {
+          "english": "DShot600",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "DShot600"
+        },
+        "mot_dshot600_help": {
+          "english": "faster DShot, for ESCs that support it.",
+          "max_length": 39,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "faster DShot, for ESCs that support it."
+        },
+        "mot_intro": {
+          "english": "How the flight controller talks to the ESC.",
+          "max_length": 43,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "How the flight controller talks to the ESC."
+        },
+        "mot_no_outputs": {
+          "english": "This board has no motor output set up.",
+          "max_length": 38,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "This board has no motor output set up."
+        },
+        "mot_none": {
+          "english": "No motor",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "No motor"
+        },
+        "mot_none_help": {
+          "english": "gliders, or a motor not on the flight controller.",
+          "max_length": 49,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "gliders, or a motor not on the flight controller."
+        },
+        "mot_other": {
+          "english": "It is set to another protocol on the ESC & Motors pages. Choosing one here replaces it.",
+          "max_length": 87,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "It is set to another protocol on the ESC & Motors pages. Choosing one here replaces it."
+        },
+        "mot_prop_off": {
+          "english": "Propeller is off",
+          "max_length": 16,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Propeller is off"
+        },
+        "mot_prop_text": {
+          "english": "The motor is about to spin. Remove the propeller and hold the model.",
+          "max_length": 68,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "The motor is about to spin. Remove the propeller and hold the model."
+        },
+        "mot_prop_title": {
+          "english": "Propeller off",
+          "max_length": 13,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Propeller off"
+        },
+        "mot_pwm": {
+          "english": "Standard PWM",
+          "max_length": 12,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Standard PWM"
+        },
+        "mot_pwm_help": {
+          "english": "works with any ESC; some need their throttle range calibrated.",
+          "max_length": 62,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "works with any ESC; some need their throttle range calibrated."
+        },
+        "mot_spin_fmt": {
+          "english": "Spin %d s",
+          "max_length": 9,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Spin %d s"
+        },
+        "mot_spin_text": {
+          "english": "It spins for a few seconds and stops by itself, or within a second if the link drops. Check it starts smoothly and turns the right way; if not, swap two motor wires or reverse it in the ESC.",
+          "max_length": 190,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "It spins for a few seconds and stops by itself, or within a second if the link drops. Check it starts smoothly and turns the right way; if not, swap two motor wires or reverse it in the ESC."
+        },
+        "mot_spin_title": {
+          "english": "Check the motor",
+          "max_length": 15,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Check the motor"
+        },
+        "mot_spinning": {
+          "english": "Spinning...",
+          "max_length": 11,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Spinning..."
+        },
+        "mot_stop": {
+          "english": "Stop",
+          "max_length": 4,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Stop"
+        },
+        "mot_test": {
+          "english": "Check motor",
+          "max_length": 11,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Check motor"
+        },
+        "mot_title": {
+          "english": "Motor",
+          "max_length": 5,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Motor"
+        },
+        "name": {
+          "english": "Setup Wizard",
+          "max_length": 12,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Setup Wizard"
+        },
+        "needs_firmware": {
+          "english": "The Setup Wizard needs flight controller firmware with MSP API 22.14 or newer, which can hold the surfaces safely. Update the firmware, or use the Configurator.",
+          "max_length": 160,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "The Setup Wizard needs flight controller firmware with MSP API 22.14 or newer, which can hold the surfaces safely. Update the firmware, or use the Configurator."
+        },
+        "no_surfaces": {
+          "english": "No control surfaces are mixed yet. Set up the mix in Mixer Rules or with the Configurator's Setup Wizard, then come back.",
+          "max_length": 121,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "No control surfaces are mixed yet. Set up the mix in Mixer Rules or with the Configurator's Setup Wizard, then come back."
+        },
+        "progress_fmt": {
+          "english": "%d of %d",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "%d of %d"
+        },
+        "refused": {
+          "english": "Disarm: the FC refused setup mode.",
+          "max_length": 34,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Disarm: the FC refused setup mode."
+        },
+        "rx_check": {
+          "english": "Put both sticks in the bottom-left corner: throttle and elevator down, aileron and rudder left. Every bar should go to the left.",
+          "max_length": 128,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Put both sticks in the bottom-left corner: throttle and elevator down, aileron and rudder left. Every bar should go to the left."
+        },
+        "rx_detect_title": {
+          "english": "Find the channel order",
+          "max_length": 22,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Find the channel order"
+        },
+        "rx_good": {
+          "english": "All good",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "All good"
+        },
+        "rx_move_pitch": {
+          "english": "Move pitch (elevator) all the way, and leave the others still.",
+          "max_length": 62,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Move pitch (elevator) all the way, and leave the others still."
+        },
+        "rx_move_roll": {
+          "english": "Move roll (aileron) all the way, and leave the others still.",
+          "max_length": 60,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Move roll (aileron) all the way, and leave the others still."
+        },
+        "rx_move_throttle": {
+          "english": "Move throttle all the way, and leave the others still.",
+          "max_length": 54,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Move throttle all the way, and leave the others still."
+        },
+        "rx_move_yaw": {
+          "english": "Move yaw (rudder) all the way, and leave the others still.",
+          "max_length": 58,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Move yaw (rudder) all the way, and leave the others still."
+        },
+        "rx_order_fmt": {
+          "english": "Channel order: %s.",
+          "max_length": 18,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Channel order: %s."
+        },
+        "rx_restart": {
+          "english": "Start again",
+          "max_length": 11,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Start again"
+        },
+        "rx_reversed": {
+          "english": "A bar going right is reversed: reverse that channel on your radio, not here.",
+          "max_length": 76,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "A bar going right is reversed: reverse that channel on your radio, not here."
+        },
+        "rx_title": {
+          "english": "Receiver",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Receiver"
+        },
+        "rx_wrong": {
+          "english": "Bars are wrong",
+          "max_length": 14,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Bars are wrong"
+        },
+        "sen_acc_busy": {
+          "english": "Calibrating. Keep the model still...",
+          "max_length": 36,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Calibrating. Keep the model still..."
+        },
+        "sen_acc_done": {
+          "english": "Accelerometer calibrated.",
+          "max_length": 25,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Accelerometer calibrated."
+        },
+        "sen_acc_failed": {
+          "english": "The calibration did not finish. Try again.",
+          "max_length": 42,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "The calibration did not finish. Try again."
+        },
+        "sen_acc_text": {
+          "english": "Hold the model level and still, then press Calibrate.",
+          "max_length": 53,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Hold the model level and still, then press Calibrate."
+        },
+        "sen_acc_title": {
+          "english": "Calibrate the accelerometer",
+          "max_length": 27,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Calibrate the accelerometer"
+        },
+        "sen_align_done_fmt": {
+          "english": "Board orientation found: roll %d, pitch %d, yaw %d degrees.",
+          "max_length": 59,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Board orientation found: roll %d, pitch %d, yaw %d degrees."
+        },
+        "sen_align_lift": {
+          "english": "Now lift the tail by at least 20 degrees and hold it...",
+          "max_length": 55,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Now lift the tail by at least 20 degrees and hold it..."
+        },
+        "sen_align_text": {
+          "english": "Place the model flat, press Start, then lift the tail by at least 20 degrees.",
+          "max_length": 77,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Place the model flat, press Start, then lift the tail by at least 20 degrees."
+        },
+        "sen_align_title": {
+          "english": "Find the board orientation",
+          "max_length": 26,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Find the board orientation"
+        },
+        "sen_calibrate": {
+          "english": "Calibrate",
+          "max_length": 9,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Calibrate"
+        },
+        "sen_done_restart": {
+          "english": "The flight controller restarts to use the new orientation and level. The wizard carries on afterwards.",
+          "max_length": 102,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "The flight controller restarts to use the new orientation and level. The wizard carries on afterwards."
+        },
+        "sen_done_same": {
+          "english": "Nothing changed here.",
+          "max_length": 21,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Nothing changed here."
+        },
+        "sen_done_title": {
+          "english": "Sensors done",
+          "max_length": 12,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Sensors done"
+        },
+        "sen_intro": {
+          "english": "The flight controller needs to know how it is mounted and which way is level. Power on with the model still: the gyro calibrates itself at power-up.",
+          "max_length": 148,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "The flight controller needs to know how it is mounted and which way is level. Power on with the model still: the gyro calibrates itself at power-up."
+        },
+        "sen_level_busy": {
+          "english": "Measuring. Keep the model still...",
+          "max_length": 34,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Measuring. Keep the model still..."
+        },
+        "sen_level_done_fmt": {
+          "english": "Mounting trim set: roll %.1f, pitch %.1f degrees.",
+          "max_length": 49,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Mounting trim set: roll %.1f, pitch %.1f degrees."
+        },
+        "sen_level_text": {
+          "english": "Hold the model in its flying attitude and keep it still while it measures.",
+          "max_length": 74,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Hold the model in its flying attitude and keep it still while it measures."
+        },
+        "sen_level_title": {
+          "english": "Set level",
+          "max_length": 9,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Set level"
+        },
+        "sen_no_acc": {
+          "english": "No accelerometer found, so the board orientation and level can't be set here.",
+          "max_length": 77,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "No accelerometer found, so the board orientation and level can't be set here."
+        },
+        "sen_no_match": {
+          "english": "No orientation matched. Lift the tail further and keep the wings level.",
+          "max_length": 71,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "No orientation matched. Lift the tail further and keep the wings level."
+        },
+        "sen_out_of_range": {
+          "english": "The model is too far from level. Hold it closer to its flying attitude.",
+          "max_length": 71,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "The model is too far from level. Hold it closer to its flying attitude."
+        },
+        "sen_rejected_armed": {
+          "english": "Disarm first.",
+          "max_length": 13,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Disarm first."
+        },
+        "sen_rejected_uncal": {
+          "english": "Calibrate the accelerometer first.",
+          "max_length": 34,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Calibrate the accelerometer first."
+        },
+        "sen_tail": {
+          "english": "On a tail wheel or skid, prop the tail up until the fuselage is level, as in flight, for the calibration and the level step.",
+          "max_length": 124,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "On a tail wheel or skid, prop the tail up until the fuselage is level, as in flight, for the calibration and the level step."
+        },
+        "sen_timeout": {
+          "english": "Nothing was measured in time. Try again.",
+          "max_length": 40,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Nothing was measured in time. Try again."
+        },
+        "sen_title": {
+          "english": "Sensors and level",
+          "max_length": 17,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Sensors and level"
+        },
+        "sen_unsupported": {
+          "english": "This firmware can't do this automatically. Set it on the Alignment page.",
+          "max_length": 72,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "This firmware can't do this automatically. Set it on the Alignment page."
+        },
+        "servo_kind_fmt": {
+          "english": "Servo %d (%s)",
+          "max_length": 13,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Servo %d (%s)"
+        },
+        "st_all": {
+          "english": "Applies to every control-surface servo.",
+          "max_length": 39,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Applies to every control-surface servo."
+        },
+        "st_analog": {
+          "english": "Analog",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Analog"
+        },
+        "st_analog_help": {
+          "english": "50 Hz, works with any standard servo.",
+          "max_length": 37,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "50 Hz, works with any standard servo."
+        },
+        "st_applied_fmt": {
+          "english": "%s set on every surface servo. It takes effect after a restart.",
+          "max_length": 63,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "%s set on every surface servo. It takes effect after a restart."
+        },
+        "st_digital": {
+          "english": "Digital",
+          "max_length": 7,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Digital"
+        },
+        "st_digital_help": {
+          "english": "333 Hz, check your servos support it.",
+          "max_length": 37,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "333 Hz, check your servos support it."
+        },
+        "st_intro": {
+          "english": "What kind of servos drive the control surfaces?",
+          "max_length": 47,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "What kind of servos drive the control surfaces?"
+        },
+        "st_narrow": {
+          "english": "Narrow band",
+          "max_length": 11,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Narrow band"
+        },
+        "st_narrow_help": {
+          "english": "560 Hz, only for 760 us servos; resets center, limits and scale.",
+          "max_length": 64,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "560 Hz, only for 760 us servos; resets center, limits and scale."
+        },
+        "st_now_fmt": {
+          "english": "Now: %s.",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Now: %s."
+        },
+        "st_title": {
+          "english": "Servo type",
+          "max_length": 10,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Servo type"
+        },
+        "st_unknown": {
+          "english": "mixed or custom",
+          "max_length": 15,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "mixed or custom"
+        },
+        "step_airframe": {
+          "english": "Airframe",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Airframe"
+        },
+        "step_centre": {
+          "english": "Center",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Center"
+        },
+        "step_direction": {
+          "english": "Direction",
+          "max_length": 9,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Direction"
+        },
+        "step_finish": {
+          "english": "Finish",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Finish"
+        },
+        "step_gyro": {
+          "english": "Gyro direction",
+          "max_length": 14,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Gyro direction"
+        },
+        "step_limits": {
+          "english": "Binding limits",
+          "max_length": 14,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Binding limits"
+        },
+        "step_modes": {
+          "english": "Mode switches",
+          "max_length": 13,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Mode switches"
+        },
+        "step_motor": {
+          "english": "Motor",
+          "max_length": 5,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Motor"
+        },
+        "step_receiver": {
+          "english": "Receiver",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Receiver"
+        },
+        "step_sensors": {
+          "english": "Sensors and level",
+          "max_length": 17,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Sensors and level"
+        },
+        "step_servotype": {
+          "english": "Servo type",
+          "max_length": 10,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Servo type"
+        },
+        "step_style": {
+          "english": "Flying style",
+          "max_length": 12,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Flying style"
+        },
+        "step_throws": {
+          "english": "Throws",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Throws"
+        },
+        "step_travel": {
+          "english": "Travel check",
+          "max_length": 12,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Travel check"
+        },
+        "step_trimgain": {
+          "english": "Trim and gain",
+          "max_length": 13,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Trim and gain"
+        },
+        "sty_3d": {
+          "english": "3D",
+          "max_length": 2,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "3D"
+        },
+        "sty_custom": {
+          "english": "Custom",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Custom"
+        },
+        "sty_intro": {
+          "english": "Choose the style closest to how you fly. It sets how fast the model rotates at full stick, and how the I-term behaves while you move the sticks.",
+          "max_length": 144,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Choose the style closest to how you fly. It sets how fast the model rotates at full stick, and how the I-term behaves while you move the sticks."
+        },
+        "sty_more": {
+          "english": "Applies to the current rate and PID profiles.",
+          "max_length": 45,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Applies to the current rate and PID profiles."
+        },
+        "sty_now_fmt": {
+          "english": "Now: %s.",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Now: %s."
+        },
+        "sty_rates_fmt": {
+          "english": "%d/%d/%d deg/s, %d%%",
+          "max_length": 20,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "%d/%d/%d deg/s, %d%%"
+        },
+        "sty_sport": {
+          "english": "Sport",
+          "max_length": 5,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Sport"
+        },
+        "sty_title": {
+          "english": "Flying style",
+          "max_length": 12,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Flying style"
+        },
+        "sty_trainer": {
+          "english": "Trainer",
+          "max_length": 7,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Trainer"
+        },
+        "surface_aileron": {
+          "english": "Aileron",
+          "max_length": 7,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Aileron"
+        },
+        "surface_elevator": {
+          "english": "Elevator",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Elevator"
+        },
+        "surface_elevon": {
+          "english": "Elevon",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Elevon"
+        },
+        "surface_flap": {
+          "english": "Flap",
+          "max_length": 4,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Flap"
+        },
+        "surface_flaperon": {
+          "english": "Flaperon",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Flaperon"
+        },
+        "surface_mixed": {
+          "english": "Mixed",
+          "max_length": 5,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Mixed"
+        },
+        "surface_rudder": {
+          "english": "Rudder",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Rudder"
+        },
+        "surface_ruddervator": {
+          "english": "V-tail",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "V-tail"
+        },
+        "tg_auto_note": {
+          "english": "Use Auto trim: give it a switch in Mode switches. Fly level with it on for a few seconds, then land and disarm.",
+          "max_length": 111,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Use Auto trim: give it a switch in Mode switches. Fly level with it on for a few seconds, then land and disarm."
+        },
+        "tg_aux_fmt": {
+          "english": "AUX %d",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "AUX %d"
+        },
+        "tg_button_none_fmt": {
+          "english": "No trim button pressed (AUX %d reads %d us).",
+          "max_length": 44,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "No trim button pressed (AUX %d reads %d us)."
+        },
+        "tg_button_now_fmt": {
+          "english": "%s",
+          "max_length": 2,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "%s"
+        },
+        "tg_buttons_check": {
+          "english": "Press each trim button: its name shows below. If one doesn't, check its weight in the TRIM mix.",
+          "max_length": 95,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Press each trim button: its name shows below. If one doesn't, check its weight in the TRIM mix."
+        },
+        "tg_detect": {
+          "english": "Detect",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Detect"
+        },
+        "tg_done_title": {
+          "english": "Trim and gain set",
+          "max_length": 17,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Trim and gain set"
+        },
+        "tg_found_fmt": {
+          "english": "Found on AUX %d.",
+          "max_length": 16,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Found on AUX %d."
+        },
+        "tg_full": {
+          "english": "Every adjustment slot is in use. Free one on the Adjustments page.",
+          "max_length": 66,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Every adjustment slot is in use. Free one on the Adjustments page."
+        },
+        "tg_gain_centre": {
+          "english": "Fly the first flight with it at center.",
+          "max_length": 39,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Fly the first flight with it at center."
+        },
+        "tg_gain_none": {
+          "english": "No gain knob",
+          "max_length": 12,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "No gain knob"
+        },
+        "tg_gain_q": {
+          "english": "A knob or slider to turn the stabilizer up or down in flight: fully down is off, center 75%, fully up 150%.",
+          "max_length": 107,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "A knob or slider to turn the stabilizer up or down in flight: fully down is off, center 75%, fully up 150%."
+        },
+        "tg_gain_separate": {
+          "english": "One per axis",
+          "max_length": 12,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "One per axis"
+        },
+        "tg_gain_single": {
+          "english": "One knob",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "One knob"
+        },
+        "tg_how_buttons": {
+          "english": "On the radio: in Trims keep the aileron, elevator and rudder trims. In those three mixes turn Trim off. Add a free mix TRIM: always on, source Maximum, Add, output a spare channel, with an action per trim button at these weights: T1 Left 70, T1 Right 80, T2 Up 60, T2 Down 50, T4 Left 30, T4 Right 40. Then press Detect and press any trim button.",
+          "max_length": 346,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "On the radio: in Trims keep the aileron, elevator and rudder trims. In those three mixes turn Trim off. Add a free mix TRIM: always on, source Maximum, Add, output a spare channel, with an action per trim button at these weights: T1 Left 70, T1 Right 80, T2 Up 60, T2 Down 50, T4 Left 30, T4 Right 40. Then press Detect and press any trim button."
+        },
+        "tg_how_channels": {
+          "english": "On the radio: set the aileron, elevator and rudder trims to Coarse. In those three mixes turn Trim off. Add free mixes ROLL TRIM, PITCH TRIM and YAW TRIM: always on, source that trim, Add, 100%, each on its own spare channel. Then press Detect and press each trim when asked.",
+          "max_length": 275,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "On the radio: set the aileron, elevator and rudder trims to Coarse. In those three mixes turn Trim off. Add free mixes ROLL TRIM, PITCH TRIM and YAW TRIM: always on, source that trim, Add, 100%, each on its own spare channel. Then press Detect and press each trim when asked."
+        },
+        "tg_intro": {
+          "english": "Two things you'll want in the air on the first flights: a way to trim, and a knob to turn the stabilizer gain up or down.",
+          "max_length": 121,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Two things you'll want in the air on the first flights: a way to trim, and a knob to turn the stabilizer gain up or down."
+        },
+        "tg_press_button": {
+          "english": "Press any trim button...",
+          "max_length": 24,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Press any trim button..."
+        },
+        "tg_press_trim_fmt": {
+          "english": "Press and hold the %s trim...",
+          "max_length": 29,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Press and hold the %s trim..."
+        },
+        "tg_row_gain": {
+          "english": "Gain",
+          "max_length": 4,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Gain"
+        },
+        "tg_row_trim": {
+          "english": "Trim",
+          "max_length": 4,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Trim"
+        },
+        "tg_timed_out": {
+          "english": "Nothing moved. Try again.",
+          "max_length": 25,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Nothing moved. Try again."
+        },
+        "tg_title": {
+          "english": "Trim and gain",
+          "max_length": 13,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Trim and gain"
+        },
+        "tg_trim_auto": {
+          "english": "Auto trim only",
+          "max_length": 14,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Auto trim only"
+        },
+        "tg_trim_buttons": {
+          "english": "Trim buttons on one channel",
+          "max_length": 27,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Trim buttons on one channel"
+        },
+        "tg_trim_channels": {
+          "english": "A channel per trim",
+          "max_length": 18,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "A channel per trim"
+        },
+        "tg_trim_q": {
+          "english": "How do you want to trim?",
+          "max_length": 24,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "How do you want to trim?"
+        },
+        "tg_turn_axis_knob_fmt": {
+          "english": "Turn the %s gain knob end to end...",
+          "max_length": 35,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Turn the %s gain knob end to end..."
+        },
+        "tg_turn_knob": {
+          "english": "Turn the knob or slider end to end...",
+          "max_length": 37,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Turn the knob or slider end to end..."
+        },
+        "thr_at_limit_fmt": {
+          "english": "Servo %s reaches its binding limit before full stick. Lower the throw, or allow more travel in Binding limits.",
+          "max_length": 110,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Servo %s reaches its binding limit before full stick. Lower the throw, or allow more travel in Binding limits."
+        },
+        "thr_axis_fmt": {
+          "english": "Hold %s and measure a surface. Press - or + until it reaches the throw you want, then check the other way. Throw: %d%%.",
+          "max_length": 119,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Hold %s and measure a surface. Press - or + until it reaches the throw you want, then check the other way. Throw: %d%%."
+        },
+        "thr_done": {
+          "english": "Throw is a percentage of the servo's normal travel. The stabilizer's output is a share of it, so set throws first and tune afterwards.",
+          "max_length": 134,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Throw is a percentage of the servo's normal travel. The stabilizer's output is a share of it, so set throws first and tune afterwards."
+        },
+        "thr_done_title": {
+          "english": "Throws set",
+          "max_length": 10,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Throws set"
+        },
+        "thr_fine_btn": {
+          "english": "Fine-tune",
+          "max_length": 9,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Fine-tune"
+        },
+        "thr_fine_fmt": {
+          "english": "%s: %d%% of normal travel.",
+          "max_length": 26,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "%s: %d%% of normal travel."
+        },
+        "thr_fine_intro": {
+          "english": "Fine-tune one surface in one direction, for differential or a surface that differs from its pair.",
+          "max_length": 97,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Fine-tune one surface in one direction, for differential or a surface that differs from its pair."
+        },
+        "thr_intro": {
+          "english": "Set how far each surface moves at full stick, using the throws from your model's guide. The wizard puts the model in PASSTHROUGH mode, so your sticks move the surfaces directly. Have a throw meter or ruler ready.",
+          "max_length": 212,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Set how far each surface moves at full stick, using the throws from your model's guide. The wizard puts the model in PASSTHROUGH mode, so your sticks move the surfaces directly. Have a throw meter or ruler ready."
+        },
+        "thr_no_passthrough": {
+          "english": "PASSTHROUGH mode isn't on: check your radio is on.",
+          "max_length": 50,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "PASSTHROUGH mode isn't on: check your radio is on."
+        },
+        "thr_pitch_back": {
+          "english": "full stick back",
+          "max_length": 15,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "full stick back"
+        },
+        "thr_pitch_forward": {
+          "english": "full stick forward",
+          "max_length": 18,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "full stick forward"
+        },
+        "thr_roll_left": {
+          "english": "full left roll",
+          "max_length": 14,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "full left roll"
+        },
+        "thr_roll_right": {
+          "english": "full right roll",
+          "max_length": 15,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "full right roll"
+        },
+        "thr_side_limit": {
+          "english": "Full stick reaches the binding limit on this side.",
+          "max_length": 50,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Full stick reaches the binding limit on this side."
+        },
+        "thr_title": {
+          "english": "Throws",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Throws"
+        },
+        "thr_yaw_left": {
+          "english": "full left yaw",
+          "max_length": 13,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "full left yaw"
+        },
+        "thr_yaw_right": {
+          "english": "full right yaw",
+          "max_length": 14,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "full right yaw"
+        },
+        "trv_back_throws": {
+          "english": "Throws",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Throws"
+        },
+        "trv_clipping": {
+          "english": "Some surfaces reach their limit. Lower the throw on the axes that share them, or accept it: full roll with full pitch on elevons is the usual case.",
+          "max_length": 147,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Some surfaces reach their limit. Lower the throw on the axes that share them, or accept it: full roll with full pitch on elevons is the usual case."
+        },
+        "trv_intro": {
+          "english": "How far each surface goes with full stick on every axis at once, against its limits (- side and + side). Above 100% it reaches its limit before full stick. Try the stick corners.",
+          "max_length": 178,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "How far each surface goes with full stick on every axis at once, against its limits (- side and + side). Above 100% it reaches its limit before full stick. Try the stick corners."
+        },
+        "trv_ok": {
+          "english": "Every surface stays inside its limits.",
+          "max_length": 38,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Every surface stays inside its limits."
+        },
+        "trv_row_fmt": {
+          "english": "-%d%%  +%d%%",
+          "max_length": 12,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "-%d%%  +%d%%"
+        },
+        "trv_title": {
+          "english": "Travel check",
+          "max_length": 12,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Travel check"
+        }
+      },
       "stats": {
         "flightcount": {
           "english": "Flight Count",
@@ -9348,7 +11577,7 @@
     },
     "msg_main_power_lost_banner": {
       "english": "MAIN POWER LOST",
-      "max_length": 27,
+      "max_length": 15,
       "needs_translation": false,
       "reverse_text": false,
       "translation": "HOVEDSTRØM BORTE"

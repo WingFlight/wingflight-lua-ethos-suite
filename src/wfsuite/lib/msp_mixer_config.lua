@@ -1,6 +1,8 @@
--- Schema + message-builder for MSP_MIXER_CONFIG (cmd 42). Read-only here:
--- the suite only needs the bus servo output count, to know how many bus
--- servos the configured SBUS/F.Bus output drives.
+-- Schema + message-builders for MSP_MIXER_CONFIG (cmd 42) and the short form
+-- of MSP_SET_MIXER_CONFIG (cmd 43, see buildWriteMessage() below). The read
+-- gives the bus servo output count, to know how many bus servos the
+-- configured SBUS/F.Bus output drives; the Setup Wizard writes the model
+-- type.
 --
 -- Wire layout (wingflight-firmware src/main/msp/msp.c, MSP_MIXER_CONFIG
 -- case): U8 model_type -> U8 bus_servo_clone_pwm -> U8 sbus_out_channels ->
@@ -45,6 +47,29 @@ function msp_mixer_config.buildReadMessage(onData, onError)
     end,
     errorHandler = onError,
     simulatorResponse = SIMULATOR_RESPONSE,
+  }
+end
+
+-- MSP_SET_MIXER_CONFIG (cmd 43), the short form: U8 model_type, U8
+-- bus_servo_clone_pwm. The bus output channel counts after them are optional
+-- on the wire (msp.c reads them only when two more bytes are there), so this
+-- changes the model type without touching the bus outputs. Used by the Setup
+-- Wizard's Airframe step.
+msp_mixer_config.WRITE_COMMAND = 43
+
+function msp_mixer_config.buildWriteMessage(data, onWritten, onError)
+  local payload = {}
+  mspcodec.writeU8(payload, data.model_type or 0)
+  mspcodec.writeU8(payload, data.bus_servo_clone_pwm or 0)
+  return {
+    command = msp_mixer_config.WRITE_COMMAND,
+    payload = payload,
+    isWrite = true,
+    processReply = function()
+      if onWritten then onWritten() end
+    end,
+    errorHandler = onError,
+    simulatorResponse = {},
   }
 end
 
