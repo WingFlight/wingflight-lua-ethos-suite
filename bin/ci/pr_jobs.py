@@ -1363,6 +1363,22 @@ unpatched master the version-2, truncated and longer replies reach onData as dec
 numbers.
 ''',
     ),
+    LuaStep(
+        name='A page refuses a reply it does not know on every read, not only the first',
+        script='bin/runtime_read_validator/verify_runtime_read_validator.lua',
+        rationale=r'''Ported from rotorflight-lua-ethos-suite PR #2557 (Issue #2494): the ESC vendor page checked the codec signature only on its first read.
+The Reload path reads through the page runtime, which took the reply into the page's data
+without any check, so an ESC with another signature in the same slot built the editor from
+its parameters. The runtime now takes an optional validateRead (or validate on a source);
+a refused reply is a failed read, exactly as a read error is. The ESC page passes its
+signature check there.
+
+No build and no package step reaches this -- it is a reload path through the page runtime.
+The harness drives the real page_runtime through loadData(): a reply with another signature
+is refused and leaves the page unloaded, a reply with the page's signature loads it, and a
+read error is refused as before. Against unpatched master the refused reply loads the page.
+''',
+    ),
 ]
 
 VERBATIM_JOBS = [
