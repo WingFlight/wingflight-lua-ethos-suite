@@ -469,7 +469,12 @@ end
 
 local function saveModelPreferences()
   if session.modelPreferences and session.modelPreferencesFile then
-    modelPreferences.save(session.modelPreferencesFile, session.modelPreferences)
+    -- A refused write is silent everywhere else (no page is open to report it),
+    -- so it is logged here: the next start would otherwise come up with the old
+    -- model preferences and no trace of why (#2500).
+    if not modelPreferences.save(session.modelPreferencesFile, session.modelPreferences) then
+      print("[session] model preferences write refused: " .. tostring(session.modelPreferencesFile))
+    end
   end
   updateModelSnapshots()
   publish()
