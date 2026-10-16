@@ -106,6 +106,9 @@ away and saves it when you disarm.
   name.
 - A flight without rate flight is not saved. A disarm while the link is down is saved once the radio
   reconnects, provided the flight controller has not been powered off in between.
+- If the flight controller answers in a layout this suite does not know, the flight is not saved and the
+  reason is written to the log. The flight stays on the flight controller, and the next disarm asks again
+  once.
 - Combining flights adds up the counts and averages each measurement weighted by how much data it came from.
   The flight controller weights its own figures slightly differently, so the combined response is a close
   estimate rather than exact; the stop figures combine exactly.

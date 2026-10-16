@@ -27,6 +27,13 @@ Available without a flight controller connection; the background task must be ru
 
 ## Notes
 
+- If the settings file cannot be written, a *Save failed* dialog is shown and the page
+  stays unsaved, so *Save* remains available for a second attempt (rotorflight-lua-ethos-suite
+  Issue #2500).
+- The page writes two files: the radio's global settings, then the model's dashboard
+  override. If only the model's copy cannot be written, the global part is already saved;
+  the dialog says so and names the model, rather than reporting the whole save as lost.
+
 TODO: Verify persistence, reboot behaviour, profile scope and any restrictions in
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than
 firmware defaults; wire values may need scaling before display.
