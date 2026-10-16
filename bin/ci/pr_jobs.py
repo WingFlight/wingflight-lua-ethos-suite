@@ -1221,6 +1221,24 @@ build: 125, 212 and 124 in lib/msp_servo_config.lua, 213 in lib/msp_servo_center
 pin to go red every time, after the unmodified modules have passed.
 '''
     ),
+    LuaStep(
+        name='A disconnected armed model is not writable until a fresh answer clears it',
+        script='bin/armed_unconfirmed/verify_armed_unconfirmed.lua',
+        rationale=r'''Ported from rotorflight-lua-ethos-suite PR #2563 (issue #2548):
+isArmed goes nil on every disconnect, and a gate written as `isArmed == true`
+reads that nil as "disarmed". On a reconnect into an armed model the save button
+and the stats write then opened before the arm flags were read again. Neither
+the firmware nor the page could tell that from a real disarm.
+
+tasks/session.lua keeps a latch, armedUnconfirmed: set on an armed read, cleared
+only by a fresh disarmed read, untouched by a disconnect. app/page_runtime.lua's
+save gate and the reboot-after-save gate read it through armedOrUnconfirmed().
+The harness drives the real session.lua through session.wakeup() and the real
+page_runtime canSave(). Against unpatched master the latch and the
+disconnected-page checks fail. --self-test splices the latch and the gate back
+out and requires them to go red.
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [
