@@ -33,6 +33,8 @@ Requires a running background task and a flight controller connection. Only avai
 
 ## Notes
 
+- In the servo editor, the Tool button's servo override can be switched on only after the page has read its values; until then, confirming the enable dialog does not enable an override (rotorflight-lua-ethos-suite PR #2552, Issue #2496).
+
 TODO: Verify persistence, reboot behaviour, profile scope and any restrictions in
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than
 firmware defaults; wire values may need scaling before display.
