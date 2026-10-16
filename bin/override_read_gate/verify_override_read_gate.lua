@@ -141,6 +141,14 @@ package.loaded["wfsuite.lib.msp_status"] = {
     return {kind = "statusRead", onData = onData, onError = onError}
   end,
 }
+
+-- Serial config: servos_pwm reads the ports to know whether servo_count packs the
+-- bus channels in, which is what decides how many PWM tiles its list builds.
+package.loaded["wfsuite.lib.msp_serial_config"] = {
+  buildReadMessage = function(onData, onError)
+    return {kind = "serialRead", onData = onData, onError = onError}
+  end,
+}
 do
   local servoConfig = requireModule("lib/msp_servo_config.lua")
   -- servos_bus reads through the module-level builder with its own index
@@ -230,8 +238,9 @@ end
 local function openServoPage(page, outcome)
   resetScenario()
   page.open(pageOpts())
-  answerReads({statusRead = true, mixerRead = true}, "ok", function(kind)
+  answerReads({statusRead = true, mixerRead = true, serialRead = true}, "ok", function(kind)
     if kind == "statusRead" then return {servo_count = 2} end
+    if kind == "serialRead" then return {ports = {}} end
     return {bus_servo_output_count = 2}
   end)
   runWakeups(1)
