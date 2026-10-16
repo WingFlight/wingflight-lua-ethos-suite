@@ -29,6 +29,11 @@ Requires a running background task and a flight controller connection.
 
 ## Notes
 
+- Save writes the rate, the PID and the Thrust Vector profile in that order. If the
+  flight controller refuses one of the writes, a *Save failed* dialog is shown and the
+  page stays unsaved, so *Save* remains available for a second attempt (rotorflight-lua-ethos-suite
+  Issue #2498).
+
 TODO: Verify persistence, reboot behaviour, profile scope and any restrictions in
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than
 firmware defaults; wire values may need scaling before display.
