@@ -135,10 +135,10 @@
     },
     "msg_save_failed_title": {
       "english": "Save failed",
-      "translation": "Opslaan",
+      "max_length": 11,
       "needs_translation": false,
       "reverse_text": false,
-      "max_length": 11
+      "translation": "Fout"
     },
     "msg_save_failed_body": {
       "english": "Settings were not saved to the flight controller. Please try again.",
@@ -146,6 +146,20 @@
       "needs_translation": false,
       "reverse_text": false,
       "max_length": 67
+    },
+    "msg_save_failed_local_body": {
+      "english": "Settings were not saved to the radio. Please try again.",
+      "max_length": 67,
+      "needs_translation": false,
+      "reverse_text": false,
+      "translation": "Instellingen niet opgeslagen op de zender. Probeer het opnieuw."
+    },
+    "msg_save_failed_model_body": {
+      "english": "The model's settings were not saved to the radio. Please try again.",
+      "max_length": 67,
+      "needs_translation": true,
+      "reverse_text": false,
+      "translation": "The model's settings were not saved to the radio. Please try again."
     },
     "msg_save_not_commited": {
       "english": "Save not committed",
@@ -5174,6 +5188,12 @@
           "needs_translation": false,
           "max_length": 17,
           "reverse_text": false
+        },
+        "edit_battery": {
+          "english": "Edit Battery",
+          "max_length": 16,
+          "needs_translation": false,
+          "translation": "Bewerk batterij"
         }
       },
       "esc_motors": {
@@ -9215,6 +9235,20 @@
       "needs_translation": false,
       "max_length": 8,
       "reverse_text": false
+    },
+    "msg_save_failed_local_body": {
+      "english": "Settings were not saved to the radio. Please try again.",
+      "max_length": 67,
+      "needs_translation": false,
+      "reverse_text": false,
+      "translation": "Instellingen niet opgeslagen op de zender. Probeer het opnieuw."
+    },
+    "msg_save_failed_model_body": {
+      "english": "The model's settings were not saved to the radio. Please try again.",
+      "max_length": 67,
+      "needs_translation": true,
+      "reverse_text": false,
+      "translation": "The model's settings were not saved to the radio. Please try again."
     }
   },
   "telemetry": {

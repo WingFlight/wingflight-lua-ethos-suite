@@ -32,9 +32,9 @@ Requires a running background task and a flight controller connection.
 
 ## Notes
 
-TODO: Verify persistence, reboot behaviour, profile scope and any restrictions in
-this page and its shared helpers. Codec defaults may be UI fallbacks rather than
-firmware defaults; wire values may need scaling before display.
+- Saving changes on this page reboots the flight controller.
+- While the model is armed, or while its armed state is *unknown after having been armed*, Save stays greyed out. The reboot after a save is skipped in that state.
+- Changes are written to the flight controller EEPROM upon Save.
 
 ## Source
 
