@@ -1221,6 +1221,18 @@ build: 125, 212 and 124 in lib/msp_servo_config.lua, 213 in lib/msp_servo_center
 pin to go red every time, after the unmodified modules have passed.
 '''
     ),
+    LuaStep(
+        name='Check the header Tool button enable state',
+        script='bin/tool_button_loaded/verify_tool_button_loaded.lua',
+        rationale=r'''Save is gated by the page runtime; Tool was not. A page with an onTool
+showed an enabled Tool button before its values had loaded, and on the servo
+override pages the dialog it opened could be confirmed against unread values.
+The runtime now drives the Tool button from the same loaded flag as Save,
+through a new setToolEnabled() on the header handle. Pages without an
+onTool are unchanged. Ported from rotorflight-lua-ethos-suite PR #2560
+(issue #2553).
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [

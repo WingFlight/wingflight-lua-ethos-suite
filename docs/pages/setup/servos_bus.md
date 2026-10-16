@@ -33,6 +33,8 @@ Requires a running background task and a flight controller connection. Only avai
 
 ## Notes
 
+- The Tool button is disabled until the page has loaded its values.
+
 TODO: Verify persistence, reboot behaviour, profile scope and any restrictions in
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than
 firmware defaults; wire values may need scaling before display.
