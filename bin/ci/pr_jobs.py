@@ -1397,6 +1397,19 @@ disconnected-page checks fail. --self-test splices the latch and the gate back
 out and requires them to go red.
 '''
     ),
+    LuaStep(
+        name='Every referenced i18n key resolves in every locale source',
+        script='bin/i18n_sources/verify_i18n_sources.lua',
+        rationale=r'''Ported from rotorflight-lua-ethos-suite PR #2564 (issue #2561):
+The locale build regenerates src/wfsuite/i18n from bin/i18n/json/ and drops any
+key that is missing from a source. Keys added directly to src/wfsuite/i18n/ would
+be silently dropped on the next build.
+
+The harness reads each source under bin/i18n/json/ with a small JSON reader and
+checks every @i18n(key)@ reference in src/wfsuite against it. --self-test removes
+keys from a copy of the English source and requires them to be reported.
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [
