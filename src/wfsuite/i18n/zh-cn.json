@@ -1394,6 +1394,13 @@
           "reverse_text": false,
           "translation": "没有存储卡"
         },
+        "no_dataflash": {
+          "english": "No dataflash",
+          "max_length": 16,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "No dataflash"
+        },
         "not_supported": {
           "english": "Not supported",
           "max_length": 13,
@@ -6920,6 +6927,12 @@
           "reverse_text": false,
           "translation": "电流来源"
         },
+        "edit_battery": {
+          "english": "Edit Battery",
+          "max_length": 16,
+          "needs_translation": false,
+          "translation": "编辑电池"
+        },
         "full_cell_voltage": {
           "english": "Full Cell Voltage",
           "max_length": 17,
@@ -6982,12 +6995,6 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "已选择"
-        },
-        "edit_battery": {
-          "english": "Edit Battery",
-          "max_length": 16,
-          "needs_translation": false,
-          "translation": "编辑电池"
         },
         "smartfuel_charge_drop_rate": {
           "english": "Charge Drop Rate",
