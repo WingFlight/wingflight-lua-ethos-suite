@@ -1111,6 +1111,55 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/servo_config_commands/verify_servo_config_commands.lua
 
+      # Ported from rotorflight-lua-ethos-suite PR #2542 (issue #2534): the bar gauge kept
+      # its last valid reading whenever its sensor dropped out, so a fuel bar stayed at 85% after
+      # the pack was unplugged before flight. Before the flight a dropped source now shows the
+      # loading dots; once a flight is under way the last reading is held, in flight as well as
+      # in postflight. The watts text object follows the same rule.
+      #
+      # No build and no package step reaches this -- it is a render path through a running
+      # widget. The harness drives the real bar gauge and the real watts text object
+      # (render.wakeup) with a fake telemetry source and the flight mode. Against unpatched
+      # master the three dropout-before-flight checks fail.
+      - name: Check the dashboard bar after telemetry loss
+        if: success() || failure()
+        run: lua5.4 bin/bar_disconnect/verify_bar_disconnect.lua
+
+      # Ported from rotorflight-lua-ethos-suite PR #2546 (issue #2498):
+      # the Select Profile page saves the rate, PID and Thrust Vector profile in turn. A
+      # refused write at any of the three steps left the progress dialog closed and nothing
+      # on screen, so the pilot saw the page return to normal with the change not saved.
+      #
+      # The WingFlight page reports a refusal at every step of the save chain (rate, PID,
+      # Thrust Vector) with the save-failed dialog and keeps the Save button lit, so a second
+      # attempt is possible. An accepted save shows no dialog and darkens the button.
+      #
+      # The harness drives the real page, bus and msp_select_profile codec, with stubs for
+      # the status read, the Thrust Vector read and write, the progress dialog and the header.
+      # Against wf/master three of its checks fail, one per refused step.
+      - name: Check the profile select page reports a refused save
+        if: success() || failure()
+        run: lua5.4 bin/profile_select/verify_profile_select.lua
+
+      # Ported from rotorflight-lua-ethos-suite PR #2541 (issue #2505):
+      # two dashboard toolbar items write to the flight controller, blackbox erase and
+      # battery profile, and neither their enable check nor their write path looked at the
+      # arm state. A battery picker open at arming, or an erase confirmation answered after
+      # arming, still wrote.
+      #
+      # No build and no package step reaches this -- it is a touch path through a running
+      # widget. The harness drives the real widgets/dashboard.lua through the descriptor the
+      # radio calls, and feeds the arm state through session.update the way the session does.
+      # While armed the Erase and Battery tiles are disabled, arming closes an open battery
+      # picker, and a confirmed erase answered after arming publishes no msp.request.
+      # Disarmed, the same paths publish their write again. The checks that depend on the
+      # toolbar being reachable assert that it is reachable first, so a run that cannot
+      # reach the tiles fails instead of passing vacuously. Run against unpatched
+      # wingflight-lua-ethos-suite master, 11 of 19 checks fail.
+      - name: Check the dashboard Erase and Battery tiles while armed
+        if: success() || failure()
+        run: lua5.4 bin/toolbar_armed/verify_toolbar_armed.lua
+
       # Ported from rotorflight-lua-ethos-suite PR #2544 (issue #2500):
       # settingsStore.save() returns false when the INI file cannot be written, and ten
       # local settings pages threw that value away. They published settings.update and
