@@ -2136,9 +2136,10 @@
         },
         "msg_no_columns": {
           "english": "No plottable columns in this file",
-          "translation": "No plottable columns in this file",
-          "needs_translation": true,
-          "max_length": 33
+          "translation": "Geen plotbare kolommen",
+          "needs_translation": false,
+          "max_length": 33,
+          "reverse_text": false
         },
         "msg_no_logs_found": {
           "english": "NO LOG FILES FOUND",
