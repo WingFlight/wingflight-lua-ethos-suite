@@ -54,6 +54,11 @@ local adjChangedAt = nil
 -- window above that is what turns a burst of clicks into one announcement.
 local ADJ_SETTLE_SECONDS = 0.35
 local speakingUntil = 0
+-- State changes that had to wait for the speaking gate in the current tick.
+-- Their key is left out of `previous` by rememberCurrent(), so the same change
+-- is compared again on the next tick and spoken then (issue #2503). Cleared by
+-- rememberCurrent().
+local holdPrevious = {}
 local rollingSamples = {}
 local timerTriggered = false
 local timerLastBeep = nil
@@ -463,18 +468,23 @@ local function announceCraftName()
   end
 end
 
-local function announceArmed()
+local function announceArmed(now)
   if not events.armflags then return end
   if previous.isArmed == nil or session.isArmed == nil then return end
   if previous.isArmed == session.isArmed then return end
+  if not canSpeak(now) then holdPrevious.isArmed = true; return end
+  markSpoken(now, SPEAK_WAV_SECONDS)
   playAlert(session.isArmed and "armed.wav" or "disarmed.wav")
 end
 
-local function announceProfile(key, enabled, file)
+local function announceProfile(now, key, enabled, file)
   if not enabled then return end
   local value = tonumber(session[key])
   local last = tonumber(previous[key])
   if value == nil or last == nil or value == last then return end
+  if not canSpeak(now) then holdPrevious[key] = true; return end
+  -- Marked before anything is queued: the number must not cut into its own file.
+  markSpoken(now, SPEAK_WAV_SECONDS + SPEAK_NUM_SECONDS)
   playAlert(file)
   playNumber(math.floor(value))
 end
@@ -520,7 +530,7 @@ local function batteryProfileCellCount(profile)
   return nil
 end
 
-local function announceBatteryProfile()
+local function announceBatteryProfile(now)
   if not events.battery_profile then return end
   -- Both already the internal 0-based index (see lib/battery_profile_index.lua).
   local value = batteryProfileIndex.index0(session.batteryProfile)
@@ -530,6 +540,11 @@ local function announceBatteryProfile()
   local capacity = batteryProfileCapacity(value)
   if not capacity then return end
   local cells = batteryProfileCellCount(value)
+
+  if not canSpeak(now) then holdPrevious.batteryProfile = true; return end
+  local spokenFor = SPEAK_WAV_SECONDS + SPEAK_NUM_SECONDS
+  if cells then spokenFor = spokenFor + SPEAK_NUM_SECONDS + SPEAK_WAV_SECONDS end
+  markSpoken(now, spokenFor)
 
   playAlert("battery.wav")
   playNumber(math.floor(capacity + 0.5), UNIT_MILLIAMPERE_HOUR)
@@ -541,7 +556,7 @@ local function announceBatteryProfile()
   end
 end
 
-local function announceGovernor()
+local function announceGovernor(now)
   if not events.governor then return end
   if session.connected ~= true or session.isArmed ~= true then return end
   local mode = tonumber(session.governorMode)
@@ -551,7 +566,10 @@ local function announceGovernor()
   local last = tonumber(previous.governorState)
   if value == nil or last == nil or value == last then return end
   local file = GOVERNOR_FILES[math.floor(value)]
-  if file then playGovernor(file) end
+  if not file then return end
+  if not canSpeak(now) then holdPrevious.governorState = true; return end
+  markSpoken(now, SPEAK_WAV_SECONDS)
+  playGovernor(file)
 end
 
 -- Unlike announceGovernor(), not armed-gated: mode selection (Angle,
@@ -1196,12 +1214,12 @@ end
 
 local function rememberCurrent()
   previous.connected = session.connected
-  previous.isArmed = session.isArmed
-  previous.pidProfile = session.pidProfile
-  previous.rateProfile = session.rateProfile
-  previous.tvProfile = session.tvProfile
-  previous.batteryProfile = session.batteryProfile
-  previous.governorState = session.governorState
+  if not holdPrevious.isArmed then previous.isArmed = session.isArmed end
+  if not holdPrevious.pidProfile then previous.pidProfile = session.pidProfile end
+  if not holdPrevious.rateProfile then previous.rateProfile = session.rateProfile end
+  if not holdPrevious.tvProfile then previous.tvProfile = session.tvProfile end
+  if not holdPrevious.batteryProfile then previous.batteryProfile = session.batteryProfile end
+  if not holdPrevious.governorState then previous.governorState = session.governorState end
   if not flightModeHeld then
     previous.flightModeFlags = session.flightModeFlags
     previous.navBlocked = session.navBlocked
@@ -1211,6 +1229,7 @@ local function rememberCurrent()
   previous.adjFunction = session.adjFunction
   previous.adjValue = session.adjValue
   previous.autoTrim = session.systemStatus and session.systemStatus.autoTrim
+  for key in pairs(holdPrevious) do holdPrevious[key] = nil end
 end
 
 local function clearAlertState()
@@ -1278,12 +1297,12 @@ function audio_events.wakeup()
   end
 
   announceCraftName()
-  announceArmed()
-  announceProfile("pidProfile", events.pid_profile, "profile.wav")
-  announceProfile("rateProfile", events.rate_profile, "rates.wav")
-  announceProfile("tvProfile", events.tv_profile, "tv.wav")
-  announceBatteryProfile()
-  announceGovernor()
+  announceArmed(now)
+  announceProfile(now, "pidProfile", events.pid_profile, "profile.wav")
+  announceProfile(now, "rateProfile", events.rate_profile, "rates.wav")
+  announceProfile(now, "tvProfile", events.tv_profile, "tv.wav")
+  announceBatteryProfile(now)
+  announceGovernor(now)
   announceFlightMode()
   announceGpsFix()
   announceSystemAlerts(now)
@@ -1304,6 +1323,7 @@ function audio_events.reset()
   craftNameAnnounced = false
   adjWavs = nil
   for key in pairs(previous) do previous[key] = nil end
+  for key in pairs(holdPrevious) do holdPrevious[key] = nil end
   for key in pairs(lastAlertAt) do lastAlertAt[key] = nil end
   clearAlertState()
   resetFuelAnnouncements()
