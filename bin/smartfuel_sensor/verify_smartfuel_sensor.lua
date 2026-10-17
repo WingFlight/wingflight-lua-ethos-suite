@@ -279,6 +279,8 @@ do
   local source = readFile(SESSION_PATH)
   check("updateFuel() does not write a settling nil to the sensor, and keeps re-sending",
     source:find("if percent == nil and settling then\n    smartfuelSensor:refresh()\n  else\n    smartfuelSensor:set(percent, session.connected)", 1, true) ~= nil)
+  check("updateFuel() keeps session.fuelPercent while settling",
+    source:find("else\n    smartfuelSensor:set(percent, session.connected)\n    if percent ~= session.fuelPercent then", 1, true) ~= nil)
   check("and the estimator's reason reaches it", source:find("percent, settling = localSmartFuel:update({", 1, true) ~= nil)
 end
 
