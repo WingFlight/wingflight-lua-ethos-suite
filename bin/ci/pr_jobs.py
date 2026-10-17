@@ -141,6 +141,17 @@ bitmap nor allocates per draw.
 '''
     ),
     LuaStep(
+        name='Check the dashboard erase wait against the flash ready bit',
+        script='bin/dashboard_erase/verify_dashboard_erase.lua',
+        rationale=r'''The erase is acknowledged before the flash is erased, and the ready
+bit is false until it is idle. The wait must end on a read that
+reports ready, keep reading on not-ready, failed or flag-less
+replies, time out 240 s after the acknowledgement, and ignore late
+replies of an earlier erase. The erase is started through the real
+toolbar path.
+'''
+    ),
+    LuaStep(
         name='Check field layout slot pooling',
         script='bin/field_layout/verify_field_layout.lua',
         rationale=r'''Ethos form widgets retain closures across form.clear(), so

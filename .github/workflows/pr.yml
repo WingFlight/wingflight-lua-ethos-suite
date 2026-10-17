@@ -86,6 +86,16 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/dashboard/verify_image_caches.lua
 
+      # The erase is acknowledged before the flash is erased, and the ready
+      # bit is false until it is idle. The wait must end on a read that
+      # reports ready, keep reading on not-ready, failed or flag-less
+      # replies, time out 240 s after the acknowledgement, and ignore late
+      # replies of an earlier erase. The erase is started through the real
+      # toolbar path.
+      - name: Check the dashboard erase wait against the flash ready bit
+        if: success() || failure()
+        run: lua5.4 bin/dashboard_erase/verify_dashboard_erase.lua
+
       # Ethos form widgets retain closures across form.clear(), so
       # app/field_layout.lua pools accessor slots per page+field shape. This
       # checks the pool is reused across visits, never shrunk on release,
