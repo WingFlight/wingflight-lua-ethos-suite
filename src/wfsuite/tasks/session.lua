@@ -1436,9 +1436,12 @@ local function updateFuel(protocol)
 
   -- A nil while the estimator re-settles (after disarm the pack voltage rises as the
   -- load goes away, and the estimate starts again) is not "no data". Writing it would
-  -- reset the Ethos sensor, which then shows as lost. Keep the last value; a real
-  -- loss (no voltage, no config) still clears the sensor.
-  if not (percent == nil and settling) then
+  -- reset the Ethos sensor, which then shows as lost. Keep the last value, and keep
+  -- re-sending it, because settling can outlast the 4 s Ethos allows between values.
+  -- A real loss (no voltage, no config, a new battery config) still clears the sensor.
+  if percent == nil and settling then
+    smartfuelSensor:refresh()
+  else
     smartfuelSensor:set(percent, session.connected)
   end
 

@@ -173,6 +173,32 @@ do
     string.format("largest gap %.2f s", gap))
 end
 
+-- While the estimator settles, updateFuel() only calls refresh(). Settling can
+-- outlast 4 s, so refresh() alone has to keep the held value alive.
+do
+  local clock = {t = 0}
+  local log = {}
+  _G.system = {getSource = function() return nil end}
+  _G.model = {createSensor = function() return newStubSensor(log, clock) end}
+  os.clock = function() return clock.t end
+  installRequire()
+  local DiySensor = assert(load(readFile(DIY_PATH), "@" .. DIY_PATH))()
+  local sensor = DiySensor.new(0x5FE1, "Smart Fuel", nil, -1, 100)
+  sensor:set(50, true)
+  local t = 0
+  while t < 20 do
+    t = t + 0.52
+    clock.t = t
+    sensor:refresh()
+  end
+  local gap, enough = maxGap(log)
+  local reset = false
+  for _, entry in ipairs(log) do if entry.reset then reset = true end end
+  check("a held value is pushed again within 2.5 s through 20 s of settling",
+    enough and gap <= 2.5 and #log > 1 and not reset,
+    string.format("largest gap %.2f s over %d pushes, reset %s", gap, #log, tostring(reset)))
+end
+
 out("the estimator says why it is answering nil")
 
 -- Pack voltage on a 3S pack, feeding the estimator on the 0.25 s wakeup cadence.
@@ -230,12 +256,29 @@ do
     string.format("reason %s", tostring(why)))
 end
 
+-- A new battery config makes the last reading wrong, so it must not be held.
+do
+  local est, clock = estimatorRig()
+  local value = nil
+  for _ = 1, 40 do
+    clock.t = clock.t + 0.25
+    value = est:update(inputs(12.3, true))
+  end
+  local changed = inputs(12.3, true)
+  changed.packCapacity = 5000
+  clock.t = clock.t + 0.25
+  local v, why = est:update(changed)
+  check("a battery config change is a plain nil, so the old reading is cleared",
+    value ~= nil and v == nil and why == nil,
+    string.format("before %s, after %s reason %s", tostring(value), tostring(v), tostring(why)))
+end
+
 out("the session keeps the last value while the estimator settles")
 
 do
   local source = readFile(SESSION_PATH)
-  check("updateFuel() does not write a settling nil to the sensor",
-    source:find("if not (percent == nil and settling) then", 1, true) ~= nil)
+  check("updateFuel() does not write a settling nil to the sensor, and keeps re-sending",
+    source:find("if percent == nil and settling then\n    smartfuelSensor:refresh()\n  else\n    smartfuelSensor:set(percent, session.connected)", 1, true) ~= nil)
   check("and the estimator's reason reaches it", source:find("percent, settling = localSmartFuel:update({", 1, true) ~= nil)
 end
 

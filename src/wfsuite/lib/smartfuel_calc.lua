@@ -188,6 +188,10 @@ function SmartFuel:update(inputs)
   if configChanged(self, cellCount, packCapacity, minV, fullV, warningPercent) then
     rememberConfig(self, cellCount, packCapacity, minV, fullV, warningPercent)
     resetFuelState(self, now)
+    -- The last reading was for the old battery config, so this restart is not
+    -- "settling": a plain nil lets the caller clear it instead of holding it.
+    self.lastPackVoltage = voltage
+    return nil
   end
 
   if self.voltageStabilised and inputs.isArmed == false and self.lastPackVoltage

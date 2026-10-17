@@ -1139,7 +1139,8 @@ estimator restarts and answers nil, which the session wrote to the sensor as a r
 The harness drives the real sensor on the session's cadence and the real estimator through a
 disarm with rising voltage. It checks that an unchanged value is pushed again within 2.5 s,
 that the estimator says it is settling on every nil while it restarts, and that a missing
-voltage is still a plain nil. A copy with the old 4.0 s window has to miss the bound.
+voltage is still a plain nil. The held value keeps being re-sent while the estimate settles,
+and a battery config change clears it. A copy with the old 4.0 s window has to miss the bound.
 
 Ported from rotorflight-lua-ethos-suite PR #2576.
 '''
