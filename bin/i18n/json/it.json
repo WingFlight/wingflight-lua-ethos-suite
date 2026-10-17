@@ -5690,36 +5690,36 @@
         },
         "bgtask_name": {
           "english": "Background task",
-          "translation": "Background task",
-          "needs_translation": true,
+          "translation": "Attività di sfondo",
+          "needs_translation": false,
           "reverse_text": false,
-          "max_length": 15
+          "max_length": 18
         },
         "bgtask_heartbeat": {
           "english": "Heartbeat",
-          "translation": "Heartbeat",
-          "needs_translation": true,
+          "translation": "Battito",
+          "needs_translation": false,
           "reverse_text": false,
-          "max_length": 9
+          "max_length": 12
         },
         "bgtask_revivals": {
           "english": "Revivals",
-          "translation": "Revivals",
-          "needs_translation": true,
+          "translation": "Riavvii",
+          "needs_translation": false,
           "reverse_text": false,
-          "max_length": 8
+          "max_length": 11
         },
         "bgtask_running": {
           "english": "Running",
-          "translation": "Running",
-          "needs_translation": true,
+          "translation": "In esecuzione",
+          "needs_translation": false,
           "reverse_text": false,
-          "max_length": 7
+          "max_length": 13
         },
         "bgtask_stale": {
           "english": "Not reporting",
-          "translation": "Not reporting",
-          "needs_translation": true,
+          "translation": "Non risponde",
+          "needs_translation": false,
           "reverse_text": false,
           "max_length": 13
         },
