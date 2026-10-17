@@ -1566,6 +1566,20 @@ unpatched master four of the checks fail.
 '''
     ),
     LuaStep(
+        name='Diagnostics Status and Info open without a flight controller',
+        script='bin/diagnostics_offline/verify_diagnostics_offline.lua',
+        rationale=r'''Ported from rotorflight-lua-ethos-suite PR #2583 (issue #2582): Status and Info show
+values that do not need the flight controller, but the menu blocked them while disconnected.
+They are now offline-capable, while FBL Status, ELRS Telemetry and RX Input Backup stay FC-only.
+The Status page's API line showed OK even without a connection; it now reads "-" unless the link
+is live and the MSP API version is supported.
+
+The harness reads the offline flags from tool.lua and drives the real Status page with a
+recording form: no connection gives "-", a live supported link gives OK, and a lost link
+after a supported one gives "-" again.
+'''
+    ),
+    LuaStep(
         name='The link-loss edge of the audio task resets once per outage',
         script='bin/audio_disconnect/verify_audio_disconnect.lua',
         rationale=r'''Ported from rotorflight-lua-ethos-suite PR #2581 (issue #2437): the disconnected branch
@@ -1580,7 +1594,25 @@ the reconnect, and the loss and the recovery of an armed model are announced for
 outages. Its can-fail check removes the re-arm from a copy of the task and requires the second
 outage to go silent there. Passing on unpatched master is expected: this is a structural
 change with no audible effect, so the harness guards the behaviour, not the saving.
-'''
+''',
+    ),
+    LuaStep(
+        name='The Telemetry page refuses a switch the save would refuse, at the tap',
+        script='bin/telemetry_slot_budget/verify_telemetry_slot_budget.lua',
+        rationale=r'''Ported from rotorflight-lua-ethos-suite PR #2586 (issue #2499): the toggle gate of the
+Telemetry page counted only the switches the page had turned on, while the save check also counted
+the native slots the radio keeps. With three kept slots the gate accepted a 40th switch that the
+save then refused, with no reason shown at the tap. The decision now lives in
+lib/telemetry_slot_budget.lua, and the page asks it in both places with the same managed count, so
+the tap and the save cannot disagree.
+
+The harness checks the arithmetic at the limit: the save fits exactly at 40, the 41st switch is
+refused, a 38th switch is refused when three native slots are kept, and the gate matches the save
+for every count it can meet. It then runs the page itself, with the form and the page runtime
+stubbed, and taps a switch the way the pilot does: the 38th tap is refused with three native slots
+kept, the 37th is accepted, and a copy of the page with the old gate accepts the 38th, so the check
+can go red. Against unpatched master the library does not exist, so the job fails there by design.
+''',
     ),
     LuaStep(
         name='The background task heartbeat reads running, stale or none, with its age and revivals',

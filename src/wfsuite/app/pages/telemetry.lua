@@ -20,6 +20,7 @@ local pageRuntime = requireModule("app/page_runtime.lua")
 local featureConfig = requireModule("lib/msp_feature_config.lua")
 local telemetryConfig = requireModule("lib/msp_telemetry_config.lua")
 local catalog = requireModule("lib/telemetry_sensor_catalog.lua")
+local slotBudget = requireModule("lib/telemetry_slot_budget.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.telemetry.name)@"
 local BTN_OK = "@i18n(app.btn_ok)@"
@@ -131,8 +132,6 @@ local function open(opts)
   local selected = {}
   local previousConflictState = {}
   local fieldsBySensor = {}
-  -- Preserved slots take up room in the 40 just as selected sensors do.
-  local unmanagedCount = 0
 
   local function refreshConflictFields()
     for _, field in pairs(fieldsBySensor) do
@@ -166,11 +165,11 @@ local function open(opts)
       "wfsuite.lib.msp_feature_config",
       "wfsuite.lib.msp_telemetry_config",
       "wfsuite.lib.telemetry_sensor_catalog",
+      "wfsuite.lib.telemetry_slot_budget",
     },
     onLoaded = function()
       local telemetry = runtime.data.telemetry or {}
       selectedFromSlots(telemetry.slots, selected)
-      unmanagedCount = countUnmanaged(telemetry.slots)
       previousConflictState = {}
       refreshConflictFields()
       if form.invalidate then form.invalidate() end
@@ -185,13 +184,14 @@ local function open(opts)
       end
       local telemetry = rt.data.telemetry
       if telemetry then
-        -- The switch setter already refuses a 41st sensor, but the Tool
-        -- button's defaults are not checked against the preserved slots.
-        -- beforeSave cannot veto the write, so on overflow the slots and mode
-        -- are left exactly as read (the write re-sends the FC's current
-        -- state) and the dialog tells the pilot, rather than silently
-        -- dropping sensors.
-        if countSelected(selected) + unmanagedCount > telemetryConfig.SLOT_COUNT then
+        -- Preserved slots count against the 40 just as managed ones do, so
+        -- the "no more than 40" refusal stays honest now that unmanaged slots
+        -- are no longer overwritten with 0.
+        local unmanaged = countUnmanaged(telemetry.slots)
+        if slotBudget.overflows(countSelected(selected), unmanaged, telemetryConfig.SLOT_COUNT) then
+          -- Refused: slots and mode are left exactly as read, so the write
+          -- that follows re-sends the flight controller's current state
+          -- rather than a truncated version of the pilot's wish.
           openTooManyDialog()
           return
         end
@@ -262,8 +262,15 @@ local function open(opts)
             return selected[sensorId] == true
           end,
           function(value)
+            -- The same quantity the save check counts: the switches the save would
+            -- write and the kept native slots.
+            local rt = controlRef.runtime
+            local telemetrySlots = rt and rt.data and rt.data.telemetry and rt.data.telemetry.slots
             if value == true and selected[sensorId] ~= true
-                and countSelected(selected) + unmanagedCount >= telemetryConfig.SLOT_COUNT then
+                and slotBudget.overflowsWithOneMore(
+                  countSelected(selected),
+                  countUnmanaged(telemetrySlots),
+                  telemetryConfig.SLOT_COUNT) then
               openTooManyDialog()
               return false
             end

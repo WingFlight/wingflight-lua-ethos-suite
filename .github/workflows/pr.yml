@@ -1432,6 +1432,19 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/audio_serial/verify_audio_serial.lua
 
+      # Ported from rotorflight-lua-ethos-suite PR #2583 (issue #2582): Status and Info show
+      # values that do not need the flight controller, but the menu blocked them while disconnected.
+      # They are now offline-capable, while FBL Status, ELRS Telemetry and RX Input Backup stay FC-only.
+      # The Status page's API line showed OK even without a connection; it now reads "-" unless the link
+      # is live and the MSP API version is supported.
+      #
+      # The harness reads the offline flags from tool.lua and drives the real Status page with a
+      # recording form: no connection gives "-", a live supported link gives OK, and a lost link
+      # after a supported one gives "-" again.
+      - name: Diagnostics Status and Info open without a flight controller
+        if: success() || failure()
+        run: lua5.4 bin/diagnostics_offline/verify_diagnostics_offline.lua
+
       # Ported from rotorflight-lua-ethos-suite PR #2581 (issue #2437): the disconnected branch
       # of tasks/audio_events.lua's wakeup was entered as a state test, not an edge, so its state
       # reset ran on every audio tick while the link was down. The reset now runs once per outage,
@@ -1447,6 +1460,23 @@ jobs:
       - name: The link-loss edge of the audio task resets once per outage
         if: success() || failure()
         run: lua5.4 bin/audio_disconnect/verify_audio_disconnect.lua
+
+      # Ported from rotorflight-lua-ethos-suite PR #2586 (issue #2499): the toggle gate of the
+      # Telemetry page counted only the switches the page had turned on, while the save check also counted
+      # the native slots the radio keeps. With three kept slots the gate accepted a 40th switch that the
+      # save then refused, with no reason shown at the tap. The decision now lives in
+      # lib/telemetry_slot_budget.lua, and the page asks it in both places with the same managed count, so
+      # the tap and the save cannot disagree.
+      #
+      # The harness checks the arithmetic at the limit: the save fits exactly at 40, the 41st switch is
+      # refused, a 38th switch is refused when three native slots are kept, and the gate matches the save
+      # for every count it can meet. It then runs the page itself, with the form and the page runtime
+      # stubbed, and taps a switch the way the pilot does: the 38th tap is refused with three native slots
+      # kept, the 37th is accepted, and a copy of the page with the old gate accepts the 38th, so the check
+      # can go red. Against unpatched master the library does not exist, so the job fails there by design.
+      - name: The Telemetry page refuses a switch the save would refuse, at the tap
+        if: success() || failure()
+        run: lua5.4 bin/telemetry_slot_budget/verify_telemetry_slot_budget.lua
 
       # Ported from rotorflight-lua-ethos-suite PR #2584 (issue #2518): the background task
       # publishes its heartbeat and its revival count on the bus, but nothing on a diagnostics page

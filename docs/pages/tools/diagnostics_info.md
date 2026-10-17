@@ -17,7 +17,7 @@ TODO: Explain what this page controls and when a pilot would use it.
 
 *System* → *Tools* → *Diagnostics* → *Info*
 
-Requires a running background task and a flight controller connection.
+Open without a flight controller: the suite version, Ethos version, simulation flag and supported MSP versions are shown. The firmware, transport, craft name and MCU ID fields need the flight controller. Read-only while the model is armed.
 
 ## Settings
 

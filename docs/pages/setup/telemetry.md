@@ -36,7 +36,10 @@ Requires a running background task and a flight controller connection.
 - **No more than 40 sensors in total**, counting the kept slots. Turning on a
   switch that would go over is refused with a dialog. If the default set from
   the Tool button would go over, saving shows the same dialog and leaves the
-  flight controller's sensor slots as they were.
+  flight controller's sensor slots as they were. The save counts the same slots,
+  so the tap and the save agree on the number. One case is still refused at the
+  tap: a switch that turns off a conflicting child while all 40 slots are in use,
+  even when the save would accept the result.
 - **Saving sets the flight controller's CRSF telemetry mode to Custom.** The
   suite reads custom CRSF telemetry only, so in Native mode it would see no
   sensors. This page has no control for the mode.

@@ -56,6 +56,14 @@ function diagnostics_common.setOkColor(field, ok)
   end
 end
 
+-- Only GREEN and RED are used as colour globals anywhere in the suite, both
+-- here; anything else would be a guess about the Ethos API.
+function diagnostics_common.setFieldColor(field, color)
+  if field and field.color then
+    field:color(color)
+  end
+end
+
 -- A line whose text spans the whole window rather than the narrow right-hand
 -- value column addValueLine() writes into -- the construction
 -- app/esc_error.lua uses for its reason lines. Returns the static text so the
