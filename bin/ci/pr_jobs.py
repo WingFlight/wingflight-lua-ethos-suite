@@ -1467,6 +1467,51 @@ function 76 to 82 has a name, and that every word of every name in wavs.lua has 
 file in default, us and gb (checked in src/ and in bin/sound-generator/soundpack/en).
 '''
     ),
+    # Appended after the tool-button port, so this entry is a pure addition rather
+    # than a re-registration of any step above.
+    LuaStep(
+        name='The dataflash erase waits for a read taken after it, and the Tool button follows the board',
+        script='bin/blackbox_erase/verify_blackbox_erase.lua',
+        rationale=r'''Issue #2495: the erase wait could end on a read asked for before the erase, a read
+asked for while another was in flight was dropped so no read followed the erase, and the
+Tool button was always offered, so a second erase could start while one ran.
+
+Each read carries a sequence number; the erase is finished only by a read requested after
+the erase command completed, a read asked for while another is in flight is queued, and the
+Tool button is enabled only on a ready board and not while erasing. The harness drives the
+real blackbox_status page with the messages answered by hand, in the order that exposes each
+defect. Against unpatched master the erase-wait and Tool-gate checks fail. --self-test
+splices the sequence test out and requires the erase-wait check to go red.
+Ported from rotorflight-lua-ethos-suite PR #2568 (issue #2495).
+'''
+    ),
+    LuaStep(
+        name='The Logs page reads CSV columns by their header name',
+        script='bin/log_columns/verify_log_columns.lua',
+        rationale=r'''Issue #2506: the Logs page read every column by its position and never parsed the
+header row, so a log written by another tool was plotted from the wrong columns, and an
+empty file was drawn as a flat zero line.
+
+The reader is lib/log_columns.lua, pure functions over the file text. The harness checks
+name-based lookup against a file in another column order, a missing column, a header-only
+and an empty file, CRLF line endings and non-numeric values. --self-test swaps in a
+position-based header lookup and requires the foreign-order checks to go red.
+Ported from rotorflight-lua-ethos-suite PR #2567 (issue #2506).
+'''
+    ),
+    LuaStep(
+        name='A board without dataflash shows Not supported, not a zero capacity',
+        script='bin/blackbox_text/verify_blackbox_text.lua',
+        rationale=r'''Issue #2507: a board without dataflash answers total = 0, and the BLACKBOX text
+object treated that as a real capacity and drew 0.0/0.0 MB. The widget now shows the
+existing "Not supported" text for total = 0, and keeps the loading dots for "no answer yet".
+
+The harness drives the real widget through render.wakeup() with the session values the
+summary sets. Against unpatched master the no-dataflash checks fail. --self-test removes
+the new branch and requires those checks to go red.
+Ported from rotorflight-lua-ethos-suite PR #2566 (issue #2507).
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [
