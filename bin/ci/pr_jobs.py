@@ -1462,6 +1462,20 @@ Ported from rotorflight-lua-ethos-suite PR #2568 (issue #2495).
 '''
     ),
     LuaStep(
+        name='The Logs page reads CSV columns by their header name',
+        script='bin/log_columns/verify_log_columns.lua',
+        rationale=r'''Issue #2506: the Logs page read every column by its position and never parsed the
+header row, so a log written by another tool was plotted from the wrong columns, and an
+empty file was drawn as a flat zero line.
+
+The reader is lib/log_columns.lua, pure functions over the file text. The harness checks
+name-based lookup against a file in another column order, a missing column, a header-only
+and an empty file, CRLF line endings and non-numeric values. --self-test swaps in a
+position-based header lookup and requires the foreign-order checks to go red.
+Ported from rotorflight-lua-ethos-suite PR #2567 (issue #2506).
+'''
+    ),
+    LuaStep(
         name='A board without dataflash shows Not supported, not a zero capacity',
         script='bin/blackbox_text/verify_blackbox_text.lua',
         rationale=r'''Issue #2507: a board without dataflash answers total = 0, and the BLACKBOX text
