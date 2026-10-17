@@ -1394,6 +1394,13 @@
           "reverse_text": false,
           "translation": "Sem cartão"
         },
+        "no_dataflash": {
+          "english": "No dataflash",
+          "max_length": 16,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Sem dataflash"
+        },
         "not_supported": {
           "english": "Not supported",
           "max_length": 13,

@@ -1459,6 +1459,19 @@ position-based header lookup and requires the foreign-order checks to go red.
 Ported from rotorflight-lua-ethos-suite PR #2567 (issue #2506).
 '''
     ),
+    LuaStep(
+        name='A board without dataflash shows Not supported, not a zero capacity',
+        script='bin/blackbox_text/verify_blackbox_text.lua',
+        rationale=r'''Issue #2507: a board without dataflash answers total = 0, and the BLACKBOX text
+object treated that as a real capacity and drew 0.0/0.0 MB. The widget now shows the
+existing "Not supported" text for total = 0, and keeps the loading dots for "no answer yet".
+
+The harness drives the real widget through render.wakeup() with the session values the
+summary sets. Against unpatched master the no-dataflash checks fail. --self-test removes
+the new branch and requires those checks to go red.
+Ported from rotorflight-lua-ethos-suite PR #2566 (issue #2507).
+'''
+    ),
 ]
 
 VERBATIM_JOBS = [
