@@ -1443,14 +1443,13 @@ local function updateFuel(protocol)
     smartfuelSensor:refresh()
   else
     smartfuelSensor:set(percent, session.connected)
-  end
-
-  if percent ~= session.fuelPercent then
-    if session.fuelPercent == nil and percent ~= nil then
-      debugLog.print("[session] fuelPercent now available: " .. tostring(percent) .. "% (mode=" .. tostring(session.smartfuelMode) .. ")")
+    if percent ~= session.fuelPercent then
+      if session.fuelPercent == nil and percent ~= nil then
+        debugLog.print("[session] fuelPercent now available: " .. tostring(percent) .. "% (mode=" .. tostring(session.smartfuelMode) .. ")")
+      end
+      session.fuelPercent = percent
+      publish()
     end
-    session.fuelPercent = percent
-    publish()
   end
 end
 
