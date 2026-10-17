@@ -68,19 +68,19 @@ local FIELDS = {
 -- tv_pid.c's PG_RESET_TEMPLATE).
 local SIMULATOR_RESPONSE = {
   0,    -- tv_profile_index (profile 0)
-  105, 0, 45, 0,  0, 0,  65, 0,  35, 0,  -- roll_p/i/d/f/b
-  105, 0, 45, 0,  0, 0,  65, 0,  35, 0,  -- pitch_p/i/d/f/b
-  190, 0, 45, 0,  0, 0,  65, 0,  35, 0,  -- yaw_p/i/d/f/b
+  150, 0, 15, 0,  0, 0,  30, 0,  35, 0,  -- roll_p/i/d/f/b
+  150, 0, 15, 0,  0, 0,  30, 0,  35, 0,  -- pitch_p/i/d/f/b
+  150, 0, 15, 0,  0, 0,  30, 0,  35, 0,  -- yaw_p/i/d/f/b
   100, 0, 100, 0, 100, 0, -- master_gain_0/1/2
-  60, 60, 60,   -- iterm_decay_time_0/1/2 (0.60s, decimals=2)
-  35,   -- iterm_decay_limit
+  30, 30, 30,   -- iterm_decay_time_0/1/2 (0.30s, decimals=2)
+  0,    -- iterm_decay_limit
   22, 22, 22,   -- iterm_relax_level_0/1/2
   5, 5, 5,      -- bounceback_0/1/2
-  45, 45, 60,   -- error_limit_0/1/2
+  25, 25, 25,   -- error_limit_0/1/2
   15, 15, 20,   -- dterm_cutoff_0/1/2
   15, 15, 20,   -- bterm_cutoff_0/1/2
   50, 50, 100,  -- gyro_cutoff_0/1/2
-  40,   -- hold_gain
+  25,   -- hold_gain
   5,    -- hold_deadband
   44, 1, -- hold_max_rate (U16 LE: 300 = 0x012C -> 44, 1)
   0, 0, 0, -- gain_curve_0/1/2
@@ -94,37 +94,37 @@ local SIMULATOR_RESPONSE = {
 -- same raw wire domain as `min`/`max`, matching iterm_decay_time_0's
 -- decimals=2 display (seconds) over its actual 1-100 (0.01 s) range.
 local FIELD_META = {
-  roll_p = {min = 0, max = 1000, default = 105},
-  roll_i = {min = 0, max = 1000, default = 45},
+  roll_p = {min = 0, max = 1000, default = 150},
+  roll_i = {min = 0, max = 1000, default = 15},
   roll_d = {min = 0, max = 1000, default = 0},
-  roll_f = {min = 0, max = 1000, default = 65},
+  roll_f = {min = 0, max = 1000, default = 30},
   roll_b = {min = 0, max = 1000, default = 35},
-  pitch_p = {min = 0, max = 1000, default = 105},
-  pitch_i = {min = 0, max = 1000, default = 45},
+  pitch_p = {min = 0, max = 1000, default = 150},
+  pitch_i = {min = 0, max = 1000, default = 15},
   pitch_d = {min = 0, max = 1000, default = 0},
-  pitch_f = {min = 0, max = 1000, default = 65},
+  pitch_f = {min = 0, max = 1000, default = 30},
   pitch_b = {min = 0, max = 1000, default = 35},
-  yaw_p = {min = 0, max = 1000, default = 190},
-  yaw_i = {min = 0, max = 1000, default = 45},
+  yaw_p = {min = 0, max = 1000, default = 150},
+  yaw_i = {min = 0, max = 1000, default = 15},
   yaw_d = {min = 0, max = 1000, default = 0},
-  yaw_f = {min = 0, max = 1000, default = 65},
+  yaw_f = {min = 0, max = 1000, default = 30},
   yaw_b = {min = 0, max = 1000, default = 35},
   master_gain_0 = {min = 0, max = 200, default = 100, suffix = "%"},
   master_gain_1 = {min = 0, max = 200, default = 100, suffix = "%"},
   master_gain_2 = {min = 0, max = 200, default = 100, suffix = "%"},
-  iterm_decay_time_0 = {min = 1, max = 100, default = 60, decimals = 2, suffix = "s"},
-  iterm_decay_time_1 = {min = 1, max = 100, default = 60, decimals = 2, suffix = "s"},
-  iterm_decay_time_2 = {min = 1, max = 100, default = 60, decimals = 2, suffix = "s"},
-  iterm_decay_limit = {min = 0, max = 250, default = 35, suffix = "°/s"},
+  iterm_decay_time_0 = {min = 1, max = 100, default = 30, decimals = 2, suffix = "s"},
+  iterm_decay_time_1 = {min = 1, max = 100, default = 30, decimals = 2, suffix = "s"},
+  iterm_decay_time_2 = {min = 1, max = 100, default = 30, decimals = 2, suffix = "s"},
+  iterm_decay_limit = {min = 0, max = 250, default = 0, suffix = "°/s"},
   iterm_relax_level_0 = {min = 10, max = 250, default = 22, suffix = "°/s"},
   iterm_relax_level_1 = {min = 10, max = 250, default = 22, suffix = "°/s"},
   iterm_relax_level_2 = {min = 10, max = 250, default = 22, suffix = "°/s"},
   bounceback_0 = {min = 1, max = 10, default = 5},
   bounceback_1 = {min = 1, max = 10, default = 5},
   bounceback_2 = {min = 1, max = 10, default = 5},
-  error_limit_0 = {min = 0, max = 180, default = 45, suffix = "°"},
-  error_limit_1 = {min = 0, max = 180, default = 45, suffix = "°"},
-  error_limit_2 = {min = 0, max = 180, default = 60, suffix = "°"},
+  error_limit_0 = {min = 0, max = 180, default = 25, suffix = "°"},
+  error_limit_1 = {min = 0, max = 180, default = 25, suffix = "°"},
+  error_limit_2 = {min = 0, max = 180, default = 25, suffix = "°"},
   dterm_cutoff_0 = {min = 0, max = 250, default = 15},
   dterm_cutoff_1 = {min = 0, max = 250, default = 15},
   dterm_cutoff_2 = {min = 0, max = 250, default = 20},
@@ -134,7 +134,7 @@ local FIELD_META = {
   gyro_cutoff_0 = {min = 0, max = 250, default = 50},
   gyro_cutoff_1 = {min = 0, max = 250, default = 50},
   gyro_cutoff_2 = {min = 0, max = 250, default = 100},
-  hold_gain = {min = 0, max = 250, default = 40},
+  hold_gain = {min = 0, max = 250, default = 25},
   hold_deadband = {min = 0, max = 100, default = 5, suffix = "%"},
   hold_max_rate = {min = 0, max = 1800, default = 300, suffix = "°/s"},
   gain_curve_0 = {min = 0, max = 8, default = 0},
