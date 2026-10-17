@@ -188,24 +188,28 @@ function SmartFuel:update(inputs)
   if configChanged(self, cellCount, packCapacity, minV, fullV, warningPercent) then
     rememberConfig(self, cellCount, packCapacity, minV, fullV, warningPercent)
     resetFuelState(self, now)
+    -- The last reading was for the old battery config, so this restart is not
+    -- "settling": a plain nil lets the caller clear it instead of holding it.
+    self.lastPackVoltage = voltage
+    return nil
   end
 
   if self.voltageStabilised and inputs.isArmed == false and self.lastPackVoltage
     and voltage > self.lastPackVoltage + STABLE_WINDOW_VOLTS then
     resetFuelState(self, now)
-    return nil
+    return nil, "settling"
   end
 
   if self.stabilizeNotBefore and now < self.stabilizeNotBefore then
     self.lastPackVoltage = voltage
-    return nil
+    return nil, "settling"
   end
 
   addVoltageSample(self, voltage)
   if not self.voltageStabilised then
     if not isVoltageStable(self) then
       self.lastPackVoltage = voltage
-      return nil
+      return nil, "settling"
     end
     self.voltageStabilised = true
   end
