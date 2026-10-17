@@ -31,6 +31,8 @@ Requires a running background task and a flight controller connection.
 
 ## Notes
 
+- The *Smart Fuel* telemetry sensor in Ethos is sent at least every 2 seconds, also while the model is disarmed. After a disarm, while the estimate restarts, it holds its last value instead of showing as lost.
+
 TODO: Verify persistence, reboot behaviour, profile scope and any restrictions in
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than
 firmware defaults; wire values may need scaling before display.
