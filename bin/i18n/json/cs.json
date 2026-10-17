@@ -4967,6 +4967,13 @@
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 12
+        },
+        "no_dataflash": {
+          "english": "No dataflash",
+          "max_length": 16,
+          "needs_translation": false,
+          "translation": "Bez dataflash",
+          "reverse_text": false
         }
       },
       "stats": {
@@ -9235,20 +9242,6 @@
       "needs_translation": false,
       "max_length": 8,
       "reverse_text": false
-    },
-    "msg_save_failed_local_body": {
-      "english": "Settings were not saved to the radio. Please try again.",
-      "max_length": 67,
-      "needs_translation": false,
-      "reverse_text": false,
-      "translation": "Nastavení nebylo uloženo do vysílačky. Zkuste znovu."
-    },
-    "msg_save_failed_model_body": {
-      "english": "The model's settings were not saved to the radio. Please try again.",
-      "max_length": 67,
-      "needs_translation": true,
-      "reverse_text": false,
-      "translation": "The model's settings were not saved to the radio. Please try again."
     }
   },
   "telemetry": {
