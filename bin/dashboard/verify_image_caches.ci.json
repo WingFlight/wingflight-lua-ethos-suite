@@ -1,0 +1,7 @@
+{
+  "id": "verify-image-caches",
+  "name": "Check the dashboard image caches",
+  "step": "Check the dashboard image caches",
+  "script": "bin/dashboard/verify_image_caches.lua",
+  "rationale": "clearCaches()'s images branch had no caller, so every decoded\ndashboard bitmap survived theme reloads, model changes and widget\nclose. This checks the reload now releases them, that the bitmap map\nis LRU-bounded, and that the paint-path draw memo neither pins a\nbitmap nor allocates per draw."
+}

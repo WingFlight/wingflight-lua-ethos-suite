@@ -1,0 +1,7 @@
+{
+  "id": "verify-dialog-lifecycle",
+  "name": "Check the dialog teardown when a page is left",
+  "step": "Check the dialog teardown when a page is left",
+  "script": "bin/dialog_lifecycle/verify_dialog_lifecycle.lua",
+  "rationale": "Leaving a page -- Back, or closing the tool -- ran its dialog teardown\non a form Ethos may already have stopped updating, and a save/reload\nconfirmation still up outlived the page with an OK button that did\nnothing. The pages are loaded for real here under a form whose writes\nraise once teardown starts."
+}

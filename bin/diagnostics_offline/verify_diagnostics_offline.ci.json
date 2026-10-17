@@ -1,0 +1,7 @@
+{
+  "id": "verify-diagnostics-offline",
+  "name": "Diagnostics Status and Info open without a flight controller",
+  "step": "Diagnostics Status and Info open without a flight controller",
+  "script": "bin/diagnostics_offline/verify_diagnostics_offline.lua",
+  "rationale": "Ported from rotorflight-lua-ethos-suite PR #2583 (issue #2582): Status and Info show\nvalues that do not need the flight controller, but the menu blocked them while disconnected.\nThey are now offline-capable, while FBL Status, ELRS Telemetry and RX Input Backup stay FC-only.\nThe Status page's API line showed OK even without a connection; it now reads \"-\" unless the link\nis live and the MSP API version is supported.\n\nThe harness reads the offline flags from tool.lua and drives the real Status page with a\nrecording form: no connection gives \"-\", a live supported link gives OK, and a lost link\nafter a supported one gives \"-\" again."
+}

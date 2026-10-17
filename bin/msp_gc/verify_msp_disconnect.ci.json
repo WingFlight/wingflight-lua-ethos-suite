@@ -1,0 +1,7 @@
+{
+  "id": "verify-msp-disconnect",
+  "name": "Check the MSP queue on disconnect and the per-message GC",
+  "step": "Check the MSP queue on disconnect and the per-message GC",
+  "script": "bin/msp_gc/verify_msp_disconnect.lua",
+  "rationale": "A disconnect must drop the MSP request queue -- including mid-flight,\nwhich takes a different branch through the reset -- so the next\nhandshake is not queued FIFO behind a backlog no FC can answer. And\ncompleting a message must not force a full GC cycle, which section 9\nof the lifecycle doc measured as buying nothing. Both need a session\ntask and a collector that can be observed."
+}

@@ -1,0 +1,7 @@
+{
+  "id": "arming-flags",
+  "name": "Check the FBL Status arming flags",
+  "step": "Check the FBL Status arming flags",
+  "script": "bin/tests/arming_flags.lua",
+  "rationale": "FBL Status must keep arming-disable reasons out of the narrow value\ncolumn, where the joined list was cut off on small screens."
+}

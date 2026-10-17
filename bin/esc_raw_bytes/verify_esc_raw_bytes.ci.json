@@ -1,0 +1,7 @@
+{
+  "id": "verify-esc-raw-bytes",
+  "name": "Check that unedited ESC bytes survive a save",
+  "step": "Check that unedited ESC bytes survive a save",
+  "script": "bin/esc_raw_bytes/verify_esc_raw_bytes.lua",
+  "rationale": "The Bluejay and AM32 forward-programming codecs built the write payload\nfrom the parsed fields alone, and the flight controller merges nothing:\nMSP_SET_ESC_PARAMETERS (wingflight-firmware msp.c:3565-3576) copies the\n66 (Bluejay) or 50 (AM32) bytes sent over the ESC's block and commits\nthem. So every byte encode() did not reproduce was a byte the ESC was\ntold changed: Bluejay rewrote 655 of the possible startup-power,\nPWM-frequency and PWM-threshold values on a save with nothing edited,\nand AM32 248 of 256 timing-advance values (two firmware generations\nnumber the same positions differently). encode() now starts from the\nESC's own bytes and writes a field only when the pilot moved it; a\nwrite with no ESC bytes behind it is refused rather than sent as zeros.\nThe exhaustive check runs every byte position against all 256 values\nthrough the real codecs, pages and page runtime. Ported from\nrotorflight-lua-ethos-suite#2461. Pass --self-test to prove all 14 gate\nchecks fail with the pre-fix codecs spliced back in."
+}

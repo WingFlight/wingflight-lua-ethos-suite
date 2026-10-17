@@ -1,0 +1,7 @@
+{
+  "id": "verify-adjfunctions-audio",
+  "name": "Check the adjustment names and their audio files in the English pack",
+  "step": "Check the adjustment names and their audio files in the English pack",
+  "script": "bin/adjfunctions_audio/verify_adjfunctions_audio.lua",
+  "rationale": "Ported from rotorflight-lua-ethos-suite PR #2572 (issue #2501): the Adjustments page\noffers functions 76 to 82 that had no name in the audio table, so they were silent when they\nchanged, and six names used words that had no audio file in the pack, so the value was spoken\nwithout its name.\n\nThe harness reads the real name table and the real page list, and checks that every\nfunction 76 to 82 has a name, and that every word of every name in wavs.lua has an audio\nfile in default, us and gb (checked in src/ and in bin/sound-generator/soundpack/en)."
+}

@@ -1,0 +1,7 @@
+{
+  "id": "verify-i18n-sources",
+  "name": "Every referenced i18n key resolves in every locale source",
+  "step": "Every referenced i18n key resolves in every locale source",
+  "script": "bin/i18n_sources/verify_i18n_sources.lua",
+  "rationale": "Ported from rotorflight-lua-ethos-suite PR #2564 (issue #2561):\nThe locale build regenerates src/wfsuite/i18n from bin/i18n/json/ and drops any\nkey that is missing from a source. Keys added directly to src/wfsuite/i18n/ would\nbe silently dropped on the next build.\n\nThe harness reads each source under bin/i18n/json/ with a small JSON reader and\nchecks every @i18n(key)@ reference in src/wfsuite against it. --self-test removes\nkeys from a copy of the English source and requires them to be reported."
+}

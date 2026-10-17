@@ -1,0 +1,7 @@
+{
+  "id": "gps-arm-without-fix",
+  "name": "Check the GPS arm-without-fix toggle",
+  "step": "Check the GPS arm-without-fix toggle",
+  "script": "bin/tests/gps_arm_without_fix.lua",
+  "rationale": "GPS Navigation writes MSP_GPS_RESCUE back from the FC's own reply with\nonly the arming byte changed, so the fields the suite does not show are\nnever overwritten, and the page still saves when the FC lacks the field."
+}
