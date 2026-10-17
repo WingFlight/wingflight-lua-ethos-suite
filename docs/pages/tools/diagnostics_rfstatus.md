@@ -17,7 +17,7 @@ TODO: Explain what this page controls and when a pilot would use it.
 
 *System* → *Tools* → *Diagnostics* → *Status*
 
-Requires a running background task and a flight controller connection.
+Open without a flight controller: memory, the RF module and MSP sensor state are shown from the radio, and the connection and API lines read "ERROR" (or "-") and "-". Read-only while the model is armed. The API line reads OK only on a live link whose MSP API version is supported.
 
 ## Settings
 
