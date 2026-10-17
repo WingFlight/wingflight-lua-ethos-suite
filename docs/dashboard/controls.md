@@ -16,10 +16,13 @@ is dimmed.
 | Tile | Does | Greyed out when |
 | --- | --- | --- |
 | Reset | Resets the flight (timers and min/max stats) after a confirmation. | Never. |
-| Erase | Erases the blackbox dataflash after a confirmation. | Not connected. |
-| Battery | Opens the battery picker (below) to choose the active battery profile. | Not connected, or fewer than two battery profiles are set. |
+| Erase | Erases the blackbox dataflash after a confirmation. The dialog closes once the flash reports ready (or the board has no dataflash); if that does not happen within four minutes of awake time after the erase is acknowledged, an error is shown. | Not connected, or armed. |
+| Battery | Opens the battery picker (below) to choose the active battery profile. | Not connected, armed, or fewer than two battery profiles are set. |
 | Info | Opens the info panel (below). | Never. |
 | Setup | Opens the WFSuite system tool. | Ethos is older than 26.1. |
+
+Erase and Battery write to the flight controller, so both are greyed out while the
+model is armed and do nothing when tapped. Arming also closes an open battery picker.
 
 ## Battery picker
 
@@ -37,7 +40,8 @@ It opens in two ways:
 - from the **Battery** tile on the toolbar;
 - by itself, once each time the radio connects to an FC with more than one
   battery profile. This follows **Settings > General > Integration > Battery
-  profile on connect**, which is on by default.
+  profile on connect**, which is on by default. If the model is already armed
+  when the radio connects, it waits and opens as soon as the model is disarmed.
 
 To change the active pack, tap its cell, or turn the rotary to it and press
 Enter. The FC receives the change, and the picker closes.
@@ -71,7 +75,7 @@ has focus, the same as the toolbar's keys.
 | Arming | **Ready** (green), **Blocked** (amber), or **Armed** (red). When blocked, each reason is listed at the bottom of the column. `-` until the FC reports its arming flags (or System Status). |
 | Profile | Active PID, rate and battery profile numbers. |
 | BEC Voltage | BEC voltage, when the sensor reports it. |
-| Blackbox | How full the blackbox dataflash is. |
+| Blackbox | How full the blackbox dataflash is. On a board without dataflash it shows *No dataflash* instead of a capacity. |
 
 **Right column: Battery, then GPS**
 
@@ -88,6 +92,16 @@ is just Battery.
 Each row only appears once its value is known. If the panel can't fit
 everything, the last rows of a column are left off. While no model is connected,
 both columns show **Not connected**.
+
+## Armed warning
+
+While the model is armed, the dashboard shows a red bar across the top edge with an
+"Armed" label hanging from its centre, on every theme. It is drawn over the theme and
+moves nothing. It appears only once the FC reports the armed state, and it goes away
+when the model is disarmed.
+
+The warning can be switched off in the widget properties with **Armed warning**. It is
+on by default.
 
 ## Status banner
 

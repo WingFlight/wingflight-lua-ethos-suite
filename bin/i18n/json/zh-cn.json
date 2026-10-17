@@ -135,10 +135,10 @@
     },
     "msg_save_failed_title": {
       "english": "Save failed",
-      "translation": "保存失败",
+      "max_length": 11,
       "needs_translation": false,
       "reverse_text": false,
-      "max_length": 11
+      "translation": "保存失败"
     },
     "msg_save_failed_body": {
       "english": "Settings were not saved to the flight controller. Please try again.",
@@ -146,6 +146,20 @@
       "needs_translation": false,
       "reverse_text": false,
       "max_length": 67
+    },
+    "msg_save_failed_local_body": {
+      "english": "Settings were not saved to the radio. Please try again.",
+      "max_length": 67,
+      "needs_translation": false,
+      "reverse_text": false,
+      "translation": "设置未能保存到遥控器。请重试。"
+    },
+    "msg_save_failed_model_body": {
+      "english": "The model's settings were not saved to the radio. Please try again.",
+      "max_length": 67,
+      "needs_translation": true,
+      "reverse_text": false,
+      "translation": "The model's settings were not saved to the radio. Please try again."
     },
     "msg_save_not_commited": {
       "english": "Save not committed",
@@ -2119,6 +2133,13 @@
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 4
+        },
+        "msg_no_columns": {
+          "english": "No plottable columns in this file",
+          "translation": "无可绘制的列",
+          "needs_translation": false,
+          "max_length": 33,
+          "reverse_text": false
         },
         "msg_no_logs_found": {
           "english": "NO LOG FILES FOUND",
@@ -4953,6 +4974,13 @@
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 12
+        },
+        "no_dataflash": {
+          "english": "No dataflash",
+          "max_length": 16,
+          "needs_translation": false,
+          "translation": "无 dataflash",
+          "reverse_text": false
         }
       },
       "stats": {
@@ -5174,6 +5202,12 @@
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 17
+        },
+        "edit_battery": {
+          "english": "Edit Battery",
+          "max_length": 16,
+          "needs_translation": false,
+          "translation": "编辑电池"
         }
       },
       "esc_motors": {
@@ -10397,6 +10431,12 @@
         "needs_translation": true,
         "reverse_text": false,
         "max_length": 5
+      },
+      "armed_warning": {
+        "english": "Armed warning",
+        "max_length": 24,
+        "needs_translation": false,
+        "translation": "Armed 警告"
       },
       "info_arming": {
         "english": "Arming",

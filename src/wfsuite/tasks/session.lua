@@ -146,12 +146,17 @@ local session = {
   bblUsed = nil,
   -- Arm state, the ARMED bit of the FC's "system_status" telemetry sensor.
   -- Nil (sensor not broadcasting yet) leaves isArmed at its last known value
-  -- rather than guessing. The one current consumer is app/pages/configuration.lua's
-  -- save flow, which must not trigger MSP_REBOOT while the aircraft could
-  -- be armed -- see lib/msp_reboot.lua's own comment for why this is the
-  -- only safety gate on that command (firmware's own MSP_REBOOT handler
-  -- has none).
+  -- rather than guessing. Writes that must not happen while the aircraft could
+  -- be armed (the page save gate, the reboot after a save, the flight-stats sync)
+  -- are gated in app/page_runtime.lua and in syncStatsWithFc(). Reads keep the
+  -- strict `== true` test. See lib/msp_reboot.lua for the firmware's own gate.
   isArmed = nil,
+  -- Latch for "the model was seen armed and no fresh answer has said disarmed
+  -- since" (#2548). isArmed goes nil on every disconnect, so a reconnect that
+  -- has not yet read the arm flags looks like "not armed". Writes gate on
+  -- armedOrUnconfirmed() instead. Set only by updateSystemStatus(), never cleared
+  -- by a disconnect; an FC that never reports arm flags never sets it.
+  armedUnconfirmed = false,
   -- Why-can't-arm bitmask, read from the FC's own "armdisableflags"
   -- telemetry sensor -- see widgets/dashboard/context.lua's
   -- armingDisableFlagsToString() for how the dashboard's governor/armflags
@@ -443,6 +448,7 @@ local function flush()
     bblSize = session.bblSize,
     bblUsed = session.bblUsed,
     isArmed = session.isArmed,
+    armedUnconfirmed = session.armedUnconfirmed,
     armDisableFlags = session.armDisableFlags,
     rxMap = session.rxMap,
     handshake = copyHandshake(session.handshake),
@@ -463,7 +469,12 @@ end
 
 local function saveModelPreferences()
   if session.modelPreferences and session.modelPreferencesFile then
-    modelPreferences.save(session.modelPreferencesFile, session.modelPreferences)
+    -- A refused write is silent everywhere else (no page is open to report it),
+    -- so it is logged here: the next start would otherwise come up with the old
+    -- model preferences and no trace of why (#2500).
+    if not modelPreferences.save(session.modelPreferencesFile, session.modelPreferences) then
+      print("[session] model preferences write refused: " .. tostring(session.modelPreferencesFile))
+    end
   end
   updateModelSnapshots()
   publish()
@@ -545,9 +556,19 @@ local function writeRemoteStats(mspQueue, remote)
   end))
 end
 
+-- #2548: a nil isArmed means "not known yet", not "disarmed". After a disconnect
+-- it is nil until the arm flags are read again, so a write gated on
+-- `isArmed == true` alone would pass in that window. An armed model stays
+-- unconfirmed until a fresh answer says disarmed. An FC that never reports arm
+-- flags keeps armedUnconfirmed false and stays usable.
+local function armedOrUnconfirmed()
+  if session.isArmed == true then return true end
+  return session.isArmed == nil and session.armedUnconfirmed == true
+end
+
 local function syncStatsWithFc(mspQueue)
   if not mspQueue or statsReadInFlight or statsWriteInFlight then return end
-  if session.connected ~= true or session.isArmed == true then return end
+  if session.connected ~= true or armedOrUnconfirmed() then return end
   if not loadModelPreferences() then return end
 
   statsReadInFlight = true
@@ -1202,6 +1223,13 @@ local function updateSystemStatus(protocol, mspQueue)
   session.systemStatus = status
   local wasArmed = session.isArmed
   session.isArmed = status.armed
+  -- Latch (#2548): a fresh armed answer sets it, a fresh disarmed answer clears
+  -- it, and nil leaves it alone -- that nil is the post-disconnect window.
+  if session.isArmed == true then
+    session.armedUnconfirmed = true
+  elseif session.isArmed == false then
+    session.armedUnconfirmed = false
+  end
   if session.isArmed ~= wasArmed then
     if session.isArmed == true then
       if mspQueue then mspQueue:clear() end

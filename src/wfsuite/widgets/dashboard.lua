@@ -214,8 +214,8 @@ local nextNotVisibleWakeupAt = 0
 
 local TOOLBAR_ITEMS = {
   {name = "Reset", icon = "widgets/dashboard/gfx/toolbar_reset.png", action = "reset_flight"},
-  {name = "Erase", icon = "widgets/dashboard/gfx/toolbar_erase.png", action = "erase_blackbox", isConnected = true},
-  {name = "Battery", icon = "widgets/dashboard/gfx/toolbar_battery.png", action = "battery_profile", isConnected = true, requiresBatteryProfiles = true},
+  {name = "Erase", icon = "widgets/dashboard/gfx/toolbar_erase.png", action = "erase_blackbox", isConnected = true, blockedWhileArmed = true},
+  {name = "Battery", icon = "widgets/dashboard/gfx/toolbar_battery.png", action = "battery_profile", isConnected = true, requiresBatteryProfiles = true, blockedWhileArmed = true},
   {name = "Info", icon = "widgets/dashboard/gfx/toolbar_info.png", action = "info_panel"},
   {name = "Setup", icon = "widgets/dashboard/gfx/toolbar_app.png", action = "launch_app", requiresOpenPage = true},
 }
@@ -621,6 +621,8 @@ local function isToolbarItemEnabled(widget, item)
   -- version doesn't wrongly block a toolbar item before the handshake has
   -- even had a chance to answer -- only a *confirmed* unsupported FC does.
   if item.isConnected == true and not (widget and widget.connected == true and widget.apiVersionSupported ~= false) then return false end
+  -- Items that write to the FC are refused while the model is armed (#2505).
+  if item.blockedWhileArmed == true and widget and widget.isArmed == true then return false end
   if item.requiresOpenPage == true and not canOpenSystemTool() then return false end
   if item.requiresBatteryProfiles == true and not hasSelectableBatteryProfiles(widget) then return false end
   return true
@@ -630,6 +632,33 @@ end
 -- it, so the overlay is the part to look at. The picker uses the same value
 -- (battery_picker.lua DIM_ALPHA).
 local OVERLAY_DIM = lcd.RGB(0, 0, 0, 0.6)
+
+-- Armed warning (#2352): a red bar across the top edge with an "Armed" label hanging
+-- from its centre, over whatever theme is on screen, so a live model is obvious on
+-- every page and theme. Drawn only for a confirmed armed state (widget.isArmed == true),
+-- the same test as the write guards, and only while the widget property
+-- "Armed warning" is on (widget.armedWarningEnabled, default on). It is an overlay:
+-- it does not move any theme layout.
+local ARMED_RED = lcd.RGB(214, 40, 40)
+local ARMED_WHITE = lcd.RGB(255, 255, 255)
+local ARMED_BAR = 4
+
+local function drawArmedWarning(widget, w, h)
+  if widget.isArmed ~= true or widget.armedWarningEnabled == false then return end
+  lcd.color(ARMED_RED)
+  lcd.drawFilledRectangle(0, 0, w, ARMED_BAR)
+
+  local label = "@i18n(widgets.dashboard.info_armed)@"
+  lcd.font(FONT_S)
+  local tw, th = lcd.getTextSize(label)
+  -- Hangs from the centre of the bar.
+  local badgeW, badgeH = tw + 12, th + 6
+  local bx = math.floor((w - badgeW) / 2)
+  lcd.color(ARMED_RED)
+  lcd.drawFilledRectangle(bx, ARMED_BAR, badgeW, badgeH)
+  lcd.color(ARMED_WHITE)
+  lcd.drawText(bx + 6, ARMED_BAR + 3, label)
+end
 
 local function dimDashboard(w, h)
   lcd.color(OVERLAY_DIM)
@@ -1116,14 +1145,25 @@ local function closeEraseDialog(widget)
   if widget then widget.eraseDialog = nil end
 end
 
-local function finishErase(widget, failed)
-  if not widget then return end
+-- Clears the erase wait. The generation moves on, so a reply to the erase that is being
+-- cleared (a late acknowledgement, a late summary) is dropped and cannot touch the next erase.
+local function resetEraseWait(widget)
+  widget.eraseGeneration = (widget.eraseGeneration or 0) + 1
   widget.eraseActive = false
   widget.eraseReadPending = false
+  widget.eraseReadInFlight = false
+  widget.eraseNextReadAt = nil
+  widget.eraseWaited = 0
+  widget.eraseLastTick = nil
   widget.eraseDone = false
   widget.eraseError = false
   widget.eraseStartedAt = 0
   widget.eraseProgressValue = 0
+end
+
+local function finishErase(widget, failed)
+  if not widget then return end
+  resetEraseWait(widget)
   closeEraseDialog(widget)
   setToolbarVisible(widget, false)
   requestPaint(widget)
@@ -1148,28 +1188,66 @@ local function finishErase(widget, failed)
   end
 end
 
+-- The firmware acknowledges the erase before it runs, and the summary's ready bit is false
+-- until the flash is idle. The wait ends on a read that reports ready, or on a board without
+-- dataflash; a read that reports not ready or fails is repeated after half a second.
+local ERASE_RETRY_SECONDS = 0.5
+-- A full chip erase takes 40 s typical and up to 200 s (W25Q128FV datasheet, see
+-- flash_w25q128fv.c:97). The timeout is counted from the erase acknowledgement, above
+-- that worst case, and only while the dashboard is awake to wait (see the wakeup).
+local ERASE_TIMEOUT_SECONDS = 240
+local ERASE_EXPECTED_SECONDS = 40
+local ERASE_MAX_TICK_SECONDS = 1
+
+local function summaryHasBit(mask, bit)
+  return (math.floor(tonumber(mask) or 0) & (1 << bit)) ~= 0
+end
+
+-- One retry path for both outcomes that do not end the wait (not ready, or a failed read).
+local function scheduleEraseRetry(widget)
+  widget.eraseReadPending = true
+  widget.eraseNextReadAt = clock() + ERASE_RETRY_SECONDS
+end
+
 local function readBlackboxSummaryAfterErase(widget)
-  if not widget or widget.eraseReadPending ~= true then return end
+  if not widget or widget.eraseReadPending ~= true or widget.eraseReadInFlight == true then return end
+  if widget.eraseNextReadAt and clock() < widget.eraseNextReadAt then return end
   widget.eraseReadPending = false
+  widget.eraseReadInFlight = true
+  -- A reply that arrives after its erase has ended, or after a newer erase has started,
+  -- must not touch the newer erase.
+  local generation = widget.eraseGeneration
   bus.publish("msp.request", ensureDataflashSummary().buildReadMessage(function(data)
-    widget.bblFlags = data and data.flags or widget.bblFlags
-    widget.bblSize = data and data.total or widget.bblSize
-    widget.bblUsed = data and data.used or widget.bblUsed
-    widget.eraseDone = true
+    if widget.eraseGeneration ~= generation then return end
+    widget.eraseReadInFlight = false
+    if data then
+      widget.bblSize = data.total or widget.bblSize
+      widget.bblUsed = data.used or widget.bblUsed
+    end
+    -- Only a reply that carries the flags can end the wait; any other reply is read again.
+    if data and type(data.flags) == "number" then
+      widget.bblFlags = data.flags
+      if summaryHasBit(data.flags, 0) or not summaryHasBit(data.flags, 1) then
+        widget.eraseDone = true
+        return
+      end
+    end
+    scheduleEraseRetry(widget)
   end, function()
-    widget.eraseDone = true
+    if widget.eraseGeneration ~= generation then return end
+    widget.eraseReadInFlight = false
+    scheduleEraseRetry(widget)
   end))
 end
 
 local function doEraseBlackbox(widget)
-  if not widget or widget.connected ~= true or widget.eraseActive == true then return end
+  if not widget or widget.connected ~= true or widget.isArmed == true or widget.eraseActive == true then return end
 
+  resetEraseWait(widget)
   widget.eraseActive = true
   widget.eraseStartedAt = clock()
-  widget.eraseProgressValue = 0
-  widget.eraseReadPending = false
-  widget.eraseDone = false
-  widget.eraseError = false
+  widget.eraseLastTick = widget.eraseStartedAt
+  local generation = widget.eraseGeneration
 
   if form and type(form.openProgressDialog) == "function" then
     widget.eraseDialog = form.openProgressDialog({
@@ -1185,8 +1263,14 @@ local function doEraseBlackbox(widget)
   end
 
   bus.publish("msp.request", ensureDataflashErase().buildWriteMessage(function()
+    if widget.eraseGeneration ~= generation then return end
     widget.eraseReadPending = true
+    widget.eraseNextReadAt = nil
+    -- The timeout counts from the acknowledgement: a slow link does not eat into the erase time.
+    widget.eraseWaited = 0
+    widget.eraseLastTick = clock()
   end, function()
+    if widget.eraseGeneration ~= generation then return end
     widget.eraseError = true
   end))
 end
@@ -1282,7 +1366,7 @@ local function showBatteryInfo(message)
 end
 
 local function writeBatteryProfile(widget, profileIndex, profileName)
-  if not widget or widget.connected ~= true or widget.batteryActive == true then return end
+  if not widget or widget.connected ~= true or widget.isArmed == true or widget.batteryActive == true then return end
   -- profile.idx is already the 0-based index MSP 176 wants: validate, never
   -- re-base (see lib/battery_profile_index.lua). Re-basing here made picking
   -- pack 3 activate pack 2 on the flight controller.
@@ -1343,7 +1427,7 @@ local function closeBatteryPicker(widget)
 end
 
 local function chooseBatteryProfile(widget)
-  if not widget or widget.connected ~= true then return end
+  if not widget or widget.connected ~= true or widget.isArmed == true then return end
   local profileList = buildBatteryProfileList(widget)
   if #profileList == 0 then
     showBatteryInfo("@i18n(widgets.battery.no_profiles)@")
@@ -1525,6 +1609,8 @@ local function create()
   return {
     connected = false,
     isArmed = nil,
+    -- Widget property (see configure); on until the user switches it off.
+    armedWarningEnabled = true,
     craftName = nil,
     mcuId = nil,
     lastConnectedMcuId = nil,
@@ -1660,6 +1746,10 @@ local function update(widget, snapshot)
   widget.isArmed = snapshot.isArmed
   -- The info panel covers most of the dashboard, so arming closes it.
   if widget.isArmed == true and previousArmed ~= true then setInfoPanelVisible(widget, false) end
+  -- Arming also closes an open battery picker, because a pack write is refused
+  -- while armed; the picker must not stay open to accept one (#2505).
+  if widget.isArmed == true and previousArmed ~= true then closeBatteryPicker(widget) end
+  if widget.isArmed ~= previousArmed then invalidateWidget(widget) end
   widget.armDisableFlags = snapshot.armDisableFlags
   widget.systemStatus = snapshot.systemStatus
   widget.systemConfig = snapshot.systemConfig
@@ -2004,6 +2094,8 @@ local function paint(widget)
     -- The picker is modal: nothing is drawn over it. The footer banner would
     -- cover the bottom row of pack cells (CodeRabbit on #2519), so it waits
     -- until the picker closes.
+    -- The armed bar stays under the modal picker, as before.
+    drawArmedWarning(widget, w, h)
     drawBatteryPicker(widget, w, h)
     return
   end
@@ -2023,6 +2115,8 @@ local function paint(widget)
       setInfoPanelVisible(widget, false)
     end
   end
+  -- Last, so the armed bar stays on top of the info panel and the toolbar dim.
+  drawArmedWarning(widget, w, h)
   drawFooterAlert(widget, w, h)
 end
 
@@ -2287,10 +2381,18 @@ local function wakeup(widget)
   -- hidden just delays the prompt to whenever the dashboard is actually
   -- shown again -- batteryDialogShown/the conditions below are unaffected,
   -- so it still fires exactly once per connection either way.
+  --
+  -- Deferred while armed, for the same reason: chooseBatteryProfile() refuses
+  -- while armed (#2505), so entering this block would latch batteryDialogShown
+  -- and lose the once-per-connection prompt for the rest of the session.
+  -- Leaving the whole block undone keeps the latch unset, and the first
+  -- wakeup after disarm opens the picker. A yet-unreported arm state counts
+  -- as disarmed, exactly as it does in the guards above.
   if isVisible
       and widget.connected == true
       and not widget.batteryDialogShown
       and widget.batteryConfig
+      and widget.isArmed ~= true
       and settingsStore.batteryProfileStartupEnabled(widget.settingsSnapshot) then
     widget.batteryDialogShown = true
     if hasSelectableBatteryProfiles(widget) then
@@ -2348,8 +2450,10 @@ local function wakeup(widget)
   if widget.eraseActive then
     local now = clock()
     readBlackboxSummaryAfterErase(widget)
-    local elapsed = now - (widget.eraseStartedAt or now)
-    local progress = math.min(95, math.floor((elapsed / 5.0) * 100))
+    local tick = now - (widget.eraseLastTick or now)
+    widget.eraseLastTick = now
+    widget.eraseWaited = (widget.eraseWaited or 0) + math.min(math.max(tick, 0), ERASE_MAX_TICK_SECONDS)
+    local progress = math.min(95, math.floor((widget.eraseWaited / ERASE_EXPECTED_SECONDS) * 100))
     if progress > (widget.eraseProgressValue or 0) then
       widget.eraseProgressValue = progress
       if widget.eraseDialog and widget.eraseDialog.value then
@@ -2358,6 +2462,8 @@ local function wakeup(widget)
     end
     if widget.eraseDone or widget.eraseError then
       finishErase(widget, widget.eraseError == true)
+    elseif widget.eraseWaited > ERASE_TIMEOUT_SECONDS then
+      finishErase(widget, true)
     end
   end
 
@@ -2388,13 +2494,23 @@ local function wakeup(widget)
   end
 end
 
+-- Widget property "Armed warning" (default on). Stored with the widget through the
+-- Ethos storage API; a missing value counts as on.
+local ARMED_WARNING_STORAGE_KEY = "armed_warning"
+
 local function configure(widget)
+  local line = form.addLine("@i18n(widgets.dashboard.armed_warning)@")
+  form.addBooleanField(line, nil,
+    function() return widget.armedWarningEnabled ~= false end,
+    function(value) widget.armedWarningEnabled = value == true end)
 end
 
 local function read(widget)
+  widget.armedWarningEnabled = storage.read(ARMED_WARNING_STORAGE_KEY) ~= false
 end
 
 local function write(widget)
+  storage.write(ARMED_WARNING_STORAGE_KEY, widget.armedWarningEnabled ~= false)
 end
 
 local function close(widget)
@@ -2413,10 +2529,7 @@ local function close(widget)
   widget.dashboardPrefsSnapshot = nil
   widget.dashboardPrefsTheme = nil
   widget.dashboardPrefsValues = nil
-  widget.eraseActive = false
-  widget.eraseReadPending = false
-  widget.eraseDone = false
-  widget.eraseError = false
+  resetEraseWait(widget)
   closeEraseDialog(widget)
   widget.batteryActive = false
   widget.batteryDone = false

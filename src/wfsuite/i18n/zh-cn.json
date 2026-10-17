@@ -1394,6 +1394,13 @@
           "reverse_text": false,
           "translation": "没有存储卡"
         },
+        "no_dataflash": {
+          "english": "No dataflash",
+          "max_length": 16,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "无 dataflash"
+        },
         "not_supported": {
           "english": "Not supported",
           "max_length": 13,
@@ -5328,6 +5335,13 @@
           "reverse_text": false,
           "translation": "加载日志数据"
         },
+        "msg_no_columns": {
+          "english": "No plottable columns in this file",
+          "max_length": 33,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "无可绘制的列"
+        },
         "msg_no_logs_found": {
           "english": "NO LOG FILES FOUND",
           "max_length": 18,
@@ -6919,6 +6933,12 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "电流来源"
+        },
+        "edit_battery": {
+          "english": "Edit Battery",
+          "max_length": 16,
+          "needs_translation": false,
+          "translation": "编辑电池"
         },
         "full_cell_voltage": {
           "english": "Full Cell Voltage",
@@ -9395,6 +9415,20 @@
       "reverse_text": false,
       "translation": "设置未保存到飞控。请重试。"
     },
+    "msg_save_failed_local_body": {
+      "english": "Settings were not saved to the radio. Please try again.",
+      "max_length": 67,
+      "needs_translation": false,
+      "reverse_text": false,
+      "translation": "设置未能保存到遥控器。请重试。"
+    },
+    "msg_save_failed_model_body": {
+      "english": "The model's settings were not saved to the radio. Please try again.",
+      "max_length": 67,
+      "needs_translation": true,
+      "reverse_text": false,
+      "translation": "The model's settings were not saved to the radio. Please try again."
+    },
     "msg_save_failed_title": {
       "english": "Save failed",
       "max_length": 11,
@@ -10369,6 +10403,12 @@
         "needs_translation": false,
         "reverse_text": false,
         "translation": "高度最大值"
+      },
+      "armed_warning": {
+        "english": "Armed warning",
+        "max_length": 24,
+        "needs_translation": false,
+        "translation": "Armed 警告"
       },
       "battery": {
         "english": "Battery",

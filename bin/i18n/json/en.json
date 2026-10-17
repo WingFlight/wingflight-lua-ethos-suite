@@ -116,15 +116,27 @@
     },
     "msg_save_failed_title": {
       "english": "Save failed",
-      "translation": "Save failed",
+      "max_length": 11,
       "needs_translation": false,
-      "max_length": 11
+      "translation": "Save failed"
     },
     "msg_save_failed_body": {
       "english": "Settings were not saved to the flight controller. Please try again.",
       "translation": "Settings were not saved to the flight controller. Please try again.",
       "needs_translation": false,
       "max_length": 67
+    },
+    "msg_save_failed_local_body": {
+      "english": "Settings were not saved to the radio. Please try again.",
+      "max_length": 67,
+      "needs_translation": false,
+      "translation": "Settings were not saved to the radio. Please try again."
+    },
+    "msg_save_failed_model_body": {
+      "english": "The model's settings were not saved to the radio. Please try again.",
+      "max_length": 67,
+      "needs_translation": false,
+      "translation": "The model's settings were not saved to the radio. Please try again."
     },
     "msg_save_not_commited": {
       "english": "Save not committed",
@@ -1821,6 +1833,12 @@
           "translation": "Logs",
           "needs_translation": false,
           "max_length": 4
+        },
+        "msg_no_columns": {
+          "english": "No plottable columns in this file",
+          "translation": "No plottable columns in this file",
+          "needs_translation": false,
+          "max_length": 33
         },
         "msg_no_logs_found": {
           "english": "NO LOG FILES FOUND",
@@ -4255,6 +4273,12 @@
           "max_length": 12,
           "needs_translation": false,
           "translation": "Used %s / %s"
+        },
+        "no_dataflash": {
+          "english": "No dataflash",
+          "max_length": 16,
+          "needs_translation": false,
+          "translation": "No dataflash"
         }
       },
       "stats": {
@@ -4445,6 +4469,12 @@
           "max_length": 17,
           "needs_translation": false,
           "translation": "Warn Cell Voltage"
+        },
+        "edit_battery": {
+          "english": "Edit Battery",
+          "max_length": 16,
+          "needs_translation": false,
+          "translation": "Edit Battery"
         }
       },
       "esc_motors": {
@@ -8934,6 +8964,12 @@
         "max_length": 5,
         "needs_translation": false,
         "translation": "Armed"
+      },
+      "armed_warning": {
+        "english": "Armed warning",
+        "max_length": 24,
+        "needs_translation": false,
+        "translation": "Armed warning"
       },
       "info_arming": {
         "english": "Arming",

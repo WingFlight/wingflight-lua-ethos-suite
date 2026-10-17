@@ -1394,6 +1394,13 @@
           "reverse_text": false,
           "translation": "Sem cartão"
         },
+        "no_dataflash": {
+          "english": "No dataflash",
+          "max_length": 16,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Sem dataflash"
+        },
         "not_supported": {
           "english": "Not supported",
           "max_length": 13,
@@ -5328,6 +5335,13 @@
           "reverse_text": false,
           "translation": "Carregando dados de registro"
         },
+        "msg_no_columns": {
+          "english": "No plottable columns in this file",
+          "max_length": 33,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Sem colunas plotáveis"
+        },
         "msg_no_logs_found": {
           "english": "NO LOG FILES FOUND",
           "max_length": 18,
@@ -6919,6 +6933,12 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Fonte Corrente"
+        },
+        "edit_battery": {
+          "english": "Edit Battery",
+          "max_length": 16,
+          "needs_translation": false,
+          "translation": "Editar bateria"
         },
         "full_cell_voltage": {
           "english": "Full Cell Voltage",
@@ -9395,12 +9415,26 @@
       "reverse_text": false,
       "translation": "Configurações não foram salvas no FC. Tente novamente."
     },
+    "msg_save_failed_local_body": {
+      "english": "Settings were not saved to the radio. Please try again.",
+      "max_length": 67,
+      "needs_translation": false,
+      "reverse_text": false,
+      "translation": "As configurações não foram salvas no rádio. Tente novamente."
+    },
+    "msg_save_failed_model_body": {
+      "english": "The model's settings were not saved to the radio. Please try again.",
+      "max_length": 67,
+      "needs_translation": true,
+      "reverse_text": false,
+      "translation": "The model's settings were not saved to the radio. Please try again."
+    },
     "msg_save_failed_title": {
       "english": "Save failed",
       "max_length": 11,
       "needs_translation": false,
       "reverse_text": false,
-      "translation": "Salvar"
+      "translation": "Erro"
     },
     "msg_save_not_commited": {
       "english": "Save not committed",
@@ -10369,6 +10403,12 @@
         "needs_translation": false,
         "reverse_text": false,
         "translation": "Alt. Máxima"
+      },
+      "armed_warning": {
+        "english": "Armed warning",
+        "max_length": 24,
+        "needs_translation": false,
+        "translation": "Aviso Armed"
       },
       "battery": {
         "english": "Battery",

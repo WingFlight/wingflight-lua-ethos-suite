@@ -15,7 +15,7 @@ seconds without a touch or key press.
 | Tile | Does | Greyed out when |
 | --- | --- | --- |
 | Reset | Resets the flight (timers and min/max stats) after a confirmation. | Never. |
-| Erase | Erases the blackbox dataflash after a confirmation. | Not connected. |
+| Erase | Erases the blackbox dataflash after a confirmation. The dialog closes once the flash reports ready (or the board has no dataflash); if that does not happen within four minutes of awake time after the erase is acknowledged, an error is shown. | Not connected. |
 | Battery | Picks the active battery profile. | Not connected, or fewer than two battery profiles are set. |
 | Info | Opens the info panel (below). | Never. |
 | Setup | Opens the Wingflight Suite. | Ethos is older than 26.1. |
