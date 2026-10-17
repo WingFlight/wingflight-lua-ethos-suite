@@ -5688,6 +5688,41 @@
           "max_length": 10,
           "reverse_text": false
         },
+        "bgtask_name": {
+          "english": "Background task",
+          "translation": "Achtergrondtaak",
+          "needs_translation": false,
+          "reverse_text": false,
+          "max_length": 18
+        },
+        "bgtask_heartbeat": {
+          "english": "Heartbeat",
+          "translation": "Hartslag",
+          "needs_translation": false,
+          "reverse_text": false,
+          "max_length": 12
+        },
+        "bgtask_revivals": {
+          "english": "Revivals",
+          "translation": "Herstarts",
+          "needs_translation": false,
+          "reverse_text": false,
+          "max_length": 11
+        },
+        "bgtask_running": {
+          "english": "Running",
+          "translation": "Actief",
+          "needs_translation": false,
+          "reverse_text": false,
+          "max_length": 13
+        },
+        "bgtask_stale": {
+          "english": "Not reporting",
+          "translation": "Geen melding",
+          "needs_translation": false,
+          "reverse_text": false,
+          "max_length": 13
+        },
         "name": {
           "english": "Info",
           "translation": "Info",

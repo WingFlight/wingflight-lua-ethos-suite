@@ -5688,6 +5688,41 @@
           "translation": "סימולציה",
           "reverse_text": true
         },
+        "bgtask_name": {
+          "english": "Background task",
+          "translation": "משימת רקע",
+          "needs_translation": false,
+          "reverse_text": true,
+          "max_length": 18
+        },
+        "bgtask_heartbeat": {
+          "english": "Heartbeat",
+          "translation": "דוֹפֶק",
+          "needs_translation": false,
+          "reverse_text": true,
+          "max_length": 12
+        },
+        "bgtask_revivals": {
+          "english": "Revivals",
+          "translation": "הפעלות מחדש",
+          "needs_translation": false,
+          "reverse_text": true,
+          "max_length": 11
+        },
+        "bgtask_running": {
+          "english": "Running",
+          "translation": "פועל",
+          "needs_translation": false,
+          "reverse_text": true,
+          "max_length": 13
+        },
+        "bgtask_stale": {
+          "english": "Not reporting",
+          "translation": "אין דיווח",
+          "needs_translation": false,
+          "reverse_text": true,
+          "max_length": 13
+        },
         "name": {
           "english": "Info",
           "max_length": 4,
