@@ -93,6 +93,16 @@ Each row only appears once its value is known. If the panel can't fit
 everything, the last rows of a column are left off. While no model is connected,
 both columns show **Not connected**.
 
+## Armed warning
+
+While the model is armed, the dashboard shows a red bar across the top edge with an
+"Armed" label hanging from its centre, on every theme. It is drawn over the theme and
+moves nothing. It appears only once the FC reports the armed state, and it goes away
+when the model is disarmed.
+
+The warning can be switched off in the widget properties with **Armed warning**. It is
+on by default.
+
 ## Status banner
 
 When the flight controller sends the **System Status** or **System Config**

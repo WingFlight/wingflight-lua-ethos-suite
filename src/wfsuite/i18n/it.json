@@ -6920,6 +6920,12 @@
           "reverse_text": false,
           "translation": "Corrente Sorgente"
         },
+        "edit_battery": {
+          "english": "Edit Battery",
+          "max_length": 16,
+          "needs_translation": false,
+          "translation": "Modifica batt."
+        },
         "full_cell_voltage": {
           "english": "Full Cell Voltage",
           "max_length": 17,
@@ -6982,12 +6988,6 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Selezion"
-        },
-        "edit_battery": {
-          "english": "Edit Battery",
-          "max_length": 16,
-          "needs_translation": false,
-          "translation": "Modifica batteria"
         },
         "smartfuel_charge_drop_rate": {
           "english": "Charge Drop Rate",
@@ -10389,6 +10389,12 @@
         "needs_translation": false,
         "reverse_text": false,
         "translation": "Altitudine Max"
+      },
+      "armed_warning": {
+        "english": "Armed warning",
+        "max_length": 24,
+        "needs_translation": false,
+        "translation": "Avviso Armed"
       },
       "battery": {
         "english": "Battery",
