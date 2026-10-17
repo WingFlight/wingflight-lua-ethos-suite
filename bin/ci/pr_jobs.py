@@ -1446,6 +1446,22 @@ onTool are unchanged. Ported from rotorflight-lua-ethos-suite PR #2560
     # Appended after the tool-button port, so this entry is a pure addition rather
     # than a re-registration of any step above.
     LuaStep(
+        name='The dataflash erase waits for a read taken after it, and the Tool button follows the board',
+        script='bin/blackbox_erase/verify_blackbox_erase.lua',
+        rationale=r'''Issue #2495: the erase wait could end on a read asked for before the erase, a read
+asked for while another was in flight was dropped so no read followed the erase, and the
+Tool button was always offered, so a second erase could start while one ran.
+
+Each read carries a sequence number; the erase is finished only by a read requested after
+the erase command completed, a read asked for while another is in flight is queued, and the
+Tool button is enabled only on a ready board and not while erasing. The harness drives the
+real blackbox_status page with the messages answered by hand, in the order that exposes each
+defect. Against unpatched master the erase-wait and Tool-gate checks fail. --self-test
+splices the sequence test out and requires the erase-wait check to go red.
+Ported from rotorflight-lua-ethos-suite PR #2568 (issue #2495).
+'''
+    ),
+    LuaStep(
         name='The Logs page reads CSV columns by their header name',
         script='bin/log_columns/verify_log_columns.lua',
         rationale=r'''Issue #2506: the Logs page read every column by its position and never parsed the
