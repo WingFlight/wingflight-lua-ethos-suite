@@ -93,11 +93,11 @@ is there. The rule is in [.agents/rules/documentation.md](../../.agents/rules/do
 | --- | --- | --- | --- |
 | Copy Profiles | [tools/copy_profiles.md](tools/copy_profiles.md) | Requires a running background task and a flight controller connection. | draft |
 | Select Profile | [tools/profile_select.md](tools/profile_select.md) | Requires a running background task and a flight controller connection. | draft |
-| Status | [tools/diagnostics_rfstatus.md](tools/diagnostics_rfstatus.md) | Requires a running background task and a flight controller connection. | draft |
+| Status | [tools/diagnostics_rfstatus.md](tools/diagnostics_rfstatus.md) | Available without a flight controller connection; the background task must be running. | draft |
 | ELRS Telemetry | [tools/diagnostics_elrs_link.md](tools/diagnostics_elrs_link.md) | Requires a running background task and a flight controller connection. | draft |
 | FBL Status | [tools/diagnostics_fblstatus.md](tools/diagnostics_fblstatus.md) | Requires a running background task and a flight controller connection. | draft |
 | Rx Backup | [tools/diagnostics_rx_input_backup.md](tools/diagnostics_rx_input_backup.md) | Requires a running background task and a flight controller connection. | draft |
-| Info | [tools/diagnostics_info.md](tools/diagnostics_info.md) | Requires a running background task and a flight controller connection. | draft |
+| Info | [tools/diagnostics_info.md](tools/diagnostics_info.md) | Available without a flight controller connection; the background task must be running. | draft |
 | MSP Speed | [tools/developer_msp_speed.md](tools/developer_msp_speed.md) | Requires a running background task and a flight controller connection. Hidden until *System* → *Settings* → *Developer* mode is active. | draft |
 | MSP Exp. | [tools/developer_msp_exp.md](tools/developer_msp_exp.md) | Requires a running background task and a flight controller connection. Hidden until *System* → *Settings* → *Developer* mode is active. | draft |
 

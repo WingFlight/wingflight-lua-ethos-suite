@@ -1566,6 +1566,20 @@ unpatched master four of the checks fail.
 '''
     ),
     LuaStep(
+        name='Diagnostics Status and Info open without a flight controller',
+        script='bin/diagnostics_offline/verify_diagnostics_offline.lua',
+        rationale=r'''Ported from rotorflight-lua-ethos-suite PR #2583 (issue #2582): Status and Info show
+values that do not need the flight controller, but the menu blocked them while disconnected.
+They are now offline-capable, while FBL Status, ELRS Telemetry and RX Input Backup stay FC-only.
+The Status page's API line showed OK even without a connection; it now reads "-" unless the link
+is live and the MSP API version is supported.
+
+The harness reads the offline flags from tool.lua and drives the real Status page with a
+recording form: no connection gives "-", a live supported link gives OK, and a lost link
+after a supported one gives "-" again.
+'''
+    ),
+    LuaStep(
         name='The link-loss edge of the audio task resets once per outage',
         script='bin/audio_disconnect/verify_audio_disconnect.lua',
         rationale=r'''Ported from rotorflight-lua-ethos-suite PR #2581 (issue #2437): the disconnected branch
@@ -1580,7 +1594,7 @@ the reconnect, and the loss and the recovery of an armed model are announced for
 outages. Its can-fail check removes the re-arm from a copy of the task and requires the second
 outage to go silent there. Passing on unpatched master is expected: this is a structural
 change with no audible effect, so the harness guards the behaviour, not the saving.
-'''
+''',
     ),
 ]
 
