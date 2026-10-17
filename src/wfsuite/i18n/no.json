@@ -1394,6 +1394,13 @@
           "reverse_text": false,
           "translation": "Ingen kort"
         },
+        "no_dataflash": {
+          "english": "No dataflash",
+          "max_length": 16,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Ingen dataflash"
+        },
         "not_supported": {
           "english": "Not supported",
           "max_length": 13,
@@ -5327,6 +5334,13 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Laster loggdata"
+        },
+        "msg_no_columns": {
+          "english": "No plottable columns in this file",
+          "max_length": 33,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Ingen plottbare kolonner"
         },
         "msg_no_logs_found": {
           "english": "NO LOG FILES FOUND",

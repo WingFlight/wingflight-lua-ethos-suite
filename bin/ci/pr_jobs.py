@@ -141,6 +141,17 @@ bitmap nor allocates per draw.
 '''
     ),
     LuaStep(
+        name='Check the dashboard erase wait against the flash ready bit',
+        script='bin/dashboard_erase/verify_dashboard_erase.lua',
+        rationale=r'''The erase is acknowledged before the flash is erased, and the ready
+bit is false until it is idle. The wait must end on a read that
+reports ready, keep reading on not-ready, failed or flag-less
+replies, time out 240 s after the acknowledgement, and ignore late
+replies of an earlier erase. The erase is started through the real
+toolbar path.
+'''
+    ),
+    LuaStep(
         name='Check field layout slot pooling',
         script='bin/field_layout/verify_field_layout.lua',
         rationale=r'''Ethos form widgets retain closures across form.clear(), so
@@ -1441,6 +1452,64 @@ The runtime now drives the Tool button from the same loaded flag as Save,
 through a new setToolEnabled() on the header handle. Pages without an
 onTool are unchanged. Ported from rotorflight-lua-ethos-suite PR #2560
 (issue #2553).
+'''
+    ),
+    LuaStep(
+        name='Check the adjustment names and their audio files in the English pack',
+        script='bin/adjfunctions_audio/verify_adjfunctions_audio.lua',
+        rationale=r'''Ported from rotorflight-lua-ethos-suite PR #2572 (issue #2501): the Adjustments page
+offers functions 76 to 82 that had no name in the audio table, so they were silent when they
+changed, and six names used words that had no audio file in the pack, so the value was spoken
+without its name.
+
+The harness reads the real name table and the real page list, and checks that every
+function 76 to 82 has a name, and that every word of every name in wavs.lua has an audio
+file in default, us and gb (checked in src/ and in bin/sound-generator/soundpack/en).
+'''
+    ),
+    # Appended after the tool-button port, so this entry is a pure addition rather
+    # than a re-registration of any step above.
+    LuaStep(
+        name='The dataflash erase waits for a read taken after it, and the Tool button follows the board',
+        script='bin/blackbox_erase/verify_blackbox_erase.lua',
+        rationale=r'''Issue #2495: the erase wait could end on a read asked for before the erase, a read
+asked for while another was in flight was dropped so no read followed the erase, and the
+Tool button was always offered, so a second erase could start while one ran.
+
+Each read carries a sequence number; the erase is finished only by a read requested after
+the erase command completed, a read asked for while another is in flight is queued, and the
+Tool button is enabled only on a ready board and not while erasing. The harness drives the
+real blackbox_status page with the messages answered by hand, in the order that exposes each
+defect. Against unpatched master the erase-wait and Tool-gate checks fail. --self-test
+splices the sequence test out and requires the erase-wait check to go red.
+Ported from rotorflight-lua-ethos-suite PR #2568 (issue #2495).
+'''
+    ),
+    LuaStep(
+        name='The Logs page reads CSV columns by their header name',
+        script='bin/log_columns/verify_log_columns.lua',
+        rationale=r'''Issue #2506: the Logs page read every column by its position and never parsed the
+header row, so a log written by another tool was plotted from the wrong columns, and an
+empty file was drawn as a flat zero line.
+
+The reader is lib/log_columns.lua, pure functions over the file text. The harness checks
+name-based lookup against a file in another column order, a missing column, a header-only
+and an empty file, CRLF line endings and non-numeric values. --self-test swaps in a
+position-based header lookup and requires the foreign-order checks to go red.
+Ported from rotorflight-lua-ethos-suite PR #2567 (issue #2506).
+'''
+    ),
+    LuaStep(
+        name='A board without dataflash shows Not supported, not a zero capacity',
+        script='bin/blackbox_text/verify_blackbox_text.lua',
+        rationale=r'''Issue #2507: a board without dataflash answers total = 0, and the BLACKBOX text
+object treated that as a real capacity and drew 0.0/0.0 MB. The widget now shows the
+existing "Not supported" text for total = 0, and keeps the loading dots for "no answer yet".
+
+The harness drives the real widget through render.wakeup() with the session values the
+summary sets. Against unpatched master the no-dataflash checks fail. --self-test removes
+the new branch and requires those checks to go red.
+Ported from rotorflight-lua-ethos-suite PR #2566 (issue #2507).
 '''
     ),
     LuaStep(

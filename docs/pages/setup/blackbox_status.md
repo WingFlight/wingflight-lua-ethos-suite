@@ -19,6 +19,16 @@ TODO: Explain what this page controls and when a pilot would use it.
 
 Requires a running background task and a flight controller connection.
 
+## Erasing the dataflash
+
+The Tool button erases the dataflash after a confirmation. It is off on a board
+without dataflash, until the board reports the dataflash as ready, and while an
+erase runs. The erase dialog closes once the dataflash summary taken after the
+erase answers: the flash is ready, or the board reports no dataflash. A failed
+dataflash read does not end the wait, and an erase that reports an error leaves
+the flash not ready until a read says otherwise, so the page never reports an
+erase as finished on a reading from before it.
+
 ## Settings
 
 | Setting | What it does |
