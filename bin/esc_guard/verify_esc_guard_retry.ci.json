@@ -1,0 +1,7 @@
+{
+  "id": "verify-esc-guard-retry",
+  "name": "Check a failed ESC/servo guard read is retried",
+  "step": "Check a failed ESC/servo guard read is retried",
+  "script": "bin/esc_guard/verify_esc_guard_retry.lua",
+  "rationale": "The ESC forward-programming and servo BUS tiles are gated by guards\nthat read the FC once. A timeout or bus error used to latch them shut\nuntil the menu was reopened; they now retry after a backoff. That\nretry reaches neither a build nor a package step, so it is pinned here."
+}

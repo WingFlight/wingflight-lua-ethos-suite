@@ -1,0 +1,7 @@
+{
+  "id": "verify-flight-record",
+  "name": "Flight record across a link loss",
+  "step": "Check the flight record behaviour",
+  "script": "bin/flight_record/verify_flight_record.lua",
+  "rationale": "A flight is a state machine that only misbehaves across a link loss, which\nno build step can reach. This pins it: a brief in-flight drop stays one\nrecord, and a pack swap stays two."
+}

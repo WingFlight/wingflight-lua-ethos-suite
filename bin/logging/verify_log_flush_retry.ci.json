@@ -1,0 +1,7 @@
+{
+  "id": "verify-log-flush-retry",
+  "name": "Check an unwritable card does not discard the log buffer",
+  "step": "Check an unwritable card does not discard the log buffer",
+  "script": "bin/logging/verify_log_flush_retry.lua",
+  "rationale": "A flight log is the pilot's evidence after a crash, and both ways it\ncould lose rows were silent: an io.open that failed emptied the buffer,\nand a failed write() trimmed the rows it had just failed to persist.\nOnly a card that cannot be written reaches either path, so the real\nlogger is driven here with io.open and the handle's write() as seams."
+}

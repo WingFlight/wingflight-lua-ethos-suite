@@ -1,0 +1,7 @@
+{
+  "id": "verify-field-layout",
+  "name": "Check field layout slot pooling",
+  "step": "Check field layout slot pooling",
+  "script": "bin/field_layout/verify_field_layout.lua",
+  "rationale": "Ethos form widgets retain closures across form.clear(), so\napp/field_layout.lua pools accessor slots per page+field shape. This\nchecks the pool is reused across visits, never shrunk on release,\ndetaches dataRef/controlRef safely, and keeps two closures per slot."
+}

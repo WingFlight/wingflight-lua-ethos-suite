@@ -1,0 +1,7 @@
+{
+  "id": "verify-toolbar-armed",
+  "name": "Check the dashboard Erase and Battery tiles while armed",
+  "step": "Check the dashboard Erase and Battery tiles while armed",
+  "script": "bin/toolbar_armed/verify_toolbar_armed.lua",
+  "rationale": "Ported from rotorflight-lua-ethos-suite PR #2541 (issue #2505):\ntwo dashboard toolbar items write to the flight controller, blackbox erase and\nbattery profile, and neither their enable check nor their write path looked at the\narm state. A battery picker open at arming, or an erase confirmation answered after\narming, still wrote.\n\nNo build and no package step reaches this -- it is a touch path through a running\nwidget. The harness drives the real widgets/dashboard.lua through the descriptor the\nradio calls, and feeds the arm state through session.update the way the session does.\nWhile armed the Erase and Battery tiles are disabled, arming closes an open battery\npicker, and a confirmed erase answered after arming publishes no msp.request.\nDisarmed, the same paths publish their write again. The checks that depend on the\ntoolbar being reachable assert that it is reachable first, so a run that cannot\nreach the tiles fails instead of passing vacuously. Run against unpatched\nwingflight-lua-ethos-suite master, 11 of 19 checks fail."
+}

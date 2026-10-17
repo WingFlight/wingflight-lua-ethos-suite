@@ -1,0 +1,7 @@
+{
+  "id": "verify-pwm-servo-write",
+  "name": "PWM servo page lists the PWM outputs only and writes each one raw",
+  "step": "PWM servo page lists the PWM outputs only and writes each one raw",
+  "script": "bin/pwm_servo_write/verify_pwm_servo_write.lua",
+  "rationale": "With a SBUS or FBUS port configured, MSP_STATUS servo_count is the packed total:\nthe PWM outputs plus the bus channels (firmware msp.c, MSP_STATUS: getServoCount() +\nBUS_SERVO_CHANNELS, with BUS_SERVO_CHANNELS 24 in common_defaults_post.h). The PWM page\nlisted min(total, 16) tiles, so tiles past the PWM outputs wrote bus servos, and each\nsave went out as cmd 212, which the firmware translates to the bus servo at that packed\nindex. The list now counts the PWM outputs using the same port test as the bus guard,\nand every PWM save is written raw (cmd 124).\nPorted from rotorflight-lua-ethos-suite PR #2555 (Issue #2445), with the bus channel\ncount taken from the WingFlight firmware (24, not the Rotorflight value of 18).\n\nNo build and no package step reaches this -- it is a list and a save path through a\nrunning page. The harness drives the real servos_pwm page with the real page runtime,\nthe real bus guard and the real servo-config write builders, in three bench layouts:\nno bus port, a FBUS port and a SBUS port. Against unpatched master 5 of its 12 checks\nfail: the bus layouts show 16 tiles and write cmd 212, and the first layout writes\ncmd 212 where the page now writes cmd 124."
+}

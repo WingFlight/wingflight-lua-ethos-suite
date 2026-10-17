@@ -1,0 +1,7 @@
+{
+  "id": "verify-system-alerts",
+  "name": "FC status alerts fire from whichever packed word is present",
+  "step": "FC status alerts fire from whichever packed word is present",
+  "script": "bin/system_status/verify_system_alerts.lua",
+  "rationale": "System Status and System Config are separate telemetry sensors, and a pilot may\nselect only one. Reboot required and Blackbox full come from System Config alone,\nbut lib/system_alerts.lua returned \"nothing active\" whenever System Status was\nmissing, so neither banner nor callout ever showed on such a model. Rules are now\nevaluated against whichever words are present, with an empty table for the other;\nthe check pins that, and that no rule reads true against an empty table.\n--self-test gates topBanner() on System Status again and requires the config-only\ncheck to go red. Ported from rotorflight-lua-ethos-suite PR #2488's review."
+}

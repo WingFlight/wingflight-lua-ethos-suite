@@ -1,0 +1,7 @@
+{
+  "id": "verify-bar-disconnect",
+  "name": "Check the dashboard bar after telemetry loss",
+  "step": "Check the dashboard bar after telemetry loss",
+  "script": "bin/bar_disconnect/verify_bar_disconnect.lua",
+  "rationale": "Ported from rotorflight-lua-ethos-suite PR #2542 (issue #2534): the bar gauge kept\nits last valid reading whenever its sensor dropped out, so a fuel bar stayed at 85% after\nthe pack was unplugged before flight. Before the flight a dropped source now shows the\nloading dots; once a flight is under way the last reading is held, in flight as well as\nin postflight. The watts text object follows the same rule.\n\nNo build and no package step reaches this -- it is a render path through a running\nwidget. The harness drives the real bar gauge and the real watts text object\n(render.wakeup) with a fake telemetry source and the flight mode. Against unpatched\nmaster the three dropout-before-flight checks fail."
+}

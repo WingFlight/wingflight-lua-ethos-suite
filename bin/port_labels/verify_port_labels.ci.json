@@ -1,0 +1,7 @@
+{
+  "id": "verify-port-labels",
+  "name": "Check the port labels and the board info parser",
+  "step": "Check the port labels and the board info parser",
+  "script": "bin/port_labels/verify_port_labels.lua",
+  "rationale": "Issue #2359: the Ports page reads MSP_BOARD_INFO and shows a silkscreen\nlabel for each UART when the board has one. No WingFlight board has label data yet,\nso the lookup must answer nil and the page shows the plain UART name. The check\nalso drives the lookup logic with injected entries, and it covers truncated replies,\nsince mspcodec reads past the end of a buffer as 0."
+}

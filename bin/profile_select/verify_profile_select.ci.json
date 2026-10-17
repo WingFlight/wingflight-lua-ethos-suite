@@ -1,0 +1,7 @@
+{
+  "id": "verify-profile-select",
+  "name": "Check the profile select page reports a refused save",
+  "step": "Check the profile select page reports a refused save",
+  "script": "bin/profile_select/verify_profile_select.lua",
+  "rationale": "Ported from rotorflight-lua-ethos-suite PR #2546 (issue #2498):\nthe Select Profile page saves the rate, PID and Thrust Vector profile in turn. A\nrefused write at any of the three steps left the progress dialog closed and nothing\non screen, so the pilot saw the page return to normal with the change not saved.\n\nThe WingFlight page reports a refusal at every step of the save chain (rate, PID,\nThrust Vector) with the save-failed dialog and keeps the Save button lit, so a second\nattempt is possible. An accepted save shows no dialog and darkens the button.\n\nThe harness drives the real page, bus and msp_select_profile codec, with stubs for\nthe status read, the Thrust Vector read and write, the progress dialog and the header.\nAgainst wf/master three of its checks fail, one per refused step."
+}

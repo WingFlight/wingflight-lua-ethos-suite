@@ -1,0 +1,7 @@
+{
+  "id": "verify-flyrotor-payload",
+  "name": "Check that a short FlyRotor block is refused, not zero-filled",
+  "step": "Check that a short FlyRotor block is refused, not zero-filled",
+  "script": "bin/esc_flyrotor_payload/verify_flyrotor_payload.lua",
+  "rationale": "The FlyRotor block is 56 bytes by the flight controller's own compiled\npage table (wingflight-firmware esc_sensor.c:1933-1934, four pages of\n22 + 12 + 10 + 10 plus the 2-byte header), and the FC hands it over only\nonce every page is cached, so a shorter reply is a truncated read, not\na smaller layout. lib/mspcodec.lua reads past the end as 0, and the\ncodec did not check the length: a 40-byte reply opened an editor whose\nunseen ADV and OTHER settings were zero, and Save wrote those zeros to\nthe ESC (flyParamCommit writes every page that differs). decode() now\nrefuses a short block, encode() refuses a table that is not a decoded\none, and the length guard is summed from the same widths as the layout.\nThe layout is walked against the firmware page table and the round trip\nis exhaustive (56 positions x 256 values). Ported from\nrotorflight-lua-ethos-suite#2462 (open upstream at the time of the\nport). Pass --self-test to prove all 8 gate checks fail with the\npre-fix codec spliced back in."
+}

@@ -1,0 +1,7 @@
+{
+  "id": "verify-battery-edit-profile",
+  "name": "Editing another battery profile does not activate it on save",
+  "step": "Editing another battery profile does not activate it on save",
+  "script": "bin/battery_edit_profile/verify_battery_edit_profile.lua",
+  "rationale": "Ported from rotorflight-lua-ethos-suite PR #2549 (issue #2502):\nthe Battery page had one profile selector, and the capacity and cell rows followed\nit. To edit the cells of profile 4 the pilot had to make profile 4 active, and saving\nthen activated it. The page now has an Edit Battery choice that the capacity and cell\nrows follow; the saved profile stays on the active one.\n\nNo build and no package step reaches this -- it is a save path through a running\npage. The harness drives the real power_battery page with the real page runtime and\nfield layout, and answers every write the way the FC would. Against unpatched\nwingflight-lua-ethos-suite master the page has no Edit Battery choice, and saving a\ncell edit of profile 3 writes profile 3 as the active one; four of the fourteen\nchecks fail."
+}

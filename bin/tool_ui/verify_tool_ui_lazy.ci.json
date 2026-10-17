@@ -1,0 +1,7 @@
+{
+  "id": "verify-tool-ui-lazy",
+  "name": "Check the tool's UI is not loaded at boot",
+  "step": "Check the tool's UI is not loaded at boot",
+  "script": "bin/tool_ui/verify_tool_ui_lazy.lua",
+  "rationale": "The system tool's UI subtree (menu_container, header, tile_grid,\nnavigation, both menu guards and their MSP codecs, memstats) loads on\nfirst create(), not at boot. Nothing reaches that from a build step."
+}
