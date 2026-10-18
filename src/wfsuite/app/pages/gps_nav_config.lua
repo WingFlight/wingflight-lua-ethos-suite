@@ -18,6 +18,7 @@ local progressDialog = requireModule("app/progress_dialog.lua")
 local eeprom = requireModule("lib/msp_eeprom.lua")
 local gpsNavConfig = requireModule("lib/msp_gps_nav_config.lua")
 local gpsRescue = requireModule("lib/msp_gps_rescue.lua")
+local leaveConfirm = requireModule("app/leave_confirm.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.gps_nav_config.name)@"
 local MSG_LOADING_TITLE = "@i18n(app.msg_loading)@"
@@ -74,6 +75,8 @@ local function open(opts)
   -- FC does not report the field; armField is only enabled while it is set.
   local rescue = nil
   local armField = nil
+  local isArmed = nil
+  local sessionHandler = nil
 
   local function closeDialog(focusFn)
     if not dialog then return end
@@ -119,10 +122,11 @@ local function open(opts)
     end
   end
 
-  local function goBack()
+  local function leave()
     disposed = true
     if opts.setWakeupHandler then opts.setWakeupHandler(nil) end
     if opts.setCleanupHandler then opts.setCleanupHandler(nil) end
+    if sessionHandler then bus.unsubscribe("session.update", sessionHandler) end
     closeDialog()
     if opts.onBack then opts.onBack() end
   end
@@ -211,12 +215,50 @@ local function open(opts)
     })
   end
 
+  -- Back with unsaved changes asks first (issue #2504): Save saves and keeps the page,
+  -- Discard leaves it, Stay keeps it.
+  local function hasUnsavedChanges()
+    return not disposed and loaded == true and dirty == true
+  end
+
+  local function canSaveNow()
+    return hasUnsavedChanges() and not busy and dialog == nil and isArmed ~= true
+  end
+
+  local function goBack()
+    if busy or dialog ~= nil then return end
+    if not hasUnsavedChanges() then
+      leave()
+      return
+    end
+    form.openDialog(leaveConfirm.args({
+      canSave = canSaveNow(),
+      save = function()
+        saveData(headerHandle and headerHandle.focusSave)
+      end,
+      discard = function()
+        leave()
+      end,
+      focus = function()
+        if headerHandle and headerHandle.focusSave then
+          headerHandle.focusSave()
+        end
+      end,
+    }))
+  end
+
   form.clear()
   headerHandle = header.build(PAGE_TITLE, {
     onBack = goBack,
     onSave = function() confirmSave(headerHandle and headerHandle.focusSave) end,
     onReload = function() confirmReload(headerHandle and headerHandle.focusReload) end,
   })
+
+  sessionHandler = function(update)
+    if disposed then return end
+    isArmed = update and update.isArmed
+  end
+  bus.subscribe("session.update", sessionHandler)
 
   if opts.setEventHandler then
     opts.setEventHandler(function(category, value)
@@ -230,6 +272,7 @@ local function open(opts)
   if opts.setCleanupHandler then
     opts.setCleanupHandler(function()
       disposed = true
+      if sessionHandler then bus.unsubscribe("session.update", sessionHandler) end
       closeDialog()
     end)
   end
