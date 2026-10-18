@@ -509,7 +509,7 @@ function render.wakeup(box)
     -- during a flight into "postflight" (flightmode.lua:124-126), so holding from
     -- "inflight" onwards also covers the link going away mid-flight.
     local mode = wfsuite.flightmode and wfsuite.flightmode.current or "preflight"
-    local holdLastValue = mode ~= "preflight"
+    local holdLastValue = mode ~= "preflight" and mode ~= "armed"
     if value ~= nil then
         c._lastValidValue = value
         c._lastValidDisplayValue = displayValue

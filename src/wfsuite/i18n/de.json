@@ -270,6 +270,12 @@
       "reverse_text": false,
       "translation": "ABBRECHEN"
     },
+    "btn_discard": {
+      "english": "DISCARD",
+      "max_length": 7,
+      "needs_translation": false,
+      "translation": "VERWERF"
+    },
     "btn_ok": {
       "english": "OK",
       "max_length": 2,
@@ -283,6 +289,18 @@
       "needs_translation": false,
       "reverse_text": false,
       "translation": "                OK                "
+    },
+    "btn_save": {
+      "english": "SAVE",
+      "max_length": 4,
+      "needs_translation": false,
+      "translation": "SICH"
+    },
+    "btn_stay": {
+      "english": "STAY",
+      "max_length": 4,
+      "needs_translation": false,
+      "translation": "HALT"
     },
     "curve_none": {
       "english": "None",
@@ -379,8 +397,9 @@
         },
         "msg_calibration_timeout": {
           "english": "The calibration did not finish. Try again.",
-          "max_length": 46,
+          "max_length": 42,
           "needs_translation": false,
+          "reverse_text": false,
           "translation": "Kalibrierung nicht beendet. Erneut versuchen."
         },
         "name": {
@@ -1396,7 +1415,7 @@
         },
         "no_dataflash": {
           "english": "No dataflash",
-          "max_length": 16,
+          "max_length": 12,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Kein Dataflash"
@@ -1530,6 +1549,18 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Wählen Sie Quelle und Ziele und speichern zum Kopieren."
+        },
+        "msgbox_copy_fmt": {
+          "english": "Copy %s Profile %d to Profile %d? This permanently overwrites Profile %d in the flight controller.",
+          "max_length": 98,
+          "needs_translation": false,
+          "translation": "%s-Profil %d auf Profil %d kopieren? Profil %d im Flugcontroller wird dauerhaft überschrieben."
+        },
+        "msgbox_copy_title": {
+          "english": "Copy profile?",
+          "max_length": 13,
+          "needs_translation": false,
+          "translation": "Profil kopieren?"
         },
         "msgbox_msg": {
           "english": "Save current page to flight controller?",
@@ -5265,28 +5296,28 @@
       "info": {
         "bgtask_heartbeat": {
           "english": "Heartbeat",
-          "max_length": 12,
+          "max_length": 9,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Herzschlag"
         },
         "bgtask_name": {
           "english": "Background task",
-          "max_length": 18,
+          "max_length": 15,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Hintergrund-Task"
         },
         "bgtask_revivals": {
           "english": "Revivals",
-          "max_length": 11,
+          "max_length": 8,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Neustarts"
         },
         "bgtask_running": {
           "english": "Running",
-          "max_length": 13,
+          "max_length": 7,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Läuft"
@@ -5374,6 +5405,7 @@
           "english": "No plottable columns in this file",
           "max_length": 33,
           "needs_translation": false,
+          "reverse_text": false,
           "translation": "Keine auswertbaren Spalten in dieser Datei"
         },
         "msg_no_logs_found": {
@@ -6970,9 +7002,16 @@
         },
         "edit_battery": {
           "english": "Edit Battery",
-          "max_length": 16,
+          "max_length": 12,
           "needs_translation": false,
+          "reverse_text": false,
           "translation": "Akku bearbeiten"
+        },
+        "esc_current_limit": {
+          "english": "ESC Current Limit",
+          "max_length": 17,
+          "needs_translation": false,
+          "translation": "ESC-Stromlimit"
         },
         "full_cell_voltage": {
           "english": "Full Cell Voltage",
@@ -7009,6 +7048,12 @@
           "reverse_text": false,
           "translation": "Energie"
         },
+        "preferences_name": {
+          "english": "Preferences",
+          "max_length": 11,
+          "needs_translation": false,
+          "translation": "Optionen"
+        },
         "reload_alerts_prompt": {
           "english": "Reload local power alert settings?",
           "max_length": 34,
@@ -7029,6 +7074,12 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Lokale Stromwarnungseinstellungen speichern?"
+        },
+        "save_preferences_prompt": {
+          "english": "Save power preferences?",
+          "max_length": 23,
+          "needs_translation": false,
+          "translation": "Optionen speichern?"
         },
         "selected": {
           "english": "Selected",
@@ -7930,12 +7981,26 @@
           "reverse_text": false,
           "translation": "Einstellungswert"
         },
+        "alert_max_repeats": {
+          "english": "Max repeats (0 = all)",
+          "max_length": 21,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Max. Wiederh. (0=alle)"
+        },
         "alert_repeat_interval": {
           "english": "Repeat interval",
           "max_length": 15,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Repeat-Intervall"
+        },
+        "alert_vibrate": {
+          "english": "Vibrate",
+          "max_length": 7,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Vibration"
         },
         "arming_flags": {
           "english": "Arming flags",
@@ -9372,6 +9437,18 @@
       "reverse_text": false,
       "translation": "Background-Task wird nicht ausgeführt"
     },
+    "msg_fc_not_connected_body": {
+      "english": "Connect the flight controller to open this menu. Check its power and the telemetry link.",
+      "max_length": 88,
+      "needs_translation": false,
+      "translation": "Verbinden Sie den Flugcontroller, um dieses Menü zu öffnen. Prüfen Sie Stromversorgung und Telemetrieverbindung."
+    },
+    "msg_fc_not_connected_title": {
+      "english": "Flight controller not connected",
+      "max_length": 31,
+      "needs_translation": false,
+      "translation": "Flugcontroller nicht verbunden"
+    },
     "msg_load_failed_body": {
       "english": "Data could not be read from the flight controller. Please reload.",
       "max_length": 65,
@@ -9402,7 +9479,7 @@
     },
     "msg_main_power_lost_banner": {
       "english": "MAIN POWER LOST",
-      "max_length": 27,
+      "max_length": 15,
       "needs_translation": false,
       "reverse_text": false,
       "translation": "HAUPTAKKU-AUSFALL"
@@ -9451,7 +9528,7 @@
     },
     "msg_save_failed_local_body": {
       "english": "Settings were not saved to the radio. Please try again.",
-      "max_length": 67,
+      "max_length": 55,
       "needs_translation": false,
       "reverse_text": false,
       "translation": "Einstellungen nicht im Radio gespeichert. Bitte erneut versuchen."
@@ -9497,6 +9574,24 @@
       "needs_translation": false,
       "reverse_text": false,
       "translation": "Einstellungen werden gespeichert..."
+    },
+    "msg_unsaved_armed_body": {
+      "english": "Saving is locked while armed. Discard the changes?",
+      "max_length": 50,
+      "needs_translation": false,
+      "translation": "Im Armed-Zustand gesperrt. Verwerfen?"
+    },
+    "msg_unsaved_body": {
+      "english": "Save the changes before leaving?",
+      "max_length": 32,
+      "needs_translation": false,
+      "translation": "Vor dem Verlassen speichern?"
+    },
+    "msg_unsaved_title": {
+      "english": "Unsaved changes",
+      "max_length": 15,
+      "needs_translation": false,
+      "translation": "Ungespeichert"
     },
     "navigation_menu": {
       "english": "BACK",
@@ -10440,8 +10535,9 @@
       },
       "armed_warning": {
         "english": "Armed warning",
-        "max_length": 24,
+        "max_length": 13,
         "needs_translation": false,
+        "reverse_text": false,
         "translation": "Armed-Warnung"
       },
       "battery": {
@@ -11038,6 +11134,248 @@
         "needs_translation": false,
         "reverse_text": false,
         "translation": "Max. Watt"
+      }
+    },
+    "escstatus": {
+      "battery_limit": {
+        "english": "BATTERY LIMIT",
+        "max_length": 13,
+        "needs_translation": false,
+        "translation": "AKKUGRENZE"
+      },
+      "bec_overcurrent": {
+        "english": "BEC OVERCURRENT",
+        "max_length": 15,
+        "needs_translation": false,
+        "translation": "BEC ÜBERSTROM"
+      },
+      "bec_overheat": {
+        "english": "BEC OVERHEAT",
+        "max_length": 12,
+        "needs_translation": false,
+        "translation": "BEC ZU HEISS"
+      },
+      "bec_overvoltage": {
+        "english": "BEC OVERVOLTAGE",
+        "max_length": 15,
+        "needs_translation": false,
+        "translation": "BEC ÜBERSPANN."
+      },
+      "bec_temp_limit": {
+        "english": "BEC TEMP LIMIT",
+        "max_length": 14,
+        "needs_translation": false,
+        "translation": "BEC TEMPGRENZE"
+      },
+      "bec_undervoltage": {
+        "english": "BEC UNDERVOLTAGE",
+        "max_length": 16,
+        "needs_translation": false,
+        "translation": "BEC UNTERSPANN."
+      },
+      "bec_voltage": {
+        "english": "BEC VOLTAGE",
+        "max_length": 11,
+        "needs_translation": false,
+        "translation": "BEC SPANN."
+      },
+      "capacity_limit": {
+        "english": "CAPACITY LIMIT",
+        "max_length": 14,
+        "needs_translation": false,
+        "translation": "KAPAZ.GRENZE"
+      },
+      "consumption": {
+        "english": "CONSUMPTION",
+        "max_length": 11,
+        "needs_translation": false,
+        "translation": "VERBRAUCH"
+      },
+      "current_limit": {
+        "english": "CURRENT LIMIT",
+        "max_length": 13,
+        "needs_translation": false,
+        "translation": "STROMGRENZE"
+      },
+      "current_warning": {
+        "english": "CURRENT WARNING",
+        "max_length": 15,
+        "needs_translation": false,
+        "translation": "STROM WARNUNG"
+      },
+      "eeprom": {
+        "english": "EEPROM",
+        "max_length": 6,
+        "needs_translation": false,
+        "translation": "EEPROM"
+      },
+      "esc_temp_limit": {
+        "english": "ESC TEMP LIMIT",
+        "max_length": 14,
+        "needs_translation": false,
+        "translation": "ESC TEMPGRENZE"
+      },
+      "fault": {
+        "english": "FAULT",
+        "max_length": 5,
+        "needs_translation": false,
+        "translation": "STÖR."
+      },
+      "input_voltage": {
+        "english": "INPUT VOLTAGE",
+        "max_length": 13,
+        "needs_translation": false,
+        "translation": "EING.SPANNUNG"
+      },
+      "motor_hot": {
+        "english": "MOTOR HOT",
+        "max_length": 9,
+        "needs_translation": false,
+        "translation": "MOT HEISS"
+      },
+      "motor_locked": {
+        "english": "MOTOR LOCKED",
+        "max_length": 12,
+        "needs_translation": false,
+        "translation": "MOTOR BLOCK."
+      },
+      "motor_saturated": {
+        "english": "MOTOR SATURATED",
+        "max_length": 15,
+        "needs_translation": false,
+        "translation": "MOTOR ANSCHLAG"
+      },
+      "motor_wiring": {
+        "english": "MOTOR WIRING",
+        "max_length": 12,
+        "needs_translation": false,
+        "translation": "MOTORANSCHL."
+      },
+      "no_status": {
+        "english": "NO STATUS",
+        "max_length": 9,
+        "needs_translation": false,
+        "translation": "KEIN INFO"
+      },
+      "ok": {
+        "english": "OK",
+        "max_length": 2,
+        "needs_translation": false,
+        "translation": "OK"
+      },
+      "operation": {
+        "english": "OPERATION FAULT",
+        "max_length": 15,
+        "needs_translation": false,
+        "translation": "BETRIEBSFEHLER"
+      },
+      "operation_warning": {
+        "english": "OPERATION WARNING",
+        "max_length": 17,
+        "needs_translation": false,
+        "translation": "BETRIEBSWARNUNG"
+      },
+      "overcurrent": {
+        "english": "OVERCURRENT",
+        "max_length": 11,
+        "needs_translation": false,
+        "translation": "ÜBERSTROM"
+      },
+      "overheat": {
+        "english": "OVERHEAT",
+        "max_length": 8,
+        "needs_translation": false,
+        "translation": "ZU HEISS"
+      },
+      "overvoltage": {
+        "english": "OVERVOLTAGE",
+        "max_length": 11,
+        "needs_translation": false,
+        "translation": "ÜBERSPANN."
+      },
+      "programming_open": {
+        "english": "PROGRAMMING OPEN",
+        "max_length": 16,
+        "needs_translation": false,
+        "translation": "PROGRAMM. OFFEN"
+      },
+      "restart": {
+        "english": "RESTART ESC",
+        "max_length": 11,
+        "needs_translation": false,
+        "translation": "NEU STARTEN"
+      },
+      "rpm_low": {
+        "english": "RPM BELOW LIMIT",
+        "max_length": 15,
+        "needs_translation": false,
+        "translation": "DREHZAHL NIEDR."
+      },
+      "rudder_cutoff": {
+        "english": "RUDDER CUTOFF",
+        "max_length": 13,
+        "needs_translation": false,
+        "translation": "HECK-STOPP"
+      },
+      "self_test": {
+        "english": "SELF TEST",
+        "max_length": 9,
+        "needs_translation": false,
+        "translation": "TESTLAUF"
+      },
+      "setpoint_noise": {
+        "english": "SETPOINT NOISE",
+        "max_length": 14,
+        "needs_translation": false,
+        "translation": "SOLLW. STÖRUNG"
+      },
+      "startup": {
+        "english": "STARTUP FAILED",
+        "max_length": 14,
+        "needs_translation": false,
+        "translation": "START FEHLER"
+      },
+      "temp_warning": {
+        "english": "TEMP WARNING",
+        "max_length": 12,
+        "needs_translation": false,
+        "translation": "TEMP WARNUNG"
+      },
+      "throttle": {
+        "english": "THROTTLE",
+        "max_length": 8,
+        "needs_translation": false,
+        "translation": "GASSIGN."
+      },
+      "throttle_at_start": {
+        "english": "THROTTLE AT START",
+        "max_length": 17,
+        "needs_translation": false,
+        "translation": "GAS BEIM START"
+      },
+      "throttle_lost": {
+        "english": "THROTTLE LOST",
+        "max_length": 13,
+        "needs_translation": false,
+        "translation": "GAS VERLOREN"
+      },
+      "undervoltage": {
+        "english": "UNDERVOLTAGE",
+        "max_length": 12,
+        "needs_translation": false,
+        "translation": "UNTERSPANN."
+      },
+      "unknown": {
+        "english": "UNKNOWN ESC",
+        "max_length": 11,
+        "needs_translation": false,
+        "translation": "UNBEKANNT"
+      },
+      "watchdog": {
+        "english": "WATCHDOG",
+        "max_length": 8,
+        "needs_translation": false,
+        "translation": "WATCHDOG"
       }
     },
     "governor": {

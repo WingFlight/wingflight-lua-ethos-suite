@@ -1624,6 +1624,8 @@ local function create()
     rpm = nil,
     linkQuality = nil,
     tempEsc = nil,
+    escStatusWord = nil,
+    escSignature = nil,
     tempMcu = nil,
     becVoltage = nil,
     fuelPercent = nil,
@@ -1637,6 +1639,7 @@ local function create()
     timerLive = 0,
     timerSession = 0,
     timerTarget = 300,
+    escCurrentLimit = nil,
     modelStats = nil,
     bblFlags = nil,
     bblSize = nil,
@@ -1773,6 +1776,8 @@ local function update(widget, snapshot)
   widget.rpm = snapshot.rpm
   widget.linkQuality = snapshot.linkQuality
   widget.tempEsc = snapshot.tempEsc
+  widget.escStatusWord = snapshot.escStatusWord
+  widget.escSignature = snapshot.escSignature
   widget.tempMcu = snapshot.tempMcu
   widget.becVoltage = snapshot.becVoltage
   widget.fuelPercent = snapshot.fuelPercent
@@ -1787,6 +1792,7 @@ local function update(widget, snapshot)
   widget.timerSession = snapshot.timerSession or 0
   widget.timerTarget = snapshot.timerTarget or 300
   widget.smartfuelModelType = snapshot.smartfuelModelType
+  widget.escCurrentLimit = snapshot.escCurrentLimit
   widget.modelStats = snapshot.modelStats
   widget.bblFlags = snapshot.bblFlags
   widget.bblSize = snapshot.bblSize
@@ -1819,7 +1825,7 @@ local function update(widget, snapshot)
   end
 
   if previousConnected == false and widget.connected == true then
-    if previousState == "postflight" and widget.flightmode and type(widget.flightmode.reset) == "function" then
+    if (previousState == "postflight" or previousState == "offline") and widget.flightmode and type(widget.flightmode.reset) == "function" then
       widget.flightmode:reset()
     end
     clearDashboardStats(widget.dashboardStats)
@@ -1834,7 +1840,7 @@ local function update(widget, snapshot)
   end
 
   widget.flightmodeState = widget.flightmode:update(widget)
-  if widget.flightmodeState == "inflight" and previousState ~= "inflight" and previousState ~= "postflight" then
+  if widget.flightmodeState == "inflight" and previousState ~= "inflight" and previousState ~= "postflight" and previousState ~= "offline" then
     clearDashboardStats(widget.dashboardStats)
     widget.rpmVariancePct = nil
   end
@@ -1842,7 +1848,7 @@ local function update(widget, snapshot)
 end
 
 local function dashboardState(widget)
-  return widget.flightmodeState or "preflight"
+  return flightmode.layoutPhase(widget.flightmodeState or "preflight")
 end
 
 -- Runs on every paint() and every prepare. settingsStore.dashboardTheme()

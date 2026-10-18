@@ -241,7 +241,7 @@ local function mode(widget)
   if widget.previewMode == "preflight" or widget.previewMode == "inflight" or widget.previewMode == "postflight" then
     return widget.previewMode
   end
-  return widget.flightmode.current
+  return flightmode.layoutPhase(widget.flightmode.current)
 end
 
 local function buildLayout(widget)
