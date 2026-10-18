@@ -451,6 +451,8 @@ local TASK_STATUS_TIMEOUT = 3.0
 local TASK_ALERT_GRACE = 10.0
 local TASK_ALERT_TITLE = "@i18n(app.msg_background_task_missing_title)@"
 local TASK_ALERT_BODY = "@i18n(app.msg_background_task_missing_body)@"
+local NOT_CONNECTED_TITLE = "@i18n(app.msg_fc_not_connected_title)@"
+local NOT_CONNECTED_BODY = "@i18n(app.msg_fc_not_connected_body)@"
 local BTN_OK = "@i18n(app.btn_ok)@"
 
 local appOpenedAt = nil
@@ -459,6 +461,8 @@ local sessionConnected = false
 local taskAlertPending = false
 local taskAlertOpen = false
 local taskAlertShown = false
+local notConnectedPending = false
+local notConnectedOpen = false
 
 local function isBackgroundTaskRunning()
   return taskStatusAt ~= nil and (os.clock() - taskStatusAt) <= TASK_STATUS_TIMEOUT
@@ -493,11 +497,39 @@ local function showBackgroundTaskAlert()
   })
 end
 
+-- A press on a tile the flight controller has not answered for (#2319). Unlike the
+-- one-shot alert above it is not latched: every press is answered, and a press
+-- waits only while a dialog is already open.
+local function requestNotConnectedAlert()
+  if notConnectedOpen then return end
+  notConnectedPending = true
+end
+
+local function showNotConnectedAlert()
+  if not notConnectedPending or notConnectedOpen then return end
+  notConnectedPending = false
+  notConnectedOpen = true
+  form.openDialog({
+    title = NOT_CONNECTED_TITLE,
+    message = NOT_CONNECTED_BODY,
+    buttons = {
+      {label = BTN_OK, action = function()
+        notConnectedOpen = false
+        return true
+      end},
+    },
+    wakeup = function() end,
+    paint = function() end,
+    options = TEXT_LEFT,
+  })
+end
+
 local taskGuard = {
   isRunning = isBackgroundTaskRunning,
   isConnected = function() return sessionConnected == true end,
   graceExpired = backgroundTaskGraceExpired,
   requestAlert = requestBackgroundTaskAlert,
+  requestNotConnectedAlert = requestNotConnectedAlert,
 }
 
 -- Attached to MENUS lazily, from create(), not here -- see this file's
@@ -567,6 +599,8 @@ local function create()
   taskAlertPending = false
   taskAlertOpen = false
   taskAlertShown = false
+  notConnectedPending = false
+  notConnectedOpen = false
   updateDeveloperMode()
   ensureMemstats()
   ensureMenuGuards()
@@ -583,6 +617,7 @@ local function wakeup(state)
     currentWakeupHandler()
   end
   showBackgroundTaskAlert()
+  showNotConnectedAlert()
 end
 
 local function paint(state)
