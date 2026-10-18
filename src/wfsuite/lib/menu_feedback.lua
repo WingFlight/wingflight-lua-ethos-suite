@@ -17,6 +17,12 @@ local menuFeedback = {}
 menuFeedback.TASK_MISSING = "task_missing"
 menuFeedback.NOT_CONNECTED = "not_connected"
 
+-- Whether a tile is enabled. Only a stopped background task disables it. A closed link leaves
+-- it enabled, so a press reaches blockedBy() and reports why. canOpenEntry still stops the open.
+function menuFeedback.tileEnabled(running)
+  return running == true
+end
+
 -- Returns why a press on a tile is blocked, or nil when the tile opens.
 --   offline    the tile works without a flight controller
 --   running    the background task is running

@@ -114,6 +114,10 @@ check("a missing running flag is treated as the task down",
   blockedBy(false, nil, true) == menuFeedback.TASK_MISSING,
   "got " .. tostring(blockedBy(false, nil, true)))
 
+check("a tile is enabled while the task runs, whatever the link does",
+  menuFeedback.tileEnabled(true) == true)
+check("a tile is disabled while the task is down", menuFeedback.tileEnabled(false) == false)
+
 if not SELF_TEST then
   print("wiring")
 
@@ -121,6 +125,10 @@ if not SELF_TEST then
   check("the press handler asks the decision", press:find("menuFeedback.blockedBy(", 1, true) ~= nil)
   check("the press handler reports the link", press:find("taskGuard.requestNotConnectedAlert()", 1, true) ~= nil)
   check("menu_container loads the decision module", press:find('requireModule("lib/menu_feedback.lua")', 1, true) ~= nil)
+  check("a tile is enabled by the task alone, so a press on it can report the link",
+    press:find("menuFeedback.tileEnabled(", 1, true) ~= nil and press:find("isTilePressable(", 1, true) ~= nil)
+  check("the enable state no longer follows the link",
+    press:find("local function isEntryEnabled", 1, true) == nil and press:find("isEntryEnabled(entries", 1, true) == nil)
 
   local tool = readFile("src/wfsuite/app/tool.lua")
   check("the task guard carries the request",
