@@ -63,6 +63,7 @@ local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("
 local closeKey = requireModule("app/close_key.lua")
 local header = requireModule("app/header.lua")
 local tileGrid = requireModule("app/tile_grid.lua")
+local menuFeedback = requireModule("lib/menu_feedback.lua")
 
 local menu_container = {}
 
@@ -112,8 +113,11 @@ local function isEntryVisible(entry)
   return true
 end
 
-local function isEntryEnabled(entry, taskGuard, menuGuard)
-  return canOpenEntry(entry, taskGuard) and entryGuardAllows(entry, menuGuard)
+-- A tile stays enabled while the task runs, even when the link is down, so a press on it can
+-- report why it is closed (#2319). Only navigation is still stopped by canOpenEntry.
+local function isTilePressable(entry, taskGuard, menuGuard)
+  return menuFeedback.tileEnabled(not taskGuard or taskGuard.isRunning() == true)
+    and entryGuardAllows(entry, menuGuard)
 end
 
 local function taskGuardExpired(taskGuard)
@@ -267,8 +271,12 @@ local function openScreen(nav, menus, rootEntries, screen, setEventHandler, setW
         options = tileFont,
         press = function()
           if not canOpenEntry(entry, taskGuard) then
-            if taskGuard and (not taskGuard.isRunning()) and taskGuard.requestAlert then
+            local blocked = taskGuard and menuFeedback.blockedBy(entry.offline == true,
+              taskGuard.isRunning(), taskGuard.isConnected())
+            if blocked == menuFeedback.TASK_MISSING and taskGuard.requestAlert then
               taskGuard.requestAlert()
+            elseif blocked == menuFeedback.NOT_CONNECTED and taskGuard.requestNotConnectedAlert then
+              taskGuard.requestNotConnectedAlert()
             end
             return
           end
@@ -311,13 +319,13 @@ local function openScreen(nav, menus, rootEntries, screen, setEventHandler, setW
   -- fallback when no tile is selected.
   local function focusEnabledTile()
     local selectedIndex = lastSelected[key]
-    if selectedIndex and tileButtons[selectedIndex] and isEntryEnabled(entries[selectedIndex], taskGuard, menuGuard) then
+    if selectedIndex and tileButtons[selectedIndex] and isTilePressable(entries[selectedIndex], taskGuard, menuGuard) then
       tileButtons[selectedIndex]:focus()
       return
     end
     for i = 1, #entries do
       local button = tileButtons[i]
-      if button and isEntryEnabled(entries[i], taskGuard, menuGuard) then
+      if button and isTilePressable(entries[i], taskGuard, menuGuard) then
         button:focus()
         return
       end
@@ -340,7 +348,7 @@ local function openScreen(nav, menus, rootEntries, screen, setEventHandler, setW
       local selectedIndex = lastSelected[key]
       for i = 1, #entries do
         local button = tileButtons[i]
-        local enabled = isEntryEnabled(entries[i], taskGuard, menuGuard)
+        local enabled = isTilePressable(entries[i], taskGuard, menuGuard)
         if selectedIndex == i and enabled then selectedStillEnabled = true end
         if button and button.enable and enabled ~= lastEnabled[i] then
           lastEnabled[i] = enabled
