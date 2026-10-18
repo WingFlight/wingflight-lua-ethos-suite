@@ -378,9 +378,8 @@ local MENUS = {
       {title = "@i18n(app.modules.gain_curves.name)@", icon = lcd.loadMask("app/gfx/curves.png"), script = "app/pages/gain_curves.lua", group = "@i18n(app.menu_section_advanced)@"},
       {title = "@i18n(app.modules.rates_advanced.name)@", icon = lcd.loadMask("app/gfx/rates_advanced.png"), script = "app/pages/rates_advanced.lua", group = "@i18n(app.menu_section_advanced)@"},
       {title = "@i18n(app.modules.autolevel.name)@", icon = lcd.loadMask("app/gfx/autolevel.png"), menuId = "autolevel_menu", group = "@i18n(app.menu_section_advanced)@"},
-      -- FEATURE_THRUST_VECTOR (see app/pages/configuration.lua) is opt-in
-      -- and off by default, but this entry is unconditional, like Flight
-      -- Modes above, which is reachable whichever mode is engaged.
+      -- Thrust Vector is always available in the firmware; its output is
+      -- switched on in flight by the THRUST VECTOR mode.
       {title = "@i18n(app.modules.thrust_vector.name)@", icon = lcd.loadMask("app/gfx/thrust_vector.png"), menuId = "thrust_vector_menu", group = "@i18n(app.menu_section_advanced)@"},
     },
   },
