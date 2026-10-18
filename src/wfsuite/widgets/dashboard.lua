@@ -105,7 +105,7 @@ end
 -- call site still goes through ensureModelPreferences()/ensureEthosVersion()
 -- directly, so this is pure warm-up, never a correctness dependency.
 local PRIME_INTERVAL = 0.25
-local nextPrimeAt = 0
+local nextPrimeAt = nil
 local primeStepIndex = 1
 local primeSteps = {ensureModelPreferences, ensureEthosVersion}
 
@@ -2340,7 +2340,9 @@ local function wakeup(widget)
   -- not just once it becomes visible.
   if primeStepIndex <= #primeSteps then
     local now = clock()
-    if now >= nextPrimeAt then
+    if not nextPrimeAt then
+      nextPrimeAt = now + PRIME_INTERVAL
+    elseif now >= nextPrimeAt then
       nextPrimeAt = now + PRIME_INTERVAL
       primeSteps[primeStepIndex]()
       primeStepIndex = primeStepIndex + 1
