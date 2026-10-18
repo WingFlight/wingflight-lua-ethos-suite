@@ -33,3 +33,8 @@ Create the locale files with the same keys as English and check the language
 matrices in `.github/workflows/`. Packaging uses `bin/package/build_package.py`,
 which includes locale generation and token resolution. Coordinate locale availability with the
 Wingflight updater and add sound pack data under `bin/sound-generator/` when needed.
+
+Check a locale's manifest against the suite's audio tree before you generate or ship it, offline and without speech credentials:
+  From `bin/sound-generator/`: `python generate-googleapi.py --json json/<locale>.json --base-dir <locale> --variant <variant> --check`
+  It exits 1 for a declared file without a WAV, a WAV without a manifest entry (except `adjfunctions/`, which the suite generates), or a key
+  that `en.json` declares and the locale lacks. Entries without a translation are listed but do not fail the check.
