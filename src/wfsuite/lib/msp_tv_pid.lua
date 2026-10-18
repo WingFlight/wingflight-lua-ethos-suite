@@ -134,7 +134,7 @@ local FIELD_META = {
   gyro_cutoff_0 = {min = 0, max = 250, default = 50},
   gyro_cutoff_1 = {min = 0, max = 250, default = 50},
   gyro_cutoff_2 = {min = 0, max = 250, default = 100},
-  hold_gain = {min = 0, max = 250, default = 25},
+  hold_gain = {min = 0, max = 250, default = 45},
   hold_deadband = {min = 0, max = 100, default = 5, suffix = "%"},
   hold_max_rate = {min = 0, max = 1800, default = 300, suffix = "°/s"},
   gain_curve_0 = {min = 0, max = 8, default = 0},
