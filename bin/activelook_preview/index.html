@@ -357,7 +357,7 @@
         ["stacked_three", "Stacked Large + Large + Small"],
       ];
       const defaults = {
-        preflight: {layout: "stacked_three", slots: ["flightmode", "armed", "timer", "off"]},
+        preflight: {layout: "stacked_three", slots: ["governor", "armed", "flightmode", "off"]},
         inflight: {layout: "one_top_two_bottom", slots: ["current", "voltage", "fuel", "timer"]},
         postflight: {layout: "two_top_two_bottom", slots: ["current", "voltage", "fuel", "timer"]},
       };
@@ -558,7 +558,9 @@
           hasBeenInFlight = false;
           nextMode = "preflight";
         } else {
-          const isFlying = armed && connected && Number(sensors.throttlePercent) > THROTTLE_THRESHOLD;
+          const governorState = Number(sensors.governorState);
+          const governorActive = governorState >= 4 && governorState <= 8;
+          const isFlying = armed && connected && (governorActive || Number(sensors.throttlePercent) > THROTTLE_THRESHOLD);
 
           if (isFlying) {
             hasBeenInFlight = true;
@@ -599,7 +601,7 @@
         liveFeed = true;
         sourceStatus.dataset.state = "live";
         sourceStatus.textContent = `Live · ${payload.target}`;
-        phaseSource.textContent = phaseSelection === "auto" ? "Auto · sensor throttle > 35%" : "Manual override";
+        phaseSource.textContent = phaseSelection === "auto" ? "Auto · active governor or throttle > 35%" : "Manual override";
         telemetrySource.textContent = "Values read from simulator sensor profiles";
       }
 
