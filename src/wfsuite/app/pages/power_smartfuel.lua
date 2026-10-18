@@ -45,7 +45,6 @@ local function open(opts)
   local savedModelType = 0
   local modelTypeLoaded = false
   local modelTypeField = nil
-  local localSaveRefused = false
 
   local runtime
   runtime = pageRuntime.new({
@@ -80,13 +79,10 @@ local function open(opts)
       if modelType == cleanModelType(savedModelType) then return end
       prefs = modelPreferences.setSmartfuelModelType(prefs, modelType)
       if not modelPreferences.save(prefsFile, prefs) then
-        -- The INI file could not be written (#2500). performSave() ignores
-        -- whatever beforeSave returns and opens its own saving dialog right
-        -- after, so the refusal is remembered here and reported from onWakeup
-        -- once no dialog is open -- the model type is on the flight controller
-        -- either way, so the save itself is not aborted.
-        localSaveRefused = true
-        return
+        -- Returning false aborts the whole save (page_runtime performSave): the
+        -- tuning values are not written either, and the page stays dirty (#2545).
+        settingsSave.reportFailure()
+        return false
       end
       savedModelType = modelType
       bus.publish("model.smartfuel_type.update", {
@@ -101,11 +97,6 @@ local function open(opts)
       modelTypeField = nil
     end,
     onWakeup = function(rt)
-      if localSaveRefused and not rt.activeDialog then
-        localSaveRefused = false
-        rt:setDirty(true)
-        settingsSave.reportFailure()
-      end
       local enabled = tuningActive(rt)
       if enabled ~= lastEnabled then
         lastEnabled = enabled

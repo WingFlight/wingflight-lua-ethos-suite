@@ -98,8 +98,7 @@ local function open(opts)
     if disposed or not loaded or not mcuId then return end
     prefs = modelPreferences.setPowerAlerts(prefs, alerts)
     if not modelPreferences.save(prefsFile, prefs) then
-      -- The INI file could not be written (#2500): keep the page dirty, publish
-      -- nothing, and tell the pilot rather than losing the setting silently.
+      -- A refused write keeps the page dirty and publishes nothing (#2545).
       settingsSave.reportFailure(focusFn)
       return
     end
