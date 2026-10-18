@@ -6974,6 +6974,12 @@
           "needs_translation": false,
           "translation": "Akku bearbeiten"
         },
+        "esc_current_limit": {
+          "english": "ESC Current Limit",
+          "max_length": 17,
+          "needs_translation": false,
+          "translation": "ESC-Stromlimit"
+        },
         "full_cell_voltage": {
           "english": "Full Cell Voltage",
           "max_length": 17,
@@ -7009,6 +7015,12 @@
           "reverse_text": false,
           "translation": "Energie"
         },
+        "preferences_name": {
+          "english": "Preferences",
+          "max_length": 11,
+          "needs_translation": false,
+          "translation": "Optionen"
+        },
         "reload_alerts_prompt": {
           "english": "Reload local power alert settings?",
           "max_length": 34,
@@ -7029,6 +7041,12 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Lokale Stromwarnungseinstellungen speichern?"
+        },
+        "save_preferences_prompt": {
+          "english": "Save power preferences?",
+          "max_length": 23,
+          "needs_translation": false,
+          "translation": "Optionen speichern?"
         },
         "selected": {
           "english": "Selected",
