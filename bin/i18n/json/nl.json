@@ -185,7 +185,7 @@
     },
     "msg_save_failed_local_body": {
       "english": "Settings were not saved to the radio. Please try again.",
-      "max_length": 67,
+      "max_length": 55,
       "needs_translation": false,
       "reverse_text": false,
       "translation": "Instellingen niet opgeslagen op de zender. Probeer het opnieuw."
@@ -213,7 +213,7 @@
     },
     "msg_main_power_lost_banner": {
       "english": "MAIN POWER LOST",
-      "max_length": 27,
+      "max_length": 15,
       "needs_translation": false,
       "reverse_text": false,
       "translation": "HOOFDVOEDING UITGEVALLEN"
@@ -2200,6 +2200,20 @@
         }
       },
       "settings": {
+        "alert_max_repeats": {
+          "english": "Max repeats (0 = all)",
+          "translation": "Max repeats (0 = all)",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 21
+        },
+        "alert_vibrate": {
+          "english": "Vibrate",
+          "translation": "Vibrate",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 7
+        },
         "name": {
           "english": "Settings",
           "translation": "Instellingen",
@@ -3104,9 +3118,10 @@
         },
         "msg_calibration_timeout": {
           "english": "The calibration did not finish. Try again.",
-          "max_length": 46,
+          "max_length": 42,
           "needs_translation": false,
-          "translation": "Kalibratie niet voltooid. Probeer opnieuw."
+          "translation": "Kalibratie niet voltooid. Probeer opnieuw.",
+          "reverse_text": false
         },
         "name": {
           "english": "Accelerometer",
@@ -5013,7 +5028,7 @@
         },
         "no_dataflash": {
           "english": "No dataflash",
-          "max_length": 16,
+          "max_length": 12,
           "needs_translation": false,
           "translation": "Geen dataflash",
           "reverse_text": false
@@ -5258,9 +5273,10 @@
         },
         "edit_battery": {
           "english": "Edit Battery",
-          "max_length": 16,
+          "max_length": 12,
           "needs_translation": false,
-          "translation": "Bewerk batterij"
+          "translation": "Bewerk batterij",
+          "reverse_text": false
         }
       },
       "esc_motors": {
@@ -5758,28 +5774,28 @@
           "translation": "Achtergrondtaak",
           "needs_translation": false,
           "reverse_text": false,
-          "max_length": 18
+          "max_length": 15
         },
         "bgtask_heartbeat": {
           "english": "Heartbeat",
           "translation": "Hartslag",
           "needs_translation": false,
           "reverse_text": false,
-          "max_length": 12
+          "max_length": 9
         },
         "bgtask_revivals": {
           "english": "Revivals",
           "translation": "Herstarts",
           "needs_translation": false,
           "reverse_text": false,
-          "max_length": 11
+          "max_length": 8
         },
         "bgtask_running": {
           "english": "Running",
           "translation": "Actief",
           "needs_translation": false,
           "reverse_text": false,
-          "max_length": 13
+          "max_length": 7
         },
         "bgtask_stale": {
           "english": "Not reporting",
@@ -10776,9 +10792,10 @@
       },
       "armed_warning": {
         "english": "Armed warning",
-        "max_length": 24,
+        "max_length": 13,
         "needs_translation": false,
-        "translation": "Armed-waarschuwing"
+        "translation": "Armed-waarschuwing",
+        "reverse_text": false
       },
       "info_arming": {
         "english": "Arming",

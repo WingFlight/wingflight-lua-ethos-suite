@@ -763,9 +763,30 @@ local function speakAdjValue(value, now)
   markSpoken(now, SPEAK_NUM_SECONDS)
 end
 
+-- Repeats per alert episode (issue #2312). A group's `<group>_repeats` setting is how many
+-- announcements one episode may make; 0 keeps the behaviour before the setting: repeat for as long
+-- as the condition holds. An episode ends when its condition clears.
+local episodeCount = {}
+local function mayAnnounce(group)
+  local limit = tonumber(events[group .. "_repeats"]) or 0
+  if limit <= 0 then return true end
+  return (episodeCount[group] or 0) < limit
+end
+local function countAnnouncement(group)
+  episodeCount[group] = (episodeCount[group] or 0) + 1
+end
+local function endEpisode(group)
+  episodeCount[group] = nil
+end
+-- The radio's vibration for a group, when its `<group>_haptic` setting is on.
+local function hapticFor(group)
+  if events[group .. "_haptic"] then haptic() end
+end
+
 local function announceVoltage(now)
   if not events.voltage then
     lastAlertAt.voltage = nil
+    endEpisode("voltage")
     lowVoltageHoldStart = nil
     return
   end
@@ -788,6 +809,7 @@ local function announceVoltage(now)
   -- reading trigger the low-voltage alarm.
   if voltage < 1 then
     lastAlertAt.voltage = nil
+    endEpisode("voltage")
     lowVoltageHoldStart = nil
     return
   end
@@ -795,6 +817,7 @@ local function announceVoltage(now)
   local cellVoltage = voltage / cellCount
   if cellVoltage >= warnCell then
     lastAlertAt.voltage = nil
+    endEpisode("voltage")
     lowVoltageHoldStart = nil
     return
   end
@@ -811,8 +834,11 @@ local function announceVoltage(now)
 
   local repeatInterval = tonumber(events.voltage_repeat_interval) or 10
   if lastAlertAt.voltage and (now - lastAlertAt.voltage) < repeatInterval then return end
+  if not mayAnnounce("voltage") then return end
   lastAlertAt.voltage = now
+  countAnnouncement("voltage")
   playAlert("lowvoltage.wav")
+  hapticFor("voltage")
 
   -- Speak the reading itself if configured: the pack total at one decimal
   -- (e.g. "22.4 volts") or the average cell at two (e.g. "3.65 volts").
@@ -912,7 +938,7 @@ local function announceTelemetryLost(now)
   -- alert above: a pack that carries none of the words would otherwise get no
   -- alert at all, and a lost link while armed is not something to leave to a
   -- file the pack happens to ship.
-  haptic()
+  hapticFor("telemetry_lost")
 end
 
 -- The model answering again, once, and only for a loss that was announced.
@@ -942,13 +968,16 @@ local function announceEscTemp(now)
   local avgTemp = updateRollingAverage("temp_esc", temp, 5)
   if avgTemp < threshold then
     lastAlertAt.temp_esc = nil
+    endEpisode("temp_esc")
     return
   end
 
   if lastAlertAt.temp_esc and (now - lastAlertAt.temp_esc) < 10 then return end
+  if not mayAnnounce("temp_esc") then return end
   lastAlertAt.temp_esc = now
+  countAnnouncement("temp_esc")
   playAlert("esctemp.wav")
-  haptic()
+  hapticFor("temp_esc")
 end
 
 local function announceBecRxVoltage(now)
@@ -977,16 +1006,19 @@ local function announceBecRxVoltage(now)
   if events.rx_voltage then
     local threshold = tonumber(events.rxalertvalue) or 7.4
     if avgVoltage < threshold then
-      if not lastAlertAt.rx_voltage or (now - lastAlertAt.rx_voltage) >= 10 then
+      if (not lastAlertAt.rx_voltage or (now - lastAlertAt.rx_voltage) >= 10) and mayAnnounce("rx_voltage") then
         lastAlertAt.rx_voltage = now
+        countAnnouncement("rx_voltage")
         playAlert("rxvolt.wav")
-        haptic()
+        hapticFor("rx_voltage")
       end
     else
       lastAlertAt.rx_voltage = nil
+      endEpisode("rx_voltage")
     end
   else
     lastAlertAt.rx_voltage = nil
+    endEpisode("rx_voltage")
   end
 end
 

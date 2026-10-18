@@ -22,6 +22,8 @@ Available without a flight controller connection; the background task must be ru
 | --- | --- |
 | *ESC temp* | Master switch. When on, calls out whenever the ESC telemetry temperature reaches or exceeds the threshold. |
 | *ESC threshold* | Temperature threshold in degrees Celsius (60 to 300, default 90). Greyed out while *ESC temp* is off. |
+| *Max repeats* | How many times one hot episode may call out. 0 (default) repeats every 10 seconds for as long as the controller stays hot; 1 to 10 stops after that many callouts. Greyed out while *ESC temp* is off. |
+| *Vibrate* | Vibrates the radio with the ESC temperature callout. On by default. Greyed out while *ESC temp* is off. |
 
 ## Notes
 
