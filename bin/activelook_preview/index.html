@@ -761,9 +761,15 @@
         phaseLabel.textContent = mode === "preflight" ? "PRE-FLIGHT" : mode === "inflight" ? "IN-FLIGHT" : "POST-FLIGHT";
         layoutLabel.textContent = layouts.find(([key]) => key === config[mode].layout)?.[1] || "Custom layout";
         phaseSource.textContent = phaseSelection === "auto"
-          ? "Auto · sensor throttle > 35%"
+          ? "Auto · active governor or throttle > 35%"
           : "Manual override";
         layoutSyncStatus.textContent = configSaveStatus;
+        const configControlsDisabled = !simulatorConfigLoaded || configSaveInFlight;
+        layoutSelect.disabled = configControlsDisabled;
+        slotContainer.querySelectorAll("select").forEach((select) => {
+          select.disabled = configControlsDisabled;
+        });
+        resetConfigButton.disabled = configSaveInFlight;
         saveConfigButton.disabled = !simulatorConfigLoaded || !configDirty || configSaveInFlight;
         document.querySelectorAll(".phase-button").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.mode === phaseSelection)));
         draw();
