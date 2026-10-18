@@ -149,7 +149,7 @@
     },
     "msg_save_failed_local_body": {
       "english": "Settings were not saved to the radio. Please try again.",
-      "max_length": 67,
+      "max_length": 55,
       "needs_translation": false,
       "reverse_text": true,
       "translation": "ההגדרות לא נשמרו במשדר. נסה שוב."
@@ -177,7 +177,7 @@
     },
     "msg_main_power_lost_banner": {
       "english": "MAIN POWER LOST",
-      "max_length": 27,
+      "max_length": 15,
       "needs_translation": false,
       "reverse_text": true,
       "translation": "איבוד מתח ראשי"
@@ -2164,6 +2164,20 @@
         }
       },
       "settings": {
+        "alert_max_repeats": {
+          "english": "Max repeats (0 = all)",
+          "translation": "Max repeats (0 = all)",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 21
+        },
+        "alert_vibrate": {
+          "english": "Vibrate",
+          "translation": "Vibrate",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 7
+        },
         "name": {
           "english": "Settings",
           "max_length": 8,
@@ -3068,9 +3082,10 @@
         },
         "msg_calibration_timeout": {
           "english": "The calibration did not finish. Try again.",
-          "max_length": 46,
+          "max_length": 42,
           "needs_translation": false,
-          "translation": "הכיול לא הסתיים. נסו שוב."
+          "translation": "הכיול לא הסתיים. נסו שוב.",
+          "reverse_text": true
         },
         "name": {
           "english": "Accelerometer",
@@ -4977,7 +4992,7 @@
         },
         "no_dataflash": {
           "english": "No dataflash",
-          "max_length": 16,
+          "max_length": 12,
           "needs_translation": false,
           "translation": "אין dataflash",
           "reverse_text": true
@@ -5205,9 +5220,10 @@
         },
         "edit_battery": {
           "english": "Edit Battery",
-          "max_length": 16,
+          "max_length": 12,
           "needs_translation": false,
-          "translation": "עריכת סוללה"
+          "translation": "עריכת סוללה",
+          "reverse_text": true
         }
       },
       "esc_motors": {
@@ -5693,28 +5709,28 @@
           "translation": "משימת רקע",
           "needs_translation": false,
           "reverse_text": true,
-          "max_length": 18
+          "max_length": 15
         },
         "bgtask_heartbeat": {
           "english": "Heartbeat",
           "translation": "דוֹפֶק",
           "needs_translation": false,
           "reverse_text": true,
-          "max_length": 12
+          "max_length": 9
         },
         "bgtask_revivals": {
           "english": "Revivals",
           "translation": "הפעלות מחדש",
           "needs_translation": false,
           "reverse_text": true,
-          "max_length": 11
+          "max_length": 8
         },
         "bgtask_running": {
           "english": "Running",
           "translation": "פועל",
           "needs_translation": false,
           "reverse_text": true,
-          "max_length": 13
+          "max_length": 7
         },
         "bgtask_stale": {
           "english": "Not reporting",
@@ -10469,7 +10485,7 @@
       },
       "armed_warning": {
         "english": "Armed warning",
-        "max_length": 24,
+        "max_length": 13,
         "needs_translation": false,
         "translation": "אזהרת Armed",
         "reverse_text": true

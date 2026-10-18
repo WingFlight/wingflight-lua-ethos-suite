@@ -379,8 +379,9 @@
         },
         "msg_calibration_timeout": {
           "english": "The calibration did not finish. Try again.",
-          "max_length": 46,
+          "max_length": 42,
           "needs_translation": false,
+          "reverse_text": false,
           "translation": "Kalibrierung nicht beendet. Erneut versuchen."
         },
         "name": {
@@ -1396,7 +1397,7 @@
         },
         "no_dataflash": {
           "english": "No dataflash",
-          "max_length": 16,
+          "max_length": 12,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Kein Dataflash"
@@ -5265,28 +5266,28 @@
       "info": {
         "bgtask_heartbeat": {
           "english": "Heartbeat",
-          "max_length": 12,
+          "max_length": 9,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Herzschlag"
         },
         "bgtask_name": {
           "english": "Background task",
-          "max_length": 18,
+          "max_length": 15,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Hintergrund-Task"
         },
         "bgtask_revivals": {
           "english": "Revivals",
-          "max_length": 11,
+          "max_length": 8,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Neustarts"
         },
         "bgtask_running": {
           "english": "Running",
-          "max_length": 13,
+          "max_length": 7,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Läuft"
@@ -5374,6 +5375,7 @@
           "english": "No plottable columns in this file",
           "max_length": 33,
           "needs_translation": false,
+          "reverse_text": false,
           "translation": "Keine auswertbaren Spalten in dieser Datei"
         },
         "msg_no_logs_found": {
@@ -6970,8 +6972,9 @@
         },
         "edit_battery": {
           "english": "Edit Battery",
-          "max_length": 16,
+          "max_length": 12,
           "needs_translation": false,
+          "reverse_text": false,
           "translation": "Akku bearbeiten"
         },
         "full_cell_voltage": {
@@ -7930,12 +7933,26 @@
           "reverse_text": false,
           "translation": "Einstellungswert"
         },
+        "alert_max_repeats": {
+          "english": "Max repeats (0 = all)",
+          "max_length": 21,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Max. Wiederh. (0=alle)"
+        },
         "alert_repeat_interval": {
           "english": "Repeat interval",
           "max_length": 15,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Repeat-Intervall"
+        },
+        "alert_vibrate": {
+          "english": "Vibrate",
+          "max_length": 7,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Vibration"
         },
         "arming_flags": {
           "english": "Arming flags",
@@ -9402,7 +9419,7 @@
     },
     "msg_main_power_lost_banner": {
       "english": "MAIN POWER LOST",
-      "max_length": 27,
+      "max_length": 15,
       "needs_translation": false,
       "reverse_text": false,
       "translation": "HAUPTAKKU-AUSFALL"
@@ -9451,7 +9468,7 @@
     },
     "msg_save_failed_local_body": {
       "english": "Settings were not saved to the radio. Please try again.",
-      "max_length": 67,
+      "max_length": 55,
       "needs_translation": false,
       "reverse_text": false,
       "translation": "Einstellungen nicht im Radio gespeichert. Bitte erneut versuchen."
@@ -10440,8 +10457,9 @@
       },
       "armed_warning": {
         "english": "Armed warning",
-        "max_length": 24,
+        "max_length": 13,
         "needs_translation": false,
+        "reverse_text": false,
         "translation": "Armed-Warnung"
       },
       "battery": {

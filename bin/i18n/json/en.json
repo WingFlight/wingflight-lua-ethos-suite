@@ -128,7 +128,7 @@
     },
     "msg_save_failed_local_body": {
       "english": "Settings were not saved to the radio. Please try again.",
-      "max_length": 67,
+      "max_length": 55,
       "needs_translation": false,
       "translation": "Settings were not saved to the radio. Please try again."
     },
@@ -152,7 +152,7 @@
     },
     "msg_main_power_lost_banner": {
       "english": "MAIN POWER LOST",
-      "max_length": 27,
+      "max_length": 15,
       "needs_translation": false,
       "translation": "MAIN POWER LOST"
     },
@@ -1860,6 +1860,18 @@
         }
       },
       "settings": {
+        "alert_max_repeats": {
+          "english": "Max repeats (0 = all)",
+          "translation": "Max repeats (0 = all)",
+          "needs_translation": false,
+          "max_length": 21
+        },
+        "alert_vibrate": {
+          "english": "Vibrate",
+          "translation": "Vibrate",
+          "needs_translation": false,
+          "max_length": 7
+        },
         "name": {
           "english": "Settings",
           "translation": "Settings",
@@ -2636,7 +2648,7 @@
         },
         "msg_calibration_timeout": {
           "english": "The calibration did not finish. Try again.",
-          "max_length": 46,
+          "max_length": 42,
           "needs_translation": false,
           "translation": "The calibration did not finish. Try again."
         },
@@ -4276,7 +4288,7 @@
         },
         "no_dataflash": {
           "english": "No dataflash",
-          "max_length": 16,
+          "max_length": 12,
           "needs_translation": false,
           "translation": "No dataflash"
         }
@@ -4472,7 +4484,7 @@
         },
         "edit_battery": {
           "english": "Edit Battery",
-          "max_length": 16,
+          "max_length": 12,
           "needs_translation": false,
           "translation": "Edit Battery"
         }
@@ -8997,7 +9009,7 @@
       },
       "armed_warning": {
         "english": "Armed warning",
-        "max_length": 24,
+        "max_length": 13,
         "needs_translation": false,
         "translation": "Armed warning"
       },

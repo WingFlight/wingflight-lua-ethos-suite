@@ -379,8 +379,9 @@
         },
         "msg_calibration_timeout": {
           "english": "The calibration did not finish. Try again.",
-          "max_length": 46,
+          "max_length": 42,
           "needs_translation": false,
+          "reverse_text": false,
           "translation": "La calibración no terminó. Reintentar."
         },
         "name": {
@@ -1396,7 +1397,7 @@
         },
         "no_dataflash": {
           "english": "No dataflash",
-          "max_length": 16,
+          "max_length": 12,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Sin dataflash"
@@ -5265,28 +5266,28 @@
       "info": {
         "bgtask_heartbeat": {
           "english": "Heartbeat",
-          "max_length": 12,
+          "max_length": 9,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Latido"
         },
         "bgtask_name": {
           "english": "Background task",
-          "max_length": 18,
+          "max_length": 15,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Tarea en 2º plano"
         },
         "bgtask_revivals": {
           "english": "Revivals",
-          "max_length": 11,
+          "max_length": 8,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Reinicios"
         },
         "bgtask_running": {
           "english": "Running",
-          "max_length": 13,
+          "max_length": 7,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Ejecutando"
@@ -6971,8 +6972,9 @@
         },
         "edit_battery": {
           "english": "Edit Battery",
-          "max_length": 16,
+          "max_length": 12,
           "needs_translation": false,
+          "reverse_text": false,
           "translation": "Editar batería"
         },
         "full_cell_voltage": {
@@ -7931,12 +7933,26 @@
           "reverse_text": false,
           "translation": "Valor de Ajuste"
         },
+        "alert_max_repeats": {
+          "english": "Max repeats (0 = all)",
+          "max_length": 21,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Max repeats (0 = all)"
+        },
         "alert_repeat_interval": {
           "english": "Repeat interval",
           "max_length": 15,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Intervalo de repetición"
+        },
+        "alert_vibrate": {
+          "english": "Vibrate",
+          "max_length": 7,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Vibrate"
         },
         "arming_flags": {
           "english": "Arming flags",
@@ -9403,7 +9419,7 @@
     },
     "msg_main_power_lost_banner": {
       "english": "MAIN POWER LOST",
-      "max_length": 27,
+      "max_length": 15,
       "needs_translation": false,
       "reverse_text": false,
       "translation": "ALIMENTACIÓN PRINCIPAL PERDIDA"
@@ -9452,7 +9468,7 @@
     },
     "msg_save_failed_local_body": {
       "english": "Settings were not saved to the radio. Please try again.",
-      "max_length": 67,
+      "max_length": 55,
       "needs_translation": false,
       "reverse_text": false,
       "translation": "Los ajustes no se guardaron en la radio. Inténtelo de nuevo."
@@ -10441,8 +10457,9 @@
       },
       "armed_warning": {
         "english": "Armed warning",
-        "max_length": 24,
+        "max_length": 13,
         "needs_translation": false,
+        "reverse_text": false,
         "translation": "Aviso Armed"
       },
       "battery": {

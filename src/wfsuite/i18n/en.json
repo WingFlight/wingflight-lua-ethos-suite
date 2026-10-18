@@ -328,7 +328,7 @@
         },
         "msg_calibration_timeout": {
           "english": "The calibration did not finish. Try again.",
-          "max_length": 46,
+          "max_length": 42,
           "needs_translation": false,
           "translation": "The calibration did not finish. Try again."
         },
@@ -1202,7 +1202,7 @@
         },
         "no_dataflash": {
           "english": "No dataflash",
-          "max_length": 16,
+          "max_length": 12,
           "needs_translation": false,
           "translation": "No dataflash"
         },
@@ -5992,7 +5992,7 @@
         },
         "edit_battery": {
           "english": "Edit Battery",
-          "max_length": 16,
+          "max_length": 12,
           "needs_translation": false,
           "translation": "Edit Battery"
         },
@@ -6818,11 +6818,23 @@
           "needs_translation": false,
           "translation": "Adjustment value"
         },
+        "alert_max_repeats": {
+          "english": "Max repeats (0 = all)",
+          "max_length": 21,
+          "needs_translation": false,
+          "translation": "Max repeats (0 = all)"
+        },
         "alert_repeat_interval": {
           "english": "Repeat interval",
           "max_length": 15,
           "needs_translation": false,
           "translation": "Repeat interval"
+        },
+        "alert_vibrate": {
+          "english": "Vibrate",
+          "max_length": 7,
+          "needs_translation": false,
+          "translation": "Vibrate"
         },
         "arming_flags": {
           "english": "Arming flags",
@@ -8082,7 +8094,7 @@
     },
     "msg_main_power_lost_banner": {
       "english": "MAIN POWER LOST",
-      "max_length": 27,
+      "max_length": 15,
       "needs_translation": false,
       "translation": "MAIN POWER LOST"
     },
@@ -8124,7 +8136,7 @@
     },
     "msg_save_failed_local_body": {
       "english": "Settings were not saved to the radio. Please try again.",
-      "max_length": 67,
+      "max_length": 55,
       "needs_translation": false,
       "translation": "Settings were not saved to the radio. Please try again."
     },
@@ -8973,7 +8985,7 @@
       },
       "armed_warning": {
         "english": "Armed warning",
-        "max_length": 24,
+        "max_length": 13,
         "needs_translation": false,
         "translation": "Armed warning"
       },
