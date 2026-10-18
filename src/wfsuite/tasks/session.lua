@@ -1154,6 +1154,7 @@ end
 
 local function updateEscStatus(protocol)
   if not telemetrySensors then return end
+  if not session.connected then return end
   local word = telemetrySensors.getValue(protocol, "esc_status")
   local signature = telemetrySensors.getValue(protocol, "esc_model")
   if word ~= session.escStatusWord or signature ~= session.escSignature then

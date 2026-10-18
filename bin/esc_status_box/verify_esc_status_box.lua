@@ -117,6 +117,8 @@ local telemetry = {
   reset = function() end,
 }
 session.setTelemetrySensors(telemetry)
+-- updateEscStatus reads only on a live link (the connected gate in updateEscStatus).
+S.connected = true
 
 telemetryValues = {esc_status = 1, esc_model = 0x4B}
 S.escStatusWord, S.escSignature = nil, nil
@@ -133,6 +135,16 @@ check("an unchanged reading is not re-stored", S.escStatusWord == 1 and S.escSig
 telemetryValues = {esc_status = 8, esc_model = 0x4B}
 session._updateEscStatus("sport")
 check("a changed status word is stored", S.escStatusWord == 8)
+
+-- Disconnect clears the verdict; the source may still hand back its last value,
+-- which must not restore it while the link is down.
+S.connected = false
+S.escStatusWord, S.escSignature = nil, nil
+telemetryValues = {esc_status = 8, esc_model = 0x4B}
+session._updateEscStatus("sport")
+check("a disconnected session does not restore a cached status word",
+  S.escStatusWord == nil and S.escSignature == nil,
+  "held=" .. tostring(S.escStatusWord))
 
 -- ---------------------------------------------------------------------------
 -- 3. The dashboard object shows the verdict, coloured by level
