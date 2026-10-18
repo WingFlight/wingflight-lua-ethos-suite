@@ -40,13 +40,12 @@ local WRITE_COMMAND = 37
 
 -- Bit positions within `enabledFeatures`, matching rotorflight-lua-ethos-
 -- suite's own FEATURE_CONFIG.lua FEATURES_BITMAP (gps=7, telemetry=10,
--- led_strip=16, thrust_vector=24, freq_sensor=28) -- standard
--- Betaflight/Wingflight feature-flag layout, with Thrust Vector confirmed
--- against wingflight-firmware's config/feature.h.
+-- led_strip=16, freq_sensor=28) -- standard Betaflight/Wingflight
+-- feature-flag layout. Bit 24 was Thrust Vector, which is now always on in
+-- the firmware (wingflight-firmware's config/feature.h).
 local FEATURE_BIT_GPS = 7
 local FEATURE_BIT_TELEMETRY = 10
 local FEATURE_BIT_LED_STRIP = 16
-local FEATURE_BIT_THRUST_VECTOR = 24
 local FEATURE_BIT_FREQ_SENSOR = 28
 
 local function getBit(value, bit)
@@ -73,7 +72,6 @@ local msp_feature_config = {
   FEATURE_BIT_GPS = FEATURE_BIT_GPS,
   FEATURE_BIT_TELEMETRY = FEATURE_BIT_TELEMETRY,
   FEATURE_BIT_LED_STRIP = FEATURE_BIT_LED_STRIP,
-  FEATURE_BIT_THRUST_VECTOR = FEATURE_BIT_THRUST_VECTOR,
   FEATURE_BIT_FREQ_SENSOR = FEATURE_BIT_FREQ_SENSOR,
   getBit = getBit,
   setBit = setBit,
