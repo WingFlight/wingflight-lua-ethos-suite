@@ -231,6 +231,7 @@ local MENUS = {
       {title = "@i18n(app.modules.power.alert_name)@", icon = lcd.loadMask("app/gfx/power.png"), script = "app/pages/power_alerts.lua"},
       {title = "@i18n(app.modules.power.source_name)@", icon = lcd.loadMask("app/gfx/power_source.png"), script = "app/pages/power_source.lua"},
       {title = "@i18n(app.modules.power.smartfuel_name)@", icon = lcd.loadMask("app/gfx/power_smartfuel.png"), script = "app/pages/power_smartfuel.lua"},
+      {title = "@i18n(app.modules.power.preferences_name)@", icon = lcd.loadMask("app/gfx/power.png"), script = "app/pages/power_preferences.lua"},
     },
   },
   esc_motors_menu = {

@@ -1637,6 +1637,7 @@ local function create()
     timerLive = 0,
     timerSession = 0,
     timerTarget = 300,
+    escCurrentLimit = nil,
     modelStats = nil,
     bblFlags = nil,
     bblSize = nil,
@@ -1787,6 +1788,7 @@ local function update(widget, snapshot)
   widget.timerSession = snapshot.timerSession or 0
   widget.timerTarget = snapshot.timerTarget or 300
   widget.smartfuelModelType = snapshot.smartfuelModelType
+  widget.escCurrentLimit = snapshot.escCurrentLimit
   widget.modelStats = snapshot.modelStats
   widget.bblFlags = snapshot.bblFlags
   widget.bblSize = snapshot.bblSize
