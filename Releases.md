@@ -1,3 +1,26 @@
+# 0.0.36
+
+Use with the 0.0.36 firmware (MSP API 22.14). Flashing keeps your settings, except the Thrust Vector profiles, which reset to the new defaults.
+Match the Thrust Vector defaults to the 0.0.36 firmware.
+Show a red Armed bar across the top of the dashboard while armed; it can be switched off in the widget settings.
+Grey out the dashboard's Erase and Battery tiles while armed, and refuse those writes while armed.
+Report a refused save on every page, including Select Profile, local settings and model preferences, and keep the page unsaved for another try.
+Add an Edit Battery choice to the Battery page, so another profile's capacity and cells can be edited without making it active.
+Read the serial ports back after a save on the Ports page.
+List only the PWM outputs on the servo PWM page when an SBUS or FBUS port is set up, and stop saving past them.
+Keep the servo override off until the page has read its values, and keep the Tool button disabled until a page has loaded.
+Keep the armed state across a disconnect, so saves and reboots stay blocked until the model is seen disarmed.
+Fix the Blackbox erase wait ending before the flash is erased, on the dashboard and the Blackbox page, and show No dataflash for a board without it.
+Keep the Smart Fuel sensor alive through a disarm and while the estimate settles.
+Stop state announcements (arming, profile, battery, governor) cutting each other off, and announce telemetry lost after a drop right after arming.
+Name adjustment functions 76 to 82 and add the missing words to the English sound pack.
+Fix the backup RX status being read one byte off.
+Fix the Telemetry page accepting a sensor switch that the save then refused.
+Show loading dots instead of a stale value when a bar or watts sensor drops out before or during flight.
+Read flight log CSV columns by their header name.
+Refuse a Tune Advisor reply in an unknown layout, and never clear a refused flight from the FC.
+Open Diagnostics Status and Info without a flight controller, and show the background task heartbeat on Info.
+
 # 0.0.35
 
 Use with the 0.0.35 firmware (MSP API 22.14). Flashing keeps your settings.
