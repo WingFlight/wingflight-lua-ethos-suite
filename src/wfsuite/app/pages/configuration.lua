@@ -294,9 +294,6 @@ local function open(opts)
     fieldLayout.buildSingle(runtime, "@i18n(app.modules.configuration.feature_led_strip)@",
       {key = "enabledFeatures", source = "featureConfig", bit = featureConfig.FEATURE_BIT_LED_STRIP, choices = OFF_ON_OPTIONS})
 
-    fieldLayout.buildSingle(runtime, "@i18n(app.modules.configuration.feature_thrust_vector)@",
-      {key = "enabledFeatures", source = "featureConfig", bit = featureConfig.FEATURE_BIT_THRUST_VECTOR, choices = OFF_ON_OPTIONS})
-
     fieldLayout.buildSingle(runtime, "@i18n(app.modules.configuration.arm_wiggle)@",
       {key = "wiggle_flags", source = "armingConfig", bit = armingConfig.WIGGLE_BIT_READY, choices = OFF_ON_OPTIONS})
 
