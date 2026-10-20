@@ -26,6 +26,7 @@ local function fixture(multi, armedGate, prefetched)
     ['lib/msp_eeprom.lua']={buildWriteMessage=function(ok,err) return {kind='eeprom',ok=ok,err=err} end},
     ['lib/msp_reboot.lua']={},
     ['app/close_key.lua']={shouldHandleClose=function() return false end},
+    ['app/leave_confirm.lua']=assert(loadfile('src/wfsuite/app/leave_confirm.lua'))(),
     ['app/header.lua']={build=function(_,options)
       headerOptions=options
       return {setTitle=function() end,setSaveEnabled=function(value) enabled=value; enableCalls=enableCalls+1 end,

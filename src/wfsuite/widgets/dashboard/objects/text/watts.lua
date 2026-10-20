@@ -93,6 +93,9 @@ function render.wakeup(box)
 
     local function statsWatts(kind)
         if not (vStats and iStats) then return nil end
+        local v = telemetry and telemetry.getSensor and telemetry.getSensor("voltage")
+        local i = telemetry and telemetry.getSensor and telemetry.getSensor("current")
+        if not (v and i) then return nil end
         if kind == "min" and vStats.min and iStats.min then return vStats.min * iStats.min end
         if kind == "max" and vStats.max and iStats.max then return vStats.max * iStats.max end
         if kind == "avg" and vStats.avg and iStats.avg then return vStats.avg * iStats.avg end
@@ -108,17 +111,30 @@ function render.wakeup(box)
         value = nil
     end
 
+    -- The same rule as the bar gauge (#2534): the last reading is HELD once a
+    -- flight is under way, so a momentary telemetry gap does not blank a number
+    -- the pilot is flying on. Before the flight a dropped source shows the
+    -- loading state instead -- a value frozen at the last reading is a wrong
+    -- number on the bench. flightmode turns a disconnect during a flight into
+    -- "postflight" (flightmode.lua:124-126), so holding from "inflight" onwards
+    -- also covers the link going away.
+    local mode = wfsuite.flightmode and wfsuite.flightmode.current or "preflight"
+    local holdLastValue = mode ~= "preflight"
+
     if type(value) == "number" and telemetryActive then
         box._lastValidValue = value
         box._lastValidUnit = "W"
+    elseif not holdLastValue then
+        box._lastValidValue = nil
+        box._lastValidUnit = nil
     end
 
     local displayValue
     local unit = cfg.manualUnit
 
-    if type(value) == "number" then
+    if type(value) == "number" and telemetryActive then
         displayValue = tostring(floor(value))
-    elseif box._lastValidValue ~= nil then
+    elseif holdLastValue and box._lastValidValue ~= nil then
         displayValue = tostring(floor(box._lastValidValue))
         unit = box._lastValidUnit
     else

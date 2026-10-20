@@ -180,6 +180,13 @@ Before finishing:
 - Check for hot-path allocations introduced by the change.
 - Confirm close/cleanup path exists for new dialogs, handles, or caches.
 - Run targeted sanity checks for affected module flows.
+- If you change behaviour under `src/wfsuite/` (a codec, a page, a task), find the `bin/`
+  harnesses that load the changed file (`grep -rl <file name> bin/`) and run each with
+  `lua5.4` (CI's version), passing `--self-test` to any that take it. When the change is
+  intended and a harness still expects the old behaviour, update the harness, and its
+  `.ci.json` rationale if that states the old behaviour, in the same pull request. If
+  you don't, CI fails on the next pull request, whatever it changes: #240 changed AM32
+  timing decoding and left `bin/esc_raw_bytes` expecting the old positions.
 - For UI changes, open the affected page in the simulator when the tooling is available
   (Section 12), and include screenshots with the pull request.
 - If the change is one a pilot can observe, update that page's file under `docs/pages/` in
@@ -309,3 +316,14 @@ This repository:
   (`quit`, then start it again).
 - **No flight controller needed:** the suite's built-in simulated sensors and MSP responses (`src/wfsuite/sim/sensors/` and the `simulatorResponse` tables in `src/wfsuite/lib/msp_*.lua`) populate pages such as PIDs.
 - **Lua errors** appear in the output of the `log` command, not on screen.
+
+### Checking on a real radio
+
+The simulator answers MSP from the `simulatorResponse` tables, so anything that depends on a real flight controller (MSP timing, real values, RAM on the radio) needs a USB-connected radio. [`ethos-tools/simulation/radio_remote.py`](https://github.com/FrSkyRC/ethos-tools/blob/main/simulation/radio_remote.md) drives one with the same screenshot / `press` / `tap` loop as `run_wasm.js`, over the radio's USB serial port.
+
+- **Firmware:** Ethos 26 nightly from 2026-10-16 or later. Older firmware has no remote control over USB.
+- **Start:** `pip install pyserial hidapi`, then `python radio_remote.py mode serial` (or pick *Serial* when plugging in), then `python radio_remote.py --serve`.
+- **A person must accept** the connection prompt on the radio screen. Every new connection asks again. Agents: ask the user to start the server and accept it, then use `python radio_remote.py screenshot|press|tap|wheel|ls|read|write ...` (port 8766).
+- **Deploying:** `write` can copy files into `/scripts/wfsuite/` without switching to storage mode, but scripts load at boot, so restart the radio before testing.
+- **One program on the serial port at a time:** stop `radio_remote.py` (`quit`) before `deploy.py --radio --connect-only` streams `print()` output, and the other way round.
+- **No sticks, pots or switches**, and don't try them: the radio may be bound to a powered model.

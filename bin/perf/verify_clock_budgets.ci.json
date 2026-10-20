@@ -1,0 +1,7 @@
+{
+  "id": "verify-clock-budgets",
+  "name": "Check the background task drain budgets",
+  "step": "Check the background task drain budgets",
+  "script": "bin/perf/verify_clock_budgets.lua",
+  "rationale": "Three drain loops run inside one background-task wakeup with no yield\npoint in between; on a single-core MCU sharing time with Ethos's UI, their\nbudget is UI latency. This drives them against a permanently full queue\nand a clock that charges real time per frame, so it measures the budgets\ninstead of trusting them -- and checks that bounding the poll does not\nbreak reply assembly, which is what says how far a budget may be cut."
+}

@@ -12,11 +12,11 @@ local closeKey = requireModule("app/close_key.lua")
 local memstats = requireModule("lib/memstats.lua")
 local progressDialog = requireModule("app/progress_dialog.lua")
 local serialConfig = requireModule("lib/msp_serial_config.lua")
-local rxConfig = requireModule("lib/msp_rx_config.lua")
 local eeprom = requireModule("lib/msp_eeprom.lua")
 local reboot = requireModule("lib/msp_reboot.lua")
 local boardInfo = requireModule("lib/msp_board_info.lua")
 local portLabels = requireModule("lib/port_labels.lua")
+local leaveConfirm = requireModule("app/leave_confirm.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.ports.name)@"
 local MSG_SAVE_TITLE = "@i18n(app.msg_save_settings)@"
@@ -59,7 +59,9 @@ local PORT_FUNCTIONS = {
   {id = 524288, excl = 524288, name = "@i18n(app.modules.ports.function_fbus_out)@", type = PORT_TYPE_AUTO},
   {id = 1048576, excl = 1048576, name = "@i18n(app.modules.ports.function_sport_input)@", type = PORT_TYPE_AUTO},
   {id = 2097152, excl = 2097152, name = "@i18n(app.modules.ports.function_srxl2_esc)@", type = PORT_TYPE_AUTO},
-  {id = 4194304, excl = 4194304, name = "@i18n(app.modules.ports.function_crsf_sensors)@", type = PORT_TYPE_AUTO},
+  -- FUNCTION_CRSF_SENSORS (firmware serial.h, added by rotorflight-firmware #497). MSP API 12.10 was
+  -- already set before it, so a 12.10 board built earlier lacks it too; this gate only excludes 12.09 (#2497).
+  {id = 4194304, excl = 4194304, name = "@i18n(app.modules.ports.function_crsf_sensors)@", type = PORT_TYPE_AUTO, minApiMinor = 10},
   {id = 8388608, excl = 8388608, name = "@i18n(app.modules.ports.function_rx_input_backup)@", type = PORT_TYPE_AUTO},
   {id = 4, excl = 4668, name = "@i18n(app.modules.ports.function_telem_frsky)@", type = PORT_TYPE_TELEM, hide = true},
   {id = 32, excl = 4668, name = "@i18n(app.modules.ports.function_telem_smartport)@", type = PORT_TYPE_TELEM},
@@ -199,6 +201,10 @@ local function otherPortsExcl(portIndex, ports)
   return excl
 end
 
+-- The firmware's minor API version, from the session snapshot. Read by the function list, which
+-- sits at module level, so it lives here rather than inside open() (#2497).
+local apiVersionMinor = nil
+
 local function buildFunctionChoiceTable(portIndex, ports)
   local port = ports[portIndex]
   if not port then return {} end
@@ -208,7 +214,12 @@ local function buildFunctionChoiceTable(portIndex, ports)
   local seen = {}
   for i = 1, #PORT_FUNCTIONS do
     local def = PORT_FUNCTIONS[i]
-    if def.id == port.function_mask or (not def.hide and (def.id == 0 or not maskHasAny(excl, def.id))) then
+    -- A function the connected firmware does not have is not offered. A port that already carries
+    -- it keeps it, so the row still shows what the board has. Before the handshake the minor
+    -- version is unknown, and such an entry is left out, as on the telemetry page (#2497).
+    local known = def.minApiMinor == nil or def.id == port.function_mask
+      or (apiVersionMinor or 0) >= def.minApiMinor
+    if known and (def.id == port.function_mask or (not def.hide and (def.id == 0 or not maskHasAny(excl, def.id)))) then
       tableData[#tableData + 1] = {def.name, def.id}
       seen[def.id] = true
     end
@@ -232,6 +243,7 @@ local function openProgress(title, message)
 end
 
 local function open(opts)
+  apiVersionMinor = nil -- a new visit starts with the handshake's version, not the last one
   local disposed = false
   local loaded = false
   local busy = false
@@ -242,6 +254,9 @@ local function open(opts)
   local saveError = nil
   local saveNotice = nil
   local needsRender = false
+  -- The API version this page instance last rendered for. Kept per page: a stale subscriber can
+  -- already have stored the shared apiVersionMinor before this page's handler runs.
+  local lastApiMinor = nil
   local isArmed = nil
   local activeDialog = nil
   local confirmDialog = nil
@@ -251,7 +266,6 @@ local function open(opts)
   local pendingSaveConfirm = false
   local portsOriginal = {}
   local portsWorking = {}
-  local rxSerialProvider = 0
 
   memstats.print("ports open")
 
@@ -286,7 +300,23 @@ local function open(opts)
   -- Stored duck-typed and closed defensively, for the reason spelled out in
   -- app/page_runtime.lua's openMessageDialog().
   local function openConfirmDialog(args)
-    confirmDialog = form.openDialog(args)
+    if not args then return nil end
+    local originalButtons = args.buttons or {}
+    local wrappedButtons = {}
+    for i = 1, #originalButtons do
+      local b = originalButtons[i]
+      wrappedButtons[#wrappedButtons + 1] = {
+        label = b.label,
+        action = function()
+          confirmDialog = nil
+          if b.action then return b.action() end
+          return true
+        end,
+      }
+    end
+    local dialogArgs = shallowCopy(args)
+    dialogArgs.buttons = wrappedButtons
+    confirmDialog = form.openDialog(dialogArgs)
     return confirmDialog
   end
 
@@ -337,18 +367,51 @@ local function open(opts)
     portsWorking = {}
     fields = {}
     package.loaded["wfsuite.lib.msp_serial_config"] = nil
-    package.loaded["wfsuite.lib.msp_rx_config"] = nil
     package.loaded["wfsuite.lib.msp_board_info"] = nil
     package.loaded["wfsuite.lib.port_labels"] = nil
     memstats.print("ports disposed")
   end
 
-  local function goBack()
+  local function leave()
     memstats.print("ports exit")
     dispose()
     if opts.onBack then opts.onBack() end
     collectgarbage("collect")
     memstats.print("ports after back")
+  end
+
+  -- The serial-port rows from an MSP_SERIAL_CONFIG reply: the USB VCP (identifier 20)
+  -- is not shown, and a port carrying the receiver function is locked.
+  local function serialPortsFrom(data)
+    local filtered = {}
+    local ports = data and data.ports or {}
+    for i = 1, #ports do
+      local port = shallowCopy(ports[i])
+      if port.identifier ~= 20 then
+        port.receiver_locked = maskHasAny(port.function_mask, FUNCTION_MASK_RX_SERIAL)
+        filtered[#filtered + 1] = port
+      end
+    end
+    return filtered
+  end
+
+  -- After a successful EEPROM write the page reads the board's serial ports back, so
+  -- the rows show what the board holds rather than what was sent (#2497). A read
+  -- that fails or returns nothing keeps the rows as they were sent.
+  local function readBackPorts(done)
+    bus.publish("msp.request", serialConfig.buildReadMessage(function(data)
+      if disposed then return end
+      local filtered = serialPortsFrom(data)
+      if #filtered > 0 then
+        portsOriginal = clonePorts(filtered)
+        portsWorking = clonePorts(filtered)
+        needsRender = true
+      end
+      done()
+    end, function()
+      if disposed then return end
+      done()
+    end))
   end
 
   local function startLoad(focusFn)
@@ -364,33 +427,13 @@ local function open(opts)
     local function loadSerialPorts()
       bus.publish("msp.request", serialConfig.buildReadMessage(function(data)
         if disposed then return end
-        local filtered = {}
-        local ports = data and data.ports or {}
-        for i = 1, #ports do
-          local port = shallowCopy(ports[i])
-          if port.identifier ~= 20 then
-            port.receiver_locked = maskHasAny(port.function_mask, FUNCTION_MASK_RX_SERIAL)
-            filtered[#filtered + 1] = port
-          end
-        end
+        local filtered = serialPortsFrom(data)
         portsOriginal = clonePorts(filtered)
         portsWorking = clonePorts(filtered)
-
-        bus.publish("msp.request", rxConfig.buildReadMessage(function(rxData)
-          if disposed then return end
-          rxSerialProvider = rxData and rxData.serialrx_provider or 0
-          loaded = true
-          closeDialog(focusFn)
-          setBusy(false)
-          needsRender = true
-        end, function()
-          if disposed then return end
-          rxSerialProvider = 0
-          loaded = true
-          closeDialog(focusFn)
-          setBusy(false)
-          needsRender = true
-        end))
+        loaded = true
+        closeDialog(focusFn)
+        setBusy(false)
+        needsRender = true
       end, function()
         if disposed then return end
         loadError = "@i18n(app.modules.ports.error_read_serial_ports)@"
@@ -415,6 +458,69 @@ local function open(opts)
     end))
   end
 
+  local function performSave(focusFn)
+    if disposed or busy or not loaded or not dirty then return end
+    applyReceiverGuard()
+    setBusy(true)
+    activeDialog = openProgress(MSG_SAVING_TITLE, MSG_SAVING_BODY)
+    saveError = nil
+    saveNotice = nil
+
+    local index = 1
+    local function fail()
+      if disposed then return end
+      loaded = true
+      saveError = "@i18n(app.modules.ports.error_save_failed)@"
+      closeDialog(focusFn or (headerHandle and headerHandle.focusSave))
+      setBusy(false)
+      needsRender = true
+    end
+    -- EEPROM_WRITE is rejected by the FC while armed -- not a real
+    -- failure, the per-port MSP_SET_SERIAL_CONFIG writes above
+    -- already landed and the FC commits them for real on disarm.
+    -- Mirrors app/page_runtime.lua's own performSave()/showSaveArmed().
+    local function failEeprom()
+      if disposed then return end
+      if isArmed == true then
+        loaded = true
+        dirty = false
+        portsOriginal = clonePorts(portsWorking)
+        saveNotice = "@i18n(app.modules.ports.save_armed)@"
+        closeDialog(focusFn or (headerHandle and headerHandle.focusSave))
+        setBusy(false)
+        needsRender = true
+        return
+      end
+      fail()
+    end
+    local function writeNext()
+      if disposed then return end
+      if index > #portsWorking then
+        bus.publish("msp.request", eeprom.buildWriteMessage(function()
+          if disposed then return end
+          readBackPorts(function()
+            if disposed then return end
+            dirty = false
+            portsOriginal = clonePorts(portsWorking)
+            closeDialog(focusFn or (headerHandle and headerHandle.focusSave))
+            setBusy(false)
+            if isArmed ~= true then
+              bus.publish("msp.request", reboot.buildWriteMessage())
+            end
+          end)
+        end, failEeprom))
+        return
+      end
+      local port = portsWorking[index]
+      bus.publish("msp.request", serialConfig.buildWriteMessage(port, function()
+        if disposed then return end
+        index = index + 1
+        writeNext()
+      end, fail))
+    end
+    writeNext()
+  end
+
   local function openSaveDialog()
     if not loaded or not dirty or busy then return end
     openConfirmDialog({
@@ -422,64 +528,7 @@ local function open(opts)
       message = MSG_SAVE_BODY,
       buttons = {
         {label = BTN_OK, action = function()
-          if not disposed then
-            applyReceiverGuard()
-            setBusy(true)
-            activeDialog = openProgress(MSG_SAVING_TITLE, MSG_SAVING_BODY)
-            saveError = nil
-            saveNotice = nil
-
-            local index = 1
-            local function fail()
-              if disposed then return end
-              loaded = true
-              saveError = "@i18n(app.modules.ports.error_save_failed)@"
-              closeDialog(headerHandle and headerHandle.focusSave)
-              setBusy(false)
-              needsRender = true
-            end
-            -- EEPROM_WRITE is rejected by the FC while armed -- not a real
-            -- failure, the per-port MSP_SET_SERIAL_CONFIG writes above
-            -- already landed and the FC commits them for real on disarm.
-            -- Mirrors app/page_runtime.lua's own performSave()/showSaveArmed().
-            local function failEeprom()
-              if disposed then return end
-              if isArmed == true then
-                loaded = true
-                dirty = false
-                portsOriginal = clonePorts(portsWorking)
-                saveNotice = "@i18n(app.modules.ports.save_armed)@"
-                closeDialog(headerHandle and headerHandle.focusSave)
-                setBusy(false)
-                needsRender = true
-                return
-              end
-              fail()
-            end
-            local function writeNext()
-              if disposed then return end
-              if index > #portsWorking then
-                bus.publish("msp.request", eeprom.buildWriteMessage(function()
-                  if disposed then return end
-                  dirty = false
-                  portsOriginal = clonePorts(portsWorking)
-                  closeDialog(headerHandle and headerHandle.focusSave)
-                  setBusy(false)
-                  if isArmed ~= true then
-                    bus.publish("msp.request", reboot.buildWriteMessage())
-                  end
-                end, failEeprom))
-                return
-              end
-              local port = portsWorking[index]
-              bus.publish("msp.request", serialConfig.buildWriteMessage(port, function()
-                if disposed then return end
-                index = index + 1
-                writeNext()
-              end, fail))
-            end
-            writeNext()
-          end
+          performSave(headerHandle and headerHandle.focusSave)
           return true
         end},
         {label = BTN_CANCEL, action = function() return true end},
@@ -487,6 +536,38 @@ local function open(opts)
       wakeup = function() end,
       paint = function() end,
     })
+  end
+
+  -- Back with unsaved changes asks first (issue #2504): Save saves and keeps the page,
+  -- Discard leaves it, Stay keeps it.
+  local function hasUnsavedChanges()
+    return not disposed and loaded == true and dirty == true
+  end
+
+  local function canSaveNow()
+    return hasUnsavedChanges() and not busy and confirmDialog == nil and activeDialog == nil and isArmed ~= true
+  end
+
+  local function goBack()
+    if busy or confirmDialog ~= nil or activeDialog ~= nil then return end
+    if not hasUnsavedChanges() then
+      leave()
+      return
+    end
+    openConfirmDialog(leaveConfirm.args({
+      canSave = canSaveNow(),
+      save = function()
+        performSave(headerHandle and headerHandle.focusSave)
+      end,
+      discard = function()
+        leave()
+      end,
+      focus = function()
+        if headerHandle and headerHandle.focusSave then
+          headerHandle.focusSave()
+        end
+      end,
+    }))
   end
 
   local function render()
@@ -574,15 +655,24 @@ local function open(opts)
           dirty = true
           needsRender = true
         end)
-      local baudField = form.addChoiceField(line, {x = xBaud, y = rowSlot.y, w = wBaud, h = rowSlot.h},
-        buildBaudChoiceTable(port),
-        function() return getActiveBaudIndex(port) end,
-        function(value)
-          if port.receiver_locked or value == getActiveBaudIndex(port) then return end
-          setActiveBaudIndex(port, value)
-          dirty = true
-          setBusy(false)
-        end)
+      local baudChoices = buildBaudChoiceTable(port)
+      local baudField = nil
+      if #baudChoices > 1 then
+        baudField = form.addChoiceField(line, {x = xBaud, y = rowSlot.y, w = wBaud, h = rowSlot.h},
+          baudChoices,
+          function() return getActiveBaudIndex(port) end,
+          function(value)
+            if port.receiver_locked or value == getActiveBaudIndex(port) then return end
+            setActiveBaudIndex(port, value)
+            dirty = true
+            setBusy(false)
+          end)
+      else
+        -- One rate and nothing to choose (a disabled, telemetry or auto port): a dropdown with one
+        -- entry suggests a choice that is not there, so the rate is shown as text (#2497).
+        form.addStaticText(line, {x = xBaud, y = rowSlot.y, w = wBaud, h = rowSlot.h},
+          baudChoices[1] and baudChoices[1][1] or "")
+      end
       fields[#fields + 1] = {field = functionField, locked = port.receiver_locked}
       fields[#fields + 1] = {field = baudField, locked = port.receiver_locked}
       if functionField and functionField.enable then
@@ -599,6 +689,14 @@ local function open(opts)
   sessionHandler = function(update)
     if disposed then return end
     isArmed = update and update.isArmed
+    -- The function choices depend on the minor version, so a change rebuilds the rows. A
+    -- load that finished before the handshake would otherwise keep the list built without it.
+    local minor = update and update.apiVersionMinor
+    apiVersionMinor = minor
+    if minor ~= lastApiMinor then
+      lastApiMinor = minor
+      needsRender = true
+    end
   end
   bus.subscribe("session.update", sessionHandler)
 

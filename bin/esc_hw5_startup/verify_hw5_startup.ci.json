@@ -1,0 +1,7 @@
+{
+  "id": "verify-hw5-startup",
+  "name": "Check the Hobbywing V5 Startup Time conversion",
+  "step": "Check the Hobbywing V5 Startup Time conversion",
+  "script": "bin/esc_hw5_startup/verify_hw5_startup.lua",
+  "rationale": "Startup Time is declared 4..25 s, but decode() handed the page the raw\nbyte, which runs 0..21, so the shortest start-up showed \"0s\" on a row\nthat begins at 4. The codec now adds 4 on read and takes it off on\nwrite (clamped to 21), matching the EdgeTX page the HW5 layouts come\nfrom, so a save writes back the byte the ESC sent. Ported from\nrotorflight-lua-edgetx-suite#2464. Pass --self-test to prove all 6 gate\nchecks fail on the pre-fix codec."
+}

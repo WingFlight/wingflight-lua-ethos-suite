@@ -1,0 +1,7 @@
+{
+  "id": "verify-msp-battery",
+  "name": "Check a short MSP payload is reported, not decoded",
+  "step": "Check a short MSP payload is reported, not decoded",
+  "script": "bin/msp_battery/verify_msp_battery.lua",
+  "rationale": "lib/mspcodec.lua's readU8 returned nil past the end of a payload where\nits siblings substituted 0, and the smartfuel decoder divided that nil\nby 1000 -- a short reply raised out of the background task. A radio\nonly produces a short reply under conditions nobody can script, so the\npayload lengths are pinned here against wingflight-firmware's handler."
+}

@@ -6,7 +6,9 @@ local closeKey = requireModule("app/close_key.lua")
 local header = requireModule("app/header.lua")
 local modelPreferences = requireModule("lib/model_preferences.lua")
 local settingsStore = requireModule("lib/settings_store.lua")
+local settingsSave = requireModule("app/settings_save.lua")
 local tableClone = requireModule("lib/table_clone.lua")
+local leaveConfirm = requireModule("app/leave_confirm.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.settings.name)@ / @i18n(app.modules.settings.dashboard)@ / @i18n(app.modules.settings.dashboard_theme)@"
 local BTN_OK = "@i18n(app.btn_ok)@"
@@ -245,7 +247,7 @@ local function open(opts)
     end
   end
 
-  local function goBack()
+  local function leave()
     if disposed then return end
     disposed = true
     if sessionHandler then bus.unsubscribe("session.update", sessionHandler); sessionHandler = nil end
@@ -264,24 +266,42 @@ local function open(opts)
     if disposed then return end
     settings.dashboard = normalizeDashboard(settings.dashboard, false)
     if settings.dashboard.use_same_theme then copyPreflightToAll(settings.dashboard, false, pathById, idByPath, fallbackId) end
-    settingsStore.save(settings)
+    if not settingsStore.save(settings) then
+      settingsSave.reportFailure(focusFn)
+      return
+    end
     originalDashboard = tableClone.shallow(settings.dashboard)
+
+    local modelFailed = false
 
     if modelEnabled() and modelPrefs and modelPath then
       modelDashboard = normalizeDashboard(modelDashboard, true)
       if modelDashboard.use_same_theme then copyPreflightToAll(modelDashboard, true, pathById, idByPath, fallbackId) end
-      if hasModelDashboardOverride(modelDashboard) then
-        modelPrefs.dashboard = modelDashboard
-      else
-        modelDashboard = normalizeDashboard(nil, true)
-        modelPrefs.dashboard = nil
+      local modelDirty = not sameSection(modelDashboard, normalizeDashboard(originalModelDashboard, true))
+      if modelDirty then
+        if hasModelDashboardOverride(modelDashboard) then
+          modelPrefs.dashboard = modelDashboard
+        else
+          modelDashboard = normalizeDashboard(nil, true)
+          modelPrefs.dashboard = nil
+        end
+        if modelPreferences.save(modelPath, modelPrefs) then
+          originalModelDashboard = tableClone.shallow(modelDashboard)
+        else
+          modelFailed = true
+        end
       end
-      modelPreferences.save(modelPath, modelPrefs)
-      originalModelDashboard = tableClone.shallow(modelDashboard)
     end
 
     bus.publish("settings.update", settingsStore.clone(settings))
     updateSaveEnabled()
+    if modelFailed then
+      -- The global half is on disk by the line above; only the model's half was
+      -- refused, so the dialog names that half instead of the radio (see
+      -- app/settings_save.lua's header).
+      settingsSave.reportModelFailure(focusFn)
+      return
+    end
     if focusFn then focusFn() end
   end
 
@@ -308,6 +328,26 @@ local function open(opts)
   end
 
   form.clear()
+  -- Back with unsaved changes asks first (issue #2504): Save saves and keeps the page,
+  -- Discard leaves it, Stay keeps it.
+  local function goBack()
+    if disposed then return end
+    if isDirty() then
+      form.openDialog(leaveConfirm.args({
+        canSave = true,
+        save = function() save(nil) end,
+        discard = function() leave() end,
+        focus = function()
+          if headerHandle and headerHandle.focusSave then
+            headerHandle.focusSave()
+          end
+        end,
+      }))
+      return
+    end
+    leave()
+  end
+
   headerHandle = header.build(PAGE_TITLE, {
     onBack = goBack,
     onSave = function() confirmSave(headerHandle and headerHandle.focusSave) end,

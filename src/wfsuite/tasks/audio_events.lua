@@ -20,6 +20,10 @@ local timer = nil
 local session = {}
 local previous = {}
 local initialized = false
+-- True from the first disconnected tick of an outage until the next connected
+-- tick. The state reset of the falling edge runs once under it, not on every
+-- tick while the link is down.
+local disconnectApplied = false
 local adjWavs = nil
 
 local lastAlertAt = {}
@@ -54,6 +58,15 @@ local adjChangedAt = nil
 -- window above that is what turns a burst of clicks into one announcement.
 local ADJ_SETTLE_SECONDS = 0.35
 local speakingUntil = 0
+-- State changes that had to wait for the speaking gate in the current tick.
+-- Their key is left out of `previous` by rememberCurrent(), so the same change
+-- is compared again on the next tick and spoken then (issue #2503). Cleared by
+-- rememberCurrent().
+local holdPrevious = {}
+-- The armed state as the task last saw it, not held back by holdPrevious. The
+-- telemetry-lost alert reads this, so a waiting arming announcement cannot hide an
+-- armed model from it.
+local lastSeenArmed = nil
 local rollingSamples = {}
 local timerTriggered = false
 local timerLastBeep = nil
@@ -463,18 +476,23 @@ local function announceCraftName()
   end
 end
 
-local function announceArmed()
+local function announceArmed(now)
   if not events.armflags then return end
   if previous.isArmed == nil or session.isArmed == nil then return end
   if previous.isArmed == session.isArmed then return end
+  if not canSpeak(now) then holdPrevious.isArmed = true; return end
+  markSpoken(now, SPEAK_WAV_SECONDS)
   playAlert(session.isArmed and "armed.wav" or "disarmed.wav")
 end
 
-local function announceProfile(key, enabled, file)
+local function announceProfile(now, key, enabled, file)
   if not enabled then return end
   local value = tonumber(session[key])
   local last = tonumber(previous[key])
   if value == nil or last == nil or value == last then return end
+  if not canSpeak(now) then holdPrevious[key] = true; return end
+  -- Marked before anything is queued: the number must not cut into its own file.
+  markSpoken(now, SPEAK_WAV_SECONDS + SPEAK_NUM_SECONDS)
   playAlert(file)
   playNumber(math.floor(value))
 end
@@ -520,7 +538,7 @@ local function batteryProfileCellCount(profile)
   return nil
 end
 
-local function announceBatteryProfile()
+local function announceBatteryProfile(now)
   if not events.battery_profile then return end
   -- Both already the internal 0-based index (see lib/battery_profile_index.lua).
   local value = batteryProfileIndex.index0(session.batteryProfile)
@@ -530,6 +548,11 @@ local function announceBatteryProfile()
   local capacity = batteryProfileCapacity(value)
   if not capacity then return end
   local cells = batteryProfileCellCount(value)
+
+  if not canSpeak(now) then holdPrevious.batteryProfile = true; return end
+  local spokenFor = SPEAK_WAV_SECONDS + SPEAK_NUM_SECONDS
+  if cells then spokenFor = spokenFor + SPEAK_NUM_SECONDS + SPEAK_WAV_SECONDS end
+  markSpoken(now, spokenFor)
 
   playAlert("battery.wav")
   playNumber(math.floor(capacity + 0.5), UNIT_MILLIAMPERE_HOUR)
@@ -541,7 +564,7 @@ local function announceBatteryProfile()
   end
 end
 
-local function announceGovernor()
+local function announceGovernor(now)
   if not events.governor then return end
   if session.connected ~= true or session.isArmed ~= true then return end
   local mode = tonumber(session.governorMode)
@@ -551,7 +574,10 @@ local function announceGovernor()
   local last = tonumber(previous.governorState)
   if value == nil or last == nil or value == last then return end
   local file = GOVERNOR_FILES[math.floor(value)]
-  if file then playGovernor(file) end
+  if not file then return end
+  if not canSpeak(now) then holdPrevious.governorState = true; return end
+  markSpoken(now, SPEAK_WAV_SECONDS)
+  playGovernor(file)
 end
 
 -- Unlike announceGovernor(), not armed-gated: mode selection (Angle,
@@ -737,9 +763,30 @@ local function speakAdjValue(value, now)
   markSpoken(now, SPEAK_NUM_SECONDS)
 end
 
+-- Repeats per alert episode (issue #2312). A group's `<group>_repeats` setting is how many
+-- announcements one episode may make; 0 keeps the behaviour before the setting: repeat for as long
+-- as the condition holds. An episode ends when its condition clears.
+local episodeCount = {}
+local function mayAnnounce(group)
+  local limit = tonumber(events[group .. "_repeats"]) or 0
+  if limit <= 0 then return true end
+  return (episodeCount[group] or 0) < limit
+end
+local function countAnnouncement(group)
+  episodeCount[group] = (episodeCount[group] or 0) + 1
+end
+local function endEpisode(group)
+  episodeCount[group] = nil
+end
+-- The radio's vibration for a group, when its `<group>_haptic` setting is on.
+local function hapticFor(group)
+  if events[group .. "_haptic"] then haptic() end
+end
+
 local function announceVoltage(now)
   if not events.voltage then
     lastAlertAt.voltage = nil
+    endEpisode("voltage")
     lowVoltageHoldStart = nil
     return
   end
@@ -762,6 +809,7 @@ local function announceVoltage(now)
   -- reading trigger the low-voltage alarm.
   if voltage < 1 then
     lastAlertAt.voltage = nil
+    endEpisode("voltage")
     lowVoltageHoldStart = nil
     return
   end
@@ -769,6 +817,7 @@ local function announceVoltage(now)
   local cellVoltage = voltage / cellCount
   if cellVoltage >= warnCell then
     lastAlertAt.voltage = nil
+    endEpisode("voltage")
     lowVoltageHoldStart = nil
     return
   end
@@ -785,8 +834,11 @@ local function announceVoltage(now)
 
   local repeatInterval = tonumber(events.voltage_repeat_interval) or 10
   if lastAlertAt.voltage and (now - lastAlertAt.voltage) < repeatInterval then return end
+  if not mayAnnounce("voltage") then return end
   lastAlertAt.voltage = now
+  countAnnouncement("voltage")
   playAlert("lowvoltage.wav")
+  hapticFor("voltage")
 
   -- Speak the reading itself if configured: the pack total at one decimal
   -- (e.g. "22.4 volts") or the average cell at two (e.g. "3.65 volts").
@@ -869,7 +921,7 @@ end
 -- says nothing, while the same drop with the rotors turning is the one event a
 -- pilot must not have to notice for himself (issue #2311).
 --
--- The armed state is read from `previous`, not from `session`: the session
+-- The armed state is read from `lastSeenArmed`, not from `session`: the session
 -- clears isArmed in the same step that clears connected (tasks/session.lua's
 -- setConnected()), so by the time a down link is visible here the armed state
 -- is already gone -- and rememberCurrent() overwrites `previous` with that
@@ -877,7 +929,7 @@ end
 -- this runs before it.
 local function announceTelemetryLost(now)
   if not events.telemetry_lost then return end
-  if previous.isArmed ~= true then return end
+  if lastSeenArmed ~= true then return end
 
   connectionLostAt = now
   local path = firstResolvedSound(TELEMETRY_LOST_SOUNDS)
@@ -886,7 +938,7 @@ local function announceTelemetryLost(now)
   -- alert above: a pack that carries none of the words would otherwise get no
   -- alert at all, and a lost link while armed is not something to leave to a
   -- file the pack happens to ship.
-  haptic()
+  hapticFor("telemetry_lost")
 end
 
 -- The model answering again, once, and only for a loss that was announced.
@@ -916,13 +968,16 @@ local function announceEscTemp(now)
   local avgTemp = updateRollingAverage("temp_esc", temp, 5)
   if avgTemp < threshold then
     lastAlertAt.temp_esc = nil
+    endEpisode("temp_esc")
     return
   end
 
   if lastAlertAt.temp_esc and (now - lastAlertAt.temp_esc) < 10 then return end
+  if not mayAnnounce("temp_esc") then return end
   lastAlertAt.temp_esc = now
+  countAnnouncement("temp_esc")
   playAlert("esctemp.wav")
-  haptic()
+  hapticFor("temp_esc")
 end
 
 local function announceBecRxVoltage(now)
@@ -951,16 +1006,19 @@ local function announceBecRxVoltage(now)
   if events.rx_voltage then
     local threshold = tonumber(events.rxalertvalue) or 7.4
     if avgVoltage < threshold then
-      if not lastAlertAt.rx_voltage or (now - lastAlertAt.rx_voltage) >= 10 then
+      if (not lastAlertAt.rx_voltage or (now - lastAlertAt.rx_voltage) >= 10) and mayAnnounce("rx_voltage") then
         lastAlertAt.rx_voltage = now
+        countAnnouncement("rx_voltage")
         playAlert("rxvolt.wav")
-        haptic()
+        hapticFor("rx_voltage")
       end
     else
       lastAlertAt.rx_voltage = nil
+      endEpisode("rx_voltage")
     end
   else
     lastAlertAt.rx_voltage = nil
+    endEpisode("rx_voltage")
   end
 end
 
@@ -1196,12 +1254,13 @@ end
 
 local function rememberCurrent()
   previous.connected = session.connected
-  previous.isArmed = session.isArmed
-  previous.pidProfile = session.pidProfile
-  previous.rateProfile = session.rateProfile
-  previous.tvProfile = session.tvProfile
-  previous.batteryProfile = session.batteryProfile
-  previous.governorState = session.governorState
+  lastSeenArmed = session.isArmed
+  if not holdPrevious.isArmed then previous.isArmed = session.isArmed end
+  if not holdPrevious.pidProfile then previous.pidProfile = session.pidProfile end
+  if not holdPrevious.rateProfile then previous.rateProfile = session.rateProfile end
+  if not holdPrevious.tvProfile then previous.tvProfile = session.tvProfile end
+  if not holdPrevious.batteryProfile then previous.batteryProfile = session.batteryProfile end
+  if not holdPrevious.governorState then previous.governorState = session.governorState end
   if not flightModeHeld then
     previous.flightModeFlags = session.flightModeFlags
     previous.navBlocked = session.navBlocked
@@ -1211,6 +1270,7 @@ local function rememberCurrent()
   previous.adjFunction = session.adjFunction
   previous.adjValue = session.adjValue
   previous.autoTrim = session.systemStatus and session.systemStatus.autoTrim
+  for key in pairs(holdPrevious) do holdPrevious[key] = nil end
 end
 
 local function clearAlertState()
@@ -1221,6 +1281,14 @@ function audio_events.wakeup()
   ensureSettings()
   local now = os.clock()
   if session.connected ~= true then
+    -- Nothing writes the state reset below while the link is down, so only the
+    -- first tick of an outage has anything to reset. Later ticks only keep
+    -- `previous` current, as they always did.
+    if disconnectApplied then
+      rememberCurrent()
+      return
+    end
+    disconnectApplied = true
     -- Whether this tick is the loss itself, read before rememberCurrent()
     -- below overwrites `previous` with the values of the down session. Both
     -- edges the link announcement needs -- that the link went, and that the
@@ -1252,6 +1320,8 @@ function audio_events.wakeup()
     return
   end
 
+  disconnectApplied = false -- re-arm the falling edge
+
   if not initialized then
     initialized = true
     pendingModeSince = nil
@@ -1278,12 +1348,12 @@ function audio_events.wakeup()
   end
 
   announceCraftName()
-  announceArmed()
-  announceProfile("pidProfile", events.pid_profile, "profile.wav")
-  announceProfile("rateProfile", events.rate_profile, "rates.wav")
-  announceProfile("tvProfile", events.tv_profile, "tv.wav")
-  announceBatteryProfile()
-  announceGovernor()
+  announceArmed(now)
+  announceProfile(now, "pidProfile", events.pid_profile, "profile.wav")
+  announceProfile(now, "rateProfile", events.rate_profile, "rates.wav")
+  announceProfile(now, "tvProfile", events.tv_profile, "tv.wav")
+  announceBatteryProfile(now)
+  announceGovernor(now)
   announceFlightMode()
   announceGpsFix()
   announceSystemAlerts(now)
@@ -1300,10 +1370,13 @@ function audio_events.wakeup()
 end
 
 function audio_events.reset()
+  lastSeenArmed = nil
   initialized = false
+  disconnectApplied = false
   craftNameAnnounced = false
   adjWavs = nil
   for key in pairs(previous) do previous[key] = nil end
+  for key in pairs(holdPrevious) do holdPrevious[key] = nil end
   for key in pairs(lastAlertAt) do lastAlertAt[key] = nil end
   clearAlertState()
   resetFuelAnnouncements()

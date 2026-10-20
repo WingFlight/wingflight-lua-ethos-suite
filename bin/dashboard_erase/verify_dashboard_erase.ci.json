@@ -1,0 +1,7 @@
+{
+  "id": "verify-dashboard-erase",
+  "name": "Check the dashboard erase wait against the flash ready bit",
+  "step": "Check the dashboard erase wait against the flash ready bit",
+  "script": "bin/dashboard_erase/verify_dashboard_erase.lua",
+  "rationale": "The erase is acknowledged before the flash is erased, and the ready\nbit is false until it is idle. The wait must end on a read that\nreports ready, keep reading on not-ready, failed or flag-less\nreplies, time out 240 s after the acknowledgement, and ignore late\nreplies of an earlier erase. The erase is started through the real\ntoolbar path."
+}

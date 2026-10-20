@@ -1,0 +1,7 @@
+{
+  "id": "smartfuel-announce",
+  "name": "Check the SmartFuel announcements",
+  "step": "Check the SmartFuel announcements",
+  "script": "bin/tests/smartfuel_announce.lua",
+  "rationale": "Same Lua job: a fresh connect must not announce \"low fuel\" from a\nSmartFuel reading that is 0 only because no battery is known yet."
+}

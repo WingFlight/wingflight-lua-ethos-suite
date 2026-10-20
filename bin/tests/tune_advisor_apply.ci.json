@@ -1,0 +1,7 @@
+{
+  "id": "tune-advisor-apply",
+  "name": "Check the Tune Advisor Apply",
+  "step": "Check the Tune Advisor Apply",
+  "script": "bin/tests/tune_advisor_apply.lua",
+  "rationale": "The Tune Advisor's Save writes its suggested changes to the FC. Pins\nwhat reaches the FC: only the advised fields change, and nothing is\nwritten unless every read is complete (a short reply would decode as a\ntune of zeros), the FC still holds the tune the flights were flown on\n(same values and profiles) and the model is disarmed; a failed write is\nnever committed to EEPROM; each stage is shown to the pilot."
+}

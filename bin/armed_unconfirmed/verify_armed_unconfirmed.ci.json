@@ -1,0 +1,7 @@
+{
+  "id": "verify-armed-unconfirmed",
+  "name": "A disconnected armed model is not writable until a fresh answer clears it",
+  "step": "A disconnected armed model is not writable until a fresh answer clears it",
+  "script": "bin/armed_unconfirmed/verify_armed_unconfirmed.lua",
+  "rationale": "Ported from rotorflight-lua-ethos-suite PR #2563 (issue #2548):\nisArmed goes nil on every disconnect, and a gate written as `isArmed == true`\nreads that nil as \"disarmed\". On a reconnect into an armed model the save button\nand the stats write then opened before the arm flags were read again. Neither\nthe firmware nor the page could tell that from a real disarm.\n\ntasks/session.lua keeps a latch, armedUnconfirmed: set on an armed read, cleared\nonly by a fresh disarmed read, untouched by a disconnect. app/page_runtime.lua's\nsave gate and the reboot-after-save gate read it through armedOrUnconfirmed().\nThe harness drives the real session.lua through session.wakeup() and the real\npage_runtime canSave(). Against unpatched master the latch and the\ndisconnected-page checks fail. --self-test splices the latch and the gate back\nout and requires them to go red."
+}

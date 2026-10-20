@@ -140,6 +140,8 @@ local function openEditor(opts, listState, row)
 
   local runtime
   runtime = pageRuntime.new({
+    -- Edits are saved with the page's Save; liveWrite would skip Back's unsaved-changes question.
+    liveWrite = false,
     pageTitle = PAGE_TITLE .. " / " .. row.title,
     logTag = "servos_bus_editor",
     mspModule = pageMsp,
@@ -187,6 +189,11 @@ local function openEditor(opts, listState, row)
                 if key ~= "mid" then field:enable(runtime.loaded) end
               end
             else
+              -- The live write below waits for the read; so must the override.
+              if not runtime.loaded then
+                if focusFn then focusFn() end
+                return true
+              end
               publishOverride(rwIndex, servoOverride.OVERRIDE_CENTER)
               inOverride = true
               inheritedOverride = false

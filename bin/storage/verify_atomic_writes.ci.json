@@ -1,0 +1,7 @@
+{
+  "id": "verify-atomic-writes",
+  "name": "Check atomic storage writes",
+  "step": "Check atomic storage writes",
+  "script": "bin/storage/verify_atomic_writes.lua",
+  "rationale": "Settings and log headers are staged to a temp file before replacing the\nlive file, so a power loss during a save does not truncate the data the\nsuite owns on the SD card."
+}

@@ -138,7 +138,7 @@ local APP_SESSION_PACKAGE_KEYS = {
 local ROOT_ENTRIES = {
   {title = "@i18n(app.menu_section_flight_tuning)@", icon = lcd.loadMask("app/gfx/flight_tuning.png"), menuId = "flight_tuning_menu", group = "@i18n(app.header_configuration)@"},
   {title = "@i18n(app.modules.hardware_setup.name)@", icon = lcd.loadMask("app/gfx/hardware.png"), menuId = "setup_menu", group = "@i18n(app.header_configuration)@"},
-  {title = "@i18n(app.menu_section_tools)@", icon = lcd.loadMask("app/gfx/tools.png"), menuId = "tools_menu", group = "@i18n(app.header_system)@"},
+  {title = "@i18n(app.menu_section_tools)@", icon = lcd.loadMask("app/gfx/tools.png"), menuId = "tools_menu", group = "@i18n(app.header_system)@", offline = true},
   {title = "@i18n(app.modules.logs.name)@", icon = lcd.loadMask("app/gfx/logs.png"), script = "app/pages/logs.lua", group = "@i18n(app.header_system)@", offline = true},
   {title = "@i18n(app.modules.settings.name)@", icon = lcd.loadMask("app/gfx/settings.png"), menuId = "settings_menu", group = "@i18n(app.header_system)@", offline = true},
 }
@@ -234,6 +234,7 @@ local MENUS = {
       {title = "@i18n(app.modules.power.alert_name)@", icon = lcd.loadMask("app/gfx/power.png"), script = "app/pages/power_alerts.lua"},
       {title = "@i18n(app.modules.power.source_name)@", icon = lcd.loadMask("app/gfx/power_source.png"), script = "app/pages/power_source.lua"},
       {title = "@i18n(app.modules.power.smartfuel_name)@", icon = lcd.loadMask("app/gfx/power_smartfuel.png"), script = "app/pages/power_smartfuel.lua"},
+      {title = "@i18n(app.modules.power.preferences_name)@", icon = lcd.loadMask("app/gfx/power.png"), script = "app/pages/power_preferences.lua"},
     },
   },
   esc_motors_menu = {
@@ -266,18 +267,18 @@ local MENUS = {
     entries = {
       {title = "@i18n(app.modules.copyprofiles.name)@", icon = lcd.loadMask("app/gfx/copy_profiles.png"), script = "app/pages/copy_profiles.lua"},
       {title = "@i18n(app.modules.profile_select.name)@", icon = lcd.loadMask("app/gfx/profile_select.png"), script = "app/pages/profile_select.lua"},
-      {title = "@i18n(app.modules.diagnostics.name)@", icon = lcd.loadMask("app/gfx/diagnostics.png"), menuId = "diagnostics_menu"},
+      {title = "@i18n(app.modules.diagnostics.name)@", icon = lcd.loadMask("app/gfx/diagnostics.png"), menuId = "diagnostics_menu", offline = true},
       {title = "@i18n(app.modules.settings.txt_developer)@", icon = lcd.loadMask("app/gfx/developer.png"), menuId = "developer_menu", visibleWhen = function() return developerModeEnabled == true end},
     },
   },
   diagnostics_menu = {
     title = "@i18n(app.modules.diagnostics.name)@",
     entries = {
-      {title = "@i18n(app.modules.rfstatus.name)@", icon = lcd.loadMask("app/gfx/diagnostics_rfstatus.png"), script = "app/pages/diagnostics_rfstatus.lua"},
+      {title = "@i18n(app.modules.rfstatus.name)@", icon = lcd.loadMask("app/gfx/diagnostics_rfstatus.png"), script = "app/pages/diagnostics_rfstatus.lua", offline = true},
       {title = "@i18n(app.modules.elrs_telemetry.name)@", icon = lcd.loadMask("app/gfx/diagnostics_elrs_link.png"), script = "app/pages/diagnostics_elrs_link.lua"},
       {title = "@i18n(app.modules.fblstatus.name)@", icon = lcd.loadMask("app/gfx/diagnostics_fblstatus.png"), script = "app/pages/diagnostics_fblstatus.lua"},
       {title = "@i18n(app.modules.rx_input_backup_status.name)@", icon = lcd.loadMask("app/gfx/diagnostics_rx_input_backup.png"), script = "app/pages/diagnostics_rx_input_backup.lua"},
-      {title = "@i18n(app.modules.info.name)@", icon = lcd.loadMask("app/gfx/diagnostics_info.png"), script = "app/pages/diagnostics_info.lua"},
+      {title = "@i18n(app.modules.info.name)@", icon = lcd.loadMask("app/gfx/diagnostics_info.png"), script = "app/pages/diagnostics_info.lua", offline = true},
     },
   },
   logs_menu = {title = "@i18n(app.modules.logs.name)@", entries = {}},
@@ -381,9 +382,8 @@ local MENUS = {
       {title = "@i18n(app.modules.gain_curves.name)@", icon = lcd.loadMask("app/gfx/curves.png"), script = "app/pages/gain_curves.lua", group = "@i18n(app.menu_section_advanced)@"},
       {title = "@i18n(app.modules.rates_advanced.name)@", icon = lcd.loadMask("app/gfx/rates_advanced.png"), script = "app/pages/rates_advanced.lua", group = "@i18n(app.menu_section_advanced)@"},
       {title = "@i18n(app.modules.autolevel.name)@", icon = lcd.loadMask("app/gfx/autolevel.png"), menuId = "autolevel_menu", group = "@i18n(app.menu_section_advanced)@"},
-      -- FEATURE_THRUST_VECTOR (see app/pages/configuration.lua) is opt-in
-      -- and off by default, but this entry is unconditional, like Flight
-      -- Modes above, which is reachable whichever mode is engaged.
+      -- Thrust Vector is always available in the firmware; its output is
+      -- switched on in flight by the THRUST VECTOR mode.
       {title = "@i18n(app.modules.thrust_vector.name)@", icon = lcd.loadMask("app/gfx/thrust_vector.png"), menuId = "thrust_vector_menu", group = "@i18n(app.menu_section_advanced)@"},
     },
   },

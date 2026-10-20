@@ -1,0 +1,7 @@
+{
+  "id": "verify-root-close-key",
+  "name": "Check the root menu close key",
+  "step": "Check the root menu close key",
+  "script": "bin/tool_ui/verify_root_close_key.lua",
+  "rationale": "Every screen but one installed a handler for the physical Back/Close key. The\nroot menu installed none, on the stated assumption that Ethos's own default\ncloses the tool on the first press. It does not -- that default takes two, the\nfirst dropping the form's input focus -- so the root menu had two ways out that\ndisagreed with each other: the on-screen Menu button left in one press, the\nhardware RTN in two. Neither a build nor a package step reaches any of it.\n\nThe harness drives the real tool.lua through registerSystemTool, create() and\nevent() and asserts that RTN and EXIT reach goBack() at the root, that goBack()\nis the same path the back button takes, that a long ENTER, a model key and a\ntouch event are still passed through untouched, and that RTN in a submenu pops\none level without exiting. Ported from rotorflight-lua-ethos-suite#2442.\n\nPass --self-test to prove the seven root checks go red against a copy of\napp/menu_container.lua with the pre-fix root branch put back."
+}

@@ -1,0 +1,7 @@
+{
+  "id": "verify-audio-disconnect",
+  "name": "The link-loss edge of the audio task resets once per outage",
+  "step": "The link-loss edge of the audio task resets once per outage",
+  "script": "bin/audio_disconnect/verify_audio_disconnect.lua",
+  "rationale": "Ported from rotorflight-lua-ethos-suite PR #2581 (issue #2437): the disconnected branch\nof tasks/audio_events.lua's wakeup was entered as a state test, not an edge, so its state\nreset ran on every audio tick while the link was down. The reset now runs once per outage,\non the first disconnected tick, and the first connected tick re-arms it. Nothing in the\nreset is written while the link is down, so the behaviour does not change; what changes is\nthe work done on each tick of an outage.\n\nThe harness pins what the edge must keep: a change made during an outage is not spoken after\nthe reconnect, and the loss and the recovery of an armed model are announced for each of two\noutages. Its can-fail check removes the re-arm from a copy of the task and requires the second\noutage to go silent there. Passing on unpatched master is expected: this is a structural\nchange with no audible effect, so the harness guards the behaviour, not the saving."
+}

@@ -1,0 +1,7 @@
+{
+  "id": "verify-no-extra-msp",
+  "name": "Check the tool adds no MSP requests across cycles",
+  "step": "Check the tool adds no MSP requests across cycles",
+  "script": "bin/tool_ui/verify_no_extra_msp.lua",
+  "rationale": "Deferring that load must not add MSP traffic or accumulate anything\nper open/close cycle. This counts msp.request at bus.publish over\nthree tool cycles plus 100 wakeups inside a guarded menu, and goes red\nif a guard stops latching (309 requests instead of 6)."
+}

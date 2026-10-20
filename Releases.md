@@ -1,3 +1,47 @@
+# 0.0.36
+
+Use with the 0.0.36 firmware (MSP API 22.14). Flashing keeps your settings, except the Thrust Vector profiles, which reset to the new defaults.
+Match the Thrust Vector defaults to the 0.0.36 firmware.
+Show a red Armed bar across the top of the dashboard while armed; it can be switched off in the widget settings.
+Grey out the dashboard's Erase and Battery tiles while armed, and refuse those writes while armed.
+Report a refused save on every page, including Select Profile, local settings and model preferences, and keep the page unsaved for another try.
+Add an Edit Battery choice to the Battery page, so another profile's capacity and cells can be edited without making it active.
+Read the serial ports back after a save on the Ports page.
+List only the PWM outputs on the servo PWM page when an SBUS or FBUS port is set up, and stop saving past them.
+Keep the servo override off until the page has read its values, and keep the Tool button disabled until a page has loaded.
+Keep the armed state across a disconnect, so saves and reboots stay blocked until the model is seen disarmed.
+Fix the Blackbox erase wait ending before the flash is erased, on the dashboard and the Blackbox page, and show No dataflash for a board without it.
+Keep the Smart Fuel sensor alive through a disarm and while the estimate settles.
+Stop state announcements (arming, profile, battery, governor) cutting each other off, and announce telemetry lost after a drop right after arming.
+Name adjustment functions 76 to 82 and add the missing words to the English sound pack.
+Fix the backup RX status being read one byte off.
+Fix the Telemetry page accepting a sensor switch that the save then refused.
+Show loading dots instead of a stale value when a bar or watts sensor drops out before or during flight.
+Read flight log CSV columns by their header name.
+Refuse a Tune Advisor reply in an unknown layout, and never clear a refused flight from the FC.
+Open Diagnostics Status and Info without a flight controller, and show the background task heartbeat on Info.
+
+# 0.0.35
+
+Use with the 0.0.35 firmware (MSP API 22.14). Flashing keeps your settings.
+Add a Motor Override page (Setup > ESC & Motors) to spin a motor from the radio for a direction check or ESC calibration. It is refused while armed and the motor stops within a second if the link drops.
+Apply the Tune Advisor's suggested changes with Save, after a confirmation. Nothing is written unless the model is disarmed and the FC still holds the tune the flights were flown on.
+Add the KSE4 and KSE5 dashboard themes.
+Show MAIN POWER LOST in the dashboard footer, and announce a main pack that goes while the receiver stays powered.
+Announce telemetry lost and recovered, only when the model was armed as the link went.
+Hold the low-voltage alert for a set time (default 2 s) so a punch-out sag no longer triggers it, and optionally speak the pack or average cell voltage.
+Speak in-flight adjustments once they settle, so a burst of trim clicks announces the final value.
+Split Settings > Audio > Events into one page per category, with a new Link page.
+Drop the battery picker down from the top as a grid, and dim the dashboard behind overlays.
+Draw the header buttons as icons, and fit every page title and string on the X18.
+Remember each controller's name and list the known models offline.
+Widen the port label column on the Ports page.
+Limit each rate field to the firmware's maximum.
+Wait for the flight controller to finish the accelerometer calibration before saving it.
+Raise the Reboot required and Blackbox full alerts on models with only the System Config sensor.
+Log a sensor that is not sending as an empty field in the flight CSV, not as 0.
+Fix the dashboard sometimes staying on loading dots after boot, keep the background task running after a page or MSP error, and cut CPU and memory spikes on the dashboard.
+
 # 0.0.34
 
 Use with the 0.0.34 firmware (MSP API 22.14). Flashing keeps your settings.

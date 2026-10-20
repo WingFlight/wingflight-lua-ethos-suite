@@ -1,0 +1,7 @@
+{
+  "id": "verify-reboot-policy",
+  "name": "Check the save-and-reboot pipeline",
+  "step": "Check the save-and-reboot pipeline",
+  "script": "bin/reboot_policy/verify_reboot_policy.lua",
+  "rationale": "A save that restarts the flight controller used to close its save dialog and\nreport the save done the moment MSP_REBOOT went out -- while the board was still\nbooting -- and a page left open kept showing pre-restart values. The page now\nholds a \"Restarting...\" dialog until the link drops and the FC answers a fresh\nhandshake, then re-reads.\n\nWingflight has no Rotorflight heli governor page, so this pins the shared\npipeline only: the wait state machine needs a link that drops and returns and a\nhandshake that answers, which no build step reaches.\nPorted from rotorflight-lua-ethos-suite#2361."
+}

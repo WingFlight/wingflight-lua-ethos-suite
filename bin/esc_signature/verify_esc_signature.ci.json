@@ -1,0 +1,7 @@
+{
+  "id": "verify-esc-signature",
+  "name": "Check the ESC forward-programming signature gate",
+  "step": "Check the ESC forward-programming signature gate",
+  "script": "bin/esc_signature/verify_esc_signature.lua",
+  "rationale": "AM32, BLHeli_S and Bluejay share one menu protocol ID. Drive their real\npages and codecs to check that a mismatched ESC never builds an editor or\nsends MSP 218, while a matching ESC opens and saves successfully. Also\nrequire every ESC tile's codec to declare its expected signature.\nPorted from rotorflight-lua-ethos-suite#2452. Pass --self-test to prove all\n30 gate checks fail when isCompatibleEsc() is replaced with return true."
+}

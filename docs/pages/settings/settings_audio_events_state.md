@@ -36,6 +36,7 @@ Available without a flight controller connection; the background task must be ru
 - Changes are saved to the radio's settings store, not to the flight controller.
 - These events are triggered on transition edges rather than periodically.
 - **Adjustments** are called out once the value has stopped changing for about a third of a second. A burst of trim clicks therefore says one number, the one the model ended up with, rather than each step. Nothing is said while the value is still moving. A change that settles while the previous callout is still playing is called out after it.
+- **Several changes at once** are spoken one after another, not on top of each other. The arming, PID profile, rate profile, thrust vector profile, battery profile and governor callouts each wait until the previous one has finished. A change that has to wait is spoken then, once, and is not dropped.
 
 ## Source
 

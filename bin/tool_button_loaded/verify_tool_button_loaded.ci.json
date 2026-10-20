@@ -1,0 +1,7 @@
+{
+  "id": "verify-tool-button-loaded",
+  "name": "Check the header Tool button enable state",
+  "step": "Check the header Tool button enable state",
+  "script": "bin/tool_button_loaded/verify_tool_button_loaded.lua",
+  "rationale": "Save is gated by the page runtime; Tool was not. A page with an onTool\nshowed an enabled Tool button before its values had loaded, and on the servo\noverride pages the dialog it opened could be confirmed against unread values.\nThe runtime now drives the Tool button from the same loaded flag as Save,\nthrough a new setToolEnabled() on the header handle. Pages without an\nonTool are unchanged. Ported from rotorflight-lua-ethos-suite PR #2560\n(issue #2553)."
+}

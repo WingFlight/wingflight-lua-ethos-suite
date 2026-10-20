@@ -94,6 +94,13 @@ the ESC exactly as the ESC reported it, in both directions.
 > flight controller does not interpret this block at all - it compares it byte for
 > byte and passes it on.
 
+## Notes
+
+- Every read is checked against this vendor's signature, Reload included: a reply that is
+  not this vendor's (or that carries no signature at all) is refused, the editor is not
+  loaded and the page cannot be saved, so another vendor's block in the slot is never
+  written back.
+
 ## Choosing the ESC
 
 If the flight controller reports more than one ESC, this page lists them and you

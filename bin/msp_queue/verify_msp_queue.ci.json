@@ -1,0 +1,7 @@
+{
+  "id": "verify-msp-queue",
+  "name": "Check the MSP queue after an aborted request",
+  "step": "Check the MSP queue after an aborted request",
+  "script": "bin/msp_queue/verify_msp_queue.lua",
+  "rationale": "An MSP request abandoned between two of its frames used to leave the\nshared TX buffer occupied, after which no request could be framed at\nall -- every configuration page then hung until the script was\nreloaded. It needs a queue, a clock and a link that stops answering,\nso no build step reaches it."
+}

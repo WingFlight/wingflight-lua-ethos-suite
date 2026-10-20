@@ -5,7 +5,8 @@
 -- Wire layout verified directly against wingflight-firmware's own
 -- serializer (src/main/msp/msp.c, MSP2_WING_RX_INPUT_BACKUP_STATUS case):
 -- U8 payload version -> U8 enabled (a port has FUNCTION_RX_INPUT_BACKUP
--- assigned) -> [version >= 2 only] U8 provider (0 = SBUS) -> U8 linkUp (a
+-- assigned) -> [version >= 3 only] U8 mainLinkUp (the main RX is receiving)
+-- -> [version >= 2 only] U8 provider (0 = SBUS) -> U8 linkUp (a
 -- valid frame decoded within the last ~50ms) -> U8 activeSource (0 = main
 -- RX currently driving the aircraft, 1 = backup is) -> U8 channelCount ->
 -- channelCount x U16 channel values, in the same ~880-2012us convention
@@ -32,8 +33,9 @@ local READ_COMMAND = 0x5F0D
 -- (see tasks/msp/queue.lua): backup not configured, no channels -- matches
 -- what a fresh Ports page with no port assigned this function looks like.
 local SIMULATOR_RESPONSE = {
-  2, -- payload version
+  3, -- payload version
   0, -- enabled = false
+  0, -- mainLinkUp = false
   0, -- provider = SBUS
   0, -- linkUp = false
   0, -- activeSource = main
@@ -49,6 +51,8 @@ function msp_rx_input_backup_status.decode(buf)
   local payloadVersion = mspcodec.readU8(buf)
 
   local enabled = mspcodec.readU8(buf) ~= 0
+  local mainLinkUp = nil -- unknown before version 3
+  if payloadVersion >= 3 then mainLinkUp = mspcodec.readU8(buf) ~= 0 end
   local provider = payloadVersion >= 2 and mspcodec.readU8(buf) or 0 -- 0 = SBUS
   local linkUp = mspcodec.readU8(buf) ~= 0
   local activeSource = mspcodec.readU8(buf) ~= 0 and "backup" or "main"
@@ -61,6 +65,7 @@ function msp_rx_input_backup_status.decode(buf)
 
   return {
     enabled = enabled,
+    mainLinkUp = mainLinkUp,
     provider = provider,
     linkUp = linkUp,
     activeSource = activeSource,

@@ -1,0 +1,7 @@
+{
+  "id": "verify-servo-config-commands",
+  "name": "Check the servo command numbers and payloads",
+  "step": "Check the servo command numbers and payloads",
+  "script": "bin/servo_config_commands/verify_servo_config_commands.lua",
+  "rationale": "Ported from rotorflight-lua-ethos-suite PR #2540 (issue #2444):\nlib/msp_servo_config.lua named the packed write 212 as its \"WRITE_COMMAND\",\nnext to a read that takes a raw index, and nothing pinned the numbers. Against\nwingflight-firmware src/main/msp/msp_protocol.h, 212 (MSP_SET_SERVO_CONFIGURATION)\ntakes the packed index and 124 (MSP_SET_SERVO_CONFIG) takes the raw one, the same\nindex space as the read, 125. A mapping slip there writes a valid-looking slot on\nanother servo with no error, so a plausible edit must not pass unseen.\n\nThe module now names each command for what it is, states the two index spaces in\nits header, and exposes the raw write as buildRawWriteMessage. Nothing in the suite\nuses the raw write yet; that is a separate decision.\n\nThe harness reads the command number and the payload off the messages the modules\nbuild: 125, 212 and 124 in lib/msp_servo_config.lua, 213 in lib/msp_servo_center.lua,\n193 in lib/msp_servo_override.lua, and the 17-byte layout shared by 124 and 212.\n--self-test swaps one number at a time in a copy of each module and requires the\npin to go red every time, after the unmodified modules have passed."
+}

@@ -31,6 +31,9 @@ Requires a running background task and a flight controller connection.
 
 ## Notes
 
+- The model type is the one setting on this page that lives in the model's INI file; the tuning values go to the flight controller. If that file cannot be written, the save itself still goes through (the flight controller has the new model type) and a *Save failed* dialog follows once the saving dialog is closed, keeping the page dirty so the pilot can retry saving the preference (rotorflight-lua-ethos-suite Issue #2500).
+- The *Smart Fuel* telemetry sensor in Ethos is sent at least every 2 seconds, also while the model is disarmed. After a disarm, while the estimate restarts, it holds its last value instead of showing as lost, and dashboard widgets retain their reading.
+
 TODO: Verify persistence, reboot behaviour, profile scope and any restrictions in
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than
 firmware defaults; wire values may need scaling before display.

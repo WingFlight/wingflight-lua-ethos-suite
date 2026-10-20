@@ -1,0 +1,7 @@
+{
+  "id": "verify-allocation-churn",
+  "name": "Check the wakeup path allocates nothing per call",
+  "step": "Check the wakeup path allocates nothing per call",
+  "script": "bin/allocation_churn/verify_allocation_churn.lua",
+  "rationale": "The dashboard wakeup path runs several times a second and session.update\nis published at up to 20 Hz, so a table rebuilt per call there is the\nsawtooth in the '[bgtask mem] lua=' log rather than a detail. Three such\nsites were removed: the subscriber copy in lib/bus.lua, the name table and\nits result table in getSensorStats(), and the per-call closure in\ntransformValue(). Ported from rotorflight-lua-ethos-suite#2435.\n\nNo build and no package step reaches this -- it needs the collector held off\nand a loop that calls the function thousands of times. Every allocation\nassertion is paired in both directions: the current code has to come out\nunder the bound and the removed code over it. The same run pins what a\npooled iteration copy can get wrong -- a handler unsubscribed long ago must\nnot come back through a leftover slot -- and the one value the change\nalters, an rssi box reading its own min/max instead of link quality's."
+}

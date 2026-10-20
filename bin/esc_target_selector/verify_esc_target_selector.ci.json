@@ -1,0 +1,7 @@
+{
+  "id": "verify-esc-target-selector",
+  "name": "Check the ESC selector offers only the ESCs that exist",
+  "step": "Check the ESC selector offers only the ESCs that exist",
+  "script": "bin/esc_target_selector/verify_esc_target_selector.lua",
+  "rationale": "Every 4-way forward-programming page opens on\napp/pages/esc_forward_4way.lua, which built all four ESC rows and greyed\nout the surplus, so a single-ESC model saw three dead lines. It now builds\none row per ESC the FC reports, and skips the selector on exactly one ESC.\nA missing count or a failed read is \"unknown\", not \"one ESC\": the page\nkeeps all four rows with only ESC 1 openable rather than entering\npass-through on a twin-motor model unasked. No other harness loads this\npage (they stub it to avoid its os.clock() delays). Ported from\nrotorflight-lua-ethos-suite#2460. Pass --self-test to prove all 5 gate\nchecks fail with the fix cut back out."
+}

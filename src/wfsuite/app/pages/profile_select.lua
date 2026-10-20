@@ -9,6 +9,7 @@ local statusMsp = requireModule("lib/msp_status.lua")
 local selectProfile = requireModule("lib/msp_select_profile.lua")
 local tvPidMsp = requireModule("lib/msp_tv_pid.lua")
 local selectTvProfile = requireModule("lib/msp_select_tv_profile.lua")
+local leaveConfirm = requireModule("app/leave_confirm.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.profile_select.name)@"
 local BTN_OK = "@i18n(app.btn_ok_long)@"
@@ -19,6 +20,9 @@ local MSG_SAVING_TITLE = "@i18n(app.msg_saving)@"
 local MSG_SAVING_BODY = "@i18n(app.msg_saving_settings)@"
 local MSG_SAVE_TITLE = "@i18n(app.msg_save_settings)@"
 local MSG_SAVE_BODY = "@i18n(app.msg_save_current_page)@"
+local MSG_SAVE_FAILED_TITLE = "@i18n(app.msg_save_failed_title)@"
+local MSG_SAVE_FAILED_BODY = "@i18n(app.msg_save_failed_body)@"
+local BTN_OK_SHORT = "@i18n(app.btn_ok)@"
 
 local MAX_PROFILE_COUNT = 6
 
@@ -61,6 +65,8 @@ local function open(opts)
   local current = {pid = 0, rate = 0, tv = 0}
   local original = {pid = 0, rate = 0, tv = 0}
   local fields = {}
+  local isArmed = nil
+  local sessionHandler = nil
 
   local function closeDialog(focusFn)
     if not dialog then return end
@@ -97,10 +103,12 @@ local function open(opts)
 
   local renderPage
 
-  local function goBack()
+  local function leave()
+    if disposed then return end
     disposed = true
     if opts.setWakeupHandler then opts.setWakeupHandler(nil) end
     if opts.setCleanupHandler then opts.setCleanupHandler(nil) end
+    if sessionHandler then bus.unsubscribe("session.update", sessionHandler) end
     closeDialog()
     if opts.onBack then opts.onBack() end
   end
@@ -149,6 +157,28 @@ local function open(opts)
     end))
   end
 
+  -- A refused profile write is reported, as the FC pages do (#2498). The page's
+  -- state does not move to the board's answer, so the Save button stays lit and
+  -- a second attempt is possible.
+  local function showSaveFailed(focusFn)
+    if disposed or not form or type(form.openDialog) ~= "function" then return end
+    form.openDialog({
+      title = MSG_SAVE_FAILED_TITLE,
+      message = MSG_SAVE_FAILED_BODY,
+      buttons = {
+        {
+          label = BTN_OK_SHORT,
+          action = function()
+            if focusFn then focusFn() end
+            return true
+          end,
+        },
+      },
+      wakeup = function() end,
+      paint = function() end,
+    })
+  end
+
   local function saveData(focusFn)
     if disposed or not loaded or not isDirty() then return end
     busy = true
@@ -169,20 +199,23 @@ local function open(opts)
         end, function()
           if disposed then return end
           busy = false
-          closeDialog(focusFn)
+          closeDialog()
           updateEnabled()
+          showSaveFailed(focusFn)
         end))
       end, function()
         if disposed then return end
         busy = false
-        closeDialog(focusFn)
+        closeDialog()
         updateEnabled()
+        showSaveFailed(focusFn)
       end))
     end, function()
       if disposed then return end
       busy = false
-      closeDialog(focusFn)
+      closeDialog()
       updateEnabled()
+      showSaveFailed(focusFn)
     end))
   end
 
@@ -198,6 +231,39 @@ local function open(opts)
       paint = function() end,
       options = TEXT_LEFT,
     })
+  end
+
+  -- Back with unsaved changes asks first (issue #2504): Save saves and keeps the page,
+  -- Discard leaves it, Stay keeps it.
+  local function hasUnsavedChanges()
+    return not disposed and loaded == true and isDirty()
+  end
+
+  local function canSaveNow()
+    return hasUnsavedChanges() and not busy and dialog == nil and isArmed ~= true
+  end
+
+  local function goBack()
+    if busy or dialog ~= nil then return end
+    if not hasUnsavedChanges() then
+      leave()
+      return
+    end
+    dialog = leaveConfirm.open(leaveConfirm.args({
+      canSave = canSaveNow(),
+      armed = isArmed == true,
+      save = function()
+        saveData(headerHandle and headerHandle.focusSave)
+      end,
+      discard = function()
+        leave()
+      end,
+      focus = function()
+        if headerHandle and headerHandle.focusSave then
+          headerHandle.focusSave()
+        end
+      end,
+    }), function() dialog = nil end)
   end
 
   renderPage = function(focusFn)
@@ -249,6 +315,12 @@ local function open(opts)
   })
   updateEnabled()
 
+  sessionHandler = function(update)
+    if disposed then return end
+    isArmed = update and update.isArmed
+  end
+  bus.subscribe("session.update", sessionHandler)
+
   if opts.setEventHandler then
     opts.setEventHandler(function(category, value)
       if closeKey.shouldHandleClose(category, value) then
@@ -271,6 +343,7 @@ local function open(opts)
   if opts.setCleanupHandler then
     opts.setCleanupHandler(function()
       disposed = true
+      if sessionHandler then bus.unsubscribe("session.update", sessionHandler) end
       closeDialog()
     end)
   end
