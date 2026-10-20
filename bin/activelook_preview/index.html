@@ -69,6 +69,10 @@
 
     .eyebrow { display: flex; align-items: center; gap: 8px; color: var(--wingflight-red); }
     .eyebrow::before { width: 18px; height: 3px; background: var(--wingflight-red); content: ""; }
+    .brand-heading { display: flex; align-items: center; gap: 24px; }
+    .brand-logo { display: block; width: 200px; max-width: 100%; height: auto; }
+    .brand-logos { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .activelook-logo { display: block; width: 100px; height: auto; filter: invert(1); mix-blend-mode: multiply; }
 
     .sim-badge {
       display: inline-flex;
@@ -108,12 +112,23 @@
       background: #ffffff;
     }
 
-    canvas {
+    .eyewear-preview { position: relative; overflow: hidden; background: #060906; }
+    .eyewear-photo { display: block; width: 100%; height: auto; }
+    /* Cover the photograph's printed telemetry without changing the source image. */
+    .lens-cleanup {
+      position: absolute;
+      left: 70%; top: 23%; width: 17%; height: 16%;
+      background: linear-gradient(120deg, #0f0f0f, #0b0c0e 75%, #0e0f11);
+      filter: blur(4px);
+    }
+    #display {
+      position: absolute;
+      left: 71.2%; top: 23.2%; width: 15.5%;
       display: block;
-      width: 100%;
       aspect-ratio: 19 / 16;
-      border: 1px solid #20292b;
-      background: var(--screen);
+      background: transparent;
+      transform: rotate(-4deg) skewX(-3deg);
+      filter: blur(0.25px);
       image-rendering: auto;
     }
 
@@ -206,6 +221,7 @@
       .app-shell { padding-top: 20px; }
       header { align-items: flex-start; flex-direction: column; gap: 14px; }
       h1 { font-size: 24px; }
+      .brand-heading { align-items: flex-start; flex-direction: column; gap: 12px; }
       .controls-column { display: block; }
       .section-heading { align-items: flex-start; flex-direction: column; gap: 5px; }
       .screen-frame { padding: 6px; }
@@ -216,9 +232,16 @@
 <body>
   <div class="app-shell">
     <header>
-      <div>
-        <div class="eyebrow">Wingflight · Bench tools</div>
-        <h1>ActiveLook Preview</h1>
+      <div class="brand-heading">
+        <div class="brand-logos">
+          <img class="brand-logo" src="./wingflight-logo.png" alt="Wingflight" width="400" height="86">
+        </div>
+        <div>
+          <div class="eyebrow">Wingflight · Bench tools</div>
+          <h1>ActiveLook Preview</h1>
+        </div>
+        <!-- Original asset: https://github.com/ActiveLook/Activelook-Visual-Assets (CC0). -->
+        <img class="activelook-logo" src="./0_splash_10fps.gif" alt="ActiveLook" width="187" height="168">
       </div>
       <div class="sim-badge" id="source-status" data-state="waiting">Waiting for simulator sensor feed</div>
     </header>
@@ -230,7 +253,11 @@
           <span class="screen-meta">304 × 256 · EnGo 2</span>
         </div>
         <div class="screen-frame">
-          <canvas id="display" width="304" height="256" aria-label="Simulated ActiveLook display"></canvas>
+          <div class="eyewear-preview">
+            <img class="eyewear-photo" src="./Engo-Sports-Eyewear.jpg" alt="ENGO sports glasses with live telemetry projected in the lens" width="900" height="780">
+            <div class="lens-cleanup" aria-hidden="true"></div>
+            <canvas id="display" width="304" height="256" aria-label="Simulated ActiveLook display"></canvas>
+          </div>
           <div class="screen-footer">
             <span>Phase: <strong id="phase-label">PRE-FLIGHT</strong></span>
             <span id="layout-label">Stacked Large + Large + Small</span>
@@ -724,8 +751,7 @@
           canvas.height = height;
         }
         context.setTransform(canvas.width / VIEW_WIDTH, 0, 0, canvas.height / VIEW_HEIGHT, 0, 0);
-        context.fillStyle = "#030708";
-        context.fillRect(0, 0, VIEW_WIDTH, VIEW_HEIGHT);
+        context.clearRect(0, 0, VIEW_WIDTH, VIEW_HEIGHT);
         if (simulatorConfigLoaded && !simulatorConfigEnabled) return;
         const phaseConfig = config[mode];
         const active = layoutActive[phaseConfig.layout];
@@ -743,7 +769,7 @@
           if (slot.align === "center") {
             x += Math.max(0, (slot.width - context.measureText(text).width) / 2);
           }
-          context.fillStyle = "#f2e300";
+          context.fillStyle = "rgba(242, 227, 0, 0.8)";
           context.fillText(text, Math.round(x), Math.round(8 + slot.y));
         }
       }
