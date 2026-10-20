@@ -20,8 +20,6 @@ local T = {
   doneTitle = "@i18n(app.modules.setup_wizard.cen_done_title)@",
   done = "@i18n(app.modules.setup_wizard.cen_done)@",
   next = "@i18n(app.modules.setup_wizard.btn_next)@",
-  again = "@i18n(app.modules.setup_wizard.btn_again)@",
-  saveNext = "@i18n(app.modules.setup_wizard.dir_save_next)@",
 }
 
 local MID_WARN_US = 100
@@ -68,12 +66,11 @@ local function new(wiz)
     scr:begin()
     if not holding then holdAll() end
     local surface = surfaces[index]
+    -- Back steps through the surfaces; from the first, the previous step.
+    local back = index > 1 and function() index = index - 1; wiz.rebuild() end or nil
     if not surface then
       scr:text(T.doneTitle, T.done)
-      return scr:buttons({
-        {text = T.again, press = function() index = 1; wiz.rebuild() end},
-        {text = T.saveNext, primary = true, press = function() wiz.finishStep() end},
-      })
+      return scr:row(back)
     end
     local config = wiz.configs[surface.servo]
     local offset = config.mid - bandCentre(config)
@@ -86,11 +83,10 @@ local function new(wiz)
       specs[#specs + 1] = {text = (d > 0 and "+" or "") .. d, small = true, weight = 0.7, needsMotion = true,
         press = function() nudge(d) end}
     end
-    specs[#specs + 1] = {text = T.next, primary = true, press = function()
+    return scr:row(back, specs, {text = T.next, press = function()
       index = index + 1
       wiz.rebuild()
-    end}
-    return scr:buttons(specs)
+    end})
   end
 
   function self.paint() scr:paint() end

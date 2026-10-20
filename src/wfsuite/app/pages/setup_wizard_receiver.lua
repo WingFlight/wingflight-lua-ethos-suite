@@ -31,10 +31,7 @@ local T = {
   reversed = "@i18n(app.modules.setup_wizard.rx_reversed)@",
   detectTitle = "@i18n(app.modules.setup_wizard.rx_detect_title)@",
   wrong = "@i18n(app.modules.setup_wizard.rx_wrong)@",
-  good = "@i18n(app.modules.setup_wizard.rx_good)@",
   restart = "@i18n(app.modules.setup_wizard.rx_restart)@",
-  cancel = "@i18n(app.btn_cancel)@",
-  skip = "@i18n(app.modules.setup_wizard.btn_skip)@",
 }
 
 local FUNCTIONS = {
@@ -120,19 +117,15 @@ local function new(wiz)
     if screen == "check" then
       scr:text(T.title, T.check .. " " .. string.format(T.order, controls.orderLabel(map)), T.reversed)
       scr:draw(drawBars)
-      return scr:buttons({
-        {text = T.skip, weight = 0.6, small = true, press = function() wiz.skipStep() end},
-        {text = T.wrong, press = startDetect},
-        {text = T.good, primary = true, press = function() wiz.finishStep() end},
-      })
+      -- Next when the bars follow the sticks; Detect when they don't.
+      return scr:row(nil, {{text = T.wrong, press = startDetect}})
     end
     local fn = FUNCTIONS[DETECT_ORDER[#found + 1]]
     scr:text(T.detectTitle, fn.move)
     scr:draw(drawBars)
-    return scr:buttons({
-      {text = T.cancel, press = function() screen = "check"; wiz.rebuild() end},
-      {text = T.restart, primary = true, press = startDetect},
-    })
+    -- Back cancels; the order is written once every stick has moved.
+    return scr:row(function() screen = "check"; wiz.rebuild() end,
+      {{text = T.restart, primary = true, press = startDetect}}, false)
   end
 
   function self.paint() scr:paint() end

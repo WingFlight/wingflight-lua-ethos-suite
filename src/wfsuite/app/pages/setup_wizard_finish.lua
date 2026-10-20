@@ -3,7 +3,8 @@
 -- The radio's copy of wingflight-configurator's StepFinish.svelte: what the
 -- wizard set (model type, control surfaces, ESC protocol, throws, flying
 -- style, the ARM switch), the checks to do before the first flight, and
--- Finish, which saves and leaves the wizard.
+-- Save and finish (the footer's way forward on the last step), which saves
+-- and leaves the wizard.
 
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local ui = requireModule("app/setup_wizard_ui.lua")
@@ -29,10 +30,7 @@ local T = {
   yes = "@i18n(app.modules.setup_wizard.btn_yes)@",
   no = "@i18n(app.modules.setup_wizard.btn_no)@",
   custom = "@i18n(app.modules.setup_wizard.sty_custom)@",
-  finish = "@i18n(app.modules.setup_wizard.fin_button)@",
   next = "@i18n(app.modules.setup_wizard.btn_next)@",
-  back = "@i18n(app.modules.setup_wizard.btn_back)@",
-  steps = "@i18n(app.modules.setup_wizard.fin_steps)@",
 }
 
 local TYPE_NAMES = {
@@ -101,10 +99,8 @@ local function new(wiz)
     local protocol = data.motor and data.motor.motor_pwm_protocol
     if screen == "before" then
       scr:text(T.title, T.before)
-      return scr:buttons({
-        {text = T.back, press = function() screen = "summary"; wiz.rebuild() end},
-        {text = T.finish, primary = true, press = function() wiz.finishStep() end},
-      })
+      -- The last step: the default way forward is Save and finish.
+      return scr:row(function() screen = "summary"; wiz.rebuild() end)
     end
     scr:text(T.title, T.intro, (not armed) and T.armMissing or nil)
     scr:rows({
@@ -115,10 +111,7 @@ local function new(wiz)
       {T.style, style and STYLE_NAMES[style.key] or T.custom},
       {T.arm, armed and T.yes or T.no, not armed},
     })
-    return scr:buttons({
-      {text = T.steps, press = function() wiz.goToStep("sensors") end},
-      {text = T.next, primary = true, press = function() screen = "before"; wiz.rebuild() end},
-    })
+    return scr:row(nil, nil, {text = T.next, press = function() screen = "before"; wiz.rebuild() end})
   end
 
   function self.paint() scr:paint() end

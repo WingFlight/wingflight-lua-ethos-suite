@@ -34,10 +34,8 @@ local T = {
   doneTitle = "@i18n(app.modules.setup_wizard.thr_done_title)@",
   done = "@i18n(app.modules.setup_wizard.thr_done)@",
   start = "@i18n(app.modules.setup_wizard.btn_start)@",
-  skip = "@i18n(app.modules.setup_wizard.btn_skip)@",
   next = "@i18n(app.modules.setup_wizard.btn_next)@",
   again = "@i18n(app.modules.setup_wizard.btn_again)@",
-  saveNext = "@i18n(app.modules.setup_wizard.dir_save_next)@",
 }
 
 -- Full stick each way. Signs as in the Direction step: roll + is right,
@@ -151,8 +149,14 @@ local function new(wiz)
       specs[#specs + 1] = {text = (d > 0 and "+" or "") .. d .. "%", small = true, weight = 0.7, needsMotion = true,
         press = function() press(d) end}
     end
-    for _, e in ipairs(extra) do specs[#specs + 1] = e end
-    return scr:buttons(specs)
+    for _, e in ipairs(extra or {}) do specs[#specs + 1] = e end
+    return specs
+  end
+
+  local function showAxis(i)
+    forcePassthrough()
+    ai, screen = i, "axis"
+    wiz.rebuild()
   end
 
   function self.build()
@@ -162,13 +166,8 @@ local function new(wiz)
 
     if screen == "intro" or #axes == 0 then
       scr:text(T.title, T.intro)
-      return scr:buttons({
-        {text = T.skip, press = function() wiz.skipStep() end},
-        {text = T.start, primary = true, needsMotion = true, disabled = #axes == 0, press = function()
-          forcePassthrough()
-          ai, screen = 1, "axis"
-          wiz.rebuild()
-        end},
+      return scr:row(nil, {
+        {text = T.start, primary = true, needsMotion = true, disabled = #axes == 0, press = function() showAxis(1) end},
       })
 
     elseif screen == "axis" then
@@ -178,10 +177,16 @@ local function new(wiz)
       scr:text(AXIS_NAMES[a] .. "  " .. string.format(T.progress, ai, #axes),
         string.format(T.axis, DIRECTIONS[a][1].name, wiz.axisGainPercent(a)), accent)
       scr:picture(art.layout(wiz.surfaces(), a))
-      return stepButtons(nudgeThrow, {
-        {text = T.fineBtn, small = true, press = startFine},
-        {text = T.next, primary = true, small = true, press = nextAxis},
-      })
+      return scr:row(function()
+        if ai > 1 then
+          showAxis(ai - 1)
+        else
+          wiz.releaseMode()
+          screen = "intro"
+          wiz.rebuild()
+        end
+      end, stepButtons(nudgeThrow, {{text = T.fineBtn, small = true, press = startFine}}),
+        {text = T.next, press = nextAxis})
 
     elseif screen == "fine" then
       local item = fineList[fi]
@@ -192,23 +197,19 @@ local function new(wiz)
         T.fineIntro .. " " .. string.format(T.fine, item.direction.name, pct),
         passNote or (config[field] >= most and T.sideLimit or nil))
       scr:picture(art.layout(wiz.surfaces(), axis(), item.direction.flip))
-      return stepButtons(nudgeScale, {
-        {text = T.next, primary = true, small = true, press = function()
-          if fi < #fineList then fi = fi + 1 else screen = "axis" end
-          wiz.rebuild()
-        end},
-      })
+      -- Back and Next step through the surfaces and directions, then back
+      -- to the axis.
+      return scr:row(function()
+        if fi > 1 then fi = fi - 1 else screen = "axis" end
+        wiz.rebuild()
+      end, stepButtons(nudgeScale), {text = T.next, press = function()
+        if fi < #fineList then fi = fi + 1 else screen = "axis" end
+        wiz.rebuild()
+      end})
     end
 
     scr:text(T.doneTitle, T.done)
-    return scr:buttons({
-      {text = T.again, press = function()
-        forcePassthrough()
-        ai, screen = 1, "axis"
-        wiz.rebuild()
-      end},
-      {text = T.saveNext, primary = true, press = function() wiz.finishStep() end},
-    })
+    return scr:row(function() showAxis(#axes) end, {{text = T.again, press = function() showAxis(1) end}})
   end
 
   function self.paint() scr:paint() end

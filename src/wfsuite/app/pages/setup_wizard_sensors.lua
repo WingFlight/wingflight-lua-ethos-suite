@@ -5,7 +5,7 @@
 -- orientation (AutoAlignWizard.svelte) and automatic level
 -- (MountTrimAutoWizard.svelte). One screen each, in that order:
 --
---   intro   the tail-wheel note; Start, or Skip the step
+--   intro   the tail-wheel note; Start, or Next to leave the step as it is
 --   acc     calibrate the accelerometer (MSP_ACC_CALIBRATION, then wait for
 --           the FC to clear ARMING_DISABLED_CALIBRATING, lib/acc_calibration_wait.lua)
 --   align   MSP2_WING_BOARD_AUTO_ALIGN: flat, Start, lift the tail 20 deg; the
@@ -58,7 +58,6 @@ local T = {
   doneRestart = "@i18n(app.modules.setup_wizard.sen_done_restart)@",
   doneSame = "@i18n(app.modules.setup_wizard.sen_done_same)@",
   start = "@i18n(app.modules.setup_wizard.btn_start)@",
-  skip = "@i18n(app.modules.setup_wizard.btn_skip)@",
   next = "@i18n(app.modules.setup_wizard.btn_next)@",
   again = "@i18n(app.modules.setup_wizard.btn_again)@",
   calibrate = "@i18n(app.modules.setup_wizard.sen_calibrate)@",
@@ -184,37 +183,31 @@ local function new(wiz)
 
     if screen == "intro" then
       scr:text(T.title, T.intro .. " " .. T.tail, (not hasAcc) and T.noAcc or nil)
-      return scr:buttons({
-        {text = T.skip, press = function() wiz.skipStep() end},
-        {text = T.start, primary = true, press = function()
-          if hasAcc then go("acc") else wiz.skipStep() end
-        end},
-      })
+      return scr:row(nil, hasAcc and {{text = T.start, primary = true, press = function() go("acc") end}} or nil)
 
     elseif screen == "acc" then
       scr:text(T.accTitle, T.accText, noteAccent or note)
-      return scr:buttons({
-        {text = T.next, disabled = busy, press = function() go("align") end},
-        {text = T.calibrate, primary = true, needsMotion = true, disabled = busy, press = startAcc},
-      })
+      -- Once it has calibrated, the focus moves on to Next.
+      local done = note ~= nil and not busy
+      return scr:row(function() go("intro") end, {
+        {text = done and T.again or T.calibrate, primary = not done, needsMotion = true, disabled = busy,
+          press = startAcc},
+      }, {text = T.next, disabled = busy, press = function() go("align") end})
 
     elseif screen == "align" or screen == "level" then
       local align = screen == "align"
       scr:text(align and T.alignTitle or T.levelTitle, align and T.alignText or T.levelText,
         noteAccent or note)
-      return scr:buttons({
-        {text = T.next, disabled = busy, press = function() go(align and "level" or "done") end},
-        {text = note and T.again or T.start, primary = true, needsMotion = true, disabled = busy,
+      local done = note ~= nil and not busy
+      return scr:row(function() go(align and "acc" or "align") end, {
+        {text = done and T.again or T.start, primary = not done, needsMotion = true, disabled = busy,
           press = function() startAuto(screen) end},
-      })
+      }, {text = T.next, disabled = busy, press = function() go(align and "level" or "done") end})
 
     else -- done
       scr:text(T.doneTitle, changed and T.doneRestart or T.doneSame)
-      return scr:buttons({
-        {text = T.again, press = function() go("acc") end},
-        changed and {text = T.saveRestart, primary = true, press = function() wiz.saveAndReboot() end}
-          or {text = T.next, primary = true, press = function() wiz.finishStep() end},
-      })
+      return scr:row(function() go("level") end, nil,
+        changed and {text = T.saveRestart, press = function() wiz.saveAndReboot() end} or nil)
     end
   end
 

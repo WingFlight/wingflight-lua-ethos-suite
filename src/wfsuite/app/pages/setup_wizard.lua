@@ -92,6 +92,9 @@ local MSG_RESTARTING_TITLE = "@i18n(app.msg_restarting)@"
 local MSG_RESTARTING = "@i18n(app.msg_restarting_fc)@"
 local MSG_REBOOT_WAIT = "@i18n(app.modules.setup_wizard.reboot_wait_fmt)@"
 local STEPS_ICON = "app/gfx/nav/steps.png"
+local NEXT = "@i18n(app.modules.setup_wizard.btn_next)@"
+local SAVE_NEXT = "@i18n(app.modules.setup_wizard.dir_save_next)@"
+local SAVE_FINISH = "@i18n(app.modules.setup_wizard.fin_button)@"
 local BTN_OK = "@i18n(app.btn_ok)@"
 local BTN_CANCEL = "@i18n(app.btn_cancel)@"
 
@@ -353,6 +356,8 @@ local function open(opts)
   -------------------------------------------------------------------------
 
   local function markChanged()
+    -- The footer's Next becomes Save and continue (wiz.forward()).
+    if not pending then rebuildWanted = true end
     pending = true
     if headerHandle and headerHandle.setSaveEnabled then headerHandle.setSaveEnabled(true) end
   end
@@ -668,6 +673,9 @@ local function open(opts)
     rebuildWanted = true
   end
 
+  -- A step that needs control surfaces, on a model with none mixed yet.
+  local noSurfacesScreen = ui.new(wiz)
+
   function wiz.stepNumber() return stepIndex, #STEPS end
   function wiz.isLastStep() return stepIndex >= #STEPS end
 
@@ -682,9 +690,24 @@ local function open(opts)
     end
   end
 
-  -- On to the next step without saving (changes stay pending).
-  function wiz.skipStep()
-    if stepIndex < #STEPS then openStep(stepIndex + 1) end
+  -- Back to the previous step, from a step's first screen (changes stay
+  -- pending, as with Next on an untouched step).
+  function wiz.isFirstStep() return stepIndex <= 1 end
+  function wiz.previousStep()
+    if stepIndex > 1 then openStep(stepIndex - 1) end
+  end
+
+  -- The footer's default way forward (app/setup_wizard_ui.lua's nav()):
+  -- Next, Save and continue once something changed, Save and finish on the
+  -- last step. press defaults to wiz.finishStep().
+  function wiz.forward(press)
+    local text = NEXT
+    if stepIndex >= #STEPS then
+      text = SAVE_FINISH
+    elseif pending then
+      text = SAVE_NEXT
+    end
+    return {text = text, press = press or wiz.finishStep}
   end
 
   function wiz.goToStep(key)
@@ -749,12 +772,12 @@ local function open(opts)
     end
     if not step then
       -- A step that needs control surfaces, on a model with none mixed yet.
+      -- The same row as every step, with a button to the Airframe step.
       addWrapped("@i18n(app.modules.setup_wizard.no_surfaces)@")
-      local width, height = lcd.getWindowSize()
-      local button = form.addButton(nil, {x = 0, y = height - 52, w = width - FORM_RIGHT_PADDING, h = 48}, {
-        text = "@i18n(app.modules.setup_wizard.go_airframe)@",
-        options = FONT_STD + CENTERED,
-        press = ui.action(1, function() wiz.goToStep("airframe") end),
+      noSurfacesScreen:begin()
+      local button = noSurfacesScreen:row(nil, {
+        {text = "@i18n(app.modules.setup_wizard.go_airframe)@", primary = true,
+          press = function() wiz.goToStep("airframe") end},
       })
       if button and button.focus then button:focus() end
       return

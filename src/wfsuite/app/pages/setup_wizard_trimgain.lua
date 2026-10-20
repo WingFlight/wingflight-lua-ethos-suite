@@ -57,13 +57,9 @@ local T = {
   gainRow = "@i18n(app.modules.setup_wizard.tg_row_gain)@",
   auxFmt = "@i18n(app.modules.setup_wizard.tg_aux_fmt)@",
   start = "@i18n(app.modules.setup_wizard.btn_start)@",
-  skip = "@i18n(app.modules.setup_wizard.btn_skip)@",
   next = "@i18n(app.modules.setup_wizard.btn_next)@",
-  back = "@i18n(app.modules.setup_wizard.btn_back)@",
   detect = "@i18n(app.modules.setup_wizard.tg_detect)@",
-  cancel = "@i18n(app.btn_cancel)@",
   again = "@i18n(app.modules.setup_wizard.btn_again)@",
-  saveNext = "@i18n(app.modules.setup_wizard.dir_save_next)@",
 }
 
 local AXIS_NAMES = {
@@ -210,14 +206,13 @@ local function new(wiz)
 
     if screen == "intro" then
       scr:text(T.title, T.intro)
-      return scr:buttons({
-        {text = T.skip, press = function() wiz.skipStep() end},
-        {text = T.start, primary = true, press = function() go("trimQ") end},
-      })
+      return scr:row(nil, {{text = T.start, primary = true, press = function() go("trimQ") end}})
 
     elseif screen == "trimQ" then
       local mode = controls.trimMode(ranges)
       scr:text(T.title, T.trimQ, note)
+      -- Next keeps the trim as it is set up now.
+      local forward = scr:row(function() go("intro") end, nil, {text = T.next, press = function() go("gainQ") end})
       return scr:grid({
         {text = T.trimButtons, primary = mode == "buttons", press = function() go("howButtons") end},
         {text = T.trimChannels, primary = mode == "programmable", press = function() go("howChannels") end},
@@ -225,13 +220,13 @@ local function new(wiz)
           removeAll(controls.SERVO_TRIM)
           go("gainQ", T.autoNote)
         end},
-      }, 1, {{text = T.back, press = function() go("intro") end}})
+      }, 1) or forward
 
     elseif screen == "howButtons" or screen == "howChannels" then
       local buttons = screen == "howButtons"
       scr:text(buttons and T.trimButtons or T.trimChannels, buttons and T.howButtons or T.howChannels, note)
-      return scr:buttons({
-        {text = T.back, press = function() go("trimQ") end},
+      local detectNext = {text = T.next, press = function() go("gainQ") end}
+      return scr:row(function() go("trimQ") end, {
         {text = T.detect, primary = true, needsMotion = true, press = function()
           -- Switching between the two kinds starts again from scratch.
           removeAll(controls.SERVO_TRIM)
@@ -242,29 +237,29 @@ local function new(wiz)
               "gainQ")
           end
         end},
-      })
+      }, detectNext)
 
     elseif screen == "listen" then
       scr:text(T.title, prompt(listening))
-      return scr:buttons({
-        {text = T.cancel, primary = true, press = function()
-          local after = listening and listening.after or "trimQ"
-          listening = nil
-          go(after == "buttons" and "howButtons" or "trimQ")
-        end},
-      })
+      -- Back cancels the listening.
+      return scr:row(function()
+        local after = listening and listening.after or "trimQ"
+        listening = nil
+        go(after == "buttons" and "howButtons" or "trimQ")
+      end, nil, false)
 
     elseif screen == "buttons" then
       scr:text(T.trimButtons, T.buttonsCheck, note)
       scr:draw(drawButtonCheck)
-      return scr:buttons({
-        {text = T.again, press = function() listen({{kind = "buttons"}}, "buttons") end},
-        {text = T.next, primary = true, press = function() go("gainQ") end},
-      })
+      return scr:row(function() go("howButtons") end,
+        {{text = T.again, press = function() listen({{kind = "buttons"}}, "buttons") end}},
+        {text = T.next, press = function() go("gainQ") end})
 
     elseif screen == "gainQ" then
       local mode = controls.gainMode(ranges)
       scr:text(T.title, T.gainQ .. " " .. T.gainCentre, note)
+      -- Next keeps the gain knob as it is set up now.
+      local forward = scr:row(function() go("trimQ") end, nil, {text = T.next, press = function() go("done") end})
       return scr:grid({
         {text = T.gainSingle, primary = mode == "single", press = function()
           listen({{kind = "gain"}}, "done")
@@ -277,15 +272,12 @@ local function new(wiz)
           removeAll(controls.MASTER_GAIN)
           go("done")
         end},
-      }, 1, {{text = T.back, press = function() go("trimQ") end}})
+      }, 1) or forward
     end
 
     scr:text(T.doneTitle, nil, note)
     scr:rows({{T.trimRow, describeTrim()}, {T.gainRow, describeGain()}})
-    return scr:buttons({
-      {text = T.again, press = function() go("trimQ") end},
-      {text = T.saveNext, primary = true, press = function() wiz.finishStep() end},
-    })
+    return scr:row(function() go("gainQ") end)
   end
 
   function self.paint() scr:paint() end

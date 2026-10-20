@@ -6,7 +6,7 @@
 -- Mixer.buildWizardRules()) and the model type. One question per screen,
 -- with a picture of the result so far:
 --
---   current   what the model has now; Keep it, or Change
+--   current   what the model has now; Next keeps it, or Change
 --   type      regular, flying wing, V-tail, delta, rudder-elevator trainer
 --   ailerons / tail / wingYaw / flaps / follow / motors / diff
 --             only the questions the type asks
@@ -30,7 +30,6 @@ local T = {
   current = "@i18n(app.modules.setup_wizard.air_current_fmt)@",
   custom = "@i18n(app.modules.setup_wizard.air_custom)@",
   none = "@i18n(app.modules.setup_wizard.air_no_surfaces)@",
-  keep = "@i18n(app.modules.setup_wizard.air_keep)@",
   change = "@i18n(app.modules.setup_wizard.air_change)@",
   typeQ = "@i18n(app.modules.setup_wizard.air_q_type)@",
   aileronsQ = "@i18n(app.modules.setup_wizard.air_q_ailerons)@",
@@ -45,10 +44,8 @@ local T = {
   tvGone = "@i18n(app.modules.setup_wizard.air_tv_removed)@",
   apply = "@i18n(app.modules.setup_wizard.air_apply)@",
   applied = "@i18n(app.modules.setup_wizard.air_applied)@",
-  back = "@i18n(app.modules.setup_wizard.btn_back)@",
   yes = "@i18n(app.modules.setup_wizard.btn_yes)@",
   no = "@i18n(app.modules.setup_wizard.btn_no)@",
-  next = "@i18n(app.modules.setup_wizard.btn_next)@",
   motor = "@i18n(app.modules.setup_wizard.air_motor_fmt)@",
 }
 
@@ -156,17 +153,22 @@ local function new(wiz)
     return art.layout(surfacesLib.surfacesFromRules(rules, 26), nil), rules
   end
 
+  -- A question's row: Back to the previous question, then the answers,
+  -- which are the way forward (the focus starts on the answer it has).
+  local function question(specs)
+    return scr:row(prevQuestion, specs, false)
+  end
+
   local function optionButtons(field, opts)
-    local specs = {{text = T.back, weight = 0.6, small = true, press = prevQuestion}}
+    local specs = {}
     for _, o in ipairs(opts) do
       specs[#specs + 1] = {text = CHOICE_NAMES[o] or o, press = answer(field, o), primary = options[field] == o}
     end
-    return scr:buttons(specs)
+    return question(specs)
   end
 
   local function yesNo(field)
-    return scr:buttons({
-      {text = T.back, weight = 0.6, small = true, press = prevQuestion},
+    return question({
       {text = T.no, press = answer(field, false), primary = not options[field]},
       {text = T.yes, press = answer(field, true), primary = options[field] == true},
     })
@@ -182,10 +184,8 @@ local function new(wiz)
       scr:text(T.title, body, value == mix.MODEL_TYPE_CUSTOM and T.custom or nil)
       scr:picture(art.layout(wiz.surfaces(), nil))
       local hasSurfaces = #wiz.surfaces() > 0
-      return scr:buttons({
-        {text = T.change, primary = not hasSurfaces, press = function() go("type") end},
-        {text = T.keep, primary = hasSurfaces, disabled = not hasSurfaces, press = function() wiz.finishStep() end},
-      })
+      -- Next keeps the mix; with nothing mixed yet the focus is on Change.
+      return scr:row(nil, {{text = T.change, primary = not hasSurfaces, press = function() go("type") end}})
 
     elseif screen == "type" then
       scr:text(T.title, T.typeQ)
@@ -194,7 +194,8 @@ local function new(wiz)
         specs[#specs + 1] = {text = TYPE_NAMES[tp.value], press = function() chooseType(tp) end,
           primary = cfg and cfg.model_type == tp.value}
       end
-      return scr:grid(specs, 2, {{text = T.back, press = function() go("current") end}})
+      local back = scr:row(function() go("current") end, nil, false)
+      return scr:grid(specs, 2) or back
 
     elseif screen == "review" then
       local layout, rules = preview()
@@ -209,21 +210,15 @@ local function new(wiz)
       end
       scr:text(TYPE_NAMES[modelType.value], string.format(T.review, describe(wiz, rules)), warn)
       scr:picture(layout)
-      return scr:buttons({
-        {text = T.back, press = prevQuestion},
-        {text = T.apply, primary = true, press = function()
-          wiz.setMix(mix.ruleTable(options), modelType.value)
-          go("applied")
-        end},
-      })
+      return scr:row(prevQuestion, nil, {text = T.apply, press = function()
+        wiz.setMix(mix.ruleTable(options), modelType.value)
+        go("applied")
+      end})
 
     elseif screen == "applied" then
       scr:text(T.title, T.applied .. " " .. describe(wiz, wiz.rules()))
       scr:picture(art.layout(wiz.surfaces(), nil))
-      return scr:buttons({
-        {text = T.change, press = function() go("type") end},
-        {text = T.next, primary = true, press = function() wiz.finishStep() end},
-      })
+      return scr:row(function() go("review") end)
     end
 
     -- A question.
@@ -240,7 +235,7 @@ local function new(wiz)
       return optionButtons("wingYaw", modelType.wingYaw.options)
     elseif screen == "flaps" then
       scr:text(TYPE_NAMES[modelType.value], T.flapsQ)
-      local specs = {{text = T.back, weight = 0.6, small = true, press = prevQuestion}}
+      local specs = {}
       local current = options.flaps and options.flapServos or "none"
       for _, c in ipairs(FLAP_CHOICES) do
         -- Flaperons are the ailerons drooping: only with two of them.
@@ -252,17 +247,17 @@ local function new(wiz)
           end}
         end
       end
-      return scr:buttons(specs)
+      return question(specs)
     elseif screen == "follow" then
       scr:text(TYPE_NAMES[modelType.value], T.followQ)
       return yesNo("flapsFollowAilerons")
     elseif screen == "motors" then
       scr:text(TYPE_NAMES[modelType.value], T.motorsQ)
-      local specs = {{text = T.back, weight = 0.6, small = true, press = prevQuestion}}
+      local specs = {}
       for n = 0, 2 do
         specs[#specs + 1] = {text = tostring(n), primary = options.motors == n, press = answer("motors", n)}
       end
-      return scr:buttons(specs)
+      return question(specs)
     else -- diff
       scr:text(TYPE_NAMES[modelType.value], T.diffQ)
       return yesNo("diffThrustYaw")

@@ -21,8 +21,6 @@ local T = {
   row = "@i18n(app.modules.setup_wizard.trv_row_fmt)@",
   clipping = "@i18n(app.modules.setup_wizard.trv_clipping)@",
   ok = "@i18n(app.modules.setup_wizard.trv_ok)@",
-  throws = "@i18n(app.modules.setup_wizard.trv_back_throws)@",
-  saveNext = "@i18n(app.modules.setup_wizard.dir_save_next)@",
 }
 
 local function new(wiz)
@@ -44,10 +42,8 @@ local function new(wiz)
     end
     scr:text(T.title, T.intro, clips and T.clipping or T.ok)
     scr:rows(rows)
-    return scr:buttons({
-      {text = T.throws, press = function() wiz.goToStep("throws") end},
-      {text = T.saveNext, primary = true, press = function() wiz.finishStep() end},
-    })
+    -- Back is the Throws step, where a clipping surface is fixed.
+    return scr:row()
   end
 
   function self.paint() scr:paint() end

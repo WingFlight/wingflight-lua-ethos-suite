@@ -38,8 +38,6 @@ local T = {
   stop = "@i18n(app.modules.setup_wizard.mot_stop)@",
   test = "@i18n(app.modules.setup_wizard.mot_test)@",
   noMotor = "@i18n(app.modules.setup_wizard.mot_no_outputs)@",
-  next = "@i18n(app.modules.setup_wizard.btn_next)@",
-  back = "@i18n(app.modules.setup_wizard.btn_back)@",
   saveRestart = "@i18n(app.modules.setup_wizard.btn_save_restart)@",
 }
 
@@ -127,30 +125,26 @@ local function new(wiz)
       for _, c in ipairs(CHOICES) do
         specs[#specs + 1] = {text = c.name, primary = current == c, press = function() choose(c) end}
       end
-      local bottom
-      if changed then
-        bottom = {{text = T.saveRestart, primary = true, press = function() wiz.saveAndReboot() end}}
-      else
-        bottom = {
-          {text = T.test, disabled = config.motor_pwm_protocol == 11 or wiz.motorCount() == 0,
-            press = function() go("prop") end},
-          {text = T.next, press = function() wiz.finishStep() end},
-        }
-      end
-      return scr:grid(specs, 2, bottom)
+      -- A new protocol needs a restart; the test spins the protocol the
+      -- motor runs now, so it waits until then.
+      local forward = scr:row(nil, (not changed) and {
+        {text = T.test, disabled = config.motor_pwm_protocol == 11 or wiz.motorCount() == 0,
+          press = function() go("prop") end},
+      } or nil, changed and {text = T.saveRestart, press = function() wiz.saveAndReboot() end} or nil)
+      return scr:grid(specs, 2) or forward
 
     elseif screen == "prop" then
       scr:text(T.propTitle, T.propText)
-      return scr:buttons({
-        {text = T.back, press = function() go("protocol") end},
-        {text = T.propOff, primary = true, press = function() go("spin") end},
-      })
+      return scr:row(function() go("protocol") end, nil, {text = T.propOff, press = function() go("spin") end})
     end
 
     -- spin
     local pct = TEST_THROTTLES[throttleIndex]
     scr:text(T.spinTitle, T.spinText, spinUntil and T.spinning or nil)
-    return scr:buttons({
+    -- Next waits for the spin to end; Back stops it (go() does).
+    local forward = wiz.forward(function() go("protocol"); wiz.finishStep() end)
+    forward.disabled = spinUntil ~= nil
+    return scr:row(function() go("protocol") end, {
       {text = string.format("%d%%", pct), weight = 0.6, small = true, disabled = spinUntil ~= nil, press = function()
         throttleIndex = throttleIndex % #TEST_THROTTLES + 1
         wiz.rebuild()
@@ -161,8 +155,7 @@ local function new(wiz)
           spinUntil, nextWriteAt = os.clock() + SPIN_SECONDS, 0
           wiz.rebuild()
         end},
-      {text = T.next, disabled = spinUntil ~= nil, press = function() go("protocol"); wiz.finishStep() end},
-    })
+    }, forward)
   end
 
   function self.paint() scr:paint() end

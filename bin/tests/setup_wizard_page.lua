@@ -98,9 +98,9 @@ _G.form = {
     foreground("addStaticText")
     return newField("static", {line = line, text = text})
   end,
-  addButton = function(line, _, opts)
+  addButton = function(line, rect, opts)
     foreground("addButton")
-    return newField("button", {line = line, text = opts.text, press = opts.press})
+    return newField("button", {line = line, text = opts.text, press = opts.press, rect = rect})
   end,
   openDialog = function(opts)
     foreground("openDialog")
@@ -468,7 +468,7 @@ before = #sent
 press(T("dir_no"))
 check("an elevon wrong on roll alone is not reversed", #writesOf(212, before + 1) == 0)
 check("the wizard says why", shows("dir_cant_fix_fmt"))
-press(T("dir_continue"))
+press(T("btn_next"))
 check("then checks roll again", shows("dir_check_roll") and shows("dir_status_none"))
 replies[172] = nil
 headers[#headers].opts.onBack()
@@ -622,6 +622,21 @@ settle()
 before = #sent
 press(T("mot_dshot600"))
 check("motor: choosing DShot600 writes the motor config", #writesOf(222, before + 1) == 1 and shows("mot_changed"))
+do
+  -- Long text: the choices keep usable buttons above the row, and the text
+  -- is cut short instead (the restart note above is still shown).
+  local rowY, ok = 0, true
+  for _, f in ipairs(fields) do
+    if f.kind == "button" and f.rect and f.rect.y > rowY then rowY = f.rect.y end
+  end
+  for _, f in ipairs(fields) do
+    local t = f.text
+    if f.kind == "button" and (t == T("mot_pwm") or t == T("mot_dshot300") or t == T("mot_dshot600") or t == T("mot_none")) then
+      if f.rect.h < 30 or f.rect.y + f.rect.h > rowY then ok = false end
+    end
+  end
+  check("motor: the protocol buttons fit above the row", ok)
+end
 openPage(14, "motor")
 settle()
 press(T("mot_test"))
@@ -774,6 +789,66 @@ do
 end
 
 check("no form was built from a reply or a bus event", #forbidden == 0, table.concat(forbidden, ","))
+
+-- The bottom row ---------------------------------------------------------------
+--
+-- One row of buttons on every screen, always in the same order: Back on the
+-- left (none on the first step), the screen's own buttons, the way forward on
+-- the right.
+
+local function footer()
+  local bottom, row = -1, {}
+  for _, f in ipairs(fields) do
+    if f.kind == "button" and f.rect then
+      if f.rect.y > bottom then bottom, row = f.rect.y, {f}
+      elseif f.rect.y == bottom then row[#row + 1] = f end
+    end
+  end
+  table.sort(row, function(a, b) return a.rect.x < b.rect.x end)
+  return row
+end
+
+local STEP_KEYS = {"sensors", "receiver", "airframe", "servotype", "motor", "centre", "direction", "limits",
+  "throws", "travel", "gyro", "trimgain", "modes", "style", "finish"}
+local FORWARD = {[T("btn_next")] = true, [T("dir_save_next")] = true, [T("fin_button")] = true,
+  [T("btn_save_restart")] = true}
+local badFooter, skips = {}, {}
+for i, key in ipairs(STEP_KEYS) do
+  openPage(14, key)
+  settle()
+  local row = footer()
+  local backOk = (i == 1) == (row[1].text ~= T("btn_back"))
+  local onlyOneBack = true
+  for j = 2, #row do if row[j].text == T("btn_back") then onlyOneBack = false end end
+  if not (backOk and onlyOneBack and FORWARD[row[#row].text]) then
+    local texts = {}
+    for _, f in ipairs(row) do texts[#texts + 1] = tostring(f.text) end
+    badFooter[#badFooter + 1] = key .. " [" .. table.concat(texts, " | ") .. "]"
+  end
+  for _, f in ipairs(fields) do
+    if f.kind == "button" and (f.text == T("btn_skip") or f.text == T("fin_steps")) then skips[#skips + 1] = key end
+  end
+end
+check("every step's row has Back on the left and the way forward on the right", #badFooter == 0,
+  table.concat(badFooter, "; "))
+check("no Skip or Steps buttons: Next moves on, the step list jumps", #skips == 0, table.concat(skips, ", "))
+
+openPage(14, "sensors")
+settle()
+check("no Back on the first step", footer()[1].text ~= T("btn_back"))
+check("Next on an untouched step says Next", footer()[#footer()].text == T("btn_next") and footer()[#footer()].enabled)
+
+openPage(14, "receiver")
+settle()
+footer()[1].press()
+tick()
+check("Back from a step's first screen opens the step before",
+  headers[#headers].title == T("name") .. " / 1. " .. T("step_sensors"), headers[#headers].title)
+
+openPage(14, "finish")
+settle()
+press(T("btn_next"))
+check("the last screen's way forward is Save and finish", footer()[#footer()].text == T("fin_button"))
 
 do
   local ui = requireModule("app/setup_wizard_ui.lua")

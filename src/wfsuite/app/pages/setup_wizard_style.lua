@@ -22,7 +22,6 @@ local T = {
   custom = "@i18n(app.modules.setup_wizard.sty_custom)@",
   rates = "@i18n(app.modules.setup_wizard.sty_rates_fmt)@",
   more = "@i18n(app.modules.setup_wizard.sty_more)@",
-  saveNext = "@i18n(app.modules.setup_wizard.dir_save_next)@",
 }
 
 local NAMES = {
@@ -75,13 +74,12 @@ local function new(wiz)
         string.format(T.rates, s.rate.roll, s.rate.pitch, s.rate.yaw, s.expo), current == s}
     end
     scr:rows(rows)
+    -- Next keeps the rates as they are.
     local specs = {}
     for _, s in ipairs(styles.STYLES) do
-      specs[#specs + 1] = {text = NAMES[s.key], small = true, press = function() apply(s) end}
+      specs[#specs + 1] = {text = NAMES[s.key], small = true, primary = current == s, press = function() apply(s) end}
     end
-    specs[#specs + 1] = {text = T.saveNext, small = true, primary = true, weight = 1.4,
-      press = function() wiz.finishStep() end}
-    return scr:buttons(specs)
+    return scr:row(nil, specs)
   end
 
   function self.paint() scr:paint() end

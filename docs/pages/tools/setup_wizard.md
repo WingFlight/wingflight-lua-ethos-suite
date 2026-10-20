@@ -31,8 +31,15 @@ on older firmware the page explains that and does nothing else.
 The title shows the step number and name. A notice line appears under it only
 when something stops the wizard moving the surfaces (see below).
 
-- Each step ends with **Save and continue**, which writes the changes to EEPROM
-  and opens the next step. Most steps also have **Skip** on their first screen.
+- Every screen has one row of buttons along the bottom, always in the same
+  order. **Back** is on the left: the screen before, or the step before from a
+  step's first screen (step 1 has none). The screen's own buttons (**Start**,
+  the ± steps, answers) are in the middle. The way forward is on the right:
+  **Next**, which becomes **Save and continue** once something has changed (it
+  writes the changes to EEPROM and opens the next step), **Save and restart**
+  where the change needs a restart, and **Save and finish** on the last step.
+  **Next** on a step's first screen leaves that step as it is. On a screen that
+  asks a question, the answers are the way forward.
 - The **checklist** button in the header opens the list of all 15 steps; tap one to go
   to it. Back from the list returns to the step.
 - **Save** in the header writes the changes at any time.
@@ -58,7 +65,7 @@ when something stops the wizard moving the surfaces (see below).
 | 8. Binding limits | For each surface, Min then Max: the servo is held by a probe that ignores the stored limits. Step it until the surface binds, back off a step, and **Set Min** / **Set Max**. A flap's limits are its end points: setting one also sets the flap travel so the flap channel's end lands on it. |
 | 9. Throws | The wizard switches PASSTHROUGH on, so your sticks move the surfaces directly. For each axis: hold full stick, measure, and step the axis Throw (−5/−1/+1/+5 %). **Fine-tune** adjusts one surface in one stick direction (that servo's scale on that side), for differential. A surface that reaches its binding limit before full stick is flagged. |
 | 10. Travel check | Each surface's reach with full stick on every axis at once, as a percentage of its limit on each side. Above 100 % it reaches its limit before full stick. PASSTHROUGH stays on so you can try the stick corners. |
-| 11. Gyro direction | The wizard switches ANGLE on. For each axis, move the model as the screen says; the surfaces should push back the way the arrows show. If one doesn't, the board orientation is wrong: **Sensors step** goes back to it. Don't reverse servos for this. |
+| 11. Gyro direction | The wizard switches ANGLE on. For each axis, move the model as the screen says; the surfaces should push back the way the arrows show. If one doesn't, the board orientation is wrong: run the Sensors step again (the step list). Don't reverse servos for this. |
 | 12. Trim and gain | Trim: trim buttons on one channel (the flight controller keeps the trim), a channel per trim (the radio keeps it), or Auto trim only. The screen says what to set up in the radio's mixes, then **Detect** finds the channel when you press a trim button. Gain: one knob, one per axis, or none; turn the knob end to end to find it (0–150 %, centre 75 %). |
 | 13. Mode switches | One screen per mode the flight controller offers (ARM, MANUAL, ATT HOLD, TRAINER, AUTO TRIM, PASSTHROUGH): **Assign** / **Change**, then flick the switch to its on position; **Remove** clears it. Only ARM is required. |
 | 14. Flying style | Trainer, Sport or 3D: rates (°/s at full stick, expo) and I-term relax for roll, pitch and yaw, on the current rate and PID profiles. |

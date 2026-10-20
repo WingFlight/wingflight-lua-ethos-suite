@@ -224,11 +224,23 @@ local function new(wiz)
     local c = check()
     local focus
 
+    -- The answer screens: Back to the check before; the answers are the way
+    -- forward.
+    local function backFromCheck()
+      status = nil
+      if ci > 1 then
+        ci = ci - 1
+        go("check")
+      else
+        go("intro")
+      end
+    end
+
     if screen == "intro" then
       stopMotion()
       scr:text("@i18n(app.modules.setup_wizard.dir_intro_title)@", "@i18n(app.modules.setup_wizard.dir_intro)@")
       scr:picture(art.layout(wiz.surfaces(), nil))
-      focus = scr:buttons({
+      focus = scr:row(nil, {
         {text = "@i18n(app.modules.setup_wizard.dir_start)@", primary = true, needsMotion = true,
           press = function() ci = 1; go("check") end},
       })
@@ -238,7 +250,7 @@ local function new(wiz)
       startAxisMotion()
       scr:text(c.title, c.expect .. " " .. "@i18n(app.modules.setup_wizard.dir_q_match)@", status)
       scr:picture(art.layout(wiz.surfaces(), c.axis), "@i18n(app.modules.setup_wizard.dir_from_behind)@")
-      focus = scr:buttons({
+      focus = scr:row(backFromCheck, {
         {text = string.format("@i18n(app.modules.setup_wizard.dir_move_fmt)@", deflection()), weight = 0.6,
           small = true, needsMotion = true,
           press = function()
@@ -247,18 +259,18 @@ local function new(wiz)
           end},
         {text = "@i18n(app.modules.setup_wizard.dir_unlike)@", needsMotion = true, press = notLikeThis},
         {text = "@i18n(app.modules.setup_wizard.dir_like)@", primary = true, needsMotion = true, press = nextCheck},
-      })
+      }, false)
 
     elseif screen == "all" then
       scr:text(c.title, "@i18n(app.modules.setup_wizard.dir_q_all)@")
       scr:picture(art.layout(wiz.surfaces(), c.axis), "@i18n(app.modules.setup_wizard.dir_from_behind)@")
-      focus = scr:buttons({
+      focus = scr:row(function() go("check") end, {
         {text = "@i18n(app.modules.setup_wizard.dir_some)@", press = function()
           identifyIndex, wrongOnes = 1, {}
           go("identify")
         end},
         {text = "@i18n(app.modules.setup_wizard.dir_all)@", primary = true, press = allWrong},
-      })
+      }, false)
 
     elseif screen == "identify" then
       local surface = moved[identifyIndex]
@@ -266,20 +278,19 @@ local function new(wiz)
       scr:text(c.title, string.format("@i18n(app.modules.setup_wizard.dir_identify_fmt)@", surface.servo + 1,
         wiz.kindName(surface.kind), identifyIndex, #moved))
       scr:picture(art.layout(wiz.surfaces(), c.axis), "@i18n(app.modules.setup_wizard.dir_from_behind)@")
-      focus = scr:buttons({
+      focus = scr:row(function() go("check") end, {
         -- Focus starts on No: a stray press must not reverse a servo.
         {text = "@i18n(app.modules.setup_wizard.dir_no)@", primary = true, needsMotion = true,
           press = function() answerIdentify(false) end},
         {text = "@i18n(app.modules.setup_wizard.dir_yes)@", needsMotion = true,
           press = function() answerIdentify(true) end},
-      })
+      }, false)
 
     elseif screen == "cantfix" then
       stopMotion()
       scr:text(c.title, string.format("@i18n(app.modules.setup_wizard.dir_cant_fix_fmt)@", servoList(cantFix)))
-      focus = scr:buttons({
-        {text = "@i18n(app.modules.setup_wizard.dir_continue)@", primary = true, press = function() go("check") end},
-      })
+      focus = scr:row(function() go("check") end, nil,
+        {text = "@i18n(app.modules.setup_wizard.btn_next)@", press = function() go("check") end})
 
     else -- done
       stopMotion()
@@ -304,13 +315,11 @@ local function new(wiz)
       scr:text("@i18n(app.modules.setup_wizard.dir_done_title)@", body,
         flapReversed and "@i18n(app.modules.setup_wizard.dir_flap_radio)@" or nil)
       scr:picture(art.layout(wiz.surfaces(), nil))
-      focus = scr:buttons({
+      focus = scr:row(function() ci, status = math.max(1, #checks), nil; go("check") end, {
         {text = "@i18n(app.modules.setup_wizard.dir_again)@", press = function()
           ci, status = 1, nil
           go("check")
         end},
-        {text = wiz.isLastStep() and "@i18n(app.modules.setup_wizard.dir_save_finish)@"
-          or "@i18n(app.modules.setup_wizard.dir_save_next)@", primary = true, press = function() wiz.finishStep() end},
       })
     end
 

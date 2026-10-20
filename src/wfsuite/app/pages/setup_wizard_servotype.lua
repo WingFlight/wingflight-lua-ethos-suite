@@ -18,8 +18,6 @@ local T = {
   unknown = "@i18n(app.modules.setup_wizard.st_unknown)@",
   applied = "@i18n(app.modules.setup_wizard.st_applied_fmt)@",
   saveRestart = "@i18n(app.modules.setup_wizard.btn_save_restart)@",
-  next = "@i18n(app.modules.setup_wizard.btn_next)@",
-  change = "@i18n(app.modules.setup_wizard.air_change)@",
 }
 
 local TYPES = {
@@ -44,6 +42,7 @@ local function new(wiz)
   local self = {}
   local scr = ui.new(wiz)
   local applied = nil
+  local changed = false     -- a type was applied: the step ends with a restart
 
   local function currentType()
     local first = wiz.surfaces()[1]
@@ -66,7 +65,7 @@ local function new(wiz)
         end
       end)
     end
-    applied = tp
+    applied, changed = tp, true
     wiz.rebuild()
   end
 
@@ -74,22 +73,21 @@ local function new(wiz)
     scr:begin()
     local current = currentType()
     if applied then
+      -- Back to the choice; the new rate needs a restart.
       scr:text(T.title, string.format(T.applied, applied.name))
-      return scr:buttons({
-        {text = T.change, press = function() applied = nil; wiz.rebuild() end},
-        {text = T.saveRestart, primary = true, press = function() wiz.saveAndReboot() end},
-      })
+      return scr:row(function() applied = nil; wiz.rebuild() end, nil,
+        {text = T.saveRestart, press = function() wiz.saveAndReboot() end})
     end
     local helps = {}
     for _, tp in ipairs(TYPES) do helps[#helps + 1] = tp.name .. ": " .. tp.help end
     scr:text(T.title, T.intro .. " " .. table.concat(helps, " "),
       T.all .. " " .. string.format(T.now, current and current.name or T.unknown))
+    -- Next keeps the servos as they are; after a change, Save and restart.
     local specs = {}
     for _, tp in ipairs(TYPES) do
       specs[#specs + 1] = {text = tp.name, small = true, primary = current == tp, press = function() apply(tp) end}
     end
-    specs[#specs + 1] = {text = T.next, small = true, press = function() wiz.finishStep() end}
-    return scr:buttons(specs)
+    return scr:row(nil, specs, changed and {text = T.saveRestart, press = function() wiz.saveAndReboot() end} or nil)
   end
 
   function self.paint() scr:paint() end

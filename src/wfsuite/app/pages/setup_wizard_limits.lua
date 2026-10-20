@@ -29,9 +29,8 @@ local T = {
   doneTitle = "@i18n(app.modules.setup_wizard.lim_done_title)@",
   done = "@i18n(app.modules.setup_wizard.lim_done)@",
   start = "@i18n(app.modules.setup_wizard.btn_start)@",
-  skip = "@i18n(app.modules.setup_wizard.btn_skip)@",
   again = "@i18n(app.modules.setup_wizard.btn_again)@",
-  saveNext = "@i18n(app.modules.setup_wizard.dir_save_next)@",
+  next = "@i18n(app.modules.setup_wizard.btn_next)@",
 }
 
 -- PWM_SERVO_PULSE_MIN/MAX and SERVO_LIMIT_MIN/MAX (firmware rx/rx.h,
@@ -128,16 +127,12 @@ local function new(wiz)
     scr:begin()
     if screen == "intro" then
       scr:text(T.title, T.intro)
-      return scr:buttons({
-        {text = T.skip, press = function() wiz.skipStep() end},
+      return scr:row(nil, {
         {text = T.start, primary = true, needsMotion = true, press = function() startSurface(1) end},
       })
     elseif screen == "done" then
       scr:text(T.doneTitle, T.done)
-      return scr:buttons({
-        {text = T.again, press = function() startSurface(1) end},
-        {text = T.saveNext, primary = true, press = function() wiz.finishStep() end},
-      })
+      return scr:row(function() startSurface(#surfaces) end, {{text = T.again, press = function() startSurface(1) end}})
     end
     local s = current()
     local config = wiz.configs[s.servo]
@@ -149,15 +144,25 @@ local function new(wiz)
     local specs = {}
     for _, d in ipairs(STEPS) do
       -- Until there is a position to set, the focus starts on a step towards
-      -- the side being found, not on Skip.
+      -- the side being found, not on Next.
       local towards = (side == "min" and d == -10) or (side == "max" and d == 10)
       specs[#specs + 1] = {text = (d > 0 and "+" or "") .. d, small = true, weight = 0.7, needsMotion = true,
         primary = position == 0 and towards, press = function() move(d) end}
     end
     specs[#specs + 1] = {text = side == "min" and T.setMin or T.setMax, small = true, primary = position ~= 0,
       needsMotion = true, disabled = position == 0, press = setHere}
-    specs[#specs + 1] = {text = T.skip, small = true, weight = 0.7, press = function() startSurface(index + 1) end}
-    return scr:buttons(specs)
+    -- Back: the surface before, or the intro. Next: the next surface; a side
+    -- not set keeps its old limit.
+    return scr:row(function()
+      if index > 1 then
+        startSurface(index - 1)
+      else
+        local s0 = current()
+        if s0 then wiz.releaseProbe(s0.servo) end
+        screen = "intro"
+        wiz.rebuild()
+      end
+    end, specs, {text = T.next, press = function() startSurface(index + 1) end})
   end
 
   function self.paint() scr:paint() end

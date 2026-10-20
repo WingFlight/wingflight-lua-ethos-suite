@@ -36,11 +36,7 @@ local T = {
   doneTitle = "@i18n(app.modules.setup_wizard.mod_done_title)@",
   progress = "@i18n(app.modules.setup_wizard.progress_fmt)@",
   start = "@i18n(app.modules.setup_wizard.btn_start)@",
-  skip = "@i18n(app.modules.setup_wizard.btn_skip)@",
   next = "@i18n(app.modules.setup_wizard.btn_next)@",
-  cancel = "@i18n(app.btn_cancel)@",
-  again = "@i18n(app.modules.setup_wizard.btn_again)@",
-  saveNext = "@i18n(app.modules.setup_wizard.dir_save_next)@",
 }
 
 -- Permanent box ids (msp/msp_box.c) and the names the FC reports for them,
@@ -164,8 +160,7 @@ local function new(wiz)
 
     if screen == "intro" then
       scr:text(T.title, T.intro)
-      return scr:buttons({
-        {text = T.skip, press = function() wiz.skipStep() end},
+      return scr:row(nil, {
         {text = T.start, primary = true, press = function() mi = 1; go(#offered > 0 and "mode" or "done") end},
       })
 
@@ -178,18 +173,22 @@ local function new(wiz)
       scr:text(m.name .. "  " .. string.format(T.progress, mi, #offered), m.help, accent)
       scr:rows({{m.required and T.required or T.optional, text}, {"", on and T.onNow or T.off, on}})
       local assigned = rangeIndex(m) ~= nil
-      return scr:buttons({
+      -- Next goes on to the next mode; once this one has a switch, the focus
+      -- is on it.
+      return scr:row(function()
+        if mi > 1 then mi = mi - 1; go("mode") else go("intro") end
+      end, {
         {text = T.remove, small = true, disabled = not assigned, press = function() remove(m) end},
         {text = assigned and T.change or T.assign, primary = not assigned, press = function()
           listening = {baseline = auxValues(), untilAt = os.clock() + LISTEN_SECONDS}
           go("listen")
         end},
-        {text = T.next, primary = assigned, press = nextMode},
-      })
+      }, {text = T.next, press = nextMode})
 
     elseif screen == "listen" then
       scr:text(offered[mi].name, T.flick)
-      return scr:buttons({{text = T.cancel, primary = true, press = function() listening = nil; go("mode") end}})
+      -- Back cancels the listening.
+      return scr:row(function() listening = nil; go("mode") end, nil, false)
     end
 
     local rows = {}
@@ -200,10 +199,10 @@ local function new(wiz)
     local armMissing = offered[1] and offered[1].id == 0 and not rangeIndex(offered[1])
     scr:text(T.doneTitle, nil, armMissing and T.armMissing or nil)
     scr:rows(rows)
-    return scr:buttons({
-      {text = T.again, press = function() mi = 1; go("mode") end},
-      {text = T.saveNext, primary = true, press = function() wiz.finishStep() end},
-    })
+    return scr:row(function()
+      mi = math.max(1, #offered)
+      go(#offered > 0 and "mode" or "intro")
+    end)
   end
 
   function self.paint() scr:paint() end

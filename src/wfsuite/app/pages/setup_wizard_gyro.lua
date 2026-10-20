@@ -22,17 +22,14 @@ local T = {
   noAngle = "@i18n(app.modules.setup_wizard.gyr_no_angle)@",
   q = "@i18n(app.modules.setup_wizard.dir_q_match)@",
   wrong = "@i18n(app.modules.setup_wizard.gyr_wrong)@",
-  toSensors = "@i18n(app.modules.setup_wizard.gyr_to_sensors)@",
   doneTitle = "@i18n(app.modules.setup_wizard.gyr_done_title)@",
   done = "@i18n(app.modules.setup_wizard.gyr_done)@",
   progress = "@i18n(app.modules.setup_wizard.progress_fmt)@",
   start = "@i18n(app.modules.setup_wizard.btn_start)@",
-  skip = "@i18n(app.modules.setup_wizard.btn_skip)@",
-  continue = "@i18n(app.modules.setup_wizard.dir_continue)@",
+  next = "@i18n(app.modules.setup_wizard.btn_next)@",
   like = "@i18n(app.modules.setup_wizard.dir_like)@",
   unlike = "@i18n(app.modules.setup_wizard.dir_unlike)@",
   again = "@i18n(app.modules.setup_wizard.btn_again)@",
-  saveNext = "@i18n(app.modules.setup_wizard.dir_save_next)@",
   fromBehind = "@i18n(app.modules.setup_wizard.dir_from_behind)@",
 }
 
@@ -67,13 +64,16 @@ local function new(wiz)
     wiz.rebuild()
   end
 
+  local function nextCheck()
+    if ci < #checks then ci = ci + 1; go("check") else wiz.releaseMode(); go("done") end
+  end
+
   function self.build()
     scr:begin()
     if screen == "intro" then
       scr:text(T.title, T.intro)
       scr:picture(art.layout(wiz.surfaces(), nil))
-      return scr:buttons({
-        {text = T.skip, press = function() wiz.skipStep() end},
+      return scr:row(nil, {
         {text = T.start, primary = true, needsMotion = true, press = function()
           forceAngle()
           ci = 1
@@ -85,26 +85,23 @@ local function new(wiz)
       scr:text(c.title .. "  " .. string.format(T.progress, ci, #checks), c.text .. " " .. T.q,
         wiz.forcedMode() ~= wiz.BOX_ANGLE and T.noAngle or nil)
       scr:picture(art.layout(wiz.surfaces(), c.axis, true), T.fromBehind)
-      return scr:buttons({
+      return scr:row(function()
+        if ci > 1 then ci = ci - 1; go("check") else wiz.releaseMode(); go("intro") end
+      end, {
         {text = T.unlike, press = function() go("wrong") end},
-        {text = T.like, primary = true, press = function()
-          if ci < #checks then ci = ci + 1; go("check") else wiz.releaseMode(); go("done") end
-        end},
-      })
+        {text = T.like, primary = true, press = nextCheck},
+      }, false)
     elseif screen == "wrong" then
+      -- The fix is in the Sensors step, which the step list (header) opens.
       scr:text(checks[ci].title, T.wrong)
-      return scr:buttons({
-        {text = T.toSensors, press = function() wiz.goToStep("sensors") end},
-        {text = T.continue, primary = true, press = function()
-          if ci < #checks then ci = ci + 1; go("check") else wiz.releaseMode(); go("done") end
-        end},
-      })
+      return scr:row(function() go("check") end, nil, {text = T.next, press = nextCheck})
     end
     scr:text(T.doneTitle, T.done)
-    return scr:buttons({
-      {text = T.again, press = function() forceAngle(); ci = 1; go("check") end},
-      {text = T.saveNext, primary = true, press = function() wiz.finishStep() end},
-    })
+    return scr:row(function()
+      forceAngle()
+      ci = math.max(1, #checks)
+      go(#checks > 0 and "check" or "intro")
+    end, {{text = T.again, press = function() forceAngle(); ci = 1; go("check") end}})
   end
 
   function self.paint() scr:paint() end
