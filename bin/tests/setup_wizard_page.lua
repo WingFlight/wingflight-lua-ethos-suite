@@ -296,6 +296,13 @@ check("opening clears mixer overrides on roll, pitch, yaw and flap",
 check("opening clears every servo override", #writesOf(196) == 1 and bytes(writesOf(196)[1].payload) == "209,7")
 check("the title names the step", headers[#headers].title == T("name") .. " / 7. " .. T("step_direction"),
   headers[#headers].title)
+check("the step-list button shows the checklist icon",
+  headers[#headers].opts.toolIcon == "app/gfx/nav/steps.png" and headers[#headers].opts.onTool ~= nil)
+do
+  local icon = io.open(ROOT .. "app/gfx/nav/steps.png", "rb")
+  check("and that icon is in the suite", icon ~= nil)
+  if icon then icon:close() end
+end
 check("it opens on the intro, which moves nothing", shows("dir_intro") and #writesOf(191) == 4)
 local start = button(T("dir_start"))
 check("the intro's only answer is Start, and it has the focus", start and start.focused)

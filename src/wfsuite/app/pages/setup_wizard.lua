@@ -91,6 +91,7 @@ local MSG_LOAD_FAILED_BODY = "@i18n(app.msg_load_failed_body)@"
 local MSG_RESTARTING_TITLE = "@i18n(app.msg_restarting)@"
 local MSG_RESTARTING = "@i18n(app.msg_restarting_fc)@"
 local MSG_REBOOT_WAIT = "@i18n(app.modules.setup_wizard.reboot_wait_fmt)@"
+local STEPS_ICON = "app/gfx/nav/steps.png"
 local BTN_OK = "@i18n(app.btn_ok)@"
 local BTN_CANCEL = "@i18n(app.btn_cancel)@"
 
@@ -625,11 +626,13 @@ local function open(opts)
     headerHandle = header.build(title, {
       onBack = ui.action("back", function() goBack() end),
       onSave = ui.action("save", function() requestSave() end),
-      -- The tool button opens the step list.
+      -- The tool button opens the step list, so it shows a checklist, not
+      -- the default wrench.
       onTool = loaded and not unsupported and not rebootWait and ui.action("tool", function()
         picking = true
         rebuildWanted = true
       end) or nil,
+      toolIcon = STEPS_ICON,
     })
     if headerHandle.setSaveEnabled then headerHandle.setSaveEnabled(pending) end
     if headerHandle.setReloadEnabled then headerHandle.setReloadEnabled(false) end

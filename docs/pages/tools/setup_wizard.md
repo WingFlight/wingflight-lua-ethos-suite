@@ -33,7 +33,7 @@ when something stops the wizard moving the surfaces (see below).
 
 - Each step ends with **Save and continue**, which writes the changes to EEPROM
   and opens the next step. Most steps also have **Skip** on their first screen.
-- The **wrench** button in the header opens the list of all 15 steps; tap one to go
+- The **checklist** button in the header opens the list of all 15 steps; tap one to go
   to it. Back from the list returns to the step.
 - **Save** in the header writes the changes at any time.
 - **Save and restart** (steps whose settings apply after a restart) shows a
