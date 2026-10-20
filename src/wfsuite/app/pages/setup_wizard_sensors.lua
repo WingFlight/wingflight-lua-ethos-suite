@@ -21,6 +21,8 @@
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local bus = requireModule("lib/bus.lua")
 local ui = requireModule("app/setup_wizard_ui.lua")
+-- Freed when the step closes (app/setup_wizard_ui.lua's notLoaded()).
+local OWNED = ui.notLoaded({"wfsuite.lib.msp_acc_calibration", "wfsuite.lib.acc_calibration_wait", "wfsuite.lib.msp_board_auto_align", "wfsuite.lib.msp_board_alignment_config", "wfsuite.lib.msp_board_mount_trim"})
 local status = requireModule("lib/msp_status.lua")
 local accCalibration = requireModule("lib/msp_acc_calibration.lua")
 local calibrationWait = requireModule("lib/acc_calibration_wait.lua")
@@ -265,4 +267,4 @@ local function new(wiz)
   return self
 end
 
-return {new = new}
+return {new = new, owned = OWNED}

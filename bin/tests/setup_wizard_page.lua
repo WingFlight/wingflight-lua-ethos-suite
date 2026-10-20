@@ -114,6 +114,7 @@ _G.form = {
 -- Stubbed modules ----------------------------------------------------------
 
 local sent = {}
+local progressDialogs = {}
 local subscribers = {}
 local headers = {}
 
@@ -143,19 +144,30 @@ local stubs = {
     end,
   },
   ["app/progress_dialog.lua"] = {
-    open = function() return {value = function() end, close = function() end} end,
+    open = function(opts)
+      local d = {title = opts.title, text = opts.message, values = {}, closed = false}
+      function d.value(_, v) d.values[#d.values + 1] = v end
+      function d.message(_, text) d.text = text end
+      function d.close() d.closed = true end
+      progressDialogs[#progressDialogs + 1] = d
+      return d
+    end,
   },
   ["app/close_key.lua"] = {shouldHandleClose = function() return false end},
 }
 
-local cache = {}
+-- Cached in package.loaded under lib/require.lua's keys, so the checks can see
+-- what the wizard frees when a step or the page closes.
+local cache = package.loaded
+local function keyOf(path) return "wfsuite." .. path:gsub("%.lua$", ""):gsub("/", ".") end
 package.loaded["wfsuite.lib.require"] = function(path)
   if stubs[path] then return stubs[path] end
-  if cache[path] == nil then
+  local key = keyOf(path)
+  if cache[key] == nil then
     local result = assert(realLoadfile(ROOT .. path))()
-    cache[path] = result == nil and true or result
+    cache[key] = result == nil and true or result
   end
-  return cache[path]
+  return cache[key]
 end
 local requireModule = package.loaded["wfsuite.lib.require"]
 
@@ -248,7 +260,6 @@ local function openPage(apiMinor, stepKey)
   fields, dialogs, sent, headers = {}, {}, {}, {}
   answeredUpTo = 0
   subscribers["session.update"] = nil
-  for k in pairs(cache) do cache[k] = nil end
   for k in pairs(package.loaded) do
     if type(k) == "string" and k:match("^wfsuite%.") and k ~= "wfsuite.lib.require" then package.loaded[k] = nil end
   end
@@ -400,6 +411,9 @@ headers[#headers].opts.onBack()
 check("Back with nothing pending leaves the wizard", ctx.back == 1)
 local release = writesOf(0x5F1B, before + 1)
 check("leaving releases the setup state", #release == 1 and bytes(release[1].payload) == "0,0,0")
+check("leaving frees the wizard's own modules but keeps the override ones",
+  package.loaded["wfsuite.lib.msp_mixer_rules"] == nil and package.loaded["wfsuite.app.setup_wizard_ui"] == nil
+  and package.loaded["wfsuite.lib.msp_servo_config"] == nil and package.loaded["wfsuite.lib.msp_mixer_override"] ~= nil)
 check("nothing is held after leaving", not requireModule("lib/override_keepalive.lua").isActive("mode_override"))
 
 -- Discard writes back what was loaded ----------------------------------------
@@ -510,6 +524,18 @@ tick()
 tick()
 check("sensors: Save and restart saves, then restarts the FC",
   #writesOf(250, before + 1) == 1 and #writesOf(68, before + 1) == 1)
+local restartDialog = progressDialogs[#progressDialogs]
+check("sensors: the restart shows a progress dialog with the countdown",
+  restartDialog and restartDialog.title == "@i18n(app.msg_restarting)@"
+  and restartDialog.text == T("reboot_wait_fmt") and not restartDialog.closed,
+  restartDialog and tostring(restartDialog.title) .. " " .. tostring(restartDialog.text))
+check("sensors: the step's own modules are freed when it closes",
+  package.loaded["wfsuite.lib.msp_board_mount_trim"] == nil and package.loaded["wfsuite.lib.msp_acc_calibration"] == nil
+  and package.loaded["wfsuite.lib.acc_calibration_wait"] == nil)
+tick(3)
+check("sensors: the bar fills while the FC restarts",
+  restartDialog and (restartDialog.values[#restartDialog.values] or 0) >= 10,
+  restartDialog and table.concat(restartDialog.values, ","))
 session({connected = false, isArmed = false, apiVersionMajor = 22, apiVersionMinor = 14})
 tick()
 session({connected = true, isArmed = false, apiVersionMajor = 22, apiVersionMinor = 14, handshake = {apiVersion = true}})
@@ -518,6 +544,7 @@ settle(6)
 check("sensors: after the restart the wizard reloads and reopens the step",
   #writesOf(101, before + 1) >= 1 and headers[#headers].title == T("name") .. " / 1. " .. T("step_sensors"),
   headers[#headers].title)
+check("sensors: the restart dialog closes once the FC is back", restartDialog and restartDialog.closed)
 replies[0x5F00], replies[0x5F05] = nil, nil
 
 -- Receiver: detect the channel order from the sticks.
@@ -740,6 +767,15 @@ do
 end
 
 check("no form was built from a reply or a bus event", #forbidden == 0, table.concat(forbidden, ","))
+
+do
+  local ui = requireModule("app/setup_wizard_ui.lua")
+  package.loaded["wfsuite.test.loaded_first"] = {}
+  local owned = ui.notLoaded({"wfsuite.test.loaded_first", "wfsuite.test.absent"})
+  check("a step frees only modules nothing else had loaded first",
+    #owned == 1 and owned[1] == "wfsuite.test.absent")
+  package.loaded["wfsuite.test.loaded_first"] = nil
+end
 
 -- Older firmware: explain and stop -------------------------------------------
 

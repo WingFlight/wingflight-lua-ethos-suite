@@ -20,7 +20,7 @@ buttons.
 
 ## Where to find it
 
-*Configuration* → *Setup* → *Setup Wizard*
+*System* → *Tools* → *Setup Wizard*
 
 Requires a running background task and a flight controller connection. The
 flight controller firmware must support MSP API 22.14 or newer (timed overrides);
@@ -36,6 +36,10 @@ when something stops the wizard moving the surfaces (see below).
 - The **wrench** button in the header opens the list of all 15 steps; tap one to go
   to it. Back from the list returns to the step.
 - **Save** in the header writes the changes at any time.
+- **Save and restart** (steps whose settings apply after a restart) shows a
+  *Restarting...* dialog while the flight controller restarts. Its bar fills
+  and its message counts down the seconds left (at most 20). The dialog closes
+  as soon as the flight controller is back, and the wizard reloads on the same step.
 - The wizard reopens on the step it was on, for the rest of the radio session.
 - A step that works on the control surfaces, on a model with none mixed yet, offers
   **Set up the airframe** instead.

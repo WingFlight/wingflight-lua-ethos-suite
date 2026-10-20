@@ -32,6 +32,46 @@ Screen.__index = Screen
 
 local ui = {}
 
+-- Ethos may retain a form callback after form.clear(). Give it a bounded
+-- set of dispatchers, never a step closure (which captures its whole screen).
+-- Keep slots across visits, but detach their targets before rebuilding/leaving.
+local actions = {}
+function ui.action(key, target)
+  local slot = actions[key]
+  if not slot then
+    slot = {}
+    slot.press = function()
+      if slot.target then return slot.target() end
+    end
+    actions[key] = slot
+  end
+  slot.target = target
+  return slot.press
+end
+
+function ui.releaseActions()
+  for _, slot in pairs(actions) do slot.target = nil end
+end
+
+-- Modules a step loads only for itself are freed when the step closes, as
+-- app/page_runtime.lua's unloadPackageKeys does for other pages; otherwise
+-- every step visited leaves its codecs in package.loaded for the rest of the
+-- session. A step calls notLoaded() before requiring them and returns the
+-- result as `owned`; the shell passes it to unload(). A module that another
+-- page or the background task had loaded first is not in the list, so it
+-- stays loaded.
+function ui.notLoaded(keys)
+  local out = {}
+  for i = 1, #keys do
+    if package.loaded[keys[i]] == nil then out[#out + 1] = keys[i] end
+  end
+  return out
+end
+
+function ui.unload(keys)
+  for i = 1, #keys do package.loaded[keys[i]] = nil end
+end
+
 function ui.new(wiz)
   return setmetatable({wiz = wiz, view = {lines = {}, rows = {}}, buttonList = {}}, Screen)
 end
@@ -103,7 +143,7 @@ function Screen:buttons(specs)
     local field = form.addButton(nil, {x = x, y = y, w = w, h = h}, {
       text = s.text,
       options = (s.small and FONT_S or FONT_STD) + CENTERED,
-      press = s.press,
+      press = ui.action(#self.buttonList + 1, s.press),
     })
     -- The field is Ethos userdata: the flags live beside it.
     self.buttonList[#self.buttonList + 1] = {field = field, needsMotion = s.needsMotion, disabled = s.disabled}
@@ -137,7 +177,7 @@ function Screen:grid(specs, cols, bottom)
     local field = form.addButton(nil, {x = col * (w + BUTTON_GAP), y = top + row * (h + BUTTON_GAP), w = w, h = h}, {
       text = s.text,
       options = FONT_S + CENTERED,
-      press = s.press,
+      press = ui.action(#self.buttonList + 1, s.press),
     })
     self.buttonList[#self.buttonList + 1] = {field = field, needsMotion = s.needsMotion, disabled = s.disabled}
     first = first or field
@@ -154,7 +194,11 @@ function Screen:refresh()
   for i = 1, #self.buttonList do
     local b = self.buttonList[i]
     if b.field and b.field.enable then
-      b.field:enable(not b.disabled and (not b.needsMotion or canMove))
+      local enabled = not b.disabled and (not b.needsMotion or canMove)
+      if b.enabled ~= enabled then
+        b.enabled = enabled
+        b.field:enable(enabled)
+      end
     end
   end
 end

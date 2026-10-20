@@ -152,9 +152,6 @@ local MENUS = {
   setup_menu = {
     title = "@i18n(app.modules.hardware_setup.name)@",
     entries = {
-      -- Guided setup of a whole model, step by step (app/pages/setup_wizard.lua),
-      -- first because it is where a new model starts.
-      {title = "@i18n(app.modules.setup_wizard.name)@", icon = lcd.loadMask("app/gfx/setup_wizard.png"), script = "app/pages/setup_wizard.lua", group = "@i18n(app.menu_section_board_radio)@"},
       {title = "@i18n(app.modules.configuration.name)@", icon = lcd.loadMask("app/gfx/configuration.png"), script = "app/pages/configuration.lua", group = "@i18n(app.menu_section_board_radio)@"},
       {title = "@i18n(app.modules.ports.name)@", icon = lcd.loadMask("app/gfx/ports.png"), script = "app/pages/ports.lua", group = "@i18n(app.menu_section_board_radio)@"},
       {title = "@i18n(app.modules.radio_config.name)@", icon = lcd.loadMask("app/gfx/radio_config.png"), script = "app/pages/radio_config.lua", group = "@i18n(app.menu_section_board_radio)@"},
@@ -265,6 +262,8 @@ local MENUS = {
   tools_menu = {
     title = "@i18n(app.menu_section_tools)@",
     entries = {
+      -- Guided setup of a whole model, step by step (app/pages/setup_wizard.lua).
+      {title = "@i18n(app.modules.setup_wizard.name)@", icon = lcd.loadMask("app/gfx/setup_wizard.png"), script = "app/pages/setup_wizard.lua"},
       {title = "@i18n(app.modules.copyprofiles.name)@", icon = lcd.loadMask("app/gfx/copy_profiles.png"), script = "app/pages/copy_profiles.lua"},
       {title = "@i18n(app.modules.profile_select.name)@", icon = lcd.loadMask("app/gfx/profile_select.png"), script = "app/pages/profile_select.lua"},
       {title = "@i18n(app.modules.diagnostics.name)@", icon = lcd.loadMask("app/gfx/diagnostics.png"), menuId = "diagnostics_menu", offline = true},

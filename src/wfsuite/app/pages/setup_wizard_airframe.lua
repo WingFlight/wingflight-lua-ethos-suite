@@ -19,6 +19,8 @@
 
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local ui = requireModule("app/setup_wizard_ui.lua")
+-- Freed when the step closes (app/setup_wizard_ui.lua's notLoaded()).
+local OWNED = ui.notLoaded({"wfsuite.lib.setup_wizard_mix"})
 local art = requireModule("app/setup_wizard_art.lua")
 local mix = requireModule("lib/setup_wizard_mix.lua")
 local surfacesLib = requireModule("lib/setup_wizard_surfaces.lua")
@@ -273,4 +275,4 @@ local function new(wiz)
   return self
 end
 
-return {new = new}
+return {new = new, owned = OWNED}

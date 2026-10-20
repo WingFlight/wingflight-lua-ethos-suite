@@ -7,6 +7,8 @@
 
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local ui = requireModule("app/setup_wizard_ui.lua")
+-- Freed when the step closes (app/setup_wizard_ui.lua's notLoaded()).
+local OWNED = ui.notLoaded({"wfsuite.lib.setup_wizard_styles", "wfsuite.lib.msp_motor_config", "wfsuite.lib.msp_rc_tuning", "wfsuite.lib.msp_pid_profile", "wfsuite.lib.msp_modes"})
 local styles = requireModule("lib/setup_wizard_styles.lua")
 local motorConfig = requireModule("lib/msp_motor_config.lua")
 local rcTuning = requireModule("lib/msp_rc_tuning.lua")
@@ -125,4 +127,4 @@ local function new(wiz)
   return self
 end
 
-return {new = new}
+return {new = new, owned = OWNED}

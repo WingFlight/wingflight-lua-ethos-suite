@@ -4385,7 +4385,8 @@
           "translation": "Save power preferences?",
           "needs_translation": false,
           "max_length": 23
-        },        "alert_name": {
+        },
+        "alert_name": {
           "english": "Alerts",
           "max_length": 6,
           "needs_translation": false,
@@ -8078,6 +8079,12 @@
           "translation": "Disarm: the FC refused setup mode.",
           "needs_translation": false,
           "max_length": 34
+        },
+        "reboot_wait_fmt": {
+          "english": "Reconnecting, up to %d s",
+          "translation": "Reconnecting, up to %d s",
+          "needs_translation": false,
+          "max_length": 24
         },
         "disconnected": {
           "english": "No link to the flight controller.",

@@ -1,4 +1,4 @@
--- Setup -> Setup Wizard.
+-- Tools -> Setup Wizard.
 --
 -- The radio's own copy of wingflight-configurator's Setup Wizard
 -- (src/tabs/setup_wizard/SetupWizard.svelte). It asks the same questions and
@@ -39,6 +39,23 @@
 -- does.
 
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
+
+-- Modules only the wizard uses: dispose() frees the ones this visit loaded,
+-- as app/page_runtime.lua's unloadPackageKeys does for other pages. Not the
+-- override modules: they hold what is still being released when the page
+-- closes. This file runs again on every visit (app/menu_container.lua's
+-- loadPage()), so the check is per visit. Each step frees its own the same
+-- way (app/setup_wizard_ui.lua's notLoaded()).
+local SHELL_MODULES = {
+  "wfsuite.lib.msp_mixer_rules", "wfsuite.lib.msp_mixer_input", "wfsuite.lib.msp_mixer_config",
+  "wfsuite.lib.msp_servo_config", "wfsuite.lib.msp_servo", "wfsuite.lib.msp_rc_channels",
+  "wfsuite.lib.setup_wizard_surfaces", "wfsuite.app.setup_wizard_ui", "wfsuite.app.setup_wizard_art",
+}
+local shellOwned = {}
+for i = 1, #SHELL_MODULES do
+  if package.loaded[SHELL_MODULES[i]] == nil then shellOwned[#shellOwned + 1] = SHELL_MODULES[i] end
+end
+
 local bus = requireModule("lib/bus.lua")
 local closeKey = requireModule("app/close_key.lua")
 local header = requireModule("app/header.lua")
@@ -58,6 +75,9 @@ local mixerOverride = requireModule("lib/msp_mixer_override.lua")
 local modeOverride = requireModule("lib/msp_mode_override.lua")
 local rcChannels = requireModule("lib/msp_rc_channels.lua")
 local surfacesLib = requireModule("lib/setup_wizard_surfaces.lua")
+local ui = requireModule("app/setup_wizard_ui.lua")
+-- Steps draw with it; loaded here so they share one copy.
+requireModule("app/setup_wizard_art.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.setup_wizard.name)@"
 local MSG_LOADING_TITLE = "@i18n(app.msg_loading)@"
@@ -68,7 +88,9 @@ local MSG_SAVE_FAILED_TITLE = "@i18n(app.msg_save_failed_title)@"
 local MSG_SAVE_FAILED_BODY = "@i18n(app.msg_save_failed_body)@"
 local MSG_LOAD_FAILED_TITLE = "@i18n(app.msg_load_failed_title)@"
 local MSG_LOAD_FAILED_BODY = "@i18n(app.msg_load_failed_body)@"
+local MSG_RESTARTING_TITLE = "@i18n(app.msg_restarting)@"
 local MSG_RESTARTING = "@i18n(app.msg_restarting_fc)@"
+local MSG_REBOOT_WAIT = "@i18n(app.modules.setup_wizard.reboot_wait_fmt)@"
 local BTN_OK = "@i18n(app.btn_ok)@"
 local BTN_CANCEL = "@i18n(app.btn_cancel)@"
 
@@ -228,6 +250,7 @@ local function open(opts)
 
   local stepIndex = 1
   local step = nil         -- instance of STEPS[stepIndex]
+  local stepOwned = nil    -- modules the step loaded for itself, freed when it closes
   local picking = false    -- the step list is showing
   local rebuildWanted = false
 
@@ -243,7 +266,7 @@ local function open(opts)
   local saveRequest = nil  -- {onSaved =} waiting for the next wakeup
   local saveResult = nil   -- "ok" | "failed", set by the EEPROM reply
   local afterSave = nil
-  local rebootWait = nil   -- {startedAt =, sawDisconnect =} while restarting
+  local rebootWait = nil   -- {startedAt =, sawDisconnect =, remaining =, percent =} while restarting
 
   local heldInputs = {}
   local heldServos = {}
@@ -541,11 +564,11 @@ local function open(opts)
     fetches[#fetches + 1] = f
     for key, build in pairs(specs) do
       bus.publish("msp.request", build(function(data)
-        if disposed then return end
+        if disposed or not f.onDone then return end
         f.results[key] = data
         f.left = f.left - 1
       end, function()
-        if disposed then return end
+        if disposed or not f.onDone then return end
         f.failed = true
         f.left = f.left - 1
       end))
@@ -600,21 +623,32 @@ local function open(opts)
 
   local function buildHeader(title)
     headerHandle = header.build(title, {
-      onBack = function() goBack() end,
-      onSave = function() requestSave() end,
+      onBack = ui.action("back", function() goBack() end),
+      onSave = ui.action("save", function() requestSave() end),
       -- The tool button opens the step list.
-      onTool = loaded and not unsupported and function()
+      onTool = loaded and not unsupported and not rebootWait and ui.action("tool", function()
         picking = true
         rebuildWanted = true
-      end or nil,
+      end) or nil,
     })
     if headerHandle.setSaveEnabled then headerHandle.setSaveEnabled(pending) end
     if headerHandle.setReloadEnabled then headerHandle.setReloadEnabled(false) end
   end
 
   local function closeStep()
+    ui.releaseActions()
+    -- Queued replies may arrive after navigation. Detach their completion
+    -- closures now, so neither the queue nor this list pins the old step.
+    for i = #fetches, 1, -1 do
+      fetches[i].onDone, fetches[i].results = nil, nil
+      fetches[i] = nil
+    end
     if step and step.leave then step.leave() end
     step = nil
+    if stepOwned then
+      ui.unload(stepOwned)
+      stepOwned = nil
+    end
     releaseAll()
   end
 
@@ -625,6 +659,7 @@ local function open(opts)
     memory.stepKey = STEPS[index].key
     if not (STEPS[index].needsSurfaces and #surfaces == 0) then
       local factory = assert(loadfile("app/pages/setup_wizard_" .. STEPS[index].key .. ".lua"))()
+      stepOwned = factory.owned
       step = factory.new(wiz)
     end
     rebuildWanted = true
@@ -654,8 +689,14 @@ local function open(opts)
     if index then openStep(index) end
   end
 
-  local function buildMessagePage(text)
+  local function clearForm()
+    ui.releaseActions()
+    noticeField, headerHandle = nil, nil
     form.clear()
+  end
+
+  local function buildMessagePage(text)
+    clearForm()
     buildHeader(PAGE_TITLE)
     addWrapped(text)
     if headerHandle.focusMenu then headerHandle.focusMenu() end
@@ -663,7 +704,7 @@ local function open(opts)
 
   -- The step list: one button per step.
   local function buildPicker()
-    form.clear()
+    clearForm()
     buildHeader(PAGE_TITLE)
     local width, height = lcd.getWindowSize()
     local gap = 6
@@ -681,7 +722,7 @@ local function open(opts)
       local button = form.addButton(nil, {x = col * (w + gap), y = top + row * (h + gap), w = w, h = h}, {
         text = string.format("%d. %s", i, s.title),
         options = FONT_S + CENTERED,
-        press = function() openStep(i) end,
+        press = ui.action(i, function() openStep(i) end),
       })
       if i == stepIndex then focus = button end
     end
@@ -694,7 +735,7 @@ local function open(opts)
       buildPicker()
       return
     end
-    form.clear()
+    clearForm()
     buildHeader(PAGE_TITLE .. " / " .. string.format("%d. %s", stepIndex, STEPS[stepIndex].title))
     -- Only when there is something to say: a 320 px screen has no row to spare.
     local notice = noticeText()
@@ -710,7 +751,7 @@ local function open(opts)
       local button = form.addButton(nil, {x = 0, y = height - 52, w = width - FORM_RIGHT_PADDING, h = 48}, {
         text = "@i18n(app.modules.setup_wizard.go_airframe)@",
         options = FONT_STD + CENTERED,
-        press = function() wiz.goToStep("airframe") end,
+        press = ui.action(1, function() wiz.goToStep("airframe") end),
       })
       if button and button.focus then button:focus() end
       return
@@ -828,20 +869,25 @@ local function open(opts)
   -- Settings that only apply after a restart (board alignment, servo rate,
   -- ESC protocol): save, restart the flight controller, wait for it to come
   -- back, and reopen the same step, as the configurator does.
+  -- A progress dialog shows the wait: the bar fills towards the give-up
+  -- bound and the message counts down to it (speed 0: only updateReboot()
+  -- moves the bar). A board that comes back sooner ends it early.
   local function startReboot()
     closeStep()
-    rebootWait = {startedAt = os.clock(), sawDisconnect = false}
+    rebootWait = {startedAt = os.clock(), sawDisconnect = false, remaining = REBOOT_TIMEOUT_SECONDS, percent = 0}
     bus.publish("msp.request", reboot.buildWriteMessage())
+    closeProgress()
+    dialog = progressDialog.open({
+      title = MSG_RESTARTING_TITLE,
+      message = string.format(MSG_REBOOT_WAIT, REBOOT_TIMEOUT_SECONDS),
+      speed = 0,
+    })
     rebuildWanted = true
   end
 
   function wiz.saveAndReboot()
-    if armed then return end
-    if pending then
-      requestSave(startReboot)
-    else
-      startReboot()
-    end
+    if armed or rebootWait then return end
+    requestSave(startReboot)
   end
 
   -- page_runtime.lua's two edges: the link must be seen to drop (or the
@@ -851,9 +897,22 @@ local function open(opts)
     if not wait.sawDisconnect and (connected == false or handshakeDone == false) then
       wait.sawDisconnect = true
     end
+    local elapsed = now - wait.startedAt
+    local remaining = math.max(0, math.ceil(REBOOT_TIMEOUT_SECONDS - elapsed))
+    if wait.remaining ~= remaining then
+      wait.remaining = remaining
+      if dialog then dialog:message(string.format(MSG_REBOOT_WAIT, remaining)) end
+    end
+    local percent = math.min(99, math.floor(elapsed * 100 / REBOOT_TIMEOUT_SECONDS))
+    if wait.percent ~= percent then
+      wait.percent = percent
+      if dialog then dialog:value(percent) end
+    end
     local back = wait.sawDisconnect and connected == true and handshakeDone == true
-    if back or (now - wait.startedAt) >= REBOOT_TIMEOUT_SECONDS then
+    if back or elapsed >= REBOOT_TIMEOUT_SECONDS then
       rebootWait = nil
+      -- beginLoad() opens its own Loading dialog.
+      closeProgress()
       beginLoad()
     end
   end
@@ -871,9 +930,13 @@ local function open(opts)
       sessionHandler = nil
     end
     headerHandle = nil
-    noticeField = nil
+    noticeField, rebootWait = nil, nil
+    afterSave, saveRequest = nil, nil
+    for i = #changes, 1, -1 do changes[i] = nil end
+    for key in pairs(changeIndex) do changeIndex[key] = nil end
     if opts.setWakeupHandler then opts.setWakeupHandler(nil) end
     if opts.setPaintHandler then opts.setPaintHandler(nil) end
+    ui.unload(shellOwned)
   end
 
   local function leave()
@@ -1066,7 +1129,9 @@ local function open(opts)
       local f = fetches[i]
       if f.left <= 0 then
         table.remove(fetches, i)
-        if f.onDone then f.onDone(f.results, f.failed) end
+        local done, results = f.onDone, f.results
+        f.onDone, f.results = nil, nil
+        if done then done(results, f.failed) end
       end
     end
 
