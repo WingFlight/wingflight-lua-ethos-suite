@@ -10729,6 +10729,13 @@
           "reverse_text": false,
           "max_length": 120
         },
+        "cen_identify": {
+          "english": "Identify",
+          "translation": "Identify",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 8
+        },
         "cen_value_fmt": {
           "english": "Center %d us (%s from normal).",
           "translation": "Center %d us (%s from normal).",
@@ -10779,18 +10786,18 @@
           "max_length": 141
         },
         "lim_todo_min": {
-          "english": "1 of 2: press - until the surface binds, back off one step, then Set Min.",
-          "translation": "1 of 2: press - until the surface binds, back off one step, then Set Min.",
+          "english": "1 of 2: press - until the surface binds, back off one step, then Set.",
+          "translation": "1 of 2: press - until the surface binds, back off one step, then Set.",
           "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 73
+          "max_length": 69,
+          "reverse_text": false
         },
         "lim_todo_max": {
-          "english": "2 of 2: now press + until it binds, back off one step, then Set Max.",
-          "translation": "2 of 2: now press + until it binds, back off one step, then Set Max.",
+          "english": "2 of 2: now press + until it binds, back off one step, then Set.",
+          "translation": "2 of 2: now press + until it binds, back off one step, then Set.",
           "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 68
+          "max_length": 64,
+          "reverse_text": false
         },
         "lim_now_fmt": {
           "english": "Now %d us from center. Limits: %d / %d us.",
@@ -10806,19 +10813,47 @@
           "reverse_text": false,
           "max_length": 97
         },
-        "lim_set_min": {
-          "english": "Set Min",
-          "translation": "Set Min",
+        "lim_set": {
+          "english": "Set",
+          "translation": "Set",
           "needs_translation": true,
           "reverse_text": false,
-          "max_length": 7
+          "max_length": 3
+        },
+        "lim_min": {
+          "english": "Min",
+          "translation": "Min",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 3
+        },
+        "lim_max": {
+          "english": "Max",
+          "translation": "Max",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 3
+        },
+        "lim_move": {
+          "english": "Move - for Min or + for Max.",
+          "translation": "Move - for Min or + for Max.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 28
+        },
+        "lim_set_min": {
+          "english": "Set saves Min",
+          "translation": "Set saves Min",
+          "needs_translation": true,
+          "max_length": 13,
+          "reverse_text": false
         },
         "lim_set_max": {
-          "english": "Set Max",
-          "translation": "Set Max",
+          "english": "Set saves Max",
+          "translation": "Set saves Max",
           "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 7
+          "max_length": 13,
+          "reverse_text": false
         },
         "lim_done_title": {
           "english": "Limits set",

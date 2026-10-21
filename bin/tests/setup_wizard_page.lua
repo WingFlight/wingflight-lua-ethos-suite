@@ -711,6 +711,90 @@ press("+10")
 local mid = writesOf(212, before + 1)
 check("centre: +10 moves servo 1's centre to 1510", #mid == 1 and mid[1].payload[1] == 0 and u16(mid[1].payload, 2) == 1510)
 
+-- Identify moves only the selected servo temporarily; configuration is untouched.
+local function lastServoValue(servo, from)
+  local value
+  for _, m in ipairs(writesOf(193, from)) do
+    if m.payload[1] == servo then value = s16(m.payload, 2) end
+  end
+  return value
+end
+before = #sent
+press(T("cen_identify"))
+local identifyWrites = writesOf(193, before + 1)
+check("centre: Identify starts only servo 1 with a small timed movement",
+  #identifyWrites == 1 and identifyWrites[1].payload[1] == 0
+  and s16(identifyWrites[1].payload, 2) == 100 and #identifyWrites[1].payload == 5)
+tick(0.25)
+check("centre: Identify rocks to the other side", lastServoValue(0, before + 1) == -100)
+tick(0.5)
+check("centre: Identify rocks back", lastServoValue(0, before + 1) == 100)
+tick(2.0)
+check("centre: Identify centers the servo after 3 seconds", lastServoValue(0, before + 1) == 0)
+check("centre: Identify changes no configuration and needs no save",
+  #writesOf(212, before + 1) == 0 and #writesOf(250, before + 1) == 0)
+before = #sent
+tick(1)
+check("centre: Identify stays stopped", #writesOf(193, before + 1) == 0)
+
+press(T("cen_identify"))
+before = #sent
+press("-1")
+check("centre: adjusting the center stops Identify first", lastServoValue(0, before + 1) == 0)
+press(T("cen_identify"))
+before = #sent
+press(T("btn_next"))
+check("centre: Next centers the old servo before changing surfaces", lastServoValue(0, before + 1) == 0)
+before = #sent
+press(T("cen_identify"))
+check("centre: Identify follows the selected surface", lastServoValue(1, before + 1) == 100)
+before = #sent
+press(T("btn_back"))
+check("centre: Back centers the servo before changing surfaces", lastServoValue(1, before + 1) == 0)
+
+press(T("cen_identify"))
+before = #sent
+headers[#headers].opts.onTool()
+tick()
+check("centre: opening the step list centers the servo", lastServoValue(0, before + 1) == 0)
+before = #sent
+tick(4)
+check("centre: Identify stays stopped in the step list", #writesOf(193, before + 1) == 0)
+headers[#headers].opts.onBack()
+tick()
+press(T("cen_identify"))
+before = #sent
+headers[#headers].opts.onSave()
+check("centre: saving centers the servo", lastServoValue(0, before + 1) == 0)
+settle()
+
+press(T("cen_identify"))
+before = #sent
+session({connected = true, isArmed = true, apiVersionMajor = 22, apiVersionMinor = 14})
+tick()
+check("centre: arming releases Identify and disables its button",
+  lastServoValue(0, before + 1) == 2001 and not button(T("cen_identify")).enabled)
+before = #sent
+tick(4)
+check("centre: Identify sends no movement while armed", #writesOf(193, before + 1) == 0)
+session({connected = true, isArmed = false, apiVersionMajor = 22, apiVersionMinor = 14})
+settle()
+check("centre: disarming holds center without resuming Identify", lastServoValue(0) == 0)
+press(T("cen_identify"))
+before = #sent
+session({connected = false, isArmed = false, apiVersionMajor = 22, apiVersionMinor = 14})
+tick()
+check("centre: disconnecting releases Identify", lastServoValue(0, before + 1) == 2001)
+before = #sent
+tick(4)
+check("centre: Identify sends no movement while disconnected", #writesOf(193, before + 1) == 0)
+session({connected = true, isArmed = false, apiVersionMajor = 22, apiVersionMinor = 14})
+settle()
+press(T("cen_identify"))
+before = #sent
+ctx.cleanup()
+check("centre: closing releases the identifying servo", lastServoValue(0, before + 1) == 2001)
+
 -- Limits: probe past the stored limits, then set Min.
 openPage(14, "limits")
 settle()
@@ -718,15 +802,89 @@ before = #sent
 press(T("btn_start"))
 local probe = writesOf(0x5F1C, before + 1)
 check("limits: servo 1 is probed at its centre, timed", #probe >= 1 and bytes(probe[1].payload) == "0,0,0,16,39")
+check("limits: the slider labels both ends and Set is disabled at center",
+  shows("lim_min") and shows("lim_max") and shows("lim_move") and not button(T("lim_set")).enabled)
+before = #sent
+button(T("lim_set")).press()
+tick()
+check("limits: Set at center cannot write a zero limit", #writesOf(212, before + 1) == 0)
 press("-50")
 press("-50")
 probe = writesOf(0x5F1C)
 check("limits: stepping moves the probe", s16(probe[#probe].payload, 2) == -100)
+check("limits: negative movement explains that Set saves Min",
+  shows("lim_set_min") and not shows("lim_set_max") and button(T("lim_set")).enabled)
 before = #sent
-press(T("lim_set_min"))
+press(T("lim_set"))
 local minWrite = writesOf(212, before + 1)
-check("limits: Set Min writes it", #minWrite == 1 and s16(minWrite[1].payload, 4) == -100)
+check("limits: Set on the negative side writes Min", #minWrite == 1 and s16(minWrite[1].payload, 4) == -100)
 check("limits: then asks for Max", shows("lim_todo_max"))
+
+-- Complete both bounds on the same servo, including the actual Max write.
+check("limits: Set is disabled at center and the slider explains how to choose a side",
+  button(T("lim_set")) and not button(T("lim_set")).enabled and shows("lim_move"))
+press("+50")
+press("+50")
+check("limits: a positive probe enables Set and says it saves Max",
+  button(T("lim_set")).enabled and shows("lim_set_max") and not shows("lim_set_min"))
+before = #sent
+press(T("lim_set"))
+local maxWrite = writesOf(212, before + 1)
+check("limits: Set on the positive side writes Max and preserves Min",
+  #maxWrite == 1 and maxWrite[1].payload[1] == 0
+  and s16(maxWrite[1].payload, 4) == -100 and s16(maxWrite[1].payload, 6) == 100)
+probe = writesOf(0x5F1C, before + 1)
+check("limits: both sides set advances to servo 2 at center",
+  probe[#probe].payload[1] == 1 and s16(probe[#probe].payload, 2) == 0 and shows("lim_todo_min"))
+
+-- The slider guidance must match the write even when Max is explored first.
+openPage(14, "limits")
+settle()
+press(T("btn_start"))
+press("+50")
+check("limits: exploring positive first still explains that Set saves Max",
+  button(T("lim_set")).enabled and shows("lim_set_max"))
+before = #sent
+press(T("lim_set"))
+maxWrite = writesOf(212, before + 1)
+check("limits: Max first writes only the maximum, then asks for Min",
+  #maxWrite == 1 and maxWrite[1].payload[1] == 0
+  and s16(maxWrite[1].payload, 4) < 0 and s16(maxWrite[1].payload, 6) == 50 and shows("lim_todo_min"))
+press("-50")
+before = #sent
+press(T("lim_set"))
+minWrite = writesOf(212, before + 1)
+check("limits: Min second preserves Max and completes the same servo",
+  #minWrite == 1 and minWrite[1].payload[1] == 0
+  and s16(minWrite[1].payload, 4) == -50 and s16(minWrite[1].payload, 6) == 50)
+
+-- Next visits both sides without changing skipped limits.
+openPage(14, "limits")
+settle()
+press(T("btn_start"))
+before = #sent
+press(T("btn_next"))
+check("limits: skipping Min offers Max on the same servo without a config write",
+  shows("lim_todo_max") and button(T("lim_set"))
+  and #writesOf(212, before + 1) == 0)
+probe = writesOf(0x5F1C, before + 1)
+check("limits: skipping Min keeps servo 1 centered", probe[#probe].payload[1] == 0 and s16(probe[#probe].payload, 2) == 0)
+before = #sent
+press(T("btn_next"))
+probe = writesOf(0x5F1C, before + 1)
+check("limits: skipping Max advances to servo 2 without a config write",
+  probe[#probe].payload[1] == 1 and shows("lim_todo_min") and #writesOf(212, before + 1) == 0)
+
+openPage(14, "limits")
+settle()
+press(T("btn_start"))
+press(T("btn_next"))
+press("+50")
+before = #sent
+press(T("lim_set"))
+probe = writesOf(0x5F1C, before + 1)
+check("limits: setting Max after skipping Min completes servo 1",
+  #writesOf(212, before + 1) == 1 and probe[#probe].payload[1] == 1 and shows("lim_todo_min"))
 
 -- Throws: PASSTHROUGH forced, Throw stepped.
 openPage(14, "throws")

@@ -20,9 +20,14 @@ local T = {
   doneTitle = "@i18n(app.modules.setup_wizard.cen_done_title)@",
   done = "@i18n(app.modules.setup_wizard.cen_done)@",
   next = "@i18n(app.modules.setup_wizard.btn_next)@",
+  identify = "@i18n(app.modules.setup_wizard.cen_identify)@",
 }
 
 local MID_WARN_US = 100
+-- Ten percent of servo travel either side of center, within the stored limits.
+local IDENTIFY_RAW = 100
+local IDENTIFY_INTERVAL = 0.5
+local IDENTIFY_SECONDS = 3
 local NUDGES = {-10, -1, 1, 10}
 
 local function bandCentre(config)
@@ -35,6 +40,23 @@ local function new(wiz)
   local surfaces = wiz.surfaces()
   local index = 1
   local holding = false
+  local identifyServo, identifyUntil, nextMoveAt, phase = nil, 0, 0, false
+
+  local function stopIdentify()
+    if identifyServo == nil then return end
+    local servo = identifyServo
+    identifyServo = nil
+    wiz.holdServo(servo, 0)
+  end
+
+  local function identify()
+    local surface = surfaces[index]
+    if identifyServo ~= nil or not surface or not wiz.canMove() then return end
+    if not wiz.holdServo(surface.servo, IDENTIFY_RAW) then return end
+    local now = os.clock()
+    identifyServo, identifyUntil = surface.servo, now + IDENTIFY_SECONDS
+    phase, nextMoveAt = true, now + IDENTIFY_INTERVAL
+  end
 
   local function holdAll()
     holding = true
@@ -44,6 +66,7 @@ local function new(wiz)
   end
 
   local function nudge(delta)
+    stopIdentify()
     local surface = surfaces[index]
     wiz.editServo(surface.servo, function(config)
       config.mid = config.mid + delta
@@ -67,7 +90,7 @@ local function new(wiz)
     if not holding then holdAll() end
     local surface = surfaces[index]
     -- Back steps through the surfaces; from the first, the previous step.
-    local back = index > 1 and function() index = index - 1; wiz.rebuild() end or nil
+    local back = index > 1 and function() stopIdentify(); index = index - 1; wiz.rebuild() end or nil
     if not surface then
       scr:text(T.doneTitle, T.done)
       return scr:row(back)
@@ -83,8 +106,12 @@ local function new(wiz)
     for _, d in ipairs(NUDGES) do
       specs[#specs + 1] = {text = (d > 0 and "+" or "") .. d, small = true, weight = 0.7, needsMotion = true,
         press = function() nudge(d) end}
+      if d == -1 then
+        specs[#specs + 1] = {text = T.identify, small = true, weight = 1.6, needsMotion = true, press = identify}
+      end
     end
     return scr:row(back, specs, {text = T.next, press = function()
+      stopIdentify()
       index = index + 1
       wiz.rebuild()
     end})
@@ -93,16 +120,33 @@ local function new(wiz)
   function self.paint() scr:paint() end
 
   local lastCanMove = nil
-  function self.wakeup()
+  function self.wakeup(now)
     local canMove = wiz.canMove()
     if canMove ~= lastCanMove then
       lastCanMove = canMove
       if canMove and not holding then holdAll() end
       scr:refresh()
     end
+    if identifyServo == nil then return end
+    if not canMove then
+      identifyServo = nil
+    elseif now >= identifyUntil then
+      stopIdentify()
+    elseif now >= nextMoveAt then
+      phase = not phase
+      if not wiz.holdServo(identifyServo, phase and IDENTIFY_RAW or -IDENTIFY_RAW) then
+        identifyServo = nil
+      end
+      nextMoveAt = now + IDENTIFY_INTERVAL
+    end
   end
 
+  -- The shell pauses motion before opening the step list, saving or leaving.
+  self.pause = stopIdentify
+  self.leave = stopIdentify
+
   function self.released()
+    identifyServo = nil
     holding = false
     scr:refresh()
   end

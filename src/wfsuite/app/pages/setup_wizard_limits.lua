@@ -23,8 +23,12 @@ local T = {
   max = "@i18n(app.modules.setup_wizard.lim_todo_max)@",
   now = "@i18n(app.modules.setup_wizard.lim_now_fmt)@",
   flap = "@i18n(app.modules.setup_wizard.lim_flap)@",
-  setMin = "@i18n(app.modules.setup_wizard.lim_set_min)@",
-  setMax = "@i18n(app.modules.setup_wizard.lim_set_max)@",
+  set = "@i18n(app.modules.setup_wizard.lim_set)@",
+  saveMin = "@i18n(app.modules.setup_wizard.lim_set_min)@",
+  saveMax = "@i18n(app.modules.setup_wizard.lim_set_max)@",
+  minLabel = "@i18n(app.modules.setup_wizard.lim_min)@",
+  maxLabel = "@i18n(app.modules.setup_wizard.lim_max)@",
+  move = "@i18n(app.modules.setup_wizard.lim_move)@",
   progress = "@i18n(app.modules.setup_wizard.progress_fmt)@",
   doneTitle = "@i18n(app.modules.setup_wizard.lim_done_title)@",
   done = "@i18n(app.modules.setup_wizard.lim_done)@",
@@ -95,15 +99,9 @@ local function new(wiz)
     end
   end
 
-  local function setHere()
-    local s = current()
-    -- The side follows where the servo is, as in the configurator.
-    local which = position > 0 and "max" or "min"
-    wiz.editServo(s.servo, function(config)
-      config[which] = position
-      matchFlapScale(s, config, which, position)
-    end)
-    sidesDone[which] = true
+  -- Setting or skipping a side always visits the other side before moving
+  -- to the next surface. A skipped side keeps its stored limit.
+  local function advance()
     if sidesDone.min and sidesDone.max then
       startSurface(index + 1)
     else
@@ -113,14 +111,37 @@ local function new(wiz)
     end
   end
 
+  local function setHere()
+    if position == 0 or not wiz.canMove() then return end
+    local s = current()
+    -- The side follows where the servo is, as in the configurator.
+    local which = position > 0 and "max" or "min"
+    wiz.editServo(s.servo, function(config)
+      config[which] = position
+      matchFlapScale(s, config, which, position)
+    end)
+    sidesDone[which] = true
+    advance()
+  end
+
   local function drawGauge(x, y, w, h, colors)
     local s = current()
     if not s then return end
     local config = wiz.configs[s.servo]
     local lo, hi = openRange(config)
-    local gh = math.min(h, 30)
+    lcd.font(FONT_S)
+    local _, th = lcd.getTextSize("Ag")
+    local gh = math.min(30, math.max(0, h - 2 * th - 8))
+    local gy = y + math.floor((h - gh) / 2)
     local function at(v) return (v - lo) / (hi - lo) end
-    ui.gauge(x, y + math.floor((h - gh) / 2), w, gh, at(position), colors, at(config.min), at(config.max))
+    lcd.color(position < 0 and colors.active or colors.muted)
+    lcd.drawText(x, gy - th - 4, T.minLabel, LEFT)
+    lcd.color(position > 0 and colors.active or colors.muted)
+    lcd.drawText(x + w, gy - th - 4, T.maxLabel, RIGHT)
+    ui.gauge(x, gy, w, gh, at(position), colors, at(config.min), at(config.max))
+    lcd.color(position ~= 0 and colors.active or colors.muted)
+    lcd.drawText(x + math.floor(w / 2), gy + gh + 4,
+      position < 0 and T.saveMin or (position > 0 and T.saveMax or T.move), CENTERED)
   end
 
   function self.build()
@@ -149,10 +170,11 @@ local function new(wiz)
       specs[#specs + 1] = {text = (d > 0 and "+" or "") .. d, small = true, weight = 0.7, needsMotion = true,
         primary = position == 0 and towards, press = function() move(d) end}
     end
-    specs[#specs + 1] = {text = side == "min" and T.setMin or T.setMax, small = true, primary = position ~= 0,
+    -- The slider explains which limit Set will save; at center Set is disabled.
+    specs[#specs + 1] = {text = T.set, small = true, primary = position ~= 0,
       needsMotion = true, disabled = position == 0, press = setHere}
-    -- Back: the surface before, or the intro. Next: the next surface; a side
-    -- not set keeps its old limit.
+    -- Back: the surface before, or the intro. Next: skip this side, keeping
+    -- its old limit, then visit the remaining side or the next surface.
     return scr:row(function()
       if index > 1 then
         startSurface(index - 1)
@@ -162,7 +184,10 @@ local function new(wiz)
         screen = "intro"
         wiz.rebuild()
       end
-    end, specs, {text = T.next, press = function() startSurface(index + 1) end})
+    end, specs, {text = T.next, press = function()
+      sidesDone[side] = true
+      advance()
+    end})
   end
 
   function self.paint() scr:paint() end

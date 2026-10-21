@@ -7894,6 +7894,12 @@
           "needs_translation": false,
           "translation": "Flaps are held at flaps up: set them in line with the wing."
         },
+        "cen_identify": {
+          "english": "Identify",
+          "max_length": 8,
+          "needs_translation": false,
+          "translation": "Identify"
+        },
         "cen_intro": {
           "english": "The surfaces are held at center. Set the horn and linkage so the surface is close to neutral first, then fine-tune here.",
           "max_length": 120,
@@ -8326,23 +8332,47 @@
           "needs_translation": false,
           "translation": "Find how far each servo can move before the surface or linkage binds. These limits protect the servo; throw is set later, in the Throws step."
         },
+        "lim_max": {
+          "english": "Max",
+          "max_length": 3,
+          "needs_translation": false,
+          "translation": "Max"
+        },
+        "lim_min": {
+          "english": "Min",
+          "max_length": 3,
+          "needs_translation": false,
+          "translation": "Min"
+        },
+        "lim_move": {
+          "english": "Move - for Min or + for Max.",
+          "max_length": 28,
+          "needs_translation": false,
+          "translation": "Move - for Min or + for Max."
+        },
         "lim_now_fmt": {
           "english": "Now %d us from center. Limits: %d / %d us.",
           "max_length": 42,
           "needs_translation": false,
           "translation": "Now %d us from center. Limits: %d / %d us."
         },
-        "lim_set_max": {
-          "english": "Set Max",
-          "max_length": 7,
+        "lim_set": {
+          "english": "Set",
+          "max_length": 3,
           "needs_translation": false,
-          "translation": "Set Max"
+          "translation": "Set"
+        },
+        "lim_set_max": {
+          "english": "Set saves Max",
+          "max_length": 13,
+          "needs_translation": false,
+          "translation": "Set saves Max"
         },
         "lim_set_min": {
-          "english": "Set Min",
-          "max_length": 7,
+          "english": "Set saves Min",
+          "max_length": 13,
           "needs_translation": false,
-          "translation": "Set Min"
+          "translation": "Set saves Min"
         },
         "lim_title": {
           "english": "Binding limits",
@@ -8351,16 +8381,16 @@
           "translation": "Binding limits"
         },
         "lim_todo_max": {
-          "english": "2 of 2: now press + until it binds, back off one step, then Set Max.",
-          "max_length": 68,
+          "english": "2 of 2: now press + until it binds, back off one step, then Set.",
+          "max_length": 64,
           "needs_translation": false,
-          "translation": "2 of 2: now press + until it binds, back off one step, then Set Max."
+          "translation": "2 of 2: now press + until it binds, back off one step, then Set."
         },
         "lim_todo_min": {
-          "english": "1 of 2: press - until the surface binds, back off one step, then Set Min.",
-          "max_length": 73,
+          "english": "1 of 2: press - until the surface binds, back off one step, then Set.",
+          "max_length": 69,
           "needs_translation": false,
-          "translation": "1 of 2: press - until the surface binds, back off one step, then Set Min."
+          "translation": "1 of 2: press - until the surface binds, back off one step, then Set."
         },
         "missing_servos_fmt": {
           "english": "Servo %s is mixed but this board has no output for it, so the wizard leaves it out.",

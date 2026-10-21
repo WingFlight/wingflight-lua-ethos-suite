@@ -28,8 +28,9 @@ on older firmware the page explains that and does nothing else.
 
 ## Moving around
 
-The title shows the step number and name. A notice line appears under it only
-when something stops the wizard moving the surfaces (see below).
+The title shows the step number and name. An amber notice line appears under it
+only when something stops the wizard moving the surfaces (see below), including
+**Switch MANUAL mode off** and **Switch PASSTHROUGH mode off**.
 
 - Every screen has one row of buttons along the bottom, always in the same
   order. **Back** (‹) is a small button at the left end: the screen before, or
@@ -61,9 +62,9 @@ when something stops the wizard moving the surfaces (see below).
 | 3. Airframe | Shows the model type and its servos. **Change** asks the type (regular, flying wing, V-tail, delta, rudder-elevator), then only the questions that type needs (ailerons, tail, rudder, flaps, flaps following the ailerons, motors, differential thrust), with a picture of the result, then **Apply** writes the whole mix and the model type. Custom mixes stay in Mixer Rules; applying a type also replaces thrust vectoring rules (set them up again in the Configurator). |
 | 4. Servo type | Analog (50 Hz), digital (333 Hz) or narrow-band (560 Hz, 760 µs) for every control-surface servo. Changing between normal and narrow band resets that servo's centre, limits and scale. Applies after a restart (**Save and restart**). |
 | 5. Motor | Standard PWM, DShot300, DShot600 or No motor (other protocols stay on the ESC & Motors pages; a change applies after a restart). **Check motor**: confirm the propeller is off, then **Spin** runs every motor at 5, 10 or 20 % for 3 seconds and stops by itself. |
-| 6. Center | Every surface is held at its centre. One screen per surface: −10/−1/+1/+10 µs until it is neutral. More than 100 µs from the servo's normal centre is flagged: move the horn instead. |
+| 6. Center | Every surface is held at its centre. One screen per surface: −10/−1/+1/+10 µs until it is neutral. **Identify** rocks only the selected servo gently either side of center for 3 seconds, then centers it again; adjusting or leaving stops it early. More than 100 µs from the servo's normal centre is flagged: move the horn instead. |
 | 7. Direction | The wizard moves each axis itself and asks **Like this** / **Not like this** against a picture of the model seen from behind. See below. |
-| 8. Binding limits | For each surface, Min then Max: the servo is held by a probe that ignores the stored limits. Step it until the surface binds, back off a step, and **Set Min** / **Set Max**. A flap's limits are its end points: setting one also sets the flap travel so the flap channel's end lands on it. |
+| 8. Binding limits | For each surface, Min then Max: the servo is held by a probe that ignores the stored limits. Step it until the surface binds, back off a step, and **Set**. The slider labels its Min and Max ends and explains what Set will save: negative sets Min, positive sets Max. At center, Set is disabled and the slider asks you to move toward Min or Max. Setting either side returns to center for the remaining side. **Next** skips only the current side, keeping its old limit; the next surface opens once both sides are set or skipped. A flap's limits are its end points: setting one also sets the flap travel so the flap channel's end lands on it. |
 | 9. Throws | The wizard switches PASSTHROUGH on, so your sticks move the surfaces directly. For each axis: hold full stick, measure, and step the axis Throw (−5/−1/+1/+5 %). **Fine-tune** adjusts one surface in one stick direction (that servo's scale on that side), for differential. A surface that reaches its binding limit before full stick is flagged. |
 | 10. Travel check | Each surface's reach with full stick on every axis at once, as a percentage of its limit on each side. Above 100 % it reaches its limit before full stick. PASSTHROUGH stays on so you can try the stick corners. |
 | 11. Gyro direction | The wizard switches ANGLE on. For each axis, move the model as the screen says; the surfaces should push back the way the arrows show. If one doesn't, the board orientation is wrong: run the Sensors step again (the step list). Don't reverse servos for this. |

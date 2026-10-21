@@ -77,7 +77,7 @@ local rcChannels = requireModule("lib/msp_rc_channels.lua")
 local surfacesLib = requireModule("lib/setup_wizard_surfaces.lua")
 local ui = requireModule("app/setup_wizard_ui.lua")
 -- Steps draw with it; loaded here so they share one copy.
-requireModule("app/setup_wizard_art.lua")
+local art = requireModule("app/setup_wizard_art.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.setup_wizard.name)@"
 local MSG_LOADING_TITLE = "@i18n(app.msg_loading)@"
@@ -634,6 +634,7 @@ local function open(opts)
       -- The tool button opens the step list, so it shows a checklist, not
       -- the default wrench.
       onTool = loaded and not unsupported and not rebootWait and ui.action("tool", function()
+        if step and step.pause then step.pause() end
         picking = true
         rebuildWanted = true
       end) or nil,
@@ -766,6 +767,7 @@ local function open(opts)
     -- Only when there is something to say: a 320 px screen has no row to spare.
     local notice = noticeText()
     noticeField = (notice ~= "") and addTextLine(notice) or nil
+    if noticeField and noticeField.color then noticeField:color(art.colors().active) end
     if #missingServos > 0 and STEPS[stepIndex].needsSurfaces then
       addWrapped(string.format("@i18n(app.modules.setup_wizard.missing_servos_fmt)@",
         table.concat(missingServos, ", ")))
@@ -889,6 +891,7 @@ local function open(opts)
   -- nothing to save); not at all if it fails.
   requestSave = function(onSaved)
     if saving or not loaded or saveRequest then return end
+    if step and step.pause then step.pause() end
     saveRequest = {onSaved = onSaved}
   end
 
@@ -993,6 +996,7 @@ local function open(opts)
 
   goBack = function()
     if disposed then return end
+    if step and step.pause then step.pause() end
     if picking and step then
       -- Back from the step list returns to the step.
       picking = false

@@ -30,13 +30,14 @@ local READ_COMMAND = 125          -- MSP_GET_SERVO_CONFIG, raw index
 local WRITE_RAW_COMMAND = 124     -- MSP_SET_SERVO_CONFIG, raw index
 local WRITE_PACKED_COMMAND = 212  -- MSP_SET_SERVO_CONFIGURATION, packed index
 
+-- PWM defaults from wingflight-firmware flight/servos.h and pg/servos.c.
 local SIMULATOR_RESPONSE = {
   220, 5,   -- mid = 1500
-  232, 3,   -- min = 1000
-  208, 7,   -- max = 2000
-  232, 3,   -- rneg = 1000
-  232, 3,   -- rpos = 1000
-  100, 0,   -- rate = 100
+  68, 253,  -- min = -700 (signed offset from mid, not an absolute pulse)
+  188, 2,   -- max = 700
+  244, 1,   -- rneg = 500
+  244, 1,   -- rpos = 500
+  50, 0,    -- rate = 50
   0, 0,     -- speed = 0
   0, 0,     -- flags = 0
 }
