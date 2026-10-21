@@ -59,7 +59,7 @@ offsets.
 
 ## Source
 
-Widget and flight-state logic: `src/wfsuite/widgets/activelook.lua` and
-`src/wfsuite/widgets/dashboard/flightmode.lua`. Settings and slot definitions:
+Widget logic: `src/wfsuite/widgets/activelook.lua`. The flight phase comes from the session
+(`src/wfsuite/lib/flight_stats.lua`), the same one the dashboard shows. Settings and slot definitions:
 `src/wfsuite/lib/activelook_config.lua`. Simulator preview:
 `bin/activelook_preview/`.

@@ -7,7 +7,7 @@ local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("
 local bus = requireModule("lib/bus.lua")
 local settingsStore = requireModule("lib/settings_store.lua")
 local batteryProfileIndex = requireModule("lib/battery_profile_index.lua")
-local flightmode = requireModule("widgets/dashboard/flightmode.lua")
+local flightStats = requireModule("lib/flight_stats.lua")
 
 -- dataflashErase/dataflashSummary/batteryProfileMsp are loadfile()'d lazily,
 -- on first actual need (matching ensureDashboardContext()/
@@ -1074,19 +1074,11 @@ local function drawInfoPanel(widget, w, h)
   drawInfoColumn(panel, panel.power, "@i18n(widgets.dashboard.battery)@", x + pad * 2 + colW, y + pad, colW, maxY)
 end
 
-local function clearDashboardStats(stats)
-  if not stats then return end
-  for key in pairs(stats) do stats[key] = nil end
-end
-
 local function applyResetFlight(widget)
   if not widget then return end
-  if widget.flightmode and type(widget.flightmode.reset) == "function" then
-    widget.flightmode:reset()
-  end
+  -- The flight object is the session's own; its next tick publishes the phase.
+  if widget.flight then widget.flight:reset() end
   widget.flightmodeState = "preflight"
-  widget.rpmVariancePct = nil
-  clearDashboardStats(widget.dashboardStats)
   widget.timerLive = 0
   widget.timerSession = 0
 
@@ -1578,33 +1570,6 @@ local function activateToolbarItem(widget, item)
   return false
 end
 
-local function updateMinMax(stats, minKey, maxKey, value)
-  value = tonumber(value)
-  if value == nil then return end
-  if stats[minKey] == nil or value < stats[minKey] then stats[minKey] = value end
-  if stats[maxKey] == nil or value > stats[maxKey] then stats[maxKey] = value end
-end
-
-local function recordStat(stats, key, value)
-  value = tonumber(value)
-  if not key or value == nil then return end
-  local entry = stats[key]
-  if not entry then
-    entry = {min = value, max = value, sum = 0, count = 0, avg = value}
-    stats[key] = entry
-  end
-  if value < entry.min then entry.min = value end
-  if value > entry.max then entry.max = value end
-  entry.sum = (entry.sum or 0) + value
-  entry.count = (entry.count or 0) + 1
-  entry.avg = entry.sum / entry.count
-end
-
-local function roundSigned(value)
-  if value >= 0 then return math.floor(value + 0.5) end
-  return -math.floor(-value + 0.5)
-end
-
 local function create()
   return {
     connected = false,
@@ -1644,12 +1609,9 @@ local function create()
     bblFlags = nil,
     bblSize = nil,
     bblUsed = nil,
-    rpmVariancePct = nil,
-    dashboardStats = {},
     dashboardSettings = nil,
     modelDashboard = nil,
     smartfuelModelType = nil,
-    flightmode = flightmode.new(),
     flightmodeState = "preflight",
     handler = nil,
     settingsHandler = nil,
@@ -1705,43 +1667,8 @@ local function create()
   }
 end
 
-local function recordDashboardStats(widget, state)
-  if state ~= "inflight" then return end
-  local stats = widget.dashboardStats
-  updateMinMax(stats, "minVoltage", "maxVoltage", widget.voltage)
-  recordStat(stats, "voltage", widget.voltage)
-  updateMinMax(stats, "minConsumption", "maxConsumption", widget.consumption)
-  recordStat(stats, "consumption", widget.consumption)
-  updateMinMax(stats, "minCurrent", "maxCurrent", widget.current)
-  recordStat(stats, "current", widget.current)
-  updateMinMax(stats, "minThrottlePercent", "maxThrottlePercent", widget.throttlePercent)
-  recordStat(stats, "throttle_percent", widget.throttlePercent)
-  updateMinMax(stats, "minRpm", "maxRpm", widget.rpm)
-  recordStat(stats, "rpm", widget.rpm)
-  local rpmStats = stats.rpm
-  if rpmStats and rpmStats.avg and rpmStats.avg > 0 and tonumber(widget.rpm) then
-    widget.rpmVariancePct = roundSigned((math.abs(tonumber(widget.rpm) - rpmStats.avg) / rpmStats.avg) * 100)
-  end
-  updateMinMax(stats, "minLink", "maxLink", widget.linkQuality)
-  recordStat(stats, "link", widget.linkQuality)
-  updateMinMax(stats, "minTempEsc", "maxTempEsc", widget.tempEsc)
-  recordStat(stats, "temp_esc", widget.tempEsc)
-  updateMinMax(stats, "minTempMcu", "maxTempMcu", widget.tempMcu)
-  recordStat(stats, "temp_mcu", widget.tempMcu)
-  updateMinMax(stats, "minBecVoltage", "maxBecVoltage", widget.becVoltage)
-  recordStat(stats, "bec_voltage", widget.becVoltage)
-  updateMinMax(stats, "minFuelPercent", "maxFuelPercent", widget.fuelPercent)
-  recordStat(stats, "smartfuel", widget.fuelPercent)
-  if tonumber(widget.voltage) and tonumber(widget.current) then
-    local watts = tonumber(widget.voltage) * tonumber(widget.current)
-    updateMinMax(stats, "minWatts", "maxWatts", watts)
-    recordStat(stats, "watts", watts)
-  end
-end
-
 local function update(widget, snapshot)
   snapshot = snapshot or {}
-  local previousState = widget.flightmodeState
   local previousConnected = widget.connected
   local previousMcuId = widget.mcuId
   local previousArmed = widget.isArmed
@@ -1797,6 +1724,10 @@ local function update(widget, snapshot)
   widget.bblFlags = snapshot.bblFlags
   widget.bblSize = snapshot.bblSize
   widget.bblUsed = snapshot.bblUsed
+  -- The phase and extremes are owned by the session (lib/flight_stats.lua). The
+  -- dashboard's own sensor samples write into the same table, so it is shared.
+  widget.flight = snapshot.flight
+  widget.dashboardStats = (snapshot.flight and snapshot.flight.stats) or {}
 
   if widget.mcuId ~= previousMcuId and widget.connected == true and widget.mcuId and widget.mcuId ~= "" then
     if widget.lastConnectedMcuId and widget.lastConnectedMcuId ~= widget.mcuId then
@@ -1807,11 +1738,6 @@ local function update(widget, snapshot)
       -- persists across that gap for the real comparison. Postflight/
       -- inflight state, min/max stats, and timers from the previous model
       -- must not bleed into the new one.
-      if widget.flightmode and type(widget.flightmode.reset) == "function" then
-        widget.flightmode:reset()
-      end
-      widget.rpmVariancePct = nil
-      clearDashboardStats(widget.dashboardStats)
       widget.timerLive = 0
       widget.timerSession = 0
     end
@@ -1824,12 +1750,9 @@ local function update(widget, snapshot)
     end
   end
 
+  -- Reconnect and craft changes reset the flight phase and extremes in the session
+  -- (lib/flight_stats.lua), which sees the same transitions.
   if previousConnected == false and widget.connected == true then
-    if (previousState == "postflight" or previousState == "offline") and widget.flightmode and type(widget.flightmode.reset) == "function" then
-      widget.flightmode:reset()
-    end
-    clearDashboardStats(widget.dashboardStats)
-    widget.rpmVariancePct = nil
   elseif previousConnected == true and widget.connected ~= true then
     -- Re-arm the startup battery-profile prompt for the next connection
     -- (matches master's own reset of session.batteryDialogShown on
@@ -1839,16 +1762,11 @@ local function update(widget, snapshot)
     closeBatteryPicker(widget)
   end
 
-  widget.flightmodeState = widget.flightmode:update(widget)
-  if widget.flightmodeState == "inflight" and previousState ~= "inflight" and previousState ~= "postflight" and previousState ~= "offline" then
-    clearDashboardStats(widget.dashboardStats)
-    widget.rpmVariancePct = nil
-  end
-  recordDashboardStats(widget, widget.flightmodeState)
+  widget.flightmodeState = snapshot.flightState or "preflight"
 end
 
 local function dashboardState(widget)
-  return flightmode.layoutPhase(widget.flightmodeState or "preflight")
+  return flightStats.layoutPhase(widget.flightmodeState or "preflight")
 end
 
 -- Runs on every paint() and every prepare. settingsStore.dashboardTheme()

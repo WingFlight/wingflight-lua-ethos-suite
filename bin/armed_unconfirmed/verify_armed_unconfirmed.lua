@@ -94,6 +94,7 @@ end
 local published = {}
 local function installRequireStub()
   package.loaded["wfsuite.lib.require"] = function(name)
+    if name == "lib/flight_stats.lua" then return dofile(TASKS .. "/../lib/flight_stats.lua") end
     if name == "lib/bus.lua" then
       return {
         publish = function(topic, payload) published[#published + 1] = { topic, payload } end,
