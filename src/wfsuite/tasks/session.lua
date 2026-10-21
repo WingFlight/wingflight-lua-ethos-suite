@@ -48,6 +48,8 @@ local flightTimer = requireModule("tasks/flight_timer.lua")
 -- Flight phase and extremes, driven here every tick so they are kept with the
 -- dashboard closed (#2344). The dashboard only reads the result.
 local flightRecord = requireModule("lib/flight_stats.lua").new()
+-- The sensor values the dashboard shows, read here for the extremes (#2344).
+local liveSensors = requireModule("lib/live_sensors.lua")
 local rxMapApi = requireModule("lib/msp_rx_map.lua")
 local systemStatusCodec = requireModule("lib/system_status.lua")
 local mainPower = requireModule("lib/main_power.lua")
@@ -1599,7 +1601,7 @@ local function wakeup(mspQueue, protocol, transport, simSensors)
   end
 
   updateFlightTimer(now)
-  local flightPhase = flightRecord:update(session)
+  local flightPhase = flightRecord:update(session, liveSensors.read)
   if flightPhase ~= session.flightState then
     session.flightState = flightPhase
     publish()

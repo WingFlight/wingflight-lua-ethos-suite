@@ -185,6 +185,13 @@ Outputs static or telemetry-based text. Subtypes located in `objects/text/`:
 | `pidrates`   | PID/Rates profile display (auto).      | –                 |
 | `watts`      | Voltage/Current => Power (auto).       | –                 |
 
+The min, max and average values these objects show are recorded by the background task while the
+model is in flight, once per tick, whether a dashboard is on screen or not (`lib/flight_stats.lua`).
+Drawing a dashboard does not add samples.
+
+The minimum headspeed and the minimum current are taken only while the rotor is under power, so
+the spool-up and the spool-down do not set them.
+
 **Common Parameters:**
 
 * `value` (for `text` subtype)
