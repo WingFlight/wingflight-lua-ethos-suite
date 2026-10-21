@@ -45,6 +45,7 @@ local T = {
   alignLift = "@i18n(app.modules.setup_wizard.sen_align_lift)@",
   alignDone = "@i18n(app.modules.setup_wizard.sen_align_done_fmt)@",
   levelTitle = "@i18n(app.modules.setup_wizard.sen_level_title)@",
+  progress = "@i18n(app.modules.setup_wizard.progress_fmt)@",
   levelText = "@i18n(app.modules.setup_wizard.sen_level_text)@",
   levelBusy = "@i18n(app.modules.setup_wizard.sen_level_busy)@",
   levelDone = "@i18n(app.modules.setup_wizard.sen_level_done_fmt)@",
@@ -186,7 +187,8 @@ local function new(wiz)
       return scr:row(nil, hasAcc and {{text = T.start, primary = true, press = function() go("acc") end}} or nil)
 
     elseif screen == "acc" then
-      scr:text(T.accTitle, T.accText, noteAccent or note)
+      -- The step's three parts, one at a time: calibrate, orientation, level.
+      scr:text(T.accTitle, T.accText, noteAccent or note, string.format(T.progress, 1, 3))
       -- Once it has calibrated, the focus moves on to Next.
       local done = note ~= nil and not busy
       return scr:row(function() go("intro") end, {
@@ -197,7 +199,7 @@ local function new(wiz)
     elseif screen == "align" or screen == "level" then
       local align = screen == "align"
       scr:text(align and T.alignTitle or T.levelTitle, align and T.alignText or T.levelText,
-        noteAccent or note)
+        noteAccent or note, string.format(T.progress, align and 2 or 3, 3))
       local done = note ~= nil and not busy
       return scr:row(function() go(align and "acc" or "align") end, {
         {text = done and T.again or T.start, primary = not done, needsMotion = true, disabled = busy,

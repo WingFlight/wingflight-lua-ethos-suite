@@ -174,8 +174,8 @@ local function new(wiz)
       local a = axis()
       local lim = limited(a)
       local accent = passNote or (#lim > 0 and string.format(T.atLimit, table.concat(lim, ", ")) or nil)
-      scr:text(AXIS_NAMES[a] .. "  " .. string.format(T.progress, ai, #axes),
-        string.format(T.axis, DIRECTIONS[a][1].name, wiz.axisGainPercent(a)), accent)
+      scr:text(AXIS_NAMES[a], string.format(T.axis, DIRECTIONS[a][1].name, wiz.axisGainPercent(a)), accent,
+        string.format(T.progress, ai, #axes))
       scr:picture(art.layout(wiz.surfaces(), a))
       return scr:row(function()
         if ai > 1 then
@@ -193,9 +193,8 @@ local function new(wiz)
       local field, most = sideOf(item.surface, axis(), item.direction)
       local config = wiz.configs[item.surface.servo]
       local pct = math.floor(config[field] / SCALE_STEP + 0.5)
-      scr:text(wiz.surfaceName(item.surface) .. "  " .. string.format(T.progress, fi, #fineList),
-        T.fineIntro .. " " .. string.format(T.fine, item.direction.name, pct),
-        passNote or (config[field] >= most and T.sideLimit or nil))
+      scr:text(wiz.surfaceName(item.surface), T.fineIntro .. " " .. string.format(T.fine, item.direction.name, pct),
+        passNote or (config[field] >= most and T.sideLimit or nil), string.format(T.progress, fi, #fineList))
       scr:picture(art.layout(wiz.surfaces(), axis(), item.direction.flip))
       -- Back and Next step through the surfaces and directions, then back
       -- to the axis.

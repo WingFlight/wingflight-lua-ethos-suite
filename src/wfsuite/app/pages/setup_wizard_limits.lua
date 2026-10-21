@@ -138,8 +138,8 @@ local function new(wiz)
     local config = wiz.configs[s.servo]
     local body = (side == "min" and T.min or T.max) .. " "
       .. string.format(T.now, position, config.min, config.max)
-    scr:text(wiz.surfaceName(s) .. "  " .. string.format(T.progress, index, #surfaces), body,
-      s.kind == "flap" and T.flap or nil)
+    scr:text(wiz.surfaceName(s), body, s.kind == "flap" and T.flap or nil,
+      string.format(T.progress, index, #surfaces))
     scr:draw(drawGauge)
     local specs = {}
     for _, d in ipairs(STEPS) do

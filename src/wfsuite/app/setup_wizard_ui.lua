@@ -29,6 +29,7 @@ local floor = math.floor
 local BUTTON_GAP = 6
 local MARGIN = 8
 local GRID_MIN_H = 30
+local GRID_MAX_H = 56
 local NEXT = "@i18n(app.modules.setup_wizard.btn_next)@"
 
 -- The row's Back and plain Next are small icon-only buttons (as the
@@ -108,11 +109,15 @@ function Screen:begin()
 end
 
 -- title (FONT_STD), body (wrapped, FONT_S), accent (wrapped, FONT_S, in the
--- accent colour: a status or warning line). Any may be nil.
-function Screen:text(title, body, accent)
+-- accent colour: a status or warning line), progress ("4 of 4", or true).
+-- Any may be nil. With progress the title is the thing being worked on now
+-- (a servo, an axis, a check, a mode): it is drawn in the accent colour, and
+-- a progress string muted after it. A step's fixed titles stay plain.
+function Screen:text(title, body, accent, progress)
   local v = self.view
   local width = lcd.getWindowSize()
   v.title = title
+  v.progress = progress
   v.lines = body and self.wiz.wrapLines(body, width - 2 * MARGIN, FONT_S) or {}
   v.accentFrom = nil
   if accent and accent ~= "" then
@@ -230,18 +235,17 @@ function Screen:grid(specs, cols)
   local v = self.view
   lcd.font(FONT_S)
   local _, th = lcd.getTextSize("Ag")
-  local top = v.top + #v.lines * th + (v.title and (th + 8) or 0) + 4
   local stop = (v.bottom or (height - 4)) - 4
   local rows = math.ceil(#specs / cols)
-  -- Text too long for the room left: the grid keeps usable buttons and the
-  -- text stops above it (paint()).
-  local need = rows * GRID_MIN_H + BUTTON_GAP * (rows - 1)
-  if stop - top < need then
-    top = stop - need
-    v.textStop = top - 2
-  end
-  local h = math.floor((stop - top - BUTTON_GAP * (rows - 1)) / rows)
-  if h > 56 then h = 56 end
+  -- The grid sits on the row, its height set by the screen alone, so a status
+  -- line that comes or goes in the text above never moves it. Text that runs
+  -- into it is cut short (paint(), which keeps the status line).
+  local titleBottom = v.top + (v.title and (th + 8) or 0) + 4
+  local h = math.max(GRID_MIN_H, math.min(GRID_MAX_H, floor(height * 0.12)))
+  h = math.min(h, floor((stop - titleBottom - BUTTON_GAP * (rows - 1)) / rows))
+  local top = stop - (rows * h + BUTTON_GAP * (rows - 1))
+  local textBottom = titleBottom + #v.lines * th
+  if textBottom > top then v.textStop = top - 2 end
   local w = math.floor((width - self.wiz.FORM_RIGHT_PADDING - BUTTON_GAP * (cols - 1)) / cols)
   for i, s in ipairs(specs) do
     local col, r = (i - 1) % cols, math.floor((i - 1) / cols)
@@ -276,9 +280,13 @@ function Screen:paint()
   local y = v.top
   if v.title then
     lcd.font(FONT_STD)
-    lcd.color(colors.text)
+    lcd.color(v.progress and colors.active or colors.text)
     lcd.drawText(MARGIN, y, v.title, LEFT)
-    local _, th = lcd.getTextSize(v.title)
+    local tw, th = lcd.getTextSize(v.title)
+    if type(v.progress) == "string" then
+      lcd.color(colors.muted)
+      lcd.drawText(MARGIN + tw + 12, y, v.progress, LEFT)
+    end
     y = y + th + 2
   end
   lcd.font(FONT_S)

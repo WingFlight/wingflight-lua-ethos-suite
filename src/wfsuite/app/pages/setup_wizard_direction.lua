@@ -248,7 +248,8 @@ local function new(wiz)
     elseif screen == "check" then
       collectMoved()
       startAxisMotion()
-      scr:text(c.title, c.expect .. " " .. "@i18n(app.modules.setup_wizard.dir_q_match)@", status)
+      scr:text(c.title, c.expect .. " " .. "@i18n(app.modules.setup_wizard.dir_q_match)@", status,
+        string.format("@i18n(app.modules.setup_wizard.progress_fmt)@", ci, #checks))
       scr:picture(art.layout(wiz.surfaces(), c.axis), "@i18n(app.modules.setup_wizard.dir_from_behind)@")
       focus = scr:row(backFromCheck, {
         {text = string.format("@i18n(app.modules.setup_wizard.dir_move_fmt)@", deflection()), weight = 0.6,
@@ -262,7 +263,7 @@ local function new(wiz)
       }, false)
 
     elseif screen == "all" then
-      scr:text(c.title, "@i18n(app.modules.setup_wizard.dir_q_all)@")
+      scr:text(c.title, "@i18n(app.modules.setup_wizard.dir_q_all)@", nil, true)
       scr:picture(art.layout(wiz.surfaces(), c.axis), "@i18n(app.modules.setup_wizard.dir_from_behind)@")
       focus = scr:row(function() go("check") end, {
         {text = "@i18n(app.modules.setup_wizard.dir_some)@", press = function()
@@ -276,7 +277,7 @@ local function new(wiz)
       local surface = moved[identifyIndex]
       startServoMotion(surface.servo)
       scr:text(c.title, string.format("@i18n(app.modules.setup_wizard.dir_identify_fmt)@", surface.servo + 1,
-        wiz.kindName(surface.kind), identifyIndex, #moved))
+        wiz.kindName(surface.kind), identifyIndex, #moved), nil, true)
       scr:picture(art.layout(wiz.surfaces(), c.axis), "@i18n(app.modules.setup_wizard.dir_from_behind)@")
       focus = scr:row(function() go("check") end, {
         -- Focus starts on No: a stray press must not reverse a servo.
@@ -288,7 +289,8 @@ local function new(wiz)
 
     elseif screen == "cantfix" then
       stopMotion()
-      scr:text(c.title, string.format("@i18n(app.modules.setup_wizard.dir_cant_fix_fmt)@", servoList(cantFix)))
+      scr:text(c.title, string.format("@i18n(app.modules.setup_wizard.dir_cant_fix_fmt)@", servoList(cantFix)),
+        nil, true)
       focus = scr:row(function() go("check") end, nil,
         {text = "@i18n(app.modules.setup_wizard.btn_next)@", press = function() go("check") end})
 

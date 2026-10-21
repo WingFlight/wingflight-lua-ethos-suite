@@ -208,7 +208,7 @@ local function new(wiz)
           break
         end
       end
-      scr:text(TYPE_NAMES[modelType.value], string.format(T.review, describe(wiz, rules)), warn)
+      scr:text(TYPE_NAMES[modelType.value], string.format(T.review, describe(wiz, rules)), warn, true)
       scr:picture(layout)
       return scr:row(prevQuestion, nil, {text = T.apply, press = function()
         wiz.setMix(mix.ruleTable(options), modelType.value)
@@ -225,16 +225,16 @@ local function new(wiz)
     local layout = preview()
     scr:picture(layout)
     if screen == "ailerons" then
-      scr:text(TYPE_NAMES[modelType.value], T.aileronsQ)
+      scr:text(TYPE_NAMES[modelType.value], T.aileronsQ, nil, true)
       return optionButtons("ailerons", modelType.ailerons.options)
     elseif screen == "tail" then
-      scr:text(TYPE_NAMES[modelType.value], T.tailQ)
+      scr:text(TYPE_NAMES[modelType.value], T.tailQ, nil, true)
       return optionButtons("tailControl", modelType.tailControl.options)
     elseif screen == "wingYaw" then
-      scr:text(TYPE_NAMES[modelType.value], T.wingYawQ)
+      scr:text(TYPE_NAMES[modelType.value], T.wingYawQ, nil, true)
       return optionButtons("wingYaw", modelType.wingYaw.options)
     elseif screen == "flaps" then
-      scr:text(TYPE_NAMES[modelType.value], T.flapsQ)
+      scr:text(TYPE_NAMES[modelType.value], T.flapsQ, nil, true)
       local specs = {}
       local current = options.flaps and options.flapServos or "none"
       for _, c in ipairs(FLAP_CHOICES) do
@@ -249,17 +249,17 @@ local function new(wiz)
       end
       return question(specs)
     elseif screen == "follow" then
-      scr:text(TYPE_NAMES[modelType.value], T.followQ)
+      scr:text(TYPE_NAMES[modelType.value], T.followQ, nil, true)
       return yesNo("flapsFollowAilerons")
     elseif screen == "motors" then
-      scr:text(TYPE_NAMES[modelType.value], T.motorsQ)
+      scr:text(TYPE_NAMES[modelType.value], T.motorsQ, nil, true)
       local specs = {}
       for n = 0, 2 do
         specs[#specs + 1] = {text = tostring(n), primary = options.motors == n, press = answer("motors", n)}
       end
       return question(specs)
     else -- diff
-      scr:text(TYPE_NAMES[modelType.value], T.diffQ)
+      scr:text(TYPE_NAMES[modelType.value], T.diffQ, nil, true)
       return yesNo("diffThrustYaw")
     end
   end

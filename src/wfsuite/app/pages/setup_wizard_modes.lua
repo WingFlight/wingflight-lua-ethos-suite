@@ -170,7 +170,7 @@ local function new(wiz)
       local accent = note
       if m.id == 0 and not rangeIndex(m) then accent = accent or T.armMissing end
       if m.id == 0 and on then accent = T.armOn end
-      scr:text(m.name .. "  " .. string.format(T.progress, mi, #offered), m.help, accent)
+      scr:text(m.name, m.help, accent, string.format(T.progress, mi, #offered))
       scr:rows({{m.required and T.required or T.optional, text}, {"", on and T.onNow or T.off, on}})
       local assigned = rangeIndex(m) ~= nil
       -- Next goes on to the next mode; once this one has a switch, the focus
@@ -186,7 +186,7 @@ local function new(wiz)
       }, {text = T.next, press = nextMode})
 
     elseif screen == "listen" then
-      scr:text(offered[mi].name, T.flick)
+      scr:text(offered[mi].name, T.flick, nil, true)
       -- Back cancels the listening.
       return scr:row(function() listening = nil; go("mode") end, nil, false)
     end

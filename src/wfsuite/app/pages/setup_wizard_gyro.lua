@@ -82,8 +82,8 @@ local function new(wiz)
       })
     elseif screen == "check" then
       local c = checks[ci]
-      scr:text(c.title .. "  " .. string.format(T.progress, ci, #checks), c.text .. " " .. T.q,
-        wiz.forcedMode() ~= wiz.BOX_ANGLE and T.noAngle or nil)
+      scr:text(c.title, c.text .. " " .. T.q, wiz.forcedMode() ~= wiz.BOX_ANGLE and T.noAngle or nil,
+        string.format(T.progress, ci, #checks))
       scr:picture(art.layout(wiz.surfaces(), c.axis, true), T.fromBehind)
       return scr:row(function()
         if ci > 1 then ci = ci - 1; go("check") else wiz.releaseMode(); go("intro") end
@@ -93,7 +93,7 @@ local function new(wiz)
       }, false)
     elseif screen == "wrong" then
       -- The fix is in the Sensors step, which the step list (header) opens.
-      scr:text(checks[ci].title, T.wrong)
+      scr:text(checks[ci].title, T.wrong, nil, true)
       return scr:row(function() go("check") end, nil, {text = T.next, press = nextCheck})
     end
     scr:text(T.doneTitle, T.done)

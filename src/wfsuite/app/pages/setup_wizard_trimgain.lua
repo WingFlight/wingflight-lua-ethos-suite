@@ -224,7 +224,7 @@ local function new(wiz)
 
     elseif screen == "howButtons" or screen == "howChannels" then
       local buttons = screen == "howButtons"
-      scr:text(buttons and T.trimButtons or T.trimChannels, buttons and T.howButtons or T.howChannels, note)
+      scr:text(buttons and T.trimButtons or T.trimChannels, buttons and T.howButtons or T.howChannels, note, true)
       local detectNext = {text = T.next, press = function() go("gainQ") end}
       return scr:row(function() go("trimQ") end, {
         {text = T.detect, primary = true, needsMotion = true, press = function()
@@ -249,7 +249,7 @@ local function new(wiz)
       end, nil, false)
 
     elseif screen == "buttons" then
-      scr:text(T.trimButtons, T.buttonsCheck, note)
+      scr:text(T.trimButtons, T.buttonsCheck, note, true)
       scr:draw(drawButtonCheck)
       return scr:row(function() go("howButtons") end,
         {{text = T.again, press = function() listen({{kind = "buttons"}}, "buttons") end}},

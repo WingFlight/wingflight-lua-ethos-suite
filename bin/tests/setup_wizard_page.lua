@@ -50,6 +50,8 @@ local clock = 0
 os.clock = function() return clock end
 
 local drawn = {}   -- text drawn by the last paint
+local drawnColor = {}   -- text -> the colour it was drawn in
+local currentColor = nil
 _G.FONT_S, _G.FONT_STD, _G.FONT_XS = 20, 25, 10
 _G.LEFT, _G.CENTERED, _G.RIGHT, _G.TEXT_LEFT = 3, 4, 5, 2
 _G.lcd = {
@@ -60,9 +62,9 @@ _G.lcd = {
   darkMode = function() return true end,
   GREY = function(v) return v end,
   RGB = function(r) return r end,
-  color = function() end,
+  color = function(c) currentColor = c end,
   invalidate = function() end,
-  drawText = function(_, _, text) drawn[#drawn + 1] = text end,
+  drawText = function(_, _, text) drawn[#drawn + 1] = text; drawnColor[text] = currentColor end,
   drawFilledRectangle = function() end,
   drawFilledTriangle = function() end,
   drawFilledCircle = function() end,
@@ -318,6 +320,9 @@ check("the intro's only answer is Start, and it has the focus", start and start.
 local before = #sent
 press(T("dir_start"))
 check("Start opens the pitch check", shows("dir_check_pitch") and shows("dir_q_match"))
+check("the check being done stands out in the accent colour, with its progress",
+  drawnColor[T("dir_check_pitch")] == 255 and drawnColor[T("progress_fmt")] ~= 255
+  and drawnColor[T("progress_fmt")] ~= nil)
 check("the check holds roll, yaw and flaps at centre, timed",
   lastMixer(before + 1, 1).value == 0 and lastMixer(before + 1, 1).timed
   and lastMixer(before + 1, 3).value == 0 and lastMixer(before + 1, 13).value == 0)
@@ -592,6 +597,22 @@ end
 openPage(14, "airframe")
 settle()
 press(T("air_change"))
+local airframeGridH
+do
+  -- The choice grid sits on the button row whatever the text above it, so a
+  -- status line that comes or goes never moves it.
+  local rowY, gridBottom = 0, 0
+  for _, f in ipairs(fields) do
+    if f.kind == "button" and f.rect and f.rect.y > rowY then rowY = f.rect.y end
+  end
+  for _, f in ipairs(fields) do
+    if f.kind == "button" and f.rect and f.rect.y < rowY then
+      gridBottom = math.max(gridBottom, f.rect.y + f.rect.h)
+    end
+  end
+  check("airframe: the type grid sits on the button row", rowY - gridBottom == 8, rowY .. " " .. gridBottom)
+  airframeGridH = button(T("air_type_regular")).rect.h
+end
 press(T("air_type_flying_wing"))
 check("airframe: asks about a rudder", shows("air_q_wing_yaw"))
 press(T("air_none"))
@@ -626,8 +647,14 @@ check("servo type: saves and restarts", #writesOf(250, before + 1) == 1 and #wri
 -- Motor: the protocol, and a timed spin.
 openPage(14, "motor")
 settle()
+local function protocolY() local b = button(T("mot_pwm")); return b and b.rect.y end
+local yBefore = protocolY()
 before = #sent
 press(T("mot_dshot600"))
+check("motor: the restart note does not move the protocol buttons", yBefore and protocolY() == yBefore,
+  tostring(yBefore) .. " -> " .. tostring(protocolY()))
+check("choice grids have one button height, whatever the text above them (Motor's is long, Airframe's short)",
+  button(T("mot_pwm")).rect.h == airframeGridH, button(T("mot_pwm")).rect.h .. " vs " .. tostring(airframeGridH))
 check("motor: choosing DShot600 writes the motor config", #writesOf(222, before + 1) == 1 and shows("mot_changed"))
 do
   -- Long text: the choices keep usable buttons above the row, and the text
@@ -666,6 +693,19 @@ for _, m in ipairs(writesOf(193)) do
   if s16(m.payload, 2) == 0 and #m.payload == 5 then held[m.payload[1]] = true end
 end
 check("centre: holds all four servos at centre", held[0] and held[1] and held[2] and held[3])
+do
+  -- The servo being set stands out: the accent colour (lcd.RGB(255, ...) here),
+  -- the "1 of 4" after it muted, the instructions in the text colour.
+  paint()
+  local name, progress
+  for _, t in ipairs(drawn) do
+    if t:find(T("servo_kind_fmt"), 1, true) then name = t end
+    if t:find(T("progress_fmt"), 1, true) then progress = t end
+  end
+  check("centre: the servo being set is drawn in the accent colour",
+    name and drawnColor[name] == 255 and progress and drawnColor[progress] ~= 255,
+    tostring(name) .. " " .. tostring(name and drawnColor[name]))
+end
 before = #sent
 press("+10")
 local mid = writesOf(212, before + 1)

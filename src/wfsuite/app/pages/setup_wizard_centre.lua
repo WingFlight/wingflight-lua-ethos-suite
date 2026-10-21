@@ -75,8 +75,9 @@ local function new(wiz)
     local config = wiz.configs[surface.servo]
     local offset = config.mid - bandCentre(config)
     local accent = math.abs(offset) > MID_WARN_US and T.far or (surface.kind == "flap" and T.flap or nil)
-    scr:text(wiz.surfaceName(surface) .. "  " .. string.format(T.progress, index, #surfaces),
-      T.intro .. " " .. string.format(T.value, config.mid, (offset >= 0 and "+" or "") .. offset), accent)
+    scr:text(wiz.surfaceName(surface),
+      T.intro .. " " .. string.format(T.value, config.mid, (offset >= 0 and "+" or "") .. offset), accent,
+      string.format(T.progress, index, #surfaces))
     scr:draw(drawGauge)
     local specs = {}
     for _, d in ipairs(NUDGES) do
