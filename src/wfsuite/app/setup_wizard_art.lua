@@ -219,6 +219,143 @@ function art.draw(l, x, y, w, h, colors)
   end
 end
 
+-- A servo seen from above: its horn on an arc from Min (left) to Max
+-- (right), for the Binding limits step. Positions are fractions of the way
+-- out, -1 (full Min) .. 1 (full Max), drawn up to 75 degrees either side of
+-- straight up. d is the caller's own table, refilled in place each paint:
+--   pos              where the horn is
+--   zoneFrom, zoneTo the stored limits (a band on the arc), or nil
+--   side             "min" | "max": the half being found, lit as the horn
+--                    moves along it; nil for none
+--   saved            a tick at this position (a stored or just-set limit)
+--   stop             a wall at this position: where the linkage binds
+--   back             an arrow from the horn back towards the centre
+local SWING = math.rad(75)
+local sin, cos = math.sin, math.cos
+
+local function dialPoint(cx, cy, r, f)
+  local a = math.pi / 2 - f * SWING
+  return cx + floor(r * cos(a) + 0.5), cy - floor(r * sin(a) + 0.5)
+end
+
+-- The arc's angles at fixed steps, worked out once: paint only looks them up.
+local GRID = 20
+local GRID_COS, GRID_SIN = {}, {}
+for i = 0, GRID do
+  local a = math.pi / 2 - (-1 + 2 * i / GRID) * SWING
+  GRID_COS[i], GRID_SIN[i] = cos(a), sin(a)
+end
+
+-- The arc from..to as a band thick pixels deep inside radius r: each step a
+-- quad of two filled triangles, the ends cut exactly at from and to.
+local function dialArc(cx, cy, r, from, to, thick)
+  if to <= from then return end
+  local ri = r - thick
+  local a = math.pi / 2 - from * SWING
+  local c0, s0 = cos(a), sin(a)
+  local ox0, oy0 = cx + floor(r * c0 + 0.5), cy - floor(r * s0 + 0.5)
+  local ix0, iy0 = cx + floor(ri * c0 + 0.5), cy - floor(ri * s0 + 0.5)
+  local i = floor((from + 1) * GRID / 2) + 1
+  while true do
+    local c1, s1
+    local last = i > GRID or (-1 + 2 * i / GRID) >= to
+    if last then
+      a = math.pi / 2 - to * SWING
+      c1, s1 = cos(a), sin(a)
+    else
+      c1, s1 = GRID_COS[i], GRID_SIN[i]
+    end
+    local ox1, oy1 = cx + floor(r * c1 + 0.5), cy - floor(r * s1 + 0.5)
+    local ix1, iy1 = cx + floor(ri * c1 + 0.5), cy - floor(ri * s1 + 0.5)
+    lcd.drawFilledTriangle(ox0, oy0, ix0, iy0, ox1, oy1)
+    lcd.drawFilledTriangle(ix0, iy0, ix1, iy1, ox1, oy1)
+    if last then return end
+    ox0, oy0, ix0, iy0 = ox1, oy1, ix1, iy1
+    i = i + 1
+  end
+end
+
+-- A radial bar across the arc, r1 out to r2, half as wide as hw.
+local function dialBar(cx, cy, r1, r2, f, hw)
+  local a = math.pi / 2 - f * SWING
+  local px, py = sin(a) * hw, cos(a) * hw
+  local x1, y1 = cx + r1 * cos(a), cy - r1 * sin(a)
+  local x2, y2 = cx + r2 * cos(a), cy - r2 * sin(a)
+  local ax, ay = floor(x1 + px + 0.5), floor(y1 + py + 0.5)
+  local bx, by = floor(x1 - px + 0.5), floor(y1 - py + 0.5)
+  local qx, qy = floor(x2 + px + 0.5), floor(y2 + py + 0.5)
+  local dx, dy = floor(x2 - px + 0.5), floor(y2 - py + 0.5)
+  lcd.drawFilledTriangle(ax, ay, bx, by, qx, qy)
+  lcd.drawFilledTriangle(bx, by, dx, dy, qx, qy)
+end
+
+local function clampUnit(f)
+  if f < -1 then return -1 elseif f > 1 then return 1 end
+  return f
+end
+
+function art.servoDial(cx, cy, r, d, colors)
+  local t = math.max(3, floor(r / 18))
+  -- A thin track, the stored range thick on it.
+  lcd.color(colors.body)
+  dialArc(cx, cy, r - floor(t / 2) + 1, -1, 1, 2)
+  if d.zoneFrom and d.zoneTo then
+    lcd.color(colors.surface)
+    dialArc(cx, cy, r, clampUnit(d.zoneFrom), clampUnit(d.zoneTo), t)
+  end
+  local pos = clampUnit(d.pos or 0)
+  lcd.color(colors.active)
+  if d.side == "min" and pos < 0 then
+    dialArc(cx, cy, r, pos, 0, t)
+  elseif d.side == "max" and pos > 0 then
+    dialArc(cx, cy, r, 0, pos, t)
+  end
+  -- Centre: where the horn starts on every side.
+  lcd.color(colors.muted)
+  dialBar(cx, cy, r + 4, r - t - 6, 0, 1)
+  if d.saved then
+    lcd.color(colors.text)
+    dialBar(cx, cy, r + 6, r - t - 8, clampUnit(d.saved), 1.5)
+  end
+  if d.stop then
+    -- The linkage binding: a solid block across the arc.
+    lcd.color(colors.text)
+    dialBar(cx, cy, r + 9, r - t - 9, clampUnit(d.stop), math.max(3, r / 14))
+  end
+
+  -- The horn: a tapered arm from the hub, rounded at the tip.
+  local a = math.pi / 2 - pos * SWING
+  local reach = floor(r * 0.82)
+  local tx, ty = cx + floor(reach * cos(a) + 0.5), cy - floor(reach * sin(a) + 0.5)
+  local hw = math.max(4, floor(r * 0.09))
+  local px, py = floor(sin(a) * hw + 0.5), floor(cos(a) * hw + 0.5)
+  lcd.color(d.side and pos ~= 0 and colors.active or colors.surface)
+  lcd.drawFilledTriangle(tx, ty, cx + px, cy + py, cx - px, cy - py)
+  lcd.drawFilledCircle(tx, ty, math.max(2, floor(hw / 2)))
+  lcd.color(colors.body)
+  lcd.drawFilledCircle(cx, cy, hw + 2)
+
+  if d.back and pos ~= 0 then
+    -- Just inside the arc, from the horn towards the centre.
+    local dir = pos > 0 and -1 or 1
+    local ar = r - t - floor(r * 0.16)
+    local f1 = pos + dir * 0.06
+    local f2 = pos + dir * 0.28
+    lcd.color(colors.text)
+    dialArc(cx, cy, ar + 1, math.min(f1, f2), math.max(f1, f2), 2)
+    local hx, hy = dialPoint(cx, cy, ar, f2 + dir * 0.08)
+    local bx1, by1 = dialPoint(cx, cy, ar - 5, f2)
+    local bx2, by2 = dialPoint(cx, cy, ar + 5, f2)
+    lcd.drawFilledTriangle(hx, hy, bx1, by1, bx2, by2)
+  end
+end
+
+-- Where a servo dial of radius r puts its arc ends (for their labels):
+-- dx out from the centre, dy up from it.
+function art.dialEnds(r)
+  return floor(r * sin(SWING) + 0.5), floor(r * cos(SWING) + 0.5)
+end
+
 local cachedDark, cachedColors = nil, nil
 
 function art.colors()

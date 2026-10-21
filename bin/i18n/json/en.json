@@ -9257,28 +9257,46 @@
           "max_length": 14
         },
         "lim_intro": {
-          "english": "Find how far each servo can move before the surface or linkage binds. These limits protect the servo; throw is set later, in the Throws step.",
-          "translation": "Find how far each servo can move before the surface or linkage binds. These limits protect the servo; throw is set later, in the Throws step.",
+          "english": "Find how far each servo can move before the surface or linkage binds, one side per screen. These limits protect the servo; throw is set later, in the Throws step.",
+          "translation": "Find how far each servo can move before the surface or linkage binds, one side per screen. These limits protect the servo; throw is set later, in the Throws step.",
           "needs_translation": false,
-          "max_length": 141
+          "max_length": 162
         },
         "lim_todo_min": {
-          "english": "1 of 2: press - until the surface binds, back off one step, then Set.",
-          "translation": "1 of 2: press - until the surface binds, back off one step, then Set.",
+          "english": "Press - until the surface binds, back off one step, then Set. Next skips this side.",
+          "translation": "Press - until the surface binds, back off one step, then Set. Next skips this side.",
           "needs_translation": false,
-          "max_length": 69
+          "max_length": 83
         },
         "lim_todo_max": {
-          "english": "2 of 2: now press + until it binds, back off one step, then Set.",
-          "translation": "2 of 2: now press + until it binds, back off one step, then Set.",
+          "english": "Press + until the surface binds, back off one step, then Set. Next skips this side.",
+          "translation": "Press + until the surface binds, back off one step, then Set. Next skips this side.",
           "needs_translation": false,
-          "max_length": 64
+          "max_length": 83
         },
         "lim_now_fmt": {
-          "english": "Now %d us from center. Limits: %d / %d us.",
-          "translation": "Now %d us from center. Limits: %d / %d us.",
+          "english": "Now %d us, saved %d us",
+          "translation": "Now %d us, saved %d us",
           "needs_translation": false,
-          "max_length": 42
+          "max_length": 22
+        },
+        "lim_head_fmt": {
+          "english": "%s: %s",
+          "translation": "%s: %s",
+          "needs_translation": false,
+          "max_length": 6
+        },
+        "lim_how_bind": {
+          "english": "Step until it binds",
+          "translation": "Step until it binds",
+          "needs_translation": false,
+          "max_length": 19
+        },
+        "lim_how_back": {
+          "english": "Back off one step",
+          "translation": "Back off one step",
+          "needs_translation": false,
+          "max_length": 17
         },
         "lim_flap": {
           "english": "These are the flap end points: Max is full flap. The wizard sets the flap travel to land on them.",
@@ -9303,24 +9321,6 @@
           "translation": "Max",
           "needs_translation": false,
           "max_length": 3
-        },
-        "lim_move": {
-          "english": "Move - for Min or + for Max.",
-          "translation": "Move - for Min or + for Max.",
-          "needs_translation": false,
-          "max_length": 28
-        },
-        "lim_set_min": {
-          "english": "Set saves Min",
-          "translation": "Set saves Min",
-          "needs_translation": false,
-          "max_length": 13
-        },
-        "lim_set_max": {
-          "english": "Set saves Max",
-          "translation": "Set saves Max",
-          "needs_translation": false,
-          "max_length": 13
         },
         "lim_done_title": {
           "english": "Limits set",

@@ -795,96 +795,79 @@ before = #sent
 ctx.cleanup()
 check("centre: closing releases the identifying servo", lastServoValue(0, before + 1) == 2001)
 
--- Limits: probe past the stored limits, then set Min.
+-- Limits: one screen per side, Min then Max for each servo, one counter.
 openPage(14, "limits")
 settle()
+check("limits: the intro pictures the method", shows("lim_how_bind") and shows("lim_how_back"))
 before = #sent
 press(T("btn_start"))
 local probe = writesOf(0x5F1C, before + 1)
 check("limits: servo 1 is probed at its centre, timed", #probe >= 1 and bytes(probe[1].payload) == "0,0,0,16,39")
-check("limits: the slider labels both ends and Set is disabled at center",
-  shows("lim_min") and shows("lim_max") and shows("lim_move") and not button(T("lim_set")).enabled)
+check("limits: the first screen is servo 1's Min",
+  shows("lim_todo_min") and not shows("lim_todo_max") and shows("lim_head_fmt")
+  and shows("lim_min") and shows("lim_max") and not button(T("lim_set")).enabled)
 before = #sent
 button(T("lim_set")).press()
 tick()
 check("limits: Set at center cannot write a zero limit", #writesOf(212, before + 1) == 0)
+press("+50")
+check("limits: on the Min screen, Set stays off on the Max side", not button(T("lim_set")).enabled)
+press("-50")
 press("-50")
 press("-50")
 probe = writesOf(0x5F1C)
 check("limits: stepping moves the probe", s16(probe[#probe].payload, 2) == -100)
-check("limits: negative movement explains that Set saves Min",
-  shows("lim_set_min") and not shows("lim_set_max") and button(T("lim_set")).enabled)
+check("limits: on the Min side, Set is on", button(T("lim_set")).enabled)
 before = #sent
 press(T("lim_set"))
 local minWrite = writesOf(212, before + 1)
-check("limits: Set on the negative side writes Min", #minWrite == 1 and s16(minWrite[1].payload, 4) == -100)
-check("limits: then asks for Max", shows("lim_todo_max"))
-
--- Complete both bounds on the same servo, including the actual Max write.
-check("limits: Set is disabled at center and the slider explains how to choose a side",
-  button(T("lim_set")) and not button(T("lim_set")).enabled and shows("lim_move"))
+check("limits: Set writes Min", #minWrite == 1 and s16(minWrite[1].payload, 4) == -100)
+probe = writesOf(0x5F1C, before + 1)
+check("limits: then servo 1's Max, back at center",
+  shows("lim_todo_max")
+  and probe[#probe].payload[1] == 0 and s16(probe[#probe].payload, 2) == 0
+  and not button(T("lim_set")).enabled)
+press("-10")
+check("limits: on the Max screen, Set stays off on the Min side", not button(T("lim_set")).enabled)
+press("+10")
 press("+50")
 press("+50")
-check("limits: a positive probe enables Set and says it saves Max",
-  button(T("lim_set")).enabled and shows("lim_set_max") and not shows("lim_set_min"))
 before = #sent
 press(T("lim_set"))
 local maxWrite = writesOf(212, before + 1)
-check("limits: Set on the positive side writes Max and preserves Min",
+check("limits: Set writes Max and preserves Min",
   #maxWrite == 1 and maxWrite[1].payload[1] == 0
   and s16(maxWrite[1].payload, 4) == -100 and s16(maxWrite[1].payload, 6) == 100)
 probe = writesOf(0x5F1C, before + 1)
-check("limits: both sides set advances to servo 2 at center",
-  probe[#probe].payload[1] == 1 and s16(probe[#probe].payload, 2) == 0 and shows("lim_todo_min"))
-
--- The slider guidance must match the write even when Max is explored first.
-openPage(14, "limits")
-settle()
-press(T("btn_start"))
-press("+50")
-check("limits: exploring positive first still explains that Set saves Max",
-  button(T("lim_set")).enabled and shows("lim_set_max"))
+check("limits: then servo 2's Min at center",
+  probe[#probe].payload[1] == 1 and s16(probe[#probe].payload, 2) == 0
+  and shows("lim_todo_min"))
 before = #sent
-press(T("lim_set"))
-maxWrite = writesOf(212, before + 1)
-check("limits: Max first writes only the maximum, then asks for Min",
-  #maxWrite == 1 and maxWrite[1].payload[1] == 0
-  and s16(maxWrite[1].payload, 4) < 0 and s16(maxWrite[1].payload, 6) == 50 and shows("lim_todo_min"))
-press("-50")
-before = #sent
-press(T("lim_set"))
-minWrite = writesOf(212, before + 1)
-check("limits: Min second preserves Max and completes the same servo",
-  #minWrite == 1 and minWrite[1].payload[1] == 0
-  and s16(minWrite[1].payload, 4) == -50 and s16(minWrite[1].payload, 6) == 50)
+press(T("btn_back"))
+probe = writesOf(0x5F1C, before + 1)
+check("limits: Back returns to servo 1's Max", shows("lim_todo_max")
+  and probe[#probe].payload[1] == 0)
 
--- Next visits both sides without changing skipped limits.
+-- Next skips a side without changing its limit.
 openPage(14, "limits")
 settle()
 press(T("btn_start"))
 before = #sent
 press(T("btn_next"))
 check("limits: skipping Min offers Max on the same servo without a config write",
-  shows("lim_todo_max") and button(T("lim_set"))
-  and #writesOf(212, before + 1) == 0)
+  shows("lim_todo_max") and #writesOf(212, before + 1) == 0)
 probe = writesOf(0x5F1C, before + 1)
 check("limits: skipping Min keeps servo 1 centered", probe[#probe].payload[1] == 0 and s16(probe[#probe].payload, 2) == 0)
 before = #sent
 press(T("btn_next"))
 probe = writesOf(0x5F1C, before + 1)
-check("limits: skipping Max advances to servo 2 without a config write",
+check("limits: skipping Max moves to servo 2 without a config write",
   probe[#probe].payload[1] == 1 and shows("lim_todo_min") and #writesOf(212, before + 1) == 0)
-
-openPage(14, "limits")
-settle()
-press(T("btn_start"))
-press(T("btn_next"))
-press("+50")
-before = #sent
-press(T("lim_set"))
-probe = writesOf(0x5F1C, before + 1)
-check("limits: setting Max after skipping Min completes servo 1",
-  #writesOf(212, before + 1) == 1 and probe[#probe].payload[1] == 1 and shows("lim_todo_min"))
+for _ = 1, 20 do
+  if not shows("lim_todo_min") and not shows("lim_todo_max") then break end
+  press(T("btn_next"))
+end
+check("limits: after the last side, the step is done", shows("lim_done"))
 
 -- Throws: PASSTHROUGH forced, Throw stepped.
 openPage(14, "throws")

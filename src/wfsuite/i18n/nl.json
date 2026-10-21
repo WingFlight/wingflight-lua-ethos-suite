@@ -9692,12 +9692,33 @@
           "reverse_text": false,
           "translation": "These are the flap end points: Max is full flap. The wizard sets the flap travel to land on them."
         },
-        "lim_intro": {
-          "english": "Find how far each servo can move before the surface or linkage binds. These limits protect the servo; throw is set later, in the Throws step.",
-          "max_length": 141,
+        "lim_head_fmt": {
+          "english": "%s: %s",
+          "max_length": 6,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "%s: %s"
+        },
+        "lim_how_back": {
+          "english": "Back off one step",
+          "max_length": 17,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "Find how far each servo can move before the surface or linkage binds. These limits protect the servo; throw is set later, in the Throws step."
+          "translation": "Back off one step"
+        },
+        "lim_how_bind": {
+          "english": "Step until it binds",
+          "max_length": 19,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Step until it binds"
+        },
+        "lim_intro": {
+          "english": "Find how far each servo can move before the surface or linkage binds, one side per screen. These limits protect the servo; throw is set later, in the Throws step.",
+          "max_length": 162,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Find how far each servo can move before the surface or linkage binds, one side per screen. These limits protect the servo; throw is set later, in the Throws step."
         },
         "lim_max": {
           "english": "Max",
@@ -9713,19 +9734,12 @@
           "reverse_text": false,
           "translation": "Min"
         },
-        "lim_move": {
-          "english": "Move - for Min or + for Max.",
-          "max_length": 28,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "Move - for Min or + for Max."
-        },
         "lim_now_fmt": {
-          "english": "Now %d us from center. Limits: %d / %d us.",
-          "max_length": 42,
+          "english": "Now %d us, saved %d us",
+          "max_length": 22,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "Now %d us from center. Limits: %d / %d us."
+          "translation": "Now %d us, saved %d us"
         },
         "lim_set": {
           "english": "Set",
@@ -9733,20 +9747,6 @@
           "needs_translation": true,
           "reverse_text": false,
           "translation": "Set"
-        },
-        "lim_set_max": {
-          "english": "Set saves Max",
-          "max_length": 13,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "Set saves Max"
-        },
-        "lim_set_min": {
-          "english": "Set saves Min",
-          "max_length": 13,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "Set saves Min"
         },
         "lim_title": {
           "english": "Binding limits",
@@ -9756,18 +9756,18 @@
           "translation": "Binding limits"
         },
         "lim_todo_max": {
-          "english": "2 of 2: now press + until it binds, back off one step, then Set.",
-          "max_length": 64,
+          "english": "Press + until the surface binds, back off one step, then Set. Next skips this side.",
+          "max_length": 83,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "2 of 2: now press + until it binds, back off one step, then Set."
+          "translation": "Press + until the surface binds, back off one step, then Set. Next skips this side."
         },
         "lim_todo_min": {
-          "english": "1 of 2: press - until the surface binds, back off one step, then Set.",
-          "max_length": 69,
+          "english": "Press - until the surface binds, back off one step, then Set. Next skips this side.",
+          "max_length": 83,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "1 of 2: press - until the surface binds, back off one step, then Set."
+          "translation": "Press - until the surface binds, back off one step, then Set. Next skips this side."
         },
         "missing_servos_fmt": {
           "english": "Servo %s is mixed but this board has no output for it, so the wizard leaves it out.",
