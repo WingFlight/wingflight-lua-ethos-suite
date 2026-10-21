@@ -32,14 +32,15 @@ The title shows the step number and name. A notice line appears under it only
 when something stops the wizard moving the surfaces (see below).
 
 - Every screen has one row of buttons along the bottom, always in the same
-  order. **Back** is on the left: the screen before, or the step before from a
-  step's first screen (step 1 has none). The screen's own buttons (**Start**,
-  the ± steps, answers) are in the middle. The way forward is on the right:
-  **Next**, which becomes **Save and continue** once something has changed (it
-  writes the changes to EEPROM and opens the next step), **Save and restart**
-  where the change needs a restart, and **Save and finish** on the last step.
-  **Next** on a step's first screen leaves that step as it is. On a screen that
-  asks a question, the answers are the way forward.
+  order. **Back** (‹) is a small button at the left end: the screen before, or
+  the step before from a step's first screen (step 1 has none). The screen's
+  own buttons (**Start**, the ± steps, answers) are in the middle, set apart
+  from the two ends. The way forward is at the right end: **Next** (›), which
+  becomes **Save and continue** once something has changed (it writes the
+  changes to EEPROM and opens the next step), **Save and restart** where the
+  change needs a restart, and **Save and finish** on the last step. **Next** on
+  a step's first screen leaves that step as it is. On a screen that asks a
+  question, the answers are the way forward.
 - The **checklist** button in the header opens the list of all 15 steps; tap one to go
   to it. Back from the list returns to the step.
 - **Save** in the header writes the changes at any time.

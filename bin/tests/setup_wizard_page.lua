@@ -54,6 +54,7 @@ _G.FONT_S, _G.FONT_STD, _G.FONT_XS = 20, 25, 10
 _G.LEFT, _G.CENTERED, _G.RIGHT, _G.TEXT_LEFT = 3, 4, 5, 2
 _G.lcd = {
   getWindowSize = function() return 480, 290 end,
+  loadMask = function(path) return path end,
   font = function() end,
   getTextSize = function(text) return #text * 8, 18 end,
   darkMode = function() return true end,
@@ -79,6 +80,10 @@ local function foreground(name)
 end
 
 local fields, dialogs
+local ICON_LABEL = {
+  ["app/gfx/nav/prev.png"] = "@i18n(app.modules.setup_wizard.btn_back)@",
+  ["app/gfx/nav/next.png"] = "@i18n(app.modules.setup_wizard.btn_next)@",
+}
 local function newField(kind, props)
   local f = {kind = kind, enabled = true}
   for k, v in pairs(props or {}) do f[k] = v end
@@ -100,7 +105,9 @@ _G.form = {
   end,
   addButton = function(line, rect, opts)
     foreground("addButton")
-    return newField("button", {line = line, text = opts.text, press = opts.press, rect = rect})
+    -- Icon-only buttons (the row's Back and Next) are found by what they mean.
+    return newField("button", {line = line, text = opts.text or ICON_LABEL[opts.icon], icon = opts.icon,
+      press = opts.press, rect = rect})
   end,
   openDialog = function(opts)
     foreground("openDialog")
@@ -832,6 +839,26 @@ end
 check("every step's row has Back on the left and the way forward on the right", #badFooter == 0,
   table.concat(badFooter, "; "))
 check("no Skip or Steps buttons: Next moves on, the step list jumps", #skips == 0, table.concat(skips, ", "))
+
+-- Back and a plain Next are small chevron buttons, clear of the screen's own.
+openPage(14, "centre")
+settle()
+do
+  local row = footer()
+  local back, nextB = row[1], row[#row]
+  local firstOwn, lastOwn = row[2], row[#row - 1]
+  check("Back and Next are small icon buttons",
+    back.icon == "app/gfx/nav/prev.png" and nextB.icon == "app/gfx/nav/next.png"
+    and back.rect.w <= 48 and nextB.rect.w <= 48)
+  check("the screen's own buttons keep clear of them",
+    firstOwn.rect.x - (back.rect.x + back.rect.w) >= 16
+    and nextB.rect.x - (lastOwn.rect.x + lastOwn.rect.w) >= 16)
+end
+openPage(14, "servotype")
+settle()
+press(T("st_digital"))
+check("a way forward that saves or restarts keeps its words",
+  footer()[#footer()].text == T("btn_save_restart") and footer()[#footer()].icon == nil)
 
 openPage(14, "sensors")
 settle()

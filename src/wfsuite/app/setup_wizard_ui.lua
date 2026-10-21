@@ -29,8 +29,21 @@ local floor = math.floor
 local BUTTON_GAP = 6
 local MARGIN = 8
 local GRID_MIN_H = 30
-local ROW_MIN_WEIGHT = 3
-local BACK = "@i18n(app.modules.setup_wizard.btn_back)@"
+local NEXT = "@i18n(app.modules.setup_wizard.btn_next)@"
+
+-- The row's Back and plain Next are small icon-only buttons (as the
+-- header's): chevrons, not the header's arrow, which leaves the wizard.
+-- Loaded with the module, which the wizard frees when it closes.
+local PREV_ICON = lcd.loadMask("app/gfx/nav/prev.png")
+local NEXT_ICON = lcd.loadMask("app/gfx/nav/next.png")
+-- Row geometry: nav buttons are square-ish, a forward button with words
+-- (Save and continue, Save and restart, ...) a fixed width; NAV_GAP keeps
+-- the screen's own buttons clear of them; ACTION_MAX stops a lone Start
+-- stretching across the screen.
+local NAV_W = 48
+local FORWARD_TEXT_SHARE = 0.36
+local NAV_GAP = 16
+local ACTION_MAX_SHARE = 0.4
 
 local Screen = {}
 Screen.__index = Screen
@@ -134,11 +147,16 @@ function Screen:setRow(i, value, accent)
 end
 
 local function addButton(self, rect, key, s, font)
-  local field = form.addButton(nil, rect, {
-    text = s.text,
-    options = font + CENTERED,
-    press = ui.action(key, s.press),
-  })
+  local field
+  if s.icon then
+    field = form.addButton(nil, rect, {icon = s.icon, press = ui.action(key, s.press)})
+  else
+    field = form.addButton(nil, rect, {
+      text = s.text,
+      options = font + CENTERED,
+      press = ui.action(key, s.press),
+    })
+  end
   -- The field is Ethos userdata: the flags live beside it.
   self.buttonList[#self.buttonList + 1] = {field = field, needsMotion = s.needsMotion, disabled = s.disabled}
   return field
@@ -153,40 +171,51 @@ end
 --            default, wiz.forward() (Next, Save and continue, or Save and
 --            finish on the last step); false for none, on a question whose
 --            answers are the way forward
--- Returns the field to focus: a spec with primary =, else the way forward.
+-- Back and a plain Next are small chevron buttons at the two ends; a way
+-- forward that saves, restarts or confirms keeps its words. The screen's own
+-- buttons sit between them, NAV_GAP clear. Returns the field to focus: a
+-- spec with primary =, else the way forward.
 function Screen:row(back, specs, forward)
-  local list = {}
+  specs = specs or {}
   if back == nil and not self.wiz.isFirstStep() then back = self.wiz.previousStep end
-  if back then list[1] = {text = BACK, press = back, small = true, weight = 0.7, key = "nav_back"} end
-  for i = 1, #(specs or {}) do list[#list + 1] = specs[i] end
   if forward == nil then forward = self.wiz.forward() end
-  local forwardIndex
-  if forward then
-    list[#list + 1] = {text = forward.text, press = forward.press, disabled = forward.disabled,
-      needsMotion = forward.needsMotion, small = true, weight = 1.3, key = "nav_next"}
-    forwardIndex = #list
-  end
 
   local width, height = lcd.getWindowSize()
   local h = math.max(36, floor(height * 0.15))
   local y = height - h - 4
-  -- A short row (Back alone, Back and Next) does not stretch its buttons
-  -- across the screen; the way forward stays against the right edge.
-  local total = 0
-  for i = 1, #list do total = total + (list[i].weight or 1) end
-  if #list <= 2 and total < ROW_MIN_WEIGHT then total = ROW_MIN_WEIGHT end
   local room = width - self.wiz.FORM_RIGHT_PADDING
-  local free = room - BUTTON_GAP * (#list - 1)
-  local x, focus, forwardField = 0, nil, nil
-  for i = 1, #list do
-    local s = list[i]
-    local w = floor(free * (s.weight or 1) / total)
-    if i == forwardIndex then x = room - w end
-    local field = addButton(self, {x = x, y = y, w = w, h = h}, s.key or i, s, s.small and FONT_S or FONT_STD)
-    if s.primary then focus = field end
-    if i == forwardIndex and not s.disabled then forwardField = field end
-    x = x + w + BUTTON_GAP
+  local left, right = 0, room
+  local focus, forwardField
+
+  if back then
+    addButton(self, {x = 0, y = y, w = NAV_W, h = h}, "nav_back", {icon = PREV_ICON, press = back}, FONT_S)
+    left = NAV_W + NAV_GAP
   end
+  if forward then
+    local plain = forward.text == NEXT
+    local w = plain and NAV_W or floor(room * FORWARD_TEXT_SHARE)
+    local spec = {text = forward.text, icon = plain and NEXT_ICON or nil, press = forward.press,
+      disabled = forward.disabled, needsMotion = forward.needsMotion}
+    local field = addButton(self, {x = room - w, y = y, w = w, h = h}, "nav_next", spec, FONT_S)
+    if not forward.disabled then forwardField = field end
+    right = room - w - NAV_GAP
+  end
+
+  if #specs > 0 then
+    local total = 0
+    for i = 1, #specs do total = total + (specs[i].weight or 1) end
+    local free = right - left - BUTTON_GAP * (#specs - 1)
+    local most = floor(room * ACTION_MAX_SHARE)
+    local x = left
+    for i = 1, #specs do
+      local s = specs[i]
+      local w = math.min(most, floor(free * (s.weight or 1) / total))
+      local field = addButton(self, {x = x, y = y, w = w, h = h}, i, s, s.small and FONT_S or FONT_STD)
+      if s.primary then focus = field end
+      x = x + w + BUTTON_GAP
+    end
+  end
+
   self.view.bottom = y - 4
   self:refresh()
   return focus or forwardField
