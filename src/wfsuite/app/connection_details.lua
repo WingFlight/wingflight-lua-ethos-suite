@@ -5,6 +5,7 @@
 -- Latency and drop rates are not kept by the session, so they are not shown.
 
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
+local bus = requireModule("lib/bus.lua")
 
 local connectionDetails = {}
 
@@ -56,12 +57,16 @@ function connectionDetails.body(session)
     text(session.craftName), text(session.rfVersion or session.fcVersion), apiVersionString(session))
 end
 
---- Opens the dialog for the current session.
+--- Opens the dialog for the current session. The session is published on the bus, which replays
+--- the latest session.update to a new subscriber. The dialog takes that snapshot and unsubscribes.
 function connectionDetails.open()
-  local session = wfsuite and wfsuite.session or {}
+  local snapshot = {}
+  local handler = function(update) snapshot = update or {} end
+  bus.subscribe("session.update", handler)
+  bus.unsubscribe("session.update", handler)
   form.openDialog({
     title = TITLE,
-    message = connectionDetails.body(session),
+    message = connectionDetails.body(snapshot),
     buttons = {{label = BTN_OK, action = function() return true end}},
     wakeup = function() end,
     paint = function() end,

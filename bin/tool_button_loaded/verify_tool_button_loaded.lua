@@ -300,6 +300,7 @@ package.loaded["wfsuite.app.header"] = nil
 package.loaded["wfsuite.lib.require"] = function(path)
   if path == "app/tile_grid.lua" then return {} end
   if path == "app/connection_details.lua" then return dofile(SUITE .. "/app/connection_details.lua") end
+  if path == "lib/bus.lua" then return package.loaded["wfsuite.lib.bus"] end
   error("unexpected require in header harness: " .. tostring(path))
 end
 local header = dofile(SUITE .. "/app/header.lua")
