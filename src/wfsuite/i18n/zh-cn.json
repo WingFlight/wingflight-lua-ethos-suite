@@ -11051,11 +11051,11 @@
           "translation": "Some surfaces reach their limit. Lower the throw on the axes that share them, or accept it: full roll with full pitch on elevons is the usual case."
         },
         "trv_intro": {
-          "english": "How far each surface goes with full stick on every axis at once, against its limits (- side and + side). Above 100% it reaches its limit before full stick. Try the stick corners.",
-          "max_length": 178,
+          "english": "Full stick on every axis at once: the bar is how far each surface goes, the marks its limits, the dot where it is now. Above 100% it hits a limit first. Try the stick corners.",
+          "max_length": 175,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "How far each surface goes with full stick on every axis at once, against its limits (- side and + side). Above 100% it reaches its limit before full stick. Try the stick corners."
+          "translation": "Full stick on every axis at once: the bar is how far each surface goes, the marks its limits, the dot where it is now. Above 100% it hits a limit first. Try the stick corners."
         },
         "trv_ok": {
           "english": "Every surface stays inside its limits.",

@@ -10996,11 +10996,11 @@
           "max_length": 12
         },
         "trv_intro": {
-          "english": "How far each surface goes with full stick on every axis at once, against its limits (- side and + side). Above 100% it reaches its limit before full stick. Try the stick corners.",
-          "translation": "How far each surface goes with full stick on every axis at once, against its limits (- side and + side). Above 100% it reaches its limit before full stick. Try the stick corners.",
+          "english": "Full stick on every axis at once: the bar is how far each surface goes, the marks its limits, the dot where it is now. Above 100% it hits a limit first. Try the stick corners.",
+          "translation": "Full stick on every axis at once: the bar is how far each surface goes, the marks its limits, the dot where it is now. Above 100% it hits a limit first. Try the stick corners.",
           "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 178
+          "max_length": 175,
+          "reverse_text": false
         },
         "trv_row_fmt": {
           "english": "-%d%%  +%d%%",

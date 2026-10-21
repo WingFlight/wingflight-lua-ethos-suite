@@ -885,6 +885,17 @@ check("throws: +5% raises roll's throw to 105%", #throw == 1 and throw[1].payloa
 openPage(14, "travel")
 settle()
 check("travel: every surface inside its limits", shows("trv_ok"))
+before = #sent
+tick(1)
+check("travel: polls the live servo outputs for the gauges", #writesOf(103, before + 1) >= 1)
+forced = writesOf(0x5F1B)
+check("travel: forces PASSTHROUGH", #forced >= 1 and bytes(forced[#forced].payload) == "16,39,1,12")
+session({connected = false, isArmed = false, apiVersionMajor = 22, apiVersionMinor = 14})
+settle()
+check("travel: without the link, says PASSTHROUGH is off", shows("thr_no_passthrough"))
+session({connected = true, isArmed = false, apiVersionMajor = 22, apiVersionMinor = 14})
+settle()
+check("travel: back on the link, PASSTHROUGH again", shows("trv_ok") and not shows("thr_no_passthrough"))
 openPage(14, "gyro")
 settle()
 before = #sent
