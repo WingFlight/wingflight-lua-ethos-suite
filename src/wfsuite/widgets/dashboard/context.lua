@@ -136,6 +136,11 @@ local DASHBOARD_THEME_WIDTHS = {800, 784, 640, 630, 480, 472}
 local ETHOS_THEME_MIN_VERSION = {26, 1, 0}
 local LOGO_DARK_FALLBACK = "widgets/dashboard/gfx/logo-dark.png"
 local LOGO_LIGHT_FALLBACK = "widgets/dashboard/gfx/logo-light.png"
+-- The logo's pre-rendered sizes, filled in by drawImageInRect() on the first
+-- logo draw (see there). Not built here: this file loads on the dashboard's
+-- first wakeup, which some themes run within a few dozen instructions of the
+-- Ethos limit.
+local logoW, logoH, logoVariants
 local FONT_LISTS_BY_RESOLUTION = {
   ["800x480"] = {value_default = {FONT_XXS, FONT_XS, FONT_S, FONT_STD, FONT_L, FONT_XL, FONT_XXL, FONT_XXXXL}, value_reduced = {FONT_XXS, FONT_XS, FONT_S, FONT_STD, FONT_L}, value_title = {FONT_XXS, FONT_XS, FONT_S, FONT_STD}},
   ["480x320"] = {value_default = {FONT_XXS, FONT_XS, FONT_S, FONT_STD, FONT_L, FONT_XL}, value_reduced = {FONT_XXS, FONT_XS, FONT_S, FONT_STD, FONT_L}, value_title = {FONT_XXS, FONT_XS, FONT_S}},
@@ -1860,6 +1865,40 @@ end
 -- eviction just because the draw path never went back through loadImage().
 local function drawImageInRect(regionX, regionY, regionW, regionH, image, imagewidth, imageheight, imagealign, bgcolor)
   local bitmap = nil
+  -- The logo comes pre-rendered at several sizes (widest first) and is drawn
+  -- at the largest that fits, unscaled: Ethos scales bitmaps by dropping or
+  -- repeating whole pixel columns, which makes the lettering wobble.
+  if (image == LOGO_DARK_FALLBACK or image == LOGO_LIGHT_FALLBACK) and not imagewidth and not imageheight then
+    if not logoVariants then
+      logoW = {400, 370, 340, 310, 280, 250, 220, 190, 160, 130, 100}
+      logoH = {88, 81, 75, 68, 62, 55, 49, 42, 36, 30, 23}
+      logoVariants = {
+        [LOGO_DARK_FALLBACK] = {
+          LOGO_DARK_FALLBACK,
+          "widgets/dashboard/gfx/logo/dark-370.png", "widgets/dashboard/gfx/logo/dark-340.png",
+          "widgets/dashboard/gfx/logo/dark-310.png", "widgets/dashboard/gfx/logo/dark-280.png",
+          "widgets/dashboard/gfx/logo/dark-250.png", "widgets/dashboard/gfx/logo/dark-220.png",
+          "widgets/dashboard/gfx/logo/dark-190.png", "widgets/dashboard/gfx/logo/dark-160.png",
+          "widgets/dashboard/gfx/logo/dark-130.png", "widgets/dashboard/gfx/logo/dark-100.png",
+        },
+        [LOGO_LIGHT_FALLBACK] = {
+          LOGO_LIGHT_FALLBACK,
+          "widgets/dashboard/gfx/logo/light-370.png", "widgets/dashboard/gfx/logo/light-340.png",
+          "widgets/dashboard/gfx/logo/light-310.png", "widgets/dashboard/gfx/logo/light-280.png",
+          "widgets/dashboard/gfx/logo/light-250.png", "widgets/dashboard/gfx/logo/light-220.png",
+          "widgets/dashboard/gfx/logo/light-190.png", "widgets/dashboard/gfx/logo/light-160.png",
+          "widgets/dashboard/gfx/logo/light-130.png", "widgets/dashboard/gfx/logo/light-100.png",
+        },
+      }
+    end
+    local logoPaths = logoVariants[image]
+    for i = 1, #logoW do
+      if logoW[i] <= regionW and logoH[i] <= regionH then
+        image, imagewidth, imageheight = logoPaths[i], logoW[i], logoH[i]
+        break
+      end
+    end
+  end
   if type(image) == "string" then
     local fallbackLogo = utils.getLogoFallbackForBackground and utils.getLogoFallbackForBackground(bgcolor)
     local byFallback = imageCache[fallbackLogo or ""]
