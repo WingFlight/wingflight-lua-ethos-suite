@@ -240,6 +240,20 @@ local function openScreen(nav, menus, rootEntries, screen, setEventHandler, setW
   local windowWidth, windowHeight = lcd.getWindowSize()
   local numPerRow, tileW, tileH, tilePadding, tileFont = tileGrid.metrics(windowWidth, windowHeight)
 
+  -- Spread the columns so the last one ends where the header's button row
+  -- ends; the fixed tile gap alone leaves the grid a few pixels short (X20:
+  -- 6 x 120 + 5 x 10 = 770 of 780). Rows keep the fixed vertical gap.
+  local colX = {}
+  local spread = 0
+  local rightEdge = headerHandle.rightEdge
+  if numPerRow > 1 and type(rightEdge) == "number" then
+    spread = rightEdge - (numPerRow * tileW + (numPerRow - 1) * tilePadding)
+    if spread < 0 or spread >= tileW then spread = 0 end
+  end
+  for c = 0, numPerRow - 1 do
+    colX[c] = c * (tileW + tilePadding) + (numPerRow > 1 and math.floor(c * spread / (numPerRow - 1) + 0.5) or 0)
+  end
+
   -- form.height() reflects the header line's actual rendered height, so
   -- the tile grid starts right below it regardless of the radio's line
   -- height -- no hardcoded offset to get wrong.
@@ -297,7 +311,7 @@ local function openScreen(nav, menus, rootEntries, screen, setEventHandler, setW
         x = 0
         y = y + tileH + tilePadding
       else
-        x = x + tileW + tilePadding
+        x = colX[col]
       end
     end
   end
