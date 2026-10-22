@@ -136,6 +136,22 @@ local DASHBOARD_THEME_WIDTHS = {800, 784, 640, 630, 480, 472}
 local ETHOS_THEME_MIN_VERSION = {26, 1, 0}
 local LOGO_DARK_FALLBACK = "widgets/dashboard/gfx/logo-dark.png"
 local LOGO_LIGHT_FALLBACK = "widgets/dashboard/gfx/logo-light.png"
+-- The logo comes pre-rendered at these sizes (widest first) and is drawn at
+-- the largest that fits, unscaled: Ethos scales bitmaps by dropping or
+-- repeating whole pixel columns, which makes the lettering wobble.
+local LOGO_SIZES = {
+  {400, 88}, {370, 81}, {340, 75}, {310, 68}, {280, 62}, {250, 55},
+  {220, 49}, {190, 42}, {160, 36}, {130, 30}, {100, 23},
+}
+local LOGO_VARIANTS = {}
+for _, base in ipairs({LOGO_DARK_FALLBACK, LOGO_LIGHT_FALLBACK}) do
+  local tone = base:match("logo%-(%a+)%.png$")
+  local paths = {base}
+  for i = 2, #LOGO_SIZES do
+    paths[i] = "widgets/dashboard/gfx/logo/" .. tone .. "-" .. LOGO_SIZES[i][1] .. ".png"
+  end
+  LOGO_VARIANTS[base] = paths
+end
 local FONT_LISTS_BY_RESOLUTION = {
   ["800x480"] = {value_default = {FONT_XXS, FONT_XS, FONT_S, FONT_STD, FONT_L, FONT_XL, FONT_XXL, FONT_XXXXL}, value_reduced = {FONT_XXS, FONT_XS, FONT_S, FONT_STD, FONT_L}, value_title = {FONT_XXS, FONT_XS, FONT_S, FONT_STD}},
   ["480x320"] = {value_default = {FONT_XXS, FONT_XS, FONT_S, FONT_STD, FONT_L, FONT_XL}, value_reduced = {FONT_XXS, FONT_XS, FONT_S, FONT_STD, FONT_L}, value_title = {FONT_XXS, FONT_XS, FONT_S}},
@@ -1860,6 +1876,16 @@ end
 -- eviction just because the draw path never went back through loadImage().
 local function drawImageInRect(regionX, regionY, regionW, regionH, image, imagewidth, imageheight, imagealign, bgcolor)
   local bitmap = nil
+  local logoPaths = LOGO_VARIANTS[image]
+  if logoPaths and not imagewidth and not imageheight then
+    for i = 1, #LOGO_SIZES do
+      local size = LOGO_SIZES[i]
+      if size[1] <= regionW and size[2] <= regionH then
+        image, imagewidth, imageheight = logoPaths[i], size[1], size[2]
+        break
+      end
+    end
+  end
   if type(image) == "string" then
     local fallbackLogo = utils.getLogoFallbackForBackground and utils.getLogoFallbackForBackground(bgcolor)
     local byFallback = imageCache[fallbackLogo or ""]
