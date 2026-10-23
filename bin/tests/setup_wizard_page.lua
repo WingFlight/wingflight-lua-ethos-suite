@@ -69,6 +69,7 @@ _G.lcd = {
   drawFilledTriangle = function() end,
   drawFilledCircle = function() end,
   drawLine = function() end,
+  setClipping = function() end,
 }
 
 -- MSP replies and bus events run in the background task, where Ethos refuses
@@ -523,6 +524,15 @@ local align = writesOf(39, before + 1)
 check("sensors: auto orientation writes the board alignment",
   #align == 1 and bytes(align[1].payload) == "0,0,0,0,90,0", align[1] and bytes(align[1].payload))
 press(T("btn_next"))
+check("sensors: then shows the live orientation check", shows("sen_check_text"))
+before = #sent
+for _ = 1, 3 do tick(0.5) end
+local attitudeReads = 0
+for i = before + 1, #sent do
+  if sent[i].command == 108 then attitudeReads = attitudeReads + 1 end
+end
+check("sensors: the check polls MSP_ATTITUDE", attitudeReads >= 2, attitudeReads)
+press(T("btn_next"))
 replies[0x5F05] = function(m)
   if m.payload then return {1, 0, 0, 0, 0, 0} end
   local r1, r2 = s16bytes(15)
@@ -550,7 +560,8 @@ check("sensors: the restart shows a progress dialog with the countdown",
   restartDialog and tostring(restartDialog.title) .. " " .. tostring(restartDialog.text))
 check("sensors: the step's own modules are freed when it closes",
   package.loaded["wfsuite.lib.msp_board_mount_trim"] == nil and package.loaded["wfsuite.lib.msp_acc_calibration"] == nil
-  and package.loaded["wfsuite.lib.acc_calibration_wait"] == nil)
+  and package.loaded["wfsuite.lib.acc_calibration_wait"] == nil
+  and package.loaded["wfsuite.lib.msp_attitude"] == nil and package.loaded["wfsuite.app.plane3d"] == nil)
 tick(3)
 check("sensors: the bar fills while the FC restarts",
   restartDialog and (restartDialog.values[#restartDialog.values] or 0) >= 10,

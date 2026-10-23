@@ -9,7 +9,12 @@
 --   acc     calibrate the accelerometer (MSP_ACC_CALIBRATION, then wait for
 --           the FC to clear ARMING_DISABLED_CALIBRATING, lib/acc_calibration_wait.lua)
 --   align   MSP2_WING_BOARD_AUTO_ALIGN: flat, Start, lift the tail 20 deg; the
---           result is written as the board alignment
+--           result is written as the board alignment. A side view of the
+--           plane (app/plane3d.lua) shows the tail lift.
+--   check   the live attitude (MSP_ATTITUDE) on the 3D plane, seen from
+--           behind: tilting the model must move the picture the same way.
+--           The firmware applies an auto-align result at once, so this
+--           shows the new orientation without a restart.
 --   level   MSP2_WING_BOARD_MOUNT_TRIM_AUTO: hold the flying attitude; the
 --           result is written as the mount trim
 --   done    board alignment only applies after a restart, so Save and
@@ -22,13 +27,15 @@ local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("
 local bus = requireModule("lib/bus.lua")
 local ui = requireModule("app/setup_wizard_ui.lua")
 -- Freed when the step closes (app/setup_wizard_ui.lua's notLoaded()).
-local OWNED = ui.notLoaded({"wfsuite.lib.msp_acc_calibration", "wfsuite.lib.acc_calibration_wait", "wfsuite.lib.msp_board_auto_align", "wfsuite.lib.msp_board_alignment_config", "wfsuite.lib.msp_board_mount_trim"})
+local OWNED = ui.notLoaded({"wfsuite.lib.msp_acc_calibration", "wfsuite.lib.acc_calibration_wait", "wfsuite.lib.msp_board_auto_align", "wfsuite.lib.msp_board_alignment_config", "wfsuite.lib.msp_board_mount_trim", "wfsuite.lib.msp_attitude", "wfsuite.app.plane3d"})
 local status = requireModule("lib/msp_status.lua")
 local accCalibration = requireModule("lib/msp_acc_calibration.lua")
 local calibrationWait = requireModule("lib/acc_calibration_wait.lua")
 local autoAlign = requireModule("lib/msp_board_auto_align.lua")
 local boardAlignment = requireModule("lib/msp_board_alignment_config.lua")
 local mountTrim = requireModule("lib/msp_board_mount_trim.lua")
+local attitude = requireModule("lib/msp_attitude.lua")
+local plane3d = requireModule("app/plane3d.lua")
 
 local T = {
   title = "@i18n(app.modules.setup_wizard.sen_title)@",
@@ -44,6 +51,9 @@ local T = {
   alignText = "@i18n(app.modules.setup_wizard.sen_align_text)@",
   alignLift = "@i18n(app.modules.setup_wizard.sen_align_lift)@",
   alignDone = "@i18n(app.modules.setup_wizard.sen_align_done_fmt)@",
+  checkTitle = "@i18n(app.modules.setup_wizard.sen_check_title)@",
+  checkText = "@i18n(app.modules.setup_wizard.sen_check_text)@",
+  attitudeFmt = "@i18n(app.modules.setup_wizard.sen_attitude_fmt)@",
   levelTitle = "@i18n(app.modules.setup_wizard.sen_level_title)@",
   progress = "@i18n(app.modules.setup_wizard.progress_fmt)@",
   levelText = "@i18n(app.modules.setup_wizard.sen_level_text)@",
@@ -67,6 +77,20 @@ local T = {
 
 -- Auto align and level: poll every quarter second while the FC works.
 local AUTO_POLL = 0.25
+-- Live attitude on the check screen, as the Alignment page polls it: the
+-- MSP queue is shared with the background task, and a request that gets no
+-- answer is given up after ATTITUDE_TIMEOUT (msp_attitude retries for ~1.6s).
+local ATTITUDE_POLL = 0.3
+local ATTITUDE_TIMEOUT = 3.0
+-- The orientation screen's view: from behind and to the side, nose to the
+-- left, and the tail lift it asks for.
+local SIDE_YAW = -65
+local TAIL_LIFT = 20
+-- The pictures sit in a wide, short box and tilt only a little: bigger
+-- than plane3d's fit-any-attitude size (it clips what overflows).
+local LIFT_ZOOM = 1.5
+local LIVE_ZOOM = 1.6
+local PARTS = 4
 
 local function new(wiz)
   local self = {}
@@ -82,6 +106,11 @@ local function new(wiz)
   local autoReply = nil               -- latest decoded auto reply
   local nextPollAt = 0
   local changed = false
+  -- Live attitude (check screen).
+  local live = {roll = 0, pitch = 0}
+  local liveText = string.format(T.attitudeFmt, 0, 0)
+  local attitudePending, attitudeAt, nextAttitudeAt = false, 0, 0
+  local attitudeMoved = false   -- repaint from wakeup: replies arrive in the background task
 
   wiz.fetch({
     status = function(ok, err) return status.buildReadMessage(ok, err) end,
@@ -96,8 +125,37 @@ local function new(wiz)
 
   local function go(name)
     screen, note, noteAccent, busy, autoKind, accWait = name, nil, nil, false, nil, nil
+    attitudePending, nextAttitudeAt = false, 0
     wiz.rebuild()
   end
+
+  -- The plane from the side, its tail lifted while auto align waits for it.
+  local function drawLift(x, y, w, h)
+    plane3d.draw(x, y, w, h, 0, (autoKind == "align") and TAIL_LIFT or 0, SIDE_YAW, LIFT_ZOOM)
+  end
+
+  -- The plane from behind at the live attitude, with the numbers under it.
+  local function drawLive(x, y, w, h, colors)
+    lcd.font(FONT_S)
+    local _, th = lcd.getTextSize(liveText)
+    plane3d.draw(x, y, w, h - th - 2, live.roll, live.pitch, 0, LIVE_ZOOM)
+    lcd.color(colors.text)
+    lcd.drawText(x, y + h - th, liveText, LEFT)
+  end
+
+  local function onAttitude(values)
+    attitudePending = false
+    if screen ~= "check" then return end
+    local roll = ((values and values.roll) or 0) / 10
+    local pitch = ((values and values.pitch) or 0) / 10
+    if roll ~= live.roll or pitch ~= live.pitch then
+      live.roll, live.pitch = roll, pitch
+      liveText = string.format(T.attitudeFmt, roll, pitch)
+      attitudeMoved = true
+    end
+  end
+
+  local function onAttitudeError() attitudePending = false end
 
   local function startAcc()
     busy = true
@@ -188,7 +246,7 @@ local function new(wiz)
 
     elseif screen == "acc" then
       -- The step's three parts, one at a time: calibrate, orientation, level.
-      scr:text(T.accTitle, T.accText, noteAccent or note, string.format(T.progress, 1, 3))
+      scr:text(T.accTitle, T.accText, noteAccent or note, string.format(T.progress, 1, PARTS))
       -- Once it has calibrated, the focus moves on to Next.
       local done = note ~= nil and not busy
       return scr:row(function() go("intro") end, {
@@ -196,15 +254,21 @@ local function new(wiz)
           press = startAcc},
       }, {text = T.next, disabled = busy, press = function() go("align") end})
 
+    elseif screen == "check" then
+      scr:text(T.checkTitle, T.checkText, nil, string.format(T.progress, 3, PARTS))
+      scr:draw(drawLive)
+      return scr:row(function() go("align") end, nil, {text = T.next, press = function() go("level") end})
+
     elseif screen == "align" or screen == "level" then
       local align = screen == "align"
       scr:text(align and T.alignTitle or T.levelTitle, align and T.alignText or T.levelText,
-        noteAccent or note, string.format(T.progress, align and 2 or 3, 3))
+        noteAccent or note, string.format(T.progress, align and 2 or 4, PARTS))
+      if align then scr:draw(drawLift) end
       local done = note ~= nil and not busy
-      return scr:row(function() go(align and "acc" or "align") end, {
+      return scr:row(function() go(align and "acc" or "check") end, {
         {text = done and T.again or T.start, primary = not done, needsMotion = true, disabled = busy,
           press = function() startAuto(screen) end},
-      }, {text = T.next, disabled = busy, press = function() go(align and "level" or "done") end})
+      }, {text = T.next, disabled = busy, press = function() go(align and "check" or "done") end})
 
     else -- done
       scr:text(T.doneTitle, changed and T.doneRestart or T.doneSame)
@@ -216,6 +280,17 @@ local function new(wiz)
   function self.paint() scr:paint() end
 
   function self.wakeup(now)
+    if screen == "check" then
+      if attitudeMoved then
+        attitudeMoved = false
+        wiz.invalidate()
+      end
+      if attitudePending and now - attitudeAt > ATTITUDE_TIMEOUT then attitudePending = false end
+      if not attitudePending and now >= nextAttitudeAt then
+        attitudePending, attitudeAt, nextAttitudeAt = true, now, now + ATTITUDE_POLL
+        bus.publish("msp.request", attitude.buildReadMessage(onAttitude, onAttitudeError))
+      end
+    end
     if accWait then
       if calibrationWait.shouldPoll(accWait, now) then
         local waiting = accWait
@@ -257,7 +332,7 @@ local function new(wiz)
   end
 
   function self.released() scr:refresh() end
-  function self.leave() accWait, autoKind = nil, nil end
+  function self.leave() accWait, autoKind, attitudePending = nil, nil, false end
 
   return self
 end

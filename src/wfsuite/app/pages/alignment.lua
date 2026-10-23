@@ -213,6 +213,7 @@ local function open(opts)
     rebootAfterSave = true,
     unloadPackageKeys = {
       "wfsuite.app.alignment_visual",
+      "wfsuite.app.plane3d",
       "wfsuite.lib.msp_attitude",
       "wfsuite.lib.msp_board_alignment_config",
       "wfsuite.lib.msp_sensor_alignment",

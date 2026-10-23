@@ -8824,11 +8824,29 @@
           "needs_translation": false,
           "translation": "Find the board orientation"
         },
+        "sen_attitude_fmt": {
+          "english": "Roll %.1f°   Pitch %.1f°",
+          "max_length": 24,
+          "needs_translation": false,
+          "translation": "Roll %.1f°   Pitch %.1f°"
+        },
         "sen_calibrate": {
           "english": "Calibrate",
           "max_length": 9,
           "needs_translation": false,
           "translation": "Calibrate"
+        },
+        "sen_check_text": {
+          "english": "Tilt the model right and left, then nose down and up: the picture must follow every movement. If it doesn't, go back and find the orientation again.",
+          "max_length": 148,
+          "needs_translation": false,
+          "translation": "Tilt the model right and left, then nose down and up: the picture must follow every movement. If it doesn't, go back and find the orientation again."
+        },
+        "sen_check_title": {
+          "english": "Check the orientation",
+          "max_length": 21,
+          "needs_translation": false,
+          "translation": "Check the orientation"
         },
         "sen_done_restart": {
           "english": "The flight controller restarts to use the new orientation and level. The wizard carries on afterwards.",
