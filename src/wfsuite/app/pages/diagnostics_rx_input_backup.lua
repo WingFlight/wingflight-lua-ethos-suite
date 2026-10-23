@@ -35,12 +35,13 @@ local T = {
 
 -- Keep in sync with wingflight-firmware's cli/settings.c
 -- lookupTableRxInputBackupProvider[] (same order, NONE=0 first).
+-- 4 (old FPORT2) detects the speed like FBUS in the firmware, so it is FBUS.
 local PROVIDER_NAMES = {
   [0] = "NONE",
   [1] = "SBUS",
   [2] = "FBUS",
   [3] = "FPORT",
-  [4] = "FPORT2",
+  [4] = "FBUS",
   [5] = "EXBUS",
   [6] = "CRSF",
 }
