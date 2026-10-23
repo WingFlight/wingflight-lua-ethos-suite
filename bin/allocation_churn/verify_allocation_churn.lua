@@ -337,6 +337,7 @@ package.loaded["wfsuite.lib.require"] = function(name)
   if name == "lib/ethos_version.lua" then return "1.0" end
   -- The shared min/max/average sampler the dashboard records with (#2344).
   if name == "lib/flight_stats.lua" then return assert(loadfile(ROOT .. "/src/wfsuite/lib/flight_stats.lua"))() end
+  if name == "lib/live_sensors.lua" then return assert(loadfile(ROOT .. "/src/wfsuite/lib/live_sensors.lua"))() end
   error("unexpected dependency: " .. tostring(name))
 end
 lcd = { RGB = function(r, g, b, a) return r end }
@@ -518,7 +519,8 @@ do
 end
 
 do
-  -- End-to-end against the recording side: whatever recordSensorStat() wrote,
+  -- End-to-end against the recording side: whatever the session's flight record
+  -- (lib/flight_stats.lua with lib/live_sensors.lua's read, #2344) wrote,
   -- getSensorStats() has to find. Dropping only the record entry is what leaves
   -- a caller on the flat-key path.
   local widget, stats = newWidget()
@@ -538,10 +540,18 @@ do
     "rpm", "link", "fuel", "smartfuel", "throttle_percent", "temp_mcu", "temp_esc",
     "bec_voltage", "watts" }
 
+  -- Record through the real path: the session's flight record on this state, the armed
+  -- edge and then 2.5 s in flight with the governor active, so the powered gate has
+  -- opened and the rpm and current minima are taken too.
+  local liveSensors = dofile(ROOT .. "/src/wfsuite/lib/live_sensors.lua")
+  local record = dofile(ROOT .. "/src/wfsuite/lib/flight_stats.lua").new()
+  record.stats = stats
+  widget.isArmed, widget.governorState, widget.mcuId = true, 4, "churn"
+  for tick = 1, 6 do record:update(widget, liveSensors.read, tick * 0.5) end
+
   local problems = {}
   for _, name in ipairs(flatOnly) do
-    -- Record once through the real path.
-    local recorded = context.tasks.telemetry.getSensor(name)
+    local recorded = liveSensors.read(widget, name)
     if recorded == nil then
       problems[#problems + 1] = name .. ": the sensor yields no value, the test would be blind"
     else
@@ -594,7 +604,13 @@ do
   local widget = newWidget()
   widget.tempMcu = 20
   context.preferences.general.temperature_unit = 0
-  context.tasks.telemetry.getSensor("temp_mcu")
+  -- Recorded by the session's flight record, as on the radio (#2344).
+  local record = dofile(ROOT .. "/src/wfsuite/lib/flight_stats.lua").new()
+  record.stats = widget.dashboardStats
+  local liveSensors = dofile(ROOT .. "/src/wfsuite/lib/live_sensors.lua")
+  widget.isArmed, widget.governorState, widget.mcuId = true, 4, "temp"
+  record:update(widget, liveSensors.read, 0.5)
+  record:update(widget, liveSensors.read, 1.0)
   local a = context.tasks.telemetry.getSensorStats("temp_mcu")
   local b = context.tasks.telemetry.getSensorStats("temp_mcu")
   check("the temperature cache returns the same object twice in a row",

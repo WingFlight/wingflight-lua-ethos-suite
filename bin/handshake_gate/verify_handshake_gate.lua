@@ -124,6 +124,7 @@ local REAL = {
   ["lib/msp_dataflash_summary.lua"] = true,
   ["lib/msp_flight_stats.lua"] = true,
   ["lib/flight_stats.lua"] = true,
+  ["lib/live_sensors.lua"] = true,
   ["lib/msp_eeprom.lua"] = true,
   ["lib/system_status.lua"] = true,
   ["tasks/flight_timer.lua"] = true,
