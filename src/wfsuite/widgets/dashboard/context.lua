@@ -772,13 +772,6 @@ local function roundSigned(value)
   return -math.floor(-value + 0.5)
 end
 
-local function updateMinMax(stats, minKey, maxKey, value)
-  value = tonumber(value)
-  if value == nil then return end
-  if stats[minKey] == nil or value < stats[minKey] then stats[minKey] = value end
-  if stats[maxKey] == nil or value > stats[maxKey] then stats[maxKey] = value end
-end
-
 local STAT_SUFFIXES = {
   rssi = "Rssi",
   link = "Link",
@@ -839,6 +832,13 @@ local function statKey(name)
   return STAT_ALIASES[name or ""] or name
 end
 
+local function updateMinMax(stats, minKey, maxKey, value)
+  value = tonumber(value)
+  if value == nil then return end
+  if stats[minKey] == nil or value < stats[minKey] then stats[minKey] = value end
+  if stats[maxKey] == nil or value > stats[maxKey] then stats[maxKey] = value end
+end
+
 local function recordSensorStat(name, value)
   local widget = currentWidget
   if not widget or widget.flightmodeState ~= "inflight" or type(widget.dashboardStats) ~= "table" then return end
@@ -858,11 +858,13 @@ local function recordSensorStat(name, value)
   entry.count = (entry.count or 0) + 1
   entry.avg = entry.sum / entry.count
 
-  if key == "rpm" then
+  -- The variance lives on the session's flight object (lib/flight_stats.lua).
+  local flight = widget.flight
+  if key == "rpm" and flight then
     if entry.avg and entry.avg > 0 then
-      widget.rpmVariancePct = roundSigned((math.abs(value - entry.avg) / entry.avg) * 100)
+      flight.rpmVariancePct = roundSigned((math.abs(value - entry.avg) / entry.avg) * 100)
     else
-      widget.rpmVariancePct = nil
+      flight.rpmVariancePct = nil
     end
   end
 
@@ -2646,7 +2648,7 @@ function context.setWidget(widget)
   context.session.bblFlags = widget and widget.bblFlags
   context.session.bblSize = widget and widget.bblSize
   context.session.bblUsed = widget and widget.bblUsed
-  context.session.rpmVariancePct = widget and widget.rpmVariancePct
+  context.session.rpmVariancePct = widget and widget.flight and widget.flight.rpmVariancePct or nil
   local modelPrefs = context.session.modelPreferences
   modelPrefs.general = modelPrefs.general or {}
   modelPrefs.battery = modelPrefs.battery or {}
