@@ -27,6 +27,13 @@ Requires a running background task and a flight controller connection.
 
 ## Notes
 
+Below the settings, a 3D aircraft shows the live attitude from the flight
+controller with the offsets in the fields applied, including edits not yet
+saved. It is the same aerobatic plane the Configurator shows: red body, dark
+ailerons, elevator and rudder, white spinner and landing gear. The view is from
+behind and slightly above, so the top of the wing shows when the model is level.
+The tool button turns the view so the tail faces you again.
+
 TODO: Verify persistence, reboot behaviour, profile scope and any restrictions in
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than
 firmware defaults; wire values may need scaling before display.

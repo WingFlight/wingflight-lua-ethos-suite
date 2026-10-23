@@ -1,9 +1,9 @@
 -- Alignment page. Loaded on demand from Setup -> Alignment.
 --
 -- Ports the original Alignment module's editable configuration plus its
--- custom live 3D helicopter attitude preview. The original page polls
+-- custom live 3D attitude preview. The original page polls
 -- MSP_ATTITUDE while open, combines live roll/pitch/yaw with the saved
--- mounting offsets, and draws a projected heli model below the form
+-- mounting offsets, and draws a projected aircraft model below the form
 -- fields; this page keeps that behavior while routing MSP traffic through
 -- this rebuild's bus/page_runtime architecture.
 
@@ -243,6 +243,7 @@ local function open(opts)
       syncDisplayFromData()
       visual.draw(state)
     end,
+    toolIcon = "app/gfx/nav/recenter.png",
     onTool = function(focusFn)
       form.openDialog({
         title = PAGE_TITLE,

@@ -21,7 +21,7 @@
 -- that file's inFlight()) showing exactly that -- a channel value that
 -- tracked isArmed one-for-one and never moved with the stick.
 --
--- Restores what widgets/dashboard/flightmode.lua's inFlight() needs to read
+-- Restores what lib/flight_stats.lua's inFlight() needs to read
 -- the *radio's own* throttle channel (a local, instant, always-accurate
 -- signal) rather than the FC's telemetry-reported throttle_percent -- see
 -- that file's own header comment for why. Fetched once per connect by

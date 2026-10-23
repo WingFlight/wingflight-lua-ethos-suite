@@ -81,6 +81,8 @@ local function loadSession(opts)
   local flightTimer = dofile(TASKS .. "/flight_timer.lua")
 
   local modules = {
+    ["lib/flight_stats.lua"] = dofile(TASKS .. "/../lib/flight_stats.lua"),
+    ["lib/live_sensors.lua"] = dofile(TASKS .. "/../lib/live_sensors.lua"),
     ["lib/msp_handshake.lua"] = { buildFcVersionReadMessage = builder(), buildUidReadMessage = builder(),
       buildNameReadMessage = builder(), buildRtcSyncMessage = builder() },
     ["lib/msp_api_version.lua"] = { buildReadMessage = builder(), isSupported = function() return true end },
