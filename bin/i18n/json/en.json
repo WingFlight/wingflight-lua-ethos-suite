@@ -8734,12 +8734,6 @@
           "needs_translation": false,
           "max_length": 148
         },
-        "sen_attitude_fmt": {
-          "english": "Roll %.1f°   Pitch %.1f°",
-          "translation": "Roll %.1f°   Pitch %.1f°",
-          "needs_translation": false,
-          "max_length": 24
-        },
         "rx_title": {
           "english": "Receiver",
           "translation": "Receiver",

@@ -206,7 +206,7 @@ local function new(wiz)
     scr:text(string.format(T.head, wiz.surfaceName(s), side == "min" and T.minLabel or T.maxLabel),
       side == "min" and T.min or T.max, s.kind == "flap" and T.flap or nil,
       string.format(T.progress, screenNumber(), 2 * #surfaces))
-    scr:draw(drawServo)
+    scr:draw(drawServo, nil, true)
     local specs = {}
     local ready = onSide()
     for _, d in ipairs(STEPS) do

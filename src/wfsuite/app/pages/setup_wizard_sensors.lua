@@ -53,7 +53,8 @@ local T = {
   alignDone = "@i18n(app.modules.setup_wizard.sen_align_done_fmt)@",
   checkTitle = "@i18n(app.modules.setup_wizard.sen_check_title)@",
   checkText = "@i18n(app.modules.setup_wizard.sen_check_text)@",
-  attitudeFmt = "@i18n(app.modules.setup_wizard.sen_attitude_fmt)@",
+  roll = "@i18n(app.modules.pids.roll)@",
+  pitch = "@i18n(app.modules.pids.pitch)@",
   levelTitle = "@i18n(app.modules.setup_wizard.sen_level_title)@",
   progress = "@i18n(app.modules.setup_wizard.progress_fmt)@",
   levelText = "@i18n(app.modules.setup_wizard.sen_level_text)@",
@@ -86,11 +87,12 @@ local ATTITUDE_TIMEOUT = 3.0
 -- left, and the tail lift it asks for.
 local SIDE_YAW = -65
 local TAIL_LIFT = 20
--- The pictures sit in a wide, short box and tilt only a little: bigger
+-- The pictures tilt only a little: a little bigger
 -- than plane3d's fit-any-attitude size (it clips what overflows).
-local LIFT_ZOOM = 1.5
-local LIVE_ZOOM = 1.6
+local LIFT_ZOOM = 1.3
+local LIVE_ZOOM = 1.25
 local PARTS = 4
+local DEGREES = "%.1f°"
 
 local function new(wiz)
   local self = {}
@@ -108,7 +110,7 @@ local function new(wiz)
   local changed = false
   -- Live attitude (check screen).
   local live = {roll = 0, pitch = 0}
-  local liveText = string.format(T.attitudeFmt, 0, 0)
+  local liveRows = {{T.roll, string.format(DEGREES, 0)}, {T.pitch, string.format(DEGREES, 0)}}
   local attitudePending, attitudeAt, nextAttitudeAt = false, 0, 0
   local attitudeMoved = false   -- repaint from wakeup: replies arrive in the background task
 
@@ -134,13 +136,9 @@ local function new(wiz)
     plane3d.draw(x, y, w, h, 0, (autoKind == "align") and TAIL_LIFT or 0, SIDE_YAW, LIFT_ZOOM)
   end
 
-  -- The plane from behind at the live attitude, with the numbers under it.
-  local function drawLive(x, y, w, h, colors)
-    lcd.font(FONT_S)
-    local _, th = lcd.getTextSize(liveText)
-    plane3d.draw(x, y, w, h - th - 2, live.roll, live.pitch, 0, LIVE_ZOOM)
-    lcd.color(colors.text)
-    lcd.drawText(x, y + h - th, liveText, LEFT)
+  -- The plane from behind at the live attitude (the numbers are rows).
+  local function drawLive(x, y, w, h)
+    plane3d.draw(x, y, w, h, live.roll, live.pitch, 0, LIVE_ZOOM)
   end
 
   local function onAttitude(values)
@@ -150,7 +148,6 @@ local function new(wiz)
     local pitch = ((values and values.pitch) or 0) / 10
     if roll ~= live.roll or pitch ~= live.pitch then
       live.roll, live.pitch = roll, pitch
-      liveText = string.format(T.attitudeFmt, roll, pitch)
       attitudeMoved = true
     end
   end
@@ -256,14 +253,15 @@ local function new(wiz)
 
     elseif screen == "check" then
       scr:text(T.checkTitle, T.checkText, nil, string.format(T.progress, 3, PARTS))
-      scr:draw(drawLive)
+      scr:draw(drawLive, nil, true)
+      scr:rows(liveRows)
       return scr:row(function() go("align") end, nil, {text = T.next, press = function() go("level") end})
 
     elseif screen == "align" or screen == "level" then
       local align = screen == "align"
       scr:text(align and T.alignTitle or T.levelTitle, align and T.alignText or T.levelText,
         noteAccent or note, string.format(T.progress, align and 2 or 4, PARTS))
-      if align then scr:draw(drawLift) end
+      if align then scr:draw(drawLift, nil, true) end
       local done = note ~= nil and not busy
       return scr:row(function() go(align and "acc" or "check") end, {
         {text = done and T.again or T.start, primary = not done, needsMotion = true, disabled = busy,
@@ -283,6 +281,8 @@ local function new(wiz)
     if screen == "check" then
       if attitudeMoved then
         attitudeMoved = false
+        scr:setRow(1, string.format(DEGREES, live.roll))
+        scr:setRow(2, string.format(DEGREES, live.pitch))
         wiz.invalidate()
       end
       if attitudePending and now - attitudeAt > ATTITUDE_TIMEOUT then attitudePending = false end

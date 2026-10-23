@@ -10273,13 +10273,6 @@
           "reverse_text": false,
           "translation": "Find the board orientation"
         },
-        "sen_attitude_fmt": {
-          "english": "Roll %.1f°   Pitch %.1f°",
-          "max_length": 24,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "Roll %.1f°   Pitch %.1f°"
-        },
         "sen_calibrate": {
           "english": "Calibrate",
           "max_length": 9,

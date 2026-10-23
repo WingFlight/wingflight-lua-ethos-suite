@@ -10,13 +10,21 @@
 --   -- in step.build():
 --   screen:begin()
 --   screen:text(title, body, accentLine)
---   screen:picture(art.layout(...), caption)   -- or screen:draw(fn)
+--   screen:picture(art.layout(...), caption)   -- or screen:draw(fn[, caption, side])
 --   return screen:row(backFn, {{text =, press =, primary =, needsMotion =, small =, weight =}, ...}, forwardSpec)
 --   -- in step.paint():
 --   screen:paint()
 --
 -- begin() is called from build() only (it reads form.height()); paint()
 -- does not allocate.
+--
+-- Side by side: a screen with a picture (or a drawing passed with side =
+-- true) shows it in the left half and its words (body, status line, rows)
+-- in the right half, under a full-width title, as Rotorflight's wizard
+-- does: the picture gets the screen's whole height instead of what the
+-- text leaves. When the words don't fit the column the screen stays
+-- stacked (text above, picture below). Gauges, bars and grids that need
+-- the width stay stacked. The row of buttons is the same either way.
 
 if package.loaded["wfsuite.app.setup_wizard_ui"] then
   return package.loaded["wfsuite.app.setup_wizard_ui"]
@@ -30,6 +38,15 @@ local BUTTON_GAP = 6
 local MARGIN = 8
 local GRID_MIN_H = 30
 local GRID_MAX_H = 56
+-- Side by side: the picture's share of the width.
+local SIDE_SHARE = 0.5
+-- Body text in FONT_STD on screens at least this wide (the 800 px radios)
+-- when it fits; FONT_S otherwise.
+local BIG_TEXT_MIN_W = 700
+local BIG_FIRST = {FONT_STD, FONT_S}
+local SMALL_ONLY = {FONT_S}
+-- Stacked text may take the room only while it leaves a picture this much.
+local STACKED_PICTURE_SHARE = 0.5
 local NEXT = "@i18n(app.modules.setup_wizard.btn_next)@"
 
 -- The row's Back and plain Next are small icon-only buttons (as the
@@ -102,40 +119,105 @@ function Screen:begin()
   v.title = nil
   v.lines = {}
   v.accentFrom = nil
+  v.body, v.accent = nil, nil
   v.picture, v.caption, v.drawFn = nil, nil, nil
+  v.side, v.split = false, nil
+  v.font = FONT_S
   v.rows = {}
   v.textStop = nil
   self.buttonList = {}
 end
 
--- title (FONT_STD), body (wrapped, FONT_S), accent (wrapped, FONT_S, in the
--- accent colour: a status or warning line), progress ("4 of 4", or true).
--- Any may be nil. With progress the title is the thing being worked on now
--- (a servo, an axis, a check, a mode): it is drawn in the accent colour, and
--- a progress string muted after it. A step's fixed titles stay plain.
+-- body and accent wrapped to maxW in font: the lines, and where the accent
+-- starts.
+local function wrapText(wiz, body, accent, maxW, font)
+  local lines = body and wiz.wrapLines(body, maxW, font) or {}
+  local accentFrom = nil
+  if accent and accent ~= "" then
+    accentFrom = #lines + 1
+    local extra = wiz.wrapLines(accent, maxW, font)
+    for i = 1, #extra do lines[#lines + 1] = extra[i] end
+  end
+  return lines, accentFrom
+end
+
+-- title (FONT_STD), body (wrapped), accent (wrapped, in the accent colour: a
+-- status or warning line), progress ("4 of 4", or true). Any may be nil.
+-- With progress the title is the thing being worked on now (a servo, an
+-- axis, a check, a mode): it is drawn in the accent colour, and a progress
+-- string muted after it. A step's fixed titles stay plain. The body is in
+-- FONT_S until row() knows the room it has (arrange()).
 function Screen:text(title, body, accent, progress)
   local v = self.view
   local width = lcd.getWindowSize()
   v.title = title
   v.progress = progress
-  v.lines = body and self.wiz.wrapLines(body, width - 2 * MARGIN, FONT_S) or {}
-  v.accentFrom = nil
-  if accent and accent ~= "" then
-    v.accentFrom = #v.lines + 1
-    local extra = self.wiz.wrapLines(accent, width - 2 * MARGIN, FONT_S)
-    for i = 1, #extra do v.lines[#v.lines + 1] = extra[i] end
-  end
+  v.body, v.accent = body, accent
+  v.font = FONT_S
+  v.lines, v.accentFrom = wrapText(self.wiz, body, accent, width - 2 * MARGIN, FONT_S)
 end
 
 function Screen:picture(layout, caption)
   self.view.picture = layout
   self.view.caption = caption
+  self.view.side = true
 end
 
--- fn(x, y, w, h, colors) draws in the space below the text.
-function Screen:draw(fn, caption)
+-- fn(x, y, w, h, colors) draws in the space below the text, or with side
+-- in the left half beside it (a picture, not a gauge that needs the width).
+function Screen:draw(fn, caption, side)
   self.view.drawFn = fn
   self.view.caption = caption
+  self.view.side = side and true or false
+end
+
+-- Height of the words in font: the wrapped lines and the rows under them.
+local function wordsHeight(v, lines, font)
+  lcd.font(font)
+  local _, lineH = lcd.getTextSize("Ag")
+  return #lines * lineH + ((#v.rows > 0) and (4 + #v.rows * (lineH + 2)) or 0)
+end
+
+-- How the screen is laid out, once row() knows where the row starts
+-- (view.bottom): the body font, and side by side or stacked. The first
+-- that fits wins: side by side (a screen with a side picture) in FONT_STD
+-- then FONT_S, then stacked in FONT_STD then FONT_S. FONT_STD is tried on
+-- big screens only, and stacked FONT_S is the fallback whatever fits (the
+-- layout before side by side existed). Stacked counts as fitting when the
+-- words leave a picture or drawing at least STACKED_PICTURE_SHARE of the
+-- room.
+function Screen:arrange()
+  local v = self.view
+  v.split = nil
+  local width, height = lcd.getWindowSize()
+  lcd.font(FONT_STD)
+  local _, titleH = lcd.getTextSize("Ag")
+  local top = v.top + (v.title and (titleH + 2) or 0)
+  local room = (v.bottom or (height - 4)) - top
+  local hasPicture = (v.picture or v.drawFn) and true or false
+  local fonts = (width >= BIG_TEXT_MIN_W) and BIG_FIRST or SMALL_ONLY
+  if v.side and hasPicture then
+    local leftW = floor(width * SIDE_SHARE)
+    local colX = leftW + MARGIN
+    for i = 1, #fonts do
+      local font = fonts[i]
+      local lines, accentFrom = wrapText(self.wiz, v.body, v.accent, width - colX - MARGIN, font)
+      if wordsHeight(v, lines, font) <= room - 4 then
+        v.lines, v.accentFrom, v.font = lines, accentFrom, font
+        v.split = {top = top + 4, leftW = leftW, colX = colX}
+        return
+      end
+    end
+  end
+  for i = 1, #fonts do
+    local font = fonts[i]
+    local lines, accentFrom = wrapText(self.wiz, v.body, v.accent, width - 2 * MARGIN, font)
+    local left = room - wordsHeight(v, lines, font)
+    if font == FONT_S or left >= (hasPicture and floor(room * STACKED_PICTURE_SHARE) or 0) then
+      v.lines, v.accentFrom, v.font = lines, accentFrom, font
+      return
+    end
+  end
 end
 
 -- Rows of "label  value" below the text: {{label, value, accent}, ...}.
@@ -222,6 +304,7 @@ function Screen:row(back, specs, forward)
   end
 
   self.view.bottom = y - 4
+  self:arrange()
   self:refresh()
   return focus or forwardField
 end
@@ -244,7 +327,16 @@ function Screen:grid(specs, cols)
   local h = math.max(GRID_MIN_H, math.min(GRID_MAX_H, floor(height * 0.12)))
   h = math.min(h, floor((stop - titleBottom - BUTTON_GAP * (rows - 1)) / rows))
   local top = stop - (rows * h + BUTTON_GAP * (rows - 1))
-  local textBottom = titleBottom + #v.lines * th
+  -- arrange() chose the body font for the whole room; the grid takes some
+  -- of it, so drop to FONT_S if the bigger font no longer fits.
+  lcd.font(v.font or FONT_S)
+  local _, lineH = lcd.getTextSize("Ag")
+  if v.font ~= FONT_S and titleBottom + #v.lines * lineH > top then
+    v.font = FONT_S
+    v.lines, v.accentFrom = wrapText(self.wiz, v.body, v.accent, width - 2 * MARGIN, FONT_S)
+    lineH = th
+  end
+  local textBottom = titleBottom + #v.lines * lineH
   if textBottom > top then v.textStop = top - 2 end
   local w = math.floor((width - self.wiz.FORM_RIGHT_PADDING - BUTTON_GAP * (cols - 1)) / cols)
   for i, s in ipairs(specs) do
@@ -273,6 +365,49 @@ function Screen:refresh()
   end
 end
 
+-- "label  value" rows from y, between x and right, stopping above stop.
+-- Returns the y after the last row.
+local function paintRows(v, x, right, y, colors, stop)
+  local _, th = lcd.getTextSize("Ag")
+  local room = right - x - 8
+  for i = 1, #v.rows do
+    if y > stop - th then break end
+    local row = v.rows[i]
+    local value = row[2] or ""
+    lcd.color(colors.muted)
+    lcd.drawText(x, y, row[1], LEFT)
+    local lw = lcd.getTextSize(row[1])
+    local vw = lcd.getTextSize(value)
+    lcd.color(row[3] and colors.active or colors.text)
+    if lw + vw + 16 <= room then
+      lcd.drawText(right - 8, y, value, RIGHT)
+    else
+      -- No room beside the label: on its own line, shortened to fit.
+      y = y + th
+      if vw > room - 16 then value = ui.fit(value, room - 16) end
+      lcd.drawText(x + 16, y, value, LEFT)
+    end
+    y = y + th + 2
+  end
+  return y
+end
+
+-- The picture or drawing in x, y, w, h, with its caption at the bottom.
+local function paintPicture(v, x, y, w, h, colors)
+  if v.caption then
+    lcd.font(FONT_XS)
+    local _, ch = lcd.getTextSize(v.caption)
+    lcd.color(colors.muted)
+    lcd.drawText(x + MARGIN, y + h - ch, v.caption, LEFT)
+    h = h - ch
+  end
+  if v.picture then
+    art.draw(v.picture, x, y, w, h, colors)
+  elseif v.drawFn then
+    v.drawFn(x + MARGIN, y, w - 2 * MARGIN, h, colors)
+  end
+end
+
 function Screen:paint()
   local v = self.view
   local colors = art.colors()
@@ -289,7 +424,23 @@ function Screen:paint()
     end
     y = y + th + 2
   end
-  lcd.font(FONT_S)
+  local sp = v.split
+  if sp then
+    -- Side by side: the words in the right column, the picture on the left.
+    local bottom = v.bottom or (height - 4)
+    lcd.font(v.font or FONT_S)
+    local _, lineH = lcd.getTextSize("Ag")
+    local ty = sp.top
+    for i = 1, #v.lines do
+      lcd.color((v.accentFrom and i >= v.accentFrom) and colors.active or colors.text)
+      lcd.drawText(sp.colX, ty, v.lines[i], LEFT)
+      ty = ty + lineH
+    end
+    if #v.rows > 0 then paintRows(v, sp.colX, width - MARGIN, ty + 4, colors, bottom) end
+    paintPicture(v, 0, sp.top, sp.leftW, bottom - sp.top, colors)
+    return
+  end
+  lcd.font(v.font or FONT_S)
   -- Cut short by a grid (textStop): the body loses lines from its end, the
   -- accent lines (a status or warning) are kept.
   local _, lineH = lcd.getTextSize("Ag")
@@ -312,42 +463,11 @@ function Screen:paint()
     end
   end
   if #v.rows > 0 then
-    y = y + 4
-    local _, th = lcd.getTextSize("Ag")
-    local room = width - 2 * MARGIN - 8
-    local stop = (v.bottom or height) - th
-    for i = 1, #v.rows do
-      if y > stop then break end
-      local row = v.rows[i]
-      local value = row[2] or ""
-      lcd.color(colors.muted)
-      lcd.drawText(MARGIN, y, row[1], LEFT)
-      local lw = lcd.getTextSize(row[1])
-      local vw = lcd.getTextSize(value)
-      lcd.color(row[3] and colors.active or colors.text)
-      if lw + vw + 16 <= room then
-        lcd.drawText(width - MARGIN - 8, y, value, RIGHT)
-      else
-        -- No room beside the label: on its own line, shortened to fit.
-        y = y + th
-        if vw > room - 16 then value = ui.fit(value, room - 16) end
-        lcd.drawText(MARGIN + 16, y, value, LEFT)
-      end
-      y = y + th + 2
-    end
+    y = paintRows(v, MARGIN, width - MARGIN, y + 4, colors, v.bottom or height)
   end
   local bottom = v.bottom or (height - 4)
-  if v.caption then
-    lcd.font(FONT_XS)
-    local _, ch = lcd.getTextSize(v.caption)
-    lcd.color(colors.muted)
-    lcd.drawText(MARGIN, bottom - ch, v.caption, LEFT)
-    bottom = bottom - ch
-  end
-  if v.picture then
-    art.draw(v.picture, 0, y + 4, width, bottom - y - 6, colors)
-  elseif v.drawFn then
-    v.drawFn(MARGIN, y + 4, width - 2 * MARGIN, bottom - y - 6, colors)
+  if v.picture or v.drawFn then
+    paintPicture(v, 0, y + 4, width, bottom - y - 6, colors)
   end
 end
 
