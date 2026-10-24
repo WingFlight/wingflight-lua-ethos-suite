@@ -1,3 +1,29 @@
+# 0.0.37
+
+Use with the 0.0.37 firmware (MSP API 22.14). Flashing keeps your settings, except the Thrust Vector profiles, which reset to the new defaults.
+Remove the Thrust Vectoring switch from the Configuration page, and match the TV Hold gain default of 45 to the firmware.
+Show the backup RX FBUS and F.Port2 settings as FBUS, matching the firmware's speed detection.
+
+Add the Setup Wizard (Tools), the Configurator's wizard on the radio. It asks one thing per screen, with 3D pictures of the model, through Sensors and level, Receiver, Airframe, Servo type, Motor, Center, Direction, Binding limits, Throws, Travel check, Gyro direction, Trim and gain, Mode switches, Flying style and Finish. ESC telemetry is not in it yet. Discard puts back everything it changed.
+Draw the Configurator's plane in the Alignment page's 3D preview.
+Add an info button to every page's header that shows the flight-controller link: its state, the handshake progress, and the craft name, firmware and API version.
+Give each page's Tool button an icon for what it does, and keep the header buttons in the same place on menu screens.
+Ask Save, Discard or Stay when Back is pressed with unsaved changes.
+Name the profile type, the source and the destination it overwrites in the Copy Profiles confirmation.
+Add a repeat limit and a vibrate switch to the voltage, RX voltage and ESC temperature alerts, and a vibrate switch to the telemetry lost alert.
+Add an ESC status line to the dashboard (escstatus), coloured by health, for APD, Graupner, Hobbywing V5, Kontronik, OpenYGE and Scorpion ESCs.
+Add ESC load to the dashboard, as a percentage of the ESC's current limit. AM32, Scorpion and YGE ESCs report their limit when their ESC page is opened; for the others, set it in Setup > Power > Preferences.
+Keep the flight phase and the flight minimum, maximum and average values while the dashboard is closed. Add Armed and Offline phases: arming on the ground keeps the preflight layout, and a link lost after a flight keeps the summary frozen.
+Take the motor RPM and current minimums only while the motor is under power, so they no longer read the spool-up.
+Reset the ActiveLook minimum and maximum values when a new flight starts.
+Tag the CRSF sensors that native mode keeps on (Altitude, Attitude, Flight mode) on the Telemetry page.
+Offer CRSF sensors on the Ports page only on firmware that has them, and show a port's only rate as text.
+Keep the AM32 30° timing advance: it showed as 22.5° and could not be chosen.
+Report a refused save on the Power alerts and Stats pages, and keep the page unsaved.
+Draw the dashboard's Wingflight logo sharply at every tile size, fix the light logo, and hide the seams in gauge arcs.
+Line the menu tile grid up with the header buttons.
+Drop settings that an older release left in the settings file.
+
 # 0.0.36
 
 Use with the 0.0.36 firmware (MSP API 22.14). Flashing keeps your settings, except the Thrust Vector profiles, which reset to the new defaults.
