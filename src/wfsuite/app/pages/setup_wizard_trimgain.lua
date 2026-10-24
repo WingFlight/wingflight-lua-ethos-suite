@@ -213,16 +213,18 @@ local function new(wiz)
     elseif screen == "trimQ" then
       local mode = controls.trimMode(ranges)
       scr:text(T.title, T.trimQ, note)
-      -- Next keeps the trim as it is set up now.
-      local forward = scr:row(function() go("intro") end, nil, {text = T.next, press = function() go("gainQ") end})
-      return scr:grid({
+      -- The grid first: the encoder visits fields in the order they are made.
+      local focus = scr:grid({
         {text = T.trimButtons, primary = mode == "buttons", press = function() go("howButtons") end},
         {text = T.trimChannels, primary = mode == "programmable", press = function() go("howChannels") end},
         {text = T.trimAuto, primary = mode == nil, press = function()
           removeAll(controls.SERVO_TRIM)
           go("gainQ", T.autoNote)
         end},
-      }, 1) or forward
+      }, 1)
+      -- Next keeps the trim as it is set up now.
+      local forward = scr:row(function() go("intro") end, nil, {text = T.next, press = function() go("gainQ") end})
+      return focus or forward
 
     elseif screen == "howButtons" or screen == "howChannels" then
       local buttons = screen == "howButtons"
@@ -260,9 +262,8 @@ local function new(wiz)
     elseif screen == "gainQ" then
       local mode = controls.gainMode(ranges)
       scr:text(T.title, T.gainQ .. " " .. T.gainCentre, note)
-      -- Next keeps the gain knob as it is set up now.
-      local forward = scr:row(function() go("trimQ") end, nil, {text = T.next, press = function() go("done") end})
-      return scr:grid({
+      -- The grid first: the encoder visits fields in the order they are made.
+      local focus = scr:grid({
         {text = T.gainSingle, primary = mode == "single", press = function()
           listen({{kind = "gain"}}, "done")
         end},
@@ -274,7 +275,10 @@ local function new(wiz)
           removeAll(controls.MASTER_GAIN)
           go("done")
         end},
-      }, 1) or forward
+      }, 1)
+      -- Next keeps the gain knob as it is set up now.
+      local forward = scr:row(function() go("trimQ") end, nil, {text = T.next, press = function() go("done") end})
+      return focus or forward
     end
 
     scr:text(T.doneTitle, nil, note)

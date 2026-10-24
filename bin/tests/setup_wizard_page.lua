@@ -243,6 +243,25 @@ end
 
 local T = function(key) return "@i18n(app.modules.setup_wizard." .. key .. ")@" end
 
+-- The rotary encoder visits fields in the order they are made: the buttons
+-- must be made in screen order, top to bottom and then left to right.
+local function inScreenOrder()
+  local prev
+  for _, f in ipairs(fields) do
+    if f.kind == "button" and f.rect then
+      if prev then
+        local sameRow = math.abs(f.rect.y - prev.rect.y) <= 2
+        if not ((sameRow and f.rect.x > prev.rect.x) or (not sameRow and f.rect.y > prev.rect.y)) then
+          return false, tostring(prev.text) .. " @" .. prev.rect.x .. "," .. prev.rect.y
+            .. " before " .. tostring(f.text) .. " @" .. f.rect.x .. "," .. f.rect.y
+        end
+      end
+      prev = f
+    end
+  end
+  return true
+end
+
 local ctx
 local function paint()
   drawn = {}
@@ -623,6 +642,7 @@ do
     end
   end
   check("airframe: the type grid sits on the button row", rowY - gridBottom == 8, rowY .. " " .. gridBottom)
+  check("airframe: the encoder goes through the grid, then Back", inScreenOrder())
 end
 press(T("air_type_flying_wing"))
 check("airframe: asks about a rudder", shows("air_q_wing_yaw"))
@@ -682,6 +702,7 @@ do
     end
   end
   check("motor: the protocol buttons fit above the row", ok)
+  check("motor: the encoder goes through the protocols, then Back, Check motor, Save and restart", inScreenOrder())
 end
 openPage(14, "motor")
 settle()
@@ -700,6 +721,7 @@ check("motor: and stops by itself", #stops >= 1 and u16(stops[#stops].payload, 2
 -- Centre: every surface held at its centre; nudging writes the Mid.
 openPage(14, "centre")
 settle()
+check("center: the encoder goes Back, the nudges and Identify, then Next", inScreenOrder())
 local held = {}
 for _, m in ipairs(writesOf(193)) do
   if s16(m.payload, 2) == 0 and #m.payload == 5 then held[m.payload[1]] = true end
@@ -968,6 +990,7 @@ end
 -- Flying style and Finish.
 openPage(14, "style")
 settle()
+check("style: the encoder goes through the styles, then Back and Next", inScreenOrder())
 before = #sent
 press(T("sty_3d"))
 local rcw, pidw = writesOf(204, before + 1), writesOf(95, before + 1)

@@ -131,6 +131,7 @@ function Screen:begin()
   v.body, v.accent = nil, nil
   v.picture, v.caption, v.drawFn = nil, nil, nil
   v.side, v.split = false, nil
+  v.arranged = false
   v.font = FONT_S
   v.rows = {}
   v.live, v.liveLines = nil, 0
@@ -216,6 +217,7 @@ end
 function Screen:arrange()
   local v = self.view
   v.split = nil
+  v.arranged = true
   local width, height = lcd.getWindowSize()
   lcd.font(FONT_STD)
   local _, titleH = lcd.getTextSize("Ag")
@@ -264,6 +266,13 @@ function Screen:setRow(i, value, accent)
   return true
 end
 
+-- The row of buttons: its top and height (the screen's size alone).
+local function rowGeometry()
+  local _, height = lcd.getWindowSize()
+  local h = math.max(36, floor(height * 0.15))
+  return height - h - 4, h
+end
+
 local function addButton(self, rect, key, s, font)
   local field
   if s.icon then
@@ -293,32 +302,36 @@ end
 -- forward that saves, restarts or confirms keeps its words. The screen's own
 -- buttons sit between them, NAV_GAP clear. Returns the field to focus: a
 -- spec with primary =, else the way forward.
+--
+-- The rotary encoder visits fields in the order they are made, so the row
+-- makes them left to right (Back, the screen's own, the way forward), and a
+-- screen with a grid or choice list makes that first (it is above the row:
+-- call grid()/choices() before row()).
 function Screen:row(back, specs, forward)
   specs = specs or {}
   if back == nil and not self.wiz.isFirstStep() then back = self.wiz.previousStep end
   if forward == nil then forward = self.wiz.forward() end
 
-  local width, height = lcd.getWindowSize()
-  local h = math.max(36, floor(height * 0.15))
-  local y = height - h - 4
+  local width = lcd.getWindowSize()
+  local y, h = rowGeometry()
   local room = width - self.wiz.FORM_RIGHT_PADDING
   local left, right = 0, room
   local focus, forwardField
 
-  if back then
-    addButton(self, {x = 0, y = y, w = NAV_W, h = h}, "nav_back", {icon = PREV_ICON, press = back}, FONT_S)
-    left = NAV_W + NAV_GAP
-  end
+  -- Where everything goes first, then the fields in screen order.
+  if back then left = NAV_W + NAV_GAP end
+  local forwardW, forwardSpec = 0, nil
   if forward then
     local plain = forward.text == NEXT
-    local w = plain and NAV_W or floor(room * FORWARD_TEXT_SHARE)
-    local spec = {text = forward.text, icon = plain and NEXT_ICON or nil, press = forward.press,
+    forwardW = plain and NAV_W or floor(room * FORWARD_TEXT_SHARE)
+    forwardSpec = {text = forward.text, icon = plain and NEXT_ICON or nil, press = forward.press,
       disabled = forward.disabled, needsMotion = forward.needsMotion}
-    local field = addButton(self, {x = room - w, y = y, w = w, h = h}, "nav_next", spec, FONT_S)
-    if not forward.disabled then forwardField = field end
-    right = room - w - NAV_GAP
+    right = room - forwardW - NAV_GAP
   end
 
+  if back then
+    addButton(self, {x = 0, y = y, w = NAV_W, h = h}, "nav_back", {icon = PREV_ICON, press = back}, FONT_S)
+  end
   if #specs > 0 then
     local total = 0
     for i = 1, #specs do total = total + (specs[i].weight or 1) end
@@ -333,11 +346,26 @@ function Screen:row(back, specs, forward)
       x = x + w + BUTTON_GAP
     end
   end
+  if forwardSpec then
+    local field = addButton(self, {x = room - forwardW, y = y, w = forwardW, h = h}, "nav_next", forwardSpec, FONT_S)
+    if not forward.disabled then forwardField = field end
+  end
 
   self.view.bottom = y - 4
-  self:arrange()
+  if not self.view.arranged then self:arrange() end
   self:refresh()
   return focus or forwardField
+end
+
+-- A grid or choice list is made before the row (see row()): where the row
+-- will be, and the layout of the text above.
+function Screen:beforeRow()
+  local v = self.view
+  if not v.bottom then
+    local y = rowGeometry()
+    v.bottom = y - 4
+  end
+  if not v.arranged then self:arrange() end
 end
 
 -- Buttons placed between the text and the row take room the text was laid
@@ -358,8 +386,9 @@ function Screen:fitTextAbove(top, titleBottom)
   if titleBottom + #v.lines * lineH > top then v.textStop = top - 2 end
 end
 
--- A few options, one per row between the text and the row (call row()
--- first): a button on the left and what the option means beside it.
+-- A few options, one per row between the text and the row (call it before
+-- row(), so the encoder reaches them first): a button on the left and what
+-- the option means beside it.
 -- specs: {{text =, help =, current =, press =, disabled =, needsMotion =},
 -- ...}; the current option's help is drawn lit. The list sits centred between
 -- the text and the row, and the text above gives way. Returns the field to focus: the
@@ -368,6 +397,7 @@ function Screen:choices(specs)
   local focus
   local width, height = lcd.getWindowSize()
   local v = self.view
+  self:beforeRow()
   local n = #specs
   local stop = (v.bottom or (height - 4)) - 4
   lcd.font(FONT_STD)
@@ -413,12 +443,14 @@ function Screen:choices(specs)
 end
 
 -- Many choices: a grid of buttons filling the space between the text and
--- the row (call row() first). A grid screen has no picture. Returns the
--- field to focus (a spec with primary =), or nil.
+-- the row (call it before row(), so the encoder reaches them first). A grid
+-- screen has no picture. Returns the field to focus (a spec with primary
+-- =), or nil.
 function Screen:grid(specs, cols)
   local focus
   local width, height = lcd.getWindowSize()
   local v = self.view
+  self:beforeRow()
   lcd.font(FONT_S)
   local _, th = lcd.getTextSize("Ag")
   local stop = (v.bottom or (height - 4)) - 4

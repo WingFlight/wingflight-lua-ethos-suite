@@ -70,14 +70,16 @@ local function new(wiz)
     -- that match none of them are custom, so say so.
     scr:text(T.title, T.intro,
       T.more .. (current and "" or (" " .. string.format(T.now, T.custom))))
-    -- Next keeps the rates as they are.
-    local forward = scr:row(nil, nil)
     local specs = {}
     for _, s in ipairs(styles.STYLES) do
       specs[#specs + 1] = {text = NAMES[s.key], current = current == s, press = function() apply(s) end,
         help = string.format(T.rates, s.rate.roll, s.rate.pitch, s.rate.yaw, s.expo)}
     end
-    return scr:choices(specs) or forward
+    -- The list first: the encoder visits fields in the order they are made.
+    local focus = scr:choices(specs)
+    -- Next keeps the rates as they are.
+    local forward = scr:row(nil, nil)
+    return focus or forward
   end
 
   function self.paint() scr:paint() end

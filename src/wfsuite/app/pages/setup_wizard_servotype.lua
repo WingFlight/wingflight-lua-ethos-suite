@@ -82,13 +82,15 @@ local function new(wiz)
     -- of types (or a custom rate) matches none, so say so.
     scr:text(T.title, T.intro,
       T.all .. (current and "" or (" " .. string.format(T.now, T.unknown))))
-    -- Next keeps the servos as they are; after a change, Save and restart.
-    local forward = scr:row(nil, nil, changed and {text = T.saveRestart, press = function() wiz.saveAndReboot() end} or nil)
     local specs = {}
     for _, tp in ipairs(TYPES) do
       specs[#specs + 1] = {text = tp.name, help = tp.help, current = current == tp, press = function() apply(tp) end}
     end
-    return scr:choices(specs) or forward
+    -- The list first: the encoder visits fields in the order they are made.
+    local focus = scr:choices(specs)
+    -- Next keeps the servos as they are; after a change, Save and restart.
+    local forward = scr:row(nil, nil, changed and {text = T.saveRestart, press = function() wiz.saveAndReboot() end} or nil)
+    return focus or forward
   end
 
   function self.paint() scr:paint() end

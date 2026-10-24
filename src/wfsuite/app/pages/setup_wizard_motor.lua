@@ -126,11 +126,13 @@ local function new(wiz)
       end
       -- A new protocol needs a restart; the test spins the protocol the
       -- motor runs now, so it waits until then.
+      -- The list first: the encoder visits fields in the order they are made.
+      local focus = scr:choices(specs)
       local forward = scr:row(nil, (not changed) and {
         {text = T.test, disabled = config.motor_pwm_protocol == 11 or wiz.motorCount() == 0,
           press = function() go("prop") end},
       } or nil, changed and {text = T.saveRestart, press = function() wiz.saveAndReboot() end} or nil)
-      return scr:choices(specs) or forward
+      return focus or forward
 
     elseif screen == "prop" then
       scr:text(T.propTitle, T.propText)

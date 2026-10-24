@@ -198,8 +198,10 @@ local function new(wiz)
         specs[#specs + 1] = {text = TYPE_NAMES[tp.value], press = function() chooseType(tp) end,
           primary = cfg and cfg.model_type == tp.value}
       end
+      -- The grid first: the encoder visits fields in the order they are made.
+      local focus = scr:grid(specs, 2)
       local back = scr:row(function() go("current") end, nil, false)
-      return scr:grid(specs, 2) or back
+      return focus or back
 
     elseif screen == "review" then
       local layout, rules = preview()
