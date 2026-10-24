@@ -10177,11 +10177,11 @@
           "max_length": 8
         },
         "rx_check": {
-          "english": "Put both sticks in the bottom-left corner: throttle and elevator down, aileron and rudder left. Every bar should go to the left.",
-          "translation": "Put both sticks in the bottom-left corner: throttle and elevator down, aileron and rudder left. Every bar should go to the left.",
+          "english": "Put both sticks in the bottom-left corner. Every bar should go to the left.",
+          "translation": "Put both sticks in the bottom-left corner. Every bar should go to the left.",
           "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 128
+          "max_length": 75,
+          "reverse_text": false
         },
         "rx_order_fmt": {
           "english": "Channel order: %s.",
@@ -10625,8 +10625,8 @@
           "max_length": 12
         },
         "mot_pwm_help": {
-          "english": "works with any ESC; some need their throttle range calibrated.",
-          "translation": "works with any ESC; some need their throttle range calibrated.",
+          "english": "Works with any ESC; some need their throttle range calibrated.",
+          "translation": "Works with any ESC; some need their throttle range calibrated.",
           "needs_translation": true,
           "reverse_text": false,
           "max_length": 62
@@ -10639,8 +10639,8 @@
           "max_length": 8
         },
         "mot_dshot300_help": {
-          "english": "digital, no calibration; BLHeli, Bluejay, AM32.",
-          "translation": "digital, no calibration; BLHeli, Bluejay, AM32.",
+          "english": "Digital, no calibration; BLHeli, Bluejay, AM32.",
+          "translation": "Digital, no calibration; BLHeli, Bluejay, AM32.",
           "needs_translation": true,
           "reverse_text": false,
           "max_length": 47
@@ -10653,8 +10653,8 @@
           "max_length": 8
         },
         "mot_dshot600_help": {
-          "english": "faster DShot, for ESCs that support it.",
-          "translation": "faster DShot, for ESCs that support it.",
+          "english": "Faster DShot, for ESCs that support it.",
+          "translation": "Faster DShot, for ESCs that support it.",
           "needs_translation": true,
           "reverse_text": false,
           "max_length": 39
@@ -10667,8 +10667,8 @@
           "max_length": 8
         },
         "mot_none_help": {
-          "english": "gliders, or a motor not on the flight controller.",
-          "translation": "gliders, or a motor not on the flight controller.",
+          "english": "Gliders, or a motor not on the flight controller.",
+          "translation": "Gliders, or a motor not on the flight controller.",
           "needs_translation": true,
           "reverse_text": false,
           "max_length": 49

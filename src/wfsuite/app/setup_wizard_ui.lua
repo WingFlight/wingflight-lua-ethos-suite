@@ -47,6 +47,15 @@ local BIG_FIRST = {FONT_STD, FONT_S}
 local SMALL_ONLY = {FONT_S}
 -- Stacked text may take the room only while it leaves a picture this much.
 local STACKED_PICTURE_SHARE = 0.5
+-- A choice list's buttons: this share of the width, the help beside them.
+local CHOICE_BUTTON_SHARE = 0.3
+-- Its rows take this share of the room under the title, each at least
+-- CHOICE_MIN_H (four fit on the X18 with a status line above).
+local CHOICES_SHARE = 0.62
+local CHOICE_MIN_H = 26
+local CHOICE_GAP = 4
+local HELP_FONTS_BIG = {FONT_STD, FONT_S}
+local HELP_FONTS = {FONT_S}
 local NEXT = "@i18n(app.modules.setup_wizard.btn_next)@"
 
 -- The row's Back and plain Next are small icon-only buttons (as the
@@ -124,6 +133,8 @@ function Screen:begin()
   v.side, v.split = false, nil
   v.font = FONT_S
   v.rows = {}
+  v.live, v.liveLines = nil, 0
+  v.choices = nil
   v.textStop = nil
   self.buttonList = {}
 end
@@ -171,11 +182,27 @@ function Screen:draw(fn, caption, side)
   self.view.side = side and true or false
 end
 
--- Height of the words in font: the wrapped lines and the rows under them.
+-- A live readout (gauges, bars) under the words: in the right column beside
+-- a picture, or under the text when stacked. fn(x, y, w, h, colors);
+-- lines is the least room it needs, in FONT_S lines.
+function Screen:live(fn, lines)
+  self.view.live = fn
+  self.view.liveLines = lines or 2
+end
+
+local function liveHeight(v)
+  if not v.live then return 0 end
+  lcd.font(FONT_S)
+  local _, lineH = lcd.getTextSize("Ag")
+  return 4 + v.liveLines * lineH
+end
+
+-- Height of the words in font: the wrapped lines, the rows under them, and
+-- the live readout.
 local function wordsHeight(v, lines, font)
   lcd.font(font)
   local _, lineH = lcd.getTextSize("Ag")
-  return #lines * lineH + ((#v.rows > 0) and (4 + #v.rows * (lineH + 2)) or 0)
+  return #lines * lineH + ((#v.rows > 0) and (4 + #v.rows * (lineH + 2)) or 0) + liveHeight(v)
 end
 
 -- How the screen is laid out, once row() knows where the row starts
@@ -196,9 +223,13 @@ function Screen:arrange()
   local room = (v.bottom or (height - 4)) - top
   local hasPicture = (v.picture or v.drawFn) and true or false
   local fonts = (width >= BIG_TEXT_MIN_W) and BIG_FIRST or SMALL_ONLY
-  if v.side and hasPicture then
-    local leftW = floor(width * SIDE_SHARE)
-    local colX = leftW + MARGIN
+  local leftW = floor(width * SIDE_SHARE)
+  local colX = leftW + MARGIN
+  -- One line of text and nothing else ("Ailerons?") would leave the right
+  -- half empty: stacked, the picture gets the full width instead.
+  local short = #v.rows == 0 and not v.live
+    and #wrapText(self.wiz, v.body, v.accent, width - colX - MARGIN, FONT_S) <= 1
+  if v.side and hasPicture and not short then
     for i = 1, #fonts do
       local font = fonts[i]
       local lines, accentFrom = wrapText(self.wiz, v.body, v.accent, width - colX - MARGIN, font)
@@ -309,6 +340,70 @@ function Screen:row(back, specs, forward)
   return focus or forwardField
 end
 
+-- Buttons placed between the text and the row take room the text was laid
+-- out with (arrange() chose the body font for the whole room): drop to
+-- FONT_S if the bigger font no longer fits above top, and cut the body
+-- short (paint(), which keeps the status line) if even that runs into it.
+function Screen:fitTextAbove(top, titleBottom)
+  local v = self.view
+  local width = lcd.getWindowSize()
+  lcd.font(v.font or FONT_S)
+  local _, lineH = lcd.getTextSize("Ag")
+  if v.font ~= FONT_S and titleBottom + #v.lines * lineH > top then
+    v.font = FONT_S
+    v.lines, v.accentFrom = wrapText(self.wiz, v.body, v.accent, width - 2 * MARGIN, FONT_S)
+    lcd.font(FONT_S)
+    _, lineH = lcd.getTextSize("Ag")
+  end
+  if titleBottom + #v.lines * lineH > top then v.textStop = top - 2 end
+end
+
+-- A few options, one per row between the text and the row (call row()
+-- first): a button on the left and what the option means beside it.
+-- specs: {{text =, help =, current =, press =, disabled =, needsMotion =},
+-- ...}; the current option's help is drawn lit. Like a grid, the list sits
+-- on the row and the text above gives way. Returns the field to focus: the
+-- current option, else nil.
+function Screen:choices(specs)
+  local focus
+  local width, height = lcd.getWindowSize()
+  local v = self.view
+  local n = #specs
+  local stop = (v.bottom or (height - 4)) - 4
+  lcd.font(FONT_STD)
+  local _, titleH = lcd.getTextSize("Ag")
+  local titleBottom = v.top + (v.title and (titleH + 2) or 0) + 4
+  -- Row height from the screen alone (so a status line that comes or goes
+  -- never moves the buttons): CHOICES_SHARE of the room under the title.
+  local h = floor(((stop - titleBottom) * CHOICES_SHARE - CHOICE_GAP * (n - 1)) / n)
+  h = math.max(CHOICE_MIN_H, math.min(GRID_MAX_H, h))
+  local top = stop - (n * h + CHOICE_GAP * (n - 1))
+  self:fitTextAbove(top, titleBottom)
+  local bw = floor(width * CHOICE_BUTTON_SHARE)
+  local helpX = bw + 2 * MARGIN
+  local helpW = width - helpX - MARGIN
+  -- The help in the biggest font in which every one fits its row.
+  local font = FONT_XS
+  for _, f in ipairs((width >= BIG_TEXT_MIN_W) and HELP_FONTS_BIG or HELP_FONTS) do
+    lcd.font(f)
+    local _, fh = lcd.getTextSize("Ag")
+    local fits = true
+    for i = 1, n do
+      if #self.wiz.wrapLines(specs[i].help or "", helpW, f) * fh > h then fits = false break end
+    end
+    if fits then font = f break end
+  end
+  v.choices = {x = helpX, font = font}
+  for i, s in ipairs(specs) do
+    local y = top + (i - 1) * (h + CHOICE_GAP)
+    local field = addButton(self, {x = 0, y = y, w = bw, h = h}, "choice_" .. i, s, FONT_S)
+    if s.current then focus = field end
+    v.choices[i] = {y = y, h = h, current = s.current, lines = self.wiz.wrapLines(s.help or "", helpW, font)}
+  end
+  self:refresh()
+  return focus
+end
+
 -- Many choices: a grid of buttons filling the space between the text and
 -- the row (call row() first). A grid screen has no picture. Returns the
 -- field to focus (a spec with primary =), or nil.
@@ -327,17 +422,7 @@ function Screen:grid(specs, cols)
   local h = math.max(GRID_MIN_H, math.min(GRID_MAX_H, floor(height * 0.12)))
   h = math.min(h, floor((stop - titleBottom - BUTTON_GAP * (rows - 1)) / rows))
   local top = stop - (rows * h + BUTTON_GAP * (rows - 1))
-  -- arrange() chose the body font for the whole room; the grid takes some
-  -- of it, so drop to FONT_S if the bigger font no longer fits.
-  lcd.font(v.font or FONT_S)
-  local _, lineH = lcd.getTextSize("Ag")
-  if v.font ~= FONT_S and titleBottom + #v.lines * lineH > top then
-    v.font = FONT_S
-    v.lines, v.accentFrom = wrapText(self.wiz, v.body, v.accent, width - 2 * MARGIN, FONT_S)
-    lineH = th
-  end
-  local textBottom = titleBottom + #v.lines * lineH
-  if textBottom > top then v.textStop = top - 2 end
+  self:fitTextAbove(top, titleBottom)
   local w = math.floor((width - self.wiz.FORM_RIGHT_PADDING - BUTTON_GAP * (cols - 1)) / cols)
   for i, s in ipairs(specs) do
     local col, r = (i - 1) % cols, math.floor((i - 1) / cols)
@@ -436,7 +521,8 @@ function Screen:paint()
       lcd.drawText(sp.colX, ty, v.lines[i], LEFT)
       ty = ty + lineH
     end
-    if #v.rows > 0 then paintRows(v, sp.colX, width - MARGIN, ty + 4, colors, bottom) end
+    if #v.rows > 0 then ty = paintRows(v, sp.colX, width - MARGIN, ty + 4, colors, bottom) end
+    if v.live then v.live(sp.colX, ty + 4, width - sp.colX - MARGIN, bottom - ty - 4, colors) end
     paintPicture(v, 0, sp.top, sp.leftW, bottom - sp.top, colors)
     return
   end
@@ -466,6 +552,26 @@ function Screen:paint()
     y = paintRows(v, MARGIN, width - MARGIN, y + 4, colors, v.bottom or height)
   end
   local bottom = v.bottom or (height - 4)
+  if v.live then
+    -- Its own room when a picture follows; all that is left otherwise.
+    local lh = (v.picture or v.drawFn) and (liveHeight(v) - 4) or (bottom - y - 6)
+    v.live(MARGIN, y + 4, width - 2 * MARGIN, lh, colors)
+    y = y + 4 + lh
+  end
+  if v.choices then
+    local c = v.choices
+    lcd.font(c.font)
+    local _, ch = lcd.getTextSize("Ag")
+    for i = 1, #c do
+      local row = c[i]
+      local ly = row.y + floor((row.h - #row.lines * ch) / 2)
+      lcd.color(row.current and colors.active or colors.text)
+      for k = 1, #row.lines do
+        lcd.drawText(c.x, ly, row.lines[k], LEFT)
+        ly = ly + ch
+      end
+    end
+  end
   if v.picture or v.drawFn then
     paintPicture(v, 0, y + 4, width, bottom - y - 6, colors)
   end

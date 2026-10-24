@@ -70,6 +70,7 @@ _G.lcd = {
   drawFilledCircle = function() end,
   drawLine = function() end,
   setClipping = function() end,
+  drawRectangle = function() end,
 }
 
 -- MSP replies and bus events run in the background task, where Ethos refuses
@@ -433,6 +434,7 @@ local release = writesOf(0x5F1B, before + 1)
 check("leaving releases the setup state", #release == 1 and bytes(release[1].payload) == "0,0,0")
 check("leaving frees the wizard's own modules but keeps the override ones",
   package.loaded["wfsuite.lib.msp_mixer_rules"] == nil and package.loaded["wfsuite.app.setup_wizard_ui"] == nil
+  and package.loaded["wfsuite.app.plane3d"] == nil
   and package.loaded["wfsuite.lib.msp_servo_config"] == nil and package.loaded["wfsuite.lib.msp_mixer_override"] ~= nil)
 check("nothing is held after leaving", not requireModule("lib/override_keepalive.lua").isActive("mode_override"))
 
@@ -561,7 +563,7 @@ check("sensors: the restart shows a progress dialog with the countdown",
 check("sensors: the step's own modules are freed when it closes",
   package.loaded["wfsuite.lib.msp_board_mount_trim"] == nil and package.loaded["wfsuite.lib.msp_acc_calibration"] == nil
   and package.loaded["wfsuite.lib.acc_calibration_wait"] == nil
-  and package.loaded["wfsuite.lib.msp_attitude"] == nil and package.loaded["wfsuite.app.plane3d"] == nil)
+  and package.loaded["wfsuite.lib.msp_attitude"] == nil)
 tick(3)
 check("sensors: the bar fills while the FC restarts",
   restartDialog and (restartDialog.values[#restartDialog.values] or 0) >= 10,
@@ -608,7 +610,6 @@ end
 openPage(14, "airframe")
 settle()
 press(T("air_change"))
-local airframeGridH
 do
   -- The choice grid sits on the button row whatever the text above it, so a
   -- status line that comes or goes never moves it.
@@ -622,7 +623,6 @@ do
     end
   end
   check("airframe: the type grid sits on the button row", rowY - gridBottom == 8, rowY .. " " .. gridBottom)
-  airframeGridH = button(T("air_type_regular")).rect.h
 end
 press(T("air_type_flying_wing"))
 check("airframe: asks about a rudder", shows("air_q_wing_yaw"))
@@ -664,8 +664,9 @@ before = #sent
 press(T("mot_dshot600"))
 check("motor: the restart note does not move the protocol buttons", yBefore and protocolY() == yBefore,
   tostring(yBefore) .. " -> " .. tostring(protocolY()))
-check("choice grids have one button height, whatever the text above them (Motor's is long, Airframe's short)",
-  button(T("mot_pwm")).rect.h == airframeGridH, button(T("mot_pwm")).rect.h .. " vs " .. tostring(airframeGridH))
+check("motor: the protocols are a choice list, each with its help beside it",
+  button(T("mot_pwm")).rect.h >= 26 and shows("mot_pwm_help") and shows("mot_none_help"),
+  button(T("mot_pwm")).rect.h)
 check("motor: choosing DShot600 writes the motor config", #writesOf(222, before + 1) == 1 and shows("mot_changed"))
 do
   -- Long text: the choices keep usable buttons above the row, and the text
@@ -677,7 +678,7 @@ do
   for _, f in ipairs(fields) do
     local t = f.text
     if f.kind == "button" and (t == T("mot_pwm") or t == T("mot_dshot300") or t == T("mot_dshot600") or t == T("mot_none")) then
-      if f.rect.h < 30 or f.rect.y + f.rect.h > rowY then ok = false end
+      if f.rect.h < 26 or f.rect.y + f.rect.h > rowY then ok = false end
     end
   end
   check("motor: the protocol buttons fit above the row", ok)

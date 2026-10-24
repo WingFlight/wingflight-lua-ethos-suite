@@ -1,23 +1,43 @@
--- The 3D plane: a low-poly copy of the Configurator's model, drawn at a
--- given attitude inside a box. Used by the Alignment page
--- (app/alignment_visual.lua) and the Setup Wizard's sensors step.
+-- The 3D plane: a low-poly aircraft drawn at a given attitude inside a box.
+-- Used by the Alignment page (app/alignment_visual.lua) and the Setup
+-- Wizard (its Sensors step, and app/setup_wizard_art.lua's pictures).
 --
---   plane3d.draw(x, y, w, h, roll, pitch, yaw)
+--   plane3d.setup(spec)        -- which airframe (default: the Extra below)
+--   plane3d.pose(arrows)       -- light up and deflect control surfaces
+--   plane3d.draw(x, y, w, h, roll, pitch, yaw[, zoom])
 --   local ux, uy = plane3d.noseDirection(roll, pitch, yaw)
 --
 -- Angles are degrees in MSP_ATTITUDE's sense. Yaw 0 shows the model from
 -- behind (tail towards the viewer), as the pilot sees it standing behind
 -- the model; callers that follow the live heading subtract their own
 -- reference yaw first. draw() sizes the model so it fits the box in any
--- attitude and clips to the box.
+-- attitude (at zoom 1) and clips to the box.
 --
--- The model is the Configurator's (wingflight-configurator
+-- The default airframe is the Configurator's model (wingflight-configurator
 -- resources/models/model.gltf, an Extra-style aerobatic plane): red body,
 -- dark ailerons/elevator/rudder, white spinner and landing gear, a canopy
--- and a two-blade prop. The mesh is written in that file's own coordinates
--- (x = span, y = up, z = aft) so its numbers can be checked against the
--- glTF, and converted once at load time to this renderer's X = nose(+)/
--- tail(-), Y = span, Z = up(+)/down(-).
+-- and a two-blade prop. setup() builds other layouts from the same parts:
+--
+--   spec.tail     "conventional" (stabilizer, elevator, fin) | "vtail" | "none"
+--   spec.wing     "straight" | "swept" (flying wing) | "delta"
+--   spec.outer    {from, to}: ailerons/elevons along the half span (0 the
+--                 centreline, 1 the tip), or nil for none
+--   spec.inner    {from, to}: flaps, or nil
+--   spec.fin, spec.rudder, spec.winglets, spec.gear   booleans
+--
+-- Control surfaces are groups: "outer", "inner", "stab", "vtail" (one per
+-- side: 1 is the left as seen from behind, 2 the right) and "fin" (1).
+-- pose() takes the Setup Wizard's arrows in that shape ({outer = {"down",
+-- "up"}, fin = {"right"}, ...}, app/setup_wizard_art.lua): a surface with
+-- an arrow is drawn in the highlight colour and swung DEFLECT degrees about
+-- its hinge, trailing edge the way the arrow points, with an arrow drawn
+-- beside it; "lit" lights a surface at neutral with no arrow. The rest sit
+-- at neutral in the surface colour.
+--
+-- The mesh is written in the glTF file's own coordinates (x = span, y = up,
+-- z = aft) so its numbers can be checked against it, and converted once, at
+-- setup, to this renderer's X = nose(+)/tail(-), Y = span (+ is the left
+-- seen from behind), Z = up(+)/down(-).
 --
 -- Rendering, per paint: the attitude becomes one rotation matrix (built by
 -- passing the three axes through rotatePoint(), the orientation the
@@ -27,7 +47,7 @@
 -- far-to-near. The camera sits CAMERA_ELEVATION above the model's level
 -- plane, so the top of a level aircraft stays visible instead of the wings
 -- collapsing to a line. No tables are allocated per paint; shaded colours
--- are built once per theme.
+-- are built once per theme, the mesh once per setup().
 
 if package.loaded["wfsuite.app.plane3d"] then
   return package.loaded["wfsuite.app.plane3d"]
@@ -100,6 +120,10 @@ local MAT_SURFACE = 2
 local MAT_WHITE = 3
 local MAT_CANOPY = 4
 local MAT_PROP = 5
+local MAT_ACTIVE = 6
+
+-- How far pose() swings a surface with an arrow.
+local DEFLECT_R = rad(28)
 
 local MX, MY, MZ = {}, {}, {}
 local vertexCount = 0
@@ -109,6 +133,15 @@ local vertexCount = 0
 -- prop, gear legs) or one side of a closed part (culled when facing away).
 local FA, FB, FC, FD, FMAT, FTWO = {}, {}, {}, {}, {}, {}
 local faceCount = 0
+
+-- Control surfaces, one entry per plate: its group and side, its face, the
+-- hinge vertices (H1, H2), the trailing vertices (T1, T2) and their neutral
+-- positions (RX/RY/RZ, indexed by vertex).
+local SGROUP, SSIDE, SFACE, SH1, SH2, ST1, ST2 = {}, {}, {}, {}, {}, {}, {}
+local RX, RY, RZ = {}, {}, {}
+local surfaceCount = 0
+
+local MODEL_RADIUS = 1
 
 local function vtx(gx, gy, gz)
   vertexCount = vertexCount + 1
@@ -127,6 +160,17 @@ end
 
 local function plate(a, b, c, d, mat)
   pushFace(a, b, c, d, mat, true)
+end
+
+-- A control surface: hinge h1-h2, trailing edge t2-t1 (a plate, drawn
+-- h1, h2, t2, t1).
+local function surface(group, side, h1, h2, t2, t1)
+  pushFace(h1, h2, t2, t1, MAT_SURFACE, true)
+  surfaceCount = surfaceCount + 1
+  SGROUP[surfaceCount], SSIDE[surfaceCount], SFACE[surfaceCount] = group, side, faceCount
+  SH1[surfaceCount], SH2[surfaceCount], ST1[surfaceCount], ST2[surfaceCount] = h1, h2, t1, t2
+  RX[t1], RY[t1], RZ[t1] = MX[t1], MY[t1], MZ[t1]
+  RX[t2], RY[t2], RZ[t2] = MX[t2], MY[t2], MZ[t2]
 end
 
 -- One face of a closed part. (rx, ry, rz) is a glTF point inside the part
@@ -149,21 +193,37 @@ local function solid(a, b, c, d, mat, rx, ry, rz)
   pushFace(a, b, c, d, mat, false)
 end
 
-do
-  -- Fuselage: a lofted hexagonal section (flat top and belly, chamfered
-  -- sides) through six stations from the cowl to the tail post.
-  -- {z, half width, bottom y, top y, side y}
-  local STATIONS = {
-    {-1.62, 0.36, -0.20, 0.30, 0.05},
-    {-1.00, 0.54, -0.42, 0.38, 0.00},
-    {-0.30, 0.60, -0.46, 0.46, 0.00},
-    { 1.00, 0.50, -0.30, 0.50, 0.05},
-    { 1.80, 0.30, -0.22, 0.62, 0.12},
-    { 3.55, 0.05, -0.04, 0.40, 0.18},
-  }
+-- Fuselage stations: {z, half width, bottom y, top y, side y}. The full
+-- body runs to a tail post; a tailless model's pod ends behind the wing.
+local BODY = {
+  {-1.62, 0.36, -0.20, 0.30, 0.05},
+  {-1.00, 0.54, -0.42, 0.38, 0.00},
+  {-0.30, 0.60, -0.46, 0.46, 0.00},
+  { 1.00, 0.50, -0.30, 0.50, 0.05},
+  { 1.80, 0.30, -0.22, 0.62, 0.12},
+  { 3.55, 0.05, -0.04, 0.40, 0.18},
+}
+local POD = {
+  {-1.62, 0.36, -0.20, 0.30, 0.05},
+  {-1.00, 0.50, -0.38, 0.38, 0.00},
+  {-0.30, 0.55, -0.40, 0.44, 0.00},
+  { 0.90, 0.45, -0.28, 0.48, 0.05},
+  { 1.70, 0.22, -0.14, 0.34, 0.08},
+  { 2.35, 0.04, -0.02, 0.12, 0.06},
+}
+
+-- Wing planforms, glTF units: root and tip as {x, leading edge z, trailing
+-- edge z, y}.
+local WINGS = {
+  straight = {root = {0.55, -0.55, 1.00, -0.12}, tip = {3.55, -0.33, 0.76, -0.06}},
+  swept = {root = {0.45, -0.95, 1.30, -0.06}, tip = {3.60, 1.55, 2.25, 0.10}},
+  delta = {root = {0.45, -1.25, 2.05, -0.08}, tip = {3.00, 1.75, 2.05, -0.02}},
+}
+
+local function fuselage(stations)
   local ring = {}
-  for i = 1, #STATIONS do
-    local s = STATIONS[i]
+  for i = 1, #stations do
+    local s = stations[i]
     local z, w, yb, yt, ym = s[1], s[2], s[3], s[4], s[5]
     local t = w * 0.65
     ring[i] = {
@@ -171,9 +231,9 @@ do
       vtx(t, yb, z), vtx(-t, yb, z), vtx(-w, ym, z),
     }
   end
-  for i = 1, #STATIONS - 1 do
+  for i = 1, #stations - 1 do
     local r0, r1 = ring[i], ring[i + 1]
-    local s0, s1 = STATIONS[i], STATIONS[i + 1]
+    local s0, s1 = stations[i], stations[i + 1]
     local rz = (s0[1] + s1[1]) * 0.5
     local ry = (s0[5] + s1[5]) * 0.5
     for k = 1, 6 do
@@ -181,27 +241,31 @@ do
       solid(r0[k], r0[k2], r1[k2], r1[k], MAT_BODY, 0, ry, rz)
     end
   end
-  local first, last = STATIONS[1], STATIONS[#STATIONS]
-  local f, l = ring[1], ring[#STATIONS]
+  local first, last = stations[1], stations[#stations]
+  local f, l = ring[1], ring[#stations]
   solid(f[1], f[2], f[3], f[4], MAT_BODY, 0, first[5], first[1] + 1)
   solid(f[4], f[5], f[6], f[1], MAT_BODY, 0, first[5], first[1] + 1)
   solid(l[1], l[2], l[3], l[4], MAT_BODY, 0, last[5], last[1] - 1)
   solid(l[4], l[5], l[6], l[1], MAT_BODY, 0, last[5], last[1] - 1)
+end
 
-  -- Canopy: windscreen point on the deck, two upper corners, two lower
-  -- corners, and a tail point that runs into the turtle deck.
+-- Canopy: windscreen point on the deck, two upper corners, two lower
+-- corners, and a tail point that runs into the deck behind.
+local function canopy(rearY, rearZ)
   local cF = vtx(0, 0.47, 0.20)
   local cBL, cBR = vtx(-0.27, 0.49, 0.80), vtx(0.27, 0.49, 0.80)
   local cTL, cTR = vtx(-0.16, 0.76, 0.85), vtx(0.16, 0.76, 0.85)
-  local cR = vtx(0, 0.62, 1.75)
+  local cR = vtx(0, rearY, rearZ)
   solid(cF, cBR, cTR, nil, MAT_CANOPY, 0, 0.55, 0.9)
   solid(cF, cTR, cTL, nil, MAT_CANOPY, 0, 0.55, 0.9)
   solid(cF, cTL, cBL, nil, MAT_CANOPY, 0, 0.55, 0.9)
   solid(cBR, cR, cTR, nil, MAT_CANOPY, 0, 0.55, 0.9)
   solid(cTR, cR, cTL, nil, MAT_CANOPY, 0, 0.55, 0.9)
   solid(cTL, cR, cBL, nil, MAT_CANOPY, 0, 0.55, 0.9)
+end
 
-  -- Spinner: a six-sided cone in front of the cowl.
+-- Spinner (a six-sided cone in front of the cowl) and a two-blade prop.
+local function nose()
   local tip = vtx(0, 0.05, -2.04)
   local base = {}
   for k = 1, 6 do
@@ -211,62 +275,202 @@ do
   for k = 1, 6 do
     solid(tip, base[k], base[(k % 6) + 1], nil, MAT_WHITE, 0, 0.05, -1.75)
   end
-
-  -- Prop: two blades just behind the spinner tip.
   plate(vtx(0.12, 0.11, -1.70), vtx(0.95, 0.08, -1.70), vtx(0.95, 0.02, -1.70), vtx(0.12, -0.01, -1.70), MAT_PROP)
   plate(vtx(-0.12, 0.11, -1.70), vtx(-0.95, 0.08, -1.70), vtx(-0.95, 0.02, -1.70), vtx(-0.12, -0.01, -1.70), MAT_PROP)
+end
 
-  for side = -1, 1, 2 do
-    -- Wing, low on the fuselage with a little dihedral, tapering mostly
-    -- from the trailing edge; aileron from just outboard of the root to
-    -- the tip.
-    local rootLE = vtx(0.55 * side, -0.12, -0.55)
-    local rootTE = vtx(0.55 * side, -0.12, 1.00)
-    local ailIn = vtx(1.05 * side, -0.11, 0.62)
-    local ailInTE = vtx(1.05 * side, -0.11, 0.99)
-    local tipLE = vtx(3.55 * side, -0.06, -0.33)
-    local tipHinge = vtx(3.55 * side, -0.06, 0.40)
-    local tipTE = vtx(3.55 * side, -0.06, 0.76)
-    plate(rootLE, tipLE, tipHinge, ailIn, MAT_BODY)
-    plate(rootLE, ailIn, ailInTE, rootTE, MAT_BODY)
-    plate(ailIn, tipHinge, tipTE, ailInTE, MAT_SURFACE)
+local function lerp(a, b, u) return a + (b - a) * u end
 
-    -- Horizontal stabilizer and elevator.
-    local sRootH = vtx(0.10 * side, 0.36, 3.47)
-    local sTipH = vtx(1.55 * side, 0.36, 3.47)
-    plate(vtx(0.10 * side, 0.36, 2.92), vtx(1.55 * side, 0.36, 3.08), sTipH, sRootH, MAT_BODY)
-    plate(vtx(0.04 * side, 0.36, 3.47), vtx(1.60 * side, 0.36, 3.47), vtx(1.60 * side, 0.36, 3.80), vtx(0.04 * side, 0.36, 3.86), MAT_SURFACE)
+-- A wing panel on one side (side 1: +x, the left seen from behind; side
+-- 2: -x), split into spanwise strips at the edges of its surfaces. Each
+-- strip is a fixed part (leading edge to hinge) and an aft part (hinge to
+-- trailing edge): a control surface where outer/inner covers the strip,
+-- fixed wing elsewhere. Surfaces take a chord of 0.25 + 0.1 of the local
+-- chord, at most 80% of it.
+local function wing(planform, outer, inner, side)
+  local root, tip = planform.root, planform.tip
+  local sx = (side == 1) and 1 or -1
+  local t0 = root[1] / tip[1]
+  local cuts = {t0, 1}
+  local function cut(t)
+    if t and t > t0 + 0.01 and t < 0.99 then cuts[#cuts + 1] = t end
+  end
+  if outer then cut(outer[1]); cut(outer[2]) end
+  if inner then cut(inner[1]); cut(inner[2]) end
+  table.sort(cuts)
+  local function at(t)
+    local x = t * tip[1]
+    local u = (x - root[1]) / (tip[1] - root[1])
+    if u < 0 then u = 0 elseif u > 1 then u = 1 end
+    local le, te, y = lerp(root[2], tip[2], u), lerp(root[3], tip[3], u), lerp(root[4], tip[4], u)
+    local chord = te - le
+    local hinge = te - min(0.25 + 0.1 * chord, 0.8 * chord)
+    return x * sx, y, le, hinge, te
+  end
+  local prevLE, prevH
+  local px, py, ple, ph, pte
+  for i = 1, #cuts do
+    local t = cuts[i]
+    if i > 1 and t - cuts[i - 1] > 0.005 then
+      local x, y, le, hinge, te = at(t)
+      local lev, hv = vtx(x, y, le), vtx(x, y, hinge)
+      plate(prevLE, lev, hv, prevH, MAT_BODY)
+      local mid = (cuts[i - 1] + t) * 0.5
+      local group = nil
+      if outer and mid > outer[1] and mid < outer[2] then group = "outer"
+      elseif inner and mid > inner[1] and mid < inner[2] then group = "inner" end
+      local h1, h2 = vtx(px, py, ph), vtx(x, y, hinge)
+      local t2, t1 = vtx(x, y, te), vtx(px, py, pte)
+      if group then surface(group, side, h1, h2, t2, t1) else plate(h1, h2, t2, t1, MAT_BODY) end
+      prevLE, prevH = lev, hv
+      px, py, ple, ph, pte = x, y, le, hinge, te
+    elseif i == 1 then
+      local x, y, le, hinge, te = at(t)
+      prevLE, prevH = vtx(x, y, le), vtx(x, y, hinge)
+      px, py, ple, ph, pte = x, y, le, hinge, te
+    end
+  end
+end
 
-    -- Main gear: a leg out of the belly and a spatted wheel.
-    local px = 0.76 * side
-    plate(vtx(0.25 * side, -0.40, -0.52), vtx(px, -0.82, -0.54), vtx(px, -0.82, -0.38), vtx(0.25 * side, -0.40, -0.25), MAT_WHITE)
-    local front = vtx(px, -0.93, -0.92)
-    local rear = vtx(px, -0.90, -0.10)
-    local around = {
-      vtx(px, -0.77, -0.50), vtx(px + 0.08, -0.92, -0.50),
-      vtx(px, -1.06, -0.50), vtx(px - 0.08, -0.92, -0.50),
-    }
-    for k = 1, 4 do
-      local k2 = (k % 4) + 1
-      solid(front, around[k], around[k2], nil, MAT_WHITE, px, -0.92, -0.50)
-      solid(rear, around[k2], around[k], nil, MAT_WHITE, px, -0.92, -0.50)
+-- Fin with a rudder (or one plain fin when there is none): base leading
+-- edge z, fin top y, hinge z, rudder trailing edge z.
+local function fin(baseY, baseLE, topY, topLE, hingeZ, teTop, teBottom, bottomY, rudder)
+  plate(vtx(0, baseY, baseLE), vtx(0, topY, topLE), vtx(0, topY, hingeZ), vtx(0, bottomY + 0.3, hingeZ), MAT_BODY)
+  local h1, h2 = vtx(0, bottomY, hingeZ), vtx(0, topY, hingeZ)
+  local t2, t1 = vtx(0, topY, teTop), vtx(0, bottomY, teBottom)
+  if rudder then surface("fin", 1, h1, h2, t2, t1) else plate(h1, h2, t2, t1, MAT_BODY) end
+end
+
+local DEFAULT_SPEC = {tail = "conventional", wing = "straight", outer = {0.30, 1.0},
+  fin = true, rudder = true, gear = true}
+
+local function build(spec)
+  local oldVertices, oldFaces = vertexCount, faceCount
+  vertexCount, faceCount, surfaceCount = 0, 0, 0
+  local tail = spec.tail or "conventional"
+  local tailless = tail == "none"
+
+  fuselage(tailless and POD or BODY)
+  if tailless then canopy(0.46, 1.45) else canopy(0.62, 1.75) end
+  nose()
+
+  local planform = WINGS[spec.wing or "straight"] or WINGS.straight
+  wing(planform, spec.outer, spec.inner, 1)
+  wing(planform, spec.outer, spec.inner, 2)
+
+  for side = 1, 2 do
+    local s = (side == 1) and 1 or -1
+    if tail == "conventional" then
+      plate(vtx(0.10 * s, 0.36, 2.92), vtx(1.55 * s, 0.36, 3.08), vtx(1.55 * s, 0.36, 3.47), vtx(0.10 * s, 0.36, 3.47), MAT_BODY)
+      surface("stab", side, vtx(0.04 * s, 0.36, 3.47), vtx(1.60 * s, 0.36, 3.47), vtx(1.60 * s, 0.36, 3.80), vtx(0.04 * s, 0.36, 3.86))
+    elseif tail == "vtail" then
+      -- Two surfaces at about 40 degrees, ruddervators on their trailing
+      -- edges.
+      local rx, ry, tx, ty = 0.06 * s, 0.40, 1.15 * s, 1.30
+      plate(vtx(rx, ry, 2.80), vtx(tx, ty, 3.20), vtx(tx, ty, 3.55), vtx(rx, ry, 3.40), MAT_BODY)
+      surface("vtail", side, vtx(rx, ry, 3.40), vtx(tx, ty, 3.55), vtx(tx, ty, 3.85), vtx(rx, ry, 3.90))
+    end
+    if spec.winglets then
+      local x, _, _, y = planform.tip[1] * s, nil, nil, planform.tip[4]
+      local le, te = planform.tip[2], planform.tip[3]
+      plate(vtx(x, y, le), vtx(x, y + 0.65, le + 0.40), vtx(x, y + 0.65, te), vtx(x, y, te), MAT_BODY)
+    end
+    if spec.gear then
+      -- A leg out of the belly and a spatted wheel.
+      local px = 0.76 * s
+      plate(vtx(0.25 * s, -0.40, -0.52), vtx(px, -0.82, -0.54), vtx(px, -0.82, -0.38), vtx(0.25 * s, -0.40, -0.25), MAT_WHITE)
+      local front = vtx(px, -0.93, -0.92)
+      local rear = vtx(px, -0.90, -0.10)
+      local around = {
+        vtx(px, -0.77, -0.50), vtx(px + 0.08, -0.92, -0.50),
+        vtx(px, -1.06, -0.50), vtx(px - 0.08, -0.92, -0.50),
+      }
+      for k = 1, 4 do
+        local k2 = (k % 4) + 1
+        solid(front, around[k], around[k2], nil, MAT_WHITE, px, -0.92, -0.50)
+        solid(rear, around[k2], around[k], nil, MAT_WHITE, px, -0.92, -0.50)
+      end
     end
   end
 
-  -- Fin and rudder (with its horn balance above the fin).
-  plate(vtx(0, 0.48, 2.85), vtx(0, 1.18, 3.28), vtx(0, 1.18, 3.52), vtx(0, 0.38, 3.52), MAT_BODY)
-  local hingeTop = vtx(0, 1.18, 3.52)
-  local hornRear = vtx(0, 1.36, 3.80)
-  plate(vtx(0, -0.02, 3.52), hingeTop, hornRear, vtx(0, 0.04, 4.14), MAT_SURFACE)
-  plate(hingeTop, vtx(0, 1.36, 3.36), hornRear, nil, MAT_SURFACE)
+  if spec.fin then
+    if tailless then
+      fin(0.40, 1.15, 1.05, 1.70, 1.95, 2.25, 2.40, 0.10, spec.rudder)
+    elseif tail == "conventional" then
+      fin(0.48, 2.85, 1.25, 3.28, 3.52, 3.84, 4.14, -0.02, spec.rudder)
+    end
+  end
+
+  -- Free what a bigger airframe used before.
+  for i = vertexCount + 1, oldVertices do MX[i], MY[i], MZ[i], RX[i], RY[i], RZ[i] = nil, nil, nil, nil, nil, nil end
+  for i = faceCount + 1, oldFaces do FA[i], FB[i], FC[i], FD[i], FMAT[i], FTWO[i] = nil, nil, nil, nil, nil, nil end
+
+  MODEL_RADIUS = 0
+  for i = 1, vertexCount do
+    MODEL_RADIUS = max(MODEL_RADIUS, sqrt(MX[i] * MX[i] + MY[i] * MY[i] + MZ[i] * MZ[i]))
+  end
 end
 
--- Furthest point from the origin, so draw() can size the model to fit its
--- box in every attitude.
-local MODEL_RADIUS = 0
-for i = 1, vertexCount do
-  MODEL_RADIUS = max(MODEL_RADIUS, sqrt(MX[i] * MX[i] + MY[i] * MY[i] + MZ[i] * MZ[i]))
+-- Swing surface k's trailing edge by angle (radians) towards (dx, dy, dz)
+-- (renderer axes), about its hinge; 0 puts it back to neutral.
+local function deflect(k, angle, dx, dy, dz)
+  local h1, h2 = SH1[k], SH2[k]
+  local ax, ay, az = MX[h2] - MX[h1], MY[h2] - MY[h1], MZ[h2] - MZ[h1]
+  local al = sqrt(ax * ax + ay * ay + az * az)
+  ax, ay, az = ax / al, ay / al, az / al
+  -- The plate's normal, turned to face the way the edge should go.
+  local t = ST1[k]
+  local ux, uy, uz = RX[t] - MX[h1], RY[t] - MY[h1], RZ[t] - MZ[h1]
+  local nx, ny, nz = ay * uz - az * uy, az * ux - ax * uz, ax * uy - ay * ux
+  local nl = sqrt(nx * nx + ny * ny + nz * nz)
+  if nl > 0 then nx, ny, nz = nx / nl, ny / nl, nz / nl end
+  if nx * dx + ny * dy + nz * dz < 0 then nx, ny, nz = -nx, -ny, -nz end
+  local c, s = cos(angle), sin(angle)
+  for j = 1, 2 do
+    local v = (j == 1) and ST1[k] or ST2[k]
+    local px, py, pz = RX[v] - MX[h1], RY[v] - MY[h1], RZ[v] - MZ[h1]
+    local along = px * ax + py * ay + pz * az
+    local rx, ry, rz = px - ax * along, py - ay * along, pz - az * along
+    local r = sqrt(rx * rx + ry * ry + rz * rz)
+    MX[v] = MX[h1] + ax * along + rx * c + nx * r * s
+    MY[v] = MY[h1] + ay * along + ry * c + ny * r * s
+    MZ[v] = MZ[h1] + az * along + rz * c + nz * r * s
+  end
 end
+
+-- Arrow -> direction the trailing edge goes, renderer axes. "right" is the
+-- right as seen from behind: -Y.
+local DIRECTIONS = {
+  up = {0, 0, 1, 1}, down = {0, 0, 1, -1},
+  right = {0, -1, 0, 1}, left = {0, -1, 0, -1},
+  -- Lit at neutral, no arrow: "this is the surface".
+  lit = {0, 0, 1, 0},
+}
+
+local currentSpec, currentArrows = nil, nil
+local NO_ARROWS = {}
+
+-- Each surface's arrow (a DIRECTIONS entry), or false: drawn by draw().
+local SDIR = {}
+
+local function applyPose(arrows)
+  for k = 1, surfaceCount do
+    local dirs = arrows[SGROUP[k]]
+    local d = dirs and DIRECTIONS[dirs[SSIDE[k]]]
+    SDIR[k] = d or false
+    if d then
+      FMAT[SFACE[k]] = MAT_ACTIVE
+      deflect(k, DEFLECT_R * d[4], d[1], d[2], d[3])
+    else
+      FMAT[SFACE[k]] = MAT_SURFACE
+      deflect(k, 0, 0, 0, 1)
+    end
+  end
+  for k = surfaceCount + 1, #SDIR do SDIR[k] = nil end
+end
+
+build(DEFAULT_SPEC)
+currentSpec = DEFAULT_SPEC
 
 ---------------------------------------------------------------------------
 -- Shading
@@ -291,6 +495,7 @@ local BASE_COLORS = {
     [MAT_WHITE] = {235, 235, 230},
     [MAT_CANOPY] = {95, 125, 160},
     [MAT_PROP] = {160, 160, 165},
+    [MAT_ACTIVE] = {255, 165, 30},
   },
   light = {
     [MAT_BODY] = {200, 30, 35},
@@ -298,6 +503,7 @@ local BASE_COLORS = {
     [MAT_WHITE] = {215, 215, 210},
     [MAT_CANOPY] = {55, 75, 100},
     [MAT_PROP] = {120, 120, 125},
+    [MAT_ACTIVE] = {255, 150, 0},
   },
 }
 
@@ -339,6 +545,21 @@ local function toRadians(roll, pitch, yaw)
   return rad(-(pitch or 0)), rad(-(yaw or 0)), rad(-(roll or 0))
 end
 
+-- The last paint's rotation matrix and projection, for the arrows.
+local m11, m12, m13, m21, m22, m23, m31, m32, m33 = 1, 0, 0, 0, 1, 0, 0, 0, 1
+local pcx, pcy, pscale = 0, 0, 1
+
+-- A model point (renderer axes) on screen, or nil behind the camera.
+local function project(x, y, z)
+  local vx = x * m11 + y * m12 + z * m13
+  local vy = x * m21 + y * m22 + z * m23
+  local vz = x * m31 + y * m32 + z * m33
+  local denom = CAMERA_DIST - vz
+  if denom <= CAMERA_NEAR_EPS then return nil end
+  local f = CAMERA_DIST / denom * pscale
+  return pcx + vx * f, pcy - vy * f
+end
+
 local function drawModel(cx, cy, scale, pitchR, yawR, rollR, shades)
   -- Rotation matrix: the images of the three model axes, then the camera
   -- elevation (a tilt about the screen's horizontal axis).
@@ -348,6 +569,8 @@ local function drawModel(cx, cy, scale, pitchR, yawR, rollR, shades)
   ay, az = ay * CAM_EC - az * CAM_ES, ay * CAM_ES + az * CAM_EC
   by, bz = by * CAM_EC - bz * CAM_ES, by * CAM_ES + bz * CAM_EC
   cy3, cz3 = cy3 * CAM_EC - cz3 * CAM_ES, cy3 * CAM_ES + cz3 * CAM_EC
+  m11, m12, m13, m21, m22, m23, m31, m32, m33 = ax, bx, cx3, ay, by, cy3, az, bz, cz3
+  pcx, pcy, pscale = cx, cy, scale
 
   for i = 1, vertexCount do
     local x, y, z = MX[i], MY[i], MZ[i]
@@ -416,21 +639,100 @@ local function drawModel(cx, cy, scale, pitchR, yawR, rollR, shades)
   end
 end
 
+-- Arrows for pose(): from the middle of each lit surface's trailing edge,
+-- the way that edge should go, in the text colour so they stand out from
+-- the lit surface.
+local arrowColors = {}
+
+local function drawArrows(scale, dark)
+  local any = false
+  for k = 1, surfaceCount do
+    if SDIR[k] then any = true break end
+  end
+  if not any then return end
+  local key = dark and 1 or 2
+  if not arrowColors[key] then arrowColors[key] = dark and lcd.RGB(245, 245, 245) or lcd.RGB(20, 20, 20) end
+  lcd.color(arrowColors[key])
+  local len = max(16, floor(scale * 0.7))
+  local head = max(6, floor(len * 0.42))
+  local half = max(1, floor(len * 0.08))
+  for k = 1, surfaceCount do
+    local d = SDIR[k]
+    if d then
+      local t1, t2 = ST1[k], ST2[k]
+      local mx, my, mz = (MX[t1] + MX[t2]) * 0.5, (MY[t1] + MY[t2]) * 0.5, (MZ[t1] + MZ[t2]) * 0.5
+      local s = 0.5 * d[4]
+      local px, py = project(mx, my, mz)
+      local qx, qy = project(mx + d[1] * s, my + d[2] * s, mz + d[3] * s)
+      if px and qx then
+        local ux, uy = qx - px, qy - py
+        local ul = sqrt(ux * ux + uy * uy)
+        -- Pointing (nearly) at the camera: no arrow to draw.
+        if ul > 0.5 then
+          ux, uy = ux / ul, uy / ul
+          local nx, ny = -uy, ux
+          local sx, sy = px + ux * 3, py + uy * 3
+          local tx, ty = sx + ux * len, sy + uy * len
+          local bx, by = tx - ux * head, ty - uy * head
+          lcd.drawFilledTriangle(sx + nx * half, sy + ny * half, bx + nx * half, by + ny * half, bx - nx * half, by - ny * half)
+          lcd.drawFilledTriangle(sx + nx * half, sy + ny * half, bx - nx * half, by - ny * half, sx - nx * half, sy - ny * half)
+          local hw = head * 0.6
+          lcd.drawFilledTriangle(tx, ty, bx + nx * hw, by + ny * hw, bx - nx * hw, by - ny * hw)
+        end
+      end
+    end
+  end
+end
+
 local plane3d = {}
+
+plane3d.DEFAULT = DEFAULT_SPEC
+
+-- Which airframe to draw (see the header); nil for the default. Rebuilds
+-- the mesh only when the spec differs from the last one (by identity, then
+-- by content), and leaves every surface at neutral.
+function plane3d.setup(spec)
+  spec = spec or DEFAULT_SPEC
+  if spec == currentSpec then return end
+  local c = currentSpec
+  local function sameSpan(a, b)
+    if a == nil or b == nil then return a == b end
+    return a[1] == b[1] and a[2] == b[2]
+  end
+  if not (c and c.tail == spec.tail and c.wing == spec.wing and sameSpan(c.outer, spec.outer)
+      and sameSpan(c.inner, spec.inner) and c.fin == spec.fin and c.rudder == spec.rudder
+      and c.winglets == spec.winglets and c.gear == spec.gear) then
+    build(spec)
+    currentArrows = nil
+  end
+  currentSpec = spec
+end
+
+-- Light up and deflect the surfaces that have an arrow (see the header);
+-- nil puts every surface back to neutral. Recomputes only when given a
+-- different table.
+function plane3d.pose(arrows)
+  arrows = arrows or NO_ARROWS
+  if arrows == currentArrows then return end
+  currentArrows = arrows
+  applyPose(arrows)
+end
 
 -- The model at (roll, pitch, yaw), fitted inside the box and clipped to it.
 -- At zoom 1 (the default) the model's radius is fitted to the box's
 -- shorter side, so it stays inside at any attitude; perspective can push a
 -- tip pointing at the camera slightly further, which the clip catches. A
--- caller whose model only tilts a little in a wide, short box can zoom in
--- and let the clip take the rare overflow.
+-- caller whose model only tilts a little can zoom in and let the clip take
+-- the rare overflow.
 function plane3d.draw(x, y, w, h, roll, pitch, yaw, zoom)
   if w < 8 or h < 8 then return end
   local pitchR, yawR, rollR = toRadians(roll, pitch, yaw)
   local scale = max(4, (min(w, h) * 0.5 - 4) / MODEL_RADIUS * (zoom or 1))
   local sw, sh = lcd.getWindowSize()
+  local dark = lcd.darkMode()
   lcd.setClipping(x, y, w, h)
-  drawModel(x + floor(w * 0.5), y + floor(h * 0.5), scale, pitchR, yawR, rollR, shadeTable(lcd.darkMode()))
+  drawModel(x + floor(w * 0.5), y + floor(h * 0.5), scale, pitchR, yawR, rollR, shadeTable(dark))
+  drawArrows(scale, dark)
   lcd.setClipping(0, 0, sw, sh)
 end
 

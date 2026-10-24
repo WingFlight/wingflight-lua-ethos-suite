@@ -78,16 +78,17 @@ local function new(wiz)
       return scr:row(function() applied = nil; wiz.rebuild() end, nil,
         {text = T.saveRestart, press = function() wiz.saveAndReboot() end})
     end
-    local helps = {}
-    for _, tp in ipairs(TYPES) do helps[#helps + 1] = tp.name .. ": " .. tp.help end
-    scr:text(T.title, T.intro .. " " .. table.concat(helps, " "),
-      T.all .. " " .. string.format(T.now, current and current.name or T.unknown))
+    -- One row per type, what it means beside it, the current one lit. A mix
+    -- of types (or a custom rate) matches none, so say so.
+    scr:text(T.title, T.intro,
+      T.all .. (current and "" or (" " .. string.format(T.now, T.unknown))))
     -- Next keeps the servos as they are; after a change, Save and restart.
+    local forward = scr:row(nil, nil, changed and {text = T.saveRestart, press = function() wiz.saveAndReboot() end} or nil)
     local specs = {}
     for _, tp in ipairs(TYPES) do
-      specs[#specs + 1] = {text = tp.name, small = true, primary = current == tp, press = function() apply(tp) end}
+      specs[#specs + 1] = {text = tp.name, help = tp.help, current = current == tp, press = function() apply(tp) end}
     end
-    return scr:row(nil, specs, changed and {text = T.saveRestart, press = function() wiz.saveAndReboot() end} or nil)
+    return scr:choices(specs) or forward
   end
 
   function self.paint() scr:paint() end

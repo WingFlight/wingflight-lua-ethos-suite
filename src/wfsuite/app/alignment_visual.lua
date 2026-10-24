@@ -128,6 +128,8 @@ function alignment_visual.draw(state)
     end
   end
 
+  plane3d.setup(nil)
+  plane3d.pose(nil)
   plane3d.draw(gx0, gy0, gw0, gh0, roll, pitch, yaw)
 end
 

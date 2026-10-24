@@ -1,34 +1,37 @@
--- Setup Wizard pictures: the model seen from behind, as the pilot sees it
--- standing behind the model, with the surfaces a check moves highlighted and
--- an arrow for the way each should go.
+-- Setup Wizard pictures: the model in 3D (app/plane3d.lua), seen from
+-- behind as the pilot sees it standing behind the model, with the surfaces
+-- a check moves lit and swung the way each should go.
 --
 -- Built from the surface kinds lib/setup_wizard_surfaces.lua finds in the
--- mix, so a V-tail, a flying wing or a model with flaps each get their own
--- picture. Which side a servo is on cannot be read from the mix (it depends
--- on how the servo is mounted, which is what the check is about), so the
--- picture shows the airframe's surfaces, not individual servos.
+-- mix and the model type, so a V-tail, a flying wing, a delta or a model
+-- with flaps each get their own airframe. Which side a servo is on cannot
+-- be read from the mix (it depends on how the servo is mounted, which is
+-- what the check is about), so the picture shows the airframe's surfaces,
+-- not individual servos.
 --
 -- layout() runs when a screen is built; draw() runs from paint and only
--- draws what layout() worked out, without allocating.
+-- draws what layout() worked out (the 3D airframe is built once per layout).
+-- The wizard sets art.modelType (MSP_MIXER_CONFIG's model_type) when it
+-- reads or changes the mix.
 
 if package.loaded["wfsuite.app.setup_wizard_art"] then
   return package.loaded["wfsuite.app.setup_wizard_art"]
 end
 
+local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
+local plane3d = requireModule("app/plane3d.lua")
+
 local floor = math.floor
-local min = math.min
 
 local art = {}
 
--- Element geometry in units of half the wingspan: x -1..1 left to right as
--- seen from behind, y down. {x1, x2, y, thickness} for bars; the V-tail and
--- fin are special-cased in draw().
-local STAB_Y = -0.16
+art.modelType = nil
+
+-- Which part of the half span the surfaces cover (0 the centreline, 1 the
+-- tip): whether a layout has them, and what the 3D airframe uses (spec3d()).
 local OUTER = {0.55, 0.97}   -- ailerons, elevons
 local FLAPERON = {0.30, 0.97}
 local INNER = {0.13, 0.50}   -- flaps
-local STAB = {0.10, 0.40}
-local FIN_TOP = -0.62
 
 -- Arrow for each element on each check: "up", "down", "right", or nil when
 -- the check does not move it. Sides: L and R as seen from behind.
@@ -73,6 +76,7 @@ function art.baseLayout(surfaces, axis)
     vtail = kinds.ruddervator,
     fin = (kinds.rudder or kinds.elevator) and not kinds.ruddervator,
     rudder = kinds.rudder,
+    modelType = art.modelType,
     arrows = {},
   }
   local a = ARROWS[axis] or {}
@@ -92,131 +96,75 @@ function art.baseLayout(surfaces, axis)
   return l
 end
 
-local function arrow(x, y, dir, size, thick)
-  local h = floor(size * 0.45)
-  if dir == "up" or dir == "down" then
-    local sign = (dir == "up") and -1 or 1
-    local tipY = y + sign * size
-    local baseY = tipY - sign * h
-    lcd.drawFilledRectangle(x - floor(thick / 2), min(y, baseY), thick, math.abs(baseY - y) + 1)
-    lcd.drawFilledTriangle(x, tipY, x - h, baseY, x + h, baseY)
-  elseif dir == "right" then
-    local tipX = x + size
-    local baseX = tipX - h
-    lcd.drawFilledRectangle(x, y - floor(thick / 2), baseX - x + 1, thick)
-    lcd.drawFilledTriangle(tipX, y, baseX, y - h, baseX, y + h)
-  else -- left
-    local tipX = x - size
-    local baseX = tipX + h
-    lcd.drawFilledRectangle(baseX, y - floor(thick / 2), x - baseX + 1, thick)
-    lcd.drawFilledTriangle(tipX, y, baseX, y - h, baseX, y + h)
-  end
-end
+-- The 3D airframe (app/plane3d.lua) for a layout: which tail and wing, and
+-- where its surfaces sit along the half span. Elevons mean a tailless
+-- model: a delta when the model type says so (lib/setup_wizard_mix.lua's
+-- deltaWing, 3), a swept flying wing with winglets otherwise.
+local MODEL_TYPE_DELTA = 3
+local SPAN_AILERON = {0.30, 1.0}
+local SPAN_AILERON_WITH_FLAPS = {0.52, 1.0}
+local SPAN_FLAPERON = {0.18, 1.0}
+local SPAN_ELEVON = {0.20, 0.97}
+local SPAN_FLAP = {0.17, 0.50}
 
--- One bar on each side, x1..x2 out from the middle.
-local function bars(cx, y, s, span, t)
-  local x1, x2 = floor(span[1] * s), floor(span[2] * s)
-  lcd.drawFilledRectangle(cx - x2, y - floor(t / 2), x2 - x1, t)
-  lcd.drawFilledRectangle(cx + x1, y - floor(t / 2), x2 - x1, t)
-end
-
-local function barArrows(cx, y, s, span, dirs, size, thick)
-  if not dirs then return end
-  local mid = floor((span[1] + span[2]) / 2 * s)
-  local gap = floor(s * 0.05)
-  for side = 1, 2 do
-    local dir = dirs[side]
-    local x = (side == 1) and (cx - mid) or (cx + mid)
-    local start = (dir == "up") and (y - gap) or (y + gap)
-    arrow(x, start, dir, size, thick)
-  end
-end
-
--- colors: {body =, surface =, active =, text =}, from art.colors().
-function art.draw(l, x, y, w, h, colors)
-  -- Half the span. From the wing the drawing reaches up to the fin top
-  -- (-FIN_TOP s) and down to the tip of a down arrow (about 0.38 s): fit
-  -- both in h and centre them.
-  local above, below = -FIN_TOP, 0.38
-  local s = floor(min(w * 0.46, h / (above + below)))
-  local cx = x + floor(w / 2)
-  local wingY = y + floor((h - (above + below) * s) / 2 + above * s)
-  local t = math.max(5, floor(s * 0.07))
-  local size = math.max(12, floor(s * 0.28))
-  local thick = math.max(3, floor(t * 0.8))
-
-  -- Wing and fuselage.
-  lcd.color(colors.body)
-  lcd.drawFilledRectangle(cx - s, wingY - floor(t / 2), 2 * s, t)
-  lcd.drawFilledCircle(cx, wingY, floor(s * 0.09))
-
-  -- Tail, behind the wing from this view: higher on the page.
-  local stabY = wingY + floor(STAB_Y * s)
-  if l.fin then
-    local finTop = wingY + floor(FIN_TOP * s)
-    lcd.color(colors.body)
-    lcd.drawFilledRectangle(cx - floor(t / 2), finTop, t, stabY - finTop)
-    if l.rudder then
-      lcd.color(l.arrows.fin and colors.active or colors.surface)
-      lcd.drawFilledRectangle(cx - floor(t / 2), finTop, t, floor((stabY - finTop) * 0.7))
-    end
-  end
-  if l.stab then
-    lcd.color(colors.body)
-    lcd.drawFilledRectangle(cx - floor(STAB[2] * s), stabY - floor(t / 2), floor(STAB[2] * s) * 2, t)
-    lcd.color(l.arrows.stab and colors.active or colors.surface)
-    bars(cx, stabY, s, STAB, t)
-  end
-  if l.vtail then
-    local tipX, tipY = floor(0.38 * s), wingY + floor(-0.5 * s)
-    lcd.color(l.arrows.vtail and colors.active or colors.surface)
-    for side = -1, 1, 2 do
-      for k = 0, thick do
-        lcd.drawLine(cx, stabY + k, cx + side * tipX, tipY + k)
-      end
-    end
-  end
-
-  -- Wing surfaces.
+local function spec3d(l)
+  local tailless = l.outerKind == "elevon" and not l.stab and not l.vtail
+  local outer = nil
   if l.outer then
-    lcd.color(l.arrows.outer and colors.active or colors.surface)
-    bars(cx, wingY, s, l.outer, t)
+    if l.outerKind == "elevon" then outer = SPAN_ELEVON
+    elseif l.outerKind == "flaperon" then outer = SPAN_FLAPERON
+    else outer = l.inner and SPAN_AILERON_WITH_FLAPS or SPAN_AILERON end
   end
-  if l.inner then
-    lcd.color(l.arrows.inner and colors.active or colors.surface)
-    bars(cx, wingY, s, l.inner, t)
-  end
+  local wing = "straight"
+  if tailless then wing = (l.modelType == MODEL_TYPE_DELTA) and "delta" or "swept" end
+  return {
+    tail = tailless and "none" or (l.vtail and "vtail" or "conventional"),
+    wing = wing,
+    outer = outer,
+    inner = l.inner and SPAN_FLAP or nil,
+    fin = tailless and l.rudder or (not tailless and not l.vtail),
+    rudder = l.rudder,
+    winglets = tailless and wing == "swept",
+    gear = not tailless,
+  }
+end
 
-  -- Arrows.
-  lcd.color(colors.active)
-  if l.outer then barArrows(cx, wingY, s, l.outer, l.arrows.outer, size, thick) end
-  if l.inner then barArrows(cx, wingY, s, l.inner, l.arrows.inner, size, thick) end
-  if l.stab then barArrows(cx, stabY, s, STAB, l.arrows.stab, size, thick) end
-  if l.vtail and l.arrows.vtail then
-    local tipX, tipY = floor(0.38 * s), wingY + floor(-0.5 * s)
-    local midX, midY = floor(0.22 * s), floor((stabY + tipY) / 2)
-    for side = 1, 2 do
-      local dir = l.arrows.vtail[side]
-      local ax = (side == 1) and (cx - tipX) or (cx + tipX)
-      if dir == "right" then
-        -- From each tip, clear of the arms.
-        arrow(ax + floor(s * 0.04), tipY, dir, size, thick)
-      elseif dir == "left" then
-        arrow(ax - floor(s * 0.04), tipY, dir, size, thick)
-      elseif dir == "down" then
-        arrow(ax, tipY + floor(s * 0.06), dir, size, thick)
-      else
-        ax = (side == 1) and (cx - midX) or (cx + midX)
-        arrow(ax, midY - floor(s * 0.06), dir, size, thick)
-      end
-    end
-  end
-  if l.fin and l.arrows.fin then
-    local finTop = wingY + floor(FIN_TOP * s)
-    local dir = l.arrows.fin[1]
-    local fy = floor((finTop + stabY) / 2) - floor(s * 0.08)
-    arrow(dir == "left" and (cx - t) or (cx + t), fy, dir, size, thick)
-  end
+-- Which picture element a surface kind is (lib/setup_wizard_surfaces.lua).
+local GROUP_OF = {
+  aileron = "outer", elevon = "outer", flaperon = "outer", flap = "inner",
+  elevator = "stab", ruddervator = "vtail", rudder = "fin",
+}
+local LIT_BOTH = {"lit", "lit"}
+
+-- The airframe with one kind of surface lit (both sides: which side a servo
+-- drives is not known), for a step that works one surface at a time.
+function art.surfaceLayout(surfaces, kind)
+  local l = art.baseLayout(surfaces, nil)
+  local group = GROUP_OF[kind]
+  if group then l.arrows[group] = LIT_BOTH end
+  return l
+end
+
+-- The 3D airframe for this mix, for a step that draws the plane itself
+-- (plane3d.setup(art.airframe(wiz.surfaces()))). Allocates: call it from
+-- build, not paint.
+function art.airframe(surfaces)
+  return spec3d(art.baseLayout(surfaces, nil))
+end
+
+-- Seen from behind, a little from the left and well above (the nose tipped
+-- down VIEW_PITCH on top of plane3d's own camera height): from low behind
+-- the surfaces' chord, and how far they swing, shrink to a thin line.
+local VIEW_YAW = -20
+local VIEW_PITCH = -28
+local VIEW_ZOOM = 1.3
+
+-- colors: unused (plane3d has its own); kept for the caller's signature.
+function art.draw(l, x, y, w, h, colors)
+  l.spec3d = l.spec3d or spec3d(l)
+  plane3d.setup(l.spec3d)
+  plane3d.pose(l.arrows)
+  plane3d.draw(x, y, w, h, 0, VIEW_PITCH, VIEW_YAW, VIEW_ZOOM)
 end
 
 -- A servo seen from above: its horn on an arc from Min (left) to Max

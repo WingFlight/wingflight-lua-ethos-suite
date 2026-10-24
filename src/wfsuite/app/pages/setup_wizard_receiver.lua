@@ -48,6 +48,21 @@ local FUNCTIONS = {
 -- The order the configurator asks for them in: throttle, then roll, pitch, yaw.
 local DETECT_ORDER = {4, 1, 2, 3}
 
+-- Which function each stick's axes carry, by the radio's stick mode
+-- (system.getStickMode(), 1..4): {left stick, right stick}, each {x =, y =}
+-- as FUNCTIONS indices (1 roll, 2 pitch, 3 yaw, 4 throttle).
+local STICKS = {
+  {{x = 3, y = 2}, {x = 1, y = 4}},   -- mode 1: rudder/elevator, aileron/throttle
+  {{x = 3, y = 4}, {x = 1, y = 2}},   -- mode 2: rudder/throttle, aileron/elevator
+  {{x = 1, y = 2}, {x = 3, y = 4}},   -- mode 3: aileron/elevator, rudder/throttle
+  {{x = 1, y = 4}, {x = 3, y = 2}},   -- mode 4: aileron/throttle, rudder/elevator
+}
+
+-- A stick this far out (of 1) counts as in the corner.
+local TARGET = 0.85
+-- Room the bars need, in text lines.
+local BARS_LINES = 6
+
 local function new(wiz)
   local self = {liveRc = "raw"}
   local scr = ui.new(wiz)
@@ -94,17 +109,62 @@ local function new(wiz)
     bus.publish("msp.request", rxMap.buildWriteMessage(map))
   end
 
+  -- One bar per function, the target (full left) marked at its left end.
   local function drawBars(x, y, w, h, colors)
     lcd.font(FONT_S)
     local _, th = lcd.getTextSize("Ag")
-    local rowH = math.min(math.floor(h / 4), th + 10)
-    local labelW = math.floor(w * 0.28)
+    local rowH = math.min(math.floor(h / 4), th + 14)
+    local labelW = 0
+    for i = 1, 4 do labelW = math.max(labelW, (lcd.getTextSize(FUNCTIONS[i].name))) end
+    labelW = labelW + 10
     for i = 1, 4 do
       local ry = y + (i - 1) * rowH
-      lcd.color(colors.text)
-      lcd.drawText(x, ry + math.floor((rowH - th) / 2), FUNCTIONS[i].name, LEFT)
       local f = reading(i)
-      ui.gauge(x + labelW, ry + 2, w - labelW - 8, rowH - 6, f and (f + 1) / 2 or nil, colors, 0.48, 0.52)
+      local there = f and f <= -TARGET
+      lcd.color(there and colors.active or colors.text)
+      lcd.drawText(x, ry + math.floor((rowH - th) / 2), FUNCTIONS[i].name, LEFT)
+      ui.gauge(x + labelW, ry + 3, w - labelW - 4, rowH - 6, f and (f + 1) / 2 or nil, colors, 0, (1 - TARGET) / 2)
+    end
+  end
+
+  -- The two sticks as the radio's stick mode has them, each a square with
+  -- the target corner (bottom left) marked and a dot where the stick is.
+  local mode = (system and system.getStickMode and system.getStickMode()) or 2
+  local sticks = STICKS[mode] or STICKS[2]
+  local stickNames = {
+    FUNCTIONS[sticks[1].x].name .. " / " .. FUNCTIONS[sticks[1].y].name,
+    FUNCTIONS[sticks[2].x].name .. " / " .. FUNCTIONS[sticks[2].y].name,
+  }
+  local function drawSticks(x, y, w, h, colors)
+    lcd.font(FONT_XS)
+    local _, lh = lcd.getTextSize("Ag")
+    local gap = math.max(8, math.floor(w * 0.06))
+    local s = math.min(math.floor((w - gap) / 2) - 4, h - lh - 6)
+    if s < 30 then return end
+    local x0 = x + math.floor((w - (2 * s + gap)) / 2)
+    local y0 = y + math.floor((h - s - lh - 4) / 2)
+    local r = math.max(3, math.floor(s * 0.07))
+    for k = 1, 2 do
+      local gx = x0 + (k - 1) * (s + gap)
+      local cx, cy = gx + math.floor(s / 2), y0 + math.floor(s / 2)
+      lcd.color(colors.surface)
+      lcd.drawRectangle(gx, y0, s, s)
+      lcd.drawLine(cx, y0 + 4, cx, y0 + s - 4)
+      lcd.drawLine(gx + 4, cy, gx + s - 4, cy)
+      -- The corner to go to.
+      local z = math.floor(s * (1 - TARGET) / 2) + r
+      lcd.color(colors.active)
+      lcd.drawRectangle(gx + 1, y0 + s - z - 1, z, z)
+      local fx, fy = reading(sticks[k].x), reading(sticks[k].y)
+      if fx and fy then
+        local px = cx + math.floor(fx * (s / 2 - r - 2))
+        local py = cy - math.floor(fy * (s / 2 - r - 2))
+        lcd.color((fx <= -TARGET and fy <= -TARGET) and colors.active or colors.text)
+        lcd.drawLine(cx, cy, px, py)
+        lcd.drawFilledCircle(px, py, r)
+      end
+      lcd.color(colors.muted)
+      lcd.drawText(gx + math.floor(s / 2), y0 + s + 4, stickNames[k], CENTERED)
     end
   end
 
@@ -116,13 +176,15 @@ local function new(wiz)
     end
     if screen == "check" then
       scr:text(T.title, T.check .. " " .. string.format(T.order, controls.orderLabel(map)), T.reversed)
-      scr:draw(drawBars)
+      scr:draw(drawSticks, nil, true)
+      scr:live(drawBars, BARS_LINES)
       -- Next when the bars follow the sticks; Detect when they don't.
       return scr:row(nil, {{text = T.wrong, press = startDetect}})
     end
     local fn = FUNCTIONS[DETECT_ORDER[#found + 1]]
     scr:text(T.detectTitle, fn.move)
-    scr:draw(drawBars)
+    scr:draw(drawSticks, nil, true)
+    scr:live(drawBars, BARS_LINES)
     -- Back cancels; the order is written once every stick has moved.
     return scr:row(function() screen = "check"; wiz.rebuild() end,
       {{text = T.restart, primary = true, press = startDetect}}, false)

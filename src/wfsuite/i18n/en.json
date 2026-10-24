@@ -8543,10 +8543,10 @@
           "translation": "DShot300"
         },
         "mot_dshot300_help": {
-          "english": "digital, no calibration; BLHeli, Bluejay, AM32.",
+          "english": "Digital, no calibration; BLHeli, Bluejay, AM32.",
           "max_length": 47,
           "needs_translation": false,
-          "translation": "digital, no calibration; BLHeli, Bluejay, AM32."
+          "translation": "Digital, no calibration; BLHeli, Bluejay, AM32."
         },
         "mot_dshot600": {
           "english": "DShot600",
@@ -8555,10 +8555,10 @@
           "translation": "DShot600"
         },
         "mot_dshot600_help": {
-          "english": "faster DShot, for ESCs that support it.",
+          "english": "Faster DShot, for ESCs that support it.",
           "max_length": 39,
           "needs_translation": false,
-          "translation": "faster DShot, for ESCs that support it."
+          "translation": "Faster DShot, for ESCs that support it."
         },
         "mot_intro": {
           "english": "How the flight controller talks to the ESC.",
@@ -8579,10 +8579,10 @@
           "translation": "No motor"
         },
         "mot_none_help": {
-          "english": "gliders, or a motor not on the flight controller.",
+          "english": "Gliders, or a motor not on the flight controller.",
           "max_length": 49,
           "needs_translation": false,
-          "translation": "gliders, or a motor not on the flight controller."
+          "translation": "Gliders, or a motor not on the flight controller."
         },
         "mot_other": {
           "english": "It is set to another protocol on the ESC & Motors pages. Choosing one here replaces it.",
@@ -8615,10 +8615,10 @@
           "translation": "Standard PWM"
         },
         "mot_pwm_help": {
-          "english": "works with any ESC; some need their throttle range calibrated.",
+          "english": "Works with any ESC; some need their throttle range calibrated.",
           "max_length": 62,
           "needs_translation": false,
-          "translation": "works with any ESC; some need their throttle range calibrated."
+          "translation": "Works with any ESC; some need their throttle range calibrated."
         },
         "mot_spin_fmt": {
           "english": "Spin %d s",
@@ -8699,10 +8699,10 @@
           "translation": "Disarm: the FC refused setup mode."
         },
         "rx_check": {
-          "english": "Put both sticks in the bottom-left corner: throttle and elevator down, aileron and rudder left. Every bar should go to the left.",
-          "max_length": 128,
+          "english": "Put both sticks in the bottom-left corner. Every bar should go to the left.",
+          "max_length": 75,
           "needs_translation": false,
-          "translation": "Put both sticks in the bottom-left corner: throttle and elevator down, aileron and rudder left. Every bar should go to the left."
+          "translation": "Put both sticks in the bottom-left corner. Every bar should go to the left."
         },
         "rx_detect_title": {
           "english": "Find the channel order",

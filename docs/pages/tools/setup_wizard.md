@@ -18,6 +18,19 @@ questions and the same rules, as a guided sequence for a radio screen. Each
 screen asks one thing, with a picture or a live value and one or two big
 buttons.
 
+The pictures show the model in 3D, built from its airframe type and the
+surfaces in its mix (a regular airplane, V-tail, flying wing, delta or
+rudder-elevator model, with flaps when it has them), seen from behind as you
+stand behind it. A check lights the surfaces it moves in orange, swings them the
+way they should go and draws an arrow for each; a step that works on one surface
+at a time lights that kind of surface. On a screen with a picture the picture is
+on the left and the words on the right. Where there is room, mostly on the bigger
+radios, the text is larger. A choice such as the servo type or motor protocol is
+a list: each option has its own button with what it means beside it, and the
+current one is lit. The Receiver step draws both sticks, laid out for the radio's
+stick mode, with the corner to go to marked; on a small screen it shows only the
+bars.
+
 ## Where to find it
 
 *System* → *Tools* → *Setup Wizard*

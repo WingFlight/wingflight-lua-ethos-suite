@@ -11,6 +11,7 @@
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local bus = requireModule("lib/bus.lua")
 local ui = requireModule("app/setup_wizard_ui.lua")
+local art = requireModule("app/setup_wizard_art.lua")
 -- Freed when the step closes (app/setup_wizard_ui.lua's notLoaded()).
 local OWNED = ui.notLoaded({"wfsuite.lib.setup_wizard_controls", "wfsuite.lib.msp_modes"})
 local controls = requireModule("lib/setup_wizard_controls.lua")
@@ -160,6 +161,7 @@ local function new(wiz)
 
     if screen == "intro" then
       scr:text(T.title, T.intro)
+      scr:picture(art.layout(wiz.surfaces(), nil))
       return scr:row(nil, {
         {text = T.start, primary = true, press = function() mi = 1; go(#offered > 0 and "mode" or "done") end},
       })

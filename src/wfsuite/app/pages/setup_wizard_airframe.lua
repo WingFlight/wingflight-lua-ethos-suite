@@ -150,7 +150,11 @@ local function new(wiz)
 
   local function preview()
     local rules = mix.buildRules(options)
-    return art.layout(surfacesLib.surfacesFromRules(rules, 26), nil), rules
+    local layout = art.layout(surfacesLib.surfacesFromRules(rules, 26), nil)
+    -- The type being chosen, not the one on the FC: a delta and a flying
+    -- wing have the same surfaces and differ only in the picture.
+    layout.modelType = modelType.value
+    return layout, rules
   end
 
   -- A question's row: Back to the previous question, then the answers,

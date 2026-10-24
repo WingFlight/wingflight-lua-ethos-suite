@@ -10,6 +10,7 @@
 
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local ui = requireModule("app/setup_wizard_ui.lua")
+local art = requireModule("app/setup_wizard_art.lua")
 
 local T = {
   intro = "@i18n(app.modules.setup_wizard.cen_intro)@",
@@ -101,7 +102,9 @@ local function new(wiz)
     scr:text(wiz.surfaceName(surface),
       T.intro .. " " .. string.format(T.value, config.mid, (offset >= 0 and "+" or "") .. offset), accent,
       string.format(T.progress, index, #surfaces))
-    scr:draw(drawGauge)
+    -- The surface on the plane, the centre gauge beside the words.
+    scr:picture(art.surfaceLayout(surfaces, surface.kind))
+    scr:live(drawGauge, 2)
     local specs = {}
     for _, d in ipairs(NUDGES) do
       specs[#specs + 1] = {text = (d > 0 and "+" or "") .. d, small = true, weight = 0.7, needsMotion = true,

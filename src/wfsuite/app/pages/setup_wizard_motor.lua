@@ -117,13 +117,12 @@ local function new(wiz)
       for _, c in ipairs(CHOICES) do
         if c.protocol == config.motor_pwm_protocol then current = c end
       end
-      local helps = {}
-      for _, c in ipairs(CHOICES) do helps[#helps + 1] = c.name .. ": " .. c.help end
-      scr:text(T.title, T.intro .. " " .. table.concat(helps, " "),
+      scr:text(T.title, T.intro,
         changed and T.changed or (not current and T.other or (wiz.motorCount() == 0 and T.noMotor or nil)))
+      -- One row per protocol, what it means beside it, the current one lit.
       local specs = {}
       for _, c in ipairs(CHOICES) do
-        specs[#specs + 1] = {text = c.name, primary = current == c, press = function() choose(c) end}
+        specs[#specs + 1] = {text = c.name, help = c.help, current = current == c, press = function() choose(c) end}
       end
       -- A new protocol needs a restart; the test spins the protocol the
       -- motor runs now, so it waits until then.
@@ -131,7 +130,7 @@ local function new(wiz)
         {text = T.test, disabled = config.motor_pwm_protocol == 11 or wiz.motorCount() == 0,
           press = function() go("prop") end},
       } or nil, changed and {text = T.saveRestart, press = function() wiz.saveAndReboot() end} or nil)
-      return scr:grid(specs, 2) or forward
+      return scr:choices(specs) or forward
 
     elseif screen == "prop" then
       scr:text(T.propTitle, T.propText)

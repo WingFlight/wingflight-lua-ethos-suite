@@ -27,7 +27,7 @@ local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("
 local bus = requireModule("lib/bus.lua")
 local ui = requireModule("app/setup_wizard_ui.lua")
 -- Freed when the step closes (app/setup_wizard_ui.lua's notLoaded()).
-local OWNED = ui.notLoaded({"wfsuite.lib.msp_acc_calibration", "wfsuite.lib.acc_calibration_wait", "wfsuite.lib.msp_board_auto_align", "wfsuite.lib.msp_board_alignment_config", "wfsuite.lib.msp_board_mount_trim", "wfsuite.lib.msp_attitude", "wfsuite.app.plane3d"})
+local OWNED = ui.notLoaded({"wfsuite.lib.msp_acc_calibration", "wfsuite.lib.acc_calibration_wait", "wfsuite.lib.msp_board_auto_align", "wfsuite.lib.msp_board_alignment_config", "wfsuite.lib.msp_board_mount_trim", "wfsuite.lib.msp_attitude"})
 local status = requireModule("lib/msp_status.lua")
 local accCalibration = requireModule("lib/msp_acc_calibration.lua")
 local calibrationWait = requireModule("lib/acc_calibration_wait.lua")
@@ -36,6 +36,7 @@ local boardAlignment = requireModule("lib/msp_board_alignment_config.lua")
 local mountTrim = requireModule("lib/msp_board_mount_trim.lua")
 local attitude = requireModule("lib/msp_attitude.lua")
 local plane3d = requireModule("app/plane3d.lua")
+local art = requireModule("app/setup_wizard_art.lua")
 
 local T = {
   title = "@i18n(app.modules.setup_wizard.sen_title)@",
@@ -131,14 +132,27 @@ local function new(wiz)
     wiz.rebuild()
   end
 
+  -- This model's airframe (as the other steps' pictures), surfaces neutral.
+  local airframe = art.airframe(wiz.surfaces())
+  local function plane(x, y, w, h, roll, pitch, yaw, zoom)
+    plane3d.setup(airframe)
+    plane3d.pose(nil)
+    plane3d.draw(x, y, w, h, roll, pitch, yaw, zoom)
+  end
+
+  -- The model level: the intro, the calibration and the level screens.
+  local function drawLevel(x, y, w, h)
+    plane(x, y, w, h, 0, 0, SIDE_YAW, LIFT_ZOOM)
+  end
+
   -- The plane from the side, its tail lifted while auto align waits for it.
   local function drawLift(x, y, w, h)
-    plane3d.draw(x, y, w, h, 0, (autoKind == "align") and TAIL_LIFT or 0, SIDE_YAW, LIFT_ZOOM)
+    plane(x, y, w, h, 0, (autoKind == "align") and TAIL_LIFT or 0, SIDE_YAW, LIFT_ZOOM)
   end
 
   -- The plane from behind at the live attitude (the numbers are rows).
   local function drawLive(x, y, w, h)
-    plane3d.draw(x, y, w, h, live.roll, live.pitch, 0, LIVE_ZOOM)
+    plane(x, y, w, h, live.roll, live.pitch, 0, LIVE_ZOOM)
   end
 
   local function onAttitude(values)
@@ -239,11 +253,13 @@ local function new(wiz)
 
     if screen == "intro" then
       scr:text(T.title, T.intro .. " " .. T.tail, (not hasAcc) and T.noAcc or nil)
+      scr:draw(drawLevel, nil, true)
       return scr:row(nil, hasAcc and {{text = T.start, primary = true, press = function() go("acc") end}} or nil)
 
     elseif screen == "acc" then
       -- The step's three parts, one at a time: calibrate, orientation, level.
       scr:text(T.accTitle, T.accText, noteAccent or note, string.format(T.progress, 1, PARTS))
+      scr:draw(drawLevel, nil, true)
       -- Once it has calibrated, the focus moves on to Next.
       local done = note ~= nil and not busy
       return scr:row(function() go("intro") end, {
@@ -261,7 +277,7 @@ local function new(wiz)
       local align = screen == "align"
       scr:text(align and T.alignTitle or T.levelTitle, align and T.alignText or T.levelText,
         noteAccent or note, string.format(T.progress, align and 2 or 4, PARTS))
-      if align then scr:draw(drawLift, nil, true) end
+      scr:draw(align and drawLift or drawLevel, nil, true)
       local done = note ~= nil and not busy
       return scr:row(function() go(align and "acc" or "check") end, {
         {text = done and T.again or T.start, primary = not done, needsMotion = true, disabled = busy,

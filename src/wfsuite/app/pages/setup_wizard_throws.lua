@@ -166,6 +166,8 @@ local function new(wiz)
 
     if screen == "intro" or #axes == 0 then
       scr:text(T.title, T.intro)
+      -- The model with its ailerons out for a roll: throws are measured at the surfaces.
+      scr:picture(art.layout(wiz.surfaces(), "roll"))
       return scr:row(nil, {
         {text = T.start, primary = true, needsMotion = true, disabled = #axes == 0, press = function() showAxis(1) end},
       })

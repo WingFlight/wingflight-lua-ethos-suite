@@ -50,6 +50,7 @@ local SHELL_MODULES = {
   "wfsuite.lib.msp_mixer_rules", "wfsuite.lib.msp_mixer_input", "wfsuite.lib.msp_mixer_config",
   "wfsuite.lib.msp_servo_config", "wfsuite.lib.msp_servo", "wfsuite.lib.msp_rc_channels",
   "wfsuite.lib.setup_wizard_surfaces", "wfsuite.app.setup_wizard_ui", "wfsuite.app.setup_wizard_art",
+  "wfsuite.app.plane3d",
 }
 local shellOwned = {}
 for i = 1, #SHELL_MODULES do
@@ -375,6 +376,8 @@ local function open(opts)
   local function recompute()
     surfaces = surfacesLib.surfacesFromRules(rules, servoCount)
     missingServos = surfacesLib.servosPastCount(rules, servoCount, PWM_SERVO_SLOTS)
+    -- The pictures draw a delta or a flying wing by the model type.
+    art.modelType = mixConfig and mixConfig.model_type or nil
   end
 
   -------------------------------------------------------------------------
