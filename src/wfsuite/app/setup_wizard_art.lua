@@ -179,6 +179,10 @@ function art.done(l, x, y, w, h, colors)
   art.tick(x + w - r - 6, y + h - r - 6, r)
 end
 
+-- The 3D pictures' background work (plane3d.service()): the wizard calls
+-- it from every wakeup.
+art.service = plane3d.service
+
 -- The 3D airframe for this mix, for a step that draws the plane itself
 -- (plane3d.setup(art.airframe(wiz.surfaces()))). Allocates: call it from
 -- build, not paint.

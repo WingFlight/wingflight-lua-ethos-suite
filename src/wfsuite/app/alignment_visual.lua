@@ -26,6 +26,9 @@ end
 
 local alignment_visual = {}
 
+-- The 3D plane's background work: call from the page's wakeup.
+alignment_visual.service = plane3d.service
+
 function alignment_visual.recenterYaw(state)
   local baseline = state.baseline or {}
   state.viewYawOffset = (tonumber(state.live.yaw) or 0) + (tonumber(state.display.yaw_degrees) or 0) - (tonumber(baseline.yaw_degrees) or 0)

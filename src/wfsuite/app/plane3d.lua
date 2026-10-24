@@ -4,8 +4,17 @@
 --
 --   plane3d.setup(spec)        -- which airframe (default: the Extra below)
 --   plane3d.pose(arrows)       -- light up and deflect control surfaces
---   plane3d.draw(x, y, w, h, roll, pitch, yaw[, zoom])
+--   plane3d.draw(x, y, w, h, roll, pitch, yaw[, zoom])   -- from paint
+--   plane3d.service()          -- from wakeup, on every page that draws it
 --   local ux, uy = plane3d.noseDirection(roll, pitch, yaw)
+--
+-- Ethos stops any callback that runs 20000 Lua instructions. Building the
+-- mesh costs about 18000 and computing a frame about 15000, so neither
+-- happens in paint: service() does one step per wakeup (a build stage, the
+-- pose, or one of four frame stages) and finishes a frame into a display
+-- list of screen triangles; draw() records the view it wants and replays
+-- the last finished frame for that box. A new view shows a few wakeups
+-- later; a live attitude runs a frame behind.
 --
 -- Angles are degrees in MSP_ATTITUDE's sense. Yaw 0 shows the model from
 -- behind (tail towards the viewer), as the pilot sees it standing behind
@@ -46,8 +55,8 @@
 -- camera are dropped, the rest are flat-shaded from a fixed light and drawn
 -- far-to-near. The camera sits CAMERA_ELEVATION above the model's level
 -- plane, so the top of a level aircraft stays visible instead of the wings
--- collapsing to a line. No tables are allocated per paint; shaded colours
--- are built once per theme, the mesh once per setup().
+-- collapsing to a line. No tables are allocated per paint or frame; shaded
+-- colours are built once per theme, the mesh once per setup().
 
 if package.loaded["wfsuite.app.plane3d"] then
   return package.loaded["wfsuite.app.plane3d"]
@@ -344,72 +353,89 @@ end
 local DEFAULT_SPEC = {tail = "conventional", wing = "straight", outer = {0.30, 1.0},
   fin = true, rudder = true, gear = true}
 
-local function build(spec)
-  local oldVertices, oldFaces = vertexCount, faceCount
-  vertexCount, faceCount, surfaceCount = 0, 0, 0
-  local tail = spec.tail or "conventional"
-  local tailless = tail == "none"
+local function specTail(spec) return spec.tail or "conventional" end
+local function specPlanform(spec) return WINGS[spec.wing or "straight"] or WINGS.straight end
 
-  fuselage(tailless and POD or BODY)
-  if tailless then canopy(0.46, 1.45) else canopy(0.62, 1.75) end
-  nose()
+---------------------------------------------------------------------------
+-- Building: one stage per service() call. The whole build costs about
+-- 18000 instructions, close to Ethos's 20000 per callback on its own; each
+-- stage is a few thousand.
+---------------------------------------------------------------------------
 
-  local planform = WINGS[spec.wing or "straight"] or WINGS.straight
-  wing(planform, spec.outer, spec.inner, 1)
-  wing(planform, spec.outer, spec.inner, 2)
+local oldVertices, oldFaces = 0, 0
 
-  for side = 1, 2 do
-    local s = (side == 1) and 1 or -1
-    if tail == "conventional" then
-      plate(vtx(0.10 * s, 0.36, 2.92), vtx(1.55 * s, 0.36, 3.08), vtx(1.55 * s, 0.36, 3.47), vtx(0.10 * s, 0.36, 3.47), MAT_BODY)
-      surface("stab", side, vtx(0.04 * s, 0.36, 3.47), vtx(1.60 * s, 0.36, 3.47), vtx(1.60 * s, 0.36, 3.80), vtx(0.04 * s, 0.36, 3.86))
-    elseif tail == "vtail" then
-      -- Two surfaces at about 40 degrees, ruddervators on their trailing
-      -- edges.
-      local rx, ry, tx, ty = 0.06 * s, 0.40, 1.15 * s, 1.30
-      plate(vtx(rx, ry, 2.80), vtx(tx, ty, 3.20), vtx(tx, ty, 3.55), vtx(rx, ry, 3.40), MAT_BODY)
-      surface("vtail", side, vtx(rx, ry, 3.40), vtx(tx, ty, 3.55), vtx(tx, ty, 3.85), vtx(rx, ry, 3.90))
+local STAGES = {
+  function(spec)
+    oldVertices, oldFaces = vertexCount, faceCount
+    vertexCount, faceCount, surfaceCount = 0, 0, 0
+    fuselage(specTail(spec) == "none" and POD or BODY)
+  end,
+  function(spec)
+    if specTail(spec) == "none" then canopy(0.46, 1.45) else canopy(0.62, 1.75) end
+    nose()
+  end,
+  function(spec) wing(specPlanform(spec), spec.outer, spec.inner, 1) end,
+  function(spec) wing(specPlanform(spec), spec.outer, spec.inner, 2) end,
+  function(spec)
+    local tail = specTail(spec)
+    local planform = specPlanform(spec)
+    for side = 1, 2 do
+      local s = (side == 1) and 1 or -1
+      if tail == "conventional" then
+        plate(vtx(0.10 * s, 0.36, 2.92), vtx(1.55 * s, 0.36, 3.08), vtx(1.55 * s, 0.36, 3.47), vtx(0.10 * s, 0.36, 3.47), MAT_BODY)
+        surface("stab", side, vtx(0.04 * s, 0.36, 3.47), vtx(1.60 * s, 0.36, 3.47), vtx(1.60 * s, 0.36, 3.80), vtx(0.04 * s, 0.36, 3.86))
+      elseif tail == "vtail" then
+        -- Two surfaces at about 40 degrees, ruddervators on their trailing
+        -- edges.
+        local rx, ry, tx, ty = 0.06 * s, 0.40, 1.15 * s, 1.30
+        plate(vtx(rx, ry, 2.80), vtx(tx, ty, 3.20), vtx(tx, ty, 3.55), vtx(rx, ry, 3.40), MAT_BODY)
+        surface("vtail", side, vtx(rx, ry, 3.40), vtx(tx, ty, 3.55), vtx(tx, ty, 3.85), vtx(rx, ry, 3.90))
+      end
+      if spec.winglets then
+        local x, y = planform.tip[1] * s, planform.tip[4]
+        local le, te = planform.tip[2], planform.tip[3]
+        plate(vtx(x, y, le), vtx(x, y + 0.65, le + 0.40), vtx(x, y + 0.65, te), vtx(x, y, te), MAT_BODY)
+      end
     end
-    if spec.winglets then
-      local x, _, _, y = planform.tip[1] * s, nil, nil, planform.tip[4]
-      local le, te = planform.tip[2], planform.tip[3]
-      plate(vtx(x, y, le), vtx(x, y + 0.65, le + 0.40), vtx(x, y + 0.65, te), vtx(x, y, te), MAT_BODY)
+    if spec.fin then
+      if tail == "none" then
+        fin(0.40, 1.15, 1.05, 1.70, 1.95, 2.25, 2.40, 0.10, spec.rudder)
+      elseif tail == "conventional" then
+        fin(0.48, 2.85, 1.25, 3.28, 3.52, 3.84, 4.14, -0.02, spec.rudder)
+      end
     end
-    if spec.gear then
+  end,
+  function(spec)
+    if not spec.gear then return end
+    for side = 1, 2 do
       -- A leg out of the belly and a spatted wheel.
+      local s = (side == 1) and 1 or -1
       local px = 0.76 * s
       plate(vtx(0.25 * s, -0.40, -0.52), vtx(px, -0.82, -0.54), vtx(px, -0.82, -0.38), vtx(0.25 * s, -0.40, -0.25), MAT_WHITE)
       local front = vtx(px, -0.93, -0.92)
       local rear = vtx(px, -0.90, -0.10)
-      local around = {
-        vtx(px, -0.77, -0.50), vtx(px + 0.08, -0.92, -0.50),
-        vtx(px, -1.06, -0.50), vtx(px - 0.08, -0.92, -0.50),
-      }
-      for k = 1, 4 do
-        local k2 = (k % 4) + 1
-        solid(front, around[k], around[k2], nil, MAT_WHITE, px, -0.92, -0.50)
-        solid(rear, around[k2], around[k], nil, MAT_WHITE, px, -0.92, -0.50)
-      end
+      local top, bottom = vtx(px, -0.77, -0.50), vtx(px, -1.06, -0.50)
+      local out, inn = vtx(px + 0.08, -0.92, -0.50), vtx(px - 0.08, -0.92, -0.50)
+      solid(front, top, out, nil, MAT_WHITE, px, -0.92, -0.50)
+      solid(front, out, bottom, nil, MAT_WHITE, px, -0.92, -0.50)
+      solid(front, bottom, inn, nil, MAT_WHITE, px, -0.92, -0.50)
+      solid(front, inn, top, nil, MAT_WHITE, px, -0.92, -0.50)
+      solid(rear, out, top, nil, MAT_WHITE, px, -0.92, -0.50)
+      solid(rear, bottom, out, nil, MAT_WHITE, px, -0.92, -0.50)
+      solid(rear, inn, bottom, nil, MAT_WHITE, px, -0.92, -0.50)
+      solid(rear, top, inn, nil, MAT_WHITE, px, -0.92, -0.50)
     end
-  end
-
-  if spec.fin then
-    if tailless then
-      fin(0.40, 1.15, 1.05, 1.70, 1.95, 2.25, 2.40, 0.10, spec.rudder)
-    elseif tail == "conventional" then
-      fin(0.48, 2.85, 1.25, 3.28, 3.52, 3.84, 4.14, -0.02, spec.rudder)
+  end,
+  function()
+    -- Free what a bigger airframe used before.
+    for i = vertexCount + 1, oldVertices do MX[i], MY[i], MZ[i], RX[i], RY[i], RZ[i] = nil, nil, nil, nil, nil, nil end
+    for i = faceCount + 1, oldFaces do FA[i], FB[i], FC[i], FD[i], FMAT[i], FTWO[i] = nil, nil, nil, nil, nil, nil end
+    MODEL_RADIUS = 0
+    for i = 1, vertexCount do
+      MODEL_RADIUS = max(MODEL_RADIUS, sqrt(MX[i] * MX[i] + MY[i] * MY[i] + MZ[i] * MZ[i]))
     end
-  end
-
-  -- Free what a bigger airframe used before.
-  for i = vertexCount + 1, oldVertices do MX[i], MY[i], MZ[i], RX[i], RY[i], RZ[i] = nil, nil, nil, nil, nil, nil end
-  for i = faceCount + 1, oldFaces do FA[i], FB[i], FC[i], FD[i], FMAT[i], FTWO[i] = nil, nil, nil, nil, nil, nil end
-
-  MODEL_RADIUS = 0
-  for i = 1, vertexCount do
-    MODEL_RADIUS = max(MODEL_RADIUS, sqrt(MX[i] * MX[i] + MY[i] * MY[i] + MZ[i] * MZ[i]))
-  end
-end
+  end,
+}
 
 -- Swing surface k's trailing edge by angle (radians) towards (dx, dy, dz)
 -- (renderer axes), about its hinge; 0 puts it back to neutral.
@@ -447,10 +473,9 @@ local DIRECTIONS = {
   lit = {0, 0, 1, 0},
 }
 
-local currentSpec, currentArrows = nil, nil
 local NO_ARROWS = {}
 
--- Each surface's arrow (a DIRECTIONS entry), or false: drawn by draw().
+-- Each surface's arrow (a DIRECTIONS entry), or false.
 local SDIR = {}
 
 local function applyPose(arrows)
@@ -468,9 +493,6 @@ local function applyPose(arrows)
   end
   for k = surfaceCount + 1, #SDIR do SDIR[k] = nil end
 end
-
-build(DEFAULT_SPEC)
-currentSpec = DEFAULT_SPEC
 
 ---------------------------------------------------------------------------
 -- Shading
@@ -508,6 +530,7 @@ local BASE_COLORS = {
 }
 
 local shadeCache = {}
+local arrowColors = {}
 
 local function shadeTable(isDark)
   local key = isDark and "dark" or "light"
@@ -526,18 +549,10 @@ local function shadeTable(isDark)
   return cached
 end
 
----------------------------------------------------------------------------
--- Per-paint buffers (reused)
----------------------------------------------------------------------------
-
-local VX, VY, VZ, SX, SY = {}, {}, {}, {}, {}
-local faceDepth = {}
-local faceColor = {}
-local drawOrder = {}
-local drawCount = 0
-
-local function fartherFirst(a, b)
-  return faceDepth[a] < faceDepth[b]
+local function arrowColor(isDark)
+  local key = isDark and 1 or 2
+  if not arrowColors[key] then arrowColors[key] = isDark and lcd.RGB(245, 245, 245) or lcd.RGB(20, 20, 20) end
+  return arrowColors[key]
 end
 
 -- MSP_ATTITUDE degrees -> the angles rotatePoint() takes.
@@ -545,9 +560,40 @@ local function toRadians(roll, pitch, yaw)
   return rad(-(pitch or 0)), rad(-(yaw or 0)), rad(-(roll or 0))
 end
 
--- The last paint's rotation matrix and projection, for the arrows.
+---------------------------------------------------------------------------
+-- Frames. draw() asks for a view and replays the last finished frame (a
+-- display list of screen triangles); service() computes the next one in
+-- four stages (rotate and project; cull and shade, in two halves; sort and list), so
+-- paint only ever replays. Each stage is a few thousand instructions.
+---------------------------------------------------------------------------
+
+local currentSpec, buildSpec, buildStage = DEFAULT_SPEC, DEFAULT_SPEC, 1
+local ready = false          -- a whole mesh is built
+local currentArrows, poseWanted = NO_ARROWS, true
+local version = 0            -- bumps whenever the mesh or the pose changes
+
+-- The view draw() last asked for.
+local wantX, wantY, wantW, wantH, wantRoll, wantPitch, wantYaw, wantZoom, wantDark
+
+-- The frame being computed.
+local prepStage = 0
+local pX, pY, pW, pH, pRoll, pPitch, pYaw, pZoom, pDark, pVersion, pScale
+local VX, VY, VZ, SX, SY = {}, {}, {}, {}, {}
+local faceDepth, faceColor = {}, {}
+local drawOrder, drawCount = {}, 0
+
+-- The finished frame: triangles and their colours, and the view it shows.
+local LX1, LY1, LX2, LY2, LX3, LY3, LCOL = {}, {}, {}, {}, {}, {}, {}
+local listCount = 0
+local listX, listY, listW, listH, listRoll, listPitch, listYaw, listZoom, listDark, listVersion
+
+-- The frame's rotation matrix and projection, for the arrows.
 local m11, m12, m13, m21, m22, m23, m31, m32, m33 = 1, 0, 0, 0, 1, 0, 0, 0, 1
-local pcx, pcy, pscale = 0, 0, 1
+local pcx, pcy = 0, 0
+
+local function fartherFirst(a, b)
+  return faceDepth[a] < faceDepth[b]
+end
 
 -- A model point (renderer axes) on screen, or nil behind the camera.
 local function project(x, y, z)
@@ -556,40 +602,23 @@ local function project(x, y, z)
   local vz = x * m31 + y * m32 + z * m33
   local denom = CAMERA_DIST - vz
   if denom <= CAMERA_NEAR_EPS then return nil end
-  local f = CAMERA_DIST / denom * pscale
+  local f = CAMERA_DIST / denom * pScale
   return pcx + vx * f, pcy - vy * f
 end
 
-local function drawModel(cx, cy, scale, pitchR, yawR, rollR, shades)
-  -- Rotation matrix: the images of the three model axes, then the camera
-  -- elevation (a tilt about the screen's horizontal axis).
-  local ax, ay, az = rotatePoint(1, 0, 0, pitchR, yawR, rollR)
-  local bx, by, bz = rotatePoint(0, 1, 0, pitchR, yawR, rollR)
-  local cx3, cy3, cz3 = rotatePoint(0, 0, 1, pitchR, yawR, rollR)
-  ay, az = ay * CAM_EC - az * CAM_ES, ay * CAM_ES + az * CAM_EC
-  by, bz = by * CAM_EC - bz * CAM_ES, by * CAM_ES + bz * CAM_EC
-  cy3, cz3 = cy3 * CAM_EC - cz3 * CAM_ES, cy3 * CAM_ES + cz3 * CAM_EC
-  m11, m12, m13, m21, m22, m23, m31, m32, m33 = ax, bx, cx3, ay, by, cy3, az, bz, cz3
-  pcx, pcy, pscale = cx, cy, scale
+local function listTriangle(x1, y1, x2, y2, x3, y3, color)
+  listCount = listCount + 1
+  LX1[listCount], LY1[listCount], LX2[listCount], LY2[listCount] = x1, y1, x2, y2
+  LX3[listCount], LY3[listCount], LCOL[listCount] = x3, y3, color
+end
 
-  for i = 1, vertexCount do
-    local x, y, z = MX[i], MY[i], MZ[i]
-    local vx = x * ax + y * bx + z * cx3
-    local vy = x * ay + y * by + z * cy3
-    local vz = x * az + y * bz + z * cz3
-    VX[i], VY[i], VZ[i] = vx, vy, vz
-    local denom = CAMERA_DIST - vz
-    if denom <= CAMERA_NEAR_EPS then
-      SX[i] = false
-    else
-      local f = CAMERA_DIST / denom * scale
-      SX[i] = cx + vx * f
-      SY[i] = cy - vy * f
-    end
-  end
-
-  local count = 0
-  for i = 1, faceCount do
+-- Faces from..to: those that show go on drawOrder (from prepCount on), with
+-- their depth and shaded colour. From 1 starts a frame's list.
+local prepCount = 0
+local function shadeFaces(from, to)
+  local shades = shadeTable(pDark)
+  local count = (from == 1) and 0 or prepCount
+  for i = from, to do
     local a, b, c, d = FA[i], FB[i], FC[i], FD[i]
     if SX[a] and SX[b] and SX[c] and (d == 0 or SX[d]) then
       local x0, y0, z0 = VX[a], VY[a], VZ[a]
@@ -623,74 +652,117 @@ local function drawModel(cx, cy, scale, pitchR, yawR, rollR, shades)
       end
     end
   end
-  for i = count + 1, drawCount do drawOrder[i] = nil end
-  drawCount = count
-  if count == 0 then return end
-
-  t_sort(drawOrder, fartherFirst)
-  for k = 1, count do
-    local i = drawOrder[k]
-    local a, b, c, d = FA[i], FB[i], FC[i], FD[i]
-    lcd.color(faceColor[i])
-    lcd.drawFilledTriangle(SX[a], SY[a], SX[b], SY[b], SX[c], SY[c])
-    if d ~= 0 then
-      lcd.drawFilledTriangle(SX[a], SY[a], SX[c], SY[c], SX[d], SY[d])
-    end
+  prepCount = count
+  if to >= faceCount then
+    for i = count + 1, drawCount do drawOrder[i] = nil end
+    drawCount = count
   end
 end
 
--- Arrows for pose(): from the middle of each lit surface's trailing edge,
--- the way that edge should go, in the text colour so they stand out from
--- the lit surface.
-local arrowColors = {}
-
-local function drawArrows(scale, dark)
-  local any = false
-  for k = 1, surfaceCount do
-    if SDIR[k] then any = true break end
-  end
-  if not any then return end
-  local key = dark and 1 or 2
-  if not arrowColors[key] then arrowColors[key] = dark and lcd.RGB(245, 245, 245) or lcd.RGB(20, 20, 20) end
-  lcd.color(arrowColors[key])
-  local len = max(16, floor(scale * 0.7))
-  local head = max(6, floor(len * 0.42))
-  local half = max(1, floor(len * 0.08))
-  for k = 1, surfaceCount do
-    local d = SDIR[k]
-    if d then
-      local t1, t2 = ST1[k], ST2[k]
-      local mx, my, mz = (MX[t1] + MX[t2]) * 0.5, (MY[t1] + MY[t2]) * 0.5, (MZ[t1] + MZ[t2]) * 0.5
-      local s = 0.5 * d[4]
-      local px, py = project(mx, my, mz)
-      local qx, qy = project(mx + d[1] * s, my + d[2] * s, mz + d[3] * s)
-      if px and qx then
-        local ux, uy = qx - px, qy - py
-        local ul = sqrt(ux * ux + uy * uy)
-        -- Pointing (nearly) at the camera: no arrow to draw.
-        if ul > 0.5 then
-          ux, uy = ux / ul, uy / ul
-          local nx, ny = -uy, ux
-          local sx, sy = px + ux * 3, py + uy * 3
-          local tx, ty = sx + ux * len, sy + uy * len
-          local bx, by = tx - ux * head, ty - uy * head
-          lcd.drawFilledTriangle(sx + nx * half, sy + ny * half, bx + nx * half, by + ny * half, bx - nx * half, by - ny * half)
-          lcd.drawFilledTriangle(sx + nx * half, sy + ny * half, bx - nx * half, by - ny * half, sx - nx * half, sy - ny * half)
-          local hw = head * 0.6
-          lcd.drawFilledTriangle(tx, ty, bx + nx * hw, by + ny * hw, bx - nx * hw, by - ny * hw)
+local PREP = {
+  -- Rotate and project every vertex.
+  function()
+    pX, pY, pW, pH = wantX, wantY, wantW, wantH
+    pRoll, pPitch, pYaw, pZoom, pDark, pVersion = wantRoll, wantPitch, wantYaw, wantZoom, wantDark, version
+    pScale = max(4, (min(pW, pH) * 0.5 - 4) / MODEL_RADIUS * pZoom)
+    pcx, pcy = pX + floor(pW * 0.5), pY + floor(pH * 0.5)
+    local pitchR, yawR, rollR = toRadians(pRoll, pPitch, pYaw)
+    -- The images of the three model axes, then the camera elevation (a
+    -- tilt about the screen's horizontal axis).
+    local ax, ay, az = rotatePoint(1, 0, 0, pitchR, yawR, rollR)
+    local bx, by, bz = rotatePoint(0, 1, 0, pitchR, yawR, rollR)
+    local cx3, cy3, cz3 = rotatePoint(0, 0, 1, pitchR, yawR, rollR)
+    ay, az = ay * CAM_EC - az * CAM_ES, ay * CAM_ES + az * CAM_EC
+    by, bz = by * CAM_EC - bz * CAM_ES, by * CAM_ES + bz * CAM_EC
+    cy3, cz3 = cy3 * CAM_EC - cz3 * CAM_ES, cy3 * CAM_ES + cz3 * CAM_EC
+    m11, m12, m13, m21, m22, m23, m31, m32, m33 = ax, bx, cx3, ay, by, cy3, az, bz, cz3
+    local cx, cy, scale = pcx, pcy, pScale
+    for i = 1, vertexCount do
+      local x, y, z = MX[i], MY[i], MZ[i]
+      local vx = x * ax + y * bx + z * cx3
+      local vy = x * ay + y * by + z * cy3
+      local vz = x * az + y * bz + z * cz3
+      VX[i], VY[i], VZ[i] = vx, vy, vz
+      local denom = CAMERA_DIST - vz
+      if denom <= CAMERA_NEAR_EPS then
+        SX[i] = false
+      else
+        local f = CAMERA_DIST / denom * scale
+        SX[i] = cx + vx * f
+        SY[i] = cy - vy * f
+      end
+    end
+  end,
+  -- Drop faces turned away (closed parts), shade the rest: the first half
+  -- of the faces here, the rest in the next stage.
+  function() shadeFaces(1, floor(faceCount / 2)) end,
+  function() shadeFaces(floor(faceCount / 2) + 1, faceCount) end,
+  -- Far to near, into the display list, with the arrows on top.
+  function()
+    if drawCount > 1 then t_sort(drawOrder, fartherFirst) end
+    local old = listCount
+    listCount = 0
+    for k = 1, drawCount do
+      local i = drawOrder[k]
+      local a, b, c, d = FA[i], FB[i], FC[i], FD[i]
+      local col = faceColor[i]
+      listTriangle(SX[a], SY[a], SX[b], SY[b], SX[c], SY[c], col)
+      if d ~= 0 then listTriangle(SX[a], SY[a], SX[c], SY[c], SX[d], SY[d], col) end
+    end
+    -- Arrows: from the middle of each lit surface's trailing edge, the way
+    -- that edge should go, in the text colour.
+    local acol = arrowColor(pDark)
+    local len = max(16, floor(pScale * 0.7))
+    local head = max(6, floor(len * 0.42))
+    local half = max(1, floor(len * 0.08))
+    for k = 1, surfaceCount do
+      local d = SDIR[k]
+      if d and d[4] ~= 0 then
+        local t1, t2 = ST1[k], ST2[k]
+        local mx, my, mz = (MX[t1] + MX[t2]) * 0.5, (MY[t1] + MY[t2]) * 0.5, (MZ[t1] + MZ[t2]) * 0.5
+        local s = 0.5 * d[4]
+        local px, py = project(mx, my, mz)
+        local qx, qy = project(mx + d[1] * s, my + d[2] * s, mz + d[3] * s)
+        if px and qx then
+          local ux, uy = qx - px, qy - py
+          local ul = sqrt(ux * ux + uy * uy)
+          -- Pointing (nearly) at the camera: no arrow to draw.
+          if ul > 0.5 then
+            ux, uy = ux / ul, uy / ul
+            local nx, ny = -uy, ux
+            local sx, sy = px + ux * 3, py + uy * 3
+            local tx, ty = sx + ux * len, sy + uy * len
+            local bx, by = tx - ux * head, ty - uy * head
+            listTriangle(sx + nx * half, sy + ny * half, bx + nx * half, by + ny * half, bx - nx * half, by - ny * half, acol)
+            listTriangle(sx + nx * half, sy + ny * half, bx - nx * half, by - ny * half, sx - nx * half, sy - ny * half, acol)
+            local hw = head * 0.6
+            listTriangle(tx, ty, bx + nx * hw, by + ny * hw, bx - nx * hw, by - ny * hw, acol)
+          end
         end
       end
     end
-  end
+    for i = listCount + 1, old do
+      LX1[i], LY1[i], LX2[i], LY2[i], LX3[i], LY3[i], LCOL[i] = nil, nil, nil, nil, nil, nil, nil
+    end
+    listX, listY, listW, listH = pX, pY, pW, pH
+    listRoll, listPitch, listYaw, listZoom, listDark, listVersion = pRoll, pPitch, pYaw, pZoom, pDark, pVersion
+  end,
+}
+
+-- The view asked for differs from the finished frame (or the model changed).
+local function frameWanted()
+  return wantX ~= nil and (listVersion ~= version or listX ~= wantX or listY ~= wantY or listW ~= wantW
+    or listH ~= wantH or listRoll ~= wantRoll or listPitch ~= wantPitch or listYaw ~= wantYaw
+    or listZoom ~= wantZoom or listDark ~= wantDark)
 end
 
 local plane3d = {}
 
 plane3d.DEFAULT = DEFAULT_SPEC
 
--- Which airframe to draw (see the header); nil for the default. Rebuilds
--- the mesh only when the spec differs from the last one (by identity, then
--- by content), and leaves every surface at neutral.
+-- Which airframe to draw (see the header); nil for the default. A different
+-- spec (by identity, then by content) is built over the next service()
+-- calls; until then draw() keeps showing the last frame.
 function plane3d.setup(spec)
   spec = spec or DEFAULT_SPEC
   if spec == currentSpec then return end
@@ -699,41 +771,82 @@ function plane3d.setup(spec)
     if a == nil or b == nil then return a == b end
     return a[1] == b[1] and a[2] == b[2]
   end
-  if not (c and c.tail == spec.tail and c.wing == spec.wing and sameSpan(c.outer, spec.outer)
-      and sameSpan(c.inner, spec.inner) and c.fin == spec.fin and c.rudder == spec.rudder
-      and c.winglets == spec.winglets and c.gear == spec.gear) then
-    build(spec)
-    currentArrows = nil
-  end
   currentSpec = spec
+  if c and c.tail == spec.tail and c.wing == spec.wing and sameSpan(c.outer, spec.outer)
+      and sameSpan(c.inner, spec.inner) and c.fin == spec.fin and c.rudder == spec.rudder
+      and c.winglets == spec.winglets and c.gear == spec.gear then
+    return
+  end
+  buildSpec, buildStage, ready, prepStage = spec, 1, false, 0
 end
 
 -- Light up and deflect the surfaces that have an arrow (see the header);
--- nil puts every surface back to neutral. Recomputes only when given a
--- different table.
+-- nil puts every surface back to neutral. Applied by the next service()
+-- call, and only when given a different table.
 function plane3d.pose(arrows)
   arrows = arrows or NO_ARROWS
   if arrows == currentArrows then return end
-  currentArrows = arrows
-  applyPose(arrows)
+  currentArrows, poseWanted = arrows, true
 end
 
--- The model at (roll, pitch, yaw), fitted inside the box and clipped to it.
--- At zoom 1 (the default) the model's radius is fitted to the box's
--- shorter side, so it stays inside at any attitude; perspective can push a
--- tip pointing at the camera slightly further, which the clip catches. A
--- caller whose model only tilts a little can zoom in and let the clip take
--- the rare overflow.
+-- Ask for the model at (roll, pitch, yaw) inside the box, and draw the last
+-- finished frame if it was made for this box (its attitude may be a step
+-- behind: service() catches up). At zoom 1 (the default) the model's radius
+-- is fitted to the box's shorter side, so it stays inside at any attitude;
+-- perspective can push a tip pointing at the camera slightly further, which
+-- the clip catches. A caller whose model only tilts a little can zoom in
+-- and let the clip take the rare overflow.
 function plane3d.draw(x, y, w, h, roll, pitch, yaw, zoom)
   if w < 8 or h < 8 then return end
-  local pitchR, yawR, rollR = toRadians(roll, pitch, yaw)
-  local scale = max(4, (min(w, h) * 0.5 - 4) / MODEL_RADIUS * (zoom or 1))
+  wantX, wantY, wantW, wantH = x, y, w, h
+  wantRoll, wantPitch, wantYaw, wantZoom = roll or 0, pitch or 0, yaw or 0, zoom or 1
+  wantDark = lcd.darkMode() and true or false
+  if listCount == 0 or listX ~= x or listY ~= y or listW ~= w or listH ~= h or listDark ~= wantDark then return end
   local sw, sh = lcd.getWindowSize()
-  local dark = lcd.darkMode()
   lcd.setClipping(x, y, w, h)
-  drawModel(x + floor(w * 0.5), y + floor(h * 0.5), scale, pitchR, yawR, rollR, shadeTable(dark))
-  drawArrows(scale, dark)
+  local last = nil
+  for i = 1, listCount do
+    local col = LCOL[i]
+    if col ~= last then lcd.color(col); last = col end
+    lcd.drawFilledTriangle(LX1[i], LY1[i], LX2[i], LY2[i], LX3[i], LY3[i])
+  end
   lcd.setClipping(0, 0, sw, sh)
+end
+
+-- The background work, one step per call: a build stage, the pose, or a
+-- frame stage. Call it from wakeup on any page that draws the plane.
+-- Returns true when it did something; invalidates the screen when a frame
+-- is finished.
+function plane3d.service()
+  if buildStage > 0 then
+    STAGES[buildStage](buildSpec)
+    if buildStage < #STAGES then
+      buildStage = buildStage + 1
+    else
+      buildStage, ready, poseWanted = 0, true, true
+    end
+    return true
+  end
+  if not ready then return false end
+  if poseWanted then
+    poseWanted = false
+    applyPose(currentArrows)
+    version = version + 1
+    prepStage = 0
+    return true
+  end
+  if prepStage == 0 then
+    if not frameWanted() then return false end
+    prepStage = 1
+  end
+  PREP[prepStage]()
+  if prepStage < #PREP then
+    prepStage = prepStage + 1
+  else
+    prepStage = 0
+    if lcd.invalidate then lcd.invalidate() end
+  end
+  return true
 end
 
 -- Where the nose points on screen, as a unit vector (x right, y up), or

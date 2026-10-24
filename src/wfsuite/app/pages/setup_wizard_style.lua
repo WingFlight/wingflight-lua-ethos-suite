@@ -66,20 +66,18 @@ local function new(wiz)
       return nil
     end
     local current = styles.matchingStyle(rc, pid)
-    scr:text(T.title, T.intro .. " " .. T.more,
-      string.format(T.now, current and NAMES[current.key] or T.custom))
-    local rows = {}
-    for _, s in ipairs(styles.STYLES) do
-      rows[#rows + 1] = {NAMES[s.key],
-        string.format(T.rates, s.rate.roll, s.rate.pitch, s.rate.yaw, s.expo), current == s}
-    end
-    scr:rows(rows)
+    -- One row per style, its rates beside it, the current one lit. Rates
+    -- that match none of them are custom, so say so.
+    scr:text(T.title, T.intro,
+      T.more .. (current and "" or (" " .. string.format(T.now, T.custom))))
     -- Next keeps the rates as they are.
+    local forward = scr:row(nil, nil)
     local specs = {}
     for _, s in ipairs(styles.STYLES) do
-      specs[#specs + 1] = {text = NAMES[s.key], small = true, primary = current == s, press = function() apply(s) end}
+      specs[#specs + 1] = {text = NAMES[s.key], current = current == s, press = function() apply(s) end,
+        help = string.format(T.rates, s.rate.roll, s.rate.pitch, s.rate.yaw, s.expo)}
     end
-    return scr:row(nil, specs)
+    return scr:choices(specs) or forward
   end
 
   function self.paint() scr:paint() end

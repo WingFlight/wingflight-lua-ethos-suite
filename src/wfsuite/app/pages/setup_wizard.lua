@@ -1113,6 +1113,9 @@ local function open(opts)
 
   local function wakeup()
     if disposed then return end
+    -- The 3D pictures are built and drawn into a list a step at a time
+    -- here, never in paint (app/plane3d.lua).
+    art.service()
 
     if loadFailed then
       loadFailed = false

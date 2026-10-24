@@ -9125,16 +9125,16 @@
           "translation": "Custom"
         },
         "sty_intro": {
-          "english": "Choose the style closest to how you fly. It sets how fast the model rotates at full stick, and how the I-term behaves while you move the sticks.",
-          "max_length": 144,
+          "english": "Choose the style closest to how you fly. It sets how fast the model turns at full stick.",
+          "max_length": 88,
           "needs_translation": false,
-          "translation": "Choose the style closest to how you fly. It sets how fast the model rotates at full stick, and how the I-term behaves while you move the sticks."
+          "translation": "Choose the style closest to how you fly. It sets how fast the model turns at full stick."
         },
         "sty_more": {
-          "english": "Applies to the current rate and PID profiles.",
-          "max_length": 45,
+          "english": "Applies to the current profiles.",
+          "max_length": 32,
           "needs_translation": false,
-          "translation": "Applies to the current rate and PID profiles."
+          "translation": "Applies to the current profiles."
         },
         "sty_now_fmt": {
           "english": "Now: %s.",
@@ -9143,10 +9143,10 @@
           "translation": "Now: %s."
         },
         "sty_rates_fmt": {
-          "english": "%d/%d/%d deg/s, %d%%",
-          "max_length": 20,
+          "english": "%d/%d/%d deg/s, expo %d%%",
+          "max_length": 25,
           "needs_translation": false,
-          "translation": "%d/%d/%d deg/s, %d%%"
+          "translation": "%d/%d/%d deg/s, expo %d%%"
         },
         "sty_sport": {
           "english": "Sport",
