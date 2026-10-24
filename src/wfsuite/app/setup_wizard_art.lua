@@ -145,6 +145,40 @@ function art.surfaceLayout(surfaces, kind)
   return l
 end
 
+-- A "done" badge: a green disc with a white tick, centred on cx, cy.
+local tickGreen, tickWhite = nil, nil
+
+local function thickLine(x1, y1, x2, y2, half)
+  local dx, dy = x2 - x1, y2 - y1
+  local l = math.sqrt(dx * dx + dy * dy)
+  if l < 1 then return end
+  local nx, ny = -dy / l * half, dx / l * half
+  lcd.drawFilledTriangle(x1 + nx, y1 + ny, x2 + nx, y2 + ny, x2 - nx, y2 - ny)
+  lcd.drawFilledTriangle(x1 + nx, y1 + ny, x2 - nx, y2 - ny, x1 - nx, y1 - ny)
+end
+
+function art.tick(cx, cy, r)
+  if not tickGreen then tickGreen, tickWhite = lcd.RGB(46, 160, 67), lcd.RGB(255, 255, 255) end
+  lcd.color(tickGreen)
+  lcd.drawFilledCircle(cx, cy, r)
+  lcd.color(tickWhite)
+  local half = math.max(2, floor(r * 0.09))
+  local ax, ay = cx - floor(r * 0.45), cy + floor(r * 0.02)
+  local bx, by = cx - floor(r * 0.12), cy + floor(r * 0.36)
+  local qx, qy = cx + floor(r * 0.48), cy - floor(r * 0.32)
+  thickLine(ax, ay, bx, by, half)
+  thickLine(bx, by, qx, qy, half)
+  lcd.drawFilledCircle(bx, by, half)
+end
+
+-- The model with the done badge in the corner (a step's or the wizard's
+-- end). l: a layout, art.layout(wiz.surfaces(), nil).
+function art.done(l, x, y, w, h, colors)
+  art.draw(l, x, y, w, h, colors)
+  local r = math.max(12, floor(math.min(w, h) * 0.17))
+  art.tick(x + w - r - 6, y + h - r - 6, r)
+end
+
 -- The 3D airframe for this mix, for a step that draws the plane itself
 -- (plane3d.setup(art.airframe(wiz.surfaces()))). Allocates: call it from
 -- build, not paint.

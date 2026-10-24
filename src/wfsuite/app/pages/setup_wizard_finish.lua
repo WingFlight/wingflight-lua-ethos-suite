@@ -8,6 +8,7 @@
 
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local ui = requireModule("app/setup_wizard_ui.lua")
+local art = requireModule("app/setup_wizard_art.lua")
 -- Freed when the step closes (app/setup_wizard_ui.lua's notLoaded()).
 local OWNED = ui.notLoaded({"wfsuite.lib.setup_wizard_styles", "wfsuite.lib.msp_motor_config", "wfsuite.lib.msp_rc_tuning", "wfsuite.lib.msp_pid_profile", "wfsuite.lib.msp_modes"})
 local styles = requireModule("lib/setup_wizard_styles.lua")
@@ -98,7 +99,10 @@ local function new(wiz)
     end
     local protocol = data.motor and data.motor.motor_pwm_protocol
     if screen == "before" then
+      -- The model with a big tick: set up, ready for the checks.
       scr:text(T.title, T.before)
+      local layout = art.layout(wiz.surfaces(), nil)
+      scr:draw(function(x, y, w, h, colors) art.done(layout, x, y, w, h, colors) end, nil, true)
       -- The last step: the default way forward is Save and finish.
       return scr:row(function() screen = "summary"; wiz.rebuild() end)
     end
