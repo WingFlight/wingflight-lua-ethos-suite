@@ -361,8 +361,8 @@ end
 -- A few options, one per row between the text and the row (call row()
 -- first): a button on the left and what the option means beside it.
 -- specs: {{text =, help =, current =, press =, disabled =, needsMotion =},
--- ...}; the current option's help is drawn lit. Like a grid, the list sits
--- on the row and the text above gives way. Returns the field to focus: the
+-- ...}; the current option's help is drawn lit. The list sits centred between
+-- the text and the row, and the text above gives way. Returns the field to focus: the
 -- current option, else nil.
 function Screen:choices(specs)
   local focus
@@ -377,7 +377,15 @@ function Screen:choices(specs)
   -- never moves the buttons): CHOICES_SHARE of the room under the title.
   local h = floor(((stop - titleBottom) * CHOICES_SHARE - CHOICE_GAP * (n - 1)) / n)
   h = math.max(CHOICE_MIN_H, math.min(GRID_MAX_H, h))
-  local top = stop - (n * h + CHOICE_GAP * (n - 1))
+  local listH = n * h + CHOICE_GAP * (n - 1)
+  -- Centred in the room the body leaves, with one line kept for a status
+  -- line: the body is fixed for the screen, so a status line coming or
+  -- going still never moves the list (a longer one cuts the body short).
+  lcd.font(v.font or FONT_S)
+  local _, lineH = lcd.getTextSize("Ag")
+  local bodyLines = v.accentFrom and (v.accentFrom - 1) or #v.lines
+  local free = stop - (titleBottom + (bodyLines + 1) * lineH) - listH
+  local top = stop - listH - ((free > 0) and floor(free / 2) or 0)
   self:fitTextAbove(top, titleBottom)
   local bw = floor(width * CHOICE_BUTTON_SHARE)
   local helpX = bw + 2 * MARGIN
