@@ -25,6 +25,8 @@ local T = {
 }
 
 local MID_WARN_US = 100
+-- A surface's center on the last screen: "1512 us (+12)".
+local DONE_VALUE = "%d us (%s)"
 -- Ten percent of servo travel either side of center, within the stored limits.
 local IDENTIFY_RAW = 100
 local IDENTIFY_INTERVAL = 0.5
@@ -93,7 +95,19 @@ local function new(wiz)
     -- Back steps through the surfaces; from the first, the previous step.
     local back = index > 1 and function() stopIdentify(); index = index - 1; wiz.rebuild() end or nil
     if not surface then
+      -- Where each surface's center ended up, lit when far from normal.
       scr:text(T.doneTitle, T.done)
+      scr:picture(art.layout(surfaces, nil))
+      local rows = {}
+      for _, s in ipairs(surfaces) do
+        local c = wiz.configs[s.servo]
+        if c then
+          local off = c.mid - bandCentre(c)
+          rows[#rows + 1] = {wiz.surfaceName(s), string.format(DONE_VALUE, c.mid, (off >= 0 and "+" or "") .. off),
+            math.abs(off) > MID_WARN_US}
+        end
+      end
+      scr:rows(rows)
       return scr:row(back)
     end
     local config = wiz.configs[surface.servo]

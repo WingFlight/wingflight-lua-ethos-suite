@@ -97,6 +97,7 @@ local function new(wiz)
       return scr:row(function() go("check") end, nil, {text = T.next, press = nextCheck})
     end
     scr:text(T.doneTitle, T.done)
+    scr:picture(art.layout(wiz.surfaces(), nil))
     return scr:row(function()
       forceAngle()
       ci = math.max(1, #checks)

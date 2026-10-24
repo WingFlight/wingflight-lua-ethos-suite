@@ -286,6 +286,7 @@ local function new(wiz)
 
     else -- done
       scr:text(T.doneTitle, changed and T.doneRestart or T.doneSame)
+      scr:draw(drawLevel, nil, true)
       return scr:row(function() go("level") end, nil,
         changed and {text = T.saveRestart, press = function() wiz.saveAndReboot() end} or nil)
     end

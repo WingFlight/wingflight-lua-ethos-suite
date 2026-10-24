@@ -54,6 +54,8 @@ local HOW = {
 local SIGNAL_MIN, SIGNAL_MAX = 50, 2250
 local TRAVEL = 1000
 local STEPS = {-50, -10, 10, 50}
+-- A surface's limits on the last screen: "-650 / +700 us".
+local DONE_VALUE = "%+d / %+d us"
 
 local function openRange(config)
   return math.max(-TRAVEL, SIGNAL_MIN - config.mid), math.min(TRAVEL, SIGNAL_MAX - config.mid)
@@ -199,7 +201,15 @@ local function new(wiz)
         {text = T.start, primary = true, needsMotion = true, press = function() show(1) end},
       })
     elseif screen == "done" then
+      -- The limits each surface ended up with, either side of its center.
       scr:text(T.doneTitle, T.done)
+      scr:picture(art.layout(surfaces, nil))
+      local rows = {}
+      for _, s in ipairs(surfaces) do
+        local c = wiz.configs[s.servo]
+        if c then rows[#rows + 1] = {wiz.surfaceName(s), string.format(DONE_VALUE, c.min, c.max)} end
+      end
+      scr:rows(rows)
       return scr:row(function() show(2 * #surfaces) end, {{text = T.again, press = function() show(1) end}})
     end
     local s = current()

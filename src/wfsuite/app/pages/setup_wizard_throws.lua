@@ -209,7 +209,12 @@ local function new(wiz)
       end})
     end
 
+    -- The throw each axis ended up with.
     scr:text(T.doneTitle, T.done)
+    scr:picture(art.layout(wiz.surfaces(), nil))
+    local rows = {}
+    for _, a in ipairs(axes) do rows[#rows + 1] = {AXIS_NAMES[a], string.format("%d%%", wiz.axisGainPercent(a))} end
+    scr:rows(rows)
     return scr:row(function() showAxis(#axes) end, {{text = T.again, press = function() showAxis(1) end}})
   end
 
