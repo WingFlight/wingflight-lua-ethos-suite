@@ -1,5 +1,5 @@
--- Message-builder for MSP_RX_MAP (cmd 64, read-only here -- this suite never
--- writes it). Standard MultiWii-lineage command: 8 bytes, each a U8 giving
+-- Message-builders for MSP_RX_MAP (cmd 64) and MSP_SET_RX_MAP (cmd 65, only
+-- written by the Setup Wizard's Receiver step). Standard MultiWii-lineage command: 8 bytes, each a U8 giving
 -- the physical RX channel index for one logical control.
 --
 -- Field order here is Roll, Pitch, Yaw, Throttle, Aux1-4 -- the plain
@@ -73,6 +73,34 @@ function msp_rx_map.buildReadMessage(onData, onError)
     end,
     errorHandler = onError,
     simulatorResponse = SIMULATOR_RESPONSE,
+  }
+end
+
+-- MSP_SET_RX_MAP (cmd 65): RX_MAPPABLE_CHANNEL_COUNT (8) bytes, the receiver
+-- channel for roll, pitch, yaw, throttle, aux1-4 in that order (msp.c
+-- MSP_SET_RX_MAP). `map` is that list, 1-based, of 0-based channels.
+msp_rx_map.WRITE_COMMAND = 65
+msp_rx_map.ORDER = {"aileron", "elevator", "rudder", "throttle", "aux1", "aux2", "aux3", "aux4"}
+
+-- The decoded record as a list in wire order, and back.
+function msp_rx_map.toList(data)
+  local out = {}
+  for i, key in ipairs(msp_rx_map.ORDER) do out[i] = data[key] or (i - 1) end
+  return out
+end
+
+function msp_rx_map.buildWriteMessage(map, onWritten, onError)
+  local payload = {}
+  for i = 1, #msp_rx_map.ORDER do mspcodec.writeU8(payload, map[i] or (i - 1)) end
+  return {
+    command = msp_rx_map.WRITE_COMMAND,
+    payload = payload,
+    isWrite = true,
+    processReply = function()
+      if onWritten then onWritten() end
+    end,
+    errorHandler = onError,
+    simulatorResponse = {},
   }
 end
 

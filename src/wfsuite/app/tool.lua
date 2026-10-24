@@ -262,6 +262,8 @@ local MENUS = {
   tools_menu = {
     title = "@i18n(app.menu_section_tools)@",
     entries = {
+      -- Guided setup of a whole model, step by step (app/pages/setup_wizard.lua).
+      {title = "@i18n(app.modules.setup_wizard.name)@", icon = lcd.loadMask("app/gfx/setup_wizard.png"), script = "app/pages/setup_wizard.lua"},
       {title = "@i18n(app.modules.copyprofiles.name)@", icon = lcd.loadMask("app/gfx/copy_profiles.png"), script = "app/pages/copy_profiles.lua"},
       {title = "@i18n(app.modules.profile_select.name)@", icon = lcd.loadMask("app/gfx/profile_select.png"), script = "app/pages/profile_select.lua"},
       {title = "@i18n(app.modules.diagnostics.name)@", icon = lcd.loadMask("app/gfx/diagnostics.png"), menuId = "diagnostics_menu", offline = true},
