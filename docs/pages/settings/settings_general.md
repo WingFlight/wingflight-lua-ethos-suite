@@ -23,7 +23,13 @@ Available without a flight controller connection; the background task must be ru
 
 | Setting | What it does |
 | --- | --- |
-| TODO | Inspect the page and its helpers; automatic extraction found no controls. |
+| *Display* → *Tx Battery Options* | How the dashboard shows the radio's own battery. |
+| *Display* → *Temperature Unit* | Celsius or Fahrenheit for temperatures on the dashboard. |
+| *Display* → *Dashboard armed warning* | While the model is armed, the dashboard shows a red bar across the top with an "Armed" label. On by default. |
+| *Developer* → *Developer mode* | Shows the developer tools. |
+| *Safety Prompts* → *Save confirm* / *Reload confirm* | Ask before a page saves to or reloads from the flight controller. |
+| *Integration* → *Sync model name* | Sets the Ethos model name to the flight controller's craft name. |
+| *Integration* → *Battery profile on connect* | Offers the battery profile chooser on connect when more than one profile is set up. |
 
 ## Notes
 

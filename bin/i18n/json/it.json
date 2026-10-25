@@ -2997,6 +2997,13 @@
           "reverse_text": false,
           "max_length": 16
         },
+        "armed_warning": {
+          "english": "Dashboard armed warning",
+          "max_length": 28,
+          "needs_translation": false,
+          "translation": "Avviso Armed pannello",
+          "reverse_text": false
+        },
         "status_alerts": {
           "english": "FC status",
           "translation": "FC status",
@@ -13160,13 +13167,6 @@
         "needs_translation": true,
         "reverse_text": false,
         "max_length": 5
-      },
-      "armed_warning": {
-        "english": "Armed warning",
-        "max_length": 13,
-        "needs_translation": false,
-        "translation": "Avviso Armed",
-        "reverse_text": false
       },
       "info_arming": {
         "english": "Arming",

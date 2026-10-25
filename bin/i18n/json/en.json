@@ -2574,6 +2574,12 @@
           "needs_translation": false,
           "translation": "Temperature Unit"
         },
+        "armed_warning": {
+          "english": "Dashboard armed warning",
+          "max_length": 28,
+          "needs_translation": false,
+          "translation": "Dashboard armed warning"
+        },
         "status_alerts": {
           "english": "FC status",
           "translation": "FC status",
@@ -11302,12 +11308,6 @@
         "max_length": 5,
         "needs_translation": false,
         "translation": "Armed"
-      },
-      "armed_warning": {
-        "english": "Armed warning",
-        "max_length": 13,
-        "needs_translation": false,
-        "translation": "Armed warning"
       },
       "info_arming": {
         "english": "Arming",
