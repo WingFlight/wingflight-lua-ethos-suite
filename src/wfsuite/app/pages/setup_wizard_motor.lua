@@ -2,9 +2,12 @@
 --
 -- The radio's copy of wingflight-configurator's StepMotor.svelte:
 --
---   protocol  Standard PWM, DShot300, DShot600 or No motor (the rest stay on
---             the ESC & Motors pages). A change applies after a restart, so
---             it ends with Save and restart.
+--   protocol  Standard PWM, DShot150 or DShot300, or any other protocol
+--             (No motor, DShot600, OneShot, ...) from the Other drop-down.
+--             DShot600 is not a row of its own: on long ESC leads it picks
+--             up noise, so only a pilot who knows that should choose it.
+--             A change applies after a restart, so it ends with Save and
+--             restart.
 --   prop      the propeller must be off before the spin check
 --   spin      runs every motor at a low throttle for SPIN_SECONDS, then stops
 --             by itself
@@ -27,6 +30,7 @@ local T = {
   title = "@i18n(app.modules.setup_wizard.mot_title)@",
   intro = "@i18n(app.modules.setup_wizard.mot_intro)@",
   other = "@i18n(app.modules.setup_wizard.mot_other)@",
+  otherHelp = "@i18n(app.modules.setup_wizard.mot_other_help)@",
   changed = "@i18n(app.modules.setup_wizard.mot_changed)@",
   propTitle = "@i18n(app.modules.setup_wizard.mot_prop_title)@",
   propText = "@i18n(app.modules.setup_wizard.mot_prop_text)@",
@@ -44,13 +48,36 @@ local T = {
 local CHOICES = {
   {protocol = 0, name = "@i18n(app.modules.setup_wizard.mot_pwm)@",
     help = "@i18n(app.modules.setup_wizard.mot_pwm_help)@"},
+  {protocol = 5, name = "@i18n(app.modules.setup_wizard.mot_dshot150)@",
+    help = "@i18n(app.modules.setup_wizard.mot_dshot150_help)@"},
   {protocol = 6, name = "@i18n(app.modules.setup_wizard.mot_dshot300)@",
     help = "@i18n(app.modules.setup_wizard.mot_dshot300_help)@"},
-  {protocol = 7, name = "@i18n(app.modules.setup_wizard.mot_dshot600)@",
-    help = "@i18n(app.modules.setup_wizard.mot_dshot600_help)@"},
-  {protocol = 11, name = "@i18n(app.modules.setup_wizard.mot_none)@",
-    help = "@i18n(app.modules.setup_wizard.mot_none_help)@"},
 }
+
+-- The Other drop-down: every protocol the codec offers that has no row, by
+-- name, after an "Other" entry shown while a row's protocol is set.
+local OTHER_NONE = -1
+local OTHER_NAMES = {
+  [1] = "OneShot125",
+  [2] = "OneShot42",
+  [3] = "MultiShot",
+  [7] = "@i18n(app.modules.setup_wizard.mot_dshot600)@",
+  [8] = "ProShot1000",
+  [motorConfig.CASTLE_PROTOCOL] = "Castle Link",
+  [motorConfig.SRXL2_PROTOCOL] = "SRXL2",
+  [motorConfig.DISABLED_PROTOCOL] = "@i18n(app.modules.setup_wizard.mot_none)@",
+}
+local OTHER_VALUES = {{T.other, OTHER_NONE}}
+do
+  local inRow = {}
+  for _, c in ipairs(CHOICES) do inRow[c.protocol] = true end
+  for _, entry in ipairs(motorConfig.BASE_PROTOCOL_CHOICES) do
+    local protocol = entry[2]
+    if not inRow[protocol] then
+      OTHER_VALUES[#OTHER_VALUES + 1] = {OTHER_NAMES[protocol] or entry[1], protocol}
+    end
+  end
+end
 
 local TEST_THROTTLES = {5, 10, 20}
 local SPIN_SECONDS = 3
@@ -85,14 +112,14 @@ local function new(wiz)
     writeAll(0)
   end
 
-  local function choose(choice)
-    if config.motor_pwm_protocol == choice.protocol then return end
+  local function choose(protocol)
+    if protocol == nil or protocol == OTHER_NONE or config.motor_pwm_protocol == protocol then return end
     wiz.change("motor_config", original, function(o)
       bus.publish("msp.request", motorConfig.buildWriteMessage(o))
     end)
     local nextConfig = {}
     for k, v in pairs(config) do nextConfig[k] = v end
-    nextConfig.motor_pwm_protocol = choice.protocol
+    nextConfig.motor_pwm_protocol = protocol
     config = nextConfig
     bus.publish("msp.request", motorConfig.buildWriteMessage(config))
     changed = true
@@ -118,18 +145,24 @@ local function new(wiz)
         if c.protocol == config.motor_pwm_protocol then current = c end
       end
       scr:text(T.title, T.intro,
-        changed and T.changed or (not current and T.other or (wiz.motorCount() == 0 and T.noMotor or nil)))
-      -- One row per protocol, what it means beside it, the current one lit.
+        changed and T.changed or (wiz.motorCount() == 0 and T.noMotor or nil))
+      -- One row per protocol, what it means beside it, the current one lit;
+      -- the rest in the Other drop-down, which shows the protocol set when
+      -- it is one of them.
       local specs = {}
       for _, c in ipairs(CHOICES) do
-        specs[#specs + 1] = {text = c.name, help = c.help, current = current == c, press = function() choose(c) end}
+        specs[#specs + 1] = {text = c.name, help = c.help, current = current == c,
+          press = function() choose(c.protocol) end}
       end
+      specs[#specs + 1] = {values = OTHER_VALUES, help = T.otherHelp, current = current == nil,
+        get = function() return current and OTHER_NONE or config.motor_pwm_protocol end,
+        set = function(value) choose(tonumber(value)) end}
       -- A new protocol needs a restart; the test spins the protocol the
       -- motor runs now, so it waits until then.
       -- The list first: the encoder visits fields in the order they are made.
       local focus = scr:choices(specs)
       local forward = scr:row(nil, (not changed) and {
-        {text = T.test, disabled = config.motor_pwm_protocol == 11 or wiz.motorCount() == 0,
+        {text = T.test, disabled = config.motor_pwm_protocol == motorConfig.DISABLED_PROTOCOL or wiz.motorCount() == 0,
           press = function() go("prop") end},
       } or nil, changed and {text = T.saveRestart, press = function() wiz.saveAndReboot() end} or nil)
       return focus or forward

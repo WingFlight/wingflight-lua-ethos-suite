@@ -85,8 +85,8 @@ function ui.action(key, target)
   local slot = actions[key]
   if not slot then
     slot = {}
-    slot.press = function()
-      if slot.target then return slot.target() end
+    slot.press = function(...)
+      if slot.target then return slot.target(...) end
     end
     actions[key] = slot
   end
@@ -390,7 +390,9 @@ end
 -- row(), so the encoder reaches them first): a button on the left and what
 -- the option means beside it.
 -- specs: {{text =, help =, current =, press =, disabled =, needsMotion =},
--- ...}; the current option's help is drawn lit. The list sits centred between
+-- ...}; the current option's help is drawn lit. A spec with values = (a
+-- form.addChoiceField list, {{text, value}, ...}), get = and set = is a
+-- drop-down in the button's place, for the options that don't get a row. The list sits centred between
 -- the text and the row, and the text above gives way. Returns the field to focus: the
 -- current option, else nil.
 function Screen:choices(specs)
@@ -434,7 +436,15 @@ function Screen:choices(specs)
   v.choices = {x = helpX, font = font}
   for i, s in ipairs(specs) do
     local y = top + (i - 1) * (h + CHOICE_GAP)
-    local field = addButton(self, {x = 0, y = y, w = bw, h = h}, "choice_" .. i, s, FONT_S)
+    local rect = {x = 0, y = y, w = bw, h = h}
+    local field
+    if s.values then
+      field = form.addChoiceField(nil, rect, s.values,
+        ui.action("choice_get_" .. i, s.get), ui.action("choice_set_" .. i, s.set))
+      self.buttonList[#self.buttonList + 1] = {field = field, needsMotion = s.needsMotion, disabled = s.disabled}
+    else
+      field = addButton(self, rect, "choice_" .. i, s, FONT_S)
+    end
     if s.current then focus = field end
     v.choices[i] = {y = y, h = h, current = s.current, lines = self.wiz.wrapLines(s.help or "", helpW, font)}
   end

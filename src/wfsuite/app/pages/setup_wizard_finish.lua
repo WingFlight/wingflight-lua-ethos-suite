@@ -42,12 +42,29 @@ local TYPE_NAMES = {
   [4] = "@i18n(app.modules.setup_wizard.air_type_trainer)@",
   [5] = "@i18n(app.modules.setup_wizard.air_type_custom)@",
 }
+-- Every protocol by name, as the Motor step's rows and Other drop-down name
+-- them; anything else falls back to the codec's name, then the number.
 local ESC_NAMES = {
   [0] = "@i18n(app.modules.setup_wizard.mot_pwm)@",
+  [1] = "OneShot125",
+  [2] = "OneShot42",
+  [3] = "MultiShot",
+  [5] = "@i18n(app.modules.setup_wizard.mot_dshot150)@",
   [6] = "@i18n(app.modules.setup_wizard.mot_dshot300)@",
   [7] = "@i18n(app.modules.setup_wizard.mot_dshot600)@",
+  [8] = "ProShot1000",
+  [9] = "Castle Link",
+  [10] = "SRXL2",
   [11] = "@i18n(app.modules.setup_wizard.mot_none)@",
 }
+local function escName(protocol)
+  if protocol == nil then return "-" end
+  if ESC_NAMES[protocol] then return ESC_NAMES[protocol] end
+  for _, entry in ipairs(motorConfig.BASE_PROTOCOL_CHOICES) do
+    if entry[2] == protocol then return entry[1] end
+  end
+  return tostring(protocol)
+end
 local STYLE_NAMES = {
   trainer = "@i18n(app.modules.setup_wizard.sty_trainer)@",
   sport = "@i18n(app.modules.setup_wizard.sty_sport)@",
@@ -110,7 +127,7 @@ local function new(wiz)
     scr:rows({
       {T.model, TYPE_NAMES[cfg and cfg.model_type or 0] or "-"},
       {T.surfaces, table.concat(surfaceNames, ", ")},
-      {T.esc, ESC_NAMES[protocol] or tostring(protocol or "-")},
+      {T.esc, escName(protocol)},
       {T.throws, table.concat(throws, ", ")},
       {T.style, style and STYLE_NAMES[style.key] or T.custom},
       {T.arm, armed and T.yes or T.no, not armed},

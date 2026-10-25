@@ -2576,7 +2576,7 @@
         },
         "armed_warning": {
           "english": "Dashboard armed warning",
-          "max_length": 28,
+          "max_length": 23,
           "needs_translation": false,
           "translation": "Dashboard armed warning"
         },
@@ -9107,10 +9107,10 @@
           "max_length": 43
         },
         "mot_other": {
-          "english": "It is set to another protocol on the ESC & Motors pages. Choosing one here replaces it.",
-          "translation": "It is set to another protocol on the ESC & Motors pages. Choosing one here replaces it.",
+          "english": "Other",
+          "translation": "Other",
           "needs_translation": false,
-          "max_length": 87
+          "max_length": 5
         },
         "mot_changed": {
           "english": "The new protocol takes effect after a restart.",
@@ -9135,6 +9135,18 @@
           "translation": "Works with any ESC; some need their throttle range calibrated.",
           "needs_translation": false,
           "max_length": 62
+        },
+        "mot_dshot150": {
+          "english": "DShot150",
+          "translation": "DShot150",
+          "needs_translation": false,
+          "max_length": 8
+        },
+        "mot_dshot150_help": {
+          "english": "Digital, slower and more tolerant of long ESC leads.",
+          "translation": "Digital, slower and more tolerant of long ESC leads.",
+          "needs_translation": false,
+          "max_length": 52
         },
         "mot_dshot300": {
           "english": "DShot300",
@@ -9171,6 +9183,12 @@
           "translation": "Gliders, or a motor not on the flight controller.",
           "needs_translation": false,
           "max_length": 49
+        },
+        "mot_other_help": {
+          "english": "No motor, DShot600 (short ESC leads only) and the rest.",
+          "translation": "No motor, DShot600 (short ESC leads only) and the rest.",
+          "needs_translation": false,
+          "max_length": 55
         },
         "mot_test": {
           "english": "Check motor",

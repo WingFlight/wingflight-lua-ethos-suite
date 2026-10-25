@@ -8047,7 +8047,7 @@
         },
         "armed_warning": {
           "english": "Dashboard armed warning",
-          "max_length": 28,
+          "max_length": 23,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Dashboard Armed-Warnung"
@@ -9944,6 +9944,20 @@
           "reverse_text": false,
           "translation": "The new protocol takes effect after a restart."
         },
+        "mot_dshot150": {
+          "english": "DShot150",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "DShot150"
+        },
+        "mot_dshot150_help": {
+          "english": "Digital, slower and more tolerant of long ESC leads.",
+          "max_length": 52,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Digital, slower and more tolerant of long ESC leads."
+        },
         "mot_dshot300": {
           "english": "DShot300",
           "max_length": 8,
@@ -10001,11 +10015,18 @@
           "translation": "Gliders, or a motor not on the flight controller."
         },
         "mot_other": {
-          "english": "It is set to another protocol on the ESC & Motors pages. Choosing one here replaces it.",
-          "max_length": 87,
+          "english": "Other",
+          "max_length": 5,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "It is set to another protocol on the ESC & Motors pages. Choosing one here replaces it."
+          "translation": "Other"
+        },
+        "mot_other_help": {
+          "english": "No motor, DShot600 (short ESC leads only) and the rest.",
+          "max_length": 55,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "No motor, DShot600 (short ESC leads only) and the rest."
         },
         "mot_prop_off": {
           "english": "Propeller is off",
