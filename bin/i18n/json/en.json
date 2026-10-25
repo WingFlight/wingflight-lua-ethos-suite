@@ -9143,10 +9143,16 @@
           "max_length": 8
         },
         "mot_dshot150_help": {
-          "english": "Digital, slower and more tolerant of long ESC leads.",
-          "translation": "Digital, slower and more tolerant of long ESC leads.",
+          "english": "Digital, tolerant of long leads. No bidirectional RPM.",
+          "translation": "Digital, tolerant of long leads. No bidirectional RPM.",
           "needs_translation": false,
-          "max_length": 52
+          "max_length": 54
+        },
+        "mot_dshot150_rpm": {
+          "english": "Motor RPM needs DShot300 or an RPM or ESC telemetry source.",
+          "translation": "Motor RPM needs DShot300 or an RPM or ESC telemetry source.",
+          "needs_translation": false,
+          "max_length": 59
         },
         "mot_dshot300": {
           "english": "DShot300",

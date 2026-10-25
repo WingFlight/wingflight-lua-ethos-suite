@@ -753,6 +753,42 @@ before = #sent
 otherPicker().set(-1)
 tick()
 check("motor: the Other entry itself writes nothing", #writesOf(222, before + 1) == 0)
+-- DShot150 has no bidirectional DShot RPM telemetry.
+local function motorReply(bidir, protocol)
+  replies[131] = function(m)
+    local out = {}
+    for i, b in ipairs(m.simulatorResponse) do out[i] = b end
+    out[9], out[10] = bidir, protocol
+    return out
+  end
+end
+check("motor: no RPM note while DShot600 is set", not shows("mot_dshot150_rpm"))
+motorReply(1, 0)
+openPage(14, "motor")
+settle()
+before = #sent
+press(T("mot_dshot150"))
+local bidirOff = writesOf(222, before + 1)
+check("motor: choosing DShot150 turns bidirectional DShot off in the same write",
+  #bidirOff == 1 and bidirOff[1].payload[8] == 0 and bidirOff[1].payload[9] == 5,
+  bidirOff[1] and bytes(bidirOff[1].payload))
+check("motor: after choosing DShot150 both the restart and the RPM notes show",
+  shows("mot_changed") and shows("mot_dshot150_rpm"))
+openPage(14, "motor")
+settle()
+before = #sent
+press(T("mot_dshot300"))
+local bidirKept = writesOf(222, before + 1)
+check("motor: DShot300 leaves bidirectional DShot as it was",
+  #bidirKept == 1 and bidirKept[1].payload[8] == 1 and bidirKept[1].payload[9] == 6,
+  bidirKept[1] and bytes(bidirKept[1].payload))
+check("motor: no RPM note after choosing DShot300", not shows("mot_dshot150_rpm"))
+motorReply(0, 5)
+openPage(14, "motor")
+settle()
+check("motor: with DShot150 set, the step says RPM needs DShot300 or telemetry",
+  shows("mot_dshot150_rpm") and not shows("mot_changed"))
+replies[131] = nil
 openPage(14, "motor")
 settle()
 press(T("mot_test"))
