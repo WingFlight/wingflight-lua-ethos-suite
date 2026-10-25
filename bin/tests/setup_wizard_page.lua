@@ -113,6 +113,10 @@ _G.form = {
     return newField("button", {line = line, text = opts.text or ICON_LABEL[opts.icon], icon = opts.icon,
       press = opts.press, rect = rect})
   end,
+  addChoiceField = function(line, rect, values, get, set)
+    foreground("addChoiceField")
+    return newField("choice", {line = line, rect = rect, values = values, get = get, set = set})
+  end,
   openDialog = function(opts)
     foreground("openDialog")
     local d = {opts = opts, closed = false}
@@ -679,15 +683,38 @@ check("servo type: saves and restarts", #writesOf(250, before + 1) == 1 and #wri
 openPage(14, "motor")
 settle()
 local function protocolY() local b = button(T("mot_pwm")); return b and b.rect.y end
+local function otherPicker()
+  for _, f in ipairs(fields) do
+    if f.kind == "choice" then return f end
+  end
+end
+local function otherHas(protocol)
+  local picker = otherPicker()
+  for _, v in ipairs(picker and picker.values or {}) do
+    if v[2] == protocol then return true end
+  end
+  return false
+end
+check("motor: the quick picks are PWM, DShot150 and DShot300 only",
+  button(T("mot_pwm")) and button(T("mot_dshot150")) and button(T("mot_dshot300"))
+    and not button(T("mot_dshot600")) and not button(T("mot_none")))
+check("motor: every other protocol is in the Other picker",
+  otherPicker() and otherHas(7) and otherHas(11) and otherHas(1) and otherHas(8)
+    and not otherHas(0) and not otherHas(5) and not otherHas(6))
+check("motor: the Other picker shows Other while a quick pick is set", otherPicker().get() == -1,
+  tostring(otherPicker().get()))
 local yBefore = protocolY()
 before = #sent
-press(T("mot_dshot600"))
+press(T("mot_dshot150"))
 check("motor: the restart note does not move the protocol buttons", yBefore and protocolY() == yBefore,
   tostring(yBefore) .. " -> " .. tostring(protocolY()))
 check("motor: the protocols are a choice list, each with its help beside it",
-  button(T("mot_pwm")).rect.h >= 26 and shows("mot_pwm_help") and shows("mot_none_help"),
+  button(T("mot_pwm")).rect.h >= 26 and shows("mot_pwm_help") and shows("mot_dshot150_help")
+    and shows("mot_other_help"),
   button(T("mot_pwm")).rect.h)
-check("motor: choosing DShot600 writes the motor config", #writesOf(222, before + 1) == 1 and shows("mot_changed"))
+local dshot150 = writesOf(222, before + 1)
+check("motor: choosing DShot150 writes the motor config", #dshot150 == 1 and dshot150[1].payload[9] == 5
+  and shows("mot_changed"), dshot150[1] and bytes(dshot150[1].payload))
 do
   -- Long text: the choices keep usable buttons above the row, and the text
   -- is cut short instead (the restart note above is still shown).
@@ -697,13 +724,35 @@ do
   end
   for _, f in ipairs(fields) do
     local t = f.text
-    if f.kind == "button" and (t == T("mot_pwm") or t == T("mot_dshot300") or t == T("mot_dshot600") or t == T("mot_none")) then
+    if (f.kind == "button" and (t == T("mot_pwm") or t == T("mot_dshot150") or t == T("mot_dshot300")))
+      or f.kind == "choice" then
       if f.rect.h < 26 or f.rect.y + f.rect.h > rowY then ok = false end
     end
   end
   check("motor: the protocol buttons fit above the row", ok)
   check("motor: the encoder goes through the protocols, then Back, Check motor, Save and restart", inScreenOrder())
+  local picker, order = otherPicker(), true
+  for _, f in ipairs(fields) do
+    if f == picker then break end
+    if f.kind == "button" and f.rect and f.rect.y > picker.rect.y then order = false end
+  end
+  check("motor: the Other picker comes after the quick picks, before the row", order)
 end
+-- Other: DShot600 is still there for a pilot who wants it.
+openPage(14, "motor")
+settle()
+before = #sent
+otherPicker().set(7)
+tick()
+local dshot600 = writesOf(222, before + 1)
+check("motor: Other can still choose DShot600 and writes the motor config",
+  #dshot600 == 1 and dshot600[1].payload[9] == 7 and shows("mot_changed"),
+  dshot600[1] and bytes(dshot600[1].payload))
+check("motor: the Other picker then shows DShot600", otherPicker().get() == 7, tostring(otherPicker().get()))
+before = #sent
+otherPicker().set(-1)
+tick()
+check("motor: the Other entry itself writes nothing", #writesOf(222, before + 1) == 0)
 openPage(14, "motor")
 settle()
 press(T("mot_test"))
