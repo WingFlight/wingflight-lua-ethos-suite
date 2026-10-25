@@ -6,6 +6,10 @@
 --             (No motor, DShot600, OneShot, ...) from the Other drop-down.
 --             DShot600 is not a row of its own: on long ESC leads it picks
 --             up noise, so only a pilot who knows that should choose it.
+--             DShot150 has no bidirectional DShot RPM telemetry, so
+--             choosing it also turns bidirectional DShot off in the same
+--             write (an ESC that doesn't answer may not arm), and while it
+--             is set the step says RPM needs DShot300 or a telemetry source.
 --             A change applies after a restart, so it ends with Save and
 --             restart.
 --   prop      the propeller must be off before the spin check
@@ -32,6 +36,7 @@ local T = {
   other = "@i18n(app.modules.setup_wizard.mot_other)@",
   otherHelp = "@i18n(app.modules.setup_wizard.mot_other_help)@",
   changed = "@i18n(app.modules.setup_wizard.mot_changed)@",
+  noRpm = "@i18n(app.modules.setup_wizard.mot_dshot150_rpm)@",
   propTitle = "@i18n(app.modules.setup_wizard.mot_prop_title)@",
   propText = "@i18n(app.modules.setup_wizard.mot_prop_text)@",
   propOff = "@i18n(app.modules.setup_wizard.mot_prop_off)@",
@@ -45,10 +50,16 @@ local T = {
   saveRestart = "@i18n(app.modules.setup_wizard.btn_save_restart)@",
 }
 
+-- Both notes at once, built once: the restart note and DShot150's RPM note.
+T.changedNoRpm = T.changed .. " " .. T.noRpm
+
+-- DShot150 never carries bidirectional DShot RPM telemetry.
+local DSHOT150 = 5
+
 local CHOICES = {
   {protocol = 0, name = "@i18n(app.modules.setup_wizard.mot_pwm)@",
     help = "@i18n(app.modules.setup_wizard.mot_pwm_help)@"},
-  {protocol = 5, name = "@i18n(app.modules.setup_wizard.mot_dshot150)@",
+  {protocol = DSHOT150, name = "@i18n(app.modules.setup_wizard.mot_dshot150)@",
     help = "@i18n(app.modules.setup_wizard.mot_dshot150_help)@"},
   {protocol = 6, name = "@i18n(app.modules.setup_wizard.mot_dshot300)@",
     help = "@i18n(app.modules.setup_wizard.mot_dshot300_help)@"},
@@ -120,6 +131,9 @@ local function new(wiz)
     local nextConfig = {}
     for k, v in pairs(config) do nextConfig[k] = v end
     nextConfig.motor_pwm_protocol = protocol
+    -- No bidirectional DShot on DShot150: an ESC that doesn't answer the
+    -- telemetry request may not arm, so it goes off in the same write.
+    if protocol == DSHOT150 then nextConfig.use_dshot_telemetry = 0 end
     config = nextConfig
     bus.publish("msp.request", motorConfig.buildWriteMessage(config))
     changed = true
@@ -144,8 +158,16 @@ local function new(wiz)
       for _, c in ipairs(CHOICES) do
         if c.protocol == config.motor_pwm_protocol then current = c end
       end
-      scr:text(T.title, T.intro,
-        changed and T.changed or (wiz.motorCount() == 0 and T.noMotor or nil))
+      local dshot150 = config.motor_pwm_protocol == DSHOT150
+      local note
+      if changed then
+        note = dshot150 and T.changedNoRpm or T.changed
+      elseif wiz.motorCount() == 0 then
+        note = T.noMotor
+      elseif dshot150 then
+        note = T.noRpm
+      end
+      scr:text(T.title, T.intro, note)
       -- One row per protocol, what it means beside it, the current one lit;
       -- the rest in the Other drop-down, which shows the protocol set when
       -- it is one of them.
