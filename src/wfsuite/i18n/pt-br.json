@@ -8045,6 +8045,13 @@
           "reverse_text": false,
           "translation": "Vibrate"
         },
+        "armed_warning": {
+          "english": "Dashboard armed warning",
+          "max_length": 28,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Aviso Armed no painel"
+        },
         "arming_flags": {
           "english": "Arming flags",
           "max_length": 12,
@@ -12850,13 +12857,6 @@
         "needs_translation": false,
         "reverse_text": false,
         "translation": "Alt. Máxima"
-      },
-      "armed_warning": {
-        "english": "Armed warning",
-        "max_length": 13,
-        "needs_translation": false,
-        "reverse_text": false,
-        "translation": "Aviso Armed"
       },
       "battery": {
         "english": "Battery",
