@@ -1764,12 +1764,6 @@
           "needs_translation": false,
           "max_length": 14
         },
-        "feature_gps": {
-          "english": "GPS",
-          "translation": "GPS",
-          "needs_translation": false,
-          "max_length": 3
-        },
         "feature_led_strip": {
           "english": "LED_STRIP",
           "translation": "LED_STRIP",

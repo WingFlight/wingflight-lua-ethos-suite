@@ -5,8 +5,8 @@
 -- comment on ROOT_ENTRIES).
 --
 -- Matches the original suite's own app/modules/configuration/
--- configuration.lua field selection: craft name, PID loop speed, feature
--- toggles (GPS, LED Strip, Thrust Vector), and ARM_WIGGLE -- a small
+-- configuration.lua field selection: craft name, PID loop speed, the LED
+-- Strip feature toggle, and ARM_WIGGLE -- a small
 -- slice of a 5-MSP-command page (NAME,
 -- ADVANCED_CONFIG, FEATURE_CONFIG, ARMING_CONFIG, STATUS),
 -- following the same multi-source load/save pattern as that suite's own
@@ -97,6 +97,11 @@
 -- somehow changed between then and a later reload -- gyro rate
 -- essentially never changes mid-session, so this is an accepted,
 -- extremely unlikely edge case, not a real gap.
+--
+-- There is no GPS toggle: the firmware no longer has a GPS feature bit
+-- (bit 7). GPS runs when a serial port is set up for it. The LED Strip
+-- toggle writes back the enabledFeatures value it read, so bit 7 keeps
+-- whatever an older firmware reported.
 --
 -- Feature toggles reuse app/field_layout.lua's existing `bit` spec
 -- (app/pages/governor_flags.lua's own convention, promoted there for
@@ -287,9 +292,6 @@ local function open(opts)
         if adv then adv.pid_process_denom = value end
       end)
     runtime:registerField("advancedConfig:pid_process_denom", pidLoopField)
-
-    fieldLayout.buildSingle(runtime, "@i18n(app.modules.configuration.feature_gps)@",
-      {key = "enabledFeatures", source = "featureConfig", bit = featureConfig.FEATURE_BIT_GPS, choices = OFF_ON_OPTIONS})
 
     fieldLayout.buildSingle(runtime, "@i18n(app.modules.configuration.feature_led_strip)@",
       {key = "enabledFeatures", source = "featureConfig", bit = featureConfig.FEATURE_BIT_LED_STRIP, choices = OFF_ON_OPTIONS})

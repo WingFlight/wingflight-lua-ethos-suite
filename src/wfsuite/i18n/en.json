@@ -1304,12 +1304,6 @@
           "needs_translation": false,
           "translation": "Craft name"
         },
-        "feature_gps": {
-          "english": "GPS",
-          "max_length": 3,
-          "needs_translation": false,
-          "translation": "GPS"
-        },
         "feature_led_strip": {
           "english": "LED_STRIP",
           "max_length": 9,

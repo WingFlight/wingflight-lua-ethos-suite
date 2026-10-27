@@ -25,7 +25,6 @@ Requires a running background task and a flight controller connection.
 | --- | --- |
 | Craft name | TODO: explain behaviour, displayed units, range and conditions. |
 | PID loop speed | TODO: explain behaviour, displayed units, range and conditions. |
-| GPS | TODO: explain behaviour, displayed units, range and conditions. |
 | LED_STRIP | TODO: explain behaviour, displayed units, range and conditions. |
 | THRUST_VECTORING | TODO: explain behaviour, displayed units, range and conditions. |
 | ARM_WIGGLE | TODO: explain behaviour, displayed units, range and conditions. |
@@ -33,6 +32,7 @@ Requires a running background task and a flight controller connection.
 ## Notes
 
 - Saving changes on this page reboots the flight controller.
+- There is no GPS switch. GPS runs when the GPS source matches a port on *Ports*: NMEA or UBLOX with a GPS port, FBUS with an FBUS or S.Port master port, CRSF with a CRSF sensors port, or MSP with no port.
 - While the model is armed, or while its armed state is *unknown after having been armed*, Save stays greyed out. The reboot after a save is skipped in that state.
 - Changes are written to the flight controller EEPROM upon Save.
 

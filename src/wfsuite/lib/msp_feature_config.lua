@@ -1,6 +1,7 @@
 -- Schema + message-builders for the MSP_FEATURE_CONFIG /
 -- MSP_SET_FEATURE_CONFIG command pair (cmd 36 read / 37 write) --
--- app/pages/configuration.lua's GPS/LED Strip/Thrust Vector feature toggles.
+-- app/pages/configuration.lua's LED Strip feature toggle, plus the
+-- Telemetry and RPM-sensor bits other pages set.
 --
 -- Confirmed directly against rotorflight-firmware's own wire handlers
 -- (src/main/msp/msp.c): both directions are a single U32
@@ -39,11 +40,13 @@ local READ_COMMAND = 36
 local WRITE_COMMAND = 37
 
 -- Bit positions within `enabledFeatures`, matching rotorflight-lua-ethos-
--- suite's own FEATURE_CONFIG.lua FEATURES_BITMAP (gps=7, telemetry=10,
+-- suite's own FEATURE_CONFIG.lua FEATURES_BITMAP (telemetry=10,
 -- led_strip=16, freq_sensor=28) -- standard Betaflight/Wingflight
 -- feature-flag layout. Bit 24 was Thrust Vector, which is now always on in
--- the firmware (wingflight-firmware's config/feature.h).
-local FEATURE_BIT_GPS = 7
+-- the firmware (wingflight-firmware's config/feature.h). Bit 7 was GPS,
+-- which the firmware dropped: GPS now runs when a serial port is set up
+-- for it. Pages only change the bit they own and write the rest of the
+-- value back as read, so bit 7 is left as the flight controller had it.
 local FEATURE_BIT_TELEMETRY = 10
 local FEATURE_BIT_LED_STRIP = 16
 local FEATURE_BIT_FREQ_SENSOR = 28
@@ -69,7 +72,6 @@ local SIMULATOR_RESPONSE = {0, 0, 0, 0} -- enabledFeatures = 0
 local msp_feature_config = {
   READ_COMMAND = READ_COMMAND,
   WRITE_COMMAND = WRITE_COMMAND,
-  FEATURE_BIT_GPS = FEATURE_BIT_GPS,
   FEATURE_BIT_TELEMETRY = FEATURE_BIT_TELEMETRY,
   FEATURE_BIT_LED_STRIP = FEATURE_BIT_LED_STRIP,
   FEATURE_BIT_FREQ_SENSOR = FEATURE_BIT_FREQ_SENSOR,
