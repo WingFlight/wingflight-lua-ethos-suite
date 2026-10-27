@@ -1,3 +1,10 @@
+# 0.0.38
+
+Use with the 0.0.38 firmware (MSP API 22.15).
+Remove the GPS switch from the Configuration page: GPS runs when the GPS source matches its port. Saving keeps the old feature bit, so older firmware keeps its GPS setting.
+Setup Wizard: offer PWM, DShot150 and DShot300 on the Motor step, with every other protocol in an Other drop-down. Choosing DShot150 turns bidirectional DShot off, since it has no RPM telemetry.
+Move the dashboard's armed warning switch to Settings > General > Display. If you had switched it off in the widget's properties, switch it off again there.
+
 # 0.0.37
 
 Use with the 0.0.37 firmware (MSP API 22.14). Flashing keeps your settings, except the Thrust Vector profiles, which reset to the new defaults.
