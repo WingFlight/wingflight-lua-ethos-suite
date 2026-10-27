@@ -1516,13 +1516,6 @@
           "reverse_text": false,
           "translation": "Nome model"
         },
-        "feature_gps": {
-          "english": "GPS",
-          "max_length": 3,
-          "needs_translation": false,
-          "reverse_text": false,
-          "translation": "GPS"
-        },
         "feature_led_strip": {
           "english": "LED_STRIP",
           "max_length": 9,

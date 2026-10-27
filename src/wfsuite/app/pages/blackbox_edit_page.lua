@@ -27,7 +27,6 @@ local MSG_SAVE_BODY = "@i18n(app.msg_save_current_page)@"
 local MSG_RELOAD_TITLE = "@i18n(reload)@"
 local MSG_RELOAD_BODY = "@i18n(app.msg_reload_settings)@"
 
-local FEATURE_BIT_GPS = 7
 local FEATURE_BIT_GOVERNOR = 26
 local FEATURE_BIT_ESC_SENSOR = 27
 
@@ -477,7 +476,6 @@ function blackbox_edit_page.new(pageConfig)
   return page
 end
 
-blackbox_edit_page.FEATURE_BIT_GPS = FEATURE_BIT_GPS
 blackbox_edit_page.FEATURE_BIT_GOVERNOR = FEATURE_BIT_GOVERNOR
 blackbox_edit_page.FEATURE_BIT_ESC_SENSOR = FEATURE_BIT_ESC_SENSOR
 

@@ -19,7 +19,7 @@ return blackboxPage.new({
     {label = "@i18n(app.modules.blackbox.log_alt)@", bit = 9},
     {label = "@i18n(app.modules.blackbox.log_battery)@", bit = 10},
     {label = "@i18n(app.modules.blackbox.log_rssi)@", bit = 11},
-    {label = "@i18n(app.modules.blackbox.log_gps)@", bit = 12, featureBit = blackboxPage.FEATURE_BIT_GPS},
+    {label = "@i18n(app.modules.blackbox.log_gps)@", bit = 12},
     {label = "@i18n(app.modules.blackbox.log_rpm)@", bit = 13},
     {label = "@i18n(app.modules.blackbox.log_motors)@", bit = 14},
     {label = "@i18n(app.modules.blackbox.log_servos)@", bit = 15},
