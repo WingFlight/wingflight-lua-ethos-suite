@@ -30,6 +30,12 @@
 --   "failed"   gave up after MAX_FAILURES; the next disarm reads it
 --   "idle"     anything else
 --
+-- Clocked by tasks/background.lua's scheduler (wakeup(), every 0.5 s), not by
+-- "session.update" alone: the session publishes only when its snapshot
+-- changes, so a quiet bench, or exactly the sensor dropout this pacing is
+-- about, could leave a wait that never ends. "session.update" only records
+-- the arm state, link and aircraft.
+--
 -- bus is the instance tasks/background.lua already loaded, passed in as this
 -- chunk's argument -- see the equivalent note atop tasks/session.lua.
 local bus = ...
@@ -50,6 +56,9 @@ local refusedOnFc = false         -- the FC holds a flight this layout refused: 
 local nextAt = 0                  -- no request before this os.clock()
 local failures = 0                -- link errors since the last disarm
 local capture = {mcuId = nil, modelName = nil, replies = {}}
+-- The latest session snapshot's fields this task reads, copied rather than
+-- holding on to the snapshot table
+local link = {armed = nil, connected = false, mcuId = nil, apiVersionSupported = nil, craftName = nil}
 local lastSeconds = {}            -- by mcuId: flight_seconds of the last flight saved
 local state = nil                 -- last "tune_history.state" published
 
@@ -70,8 +79,8 @@ local function publishState()
   end
 end
 
-local function snapshotModelName(snapshot)
-  if snapshot.craftName and snapshot.craftName ~= "" then return snapshot.craftName end
+local function modelName()
+  if link.craftName and link.craftName ~= "" then return link.craftName end
   if model and model.name then
     local ok, name = pcall(model.name)
     if ok and name and name ~= "" then return name end
@@ -88,8 +97,8 @@ local function waitFor(seconds)
   nextAt = os.clock() + seconds
 end
 
--- A link error or a failed save. After MAX_FAILURES, nothing more until the
--- next disarm resets the count.
+-- A link error, or replies that are not one flight. After MAX_FAILURES,
+-- nothing more until the next disarm resets the count.
 local function failed()
   failures = failures + 1
   if failures >= MAX_FAILURES then
@@ -121,7 +130,9 @@ end
 --                   to save the retries would throw away data this suite could read once it
 --                   knows the layout.
 --   "cleared"       the queue was emptied (arming, a link loss, a transport change). Not
---                   this request's fault, so not counted against MAX_FAILURES.
+--                   this request's fault, so not counted against MAX_FAILURES. The axes
+--                   already read are dropped: the FC may have restarted, and its next
+--                   answers would be another flight's.
 --   anything else   the link. Asked again shortly, from the axis that failed; the axes
 --                   already read are kept.
 local function handleError(reason, refused)
@@ -141,6 +152,7 @@ local function handleError(reason, refused)
     return
   end
   if reason == "cleared" then
+    clearReplies()
     waitFor(RETRY_SECONDS)
     return
   end
@@ -164,23 +176,27 @@ local function requestAxis(axis)
   bus.publish("msp.request", tuneAdvisor.buildReadMessage(axis, onData, onError))
 end
 
-onData = function(data)
+-- All three axes are in: save them as one flight, then clear the FC.
+local function finishCapture()
   local replies = capture.replies
-  replies[#replies + 1] = data
-  if #replies < tuneAdvisor.AXIS_COUNT then
-    waitFor(GAP_SECONDS)
-    return
-  end
-
   local mcuId, seconds = capture.mcuId, replies[1].seconds
+  -- One flight has one flight time on every axis. Anything else is an FC that
+  -- restarted or flew between two reads: start again.
+  for i = 2, #replies do
+    if replies[i].seconds ~= seconds then
+      clearReplies()
+      failed()
+      return
+    end
+  end
   -- 0: no rate flight. Same as last time: the clear after that flight never
   -- got through and nothing new was flown.
   if seconds > 0 and lastSeconds[mcuId] ~= seconds then
     if not tuneHistory.save(mcuId, capture.modelName, replies) then
+      -- The replies are kept and only the write is tried again: no MSP, so
+      -- not counted against MAX_FAILURES
       print("[tune_history] cannot write " .. tuneHistory.path(mcuId))
-      clearReplies()
-      failed()
-      publishState()
+      waitFor(RETRY_SECONDS)
       return
     end
     lastSeconds[mcuId] = seconds
@@ -190,10 +206,45 @@ onData = function(data)
   pending = false
   if seconds > 0 then clearPending = true end
   waitFor(GAP_SECONDS)
+end
+
+onData = function(data)
+  local replies = capture.replies
+  replies[#replies + 1] = data
+  if #replies < tuneAdvisor.AXIS_COUNT then
+    waitFor(GAP_SECONDS)
+  else
+    finishCapture()
+  end
   publishState()
 end
 
-local function step(snapshot)
+-- Sends the next request when one is due
+local function advance()
+  if not (pending or clearPending) or busy or link.armed ~= false or link.connected ~= true then return end
+  if not link.mcuId or link.apiVersionSupported == false then return end
+  if os.clock() < nextAt then return end
+
+  if pending then
+    -- Another aircraft since the last answer: its axes, not these
+    if #capture.replies > 0 and capture.mcuId ~= link.mcuId then clearReplies() end
+    if #capture.replies == 0 then
+      refusedOnFc = false
+      capture.mcuId = link.mcuId
+      capture.modelName = modelName()
+    end
+    if #capture.replies >= tuneAdvisor.AXIS_COUNT then
+      finishCapture()             -- a save that failed, tried again
+    else
+      requestAxis(#capture.replies + 1)
+    end
+  elseif not refusedOnFc then
+    sendClear()
+  end
+end
+
+local function onSessionUpdate(snapshot)
+  if not snapshot then return end
   local armed = snapshot.isArmed
   if armed == true then
     pending = false               -- the next disarm captures this flight too
@@ -204,31 +255,22 @@ local function step(snapshot)
     nextAt = os.clock() + START_SECONDS
   end
   if armed ~= nil then lastArmed = armed end
+  link.armed = armed
+  link.connected = snapshot.connected
+  link.mcuId = snapshot.mcuId
+  link.apiVersionSupported = snapshot.apiVersionSupported
+  link.craftName = snapshot.craftName
 
-  if not (pending or clearPending) or busy or armed ~= false or snapshot.connected ~= true then return end
-  if not snapshot.mcuId or snapshot.apiVersionSupported == false then return end
-  if os.clock() < nextAt then return end
-
-  if pending then
-    -- Another aircraft since the last answer: its axes, not these
-    if #capture.replies > 0 and capture.mcuId ~= snapshot.mcuId then clearReplies() end
-    if #capture.replies == 0 then
-      refusedOnFc = false
-      capture.mcuId = snapshot.mcuId
-      capture.modelName = snapshotModelName(snapshot)
-    end
-    requestAxis(#capture.replies + 1)
-  elseif not refusedOnFc then
-    sendClear()
-  end
+  advance()
+  publishState()
 end
 
-local function onSessionUpdate(snapshot)
-  if not snapshot then return end
-  step(snapshot)
+-- tasks/background.lua's scheduler, every 0.5 s
+local function wakeup()
+  advance()
   publishState()
 end
 
 bus.subscribe("session.update", onSessionUpdate)
 
-return {}
+return {wakeup = wakeup}

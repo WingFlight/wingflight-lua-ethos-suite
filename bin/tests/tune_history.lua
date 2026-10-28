@@ -75,7 +75,7 @@ os.clock = function() return clock end
 local MCU = "abc123"
 local HISTORY = "LOGS:/wfsuite/tune/" .. MCU .. "/history.csv"
 
-local handlers, requests, saved, states
+local handlers, requests, saved, states, task
 local function load()
   handlers, requests, saved, states = {}, {}, {}, {}
   for k in pairs(files) do files[k] = nil end
@@ -88,7 +88,7 @@ local function load()
       if topic == "tune_history.state" then states[#states + 1] = message end
     end,
   }
-  assert(loadfile(ROOT .. "tasks/tune_history.lua"))(bus)
+  task = assert(loadfile(ROOT .. "tasks/tune_history.lua"))(bus)
 end
 
 local function update(fields)
@@ -263,6 +263,68 @@ do
   local asked = pump({roll = {n = 5, reason = "cleared"}}, nil, 60)
   check("a cleared queue is not counted as a link error",
     asked == "roll,roll,roll,roll,roll,roll,pitch,yaw,clear", asked)
+end
+
+-- The session publishes only when its snapshot changes. The capture's waits
+-- must run out on the background task's own clock.
+do
+  load()
+  update({isArmed = true})
+  update({isArmed = false})
+  local asked = {}
+  for _ = 1, 60 do
+    clock = clock + 0.5
+    task.wakeup()
+    while requests[1] do
+      local msg = table.remove(requests, 1)
+      asked[#asked + 1] = msg.command == tuneAdvisor.CLEAR_COMMAND and "clear" or NAMES[msg.payload[1] + 1]
+      msg.processReply(msg, msg.simulatorResponse)
+    end
+  end
+  asked = table.concat(asked, ",")
+  check("a quiet session still captures, on the task's clock", asked == "roll,pitch,yaw,clear"
+    and #lines() == 4, asked .. " / " .. #lines() .. " lines")
+end
+
+-- An FC that restarted between two reads answers with another flight
+do
+  load()
+  reply.seconds = 147
+  disarmAndWait()
+  local roll = table.remove(requests, 1)
+  roll.processReply(roll, roll.simulatorResponse)
+  reply.seconds = 0
+  local asked = pump()
+  check("axes from two flights are not saved as one", asked == "pitch,yaw,roll,pitch,yaw"
+    and files[HISTORY] == nil, asked .. " / " .. tostring(files[HISTORY]))
+  reply.seconds = 147
+end
+
+do
+  load()
+  disarmAndWait()
+  local roll = table.remove(requests, 1)
+  roll.processReply(roll, roll.simulatorResponse)
+  local asked = pump({pitch = {n = 1, reason = "cleared"}})
+  check("a cleared queue drops the axes already read", asked == "pitch,roll,pitch,yaw,clear"
+    and #lines() == 4, asked .. " / " .. #lines() .. " lines")
+end
+
+do
+  load()
+  local realSave, saves = tuneHistory.save, 0
+  tuneHistory.save = function(...)
+    saves = saves + 1
+    if saves <= 4 then return false end
+    return realSave(...)
+  end
+  update({isArmed = true})
+  update({isArmed = false})
+  local asked = pump(nil, nil, 60)
+  tuneHistory.save = realSave
+  check("a failed write is tried again without reading again, past the link-error limit",
+    asked == "roll,pitch,yaw,clear" and saves == 5 and #lines() == 4,
+    asked .. " / " .. saves .. " saves / " .. #lines() .. " lines")
 end
 
 do
