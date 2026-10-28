@@ -9,7 +9,9 @@ source: app/pages/tune_advisor.lua
 # Tune Advisor
 
 While you fly in rate mode, the flight controller measures how the model answers the sticks. Each time you
-disarm, the radio saves that flight's measurements. This page combines your last flights and suggests one change
+disarm, the radio saves that flight's measurements, starting 5 seconds after the disarm and taking about 10
+seconds, with pauses so telemetry sensors keep updating meanwhile. If the link drops the reading three times, the
+radio tries again at the next disarm; the flight controller keeps the measurements until then. This page combines your last flights and suggests one change
 at a time for each axis. Press *Save* to write the suggested changes for the shown axis to the flight controller,
 or make them yourself on *PIDs*, *Rates* or *Flight Feel*. Then fly again and come back.
 
@@ -24,7 +26,10 @@ with the stick centred after each one, which one flight may or may not give.
 *Configuration* → *Flight Tuning* → *Tune Advisor*
 
 Requires a running background task. The page works from the flights saved for the connected model, and
-updates when you disarm while it is open. Without a model connected since the page opened it shows "Connect to
+updates when a flight is saved while it is open, about 10 seconds after you disarm. Until then it shows "Reading
+the last flight..." in place of the advice, with *Save* and the erase button greyed out. If the radio could not
+read the flight, the advice from the saved flights comes back with "Last flight not read" above it until you arm
+again. Without a model connected since the page opened it shows "Connect to
 a model first"; once known, the model stays on screen through a link loss. On opening (and on Reload) the page
 asks the flight controller once whether its firmware has the Tune Advisor: firmware from before it shows "Needs
 newer firmware".
