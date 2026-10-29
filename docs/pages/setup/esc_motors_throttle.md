@@ -19,6 +19,8 @@ TODO: Explain what this page controls and when a pilot would use it.
 
 Requires a running background task and a flight controller connection.
 
+![Ethos simulator Throttle page showing the 50 Hz default](../../images/esc-motors-throttle.png)
+
 ## Settings
 
 | Setting | What it does |
