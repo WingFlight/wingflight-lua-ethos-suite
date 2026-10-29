@@ -82,7 +82,7 @@ local SIMULATOR_RESPONSE = {
   1,      -- pid_process_denom
   0,      -- use_unsynced_pwm
   0,      -- motor_pwm_protocol
-  232, 3, -- motor_pwm_rate (U16)
+  50, 0,  -- motor_pwm_rate (U16)
 }
 
 -- `pid_process_denom`'s real range/default per rotorflight-lua-ethos-

@@ -158,7 +158,7 @@ local FIELD_META = {
   -- app/pages/esc_motors_throttle.lua passes it explicitly and is the only page that
   -- builds this field.
   motor_pwm_protocol = {choices = BASE_CHOICES},
-  motor_pwm_rate = {min = 50, max = 8000, default = 250, suffix = "Hz"},
+  motor_pwm_rate = {min = 50, max = 8000, default = 50, suffix = "Hz"},
   use_unsynced_pwm = {choices = ON_OFF_CHOICES},
   motor_pole_count_0 = {min = 2, max = 256, default = 10},
   motor1_gear_ratio_0 = {min = 1, max = 50000, default = 1},
@@ -175,7 +175,7 @@ local SIMULATOR_RESPONSE = {
   6,
   0,
   0,
-  250, 0,
+  50, 0, -- motor_pwm_rate (U16)
   1,
   6,
   4,
