@@ -19,12 +19,14 @@ TODO: Explain what this page controls and when a pilot would use it.
 
 Requires a running background task and a flight controller connection.
 
+![Ethos simulator Throttle page showing the 50 Hz default](../../images/esc-motors-throttle.png)
+
 ## Settings
 
 | Setting | What it does |
 | --- | --- |
 | Throttle Protocol | Which signal the FC uses to command the ESCs. The list follows the flight controller's own enum - see below. |
-| Update frequency | TODO: explain behaviour, displayed units, range and conditions. |
+| Update frequency | ESC pulse update frequency in Hz (50-8000). Defaults to 50 Hz; the simulator uses the same rate. Enabled for pulse protocols, CASTLE and SRXL2; greyed out for digital protocols and DISABLED. |
 | Motor Stop PWM Value | TODO: explain behaviour, displayed units, range and conditions. |
 | 0% Throttle PWM Value | TODO: explain behaviour, displayed units, range and conditions. |
 | 100% Throttle PWM value | TODO: explain behaviour, displayed units, range and conditions. |
