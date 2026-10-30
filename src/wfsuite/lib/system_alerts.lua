@@ -31,6 +31,7 @@ local codec = requireModule("lib/system_status.lua")
 local FAILSAFE = codec.FAILSAFE
 local NAV_BLOCKED = codec.NAV_BLOCKED
 local BATTERY = codec.BATTERY
+local TRIM = codec.TRIM
 
 local LEVEL = {
   CRITICAL = 1,
@@ -139,6 +140,64 @@ local RULES = {
     active = function(_, c) return c.blackboxFull == true end,
     setting = "status_blackbox",
     enterSound = "bbfull.wav",
+  },
+
+  -- Out of trim: the gyro's I-term is holding a steady surface deflection in
+  -- hands-off rate flight, so Manual/Passthrough would fly off line. Kept by
+  -- the FC after landing until the next arm. "Trim OK" when it clears.
+  {
+    id = "trim_pitch_up",
+    level = LEVEL.WARNING,
+    text = "@i18n(widgets.dashboard.alert_trim_nose_up)@",
+    active = function(_, c) return c.trimPitch == TRIM.RIGHT_UP end,
+    setting = "status_trim",
+    enterSound = "trimnoseup.wav",
+    exitSound = "trimok.wav",
+  },
+  {
+    id = "trim_pitch_down",
+    level = LEVEL.WARNING,
+    text = "@i18n(widgets.dashboard.alert_trim_nose_down)@",
+    active = function(_, c) return c.trimPitch == TRIM.LEFT_DOWN end,
+    setting = "status_trim",
+    enterSound = "trimnosedown.wav",
+    exitSound = "trimok.wav",
+  },
+  {
+    id = "trim_roll_right",
+    level = LEVEL.WARNING,
+    text = "@i18n(widgets.dashboard.alert_trim_roll_right)@",
+    active = function(_, c) return c.trimRoll == TRIM.RIGHT_UP end,
+    setting = "status_trim",
+    enterSound = "trimrollright.wav",
+    exitSound = "trimok.wav",
+  },
+  {
+    id = "trim_roll_left",
+    level = LEVEL.WARNING,
+    text = "@i18n(widgets.dashboard.alert_trim_roll_left)@",
+    active = function(_, c) return c.trimRoll == TRIM.LEFT_DOWN end,
+    setting = "status_trim",
+    enterSound = "trimrollleft.wav",
+    exitSound = "trimok.wav",
+  },
+  {
+    id = "trim_yaw_right",
+    level = LEVEL.WARNING,
+    text = "@i18n(widgets.dashboard.alert_trim_yaw_right)@",
+    active = function(_, c) return c.trimYaw == TRIM.RIGHT_UP end,
+    setting = "status_trim",
+    enterSound = "trimyawright.wav",
+    exitSound = "trimok.wav",
+  },
+  {
+    id = "trim_yaw_left",
+    level = LEVEL.WARNING,
+    text = "@i18n(widgets.dashboard.alert_trim_yaw_left)@",
+    active = function(_, c) return c.trimYaw == TRIM.LEFT_DOWN end,
+    setting = "status_trim",
+    enterSound = "trimyawleft.wav",
+    exitSound = "trimok.wav",
   },
 }
 
