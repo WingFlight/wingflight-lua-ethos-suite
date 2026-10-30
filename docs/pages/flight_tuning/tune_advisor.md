@@ -54,9 +54,17 @@ The suggestions follow these rules:
   opposite directions. The stick moves the surfaces as far as before, but now asks for the rate the model
   really flies. One step changes F by at most 20%.
 - **Full stick asks for more roll rate than the model reaches** (roll only), with the surfaces at their limit: lower RC Rate
-  to what the model reaches, or add surface throw.
+  toward what the model reaches, by at most 20% per step, or add surface throw.
 - **Stops bounce back 12% or more**: if the I-term pushes back, raise *Flight Feel > Relax* by one. If F does not
-  match yet, fix F first. Otherwise the controller is barely braking the stop: raise P by 20% (or add B).
+  match yet, fix F first. Otherwise the controller is barely braking the stop: raise P by 20% (or add B). The
+  page raises P to at most 50% above your own P, which allows two steps. Your own P is the last one you set by
+  hand: the page works it out from `changes.csv` (see below), and setting P by hand starts the count again. If stops
+  still bounce back after that, the reasons say "P is already ...% above your setting. Check the mechanics."
+  More P will not fix it.
+- **A change would go past a setting's limit** (F below 50 or P or F above 1000, RC Rate above 1000 deg/s): the
+  page does not suggest it, or any change that goes with it (F is never suggested without its RC Rate). Instead,
+  the reasons say "The change needed goes past a setting's limit." Look for the cause outside the tune, for
+  example surface throw or linkages.
 
 ## Applying the changes
 
