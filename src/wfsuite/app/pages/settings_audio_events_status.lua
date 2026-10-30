@@ -31,6 +31,7 @@ local function open(opts)
     fields.statusGps = ctx.addBool("@i18n(app.modules.settings.status_gps)@", "status_gps")
     fields.statusBlackbox = ctx.addBool("@i18n(app.modules.settings.status_blackbox)@", "status_blackbox")
     fields.statusAutotrim = ctx.addBool("@i18n(app.modules.settings.status_autotrim)@", "status_autotrim")
+    fields.statusTrim = ctx.addBool("@i18n(app.modules.settings.status_trim)@", "status_trim")
     fields.statusSaturation = ctx.addBool("@i18n(app.modules.settings.status_saturation)@", "status_saturation")
   end)
 end

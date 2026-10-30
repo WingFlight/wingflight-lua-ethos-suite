@@ -25,6 +25,7 @@ Available without a flight controller connection; the background task must be ru
 | *GPS warning* | Calls out when the GPS unit stops communicating or reports failure. |
 | *Blackbox full* | Calls out when on-board flash logging space is exhausted. |
 | *Autotrim completed* | Calls out when automatic trim computation completes. |
+| *Out of trim* | Calls out which way to trim when the stabiliser is holding trim on an axis ("Trim nose up", "Trim roll left", "Trim rudder right", ...), and "Trim OK" once every axis is back in trim. On by default. |
 | *Control limits* | Calls out when actuator command reaches mechanical or configured saturation limits (disabled by default). |
 
 ## Notes

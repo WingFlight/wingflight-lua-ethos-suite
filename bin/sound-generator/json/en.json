@@ -654,6 +654,48 @@
     "needs_translation": false
   },
   {
+    "file": "events/alerts/trimnoseup.wav",
+    "english": "Trim nose up",
+    "translation": "Trim nose up",
+    "needs_translation": false
+  },
+  {
+    "file": "events/alerts/trimnosedown.wav",
+    "english": "Trim nose down",
+    "translation": "Trim nose down",
+    "needs_translation": false
+  },
+  {
+    "file": "events/alerts/trimrollright.wav",
+    "english": "Trim roll right",
+    "translation": "Trim roll right",
+    "needs_translation": false
+  },
+  {
+    "file": "events/alerts/trimrollleft.wav",
+    "english": "Trim roll left",
+    "translation": "Trim roll left",
+    "needs_translation": false
+  },
+  {
+    "file": "events/alerts/trimyawright.wav",
+    "english": "Trim rudder right",
+    "translation": "Trim rudder right",
+    "needs_translation": false
+  },
+  {
+    "file": "events/alerts/trimyawleft.wav",
+    "english": "Trim rudder left",
+    "translation": "Trim rudder left",
+    "needs_translation": false
+  },
+  {
+    "file": "events/alerts/trimok.wav",
+    "english": "Trim OK",
+    "translation": "Trim OK",
+    "needs_translation": false
+  },
+  {
     "file": "events/alerts/trimcaptured.wav",
     "english": "Trim captured",
     "translation": "Trim captured",

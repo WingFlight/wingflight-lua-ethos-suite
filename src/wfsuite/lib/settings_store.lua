@@ -87,6 +87,7 @@ local DEFAULTS = {
     status_gps = true,
     status_blackbox = true,
     status_autotrim = true,
+    status_trim = true,
     -- Off by default: "control limit" can be chatty on 3D models.
     status_saturation = false,
     smartfuel = true,
@@ -234,6 +235,7 @@ local function normalizeEvents(values)
   events.status_gps = coerceBool(events.status_gps, DEFAULTS.events.status_gps)
   events.status_blackbox = coerceBool(events.status_blackbox, DEFAULTS.events.status_blackbox)
   events.status_autotrim = coerceBool(events.status_autotrim, DEFAULTS.events.status_autotrim)
+  events.status_trim = coerceBool(events.status_trim, DEFAULTS.events.status_trim)
   events.status_saturation = coerceBool(events.status_saturation, DEFAULTS.events.status_saturation)
   events.smartfuel = coerceBool(events.smartfuel, DEFAULTS.events.smartfuel)
   events.smartfuelcallout = clampNumber(events.smartfuelcallout, DEFAULTS.events.smartfuelcallout, 0, 50)

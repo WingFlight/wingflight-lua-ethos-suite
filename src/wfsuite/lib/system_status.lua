@@ -54,6 +54,14 @@ systemStatus.AUTOTRIM = { -- autoTrimState_e
   SAVE_PENDING = 2,
 }
 
+-- Out of trim, per axis (trimMonitorState_e, flight/trim_monitor.h). The FC
+-- watches the I-term in hands-off rate flight and says which way to trim.
+systemStatus.TRIM = {
+  IN_TRIM = 0,
+  RIGHT_UP = 1,   -- roll/yaw: trim right; pitch: trim nose up
+  LEFT_DOWN = 2,  -- roll/yaw: trim left; pitch: trim nose down
+}
+
 local LOGIC_CONDITION_COUNT = 4
 
 local function toInt(raw)
@@ -129,6 +137,9 @@ function systemStatus.decodeConfig(raw)
     rxBackupConfigured = flag(value, 20),
     blackboxFull = flag(value, 21),
     rpmSourceActive = flag(value, 22),
+    trimRoll = field(value, 23, 0x3),
+    trimPitch = field(value, 25, 0x3),
+    trimYaw = field(value, 27, 0x3),
   }
 end
 

@@ -112,6 +112,40 @@ local function run()
   rule = alerts.topBanner({}, { rebootRequired = true })
   check("with both words present the config rule still shows",
     rule ~= nil and rule.id == "reboot_required")
+
+  -- Out of trim: System Config bits 23-28, two bits per axis (roll, pitch,
+  -- yaw), 1 = right / nose up, 2 = left / nose down. Decoded by the real
+  -- codec so a shifted field shows up here.
+  local codec = assert(loadfile(SRC .. "/lib/system_status.lua"))()
+  local function trimBanners(roll, pitch, yaw)
+    local raw = (roll << 23) | (pitch << 25) | (yaw << 27)
+    local config = codec.decodeConfig(raw)
+    local ids = {}
+    for _, r in ipairs(alerts.RULES) do
+      if r.id:find("^trim_") and alerts.isActive(r, nil, config) then ids[#ids + 1] = r.id end
+    end
+    table.sort(ids)
+    return table.concat(ids, ",")
+  end
+  check("in trim raises no trim banner", trimBanners(0, 0, 0) == "")
+  check("trim directions decode per axis",
+    trimBanners(1, 2, 1) == "trim_pitch_down,trim_roll_right,trim_yaw_right", trimBanners(1, 2, 1))
+  check("opposite trim directions decode per axis",
+    trimBanners(2, 1, 2) == "trim_pitch_up,trim_roll_left,trim_yaw_left", trimBanners(2, 1, 2))
+
+  local trimAudio = true
+  for _, r in ipairs(alerts.RULES) do
+    if r.id:find("^trim_") then
+      trimAudio = trimAudio and r.setting == "status_trim" and r.enterSound ~= nil
+        and r.exitSound == "trimok.wav" and r.level == alerts.LEVEL.WARNING
+        and r.group == "trim"
+    end
+  end
+  check("trim rules are amber, switched by status_trim, grouped, and announce enter and exit", trimAudio)
+
+  rule = alerts.topBanner({}, codec.decodeConfig((2 << 25) | (1 << 14)))
+  check("a trim banner ranks below reboot required",
+    rule ~= nil and rule.id == "reboot_required")
 end
 
 local function selfTest()

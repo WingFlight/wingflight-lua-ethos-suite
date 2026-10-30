@@ -2610,6 +2610,12 @@
           "needs_translation": false,
           "max_length": 8
         },
+        "status_trim": {
+          "english": "Out of trim",
+          "translation": "Out of trim",
+          "needs_translation": false,
+          "max_length": 11
+        },
         "status_saturation": {
           "english": "Control limit",
           "translation": "Control limit",
@@ -11836,6 +11842,42 @@
         "translation": "BLACKBOX FULL",
         "needs_translation": false,
         "max_length": 13
+      },
+      "alert_trim_nose_up": {
+        "english": "TRIM NOSE UP",
+        "translation": "TRIM NOSE UP",
+        "needs_translation": false,
+        "max_length": 12
+      },
+      "alert_trim_nose_down": {
+        "english": "TRIM NOSE DOWN",
+        "translation": "TRIM NOSE DOWN",
+        "needs_translation": false,
+        "max_length": 14
+      },
+      "alert_trim_roll_right": {
+        "english": "TRIM ROLL RIGHT",
+        "translation": "TRIM ROLL RIGHT",
+        "needs_translation": false,
+        "max_length": 15
+      },
+      "alert_trim_roll_left": {
+        "english": "TRIM ROLL LEFT",
+        "translation": "TRIM ROLL LEFT",
+        "needs_translation": false,
+        "max_length": 14
+      },
+      "alert_trim_yaw_right": {
+        "english": "TRIM RUDDER RIGHT",
+        "translation": "TRIM RUDDER RIGHT",
+        "needs_translation": false,
+        "max_length": 17
+      },
+      "alert_trim_yaw_left": {
+        "english": "TRIM RUDDER LEFT",
+        "translation": "TRIM RUDDER LEFT",
+        "needs_translation": false,
+        "max_length": 16
       }
     },
     "governor": {

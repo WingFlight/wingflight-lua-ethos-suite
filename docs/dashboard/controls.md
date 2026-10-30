@@ -108,8 +108,8 @@ The warning can be switched off in *Settings* → *General* → *Display* with
 When the flight controller sends the **System Status** or **System Config**
 telemetry sensor (firmware with MSP API 12.10 or newer, sensor selected under
 *Setup* → *Telemetry*), a banner across the bottom of the dashboard shows the
-most important problem they report. REBOOT REQUIRED and BLACKBOX FULL come
-from System Config, the others from System Status, so each banner needs its
+most important problem they report. REBOOT REQUIRED, BLACKBOX FULL and the
+TRIM banners come from System Config, the others from System Status, so each banner needs its
 own sensor selected. Critical problems are red, warnings amber. When
 more than one is active, the banner adds a count, for example
 `GYRO OVERFLOW (+2)`. The banner goes away by itself when the problem clears.
@@ -125,6 +125,7 @@ more than one is active, the banner adds a count, for example
 | TEST OVERRIDE ACTIVE | Warning | A servo, motor or mixer override from a setup tool is on. |
 | REBOOT REQUIRED | Warning | A saved setting only takes effect after a reboot. Needs **System Config**. |
 | BLACKBOX FULL | Warning | The blackbox storage is full. Needs **System Config**. |
+| TRIM NOSE UP / TRIM NOSE DOWN, TRIM ROLL RIGHT / LEFT, TRIM RUDDER RIGHT / LEFT | Warning | The stabiliser's I-term is holding a steady surface deflection in hands-off, near-level rate flight, so the model is out of trim on that axis and would fly off line in Manual or Passthrough. Trim the way it says. Kept after landing until the next flight has settled. Needs **System Config**. |
 | MAIN POWER LOST | Critical | The flight pack has gone (under 1.0 V) while the receiver still runs on a BEC or backup battery. Needs the **Voltage** and **BEC voltage** telemetry sensors, and only shows once the pack has read a real voltage on this connection. |
 
 In priority order, the footer shows: "background task not running", then MAIN

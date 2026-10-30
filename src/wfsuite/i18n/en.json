@@ -7358,6 +7358,12 @@
           "needs_translation": false,
           "translation": "Control limit"
         },
+        "status_trim": {
+          "english": "Out of trim",
+          "max_length": 11,
+          "needs_translation": false,
+          "translation": "Out of trim"
+        },
         "telemetry_lost": {
           "english": "Telemetry lost",
           "max_length": 14,
@@ -11078,6 +11084,42 @@
         "max_length": 19,
         "needs_translation": false,
         "translation": "BACKUP RX NO SIGNAL"
+      },
+      "alert_trim_nose_down": {
+        "english": "TRIM NOSE DOWN",
+        "max_length": 14,
+        "needs_translation": false,
+        "translation": "TRIM NOSE DOWN"
+      },
+      "alert_trim_nose_up": {
+        "english": "TRIM NOSE UP",
+        "max_length": 12,
+        "needs_translation": false,
+        "translation": "TRIM NOSE UP"
+      },
+      "alert_trim_roll_left": {
+        "english": "TRIM ROLL LEFT",
+        "max_length": 14,
+        "needs_translation": false,
+        "translation": "TRIM ROLL LEFT"
+      },
+      "alert_trim_roll_right": {
+        "english": "TRIM ROLL RIGHT",
+        "max_length": 15,
+        "needs_translation": false,
+        "translation": "TRIM ROLL RIGHT"
+      },
+      "alert_trim_yaw_left": {
+        "english": "TRIM RUDDER LEFT",
+        "max_length": 16,
+        "needs_translation": false,
+        "translation": "TRIM RUDDER LEFT"
+      },
+      "alert_trim_yaw_right": {
+        "english": "TRIM RUDDER RIGHT",
+        "max_length": 17,
+        "needs_translation": false,
+        "translation": "TRIM RUDDER RIGHT"
       },
       "altitude_max": {
         "english": "Altitude Max",
