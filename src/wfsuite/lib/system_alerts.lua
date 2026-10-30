@@ -15,6 +15,8 @@
 --   setting    events.<setting> switch for the callouts
 --   enterSound / exitSound  events/alerts/<file> played when the
 --              condition starts / clears (nil = silent)
+--   group      rules sharing a group play their exitSound once, and only
+--              when no rule in the group is still active (nil = no group)
 --   debounce   seconds a change must hold before it is announced, so a
 --              flickering link doesn't chatter
 --
@@ -144,13 +146,15 @@ local RULES = {
 
   -- Out of trim: the gyro's I-term is holding a steady surface deflection in
   -- hands-off rate flight, so Manual/Passthrough would fly off line. Kept by
-  -- the FC after landing until the next arm. "Trim OK" when it clears.
+  -- the FC after landing until the next arm. "Trim OK" once every axis is in
+  -- trim.
   {
     id = "trim_pitch_up",
     level = LEVEL.WARNING,
     text = "@i18n(widgets.dashboard.alert_trim_nose_up)@",
     active = function(_, c) return c.trimPitch == TRIM.RIGHT_UP end,
     setting = "status_trim",
+    group = "trim",
     enterSound = "trimnoseup.wav",
     exitSound = "trimok.wav",
   },
@@ -160,6 +164,7 @@ local RULES = {
     text = "@i18n(widgets.dashboard.alert_trim_nose_down)@",
     active = function(_, c) return c.trimPitch == TRIM.LEFT_DOWN end,
     setting = "status_trim",
+    group = "trim",
     enterSound = "trimnosedown.wav",
     exitSound = "trimok.wav",
   },
@@ -169,6 +174,7 @@ local RULES = {
     text = "@i18n(widgets.dashboard.alert_trim_roll_right)@",
     active = function(_, c) return c.trimRoll == TRIM.RIGHT_UP end,
     setting = "status_trim",
+    group = "trim",
     enterSound = "trimrollright.wav",
     exitSound = "trimok.wav",
   },
@@ -178,6 +184,7 @@ local RULES = {
     text = "@i18n(widgets.dashboard.alert_trim_roll_left)@",
     active = function(_, c) return c.trimRoll == TRIM.LEFT_DOWN end,
     setting = "status_trim",
+    group = "trim",
     enterSound = "trimrollleft.wav",
     exitSound = "trimok.wav",
   },
@@ -187,6 +194,7 @@ local RULES = {
     text = "@i18n(widgets.dashboard.alert_trim_yaw_right)@",
     active = function(_, c) return c.trimYaw == TRIM.RIGHT_UP end,
     setting = "status_trim",
+    group = "trim",
     enterSound = "trimyawright.wav",
     exitSound = "trimok.wav",
   },
@@ -196,6 +204,7 @@ local RULES = {
     text = "@i18n(widgets.dashboard.alert_trim_yaw_left)@",
     active = function(_, c) return c.trimYaw == TRIM.LEFT_DOWN end,
     setting = "status_trim",
+    group = "trim",
     enterSound = "trimyawleft.wav",
     exitSound = "trimok.wav",
   },

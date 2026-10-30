@@ -138,9 +138,10 @@ local function run()
     if r.id:find("^trim_") then
       trimAudio = trimAudio and r.setting == "status_trim" and r.enterSound ~= nil
         and r.exitSound == "trimok.wav" and r.level == alerts.LEVEL.WARNING
+        and r.group == "trim"
     end
   end
-  check("trim rules are amber, switched by status_trim and announce enter and exit", trimAudio)
+  check("trim rules are amber, switched by status_trim, grouped, and announce enter and exit", trimAudio)
 
   rule = alerts.topBanner({}, codec.decodeConfig((2 << 25) | (1 << 14)))
   check("a trim banner ranks below reboot required",

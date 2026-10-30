@@ -671,6 +671,22 @@ local function announceGpsFix()
   end
 end
 
+-- True when any rule in the group is active, so a grouped exit sound waits
+-- until the whole group has cleared.
+local function alertGroupActive(rules, group, status, config)
+  for i = 1, #rules do
+    local rule = rules[i]
+    if rule.group == group and systemAlerts.isActive(rule, status, config) then
+      return true
+    end
+  end
+  return false
+end
+
+-- Time each group last played its exit sound, so several rules clearing on
+-- the same tick announce it once.
+local alertGroupExitAt = {}
+
 -- FC status callouts from lib/system_alerts.lua's rules. A condition already
 -- present when the status first arrives becomes the baseline silently (the
 -- dashboard banner shows it); after that each change is announced once it has
@@ -700,7 +716,15 @@ local function announceSystemAlerts(now)
           state.reported = active
           state.pending = nil
           local file
-          if active then file = rule.enterSound else file = rule.exitSound end
+          if active then
+            file = rule.enterSound
+          elseif rule.group == nil then
+            file = rule.exitSound
+          elseif alertGroupExitAt[rule.group] ~= now
+              and not alertGroupActive(rules, rule.group, status, config) then
+            file = rule.exitSound
+            alertGroupExitAt[rule.group] = now
+          end
           if file and events[rule.setting] then playAlert(file) end
         end
       end
