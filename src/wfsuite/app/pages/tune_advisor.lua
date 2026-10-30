@@ -279,7 +279,10 @@ local function advise(a, axis, name, pilotP, actions, whys, changes)
     -- Keep stick-to-surface the same: F x rate is what the pilot feels. F and
     -- RC Rate go together or not at all.
     local newRate = newF > 0 and round(a.rcRate * a.F / newF) or 0
-    if inRange("F", axis, newF) and inRange("rcRate", axis, newRate) then
+    -- At a very low RC Rate the new one can round back to the same value: F
+    -- alone would change the feel, so neither is given (not a limit).
+    local fits = inRange("F", axis, newF) and inRange("rcRate", axis, newRate)
+    if fits and newRate ~= a.rcRate then
       change(string.format(T.actFFmt, name, a.F, newF), "F", a.F, newF)
       change(string.format(T.actRateFmt, name, a.rcRate * RC_RATE_DPS, newRate * RC_RATE_DPS),
         "rcRate", a.rcRate, newRate)
@@ -287,7 +290,7 @@ local function advise(a, axis, name, pilotP, actions, whys, changes)
       why(T.whyKeepFeel)
     else
       why(hot and T.whyFast or T.whySlow)
-      atLimit()
+      if not fits then atLimit() end
     end
   else
     response = T.respOk

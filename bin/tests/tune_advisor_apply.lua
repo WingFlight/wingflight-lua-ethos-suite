@@ -378,6 +378,18 @@ do
   flightRoll = nil
 end
 
+print("F is not offered when its RC Rate rounds back to the same value")
+do
+  -- RC Rate 1: x1.25 rounds to 1 again
+  resetFc()
+  fc[111].rcRates_1 = 1
+  flightRoll = {rcRate = 1}
+  openPage()
+  pump()
+  check("no F change without an RC Rate change", saveEnabled == false)
+  flightRoll = nil
+end
+
 print("P is raised at most 50% above the pilot's own P")
 do
   -- The response matches and stops bounce back 20% with no I-term push: more P
