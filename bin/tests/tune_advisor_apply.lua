@@ -4,7 +4,10 @@
 -- with the real codecs. Pins what reaches the FC: only the advised fields
 -- change, and nothing is written unless every read is complete, the FC still
 -- holds the tune the flights were flown on, and the model is disarmed; a
--- failed write never reaches EEPROM. Also pins that each stage is shown.
+-- failed write never reaches EEPROM; advice that would leave a setting's
+-- range is not offered; a full-stick RC Rate cut is one 20% step; P is
+-- raised at most 50% above the pilot's own P (from changes.csv). Also pins
+-- that each stage is shown.
 -- i18n tags are left unresolved: messages are matched by their key.
 
 local ROOT = "src/wfsuite/"
@@ -88,6 +91,7 @@ local EEPROM = 250
 
 -- The saved flights: one flight from the advisor's simulator fixture, whose
 -- tune is the other codecs' fixtures. Roll: F 65 -> 52, RC Rate 18 -> 23.
+local flightRoll = nil            -- fields overriding the fixture's roll axis when set
 local function fixtureFlights()
   local axes = {}
   for axis = 1, 3 do
@@ -95,11 +99,16 @@ local function fixtureFlights()
     local buf = {}
     for i, b in ipairs(m.simulatorResponse) do buf[i] = b end
     m.processReply(nil, buf)
+    if flightRoll and axis == 1 then
+      for k, v in pairs(flightRoll) do axes[axis][k] = v end
+    end
   end
   return {{date = "d", seconds = 147, axes = axes}}
 end
 tuneHistory.read = function() return fixtureFlights() end
 tuneHistory.logChanges = function(_, axis, changes) logged[#logged + 1] = {axis = axis, changes = changes} end
+local changeLog = {}              -- what changes.csv holds: {axis, key, from, to} rows
+tuneHistory.readChanges = function() return changeLog end
 
 -- The FC: each codec's simulator fixture, decoded
 local fc
@@ -333,6 +342,95 @@ do
   subs["tune_history.state"]("failed")
   pump()
   check("a failed read leaves Save available on the saved flights", saveEnabled == true)
+end
+
+print("Advice past a setting's limit is not given")
+do
+  -- F 60 -> 48 is below the firmware's F minimum of 50
+  resetFc()
+  fc[112].roll_f = 60
+  flightRoll = {F = 60}
+  openPage()
+  pump()
+  check("neither F nor RC Rate is offered below the F minimum", saveEnabled == false)
+
+  -- RC Rate 170 -> 213 is past the firmware's 200
+  resetFc()
+  fc[111].rcRates_1 = 170
+  flightRoll = {rcRate = 170}
+  openPage()
+  pump()
+  check("neither F nor RC Rate is offered past the RC Rate maximum", saveEnabled == false)
+  flightRoll = nil
+end
+
+print("A full-stick RC Rate cut is limited to one step")
+do
+  -- The response matches, but full stick reaches 30 of the 90 deg/s asked:
+  -- RC Rate comes down 20%, not to 30 deg/s
+  resetFc()
+  flightRoll = {ffGain = 1.0, fullCount = 200, fullSatCount = 200, fullMaxRate = 30}
+  openPage()
+  pump()
+  applyNow()
+  check("RC Rate drops by 20%", fc[111].rcRates_1 == 14, tostring(fc[111].rcRates_1))
+  check("F is left alone", fc[112].roll_f == 65, tostring(fc[112].roll_f))
+  flightRoll = nil
+end
+
+print("F is not offered when its RC Rate rounds back to the same value")
+do
+  -- RC Rate 1: x1.25 rounds to 1 again
+  resetFc()
+  fc[111].rcRates_1 = 1
+  flightRoll = {rcRate = 1}
+  openPage()
+  pump()
+  check("no F change without an RC Rate change", saveEnabled == false)
+  flightRoll = nil
+end
+
+print("P is raised at most 50% above the pilot's own P")
+do
+  -- The response matches and stops bounce back 20% with no I-term push: more P
+  local bouncy = {ffGain = 1.0, fullCount = 0, releases = 20, meanRebound = 0.2, meanIterm = 0}
+
+  resetFc()
+  flightRoll = bouncy
+  changeLog = {}
+  openPage()
+  pump()
+  local before = snapshot()
+  applyNow()
+  check("with no Apply record, P 105 -> 126", fc[112].roll_p == 126 and changedFields(before) == "roll_p",
+    tostring(fc[112].roll_p) .. " " .. changedFields(before))
+
+  -- The page raised the pilot's 75 twice already: 126 would be past 112
+  resetFc()
+  changeLog = {{axis = 1, key = "P", from = 75, to = 90}, {axis = 2, key = "P", from = 75, to = 90},
+    {axis = 1, key = "P", from = 90, to = 105}}
+  openPage()
+  pump()
+  check("no more P past 1.5x the pilot's own", saveEnabled == false)
+
+  -- The pilot set 105 by hand after the page's 75 -> 90: 105 is the pilot's own
+  resetFc()
+  changeLog = {{axis = 1, key = "P", from = 75, to = 90}}
+  openPage()
+  pump()
+  check("a P set by hand starts again from that P", saveEnabled == true)
+  changeLog = {}
+  flightRoll = nil
+end
+
+print("pilotValue follows only an unbroken chain of Apply changes")
+do
+  local log = {{axis = 1, key = "P", from = 40, to = 48}, {axis = 1, key = "F", from = 100, to = 80},
+    {axis = 1, key = "P", from = 48, to = 58}}
+  check("follows the chain back", tuneHistory.pilotValue(log, 1, "P", 58) == 40)
+  check("a different current value is the pilot's", tuneHistory.pilotValue(log, 1, "P", 65) == 65)
+  check("another axis is not followed", tuneHistory.pilotValue(log, 2, "P", 58) == 58)
+  check("no record: the current value", tuneHistory.pilotValue({}, 1, "P", 58) == 58)
 end
 
 print()
