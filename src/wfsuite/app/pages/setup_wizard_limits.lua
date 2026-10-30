@@ -31,6 +31,8 @@ local T = {
   head = "@i18n(app.modules.setup_wizard.lim_head_fmt)@",
   now = "@i18n(app.modules.setup_wizard.lim_now_fmt)@",
   flap = "@i18n(app.modules.setup_wizard.lim_flap)@",
+  howBind = "@i18n(app.modules.setup_wizard.lim_how_bind)@",
+  howBack = "@i18n(app.modules.setup_wizard.lim_how_back)@",
   set = "@i18n(app.modules.setup_wizard.lim_set)@",
   minLabel = "@i18n(app.modules.setup_wizard.lim_min)@",
   maxLabel = "@i18n(app.modules.setup_wizard.lim_max)@",
@@ -44,8 +46,8 @@ local T = {
 
 -- The intro's three pictures: the method, a step each.
 local HOW = {
-  {caption = "1. @i18n(app.modules.setup_wizard.lim_how_bind)@", pos = 0.8, stop = 0.86},
-  {caption = "2. @i18n(app.modules.setup_wizard.lim_how_back)@", pos = 0.62, stop = 0.86, back = true},
+  {caption = "1. " .. T.howBind, pos = 0.8, stop = 0.86},
+  {caption = "2. " .. T.howBack, pos = 0.62, stop = 0.86, back = true},
   {caption = "3. " .. T.set, pos = 0.62, stop = 0.86, saved = 0.62},
 }
 
