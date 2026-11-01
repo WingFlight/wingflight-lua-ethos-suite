@@ -472,7 +472,7 @@ local function newRig(sessionSource)
         mspEnabled = function() return false end }
     elseif name == "lib/settings_store.lua" then
       return { load = function() return {} end, simulatedApiVersionMode = function() return false end,
-        syncNameEnabled = function() return false end }
+        syncNameEnabled = function() return false end, addressedAccessEnabled = function() return false end, addressedWritesEnabled = function() return false end }
     elseif name == "lib/battery_profile_index.lua" then
       return { fromTelemetrySensor = function() return nil end, index0 = function() return nil end }
     elseif name == "lib/smartfuel_reserve.lua" then
@@ -499,7 +499,7 @@ local function newRig(sessionSource)
   local settingsStoreStub = {
     load = function() return {} end,
     simulatedApiVersionMode = function() return false end,
-    syncNameEnabled = function() return false end,
+    syncNameEnabled = function() return false end, addressedAccessEnabled = function() return false end, addressedWritesEnabled = function() return false end,
   }
   local debugLogStub = {
     print = function() end,

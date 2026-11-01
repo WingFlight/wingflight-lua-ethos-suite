@@ -108,7 +108,7 @@ local function installRequireStub()
       return {
         load = function() return {} end,
         simulatedApiVersionMode = function() return false end,
-        syncNameEnabled = function() return false end,
+        syncNameEnabled = function() return false end, addressedAccessEnabled = function() return false end, addressedWritesEnabled = function() return false end,
       }
     elseif name == "lib/model_preferences.lua" then
       return {
@@ -157,7 +157,7 @@ local function loadSession(source)
   local settingsStore = {
     load = function() return {} end,
     simulatedApiVersionMode = function() return false end,
-    syncNameEnabled = function() return false end,
+    syncNameEnabled = function() return false end, addressedAccessEnabled = function() return false end, addressedWritesEnabled = function() return false end,
   }
   local debugLog = { print = function() end, msp = function() end, format = function() end, enabled = function() return false end }
 
