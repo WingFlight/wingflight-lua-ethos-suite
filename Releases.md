@@ -1,3 +1,14 @@
+# 0.0.39
+
+Use with the 0.0.39 firmware (MSP API 22.15).
+Show both backup receivers on the Rx Backup diagnostics page: protocol and link per backup, which source is active, and each channel as backup 1 / backup 2. The Ports page adds Receiver: Backup 2 and lists the functions grouped like the Configurator (Receiver, Telemetry, ESC, Bus).
+Announce out-of-trim axes from the flight controller: "Trim nose up", "Trim left" and so on with a TRIM banner, and "Trim OK" once every axis is in trim. Switch it under Settings > Audio > Events > FC status.
+Tune Advisor: read the 0.0.39 firmware's packed reply (older firmware still works); wait for the last flight to be read before showing advice, with "Reading the last flight..." and a "Last flight not read" line if it fails; never advise past a setting's limit, keep F and RC Rate together, cut full-stick RC Rate one step at a time, and raise P at most 50% above your own setting.
+Pace the tune history capture after a disarm so telemetry sensors keep flowing, and never save two flights as one.
+Resend an MSP request on a lost frame straight away instead of after 0.8 s of silence, and keep a frame Ethos refuses to queue for the next tick: large pages such as the mixer rules load much faster on a lossy link.
+Default motor PWM to 50 Hz, matching the firmware.
+Fix the Setup Wizard's servo limits captions failing the i18n check.
+
 # 0.0.38
 
 Use with the 0.0.38 firmware (MSP API 22.15).
