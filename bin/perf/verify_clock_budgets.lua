@@ -199,7 +199,12 @@ local function replyFrames(cmd, declaredLen, chunks)
     for j = 1, #chunk do bytes[#bytes + 1] = chunk[j] end
   end
   local frames = {}
-  local start = { 0x60 | 0x10, cmd % 256, math.floor(cmd / 256) % 256, declaredLen }
+  local start = { 0x60 | 0x10, cmd % 256, math.floor(cmd / 256) % 256 }
+  if declaredLen >= 0xFF then -- the firmware's 16-bit form, as telemetry/msp_shared.c writes it
+    start[4], start[5], start[6] = 0xFF, declaredLen % 256, math.floor(declaredLen / 256) % 256
+  else
+    start[4] = declaredLen
+  end
   local pos = 1
   while pos <= #bytes and #start < 6 do
     start[#start + 1] = bytes[pos]

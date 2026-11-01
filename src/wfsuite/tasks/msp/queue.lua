@@ -361,7 +361,9 @@ function Queue:processQueue()
   local breaks, expected, got, bytes, size = common.mspRxBreakInfo()
   if breaks ~= self.rxBreaks then
     self.rxBreaks = breaks
-    if self.lastSent then self.resendNow = true end
+    -- Not while a newer reply is already being assembled: the resend would
+    -- throw it away.
+    if self.lastSent and not common.mspRxInProgress() then self.resendNow = true end
     -- MSP-log only: got past expected means frames were lost; gap is the
     -- time since the previous tick, long gaps pointing at an overflowed Ethos
     -- frame queue.

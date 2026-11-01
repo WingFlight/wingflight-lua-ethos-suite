@@ -128,7 +128,12 @@ local function replyFrames(cmd, declaredLen, chunks)
     for j = 1, #chunk do bytes[#bytes + 1] = chunk[j] end
   end
   local frames = {}
-  local start = { 0x60 | 0x10, cmd % 256, math.floor(cmd / 256) % 256, declaredLen } -- version 3 + start, sequence 0
+  local start = { 0x60 | 0x10, cmd % 256, math.floor(cmd / 256) % 256 } -- version 3 + start, sequence 0
+  if declaredLen >= 0xFF then -- the firmware's 16-bit form, as telemetry/msp_shared.c writes it
+    start[4], start[5], start[6] = 0xFF, declaredLen % 256, math.floor(declaredLen / 256) % 256
+  else
+    start[4] = declaredLen
+  end
   local pos = 1
   while pos <= #bytes and #start < 6 do
     start[#start + 1] = bytes[pos]
@@ -491,7 +496,11 @@ end
 -- Reads every reply frame queued on the transport, however many ticks the
 -- bounded poll loop needs for them.
 local function drainReplies(rig)
-  while #rig.transport.replies > 0 do rig.tick() end
+  while #rig.transport.replies > 0 do
+    -- An idle queue does not poll; frames left after a message completed are
+    -- read directly.
+    if rig.queue:isProcessed() then rig.common.mspPollReply() else rig.tick() end
+  end
 end
 
 do
@@ -543,6 +552,93 @@ do
   check("no attempt beyond maxRetries went out",
     framesForCommand(rig.transport.sent, msg.command) == 2,
     "frames=" .. framesForCommand(rig.transport.sent, msg.command))
+end
+
+-- A break and, in the same poll, the start of a newer reply to the same
+-- command (an earlier resend answered). Resending then would throw the newer
+-- reply away; the queue lets it finish instead.
+do
+  local rig = newRig()
+  local msg = newMessage(0x1E, { maxRetries = 2 })
+  rig.queue:add(msg)
+  rig.tick() -- attempt 1
+  for _, frame in ipairs(brokenReply(msg.command)) do
+    rig.transport.replies[#rig.transport.replies + 1] = frame
+  end
+  local newer = replyFrames(msg.command, 9, { {21, 22, 23, 24, 25, 26, 27, 28, 29} })
+  rig.transport.replies[#rig.transport.replies + 1] = newer[1]
+  clock.step = 0.0001 -- one poll slice takes every frame queued
+  rig.tick()
+  clock.step = 0.001
+  rig.tick()
+  check("no resend while a newer reply is being assembled",
+    framesForCommand(rig.transport.sent, msg.command) == 1,
+    "frames=" .. framesForCommand(rig.transport.sent, msg.command))
+  for i = 2, #newer do rig.transport.replies[#rig.transport.replies + 1] = newer[i] end
+  drainReplies(rig)
+  check("the newer reply is delivered",
+    #msg.replies == 1 and msg.replies[1][1] == 21 and msg.replies[1][9] == 29,
+    "replies=" .. #msg.replies .. " errors=" .. #msg.errors)
+end
+
+-- ---------------------------------------------------------------------------
+-- A late reply to an earlier command does not break the message in flight
+-- ---------------------------------------------------------------------------
+
+-- A single-frame reply to an earlier command, then the current message's
+-- multi-frame reply. The parser used to take the late frame as a complete
+-- reply, which cleared the request it was waiting for, so the real reply was
+-- discarded frame by frame and the message waited out its retry window.
+do
+  local rig = newRig()
+  local msg = newMessage(0x1E, { maxRetries = 2 })
+  rig.queue:add(msg)
+  rig.tick()
+  rig.transport.replies[#rig.transport.replies + 1] = replyFrames(0x0A, 0, {})[1]
+  for _, frame in ipairs(replyFrames(msg.command, 9, { {1, 2, 3, 4, 5, 6, 7, 8, 9} })) do
+    rig.transport.replies[#rig.transport.replies + 1] = frame
+  end
+  drainReplies(rig)
+  check("a late reply to another command leaves the current one deliverable",
+    #msg.replies == 1 and msg.replies[1][9] == 9 and #msg.errors == 0,
+    "replies=" .. #msg.replies .. " errors=" .. #msg.errors)
+  check("and costs no resend",
+    framesForCommand(rig.transport.sent, msg.command) == 1,
+    "frames=" .. framesForCommand(rig.transport.sent, msg.command))
+end
+
+-- A late error reply to another command does not abort the message in flight.
+do
+  local rig = newRig()
+  local msg = newMessage(0x1E, { maxRetries = 2 })
+  rig.queue:add(msg)
+  rig.tick()
+  local late = replyFrames(0x0A, 1, { {2} })
+  late[1][1] = late[1][1] | 0x80 -- error bit
+  for _, frame in ipairs(late) do rig.transport.replies[#rig.transport.replies + 1] = frame end
+  drainReplies(rig)
+  check("a late error reply to another command does not abort the message",
+    #msg.errors == 0, "errors=" .. #msg.errors .. " first=" .. tostring(msg.errors[1]))
+end
+
+-- A reply of 300 bytes announces its length as 0xFF and 16 bits, as the
+-- firmware writes it from 255 bytes.
+do
+  local rig = newRig()
+  local msg = newMessage(0x1E)
+  rig.queue:add(msg)
+  rig.tick()
+  local bytes = {}
+  for i = 1, 300 do bytes[i] = i % 256 end
+  local frames = replyFrames(msg.command, 300, { bytes })
+  check("precondition: the start frame carries 0xFF and a 16-bit length",
+    frames[1][4] == 0xFF and frames[1][5] == 0x2C and frames[1][6] == 0x01)
+  for _, frame in ipairs(frames) do rig.transport.replies[#rig.transport.replies + 1] = frame end
+  drainReplies(rig)
+  local got = msg.replies[1]
+  check("a 300-byte reply in the 16-bit length form is delivered whole",
+    got and #got == 300 and got[1] == 1 and got[300] == 300 % 256,
+    "replies=" .. #msg.replies .. " bytes=" .. (got and #got or 0))
 end
 
 -- ---------------------------------------------------------------------------
@@ -604,6 +700,32 @@ do
   check("a transport that refuses every frame still lets the message run out of attempts",
     #msg.errors == 1 and msg.errors[1] == "max_retries",
     "errors=" .. #msg.errors .. " first=" .. tostring(msg.errors[1]))
+end
+
+-- The refusal count belongs to the message. One abandoned after seven
+-- refusals must not leave the next with three: its frame would then be
+-- dropped on the fourth refusal instead of kept.
+do
+  local rig = newRig()
+  local refusals = 0
+  local sendFrame = rig.transport.mspSend
+  rig.transport.mspSend = function(payload, isWrite)
+    if refusals > 0 then refusals = refusals - 1; return false end
+    return sendFrame(payload, isWrite)
+  end
+  local first = newMessage(0x1E, { maxRetries = 0 })
+  rig.queue:add(first)
+  refusals = 7
+  for _ = 1, 7 do rig.tick() end
+  rig.queue:abortCurrent("aborted")
+  local second = newMessage(0x1F, { maxRetries = 0 })
+  rig.queue:add(second)
+  refusals = 7
+  for _ = 1, 8 do rig.tick() end
+  check("a new message starts with a fresh refusal count",
+    framesForCommand(rig.transport.sent, second.command) == 1,
+    "frames for the second message=" .. framesForCommand(rig.transport.sent, second.command) ..
+    " (0 means its frame was dropped at a cap left over from the first)")
 end
 
 -- ---------------------------------------------------------------------------
