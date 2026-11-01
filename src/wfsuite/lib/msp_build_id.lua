@@ -1,4 +1,4 @@
--- MSP2_WING_BUILD_ID (0x5F20): which firmware build this is, exactly.
+-- MSP2_WING_BUILD_ID (0x5F35): which firmware build this is, exactly.
 --
 -- The hash of the build's parameter manifest, 8 bytes, reported by the
 -- firmware's msp/msp_param.c. It names the codec pack (codecs/<id>.lua) that
@@ -14,7 +14,7 @@ end
 
 local msp_build_id = {}
 
-msp_build_id.READ_COMMAND = 0x5F20
+msp_build_id.READ_COMMAND = 0x5F35
 
 local CAP_BUILD_ID_VALID = 2
 
