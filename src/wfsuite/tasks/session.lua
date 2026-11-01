@@ -688,10 +688,15 @@ local function runHandshake(mspQueue, protocol)
 
   -- Opt-in (developer settings): read the firmware's build id first, so the
   -- codec pack for it (codecs/<id>.lua, shipped with the suite) is in place
-  -- before the rest of the handshake's reads go out.
-  if not isSim and not session.buildIdRead and settingsStore.addressedAccessEnabled(settingsStore.load()) then
-    session.buildIdRead = true
-    mspQueue:add(mspBuildId.buildReadMessage(function(id)
+  -- before the rest of the handshake's reads go out. Like the reads below, a
+  -- read dropped by arming ("cleared") is resumed on disarm; any other
+  -- outcome settles addressed access for this connection.
+  if not isSim and not session.buildIdRead and not handshakeInFlight.buildId
+      and settingsStore.addressedAccessEnabled(settingsStore.load()) then
+    handshakeInFlight.buildId = true
+    local queued = mspQueue:add(mspBuildId.buildReadMessage(function(id)
+      handshakeInFlight.buildId = false
+      session.buildIdRead = true
       session.buildId = id
       if not id then
         debugLog.print("[session] addressed access off: the firmware reports no build id")
@@ -714,8 +719,15 @@ local function runHandshake(mspQueue, protocol)
       debugLog.print("[session] addressed access: codec pack for build " .. id
         .. (virtual.writes and ", setters included" or ""))
     end, function(reason)
-      debugLog.print("[session] addressed access off: build id read failed (" .. tostring(reason) .. ")")
+      handshakeInFlight.buildId = false
+      if reason ~= "cleared" then
+        session.buildIdRead = true
+        debugLog.print("[session] addressed access off: build id read failed (" .. tostring(reason) .. ")")
+      end
     end))
+    if queued == false then
+      handshakeInFlight.buildId = false
+    end
   end
 
   if not session.handshake.apiVersion and not handshakeInFlight.apiVersion then
