@@ -59,8 +59,8 @@ local PORT_FUNCTIONS = {
   -- Receivers: primary, then the backups in the order they take over
   {id = 64, excl = 64, name = "@i18n(app.modules.ports.function_rx_serial)@", type = PORT_TYPE_AUTO},
   {id = 8388608, excl = 8388608, name = "@i18n(app.modules.ports.function_rx_input_backup)@", type = PORT_TYPE_AUTO},
-  -- FUNCTION_RX_INPUT_BACKUP2 (firmware serial.h): the second backup receiver, MSP API 22.16.
-  {id = 16777216, excl = 16777216, name = "@i18n(app.modules.ports.function_rx_input_backup2)@", type = PORT_TYPE_AUTO, minApiMinor = 16},
+  -- FUNCTION_RX_INPUT_BACKUP2 (firmware serial.h): the second backup receiver, MSP API 22.15 dev builds onwards.
+  {id = 16777216, excl = 16777216, name = "@i18n(app.modules.ports.function_rx_input_backup2)@", type = PORT_TYPE_AUTO, minApiMinor = 15},
   -- Telemetry to the radio
   {id = 32, excl = 4668, name = "@i18n(app.modules.ports.function_telem_smartport)@", type = PORT_TYPE_TELEM},
   {id = 4096, excl = 4668, name = "@i18n(app.modules.ports.function_telem_ibus)@", type = PORT_TYPE_TELEM},
