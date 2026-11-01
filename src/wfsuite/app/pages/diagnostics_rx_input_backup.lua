@@ -1,11 +1,13 @@
--- Tools -> Diagnostics -> Serial Rx (Backup) page.
+-- Tools -> Diagnostics -> Rx Backup page.
 --
--- Live link/channel readout for the backup-RX input (see app/pages/ports.lua's
--- RX_INPUT_BACKUP function and lib/msp_rx_input_backup_status.lua), for
--- bench-testing that a backup satellite is wired/bound correctly and to watch
--- it take over when the main RX link is pulled. Provider-selectable in
--- firmware (rx_input_backup_provider) - NONE/SBUS/FBUS/FPORT/FPORT2/EXBUS/
--- CRSF - the Protocol line below is already generic.
+-- Live link/channel readout for the backup receivers (see app/pages/ports.lua's
+-- RX_INPUT_BACKUP/RX_INPUT_BACKUP2 functions and
+-- lib/msp_rx_input_backup_status.lua), for bench-testing that a backup
+-- satellite is wired/bound correctly and to watch it take over when the main
+-- RX link is pulled. One protocol/link line pair per backup; each channel row
+-- shows every backup's value, "backup 1 / backup 2". Provider-selectable in
+-- firmware (rx_input_backup_provider, rx_input_backup2_provider) -
+-- NONE/SBUS/FBUS/FPORT/FPORT2/EXBUS/CRSF - the Protocol line is generic.
 --
 -- Read-only, so this uses app/diagnostics_common.lua's openReadOnlyPage()
 -- helper like diagnostics_fblstatus.lua does. Refreshed faster than that
@@ -31,7 +33,12 @@ local T = {
   activeBackup = "@i18n(app.modules.rx_input_backup_status.active_backup)@",
   notConfigured = "@i18n(app.modules.rx_input_backup_status.not_configured)@",
   channel = "@i18n(app.modules.rx_input_backup_status.channel)@",
+  backup = "@i18n(app.modules.rx_input_backup_status.backup)@",
 }
+
+-- Backup receivers the firmware can carry (RX_INPUT_BACKUP_COUNT); rows are
+-- built for all of them, a backup without a port reads "not configured".
+local BACKUP_COUNT = 2
 
 -- Keep in sync with wingflight-firmware's cli/settings.c
 -- lookupTableRxInputBackupProvider[] (same order, NONE=0 first).
@@ -64,8 +71,12 @@ local function open(opts)
       common.updateField(field, value)
     end
 
-    local protocolField = common.addValueLine(T.protocol, "-")
-    local linkField = common.addValueLine(T.link, "-")
+    local protocolFields, linkFields = {}, {}
+    for b = 1, BACKUP_COUNT do
+      local prefix = T.backup .. " " .. b .. " "
+      protocolFields[b] = common.addValueLine(prefix .. T.protocol, "-")
+      linkFields[b] = common.addValueLine(prefix .. T.link, "-")
+    end
     local activeField = common.addValueLine(T.activeSource, "-")
 
     local channelFields = {}
@@ -76,28 +87,48 @@ local function open(opts)
     local pending = false
 
     local function applyStatus(data)
-      if not data.enabled then
-        setFieldValue(protocolField, "-")
-        setFieldValue(linkField, T.notConfigured)
-        setFieldValue(activeField, "-")
-      else
-        setFieldValue(protocolField, PROVIDER_NAMES[data.provider] or tostring(data.provider))
+      local ports = data.ports or {}
+      local anyEnabled = false
 
-        setFieldValue(linkField, data.linkUp and T.linkUp or T.linkDown)
-        if linkField and linkField.color then
-          linkField:color(data.linkUp and GREEN or RED)
-        end
-
-        local isBackup = data.activeSource == "backup"
-        setFieldValue(activeField, isBackup and T.activeBackup or T.activeMain)
-        if activeField and activeField.color then
-          activeField:color(isBackup and RED or GREEN)
+      for b = 1, BACKUP_COUNT do
+        local port = ports[b]
+        if not port or not port.enabled then
+          setFieldValue(protocolFields[b], "-")
+          setFieldValue(linkFields[b], T.notConfigured)
+          if linkFields[b] and linkFields[b].color then
+            linkFields[b]:color(WHITE)
+          end
+        else
+          anyEnabled = true
+          setFieldValue(protocolFields[b], PROVIDER_NAMES[port.provider] or tostring(port.provider))
+          setFieldValue(linkFields[b], port.linkUp and T.linkUp or T.linkDown)
+          if linkFields[b] and linkFields[b].color then
+            linkFields[b]:color(port.linkUp and GREEN or RED)
+          end
         end
       end
 
+      if not anyEnabled then
+        setFieldValue(activeField, "-")
+      else
+        local activeBackup = data.activeBackup
+        setFieldValue(activeField, activeBackup and (T.activeBackup .. " " .. activeBackup) or T.activeMain)
+        if activeField and activeField.color then
+          activeField:color(activeBackup and RED or GREEN)
+        end
+      end
+
+      -- One row per channel: every backup's value, in failover order
       for i = 1, MAX_CHANNELS do
-        local value = data.channels and data.channels[i]
-        setFieldValue(channelFields[i], value ~= nil and tostring(value) or "-")
+        local text = nil
+        for b = 1, BACKUP_COUNT do
+          local port = ports[b]
+          local value = port and port.channels and port.channels[i]
+          if value ~= nil then
+            text = text and (text .. " / " .. tostring(value)) or tostring(value)
+          end
+        end
+        setFieldValue(channelFields[i], text or "-")
       end
     end
 
