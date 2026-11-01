@@ -29,6 +29,25 @@ Requires a running background task and a flight controller connection.
 | Saved; written to flash on disarm | Shown after saving while armed: the port settings were sent, but the flight controller refuses the EEPROM write while armed and commits them when you disarm. Not an error. |
 | No serial ports reported by FC. | TODO: explain behaviour, displayed units, range and conditions. |
 
+## Port functions
+
+Each port's function dropdown lists the same functions as the Configurator's
+Ports tab, in the same groups and with the same "Group: Item" labels:
+
+| Group | Functions |
+| --- | --- |
+| Core | Disabled, MSP, GPS, Blackbox |
+| Receivers, in failover order | Receiver: Primary, Receiver: Backup 1, Receiver: Backup 2 |
+| Telemetry to the radio | Telemetry: SmartPort, Telemetry: iBus, Telemetry: HoTT (FrSky, MAVLink and LTM only show on a port already set to them) |
+| ESC links | ESC: Telemetry, ESC: SRXL2 |
+| Buses the flight controller hosts | Bus: S.BUS Output, Bus: F.BUS Master, Bus: S.PORT Master, Bus: CRSF Sensors |
+
+A function that another port already holds is greyed out. *Receiver: Backup 2*
+(the second backup receiver, PR #277) needs MSP API 22.15 or later;
+*Bus: CRSF Sensors* needs 22.10 or later. The backup receivers take over when
+the primary receiver's signal is lost, backup 1 first; see the *Rx Backup*
+diagnostics page.
+
 ## Notes
 
 - A *Save* or *Reload* confirmation that is still on screen when you leave the
