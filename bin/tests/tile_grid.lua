@@ -71,7 +71,7 @@ for _, font in ipairs({FONT_XS, FONT_S}) do
       assert(textWidth(result) <= maxWidth, "Text exceeds available width")
       if result ~= text and result ~= "" then
         equal(result:sub(-3), "...")
-        assert(not result:find("%s%.%.%.$"), "Whitespace before ellipsis")
+        assert(not result:find("[ \t\r\n]%.%.%.$"), "Whitespace before ellipsis")   -- ASCII: %s may match UTF-8 bytes
       end
     end
     local result = grid.fitLabel(text, 110, font)

@@ -1,0 +1,7 @@
+{
+  "id": "dashboard-text",
+  "name": "Check the dashboard text fitting",
+  "step": "Check the dashboard text fitting",
+  "script": "bin/tests/dashboard_text.lua",
+  "rationale": "utils.fitText() trims a label character by character until it fits. It stripped trailing\nspace with %s, which follows the C library's isspace(): where that matches 0x85 or 0xA0,\nthe pattern also ate the last byte of a UTF-8 character such as U+4F20 (E4 BC A0) and\nhanded the font a split character. The harness drives Latin, CJK and emoji labels\nthrough every width and checks that each result is valid UTF-8 and fits. It was not a\nCI job before, so it went red unnoticed when the dashboard started reading the screen\nsize from system.getVersion(); its fixture mocks that now."
+}

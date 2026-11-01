@@ -16,6 +16,8 @@ lcd = {
   color = function() end,
   drawText = function(x, y, text) draws[#draws + 1] = {x=x, y=y, text=text, width=measure(text)} end,
 }
+-- The radio's own screen size (getFontListsForResolution); the same 480x320 as the window.
+system = {getVersion = function() return {lcdWidth = 480, lcdHeight = 320} end}
 package.loaded['wfsuite.lib.require'] = function() return {version={}} end
 local context = assert(loadfile('src/wfsuite/widgets/dashboard/context.lua'))()
 local utils = context.widgets.dashboard.utils

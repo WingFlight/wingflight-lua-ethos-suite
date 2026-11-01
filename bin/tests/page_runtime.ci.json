@@ -1,0 +1,7 @@
+{
+  "id": "page-runtime",
+  "name": "Check the page runtime",
+  "step": "Check the page runtime",
+  "script": "bin/tests/page_runtime.lua",
+  "rationale": "app/page_runtime.lua: save gates, keyboard and confirmation, partial and reload\nfailures, retry, cleanup and prefetched pages. Passing, but not a CI job until now."
+}
