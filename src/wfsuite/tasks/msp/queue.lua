@@ -127,6 +127,9 @@ end
 
 function Queue.new(common, sharedDebugLog)
   debugLog = sharedDebugLog
+  -- A new queue is a new link (tasks/background.lua makes one on a transport
+  -- swap): version 2 until setFirmwareApi() says otherwise.
+  common.setFraming(2)
   return setmetatable({
     common = common,
     pending = {},
@@ -134,13 +137,41 @@ function Queue.new(common, sharedDebugLog)
     lastSent = nil,
     retryCount = 0,
     resendNow = false,
+    -- Off until the session has read an API version that has the firmware
+    -- fix this relies on; see Queue:setFirmwareApi().
+    resendOnBreak = false,
     rxFrames = 0,
     -- The shared common instance outlives a queue (tasks/background.lua
     -- makes a new queue on a transport swap), so start from its count or the
     -- first message would see every break it ever recorded as a new one.
     rxBreaks = (common.mspRxBreakInfo()),
+    framingFallbacks = common.mspFramingFallbackCount(),
     lastTickAt = nil,
   }, Queue)
+end
+
+-- Called by tasks/session.lua once MSP_API_VERSION has answered, and with nil
+-- on a disconnect. Kept in step with the Rotorflight suite's queue; only the
+-- API versions differ.
+--
+-- Resending on a broken reply needs the firmware to answer a request that
+-- replaces a reply in progress with a reply of its own, START frame first:
+-- wingflight-firmware #173, MSP API 22.12 (snapshot 0.0.30). Below that the
+-- resend's answer comes without a START frame and is discarded, so the queue
+-- waits for retryDelay of silence instead.
+--
+-- Version 3 of the framing (tasks/msp/common.lua) is offered from API 22.15.
+-- Snapshot 0.0.38 already reports 22.15 without having it
+-- (wingflight-firmware #251 came in 0.0.39); it refuses version 3 once, and
+-- the link falls back to version 2 for its lifetime.
+local function apiAtLeast(major, minor, wantMajor, wantMinor)
+  return major ~= nil and minor ~= nil
+    and (major > wantMajor or (major == wantMajor and minor >= wantMinor))
+end
+
+function Queue:setFirmwareApi(major, minor)
+  self.resendOnBreak = apiAtLeast(major, minor, 22, 12)
+  self.common.setFraming(apiAtLeast(major, minor, 22, 15) and 3 or 2)
 end
 
 function Queue:isProcessed()
@@ -347,21 +378,36 @@ function Queue:processQueue()
     if self.lastSent then self.lastSent = now end
   end
 
+  -- The firmware refused version 3 and the link is back on version 2 (see
+  -- tasks/msp/common.lua's receivedReply()). The request was answered at once
+  -- with a refusal, so there is nothing to wait for: send it again now. The
+  -- refused attempt is not counted -- the request never reached the command.
+  local fallbacks = common.mspFramingFallbackCount()
+  if fallbacks ~= self.framingFallbacks then
+    self.framingFallbacks = fallbacks
+    if self.lastSent then
+      self.resendNow = true
+      if self.retryCount > 0 then self.retryCount = self.retryCount - 1 end
+    end
+    if debugLog then debugLog.msp("V2", msg.command, EMPTY_PAYLOAD, "firmware refused framing 3") end
+  end
+
   -- A reply dropped part-way (a lost frame breaks the sequence) is resent on
-  -- the next tick, not after retryDelay of silence. The rest of the broken
-  -- reply keeps arriving and is discarded, and the firmware answers the
-  -- resend with its own START frame as soon as the request reaches it
-  -- (telemetry/msp_shared.c's processMspPacket() clears headerSent when a
-  -- new request replaces a reply in progress; snapshot 0.0.30 and later), so
-  -- the old reply's tail cannot poison the new one. Waiting for silence cost
-  -- retryDelay plus the rest of the old reply on every lost frame -- over a
-  -- second for a long reply; this costs one round trip. The break still
-  -- spends an attempt, so a link that keeps losing frames ends in
-  -- max_retries as before.
+  -- the next tick, not after retryDelay of silence, on firmware that answers
+  -- a replacement request with its own START frame (see setFirmwareApi()).
+  -- The rest of the broken reply keeps arriving and is discarded, so it
+  -- cannot poison the new one. Waiting for silence cost retryDelay plus the
+  -- rest of the old reply on every lost frame -- over a second for a long
+  -- reply; this costs one round trip. The break still spends an attempt, so a
+  -- link that keeps losing frames ends in max_retries as before. No resend
+  -- while a newer reply is already being assembled: it would throw that reply
+  -- away.
   local breaks, expected, got, bytes, size = common.mspRxBreakInfo()
   if breaks ~= self.rxBreaks then
     self.rxBreaks = breaks
-    if self.lastSent then self.resendNow = true end
+    if self.lastSent and self.resendOnBreak and not common.mspRxInProgress() then
+      self.resendNow = true
+    end
     -- MSP-log only: got past expected means frames were lost; gap is the
     -- time since the previous tick, long gaps pointing at an overflowed Ethos
     -- frame queue.

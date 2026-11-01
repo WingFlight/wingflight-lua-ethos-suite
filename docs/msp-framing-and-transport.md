@@ -1,5 +1,13 @@
 # MSP Framing and Transport Handling in Rotorflight Suite
 
+> **Wingflight note.** This document was written for the Rotorflight suite and describes the MSPv1/MSPv2
+> headers. Wingflight's `tasks/msp/common.lua` speaks only the compact framing, version `11` in the status
+> byte: a 3-byte header of 16-bit command and 8-bit length (`0xFF` followed by a 16-bit length for long
+> messages), no flags byte and no CRC. The first 6-byte S.Port frame therefore carries 2 payload bytes.
+> The chunking, sequencing and reassembly below still apply; only the header layout differs. The
+> firmware side is `telemetry/msp_shared.c` in wingflight-firmware, and the Technical Reference page
+> "MSP over Telemetry" on doc.wingflight.org has the frame budget and the measured link limits.
+
 This document describes how Rotorflight Suite currently turns an MSP API request into one or more telemetry transport frames, and how replies are reassembled. It is written for developers considering moving the MSP framing/splitting/reassembly code out of Lua and into Ethos firmware.
 
 The relevant Lua files are:
