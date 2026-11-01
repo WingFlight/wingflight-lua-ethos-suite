@@ -1,3 +1,9 @@
+# 0.0.40
+
+Use with the 0.0.40 firmware (MSP API 22.15); the 0.0.38 and 0.0.39 firmware work too.
+Use the compact MSP-over-telemetry framing on firmware that has it (0.0.39 and later): one frame fewer on most messages, and short reads about 13% faster over FBUS. 0.0.38 boards fall back to the standard framing. The 0.0.39 suite was meant to include this and did not.
+Fix a page waiting out its retry, or failing, when a late reply to an earlier request arrives, and keep a reply that is already arriving when a lost frame would trigger a resend.
+
 # 0.0.39
 
 Use with the 0.0.39 firmware (MSP API 22.15).
