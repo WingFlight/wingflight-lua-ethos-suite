@@ -33,10 +33,13 @@ local PARAM_READ = 0x5F37
 local PARAM_WRITE = 0x5F38
 local SYSTEM_CONFIG_PGN = 18
 local CHUNK = 128 -- MSP-over-telemetry buffers are 192 in / 320 out
-local PACK_FORMAT = 2
+local PACK_FORMAT = 3
 
 -- op kinds (wf_lua_pack.py)
 local K_FIELD, K_CONST, K_SKIP, K_DATA, K_SELECT, K_STR_OUT, K_STR_IN = 1, 2, 3, 4, 5, 6, 7
+-- A field the firmware stores clamped (constrain(), MIN()): decoded as K_FIELD
+-- with clampLow / clampHigh, so every field path treats it as one.
+local K_CLAMPED = 8
 
 -- op flags (wf_lua_pack.py)
 local F_OPTIONAL, F_INDEXED, F_SIGNED, F_WIRE_SIGNED = 1, 2, 4, 8
@@ -109,10 +112,16 @@ local function decode(s)
   for i = 1, nops do
     local kind = s:byte(p)
     local op
-    if kind == K_FIELD then
-      op = { kind = kind, w = s:byte(p + 1), pgn = strUInt(s, p + 2, 2), off = strUInt(s, p + 4, 2),
+    if kind == K_FIELD or kind == K_CLAMPED then
+      op = { kind = K_FIELD, w = s:byte(p + 1), pgn = strUInt(s, p + 2, 2), off = strUInt(s, p + 4, 2),
              size = s:byte(p + 6), flags = s:byte(p + 7) }
       p = p + 8
+      if kind == K_CLAMPED then
+        -- an absent bound is the s32 limit, which no wire value passes
+        op.clampLow = toSigned(strUInt(s, p, 4), 4)
+        op.clampHigh = toSigned(strUInt(s, p + 4, 4), 4)
+        p = p + 8
+      end
       if hasFlag(op.flags, F_CHECK) then
         op.min = toSigned(strUInt(s, p, 4), 4)
         op.max = toSigned(strUInt(s, p + 4, 4), 4)
@@ -430,7 +439,7 @@ function Virtual:expand(msg, queue)
         pos = pos + w
       elseif op.kind ~= K_FIELD and op.kind ~= K_SELECT then
         return fail("op_in_setter")
-      elseif w == op.size and not op.min then
+      elseif w == op.size and not op.min and not op.clampLow then
         -- the bytes as sent, whatever the width (64-bit fields too)
         local bytes = {}
         for k = 1, w do bytes[k] = data[pos + k - 1] end
@@ -441,6 +450,10 @@ function Virtual:expand(msg, queue)
         if hasFlag(op.flags, F_WIRE_SIGNED) then v = toSigned(v, w) end
         pos = pos + w
         if op.min and (v < op.min or v > op.max) then return fail("refused") end
+        if op.clampLow then
+          -- stored clamped, as constrain() / MIN() in the firmware's setter
+          if v < op.clampLow then v = op.clampLow elseif v > op.clampHigh then v = op.clampHigh end
+        end
         local bytes = {}
         putInt(bytes, v, op.size) -- the store truncates to the field
         patch(op.pgn, placed[i], bytes)
