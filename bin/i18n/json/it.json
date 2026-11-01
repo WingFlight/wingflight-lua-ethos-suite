@@ -3372,102 +3372,109 @@
           "max_length": 8
         },
         "function_esc_sensor": {
-          "english": "ESC Sensor",
-          "translation": "ESC Sensor",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 10
+          "english": "ESC: Telemetry",
+          "translation": "ESC: Telemetry",
+          "needs_translation": true,
+          "max_length": 14,
+          "reverse_text": false
         },
         "function_fbus_out": {
-          "english": "FBus Out",
-          "translation": "FBus Out",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 8
+          "english": "Bus: F.BUS Master",
+          "translation": "Bus: F.BUS Master",
+          "needs_translation": true,
+          "max_length": 17,
+          "reverse_text": false
         },
         "function_rx_serial": {
-          "english": "RX Serial",
-          "translation": "RX Seriale",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 9
+          "english": "Receiver: Primary",
+          "translation": "Receiver: Primary",
+          "needs_translation": true,
+          "max_length": 17,
+          "reverse_text": false
         },
         "function_sbus_out": {
-          "english": "SBus Out",
-          "translation": "SBus Out",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 8
+          "english": "Bus: S.BUS Output",
+          "translation": "Bus: S.BUS Output",
+          "needs_translation": true,
+          "max_length": 17,
+          "reverse_text": false
         },
         "function_sport_input": {
-          "english": "S.PORT Master",
-          "translation": "S.PORT Principale",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 13
-        },
-        "function_srxl2_esc": {
-          "english": "SRXL2 ESC",
-          "translation": "SRXL2 ESC",
-          "needs_translation": true,
-          "max_length": 9,
-          "reverse_text": false
-        },
-        "function_crsf_sensors": {
-          "english": "CRSF Sensors",
-          "translation": "CRSF Sensors",
-          "needs_translation": true,
-          "max_length": 12,
-          "reverse_text": false
-        },
-        "function_rx_input_backup": {
-          "english": "Serial Rx (Backup)",
-          "translation": "Serial Rx (Backup)",
+          "english": "Bus: S.PORT Master",
+          "translation": "Bus: S.PORT Master",
           "needs_translation": true,
           "max_length": 18,
           "reverse_text": false
         },
-        "function_telem_frsky": {
-          "english": "Telemetry FrSky",
-          "translation": "Telem. FrSky",
-          "needs_translation": false,
+        "function_srxl2_esc": {
+          "english": "ESC: SRXL2",
+          "translation": "ESC: SRXL2",
+          "needs_translation": true,
+          "max_length": 10,
+          "reverse_text": false
+        },
+        "function_crsf_sensors": {
+          "english": "Bus: CRSF Sensors",
+          "translation": "Bus: CRSF Sensors",
+          "needs_translation": true,
+          "max_length": 17,
+          "reverse_text": false
+        },
+        "function_rx_input_backup": {
+          "english": "Receiver: Backup 1",
+          "translation": "Receiver: Backup 1",
+          "needs_translation": true,
+          "max_length": 18,
+          "reverse_text": false
+        },
+        "function_rx_input_backup2": {
+          "english": "Receiver: Backup 2",
+          "translation": "Receiver: Backup 2",
+          "needs_translation": true,
           "reverse_text": false,
-          "max_length": 15
+          "max_length": 18
+        },
+        "function_telem_frsky": {
+          "english": "Telemetry: FrSky",
+          "translation": "Telemetry: FrSky",
+          "needs_translation": true,
+          "max_length": 16,
+          "reverse_text": false
         },
         "function_telem_hott": {
-          "english": "Telemetry HoTT",
-          "translation": "Telem. HoTT",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 14
+          "english": "Telemetry: HoTT",
+          "translation": "Telemetry: HoTT",
+          "needs_translation": true,
+          "max_length": 15,
+          "reverse_text": false
         },
         "function_telem_ibus": {
-          "english": "Telemetry iBus",
-          "translation": "Telem. iBus",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 14
+          "english": "Telemetry: iBus",
+          "translation": "Telemetry: iBus",
+          "needs_translation": true,
+          "max_length": 15,
+          "reverse_text": false
         },
         "function_telem_ltm": {
-          "english": "Telemetry LTM",
-          "translation": "Telem. LTM",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 13
+          "english": "Telemetry: LTM",
+          "translation": "Telemetry: LTM",
+          "needs_translation": true,
+          "max_length": 14,
+          "reverse_text": false
         },
         "function_telem_mavlink": {
-          "english": "Telemetry MAVLink",
-          "translation": "Telem. MAVLink",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 17
+          "english": "Telemetry: MAVLink",
+          "translation": "Telemetry: MAVLink",
+          "needs_translation": true,
+          "max_length": 18,
+          "reverse_text": false
         },
         "function_telem_smartport": {
-          "english": "Telemetry SmartPort",
-          "translation": "Telem. SmartPort",
-          "needs_translation": false,
-          "reverse_text": false,
-          "max_length": 19
+          "english": "Telemetry: SmartPort",
+          "translation": "Telemetry: SmartPort",
+          "needs_translation": true,
+          "max_length": 20,
+          "reverse_text": false
         },
         "load_error_prefix": {
           "english": "Load error:",
@@ -6152,10 +6159,10 @@
       },
       "rx_input_backup_status": {
         "active_backup": {
-          "english": "Active: Backup RX",
-          "translation": "Active: Backup RX",
+          "english": "Active: Backup",
+          "translation": "Active: Backup",
           "needs_translation": true,
-          "max_length": 17,
+          "max_length": 14,
           "reverse_text": false
         },
         "active_main": {
@@ -6171,6 +6178,13 @@
           "needs_translation": true,
           "max_length": 13,
           "reverse_text": false
+        },
+        "backup": {
+          "english": "Backup",
+          "translation": "Backup",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 6
         },
         "channel": {
           "english": "CH",

@@ -46,29 +46,38 @@ local BAUD_RATES = {
   "400000", "460800", "500000", "921600", "1000000", "1500000", "2000000", "2470000",
 }
 
+-- Listed in this order, grouped like the Configurator's Ports tab: core
+-- functions, the receivers in failover order, telemetry to the radio, ESC
+-- links, and the buses the flight controller hosts.
 -- hide: not compiled into Wingflight firmware. Listed only for a port that is
 -- still set to it, so it shows its real name instead of "Custom".
 local PORT_FUNCTIONS = {
   {id = 0, excl = 0, name = "@i18n(app.modules.ports.function_disabled)@", type = PORT_TYPE_DISABLED},
   {id = 1, excl = 1, name = "MSP", type = PORT_TYPE_MSP},
   {id = 2, excl = 2, name = "GPS", type = PORT_TYPE_GPS},
-  {id = 64, excl = 64, name = "@i18n(app.modules.ports.function_rx_serial)@", type = PORT_TYPE_AUTO},
-  {id = 1024, excl = 1024, name = "@i18n(app.modules.ports.function_esc_sensor)@", type = PORT_TYPE_AUTO},
   {id = 128, excl = 128, name = "@i18n(app.modules.ports.function_blackbox)@", type = PORT_TYPE_BLACKBOX},
-  {id = 262144, excl = 262144, name = "@i18n(app.modules.ports.function_sbus_out)@", type = PORT_TYPE_AUTO},
-  {id = 524288, excl = 524288, name = "@i18n(app.modules.ports.function_fbus_out)@", type = PORT_TYPE_AUTO},
-  {id = 1048576, excl = 1048576, name = "@i18n(app.modules.ports.function_sport_input)@", type = PORT_TYPE_AUTO},
-  {id = 2097152, excl = 2097152, name = "@i18n(app.modules.ports.function_srxl2_esc)@", type = PORT_TYPE_AUTO},
-  -- FUNCTION_CRSF_SENSORS (firmware serial.h, added by rotorflight-firmware #497). MSP API 12.10 was
-  -- already set before it, so a 12.10 board built earlier lacks it too; this gate only excludes 12.09 (#2497).
-  {id = 4194304, excl = 4194304, name = "@i18n(app.modules.ports.function_crsf_sensors)@", type = PORT_TYPE_AUTO, minApiMinor = 10},
+  -- Receivers: primary, then the backups in the order they take over
+  {id = 64, excl = 64, name = "@i18n(app.modules.ports.function_rx_serial)@", type = PORT_TYPE_AUTO},
   {id = 8388608, excl = 8388608, name = "@i18n(app.modules.ports.function_rx_input_backup)@", type = PORT_TYPE_AUTO},
-  {id = 4, excl = 4668, name = "@i18n(app.modules.ports.function_telem_frsky)@", type = PORT_TYPE_TELEM, hide = true},
+  -- FUNCTION_RX_INPUT_BACKUP2 (firmware serial.h): the second backup receiver, MSP API 22.15 dev builds onwards.
+  {id = 16777216, excl = 16777216, name = "@i18n(app.modules.ports.function_rx_input_backup2)@", type = PORT_TYPE_AUTO, minApiMinor = 15},
+  -- Telemetry to the radio
   {id = 32, excl = 4668, name = "@i18n(app.modules.ports.function_telem_smartport)@", type = PORT_TYPE_TELEM},
   {id = 4096, excl = 4668, name = "@i18n(app.modules.ports.function_telem_ibus)@", type = PORT_TYPE_TELEM},
   {id = 8, excl = 4668, name = "@i18n(app.modules.ports.function_telem_hott)@", type = PORT_TYPE_TELEM},
+  {id = 4, excl = 4668, name = "@i18n(app.modules.ports.function_telem_frsky)@", type = PORT_TYPE_TELEM, hide = true},
   {id = 512, excl = 4668, name = "@i18n(app.modules.ports.function_telem_mavlink)@", type = PORT_TYPE_MAVLINK, hide = true},
   {id = 16, excl = 4668, name = "@i18n(app.modules.ports.function_telem_ltm)@", type = PORT_TYPE_TELEM, hide = true},
+  -- ESC links
+  {id = 1024, excl = 1024, name = "@i18n(app.modules.ports.function_esc_sensor)@", type = PORT_TYPE_AUTO},
+  {id = 2097152, excl = 2097152, name = "@i18n(app.modules.ports.function_srxl2_esc)@", type = PORT_TYPE_AUTO},
+  -- Buses the flight controller hosts
+  {id = 262144, excl = 262144, name = "@i18n(app.modules.ports.function_sbus_out)@", type = PORT_TYPE_AUTO},
+  {id = 524288, excl = 524288, name = "@i18n(app.modules.ports.function_fbus_out)@", type = PORT_TYPE_AUTO},
+  {id = 1048576, excl = 1048576, name = "@i18n(app.modules.ports.function_sport_input)@", type = PORT_TYPE_AUTO},
+  -- FUNCTION_CRSF_SENSORS (firmware serial.h, added by rotorflight-firmware #497). MSP API 12.10 was
+  -- already set before it, so a 12.10 board built earlier lacks it too; this gate only excludes 12.09 (#2497).
+  {id = 4194304, excl = 4194304, name = "@i18n(app.modules.ports.function_crsf_sensors)@", type = PORT_TYPE_AUTO, minApiMinor = 10},
 }
 
 local BAUD_OPTIONS = {
