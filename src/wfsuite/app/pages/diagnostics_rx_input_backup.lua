@@ -118,17 +118,20 @@ local function open(opts)
         end
       end
 
-      -- One row per channel: every backup's value, in failover order
+      -- One row per channel: every backup's value, in failover order. A
+      -- backup without a value keeps its position ("- / 1500") so the reader
+      -- can tell which receiver a number belongs to.
       for i = 1, MAX_CHANNELS do
         local text = nil
+        local any = false
         for b = 1, BACKUP_COUNT do
           local port = ports[b]
           local value = port and port.channels and port.channels[i]
-          if value ~= nil then
-            text = text and (text .. " / " .. tostring(value)) or tostring(value)
-          end
+          any = any or value ~= nil
+          local rendered = value ~= nil and tostring(value) or "-"
+          text = text and (text .. " / " .. rendered) or rendered
         end
-        setFieldValue(channelFields[i], text or "-")
+        setFieldValue(channelFields[i], any and text or "-")
       end
     end
 

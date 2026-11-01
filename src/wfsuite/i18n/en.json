@@ -6658,17 +6658,17 @@
           "needs_translation": false,
           "translation": "Active: Main RX"
         },
-        "backup": {
-          "english": "Backup",
-          "max_length": 6,
-          "needs_translation": false,
-          "translation": "Backup"
-        },
         "active_source": {
           "english": "Active Source",
           "max_length": 13,
           "needs_translation": false,
           "translation": "Active Source"
+        },
+        "backup": {
+          "english": "Backup",
+          "max_length": 6,
+          "needs_translation": false,
+          "translation": "Backup"
         },
         "channel": {
           "english": "CH",
