@@ -66,6 +66,7 @@ lua_(`
   FIRMWARE_WRITES = {}  -- cmd -> { {pgn, off, bytes}, ... } the firmware's setter stores
   FIRMWARE_ERRORS = {}  -- cmd -> true: the firmware answers MSP_RESULT_ERROR
   local pendingReply
+  rxFrames = 0
   COMMON = {
     mspSendRequest = function(cmd, payload)
       WIRE[#WIRE + 1] = cmd
@@ -96,11 +97,16 @@ lua_(`
     mspPollReply = function()
       if not pendingReply then return nil end
       local r = pendingReply; pendingReply = nil
+      rxFrames = rxFrames + 1
       local copy = {}
       for i = 1, #r[2] do copy[i] = r[2][i] end
       return r[1], copy, r[3]
     end,
     mspClearBufs = function() pendingReply = nil end,
+    -- the transport's receive statistics: a frame per reply, never a broken sequence
+    mspRxFrameCount = function() return rxFrames end,
+    mspRxBreakInfo = function() return 0 end,
+    mspClearTxBuf = function() end,
   }
   function drain(q)
     local guard = 0
