@@ -114,42 +114,24 @@ end
 
 -- Builds the reply frames a flight controller would put on the wire, in the
 -- layout tasks/msp/common.lua's receivedReply() parses: a start frame carrying
--- status, command and length plus the first two payload bytes (the compact
--- header leaves room for them in a 6-byte S.Port frame), then continuation
--- frames carrying five payload bytes each, numbered from 1.
+-- status, flags, command and length, then continuation frames carrying payload
+-- bytes, numbered from 1.
 --
--- `chunks` is a list of byte lists; their bytes are concatenated and re-cut to
--- that layout, so a caller only decides what the payload is. A start frame is
--- left short rather than padded: receivedReply() counts payload bytes up to the
--- declared length, so padding would be taken for data.
+-- `chunks` is a list of byte lists; one continuation frame is emitted per entry.
 local function replyFrames(cmd, declaredLen, chunks)
-  local bytes = {}
-  for _, chunk in ipairs(chunks) do
-    for j = 1, #chunk do bytes[#bytes + 1] = chunk[j] end
-  end
   local frames = {}
-  local start = { 0x60 | 0x10, cmd % 256, math.floor(cmd / 256) % 256 } -- version 3 + start, sequence 0
-  if declaredLen >= 0xFF then -- the firmware's 16-bit form, as telemetry/msp_shared.c writes it
-    start[4], start[5], start[6] = 0xFF, declaredLen % 256, math.floor(declaredLen / 256) % 256
-  else
-    start[4] = declaredLen
-  end
-  local pos = 1
-  while pos <= #bytes and #start < 6 do
-    start[#start + 1] = bytes[pos]
-    pos = pos + 1
-  end
+  local start = {}
+  start[1] = 0x40 | 0x10 -- version bits (2 << 5) + start flag, sequence 0
+  start[2] = 0            -- flags, skipped by receivedReply()
+  start[3] = cmd % 256
+  start[4] = math.floor(cmd / 256) % 256
+  start[5] = declaredLen % 256
+  start[6] = math.floor(declaredLen / 256) % 256
   frames[1] = start
-  local seq = 1
-  while pos <= #bytes do
-    local frame = { seq & 0x0F }
-    for _ = 1, 5 do
-      if pos > #bytes then break end
-      frame[#frame + 1] = bytes[pos]
-      pos = pos + 1
-    end
+  for i, chunk in ipairs(chunks) do
+    local frame = { i & 0x0F } -- sequence continues from 1
+    for j = 1, #chunk do frame[j + 1] = chunk[j] end
     frames[#frames + 1] = frame
-    seq = seq + 1
   end
   return frames
 end
@@ -163,6 +145,9 @@ local function newRig(opts)
   local transport = newTransport(opts)
   common.setTransport(transport)
   local queue = Queue.new(common, debugLog)
+  -- opts.api = {major, minor}: what the session would pass once MSP_API_VERSION
+  -- has answered. Left out, the queue behaves as before the version is known.
+  if opts and opts.api then queue:setFirmwareApi(opts.api[1], opts.api[2]) end
   clock.now = 0.0
   return {
     common = common,
@@ -206,9 +191,12 @@ end
 
 -- How many of the frames handed to the transport were addressed to `cmd`.
 --
--- A request frame laid out by mspProcessTxQ() is
+-- A version-2 request frame laid out by mspProcessTxQ() is
+--   status, <flags>, cmd1, cmd2, len1, len2, data...
+-- so the command sits at bytes 3 and 4; in version 3 (status bits 0x60) it is
 --   status, cmd1, cmd2, len, data...
--- so the command sits at bytes 2 and 3 of the start frame.
+-- at bytes 2 and 3. Only start frames are counted: a continuation carries
+-- payload, which could look like any command.
 --
 -- Counting "frames on the wire" instead would not do: a poisoned buffer still
 -- leaks its leftovers onto the wire, it just leaks the *previous* request's
@@ -217,7 +205,8 @@ local function framesForCommand(sent, cmd)
   local count = 0
   for _, frame in ipairs(sent) do
     local b = frame.bytes
-    if b[2] == cmd % 256 and b[3] == math.floor(cmd / 256) % 256 then
+    local at = ((b[1] or 0) & 0x60) == 0x60 and 2 or 3
+    if (b[1] or 0) & 0x10 ~= 0 and b[at] == cmd % 256 and b[at + 1] == math.floor(cmd / 256) % 256 then
       count = count + 1
     end
   end
@@ -278,14 +267,14 @@ end
 -- ---------------------------------------------------------------------------
 
 -- MSP_TELEMETRY_CONFIG's size, the worst case the issue names: 52 payload bytes
--- plus the 3-byte compact header, at 5 payload bytes per S.Port frame.
+-- plus the 5-byte MSPv2 header, at 5 payload bytes per S.Port frame.
 local BIG_WRITE_CMD = 0x8A
 local BIG_WRITE_BYTES = 52
 -- Derived from the framing rather than measured, so that the checks below can
 -- be anchored on what the message owes the wire instead of on whatever the
 -- first attempt happened to produce -- anchoring on the first attempt is what
 -- let the old one-frame-per-tick code satisfy this arithmetic by accident.
-local BIG_WRITE_FRAMES = math.ceil((3 + BIG_WRITE_BYTES) / 5)
+local BIG_WRITE_FRAMES = math.ceil((5 + BIG_WRITE_BYTES) / 5)
 
 -- One frame per tick: Ethos's pushFrame() queue is shallow, and a burst of a
 -- whole multi-frame write overflowed it on hardware.
@@ -407,7 +396,7 @@ do
   rig.tick() -- max_retries: the message is abandoned with a half-built reply
 
   -- The rest of the abandoned reply arrives late, and completes it.
-  rig.transport.replies[#rig.transport.replies + 1] = { 1, 0xBB }
+  rig.transport.replies[#rig.transport.replies + 1] = { 2, 0xBB }
 
   local fresh = newMessage(0x09, { maxRetries = 2 })
   rig.queue:add(fresh)
@@ -443,7 +432,7 @@ do
   rig.queue:clear() -- drops in-flight work and resets buffers via mspClearBufs()
 
   -- Deliver the late orphaned frame
-  rig.transport.replies[#rig.transport.replies + 1] = { 1, 0xBB }
+  rig.transport.replies[#rig.transport.replies + 1] = { 2, 0xBB }
 
   local fresh = newMessage(0x09, { maxRetries = 1 })
   rig.queue:add(fresh)
@@ -480,31 +469,32 @@ end
 -- A broken reply is resent at once, and still spends an attempt
 -- ---------------------------------------------------------------------------
 
--- The FC's answer loses its second continuation frame on the link: start (two
--- payload bytes), sequence 1, then sequence 3. The queue sees the break on the
--- tick that reads the out-of-sequence frame and resends on the next tick,
--- without waiting for the retry window -- the firmware answers a replacement
--- request with its own start frame, so there is nothing to wait for.
+-- The FC's answer loses its second continuation frame on the link: start,
+-- sequence 1, then sequence 3. The queue sees the break on the tick that reads
+-- the out-of-sequence frame and resends on the next tick, without waiting for
+-- the retry window -- on firmware at MSP API 22.12 or later, which answers a
+-- replacement request with its own start frame (wingflight-firmware #173).
+-- 22.15 also offers version 3 of the framing; 22.11 has neither.
+local API_WITH_REPLACEMENT_START = {22, 15}
+local API_4_6 = {22, 11}
+
 local function brokenReply(cmd)
-  local bytes = {}
-  for i = 1, 17 do bytes[i] = i end -- 2 in the start frame, then 5 + 5 + 5
-  local frames = replyFrames(cmd, 17, { bytes })
+  local frames = replyFrames(cmd, 12, { {1, 2, 3, 4, 5}, {6, 7, 8, 9, 10}, {11, 12} })
   table.remove(frames, 3) -- sequence 2 lost: the sequence jumps from 1 to 3
   return frames
 end
 
 -- Reads every reply frame queued on the transport, however many ticks the
--- bounded poll loop needs for them.
+-- bounded poll loop needs for them. An idle queue does not poll, so frames
+-- left after the message completed (a status-only trailer) are read directly.
 local function drainReplies(rig)
   while #rig.transport.replies > 0 do
-    -- An idle queue does not poll; frames left after a message completed are
-    -- read directly.
     if rig.queue:isProcessed() then rig.common.mspPollReply() else rig.tick() end
   end
 end
 
 do
-  local rig = newRig()
+  local rig = newRig({ api = API_WITH_REPLACEMENT_START })
   local msg = newMessage(0x1E, { maxRetries = 2 })
   rig.queue:add(msg)
   rig.tick() -- attempt 1
@@ -535,7 +525,7 @@ end
 -- A link that breaks every reply must still end in max_retries, not resend
 -- for ever: maxRetries=1 buys two attempts, both broken.
 do
-  local rig = newRig()
+  local rig = newRig({ api = API_WITH_REPLACEMENT_START })
   local msg = newMessage(0x1E, { maxRetries = 1 })
   rig.queue:add(msg)
   rig.tick() -- attempt 1
@@ -554,18 +544,47 @@ do
     "frames=" .. framesForCommand(rig.transport.sent, msg.command))
 end
 
--- A break and, in the same poll, the start of a newer reply to the same
--- command (an earlier resend answered). Resending then would throw the newer
--- reply away; the queue lets it finish instead.
-do
-  local rig = newRig()
+-- Firmware below API 22.12 (before snapshot 0.0.30) answers a replacement request without a start
+-- frame, so an early resend there only spends an attempt. The queue waits for
+-- the retry window, as it did before; so does a queue that has not been told
+-- the API version yet, and one told nil on a disconnect.
+for _, case in ipairs({
+  { label = "API 22.11", api = API_4_6 },
+  { label = "an unknown API version", api = nil },
+  { label = "a disconnect", api = API_WITH_REPLACEMENT_START, disconnect = true },
+}) do
+  local rig = newRig({ api = case.api })
+  if case.disconnect then rig.queue:setFirmwareApi(nil, nil) end
   local msg = newMessage(0x1E, { maxRetries = 2 })
   rig.queue:add(msg)
   rig.tick() -- attempt 1
   for _, frame in ipairs(brokenReply(msg.command)) do
     rig.transport.replies[#rig.transport.replies + 1] = frame
   end
-  local newer = replyFrames(msg.command, 9, { {21, 22, 23, 24, 25, 26, 27, 28, 29} })
+  drainReplies(rig)
+  rig.tick()
+  check("after " .. case.label .. ", a sequence break waits for the retry window",
+    framesForCommand(rig.transport.sent, msg.command) == 1,
+    "frames=" .. framesForCommand(rig.transport.sent, msg.command))
+  rig.jump(1.0)
+  rig.tick()
+  check("after " .. case.label .. ", the resend follows the retry window",
+    framesForCommand(rig.transport.sent, msg.command) == 2,
+    "frames=" .. framesForCommand(rig.transport.sent, msg.command))
+end
+
+-- A break and, in the same poll, the start of a newer reply to the same
+-- command (an earlier resend answered). Resending then would throw the newer
+-- reply away; the queue lets it finish instead.
+do
+  local rig = newRig({ api = API_WITH_REPLACEMENT_START })
+  local msg = newMessage(0x1E, { maxRetries = 2 })
+  rig.queue:add(msg)
+  rig.tick() -- attempt 1
+  for _, frame in ipairs(brokenReply(msg.command)) do
+    rig.transport.replies[#rig.transport.replies + 1] = frame
+  end
+  local newer = replyFrames(msg.command, 7, { {21, 22, 23, 24, 25}, {26, 27} })
   rig.transport.replies[#rig.transport.replies + 1] = newer[1]
   clock.step = 0.0001 -- one poll slice takes every frame queued
   rig.tick()
@@ -577,7 +596,7 @@ do
   for i = 2, #newer do rig.transport.replies[#rig.transport.replies + 1] = newer[i] end
   drainReplies(rig)
   check("the newer reply is delivered",
-    #msg.replies == 1 and msg.replies[1][1] == 21 and msg.replies[1][9] == 29,
+    #msg.replies == 1 and msg.replies[1][1] == 21 and msg.replies[1][7] == 27,
     "replies=" .. #msg.replies .. " errors=" .. #msg.errors)
 end
 
@@ -585,22 +604,22 @@ end
 -- A late reply to an earlier command does not break the message in flight
 -- ---------------------------------------------------------------------------
 
--- A single-frame reply to an earlier command, then the current message's
--- multi-frame reply. The parser used to take the late frame as a complete
--- reply, which cleared the request it was waiting for, so the real reply was
--- discarded frame by frame and the message waited out its retry window.
+-- rotorflight-lua-ethos-suite #2653: a single-frame reply to an earlier command, then the current
+-- message's multi-frame reply. The parser used to take the late frame as a
+-- complete reply, which cleared the request it was waiting for, so the real
+-- reply was discarded frame by frame and the message waited out its window.
 do
   local rig = newRig()
   local msg = newMessage(0x1E, { maxRetries = 2 })
   rig.queue:add(msg)
   rig.tick()
   rig.transport.replies[#rig.transport.replies + 1] = replyFrames(0x0A, 0, {})[1]
-  for _, frame in ipairs(replyFrames(msg.command, 9, { {1, 2, 3, 4, 5, 6, 7, 8, 9} })) do
+  for _, frame in ipairs(replyFrames(msg.command, 7, { {1, 2, 3, 4, 5}, {6, 7} })) do
     rig.transport.replies[#rig.transport.replies + 1] = frame
   end
   drainReplies(rig)
   check("a late reply to another command leaves the current one deliverable",
-    #msg.replies == 1 and msg.replies[1][9] == 9 and #msg.errors == 0,
+    #msg.replies == 1 and msg.replies[1][7] == 7 and #msg.errors == 0,
     "replies=" .. #msg.replies .. " errors=" .. #msg.errors)
   check("and costs no resend",
     framesForCommand(rig.transport.sent, msg.command) == 1,
@@ -619,26 +638,6 @@ do
   drainReplies(rig)
   check("a late error reply to another command does not abort the message",
     #msg.errors == 0, "errors=" .. #msg.errors .. " first=" .. tostring(msg.errors[1]))
-end
-
--- A reply of 300 bytes announces its length as 0xFF and 16 bits, as the
--- firmware writes it from 255 bytes.
-do
-  local rig = newRig()
-  local msg = newMessage(0x1E)
-  rig.queue:add(msg)
-  rig.tick()
-  local bytes = {}
-  for i = 1, 300 do bytes[i] = i % 256 end
-  local frames = replyFrames(msg.command, 300, { bytes })
-  check("precondition: the start frame carries 0xFF and a 16-bit length",
-    frames[1][4] == 0xFF and frames[1][5] == 0x2C and frames[1][6] == 0x01)
-  for _, frame in ipairs(frames) do rig.transport.replies[#rig.transport.replies + 1] = frame end
-  drainReplies(rig)
-  local got = msg.replies[1]
-  check("a 300-byte reply in the 16-bit length form is delivered whole",
-    got and #got == 300 and got[1] == 1 and got[300] == 300 % 256,
-    "replies=" .. #msg.replies .. " bytes=" .. (got and #got or 0))
 end
 
 -- ---------------------------------------------------------------------------
@@ -661,7 +660,7 @@ do
     end
     return sendFrame(payload, isWrite)
   end
-  local write = newMessage(BIG_WRITE_CMD, { isWrite = true, payloadBytes = 8 }) -- 3-byte header + 8 bytes: 3 frames
+  local write = newMessage(BIG_WRITE_CMD, { isWrite = true, payloadBytes = 7 }) -- header + 7 bytes: 3 frames
   rig.queue:add(write)
   for _ = 1, 2 + 3 do rig.tick() end -- two refusals, then the three frames
   check("a refused frame is not counted as sent",
@@ -677,8 +676,8 @@ do
   local seq0 = refused[1][1] & 0x0F
   check("the frames after it continue the sequence",
     #rig.transport.sent == 3 and
-    rig.transport.sent[2].bytes[1] == 0x60 + ((seq0 + 1) & 0x0F) and
-    rig.transport.sent[3].bytes[1] == 0x60 + ((seq0 + 2) & 0x0F),
+    rig.transport.sent[2].bytes[1] == 0x40 + ((seq0 + 1) & 0x0F) and
+    rig.transport.sent[3].bytes[1] == 0x40 + ((seq0 + 2) & 0x0F),
     "status bytes=" .. (#rig.transport.sent == 3 and string.format("%02X %02X %02X",
       rig.transport.sent[1].bytes[1], rig.transport.sent[2].bytes[1],
       rig.transport.sent[3].bytes[1]) or ("sent=" .. #rig.transport.sent)))
@@ -840,15 +839,15 @@ do
 end
 
 -- One frame of a long reply is lost on the link. The rest of that reply keeps
--- arriving and is discarded. The queue resends on the tick after it sees the
--- break, while that tail is still arriving: the firmware answers a request
--- that replaces a reply in progress with its own start frame (msp_shared.c's
--- processMspPacket() clears headerSent), so there is nothing to wait for. It
--- used to wait for the whole broken reply to finish and then the retry window
--- on top -- here, 7s of stale frames plus 0.8s of silence for one lost frame.
--- The stale frames must not trigger any further resend.
+-- arriving and is discarded. On API 22.12 the queue resends on the tick after
+-- it sees the break, while that tail is still arriving: the firmware answers a
+-- request that replaces a reply in progress with its own start frame
+-- (wingflight-firmware #173), so there is nothing to wait for. It used to
+-- wait for the whole broken reply to finish and then the retry window on top
+-- -- here, 7s of stale frames plus 0.8s of silence for one lost frame. The
+-- stale frames must not trigger any further resend.
 do
-  local rig = newRig()
+  local rig = newRig({ api = API_WITH_REPLACEMENT_START })
   local msg = newMessage(POOL_CMD)
   rig.queue:add(msg)
   rig.tick() -- sends
@@ -885,6 +884,165 @@ do
     #msg.replies == 1 and #msg.errors == 0 and got and #got == POOL_BYTES,
     "replies=" .. #msg.replies .. " errors=" .. #msg.errors ..
     " bytes=" .. (got and #got or 0))
+end
+
+-- ---------------------------------------------------------------------------
+-- Framing: version 2 to start, version 3 from API 22.15, back on a refusal
+-- ---------------------------------------------------------------------------
+
+-- Reply frames as telemetry/msp_shared.c's sendMspReply() writes version 3: a
+-- start frame of status, command and an 8-bit length (0xFF then a 16-bit
+-- length from 255 bytes), payload in whatever room is left, then continuations
+-- of five bytes. A chunk is sent as partial while the rest fills it exactly,
+-- so a reply that ends on a frame boundary is followed by a status-only frame.
+local function replyFramesV3(cmd, bytes, opts)
+  opts = opts or {}
+  local seq = opts.seq or 0
+  local status = 0x60 | 0x10 | (seq & 0x0F)
+  if opts.error then status = status | 0x80 end
+  local frame = { status, cmd % 256, math.floor(cmd / 256) % 256 }
+  if #bytes >= 0xFF then
+    frame[4], frame[5], frame[6] = 0xFF, #bytes % 256, math.floor(#bytes / 256) % 256
+  else
+    frame[4] = #bytes
+  end
+  local frames, pos = { frame }, 1
+  while true do
+    while #frame < 6 and pos <= #bytes do
+      frame[#frame + 1] = bytes[pos]
+      pos = pos + 1
+    end
+    if pos > #bytes and #frame < 6 then break end
+    seq = seq + 1
+    frame = { 0x60 | (seq & 0x0F) }
+    frames[#frames + 1] = frame
+    if pos > #bytes then break end
+  end
+  return frames
+end
+
+local function bytesOf(n, base)
+  local t = {}
+  for i = 1, n do t[i] = (base + i) % 256 end
+  return t
+end
+
+local function queueReplies(rig, frames)
+  for _, f in ipairs(frames) do rig.transport.replies[#rig.transport.replies + 1] = f end
+end
+
+-- Before the API version is known, and below API 22.15, requests go out as
+-- MSPv2: version bits 2 and a flags byte.
+for _, case in ipairs({ { label = "an unknown API version", api = nil }, { label = "API 22.11", api = API_4_6 },
+    { label = "API 22.12 (resend on, no version 3 yet)", api = {22, 12} } }) do
+  local rig = newRig({ api = case.api })
+  rig.queue:add(newMessage(0x1E))
+  rig.tick()
+  local b = rig.transport.sent[1] and rig.transport.sent[1].bytes or {}
+  check("with " .. case.label .. ", a request goes out in version 2",
+    (b[1] or 0) & 0x60 == 0x40 and b[2] == 0 and b[3] == 0x1E and b[4] == 0 and b[5] == 0 and b[6] == 0,
+    string.format("bytes=%02X %02X %02X %02X %02X %02X", b[1] or 0, b[2] or 0, b[3] or 0, b[4] or 0, b[5] or 0, b[6] or 0))
+end
+
+-- From API 22.15 a request goes out in version 3: command and an 8-bit length
+-- right after the status byte, so the first frame has room for payload.
+do
+  local rig = newRig({ api = API_WITH_REPLACEMENT_START })
+  rig.queue:add(newMessage(0x1E, { payload = { 0xAA, 0xBB, 0xCC } }))
+  rig.tick()
+  local b = rig.transport.sent[1].bytes
+  check("from API 22.15, a request goes out in version 3 with payload in its start frame",
+    b[1] & 0x70 == 0x70 and b[2] == 0x1E and b[3] == 0 and b[4] == 3 and b[5] == 0xAA and b[6] == 0xBB,
+    string.format("bytes=%02X %02X %02X %02X %02X %02X", b[1], b[2], b[3], b[4], b[5], b[6]))
+end
+
+-- A version-3 request of 300 bytes announces its length as 0xFF and 16 bits.
+do
+  local rig = newRig({ api = API_WITH_REPLACEMENT_START })
+  rig.queue:add(newMessage(0x1E, { isWrite = true, payload = bytesOf(300, 0) }))
+  rig.tick()
+  local b = rig.transport.sent[1].bytes
+  check("a version-3 request of 300 bytes carries 0xFF and a 16-bit length",
+    b[2] == 0x1E and b[3] == 0 and b[4] == 0xFF and b[5] == 0x2C and b[6] == 0x01,
+    string.format("bytes=%02X %02X %02X %02X %02X", b[2], b[3], b[4], b[5], b[6]))
+end
+
+-- Version-3 replies: a short one, one that ends exactly on a frame boundary,
+-- and the 16-bit length form of a long one.
+for _, n in ipairs({ 11, 12, 300 }) do
+  local rig = newRig({ api = API_WITH_REPLACEMENT_START })
+  local msg = newMessage(0x1E)
+  rig.queue:add(msg)
+  rig.tick()
+  queueReplies(rig, replyFramesV3(0x1E, bytesOf(n, 7)))
+  drainReplies(rig)
+  local got = msg.replies[1]
+  check("a version-3 reply of " .. n .. " bytes is delivered whole",
+    got and #got == n and got[1] == 8 and got[n] == (n + 7) % 256 and #msg.errors == 0,
+    "replies=" .. #msg.replies .. " bytes=" .. (got and #got or 0) .. " errors=" .. #msg.errors)
+end
+
+-- A firmware without version 3 refuses it: start and error bits, the version
+-- bits of the request, and an MSPv2 body for command 0 (flags, command 0,
+-- length 1, the error code). The link falls back to version 2, the request
+-- goes again at once in version 2, the refusal is not counted as an attempt
+-- and not reported as an error, and the link stays on version 2.
+do
+  local rig = newRig({ api = API_WITH_REPLACEMENT_START })
+  local msg = newMessage(0x1E, { maxRetries = 0 })
+  rig.queue:add(msg)
+  rig.tick()
+  queueReplies(rig, { { 0x60 | 0x10 | 0x80, 0, 0, 0, 1, 0 }, { 0x61, 0 } })
+  drainReplies(rig)
+  rig.tick()
+  local last = rig.transport.sent[#rig.transport.sent].bytes
+  check("a refusal of version 3 resends the request at once, in version 2",
+    #rig.transport.sent == 2 and last[1] & 0x70 == 0x50 and last[3] == 0x1E,
+    "sent=" .. #rig.transport.sent .. string.format(" status=%02X", last[1]))
+  check("the refusal is neither an attempt nor an error",
+    rig.queue.retryCount == 1 and #msg.errors == 0,
+    "retryCount=" .. rig.queue.retryCount .. " errors=" .. #msg.errors .. " first=" .. tostring(msg.errors[1]))
+  queueReplies(rig, replyFrames(0x1E, 2, { { 7, 8 } }))
+  drainReplies(rig)
+  check("the version-2 resend is answered and delivered",
+    #msg.replies == 1 and msg.replies[1][1] == 7, "replies=" .. #msg.replies)
+  check("the link stays on version 2", rig.common.framing() == 2,
+    "framing=" .. tostring(rig.common.framing()))
+end
+
+-- An error reply in version 3 that names its command is a real answer, not a
+-- refusal of the framing.
+do
+  local rig = newRig({ api = API_WITH_REPLACEMENT_START })
+  local msg = newMessage(0x1E, { maxRetries = 0 })
+  rig.queue:add(msg)
+  rig.tick()
+  queueReplies(rig, replyFramesV3(0x1E, { 2 }, { error = true }))
+  drainReplies(rig)
+  check("a version-3 error reply for the command stays an error, framing 3 kept",
+    #msg.errors == 1 and rig.common.framing() == 3,
+    "errors=" .. #msg.errors .. " framing=" .. tostring(rig.common.framing()))
+end
+
+-- A start frame in version 0 or 1 answers nothing this suite asked for.
+do
+  local rig = newRig()
+  local msg = newMessage(0x1E)
+  rig.queue:add(msg)
+  rig.tick()
+  queueReplies(rig, { { 0x30, 1, 0x1E, 9, 0, 0 } }) -- version 1: length 1, command 0x1E
+  drainReplies(rig)
+  check("a version-1 start frame is not taken as a reply", #msg.replies == 0,
+    "replies=" .. #msg.replies)
+end
+
+-- A new queue (a transport swap) starts the link in version 2 again.
+do
+  local rig = newRig({ api = API_WITH_REPLACEMENT_START })
+  local Queue = dofile(MSP .. "/queue.lua")
+  Queue.new(rig.common, debugLog)
+  check("a new queue starts the link in version 2", rig.common.framing() == 2,
+    "framing=" .. tostring(rig.common.framing()))
 end
 
 -- ---------------------------------------------------------------------------

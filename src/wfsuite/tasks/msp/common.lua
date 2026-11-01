@@ -1,14 +1,20 @@
 -- MSP byte-framing engine (sequencing, chunking).
 --
--- Compact framing only (version 3 in the status byte, telemetry/msp_shared.c
--- in wingflight-firmware): an MSPv2 command with a 3-byte header
---   CMD_LOW CMD_HIGH LEN
--- and, when LEN is 0xFF, LEN_LOW LEN_HIGH after it. No flags byte, no CRC
--- (the telemetry frame has its own). The 5-byte MSPv2 header filled the whole
--- first S.Port frame on its own; this one leaves 2 payload bytes in it, which
--- is one frame fewer on most messages over a link that moves a frame every
--- 30 ms or so. There is no version negotiation and no older wire format:
--- the firmware answers in the framing it was asked in.
+-- Two framings of an MSPv2 command, chosen per link (setFraming()):
+--   version 2  FLAGS CMD_LOW CMD_HIGH LEN_LOW LEN_HIGH
+--   version 3  CMD_LOW CMD_HIGH LEN, and when LEN is 0xFF, LEN_LOW LEN_HIGH
+--              after it (wingflight-firmware telemetry/msp_shared.c)
+-- No CRC at this layer: the telemetry frame carries its own. Version 3 leaves
+-- two payload bytes in a 6-byte S.Port start frame that version 2 fills with
+-- header alone, one frame fewer on most messages. Over CRSF it saves a frame
+-- only at a few reply sizes.
+--
+-- Every link starts in version 2, so MSP_API_VERSION reads on any firmware.
+-- tasks/msp/queue.lua's setFirmwareApi() offers version 3 from the API version
+-- that has it. A firmware without it answers a version-3 request with a start
+-- frame that has the error bit set and command 0; that drops the link back to
+-- version 2 (see receivedReply()). A reply is parsed by the version bits of its
+-- own start frame. Versions 0 and 1 are never asked for, so never accepted.
 --
 -- Protocol-agnostic: talks to whatever transport was registered via
 -- setTransport() (see transport_sport.lua / transport_crsf.lua). Private to
@@ -32,7 +38,6 @@ local DRAIN_INSTRUCTION_LIMIT = 60
 
 local math_floor = math.floor
 
-local MSP_VERSION_BITS = 3 << 5 -- compact MSPv2 framing
 local MSP_STARTFLAG = 1 << 4
 
 -- Bounds on the two drain loops below. They are different bounds on purpose,
@@ -41,7 +46,7 @@ local MSP_STARTFLAG = 1 << 4
 --
 -- mspPollReply() assembles a reply, so its bound is wall time: a frame count
 -- that actually bound it would slice one long reply across wakeups, and the
--- slice is not harmless (see mspPollReply() for what makes it survivable).
+-- slice is not harmless (see POLL_SLICE_SECONDS for what makes it survivable).
 local POLL_SLICE_SECONDS = 0.003
 -- mspClearBufs() discards frames without looking at them, so its bound is a
 -- frame count: nothing there is lost by stopping early.
@@ -58,6 +63,13 @@ local mspLastReq = 0
 local mspLastReqIsWrite = false
 local mspTxBuf = {}
 local mspTxIdx = 1
+-- The framing new requests are built in, and the one the request in flight
+-- was built in: a fallback mid-request must not relabel its remaining frames.
+local mspFraming = 2
+local mspTxFraming = 2
+-- Times the link fell back from version 3 to 2, ever: see
+-- mspFramingFallbackCount().
+local mspFramingFallbacks = 0
 -- MSP reply frames received, ever -- accepted or discarded. Only its change
 -- matters: see mspRxFrameCount().
 local mspRxFrames = 0
@@ -77,8 +89,12 @@ end
 local function maxTx() return transport.maxTxBufferSize end
 local function maxRx() return transport.maxRxBufferSize end
 
+local function setFraming(version)
+  mspFraming = (version == 3) and 3 or 2
+end
+
 local function mkStatusByte(isStart)
-  local status = mspSeq + MSP_VERSION_BITS
+  local status = mspSeq + (mspTxFraming << 5)
   if isStart then status = status + MSP_STARTFLAG end
   return status & 0x7F
 end
@@ -136,17 +152,24 @@ end
 -- to transports (like CRSF) that distinguish read vs write at the link
 -- layer; ignored otherwise.
 local function mspSendRequest(cmd, payload, isWrite)
-  if type(payload) ~= "table" or type(cmd) ~= "number" then return false end
+  if type(payload) ~= "table" or not cmd or type(cmd) ~= "number" then return false end
   if #mspTxBuf ~= 0 then return false end -- TX already busy
 
   local len = #payload
   local cmd1 = cmd % 256
   local cmd2 = math_floor(cmd / 256) % 256
-  if len < 255 then
-    mspTxBuf = {cmd1, cmd2, len}
+  local len1 = len % 256
+  local len2 = math_floor(len / 256) % 256
+  if mspFraming == 3 then
+    if len < 0xFF then
+      mspTxBuf = {cmd1, cmd2, len}
+    else
+      mspTxBuf = {cmd1, cmd2, 0xFF, len1, len2}
+    end
   else
-    mspTxBuf = {cmd1, cmd2, 0xFF, len % 256, math_floor(len / 256) % 256}
+    mspTxBuf = {0, cmd1, cmd2, len1, len2}
   end
+  mspTxFraming = mspFraming
   for i = 1, len do mspTxBuf[#mspTxBuf + 1] = payload[i] % 256 end
 
   mspLastReq = cmd
@@ -183,22 +206,54 @@ local function receivedReply(payload)
     mspRxBuf = {}
     mspRxError = (status & 0x80) ~= 0
 
-    local cmd1 = payload[idx] or 0; idx = idx + 1
-    local cmd2 = payload[idx] or 0; idx = idx + 1
-    local len = payload[idx] or 0; idx = idx + 1
-    if len == 0xFF then
+    local version = (status >> 5) & 0x03
+    if version == 3 then
+      local cmd1 = payload[idx] or 0; idx = idx + 1
+      local cmd2 = payload[idx] or 0; idx = idx + 1
+      local len = payload[idx] or 0; idx = idx + 1
+      if len == 0xFF then
+        local len1 = payload[idx] or 0; idx = idx + 1
+        local len2 = payload[idx] or 0; idx = idx + 1
+        len = ((len2 & 0xFF) << 8) | (len1 & 0xFF)
+      end
+      mspRxReq = ((cmd2 & 0xFF) << 8) | (cmd1 & 0xFF)
+      mspRxSize = len
+    elseif version == 2 then
+      idx = idx + 1 -- skip flags byte
+      local cmd1 = payload[idx] or 0; idx = idx + 1
+      local cmd2 = payload[idx] or 0; idx = idx + 1
       local len1 = payload[idx] or 0; idx = idx + 1
       local len2 = payload[idx] or 0; idx = idx + 1
-      len = ((len2 & 0xFF) << 8) | (len1 & 0xFF)
+      mspRxReq = ((cmd2 & 0xFF) << 8) | (cmd1 & 0xFF)
+      mspRxSize = ((len2 & 0xFF) << 8) | (len1 & 0xFF)
+    else
+      mspStarted = false
+      mspRxBuf, mspRxSize, mspRemoteSeq = {}, 0, 0
+      return nil
     end
-    mspRxReq = ((cmd2 & 0xFF) << 8) | (cmd1 & 0xFF)
-    mspRxSize = len
+
+    -- A firmware without version 3 refuses it: it answers in the request's
+    -- version bits, with the error bit, and lays out command 0 as MSPv2, which
+    -- reads here as command 0 (its flags byte) and length 0. No firmware that
+    -- has version 3 sends command 0. Fall back to version 2 for this link and
+    -- hand the request back, so the queue resends it at once
+    -- (mspFramingFallbackCount()). Only once: the refusals of the request's
+    -- other frames find the link already on version 2.
+    if mspRxError and mspRxReq == 0 and mspTxFraming == 3 and mspFraming == 3 then
+      mspFraming = 2
+      mspFramingFallbacks = mspFramingFallbacks + 1
+      mspClearTxBuf()
+      mspStarted = false
+      mspRxBuf, mspRxSize, mspRemoteSeq = {}, 0, 0
+      return nil
+    end
+
     mspStarted = (mspRxReq == mspLastReq)
     -- A late reply to an earlier command is not ours. It used to fall through
     -- to the copy loop below, and one that fits in this frame came back as a
     -- complete reply: mspPollReply() then cleared mspLastReq, so the real
     -- reply's start frame no longer matched and the message waited out its
-    -- retry window.
+    -- retry window (rotorflight-lua-ethos-suite #2653).
     if not mspStarted then
       mspRxBuf, mspRxSize, mspRemoteSeq = {}, 0, 0
       return nil
@@ -249,14 +304,13 @@ end
 -- wakeups stay inside DEFAULT_RETRY_DELAY -- a period far longer than the 0.05s
 -- the rest of this subsystem already schedules its session poll at.
 --
--- 5ms was well above what the work needs. Upstream's issue asked for 1-2ms;
--- 3ms is the smallest cut that changes nothing bin/msp_queue/verify_msp_queue.lua
--- already pins -- that gate's clock charges a millisecond per clock read rather
--- than per frame, so the frames one call can take there is slice/1ms, and at
--- 2ms it stops being able to take a minimal two-frame reply inside one wakeup
--- (two of its cases go red). Re-basing that gate's clock model is what would
--- unlock 1-2ms; until then this is the measured limit of the cut, not a
--- preference.
+-- 5ms was well above what the work needs. The issue asks for 1-2ms; 3ms is the
+-- smallest cut that changes nothing bin/msp_queue/verify_msp_queue.lua already
+-- pins -- that gate's clock charges a millisecond per clock read rather than per
+-- frame, so the frames one call can take there is slice/1ms, and at 2ms it stops
+-- being able to take a minimal two-frame reply inside one wakeup (two of its
+-- cases go red). Re-basing that gate's clock model is what would unlock 1-2ms;
+-- until then this is the measured limit of the cut, not a preference.
 --
 -- bin/perf/verify_clock_budgets.lua pins the number and the slicing case
 -- together, because the second one is what says how far it may be cut at all.
@@ -308,6 +362,12 @@ end
 
 return {
   setTransport = setTransport,
+  -- 2 or 3: the framing new requests are built in. Set by tasks/msp/queue.lua.
+  setFraming = setFraming,
+  framing = function() return mspFraming end,
+  -- Grows by one each time a firmware refused version 3 and the link fell
+  -- back to version 2. The queue resends the message in flight when it moves.
+  mspFramingFallbackCount = function() return mspFramingFallbacks end,
   mspSendRequest = mspSendRequest,
   mspProcessTxQ = mspProcessTxQ,
   mspPollReply = mspPollReply,
