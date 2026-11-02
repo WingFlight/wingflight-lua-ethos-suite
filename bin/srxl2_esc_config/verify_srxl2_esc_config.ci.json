@@ -1,0 +1,7 @@
+{
+  "id": "srxl2-esc-config",
+  "name": "An SRXL2 ESC config reply of another version or length is refused",
+  "step": "Check the SRXL2 ESC config codec and page",
+  "script": "bin/srxl2_esc_config/verify_srxl2_esc_config.lua",
+  "rationale": "The SRXL2 ESC page (Setup -> ESC & Motors -> SRXL2 ESC) saves by writing\nback what it read, so a reply decoded in the wrong layout would be stored on the\nflight controller at the next save. The reply starts with a payload version byte\nfor exactly that reason, and the first codec read it and ignored it, and decoded\nany length. The wire sizes and command ids are pinned here against the firmware\nhandler (wingflight-firmware PR #257, MSP2_WING_SRXL2_ESC_CONFIG 0x5F35 /\nMSP2_WING_SET_SRXL2_ESC_CONFIG 0x5F36): a 5-byte version-1 reply and a 4-byte\nwrite. The harness also checks the 32 motor 2 channel choices, that the page\nreboots after saving (the settings latch at boot) and refuses saves while armed,\nand that the menu row's icon exists. Cases 3, 4 and 5 go red on the pre-fix codec.\nPorted from rotorflight-lua-ethos-suite PR #2680."
+}

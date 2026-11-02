@@ -8,7 +8,7 @@ sidebar_label: Pages
 Reference documentation for each configuration and settings page reachable
 within the WFSuite Ethos system tool.
 
-**Coverage:** 88 reachable pages in navigation hierarchy. Drafts require review.
+**Coverage:** 89 reachable pages in navigation hierarchy. Drafts require review.
 
 The *Conditions* column names what hides, greys out or locks a page; the sentences
 and structure follow [_template.md](../_template.md).
@@ -75,6 +75,7 @@ is there. The rule is in [.agents/rules/documentation.md](../../.agents/rules/do
 | Motor Override | [setup/motor_override.md](setup/motor_override.md) | Requires a running background task and a flight controller connection. | reviewed |
 | Throttle | [setup/esc_motors_throttle.md](setup/esc_motors_throttle.md) | Requires a running background task and a flight controller connection. | draft |
 | Telemetry | [setup/esc_motors_telemetry.md](setup/esc_motors_telemetry.md) | Requires a running background task and a flight controller connection. | draft |
+| SRXL2 ESC | [setup/esc_motors_srxl2.md](setup/esc_motors_srxl2.md) | Requires a running background task and a flight controller connection. | reviewed |
 | RPM | [setup/esc_motors_rpm.md](setup/esc_motors_rpm.md) | Requires a running background task and a flight controller connection. | draft |
 | Hobbywing V5 | [setup/esc_forward_hw5.md](setup/esc_forward_hw5.md) | Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 3). If that read fails, it is retried every 5 seconds. | reviewed |
 | AM32 | [setup/esc_forward_am32.md](setup/esc_forward_am32.md) | Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 1). If that read fails, it is retried every 5 seconds. | draft |

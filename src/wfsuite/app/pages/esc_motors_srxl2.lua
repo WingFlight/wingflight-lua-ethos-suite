@@ -14,6 +14,7 @@ local function open(opts)
     pageTitle = PAGE_TITLE,
     logTag = "esc_srxl2",
     mspModule = srxl2EscConfig,
+    isMspPage = true,
     opts = opts,
     profileField = "none",
     rebootAfterSave = true,
