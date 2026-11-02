@@ -16,7 +16,7 @@ motor of a dual-motor ESC.
 
 *Configuration* → *Setup* → *ESC & Motors* → *SRXL2 ESC*
 
-Requires a running background task and a flight controller connection.
+Requires a running background task and a flight controller connection. Lit only while the flight controller reports this ESC telemetry protocol (Protocol ID: 14). The firmware sets that protocol whenever a serial port carries the SRXL2 ESC function.
 
 ## Settings
 

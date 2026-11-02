@@ -180,7 +180,11 @@ check("menu row present in app/tool.lua", row ~= nil)
 if row then
   local icon = row:match('lcd%.loadMask%("([^"]+)"%)')
   check("menu row icon exists", icon ~= nil and readFile(SUITE .. "/" .. icon) ~= nil, icon)
+  check("menu row lit only on SRXL2 ESC telemetry (escProtocolId = 14)",
+    row:find("escProtocolId%s*=%s*14") ~= nil)
 end
+check("ESC & Motors menu has an ESC protocol guard",
+  tool ~= nil and tool:find("MENUS%.esc_motors_menu%.guard%s*=%s*ensureEscProtocolGuard%(%)") ~= nil)
 
 -- ---------------------------------------------------------------------------
 

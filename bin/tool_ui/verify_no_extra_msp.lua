@@ -25,6 +25,9 @@
 -- The path deliberately enters BOTH guarded menus:
 --   root -> Hardware -> Servos                   (servo_bus_guard,    MSP 54)
 --   root -> Hardware -> ESC & Motors -> ESC Tools (esc_protocol_guard, MSP 123)
+-- ESC & Motors and ESC Tools each carry their own esc_protocol_guard (the
+-- first lights the SRXL2 ESC tile), so a cycle reads MSP 123 twice: once per
+-- guarded menu entered, never more.
 -- and ticks wakeup() 100 times inside the second one, because a retry storm
 -- can only arrive through wakeup(), which menu_container.lua forwards to the
 -- current menu's guard.
@@ -248,13 +251,13 @@ end
 out("")
 
 -- Each guarded menu issues exactly ONE request on entry: the guard reads once
--- and holds the answer.
+-- and holds the answer. Two ESC menus are entered, hence two ESC reads.
 for i = 1, #tracePerCycle do
   local t = tracePerCycle[i]
   check(string.format("cycle %d  exactly one Servos read (MSP %d)", i, SERIAL_READ),
     t:find("Servos=1%(" .. SERIAL_READ .. "%)") ~= nil, t)
-  check(string.format("cycle %d  exactly one ESC read (MSP %d)", i, ESC_READ),
-    t:find("ESC=1%(" .. ESC_READ .. "%)") ~= nil, t)
+  check(string.format("cycle %d  one ESC read per ESC menu (MSP %d)", i, ESC_READ),
+    t:find("ESC=2%(" .. ESC_READ .. "," .. ESC_READ .. "%)") ~= nil, t)
 end
 
 -- The trace must be the same in EVERY cycle. If it grows, something is
@@ -269,7 +272,7 @@ check(TICKS .. " ticks inside the ESC menu produce no request",
   tracePerCycle[1]:find("Tick=0$") ~= nil, tracePerCycle[1])
 
 check("the same total number of requests in every cycle",
-  #trace == 2 * #tracePerCycle,
+  #trace == 3 * #tracePerCycle, -- one Servos read and two ESC reads
   "trace holds " .. #trace .. " entries for " .. #tracePerCycle .. " cycles")
 
 out("")
