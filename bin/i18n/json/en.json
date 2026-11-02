@@ -4771,6 +4771,24 @@
           "max_length": 18,
           "needs_translation": false,
           "translation": "Voltage Correction"
+        },
+        "srxl2": {
+          "english": "SRXL2 ESC",
+          "max_length": 9,
+          "needs_translation": false,
+          "translation": "SRXL2 ESC"
+        },
+        "srxl2_telem_interval": {
+          "english": "Telemetry Interval",
+          "max_length": 18,
+          "needs_translation": false,
+          "translation": "Telemetry Interval"
+        },
+        "srxl2_motor2_channel": {
+          "english": "Motor 2 Channel",
+          "max_length": 15,
+          "needs_translation": false,
+          "translation": "Motor 2 Channel"
         }
       },
       "copyprofiles": {
@@ -10974,6 +10992,14 @@
         "max_length": 6,
         "needs_translation": false,
         "translation": "SWITCH"
+      }
+    },
+    "SRXL2_ESC_CONFIG": {
+      "tbl_off": {
+        "english": "Off",
+        "max_length": 3,
+        "needs_translation": false,
+        "translation": "Off"
       }
     }
   },
