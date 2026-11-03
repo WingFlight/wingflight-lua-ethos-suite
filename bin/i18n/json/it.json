@@ -5555,6 +5555,27 @@
           "needs_translation": false,
           "max_length": 18,
           "reverse_text": false
+        },
+        "srxl2": {
+          "english": "SRXL2 ESC",
+          "translation": "SRXL2 ESC",
+          "needs_translation": false,
+          "reverse_text": false,
+          "max_length": 9
+        },
+        "srxl2_telem_interval": {
+          "english": "Telemetry Interval",
+          "translation": "Intervallo telem.",
+          "needs_translation": false,
+          "reverse_text": false,
+          "max_length": 18
+        },
+        "srxl2_motor2_channel": {
+          "english": "Motor 2 Channel",
+          "translation": "Canale motore 2",
+          "needs_translation": false,
+          "reverse_text": false,
+          "max_length": 15
         }
       },
       "copyprofiles": {
@@ -12779,6 +12800,15 @@
         "needs_translation": false,
         "max_length": 6,
         "reverse_text": false
+      }
+    },
+    "SRXL2_ESC_CONFIG": {
+      "tbl_off": {
+        "english": "Off",
+        "translation": "Off",
+        "needs_translation": false,
+        "reverse_text": false,
+        "max_length": 3
       }
     }
   },

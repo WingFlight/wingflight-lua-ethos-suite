@@ -253,6 +253,15 @@
         "reverse_text": false,
         "translation": "Ustawić"
       }
+    },
+    "SRXL2_ESC_CONFIG": {
+      "tbl_off": {
+        "english": "Off",
+        "max_length": 3,
+        "needs_translation": false,
+        "reverse_text": false,
+        "translation": "Wył"
+      }
     }
   },
   "app": {
@@ -2267,6 +2276,27 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "RPM Czujnik"
+        },
+        "srxl2": {
+          "english": "SRXL2 ESC",
+          "max_length": 9,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "SRXL2 ESC"
+        },
+        "srxl2_motor2_channel": {
+          "english": "Motor 2 Channel",
+          "max_length": 15,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Kanał silnika 2"
+        },
+        "srxl2_telem_interval": {
+          "english": "Telemetry Interval",
+          "max_length": 18,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Interwał telem."
         },
         "tail_motor_ratio": {
           "english": "Tail Motor Ratio",
