@@ -2,6 +2,15 @@
 -- Exercise the session task with mocked telemetry/MSP and the real status decoder.
 local function eq(a,b) assert(a==b,tostring(a)..' ~= '..tostring(b)) end
 local clock = os.clock
+-- The production version check, so a version the suite would refuse cannot
+-- pass a handshake here. It needs only lib/mspcodec.lua, which is pure.
+local apiVersion = (function()
+  local saved = package.loaded['wfsuite.lib.require']
+  package.loaded['wfsuite.lib.require'] = function(name) return assert(loadfile('src/wfsuite/'..name))() end
+  local module = assert(loadfile('src/wfsuite/lib/msp_api_version.lua'))()
+  package.loaded['wfsuite.lib.require'] = saved
+  return module
+end)()
 local function fixture(armed)
   local now, active, raw = 10, true, armed and 1 or 0
   local snapshots, handlers, counts, pending = {}, {}, {}, {}
@@ -19,7 +28,7 @@ local function fixture(armed)
   local modules={
     ['lib/msp_handshake.lua']={buildFcVersionReadMessage=builder('fcVariant'),buildUidReadMessage=builder('mcuId'),
       buildNameReadMessage=builder('craftName'),buildRtcSyncMessage=builder('clockSynced')},
-    ['lib/msp_api_version.lua']={buildReadMessage=builder('apiVersion'),isSupported=function(major) return major==13 end},
+    ['lib/msp_api_version.lua']={buildReadMessage=builder('apiVersion'),isSupported=apiVersion.isSupported},
     ['lib/msp_battery.lua']={buildBatteryConfigReadMessage=builder('batteryConfig'),buildSmartfuelConfigReadMessage=builder('smartfuelConfig')},
     ['lib/msp_rx_map.lua']={buildReadMessage=builder('rxMap')},
     ['lib/msp_telemetry_config.lua']={buildReadMessage=builder('telemetry')},
@@ -73,10 +82,10 @@ local function fixture(armed)
   }
 end
 -- Everything after API_VERSION waits for a supported version: answer it with one.
-local function supported(f) f.reply('apiVersion',{major=13,minor=9}); f.wake() end
+local function supported(f) f.reply('apiVersion',{major=apiVersion.EXPECTED_API_MAJOR,minor=apiVersion.MIN_API_MINOR}); f.wake() end
 local f=fixture(false)
 f.wake(); eq(f.count('apiVersion'),1)
-f.reply('apiVersion',{major=13,minor=9}); f.wake()
+f.reply('apiVersion',{major=apiVersion.EXPECTED_API_MAJOR,minor=apiVersion.MIN_API_MINOR}); f.wake()
 local old=f.snapshot(); eq(old.handshake.apiVersion,true)
 f.arm(1); f.wake(); eq(f.clears(),1); eq(f.pending('craftName'),false)
 eq(f.snapshot().handshake.smartfuelConfig,false); eq(f.snapshot().handshake.clockSynced,false)
