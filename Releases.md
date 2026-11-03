@@ -1,3 +1,8 @@
+# 0.0.41
+
+Use with the 0.0.41 firmware (MSP API 22.15); the 0.0.38 to 0.0.40 firmware work too, without the SRXL2 ESC page.
+Add an SRXL2 ESC page under ESC & Motors with the telemetry poll interval and the motor 2 channel for dual-motor Smart ESCs. It shows only with SRXL2 ESC telemetry, needs the 0.0.41 firmware, and cannot be saved while armed.
+
 # 0.0.40
 
 Use with the 0.0.40 firmware (MSP API 22.15); the 0.0.38 and 0.0.39 firmware work too.
