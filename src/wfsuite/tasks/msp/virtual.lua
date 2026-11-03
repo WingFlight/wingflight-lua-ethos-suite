@@ -29,8 +29,8 @@
 local Virtual = {}
 Virtual.__index = Virtual
 
-local PARAM_READ = 0x5F37
-local PARAM_WRITE = 0x5F38
+local PARAM_READ = 0x5F2C
+local PARAM_WRITE = 0x5F2D
 local SYSTEM_CONFIG_PGN = 18
 local CHUNK = 128 -- MSP-over-telemetry buffers are 192 in / 320 out
 local PACK_FORMAT = 3

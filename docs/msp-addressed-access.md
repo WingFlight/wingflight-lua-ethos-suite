@@ -3,7 +3,7 @@
 wingflight-firmware is replacing its hand-written MSP config catalogue --
 one opcode per settings block, each with its own serializer in `msp.c` -- with
 two generic opcodes that address configuration by parameter group, offset and
-length: `MSP2_WING_PARAM_READ` (0x5F37) and `MSP2_WING_PARAM_WRITE` (0x5F38).
+length: `MSP2_WING_PARAM_READ` (0x5F2C) and `MSP2_WING_PARAM_WRITE` (0x5F2D).
 Step 5 of the firmware's `docs/parameter-addressing-design.md` then deletes
 the catalogue. This suite's pages (`lib/msp_*.lua`) speak the catalogue, so
 they have to move off it first; this is how.

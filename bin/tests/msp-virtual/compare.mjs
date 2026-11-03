@@ -73,7 +73,7 @@ runLua(`
       local p = m.payload
       local pgn, off = p[1] + p[2] * 256, p[3] + p[4] * 256
       local g = board[pgn]
-      if m.command == 0x5F37 then
+      if m.command == 0x5F2C then
         local len = p[5] + p[6] * 256
         local reply = {}
         for k = 1, len do reply[k] = g[off + k] end

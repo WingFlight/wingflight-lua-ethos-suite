@@ -71,12 +71,12 @@ lua_(`
     mspSendRequest = function(cmd, payload)
       WIRE[#WIRE + 1] = cmd
       local p = payload
-      if cmd == 0x5F37 then
+      if cmd == 0x5F2C then
         local pgn, off, len = p[1] + p[2] * 256, p[3] + p[4] * 256, p[5] + p[6] * 256
         local r = {}
         for k = 1, len do r[k] = BOARD[pgn][off + k] end
         pendingReply = { cmd, r }
-      elseif cmd == 0x5F38 then
+      elseif cmd == 0x5F2D then
         local pgn, off = p[1] + p[2] * 256, p[3] + p[4] * 256
         for k = 5, #p do BOARD[pgn][off + k - 4] = p[k] end
         pendingReply = { cmd, {} }
@@ -151,7 +151,7 @@ const first = lua_(`return request(Q, ${REPLY})`);
 check("first request gets the firmware's reply", first === hexOf(firmware[REPLY]), first);
 check("first request went over the wire", lua_(`return tostring(wireCount(${REPLY}))`) === "1");
 check("verification ran and matched", lua_(`return tostring(VERIFIED[${REPLY}])`) === "true");
-check("verification used PARAM_READ", Number(lua_(`return tostring(wireCount(0x5F37))`)) >= 1);
+check("verification used PARAM_READ", Number(lua_(`return tostring(wireCount(0x5F2C))`)) >= 1);
 
 // 2. Second request: answered locally, same bytes, no legacy opcode on the wire.
 const second = lua_(`return request(Q, ${REPLY})`);
@@ -191,12 +191,12 @@ lua_(`WIRE = {}; V.writes = true; FIRMWARE_WRITES[${SETTER}] = ${luaRuns(setterR
 const payloadLua = `{${SETTER_PAYLOAD.join(",")}}`;
 const firstSet = lua_(`return request(Q, ${SETTER}, ${payloadLua})`);
 check("setter, first request, goes to the firmware", firstSet === "" && lua_(`return tostring(wireCount(${SETTER}))`) === "1", firstSet);
-check("and is verified without writing", lua_(`return tostring(VERIFIED[${SETTER}])`) === "true" && lua_(`return tostring(wireCount(0x5F38))`) === "0");
+check("and is verified without writing", lua_(`return tostring(VERIFIED[${SETTER}])`) === "true" && lua_(`return tostring(wireCount(0x5F2D))`) === "0");
 const bumped = SETTER_PAYLOAD.map((b) => (b + 1) & 0xff);
 const bumpedRuns = await js.plan(SETTER, bumped);
 lua_(`request(Q, ${SETTER}, {${bumped.join(",")}})`);
 check("a verified setter is written through PARAM_WRITE, not sent",
-    lua_(`return tostring(wireCount(${SETTER}))`) === "1" && Number(lua_(`return tostring(wireCount(0x5F38))`)) >= 1);
+    lua_(`return tostring(wireCount(${SETTER}))`) === "1" && Number(lua_(`return tostring(wireCount(0x5F2D))`)) >= 1);
 check("and stores what the firmware's setter would",
     bumpedRuns.every((r) => lua_(`local t = {} for k = 1, ${r.bytes.length} do t[k] = BOARD[${r.pgn}][${r.offset} + k] end return table.concat(t, ",")`) === [...r.bytes].join(",")));
 
