@@ -146,6 +146,15 @@ local function run()
   rule = alerts.topBanner({}, codec.decodeConfig((2 << 25) | (1 << 14)))
   check("a trim banner ranks below reboot required",
     rule ~= nil and rule.id == "reboot_required")
+
+  -- GPS can't navigate: System Config bit 29, banner only.
+  rule = alerts.topBanner(nil, codec.decodeConfig(1 << 29))
+  check("config bit 29 raises the GPS nav banner",
+    rule ~= nil and rule.id == "gps_nav_unsupported" and rule.level == alerts.LEVEL.WARNING
+      and rule.enterSound == nil)
+  rule = alerts.topBanner(nil, codec.decodeConfig(1 << 28))
+  check("bit 28 alone is not the GPS nav banner",
+    rule == nil or rule.id ~= "gps_nav_unsupported")
 end
 
 local function selfTest()

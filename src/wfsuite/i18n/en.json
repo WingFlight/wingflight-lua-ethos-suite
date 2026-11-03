@@ -11081,6 +11081,12 @@
         "needs_translation": false,
         "translation": "GPS NOT RESPONDING"
       },
+      "alert_gps_nav_unsupported": {
+        "english": "NAV NEEDS U-BLOX",
+        "max_length": 16,
+        "needs_translation": false,
+        "translation": "NAV NEEDS U-BLOX"
+      },
       "alert_gyro_overflow": {
         "english": "GYRO OVERFLOW",
         "max_length": 13,

@@ -13807,6 +13807,13 @@
         "max_length": 18,
         "reverse_text": false
       },
+      "alert_gps_nav_unsupported": {
+        "english": "NAV NEEDS U-BLOX",
+        "translation": "NAV NEEDS U-BLOX",
+        "needs_translation": true,
+        "reverse_text": false,
+        "max_length": 16
+      },
       "alert_acc_uncalibrated": {
         "english": "ACC NOT CALIBRATED",
         "translation": "ACC NOT CALIBRATED",
