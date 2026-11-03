@@ -107,6 +107,10 @@ lua_(`
     mspRxFrameCount = function() return rxFrames end,
     mspRxBreakInfo = function() return 0 end,
     mspClearTxBuf = function() end,
+    -- master's framing negotiation: one framing, no fallbacks, no frame in flight
+    setFraming = function() end,
+    mspFramingFallbackCount = function() return 0 end,
+    mspRxInProgress = function() return false end,
   }
   function drain(q)
     local guard = 0
