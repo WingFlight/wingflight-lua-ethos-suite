@@ -13808,11 +13808,11 @@
         "max_length": 18
       },
       "alert_gps_nav_unsupported": {
-        "english": "NAV NEEDS U-BLOX",
-        "translation": "NAV NEEDS U-BLOX",
+        "english": "GPS CAN'T NAVIGATE",
+        "translation": "GPS CAN'T NAVIGATE",
         "needs_translation": true,
-        "reverse_text": false,
-        "max_length": 16
+        "max_length": 18,
+        "reverse_text": false
       },
       "alert_acc_uncalibrated": {
         "english": "ACC NOT CALIBRATED",

@@ -12903,11 +12903,11 @@
         "translation": "GPS NOT RESPONDING"
       },
       "alert_gps_nav_unsupported": {
-        "english": "NAV NEEDS U-BLOX",
-        "max_length": 16,
+        "english": "GPS CAN'T NAVIGATE",
+        "max_length": 18,
         "needs_translation": true,
         "reverse_text": false,
-        "translation": "NAV NEEDS U-BLOX"
+        "translation": "GPS CAN'T NAVIGATE"
       },
       "alert_gyro_overflow": {
         "english": "GYRO OVERFLOW",
