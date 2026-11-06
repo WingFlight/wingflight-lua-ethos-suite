@@ -559,8 +559,16 @@ end
 -- once -- and the comparison runs behind it. An indexed reply is verified per
 -- index, each being its own request. Setters are taken only with writes
 -- enabled as well (`self.writes`), and only once verified: watchSetter().
+--
+-- An authoritative layer (`self.authoritative`, set for a build without a
+-- config catalogue) answers every opcode its pack covers at once, setters
+-- included: the firmware has no own reply to verify against.
 function Virtual:intercept(msg, queue)
   if not self:handles(msg) then return false end
+  if self.authoritative then
+    self:expand(msg, queue)
+    return true
+  end
   local cmd = msg.command
   if self.pack.codecs[cmd]:byte(1) ~= 0 then
     -- setters: only with writes enabled (developer settings), each verified first

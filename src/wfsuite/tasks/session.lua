@@ -686,30 +686,41 @@ local function runHandshake(mspQueue, protocol)
     return
   end
 
-  -- Opt-in (developer settings): read the firmware's build id first, so the
-  -- codec pack for it (codecs/<id>.lua, shipped with the suite) is in place
-  -- before the rest of the handshake's reads go out. Like the reads below, a
-  -- read dropped by arming ("cleared") is resumed on disarm; any other
-  -- outcome settles addressed access for this connection.
-  if not isSim and not session.buildIdRead and not handshakeInFlight.buildId
-      and settingsStore.addressedAccessEnabled(settingsStore.load()) then
+  -- Read the firmware's build id first, so the codec pack for it
+  -- (codecs/<id>.lua, shipped with the suite) is in place before the rest of
+  -- the handshake's reads go out. A build without a config catalogue needs
+  -- the pack to be configured at all, so it gets addressed access, answered
+  -- locally from the first request; for any other build it stays opt-in
+  -- (developer settings). Firmware without parameter addressing answers the
+  -- read with an error, which settles it. Like the reads below, a read
+  -- dropped by arming ("cleared") is resumed on disarm; any other outcome
+  -- settles addressed access for this connection.
+  if not isSim and not session.buildIdRead and not handshakeInFlight.buildId then
     handshakeInFlight.buildId = true
-    local queued = mspQueue:add(mspBuildId.buildReadMessage(function(id)
+    local queued = mspQueue:add(mspBuildId.buildReadMessage(function(id, noCatalogue)
       handshakeInFlight.buildId = false
       session.buildIdRead = true
       session.buildId = id
+      session.noConfigCatalogue = noCatalogue == true
+      if not noCatalogue and not settingsStore.addressedAccessEnabled(settingsStore.load()) then
+        return
+      end
       if not id then
-        debugLog.print("[session] addressed access off: the firmware reports no build id")
+        debugLog.print("[session] addressed access off: the firmware reports no build id"
+          .. (noCatalogue and "; it has no config catalogue, so config pages cannot load" or ""))
         return
       end
       local Virtual = requireModule("tasks/msp/virtual.lua")
       local virtual, why = Virtual.load(id)
       if not virtual then
-        debugLog.print("[session] addressed access off: " .. tostring(why))
+        debugLog.print("[session] addressed access off: " .. tostring(why)
+          .. (noCatalogue and "; the firmware has no config catalogue, so config pages cannot load" or ""))
         return
       end
-      -- Setters too, if also opted in; each verified on its first use.
-      virtual.writes = settingsStore.addressedWritesEnabled(settingsStore.load())
+      virtual.authoritative = noCatalogue == true
+      -- Setters too, if also opted in; each verified on its first use. A
+      -- build without a catalogue takes every setter through its codec.
+      virtual.writes = virtual.authoritative or settingsStore.addressedWritesEnabled(settingsStore.load())
       virtual.onVerified = function(cmd, same, reason)
         debugLog.print(string.format("[virtual] opcode %d %s%s", cmd,
           same and "matches the firmware; answered locally from now on" or "differs; stays on the firmware",
@@ -717,7 +728,8 @@ local function runHandshake(mspQueue, protocol)
       end
       mspQueue.virtual = virtual
       debugLog.print("[session] addressed access: codec pack for build " .. id
-        .. (virtual.writes and ", setters included" or ""))
+        .. (virtual.authoritative and ", authoritative (no config catalogue)"
+            or (virtual.writes and ", setters included" or "")))
     end, function(reason)
       handshakeInFlight.buildId = false
       if reason ~= "cleared" then
@@ -998,6 +1010,7 @@ local function setConnected(value, mspQueue, protocol)
     if mspQueue then mspQueue.virtual = nil end
     session.buildId = nil
     session.buildIdRead = nil
+    session.noConfigCatalogue = nil
     -- Forget everything the handshake fetched so it re-runs in full on the
     -- next connect (a stale FC version/UID/battery config from a previous
     -- session -- or a different aircraft entirely -- must not survive a
