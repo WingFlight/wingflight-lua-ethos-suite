@@ -12902,6 +12902,13 @@
         "reverse_text": false,
         "translation": "GPS NOT RESPONDING"
       },
+      "alert_gps_nav_unsupported": {
+        "english": "GPS CAN'T NAVIGATE",
+        "max_length": 18,
+        "needs_translation": true,
+        "reverse_text": false,
+        "translation": "GPS CAN'T NAVIGATE"
+      },
       "alert_gyro_overflow": {
         "english": "GYRO OVERFLOW",
         "max_length": 13,

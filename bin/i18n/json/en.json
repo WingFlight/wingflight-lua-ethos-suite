@@ -11857,6 +11857,12 @@
         "needs_translation": false,
         "max_length": 18
       },
+      "alert_gps_nav_unsupported": {
+        "english": "GPS CAN'T NAVIGATE",
+        "translation": "GPS CAN'T NAVIGATE",
+        "needs_translation": false,
+        "max_length": 18
+      },
       "alert_acc_uncalibrated": {
         "english": "ACC NOT CALIBRATED",
         "translation": "ACC NOT CALIBRATED",

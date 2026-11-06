@@ -13807,6 +13807,13 @@
         "translation": "GPS NOT RESPONDING",
         "reverse_text": false
       },
+      "alert_gps_nav_unsupported": {
+        "english": "GPS CAN'T NAVIGATE",
+        "translation": "GPS CAN'T NAVIGATE",
+        "needs_translation": true,
+        "max_length": 18,
+        "reverse_text": false
+      },
       "alert_acc_uncalibrated": {
         "english": "ACC NOT CALIBRATED",
         "max_length": 18,

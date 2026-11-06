@@ -140,6 +140,9 @@ function systemStatus.decodeConfig(raw)
     trimRoll = field(value, 23, 0x3),
     trimPitch = field(value, 25, 0x3),
     trimYaw = field(value, 27, 0x3),
+    -- RTH/LOITER on a switch or GPS rescue failsafe, but the GPS provider
+    -- can't navigate (NMEA, FBUS, CRSF). From the FC settings, not the fix.
+    gpsNavUnsupported = flag(value, 29),
   }
 end
 

@@ -118,6 +118,15 @@ local RULES = {
     debounce = 1.0,
   },
   {
+    -- A setup problem, not an in-flight event: the FC refuses GPS nav on
+    -- NMEA/FBUS/CRSF GPS, so LOITER/RTH/GPS rescue would never engage.
+    -- Banner only.
+    id = "gps_nav_unsupported",
+    level = LEVEL.WARNING,
+    text = "@i18n(widgets.dashboard.alert_gps_nav_unsupported)@",
+    active = function(_, c) return c.gpsNavUnsupported == true end,
+  },
+  {
     id = "acc_uncalibrated",
     level = LEVEL.WARNING,
     text = "@i18n(widgets.dashboard.alert_acc_uncalibrated)@",
