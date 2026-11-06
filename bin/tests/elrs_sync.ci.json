@@ -1,0 +1,7 @@
+{
+  "id": "elrs-sync",
+  "name": "Check the ELRS link sync",
+  "step": "Check the ELRS link sync",
+  "script": "bin/tests/elrs_sync.lua",
+  "rationale": "Verification, probe and sync of the ELRS link page, armed aborts, late callbacks,\nconfirmation and cleanup. Passing, but not a CI job until now."
+}

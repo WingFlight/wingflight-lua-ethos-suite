@@ -1,0 +1,7 @@
+{
+  "id": "setup-state-announce",
+  "name": "Check the setup state announcement",
+  "step": "Check the setup state announcement",
+  "script": "bin/tests/setup_state_announce.lua",
+  "rationale": "The audio announcement of the setup state. Passing, but not a CI job until now."
+}

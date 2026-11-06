@@ -1,0 +1,7 @@
+{
+  "id": "tile-grid",
+  "name": "Check the menu tile grid",
+  "step": "Check the menu tile grid",
+  "script": "bin/tests/tile_grid.lua",
+  "rationale": "app/tile_grid.lua fits tile labels the same way as the dashboard and had the same\nlocale-dependent %s strip (see dashboard_text). The harness covers layouts, font\nselection, padding, UTF-8 and narrow widths; its own whitespace check uses an explicit\nASCII class for the same reason."
+}

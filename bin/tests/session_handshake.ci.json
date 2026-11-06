@@ -1,0 +1,7 @@
+{
+  "id": "session-handshake",
+  "name": "Check the session handshake",
+  "step": "Check the session handshake",
+  "script": "bin/tests/session_handshake.lua",
+  "rationale": "The connection handshake in tasks/session.lua: requests start on connect, wait while\narmed, resume after disarm, retry after genuine failures, survive queue pressure, and\nnothing after API_VERSION is requested for unsupported firmware. It was not a CI job,\nso its fixture fell behind session.lua (battery profile index, flight timer, main power,\nflight records, live sensors, the API-version gate); pure modules now load for real and\nthe rest are inert stubs."
+}

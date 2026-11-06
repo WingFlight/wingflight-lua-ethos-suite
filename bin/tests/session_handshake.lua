@@ -2,6 +2,15 @@
 -- Exercise the session task with mocked telemetry/MSP and the real status decoder.
 local function eq(a,b) assert(a==b,tostring(a)..' ~= '..tostring(b)) end
 local clock = os.clock
+-- The production version check, so a version the suite would refuse cannot
+-- pass a handshake here. It needs only lib/mspcodec.lua, which is pure.
+local apiVersion = (function()
+  local saved = package.loaded['wfsuite.lib.require']
+  package.loaded['wfsuite.lib.require'] = function(name) return assert(loadfile('src/wfsuite/'..name))() end
+  local module = assert(loadfile('src/wfsuite/lib/msp_api_version.lua'))()
+  package.loaded['wfsuite.lib.require'] = saved
+  return module
+end)()
 local function fixture(armed)
   local now, active, raw = 10, true, armed and 1 or 0
   local snapshots, handlers, counts, pending = {}, {}, {}, {}
@@ -13,11 +22,13 @@ local function fixture(armed)
     return function(ok,err) return {key=key,ok=ok,err=err} end
   end
   local noop=function() end
+  -- a module whose every method is a no-op returning nothing
+  local function inert() return setmetatable({},{__index=function() return noop end}) end
   local status=assert(loadfile('src/wfsuite/lib/system_status.lua'))()
   local modules={
     ['lib/msp_handshake.lua']={buildFcVersionReadMessage=builder('fcVariant'),buildUidReadMessage=builder('mcuId'),
       buildNameReadMessage=builder('craftName'),buildRtcSyncMessage=builder('clockSynced')},
-    ['lib/msp_api_version.lua']={buildReadMessage=builder('apiVersion'),isSupported=function(major) return major==13 end},
+    ['lib/msp_api_version.lua']={buildReadMessage=builder('apiVersion'),isSupported=apiVersion.isSupported},
     ['lib/msp_battery.lua']={buildBatteryConfigReadMessage=builder('batteryConfig'),buildSmartfuelConfigReadMessage=builder('smartfuelConfig')},
     ['lib/msp_rx_map.lua']={buildReadMessage=builder('rxMap')},
     ['lib/msp_telemetry_config.lua']={buildReadMessage=builder('telemetry')},
@@ -27,9 +38,16 @@ local function fixture(armed)
     ['lib/smartfuel_calc.lua']={new=function() return {reset=noop,update=function() return nil end} end},
     ['lib/diy_sensor.lua']={new=function() return {reset=noop,set=noop} end},
     ['lib/model_preferences.lua']={load=function() return {} end,stats=function() return {} end,
-      timerTarget=function() return 300 end,smartfuelModelType=function() return 0 end},
-    ['tasks/flight_timer.lua']={reset=noop,update=function() return false end},
+      timerTarget=function() return 300 end,smartfuelModelType=function() return 0 end,
+      escCurrentLimit=function() return nil end},
+    ['tasks/flight_timer.lua']=assert(loadfile('src/wfsuite/tasks/flight_timer.lua'))(),   -- pure: the real one
     ['tasks/elrs_sensors.lua']={wakeup=noop,reset=noop},
+    -- pure arithmetic, no Ethos API: the real module
+    ['lib/battery_profile_index.lua']=assert(loadfile('src/wfsuite/lib/battery_profile_index.lua'))(),
+    -- flight records and live sensor sources: not part of the handshake; any call is a no-op
+    ['lib/flight_stats.lua']={new=function() return inert() end},
+    ['lib/live_sensors.lua']=inert(),['lib/frsky_sensors.lua']=inert(),
+    ['lib/main_power.lua']=assert(loadfile('src/wfsuite/lib/main_power.lua'))(),   -- pure: the real one
     ['lib/system_status.lua']={copy=status.copy,decodeConfig=status.decodeConfig,decodeStatus=function(value)
       decodes=decodes+1; return status.decodeStatus(value)
     end},
@@ -63,9 +81,11 @@ local function fixture(armed)
     reject=function(key) reject=key end,emit=function(topic) handlers[topic]() end,
   }
 end
+-- Everything after API_VERSION waits for a supported version: answer it with one.
+local function supported(f) f.reply('apiVersion',{major=apiVersion.EXPECTED_API_MAJOR,minor=apiVersion.MIN_API_MINOR}); f.wake() end
 local f=fixture(false)
 f.wake(); eq(f.count('apiVersion'),1)
-f.reply('apiVersion',{major=13,minor=9}); f.wake()
+f.reply('apiVersion',{major=apiVersion.EXPECTED_API_MAJOR,minor=apiVersion.MIN_API_MINOR}); f.wake()
 local old=f.snapshot(); eq(old.handshake.apiVersion,true)
 f.arm(1); f.wake(); eq(f.clears(),1); eq(f.pending('craftName'),false)
 eq(f.snapshot().handshake.smartfuelConfig,false); eq(f.snapshot().handshake.clockSynced,false)
@@ -89,6 +109,7 @@ f.arm(0); f.wake(); eq(f.count('apiVersion'),1)
 -- Genuine failures retry after two seconds, including a rejected queue insertion.
 f.reply('apiVersion',nil,'timeout'); f.wake(); eq(f.count('apiVersion'),1)
 f.wake(2); eq(f.count('apiVersion'),2)
+supported(f)   -- the retry
 f.reply('craftName',nil,'timeout'); f.reject('craftName'); f.wake(2)
 f.reject(nil); f.wake(2); eq(f.count('craftName'),3)
 -- A cleared post-save SmartFuel refresh must be retried, not choose mode-0 fallback.
@@ -97,17 +118,18 @@ f.arm(1); f.wake(); eq(f.snapshot().handshake.smartfuelConfig,false)
 f.arm(0); f.wake(); eq(f.pending('smartfuelConfig'),true)
 -- Queue pressure cannot prematurely complete optional handshake steps.
 for _,key in ipairs({'clockSynced','smartfuelConfig'}) do
-  f=fixture(false); f.reject(key); f.wake()
+  f=fixture(false); f.reject(key); f.wake(); supported(f)
   eq(f.snapshot().handshake[key],false)
   f.reject(nil); f.wake(2); eq(f.pending(key),true)
 end
 -- A cancelled battery refresh also resumes after disarm.
-f=fixture(false); f.wake(); f.reply('batteryConfig',{}); f.emit('battery.config.saved')
+f=fixture(false); f.wake(); supported(f); f.reply('batteryConfig',{}); f.emit('battery.config.saved')
 f.arm(1); f.wake(); eq(f.snapshot().handshake.batteryConfig,false)
 f.arm(0); f.wake(); eq(f.pending('batteryConfig'),true)
 -- Unsupported firmware doesn't start a perpetual retry loop.
 f=fixture(false); f.wake(); f.reply('apiVersion',{major=12,minor=9})
-f.reply('craftName',nil,'timeout'); f.wake(3); eq(f.count('craftName'),1)
+-- nothing after API_VERSION is requested, and API_VERSION itself is not repeated
+f.wake(3); eq(f.count('craftName'),0); eq(f.count('apiVersion'),1)
 -- Disconnect cancels outstanding requests before resetting metadata.
 f.connect(false); f.wake(); eq(f.pending('mcuId'),false); eq(f.snapshot().mcuId,nil)
 os.clock=clock

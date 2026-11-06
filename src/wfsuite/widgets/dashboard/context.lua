@@ -852,7 +852,9 @@ function utils.fitText(text, maxW, font)
   local trimmed = text
   local result = ellipsis
   while #trimmed > 0 do
-    trimmed = trimLastUtf8Char(trimmed):gsub("%s+$", "")
+    -- ASCII whitespace only: %s follows the C library's isspace(), which can match 0x85 or 0xA0,
+    -- bytes that also occur inside UTF-8 characters (U+4F20 is E4 BC A0) and would split them.
+    trimmed = trimLastUtf8Char(trimmed):gsub("[ \t\r\n]+$", "")
     local candidate = trimmed .. ellipsis
     if lcd.getTextSize(candidate) <= maxW then
       result = candidate
