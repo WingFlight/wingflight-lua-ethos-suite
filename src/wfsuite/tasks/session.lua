@@ -39,6 +39,7 @@ local batteryProfileIndex = requireModule("lib/battery_profile_index.lua")
 local dataflashSummary = requireModule("lib/msp_dataflash_summary.lua")
 local modelPreferences = requireModule("lib/model_preferences.lua")
 local flightStats = requireModule("lib/msp_flight_stats.lua")
+local mspBuildId = requireModule("lib/msp_build_id.lua")
 local eeprom = requireModule("lib/msp_eeprom.lua")
 local smartfuelReserve = requireModule("lib/smartfuel_reserve.lua")
 local SmartFuel = requireModule("lib/smartfuel_calc.lua")
@@ -685,6 +686,50 @@ local function runHandshake(mspQueue, protocol)
     return
   end
 
+  -- Opt-in (developer settings): read the firmware's build id first, so the
+  -- codec pack for it (codecs/<id>.lua, shipped with the suite) is in place
+  -- before the rest of the handshake's reads go out. Like the reads below, a
+  -- read dropped by arming ("cleared") is resumed on disarm; any other
+  -- outcome settles addressed access for this connection.
+  if not isSim and not session.buildIdRead and not handshakeInFlight.buildId
+      and settingsStore.addressedAccessEnabled(settingsStore.load()) then
+    handshakeInFlight.buildId = true
+    local queued = mspQueue:add(mspBuildId.buildReadMessage(function(id)
+      handshakeInFlight.buildId = false
+      session.buildIdRead = true
+      session.buildId = id
+      if not id then
+        debugLog.print("[session] addressed access off: the firmware reports no build id")
+        return
+      end
+      local Virtual = requireModule("tasks/msp/virtual.lua")
+      local virtual, why = Virtual.load(id)
+      if not virtual then
+        debugLog.print("[session] addressed access off: " .. tostring(why))
+        return
+      end
+      -- Setters too, if also opted in; each verified on its first use.
+      virtual.writes = settingsStore.addressedWritesEnabled(settingsStore.load())
+      virtual.onVerified = function(cmd, same, reason)
+        debugLog.print(string.format("[virtual] opcode %d %s%s", cmd,
+          same and "matches the firmware; answered locally from now on" or "differs; stays on the firmware",
+          reason and (" (" .. tostring(reason) .. ")") or ""))
+      end
+      mspQueue.virtual = virtual
+      debugLog.print("[session] addressed access: codec pack for build " .. id
+        .. (virtual.writes and ", setters included" or ""))
+    end, function(reason)
+      handshakeInFlight.buildId = false
+      if reason ~= "cleared" then
+        session.buildIdRead = true
+        debugLog.print("[session] addressed access off: build id read failed (" .. tostring(reason) .. ")")
+      end
+    end))
+    if queued == false then
+      handshakeInFlight.buildId = false
+    end
+  end
+
   if not session.handshake.apiVersion and not handshakeInFlight.apiVersion then
     local simResponse = nil
     if isSim then
@@ -950,6 +995,9 @@ local function setConnected(value, mspQueue, protocol)
     else
       clearAircraftIdentity()
     end
+    if mspQueue then mspQueue.virtual = nil end
+    session.buildId = nil
+    session.buildIdRead = nil
     -- Forget everything the handshake fetched so it re-runs in full on the
     -- next connect (a stale FC version/UID/battery config from a previous
     -- session -- or a different aircraft entirely -- must not survive a
