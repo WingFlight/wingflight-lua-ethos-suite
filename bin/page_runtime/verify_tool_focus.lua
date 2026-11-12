@@ -5,7 +5,7 @@
 --
 -- Every page that gives PageRuntime an onTool writes it as
 -- function(focusFn), and calls focusFn() when its dialog closes or is
--- cancelled (accelerometer, alignment, servos_bus, servos_pwm, telemetry).
+-- cancelled (accelerometer, alignment, servos, telemetry).
 -- buildChrome() used to call it as runtime:onTool(focus), which made the
 -- runtime table the first argument, so on the radio calibrating the
 -- accelerometer ended in "focusFn is not callable (a table value)" from

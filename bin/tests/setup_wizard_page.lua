@@ -406,7 +406,8 @@ before = #sent
 press(T("dir_no"))
 local cfg = writesOf(212, before + 1)
 check("the aileron picked is reversed: servo 1, reverse flag set",
-  #cfg == 1 and cfg[1].payload[1] == 0 and u16(cfg[1].payload, 16) == 1, cfg[1] and bytes(cfg[1].payload))
+  #cfg == 1 and cfg[1].payload[1] == 0 and #cfg[1].payload == 15 and u16(cfg[1].payload, 14) == 1,
+  cfg[1] and bytes(cfg[1].payload))
 check("and roll is checked again", shows("dir_check_roll") and shows("dir_status_reversed_fmt"))
 
 -- Yaw: a single rudder the wrong way is reversed straight away
@@ -416,7 +417,7 @@ before = #sent
 press(T("dir_unlike"))
 cfg = writesOf(212, before + 1)
 check("one surface wrong on its own axis: its servo is reversed",
-  #cfg == 1 and cfg[1].payload[1] == 3 and u16(cfg[1].payload, 16) == 1)
+  #cfg == 1 and cfg[1].payload[1] == 3 and #cfg[1].payload == 15 and u16(cfg[1].payload, 14) == 1)
 
 -- Arming lets go of everything
 before = #sent
@@ -661,18 +662,24 @@ local ruleWrites = writesOf(173, before + 1)
 local cfgWrites = writesOf(43, before + 1)
 check("airframe: every rule slot is written", #ruleWrites == 32
   and bytes({table.unpack(ruleWrites[1].payload, 1, 4)}) == "0,1,2,1", ruleWrites[1] and bytes(ruleWrites[1].payload))
-check("airframe: the model type is flying wing", #cfgWrites == 1 and cfgWrites[1].payload[1] == 1)
+-- The two-byte short form: the bus channel counts and the PWM rate are left alone.
+check("airframe: the model type is flying wing, and nothing else is written with it",
+  #cfgWrites == 1 and bytes(cfgWrites[1].payload) == "1,0", cfgWrites[1] and bytes(cfgWrites[1].payload))
 check("airframe: the surfaces are elevons now", shows("surface_elevon"))
 
--- Servo type: digital on every surface servo, then save and restart.
+-- Servo type: digital sets the one PWM rate, then save and restart.
 openPage(14, "servotype")
 settle()
+check("servo type: analog and digital are offered",
+  button(T("st_analog")) ~= nil and button(T("st_digital")) ~= nil)
 before = #sent
 press(T("st_digital"))
-local st = writesOf(212, before + 1)
-local allDigital = #st == 4
-for _, m in ipairs(st) do if u16(m.payload, 12) ~= 333 then allDigital = false end end
-check("servo type: every surface servo set to 333 Hz", allDigital, #st)
+local st = writesOf(43, before + 1)
+-- MSP_SET_MIXER_CONFIG, long form, with what the page read when it opened:
+-- model type 0, reserved 0, SBUS 16, F.Bus 24, then rate 333 = 77 + 1 * 256.
+check("servo type: digital writes the PWM rate, 333 Hz, with the bus channel counts as read",
+  #st == 1 and bytes(st[1].payload) == "0,0,16,24,77,1", st[1] and bytes(st[1].payload))
+check("servo type: no servo's centre, limits or scale is written", #writesOf(212, before + 1) == 0)
 before = #sent
 press(T("btn_save_restart"))
 tick()

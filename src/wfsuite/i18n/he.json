@@ -6116,13 +6116,6 @@
           "reverse_text": true,
           "translation": "פלט"
         },
-        "output_bus_servo_fmt": {
-          "english": "Bus Servo %d",
-          "max_length": 12,
-          "needs_translation": false,
-          "reverse_text": false,
-          "translation": "Bus Servo %d"
-        },
         "output_motor_fmt": {
           "english": "Motor %d",
           "max_length": 8,
@@ -6137,12 +6130,12 @@
           "reverse_text": true,
           "translation": "ללא"
         },
-        "output_pwm_servo_fmt": {
-          "english": "PWM Servo %d",
-          "max_length": 12,
+        "output_servo_fmt": {
+          "english": "Servo %d",
+          "max_length": 8,
           "needs_translation": false,
           "reverse_text": false,
-          "translation": "PWM Servo %d"
+          "translation": "Servo %d"
         },
         "role": {
           "english": "Role",
@@ -7842,13 +7835,6 @@
         }
       },
       "servos": {
-        "bus": {
-          "english": "BUS Output",
-          "max_length": 10,
-          "needs_translation": false,
-          "reverse_text": true,
-          "translation": "פלט BUS"
-        },
         "center": {
           "english": "Center",
           "max_length": 6,
@@ -7933,19 +7919,40 @@
           "reverse_text": true,
           "translation": "סרווים"
         },
-        "pwm": {
-          "english": "PWM Output",
-          "max_length": 10,
-          "needs_translation": false,
-          "reverse_text": true,
-          "translation": "פלט PWM"
+        "pwm_rate": {
+          "english": "PWM Rate",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "PWM Rate"
         },
-        "rate": {
-          "english": "Rate",
-          "max_length": 4,
-          "needs_translation": false,
-          "reverse_text": true,
-          "translation": "קצב"
+        "pwm_rate_high": {
+          "english": "High speed (333 Hz)",
+          "max_length": 19,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "High speed (333 Hz)"
+        },
+        "pwm_rate_note_digital": {
+          "english": "High speed is for digital servos only.",
+          "max_length": 38,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "High speed is for digital servos only."
+        },
+        "pwm_rate_note_restart": {
+          "english": "A change applies after a restart.",
+          "max_length": 33,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "A change applies after a restart."
+        },
+        "pwm_rate_standard": {
+          "english": "Standard (50 Hz)",
+          "max_length": 16,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Standard (50 Hz)"
         },
         "reverse": {
           "english": "Reverse",
@@ -10500,11 +10507,11 @@
           "translation": "Servo %d (%s)"
         },
         "st_all": {
-          "english": "Applies to every control-surface servo.",
+          "english": "Applies to every servo on a PWM output.",
           "max_length": 39,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "Applies to every control-surface servo."
+          "translation": "Applies to every servo on a PWM output."
         },
         "st_analog": {
           "english": "Analog",
@@ -10521,11 +10528,18 @@
           "translation": "50 Hz, works with any standard servo."
         },
         "st_applied_fmt": {
-          "english": "%s set on every surface servo. It takes effect after a restart.",
-          "max_length": 63,
+          "english": "%s set on every PWM servo output. It takes effect after a restart.",
+          "max_length": 66,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "%s set on every surface servo. It takes effect after a restart."
+          "translation": "%s set on every PWM servo output. It takes effect after a restart."
+        },
+        "st_custom_fmt": {
+          "english": "%d Hz",
+          "max_length": 5,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "%d Hz"
         },
         "st_digital": {
           "english": "Digital",
@@ -10548,20 +10562,6 @@
           "reverse_text": false,
           "translation": "What kind of servos drive the control surfaces?"
         },
-        "st_narrow": {
-          "english": "Narrow band",
-          "max_length": 11,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "Narrow band"
-        },
-        "st_narrow_help": {
-          "english": "560 Hz, only for 760 us servos; resets center, limits and scale.",
-          "max_length": 64,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "560 Hz, only for 760 us servos; resets center, limits and scale."
-        },
         "st_now_fmt": {
           "english": "Now: %s.",
           "max_length": 8,
@@ -10575,13 +10575,6 @@
           "needs_translation": true,
           "reverse_text": false,
           "translation": "Servo type"
-        },
-        "st_unknown": {
-          "english": "mixed or custom",
-          "max_length": 15,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "mixed or custom"
         },
         "step_airframe": {
           "english": "Airframe",

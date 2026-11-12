@@ -1,23 +1,29 @@
--- Indexed servo configuration helpers: MSP_GET_SERVO_CONFIG (125, read),
--- MSP_SET_SERVO_CONFIG (124, raw write) and MSP_SET_SERVO_CONFIGURATION
--- (212, packed write). Command numbers as in wingflight-firmware
--- src/main/msp/msp_protocol.h:174-175 and :260.
+-- Indexed servo configuration helpers: MSP_GET_SERVO_CONFIG (125, read) and
+-- MSP_SET_SERVO_CONFIGURATION (212, write). Command numbers as in
+-- wingflight-firmware src/main/msp/msp_protocol.h.
 --
--- Two index spaces, and the commands do not share one:
---   * raw index: servoParams(i). Read (125) and raw write (124) take it.
---     Bus servos sit at raw 8..25 (BUS_SERVO_OFFSET = 8, pg/bus_servo.h:33-35).
---   * packed index: the PWM servos 0..n-1, then the bus servos. The packed
---     write (212) takes it. With bus servos configured, the bus servo at raw r
---     is packed n + (r - 8) (msp.c:3066), where n is the PWM servo count and
---     MSP_STATUS reports n + 18 (msp.c:1098-1100). The caller therefore sends
---     servo_count - 18 as the offset (servos_bus.lua configWriteIndex).
--- A PWM servo has the same index in both spaces, which is why forIndex() can
--- use the packed write unchanged.
+-- One index space (MSP API 22.16): index N is servo S(N+1) in every servo
+-- message, 0..23. A servo is sent on PWM output N+1 where the board has one
+-- and on channel N+1 of a bus output (SBUS, F.Bus) when one is set up; it is
+-- configured the same way either way. The read and the write both take any
+-- index 0..23, in use or not. MSP_SET_SERVO_CONFIG (124) takes the same
+-- payload and index as 212; this suite only sends 212.
 --
--- Wingflight 2.3 / MSP API >= 12.09 is the floor for this rebuild, so
--- the indexed API is always available. The original suite still carries a
--- bulk-config fallback for older firmware; this lite rebuild deliberately
--- does not.
+-- Wire layout verified against wingflight-firmware's src/main/msp/msp.c
+-- (MSP_GET_SERVO_CONFIG / MSP_SET_SERVO_CONFIGURATION): seven 16-bit fields,
+-- mid U16, min S16, max S16, rneg U16, rpos U16, speed U16, flags U16. The
+-- read reply is 14 bytes; the write is the U8 index and the same 14 bytes,
+-- and the firmware refuses any other length. There is no per-servo rate any
+-- more: the PWM update rate is one setting, servo_pwm_rate in
+-- lib/msp_mixer_config.lua.
+--
+-- Limits from flight/servos.h, applied by validateAndFixServoConfig() on
+-- every write: mid 1000..2000 (SERVO_CENTER_MIN/MAX), min -1000..0, max
+-- 0..1000 (SERVO_LIMIT_MIN/MAX), scale 50..1000 (SERVO_SCALE_MIN/MAX), speed
+-- 0..60000. min/max are stored as set; the output stays inside 880..2159 us
+-- (SERVO_SIGNAL_MIN/MAX), so the travel used at a given mid is
+-- max(min, 880 - mid) .. min(max, 2159 - mid). flags: bit 0 reverse, bit 1
+-- geometry correction.
 
 if package.loaded["wfsuite.lib.msp_servo_config"] then
   return package.loaded["wfsuite.lib.msp_servo_config"]
@@ -26,33 +32,29 @@ end
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local mspcodec = requireModule("lib/mspcodec.lua")
 
-local READ_COMMAND = 125          -- MSP_GET_SERVO_CONFIG, raw index
-local WRITE_RAW_COMMAND = 124     -- MSP_SET_SERVO_CONFIG, raw index
-local WRITE_PACKED_COMMAND = 212  -- MSP_SET_SERVO_CONFIGURATION, packed index
+local READ_COMMAND = 125   -- MSP_GET_SERVO_CONFIG
+local WRITE_COMMAND = 212  -- MSP_SET_SERVO_CONFIGURATION
 
--- PWM defaults from wingflight-firmware flight/servos.h and pg/servos.c.
+-- Defaults from wingflight-firmware flight/servos.h and pg/servos.c.
 local SIMULATOR_RESPONSE = {
   220, 5,   -- mid = 1500
-  68, 253,  -- min = -700 (signed offset from mid, not an absolute pulse)
-  188, 2,   -- max = 700
+  168, 253, -- min = -600 (signed offset from mid, not an absolute pulse)
+  88, 2,    -- max = 600
   244, 1,   -- rneg = 500
   244, 1,   -- rpos = 500
-  50, 0,    -- rate = 50
   0, 0,     -- speed = 0
   0, 0,     -- flags = 0
 }
 
 local msp_servo_config = {
   READ_COMMAND = READ_COMMAND,
-  WRITE_RAW_COMMAND = WRITE_RAW_COMMAND,
-  WRITE_PACKED_COMMAND = WRITE_PACKED_COMMAND,
+  WRITE_COMMAND = WRITE_COMMAND,
   FIELD_META = {
-    mid = {min = 50, max = 2250, default = 1500},
-    min = {min = -1000, max = 1000, default = -700},
-    max = {min = -1000, max = 1000, default = 700},
-    rneg = {min = 100, max = 1000, default = 500},
-    rpos = {min = 100, max = 1000, default = 500},
-    rate = {min = 50, max = 5000, default = 333, suffix = "@i18n(app.unit_hertz)@"},
+    mid = {min = 1000, max = 2000, default = 1500},
+    min = {min = -1000, max = 0, default = -600},
+    max = {min = 0, max = 1000, default = 600},
+    rneg = {min = 50, max = 1000, default = 500},
+    rpos = {min = 50, max = 1000, default = 500},
     speed = {min = 0, max = 60000, default = 0, suffix = "ms"},
   },
 }
@@ -71,7 +73,6 @@ function msp_servo_config.decode(buf)
     max = mspcodec.readS16(buf),
     rneg = mspcodec.readU16(buf),
     rpos = mspcodec.readU16(buf),
-    rate = mspcodec.readU16(buf),
     speed = mspcodec.readU16(buf),
     flags = mspcodec.readU16(buf),
   }
@@ -86,7 +87,6 @@ function msp_servo_config.encode(index, data)
   mspcodec.writeS16(payload, data.max or 0)
   mspcodec.writeU16(payload, data.rneg or 0)
   mspcodec.writeU16(payload, data.rpos or 0)
-  mspcodec.writeU16(payload, data.rate or 0)
   mspcodec.writeU16(payload, data.speed or 0)
   mspcodec.writeU16(payload, data.flags or 0)
   return payload
@@ -104,9 +104,9 @@ function msp_servo_config.buildReadMessage(index, onData, onError)
   }
 end
 
-local function buildWrite(command, index, data, onWritten, onError)
+function msp_servo_config.buildWriteMessage(index, data, onWritten, onError)
   return {
-    command = command,
+    command = WRITE_COMMAND,
     payload = msp_servo_config.encode(index, data),
     isWrite = true,
     processReply = function()
@@ -117,18 +117,6 @@ local function buildWrite(command, index, data, onWritten, onError)
   }
 end
 
--- Packed index (cmd 212): the index is passed through unchanged; the caller
--- computes the packed value (see the header).
-function msp_servo_config.buildWriteMessage(index, data, onWritten, onError)
-  return buildWrite(WRITE_PACKED_COMMAND, index, data, onWritten, onError)
-end
-
--- Raw index (cmd 124): the same 17-byte payload as cmd 212, addressed by the
--- slot cmd 125 reads back.
-function msp_servo_config.buildRawWriteMessage(index, data, onWritten, onError)
-  return buildWrite(WRITE_RAW_COMMAND, index, data, onWritten, onError)
-end
-
 function msp_servo_config.forIndex(index)
   return {
     FIELD_META = msp_servo_config.FIELD_META,
@@ -137,9 +125,6 @@ function msp_servo_config.forIndex(index)
     end,
     buildWriteMessage = function(data, onWritten, onError)
       return msp_servo_config.buildWriteMessage(index, data, onWritten, onError)
-    end,
-    buildRawWriteMessage = function(data, onWritten, onError)
-      return msp_servo_config.buildRawWriteMessage(index, data, onWritten, onError)
     end,
   }
 end

@@ -75,7 +75,7 @@
 --
 -- MSP API 22.13 appends angle_level_damping (LEVEL_FIELDS) after the SPA
 -- fields: percent of the measured roll/pitch rate taken off the ANGLE
--- leveling command. Minimum API is 22.13, so it is always read/written.
+-- leveling command. The minimum API is past 22.13, so it is always read/written.
 --
 -- Snap relax (SNAP_FIELDS) follows angle_level_damping: roll/pitch feedback
 -- relaxed against a fast roll + pitch + yaw stick input (pop top, pinwheel,

@@ -6,18 +6,16 @@
 -- driving the same control surface (e.g. dual ailerons).
 --
 -- Wire layout verified against wingflight-firmware's src/main/msp/msp.c
--- (MSP_SERVO_CURVES serializer / MSP_SET_SERVO_CURVE parser, commit
--- aa362d09a) and src/main/pg/servo_curve.h -- see AGENTS.md Section 8.
+-- (MSP_SERVO_CURVES serializer / MSP_SET_SERVO_CURVE parser, MSP API 22.16)
+-- and src/main/pg/servo_curve.h -- see AGENTS.md Section 8.
 --
 -- Same asymmetric GET/SET shape as lib/msp_mixer_curves.lua (whole-pool
 -- GET, one-curve-at-a-time SET selected by a leading index byte), with
 -- two differences:
---   * There is no fixed pool size: GET is prefixed with a servo-count U8
---     (PWM servos, plus BUS_SERVO_CHANNELS more when bus servos are
---     configured -- the same count/remap MSP_SERVO_CONFIGURATIONS uses),
---     so the number of curves is read off the wire, not a CURVE_COUNT
---     constant here. SET's index is in that same 0-based count space; the
---     firmware does the PWM/bus-servo remap itself.
+--   * There is no fixed pool size: GET is prefixed with a servo-count U8,
+--     the servos in use (MSP_STATUS servo_count), so the number of curves
+--     is read off the wire, not a CURVE_COUNT constant here. Index N is
+--     servo S(N+1) in the GET and in the SET, which takes any servo 0..23.
 --   * Y is a small corrective delta (-100..100, i.e. +-10%), not a
 --     replacement value: the neutral/default curve is flat at y=0, not
 --     the x==y diagonal. X is the servo's own output, -1000..1000.

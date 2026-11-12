@@ -21,15 +21,18 @@ local mspcodec = requireModule("lib/mspcodec.lua")
 
 local READ_COMMAND = 1
 
--- Wingflight 22.13 is required for ANGLE mode damping (angle_level_damping).
+-- Wingflight 22.16 is required for the servo messages: it made a servo index
+-- the same in every one of them, dropped the per-servo rate from the servo
+-- record and changed what MSP_STATUS's servo count means, so older firmware
+-- would be misread and miswritten (lib/msp_servo_config.lua).
 local EXPECTED_API_MAJOR = 22
-local MIN_API_MINOR = 13
+local MIN_API_MINOR = 16
 
 -- Concrete versions offered by the developer "simulated API version"
 -- picker (see app/pages/developer_settings.lua) -- add new entries here as
 -- Wingflight ships new MSP API versions; nothing else needs to change,
 -- the simulator byte-triplet is derived from the string itself below.
-local SIMULATABLE_VERSIONS = {"22.09", "22.10", "22.11", "22.12", "22.13", "22.14", "22.15"}
+local SIMULATABLE_VERSIONS = {"22.09", "22.10", "22.11", "22.12", "22.13", "22.14", "22.15", "22.16"}
 
 -- "Invalid" simulates talking to a *different firmware family* entirely
 -- (major 12 -- Rotorflight's own, per that project's own

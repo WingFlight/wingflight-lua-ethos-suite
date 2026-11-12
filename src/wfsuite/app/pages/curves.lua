@@ -17,12 +17,12 @@
 -- flat at 0 by default) rather than a reshape -- so it is not assigned
 -- from anywhere else, it simply applies to the servo it belongs to.
 --
--- Three screens, mirroring app/pages/servos_pwm.lua's list->editor shape
+-- Three screens, mirroring app/pages/servos.lua's list->editor shape
 -- with one extra level on top:
 --   open() -> openCategoryMenu(): Mixer / Gain / Servo chooser, no MSP
 --     traffic yet.
 --   openCategory(): one-off whole-pool GET (own progress dialog, like
---     servos_pwm.lua's own top-level open()), then openSlotList().
+--     servos.lua's own top-level open()), then openSlotList().
 --   openSlotList(): a tile grid over the already-fetched pool (no
 --     re-read -- the tiles show nothing curve-specific, just "Curve N" /
 --     "SERVO N", so nothing to refresh); tapping a tile opens
@@ -68,7 +68,7 @@ local MSG_NO_SERVOS = "@i18n(app.modules.curves.no_servos)@"
 -- Master Gains table that references it, distinct from a Mixer curve
 -- slot. Servo's category tile uses servos.png (the Servos menu entry's own
 -- icon) and each slot tile the matching servo<N>.png that
--- app/pages/servos_pwm.lua/servos_bus.lua use for that servo, so a curve
+-- app/pages/servos.lua uses for that servo, so a curve
 -- visually ties back to the servo it trims. Loaded once here rather than
 -- per-tile inside the grid-building loops, since those loops rerun on
 -- every visit to these screens; the per-servo masks fill in lazily since
@@ -76,8 +76,8 @@ local MSG_NO_SERVOS = "@i18n(app.modules.curves.no_servos)@"
 local MIXER_ICON = lcd.loadMask("app/gfx/curves.png")
 local GAIN_ICON = lcd.loadMask("app/gfx/master_gains.png")
 local SERVO_ICON = lcd.loadMask("app/gfx/servos.png")
--- Only servo1..servo16 .png exist; a bus-servo setup can push the total
--- past that, and those extra slots just fall back to the generic icon.
+-- Only servo1..servo16 .png exist; there can be up to 24 servos in use, and
+-- the slots past 16 just fall back to the generic icon.
 local MAX_SERVO_ICON = 16
 local servoIcons = {}
 

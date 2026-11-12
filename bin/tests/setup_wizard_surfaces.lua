@@ -120,6 +120,15 @@ do
   check("MUL rule makes no surface", #surfaces == 2, #surfaces)
   local past = S.servosPastCount({rule(SET, 2, 9, 1000), rule(SET, 2, 6, 1000), rule(SET, 2, 6, 0)}, 4, 8)
   check("servosPastCount: in slots only, once each", table.concat(past, ",") == "6", table.concat(past, ","))
+  -- The wizard's own call: 24 servo slots (MSP API 22.16). Outputs 25 and 26
+  -- are reserved and 27 is a motor, so none of them is a missing servo.
+  past = S.servosPastCount({rule(SET, 2, 24, 1000), rule(SET, 2, 9, 1000), rule(SET, 2, 25, 1000),
+    rule(SET, 2, 26, 1000), rule(SET, 2, 27, 1000)}, 8, 24)
+  check("servosPastCount: 24 slots, the reserved outputs and the motors left out",
+    table.concat(past, ",") == "9,24", table.concat(past, ","))
+  local bus = S.surfacesFromRules({rule(SET, 1, 9, 1000), rule(SET, 2, 24, 1000)}, 24)
+  check("a servo on a bus channel only is a surface like any other",
+    #bus == 2 and bus[1].servo == 8 and bus[2].servo == 23, #bus)
   local g = S.axisGainsFromRates({roll = 830, pitch = -1000})
   check("axis gains from rates", near(g.roll, 0.83) and near(g.pitch, -1) and near(g.yaw, 1))
 end

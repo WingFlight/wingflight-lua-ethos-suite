@@ -46,7 +46,7 @@
 --
 --    It is in this list and always was. Upstream added a 12.10 version gate for it
 --    because that suite's floor is 12.09 and a 12.09 FC exists. THIS SUITE'S FLOOR IS
---    22.13 (lib/msp_api_version.lua:26, MIN_API_MINOR = 13, EXPECTED_API_MAJOR = 22),
+--    22.16 (lib/msp_api_version.lua, MIN_API_MINOR = 16, EXPECTED_API_MAJOR = 22),
 --    which is past every protocol's introduction -- there is nothing left to gate, and
 --    a gate that cannot fire is a second thing to keep true. protocolChoices() keeps
 --    the apiMinor argument so the shape survives a future floor and returns the base
@@ -475,11 +475,11 @@ local ENUM = {
 }
 
 -- This suite's own floor, transcribed: lib/msp_api_version.lua carries
--- EXPECTED_API_MAJOR = 22 and MIN_API_MINOR = 13, so the lowest API any FC this suite
--- will talk to reports is 22.13. That is past every protocol's introduction, which is
+-- EXPECTED_API_MAJOR = 22 and MIN_API_MINOR = 16, so the lowest API any FC this suite
+-- will talk to reports is 22.16. That is past every protocol's introduction, which is
 -- why there is no version gate to test and why SRXL2_MIN_API_MINOR does not exist in
 -- this file the way it does upstream's.
-local SUITE_MIN_API_MINOR = 13
+local SUITE_MIN_API_MINOR = 16
 
 -- ---------------------------------------------------------------------------
 -- Helpers over a choice list
@@ -601,10 +601,10 @@ local function checkDisabledValue()
   -- hold before and after is not a gate.
   --
   -- The apiMinor values swept here are the ones this suite can actually see. Its floor
-  -- is 22.13, so the minors below are all "old enough to be real"; on this side the
+  -- is 22.16, so the minors below are all "old enough to be real"; on this side the
   -- argument changes nothing, and that is the point of the next check.
   local wrong = {}
-  for _, apiMinor in ipairs({13, 14, nil}) do
+  for _, apiMinor in ipairs({16, 17, nil}) do
     local choices = codec.protocolChoices(apiMinor)
     local got = valueOfLabel(choices, "DISABLED")
     if got ~= ENUM.DISABLED then
@@ -627,7 +627,7 @@ local function checkDisabledValue()
   -- iteration, not two. A sweep that silently tests one case is the same failure as a
   -- check that cannot fail.
   local mismatched = {}
-  for _, apiMinor in ipairs({13, 14}) do
+  for _, apiMinor in ipairs({16, 17}) do
     for _, entry in ipairs(codec.protocolChoices(apiMinor)) do
       local want = ENUM[tostring(entry[1])]
       if want == nil then
@@ -705,7 +705,7 @@ local function checkSrxl2Gating()
   local reference = labelsOf(codec.protocolChoices(nil))
   local sameForEvery = true
   local detail = nil
-  for _, apiMinor in ipairs({13, 14, 99}) do
+  for _, apiMinor in ipairs({16, 17, 99}) do
     local list = labelsOf(codec.protocolChoices(apiMinor))
     if table.concat(list, ",") ~= table.concat(reference, ",") then
       sameForEvery = false
@@ -713,7 +713,7 @@ local function checkSrxl2Gating()
       break
     end
   end
-  check(string.format("the offered list is the same for apiMinor nil, 13, 14 and 99 -- nothing is gated"),
+  check(string.format("the offered list is the same for apiMinor nil, 16, 17 and 99 -- nothing is gated"),
     sameForEvery, detail or "every argument yields: " .. table.concat(reference, ", "))
 
   -- A non-number must behave like nil: not crash, and not leak a different list. The
@@ -725,7 +725,7 @@ local function checkSrxl2Gating()
   -- It is here so that a future floor -- when this becomes a filter -- has a case that
   -- pins the direction a nil must take.
   local oddWrong = {}
-  for _, odd in ipairs({"22.13", "", "invalid", false}) do
+  for _, odd in ipairs({"22.16", "", "invalid", false}) do
     local ok, list = pcall(codec.protocolChoices, odd)
     if not ok then
       oddWrong[#oddWrong + 1] = string.format("apiMinor %s raised %s", tostring(odd), tostring(list))
@@ -741,7 +741,7 @@ local function checkSrxl2Gating()
   -- version filter that fails closed and drops a protocol every supported FC has.
   for _, name in ipairs({"SRXL2", "CASTLE"}) do
     local want = ENUM[name]
-    for _, apiMinor in ipairs({13, 14, nil}) do
+    for _, apiMinor in ipairs({16, 17, nil}) do
       local list = codec.protocolChoices(apiMinor)
       check(string.format("%s stays available at apiMinor %s, with the enum's value %d",
           name, tostring(apiMinor), want),
@@ -763,7 +763,7 @@ local function checkBrushed()
   -- pre-fix list carried BRUSHED unconditionally, so it goes red there. It is also the
   -- gate that carries the whole menu change on this side.
   local wrong = {}
-  for _, minor in ipairs({13, 14, nil}) do
+  for _, minor in ipairs({16, 17, nil}) do
     if hasLabel(codec.protocolChoices(minor), "BRUSHED") then
       wrong[#wrong + 1] = string.format("BRUSHED offered at apiMinor %s", tostring(minor))
     end

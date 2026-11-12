@@ -387,8 +387,8 @@ tick of that page.
 `app/tool.lua` still registers eagerly at boot (§1), but everything the tool
 only needs once it is open -- `app/navigation.lua`, `app/menu_container.lua`
 (and through it `app/close_key.lua`, `app/header.lua`, `app/tile_grid.lua`),
-`app/esc_protocol_guard.lua`, `app/servo_bus_guard.lua` (and their
-`lib/msp_esc_sensor_config.lua`/`lib/msp_serial_config.lua` codecs), and
+`app/esc_protocol_guard.lua` (and its `lib/msp_esc_sensor_config.lua`
+codec), and
 `lib/memstats.lua` -- is loaded through `ensureX()` helpers from `create()`,
 not at module scope. Only `lib/bus.lua` stays eager, because the tool's
 `bus.subscribe()` calls have to be live from boot.

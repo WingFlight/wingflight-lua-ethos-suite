@@ -51,12 +51,13 @@ local HOW = {
   {caption = "3. " .. T.set, pos = 0.62, stop = 0.86, saved = 0.62},
 }
 
--- PWM_SERVO_PULSE_MIN/MAX and SERVO_LIMIT_MIN/MAX (firmware rx/rx.h,
--- flight/servos.h), as the configurator's servoLimits.js.
-local SIGNAL_MIN, SIGNAL_MAX = 50, 2250
+-- SERVO_SIGNAL_MIN/MAX and SERVO_LIMIT_MIN/MAX (firmware flight/servos.h), as
+-- the configurator's servoLimits.js: the signal range of every servo, on a
+-- PWM output and on a bus channel alike.
+local SIGNAL_MIN, SIGNAL_MAX = 880, 2159
 local TRAVEL = 1000
 local STEPS = {-50, -10, 10, 50}
--- A surface's limits on the last screen: "-650 / +700 us".
+-- A surface's limits on the last screen: "-550 / +600 us".
 local DONE_VALUE = "%+d / %+d us"
 
 local function openRange(config)

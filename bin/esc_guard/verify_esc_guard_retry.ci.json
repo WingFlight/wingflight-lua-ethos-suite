@@ -1,7 +1,7 @@
 {
   "id": "verify-esc-guard-retry",
-  "name": "Check a failed ESC/servo guard read is retried",
-  "step": "Check a failed ESC/servo guard read is retried",
+  "name": "Check a failed ESC guard read is retried",
+  "step": "Check a failed ESC guard read is retried",
   "script": "bin/esc_guard/verify_esc_guard_retry.lua",
-  "rationale": "The ESC forward-programming and servo BUS tiles are gated by guards\nthat read the FC once. A timeout or bus error used to latch them shut\nuntil the menu was reopened; they now retry after a backoff. That\nretry reaches neither a build nor a package step, so it is pinned here."
+  "rationale": "The ESC forward-programming tiles are gated by a guard that reads the FC\nonce. A timeout or bus error used to latch it shut until the menu was\nreopened; it now retries after a backoff. That retry reaches neither a\nbuild nor a package step, so it is pinned here.\n\nThe servo BUS tile had a guard of the same shape, covered here too until\nMSP API 22.16 made a servo a servo: the PWM and BUS pages became one Servos\npage, there is nothing left to gate on a bus output, and app/servo_bus_guard.lua\nand its cases were removed."
 }

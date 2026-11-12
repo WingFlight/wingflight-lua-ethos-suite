@@ -106,7 +106,8 @@ local STEPS = {
   {key = "sensors", title = "@i18n(app.modules.setup_wizard.step_sensors)@"},
   {key = "receiver", title = "@i18n(app.modules.setup_wizard.step_receiver)@"},
   {key = "airframe", title = "@i18n(app.modules.setup_wizard.step_airframe)@"},
-  {key = "servotype", title = "@i18n(app.modules.setup_wizard.step_servotype)@", needsSurfaces = true},
+  -- The one PWM update rate of the board's servo outputs: no surfaces needed.
+  {key = "servotype", title = "@i18n(app.modules.setup_wizard.step_servotype)@"},
   {key = "motor", title = "@i18n(app.modules.setup_wizard.step_motor)@"},
   {key = "centre", title = "@i18n(app.modules.setup_wizard.step_centre)@", needsSurfaces = true},
   {key = "direction", title = "@i18n(app.modules.setup_wizard.step_direction)@", needsSurfaces = true},
@@ -126,10 +127,10 @@ local STEPS = {
 local memory = package.loaded["wfsuite.setup_wizard.memory"] or {stepKey = nil}
 package.loaded["wfsuite.setup_wizard.memory"] = memory
 
--- PWM servos only: mixer output N drives servo config N - 1 and servo
--- override N - 1 directly. Bus servos use another index scheme and are left
--- to the Servos pages.
-local PWM_SERVO_SLOTS = 8
+-- The servos in use, on a PWM output, a bus channel or both: mixer output N
+-- drives servo config N - 1, servo override N - 1 and servo probe N - 1
+-- directly (MSP API 22.16). MAX_SUPPORTED_SERVOS in the firmware.
+local SERVO_SLOTS = 24
 
 -- Mixer inputs the wizard holds: the stabilized axes, and the flap channel
 -- for the flap direction check.
@@ -375,7 +376,7 @@ local function open(opts)
 
   local function recompute()
     surfaces = surfacesLib.surfacesFromRules(rules, servoCount)
-    missingServos = surfacesLib.servosPastCount(rules, servoCount, PWM_SERVO_SLOTS)
+    missingServos = surfacesLib.servosPastCount(rules, servoCount, SERVO_SLOTS)
     -- The pictures draw a delta or a flying wing by the model type.
     art.modelType = mixConfig and mixConfig.model_type or nil
   end
@@ -499,6 +500,22 @@ local function open(opts)
     wiz.sendServo(servo, original)
   end
 
+  -- The PWM update rate of every PWM servo output, Hz (Servo type step). It
+  -- follows the bus channel counts on the wire, so the whole mixer config goes
+  -- back as it was read with the new rate (lib/msp_mixer_config.lua encode()).
+  -- The flight controller uses it from the next boot.
+  function wiz.pwmRate() return mixConfig and mixConfig.servo_pwm_rate end
+
+  function wiz.setPwmRate(rate)
+    if not mixConfig then return end
+    change("pwm_rate", mixConfig.servo_pwm_rate, function(o)
+      mixConfig.servo_pwm_rate = o
+      bus.publish("msp.request", mixerConfig.buildWriteMessage(mixConfig))
+    end)
+    mixConfig.servo_pwm_rate = rate
+    bus.publish("msp.request", mixerConfig.buildWriteMessage(mixConfig))
+  end
+
   local function sendInput(axis)
     bus.publish("msp.request", inputCodecs[axis].buildWriteMessage(inputs[axis]))
   end
@@ -541,6 +558,12 @@ local function open(opts)
     return surfacesLib.axisGainsFromRates(rates)
   end
 
+  -- The model type alone, as MSP_SET_MIXER_CONFIG's two-byte short form: the
+  -- bus channel counts and the PWM rate are not this write's to send.
+  local function sendModelType()
+    bus.publish("msp.request", mixerConfig.buildWriteMessage({model_type = mixConfig.model_type}))
+  end
+
   -- Replaces the whole mix (Airframe step): every rule slot and the model type.
   function wiz.setMix(ruleTable, modelType)
     change("mix", {rules = rules, modelType = mixConfig and mixConfig.model_type}, function(o)
@@ -550,7 +573,7 @@ local function open(opts)
       end
       if mixConfig then
         mixConfig.model_type = o.modelType
-        bus.publish("msp.request", mixerConfig.buildWriteMessage(mixConfig))
+        sendModelType()
       end
     end)
     rules = ruleTable
@@ -559,7 +582,7 @@ local function open(opts)
     end
     if mixConfig then
       mixConfig.model_type = modelType
-      bus.publish("msp.request", mixerConfig.buildWriteMessage(mixConfig))
+      sendModelType()
     end
     recompute()
   end
@@ -1083,7 +1106,7 @@ local function open(opts)
     end
     bus.publish("msp.request", status.buildReadMessage(function(data)
       if disposed then return end
-      servoCount = math.min(tonumber(data and data.servo_count) or 0, PWM_SERVO_SLOTS)
+      servoCount = math.min(tonumber(data and data.servo_count) or 0, SERVO_SLOTS)
       motorCount = tonumber(data and data.motor_count) or 0
       requestRest()
     end, failed))

@@ -144,10 +144,8 @@ local UNDER_TEST = {
   "app/tile_grid.lua",
   "app/close_key.lua",
   "app/esc_protocol_guard.lua",
-  "app/servo_bus_guard.lua",
   "lib/memstats.lua",
   "lib/msp_esc_sensor_config.lua",
-  "lib/msp_serial_config.lua",
 }
 
 local function countUnder(name)

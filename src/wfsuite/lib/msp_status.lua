@@ -20,6 +20,11 @@
 -- as always: keeping every field after them correctly aligned) but never
 -- exposed as anything.
 --
+-- `servo_count` is the servos in use (wingflight-firmware msp.c,
+-- getServoCount(); MSP API 22.16): the larger of the board's PWM servo
+-- outputs and the servos a bus output (SBUS, F.Bus) sends, up to 24. The
+-- servo list messages hold that many entries, servo S1 first.
+--
 -- Read-only -- MSP_STATUS has no MSP_SET_STATUS counterpart in the
 -- firmware at all, matching rotorflight-lua-ethos-suite's own
 -- `core.createReadOnlyAPI(...)` for this exact command. No encode()/
