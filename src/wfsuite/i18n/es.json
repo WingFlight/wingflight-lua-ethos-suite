@@ -10807,12 +10807,47 @@
           "reverse_text": false,
           "translation": "V-tail"
         },
+        "tg_auto_knob": {
+          "english": "Set the knob first with it off: it hides the wobble.",
+          "max_length": 52,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Set the knob first with it off: it hides the wobble."
+        },
         "tg_auto_note": {
           "english": "Use Auto trim: give it a switch in Mode switches. Fly level with it on for a few seconds, then land and disarm.",
           "max_length": 111,
           "needs_translation": true,
           "reverse_text": false,
           "translation": "Use Auto trim: give it a switch in Mode switches. Fly level with it on for a few seconds, then land and disarm."
+        },
+        "tg_auto_off": {
+          "english": "Off",
+          "max_length": 3,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Off"
+        },
+        "tg_auto_on": {
+          "english": "On",
+          "max_length": 2,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "On"
+        },
+        "tg_auto_q": {
+          "english": "Turns the gain of an axis down by itself while it wobbles, then back up. Use it?",
+          "max_length": 80,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Turns the gain of an axis down by itself while it wobbles, then back up. Use it?"
+        },
+        "tg_auto_title": {
+          "english": "Auto gain",
+          "max_length": 9,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Auto gain"
         },
         "tg_aux_fmt": {
           "english": "AUX %d",

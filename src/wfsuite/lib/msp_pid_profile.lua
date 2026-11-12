@@ -87,6 +87,12 @@
 -- angle from vertical in degrees, fade-out in ms. Optional: read only when
 -- the reply carries it (75 bytes), and written back only if it was read, so
 -- firmware without it keeps working. `has_prop_hang` records which.
+--
+-- Auto gain (AUTO_GAIN_FIELDS) follows prop-hang relax: P and D of an axis
+-- turned down while that axis oscillates. On/off per axis, the lowest scale
+-- in percent, the feedback swing that counts in 0.1 % of surface travel, and
+-- the recovery rate in percent per second. Optional in the same way (81
+-- bytes with it); `has_auto_gain` records which.
 
 -- Self-caches via package.loaded (same mechanism lib/bus.lua uses) --
 -- multiple pages share this codec and each reloads fresh via loadfile() on
@@ -162,6 +168,14 @@ local HANG_FIELDS = {
   {"prop_hang_fade", "U16"},
 }
 
+-- Auto gain, after prop-hang relax on the wire. Optional, see above.
+local AUTO_GAIN_FIELDS = {
+  {"auto_gain_0", "U8"}, {"auto_gain_1", "U8"}, {"auto_gain_2", "U8"}, -- roll, pitch, yaw
+  {"auto_gain_min", "U8"},
+  {"auto_gain_threshold", "U8"},
+  {"auto_gain_recovery", "U8"},
+}
+
 -- API 22.4 axis limits: raw zero inherits the corresponding legacy shared limit.
 local AXIS_LIMITS = {
   {"angle_roll_limit", "angle_level_limit", 90},
@@ -214,6 +228,10 @@ local SIMULATOR_RESPONSE = {
   100,  -- prop_hang_strength
   20,   -- prop_hang_angle
   244, 1, -- prop_hang_fade (U16 LE: 500 = 0x01F4 -> 244, 1)
+  0, 0, 0, -- auto_gain_0/1/2 (off)
+  40,   -- auto_gain_min
+  20,   -- auto_gain_threshold
+  5,    -- auto_gain_recovery
 }
 
 -- Per-field {min, max, default, decimals, suffix}, sourced from this
@@ -264,6 +282,9 @@ local FIELD_META = {
   prop_hang_strength = {min = 0, max = 100, default = 100, suffix = "%"},
   prop_hang_angle = {min = 5, max = 45, default = 20, suffix = "°"},
   prop_hang_fade = {min = 0, max = 2000, default = 500, suffix = "ms"},
+  auto_gain_min = {min = 20, max = 90, default = 40, suffix = "%"},
+  auto_gain_threshold = {min = 5, max = 200, default = 20, decimals = 1, suffix = "%"},
+  auto_gain_recovery = {min = 1, max = 100, default = 5, suffix = "%/s"},
   trainer_gain = {min = 25, max = 255, default = 75},
   atthold_gain = {min = 0, max = 250, default = 40},
   atthold_deadband = {min = 0, max = 100, default = 5, suffix = "%"},
@@ -349,6 +370,12 @@ function msp_pid_profile.decode(buf)
       end
     end
   end
+  data.has_auto_gain = data.has_prop_hang and #buf - buf.offset + 1 >= 6
+  if data.has_auto_gain then
+    for i = 1, #AUTO_GAIN_FIELDS do
+      data[AUTO_GAIN_FIELDS[i][1]] = mspcodec.readU8(buf)
+    end
+  end
   return data
 end
 
@@ -394,6 +421,11 @@ function msp_pid_profile.encode(data)
       else
         mspcodec.writeU8(payload, data[name] or 0)
       end
+    end
+  end
+  if data.has_prop_hang and data.has_auto_gain then
+    for i = 1, #AUTO_GAIN_FIELDS do
+      mspcodec.writeU8(payload, data[AUTO_GAIN_FIELDS[i][1]] or 0)
     end
   end
   return payload

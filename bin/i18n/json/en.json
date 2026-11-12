@@ -9790,6 +9790,36 @@
           "needs_translation": false,
           "max_length": 4
         },
+        "tg_auto_title": {
+          "english": "Auto gain",
+          "translation": "Auto gain",
+          "needs_translation": false,
+          "max_length": 9
+        },
+        "tg_auto_q": {
+          "english": "Turns the gain of an axis down by itself while it wobbles, then back up. Use it?",
+          "translation": "Turns the gain of an axis down by itself while it wobbles, then back up. Use it?",
+          "needs_translation": false,
+          "max_length": 80
+        },
+        "tg_auto_knob": {
+          "english": "Set the knob first with it off: it hides the wobble.",
+          "translation": "Set the knob first with it off: it hides the wobble.",
+          "needs_translation": false,
+          "max_length": 52
+        },
+        "tg_auto_on": {
+          "english": "On",
+          "translation": "On",
+          "needs_translation": false,
+          "max_length": 2
+        },
+        "tg_auto_off": {
+          "english": "Off",
+          "translation": "Off",
+          "needs_translation": false,
+          "max_length": 3
+        },
         "tg_row_gain": {
           "english": "Gain",
           "translation": "Gain",

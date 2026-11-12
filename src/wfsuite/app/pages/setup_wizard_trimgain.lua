@@ -14,6 +14,8 @@
 --   listen    "press any trim button" / "press the roll trim" / "turn the knob"
 --   buttons   live check: which trim button the channel shows
 --   gainQ     one knob, one per axis, or none
+--   autoQ     auto gain on or off (a PID profile setting; skipped on
+--             firmware without it)
 --   done      what is set up
 --
 -- The configurator shows Ethos screenshots of the radio setup; here the
@@ -24,9 +26,11 @@ local bus = requireModule("lib/bus.lua")
 local ui = requireModule("app/setup_wizard_ui.lua")
 local art = requireModule("app/setup_wizard_art.lua")
 -- Freed when the step closes (app/setup_wizard_ui.lua's notLoaded()).
-local OWNED = ui.notLoaded({"wfsuite.lib.setup_wizard_controls", "wfsuite.lib.msp_adjustments"})
+local OWNED = ui.notLoaded({"wfsuite.lib.setup_wizard_controls", "wfsuite.lib.msp_adjustments",
+  "wfsuite.lib.msp_pid_profile"})
 local controls = requireModule("lib/setup_wizard_controls.lua")
 local adjustments = requireModule("lib/msp_adjustments.lua")
+local pidProfile = requireModule("lib/msp_pid_profile.lua")
 
 local T = {
   title = "@i18n(app.modules.setup_wizard.tg_title)@",
@@ -50,6 +54,11 @@ local T = {
   gainSeparate = "@i18n(app.modules.setup_wizard.tg_gain_separate)@",
   gainNone = "@i18n(app.modules.setup_wizard.tg_gain_none)@",
   gainCentre = "@i18n(app.modules.setup_wizard.tg_gain_centre)@",
+  autoTitle = "@i18n(app.modules.setup_wizard.tg_auto_title)@",
+  autoQ = "@i18n(app.modules.setup_wizard.tg_auto_q)@",
+  autoKnob = "@i18n(app.modules.setup_wizard.tg_auto_knob)@",
+  autoOn = "@i18n(app.modules.setup_wizard.tg_auto_on)@",
+  autoOff = "@i18n(app.modules.setup_wizard.tg_auto_off)@",
   full = "@i18n(app.modules.setup_wizard.tg_full)@",
   timedOut = "@i18n(app.modules.setup_wizard.tg_timed_out)@",
   found = "@i18n(app.modules.setup_wizard.tg_found_fmt)@",
@@ -79,12 +88,17 @@ local function new(wiz)
   local scr = ui.new(wiz)
 
   local ranges = nil
+  local pid = nil               -- the PID profile, for auto gain
   local screen = "intro"
   local note = nil
   local listening = nil         -- {kind =, axis =, start =, peaks =, untilAt =, queue =}
 
-  wiz.fetch({adj = function(ok, err) return adjustments.buildReadMessage(ok, err) end}, function(results)
+  wiz.fetch({
+    adj = function(ok, err) return adjustments.buildReadMessage(ok, err) end,
+    pid = function(ok, err) return pidProfile.buildReadMessage(ok, err) end,
+  }, function(results)
     ranges = results.adj and results.adj.ranges or {}
+    pid = results.pid
     wiz.rebuild()
   end)
 
@@ -128,6 +142,28 @@ local function new(wiz)
 
   local function removeAll(functions)
     for _, axis in ipairs(controls.AXES) do removeFunction(functions[axis]) end
+  end
+
+  local function hasAutoGain() return pid ~= nil and pid.has_auto_gain end
+
+  -- On when any axis has it.
+  local function autoGainOn()
+    return hasAutoGain() and (pid.auto_gain_0 ~= 0 or pid.auto_gain_1 ~= 0 or pid.auto_gain_2 ~= 0)
+  end
+
+  -- The screen after the gain knob.
+  local function afterGain() return hasAutoGain() and "autoQ" or "done" end
+
+  -- All three axes together, written straight away like the ranges.
+  local function setAutoGain(on)
+    if autoGainOn() == on then return end
+    wiz.change("pid_profile", pid, function(o) bus.publish("msp.request", pidProfile.buildWriteMessage(o)) end)
+    local changed = {}
+    for k, v in pairs(pid) do changed[k] = v end
+    local value = on and 1 or 0
+    changed.auto_gain_0, changed.auto_gain_1, changed.auto_gain_2 = value, value, value
+    pid = changed
+    bus.publish("msp.request", pidProfile.buildWriteMessage(pid))
   end
 
   -- queue: the detections to run in turn, {kind =, axis =} each.
@@ -265,25 +301,48 @@ local function new(wiz)
       -- The grid first: the encoder visits fields in the order they are made.
       local focus = scr:grid({
         {text = T.gainSingle, primary = mode == "single", press = function()
-          listen({{kind = "gain"}}, "done")
+          listen({{kind = "gain"}}, afterGain())
         end},
         {text = T.gainSeparate, primary = mode == "separate", press = function()
           listen({{kind = "gain", axis = "roll"}, {kind = "gain", axis = "pitch"},
-            {kind = "gain", axis = "yaw"}}, "done")
+            {kind = "gain", axis = "yaw"}}, afterGain())
         end},
         {text = T.gainNone, primary = mode == "none", press = function()
           removeAll(controls.MASTER_GAIN)
-          go("done")
+          go(afterGain())
         end},
       }, 1)
       -- Next keeps the gain knob as it is set up now.
-      local forward = scr:row(function() go("trimQ") end, nil, {text = T.next, press = function() go("done") end})
+      local forward = scr:row(function() go("trimQ") end, nil,
+        {text = T.next, press = function() go(afterGain()) end})
+      return focus or forward
+
+    elseif screen == "autoQ" then
+      local on = autoGainOn()
+      -- Auto gain hides the wobble the knob is set by.
+      local knob = controls.gainMode(ranges) ~= "none"
+      scr:text(T.autoTitle, knob and (T.autoQ .. " " .. T.autoKnob) or T.autoQ, note)
+      -- The grid first: the encoder visits fields in the order they are made.
+      local focus = scr:grid({
+        {text = T.autoOn, primary = on, press = function()
+          setAutoGain(true)
+          go("done")
+        end},
+        {text = T.autoOff, primary = not on, press = function()
+          setAutoGain(false)
+          go("done")
+        end},
+      }, 1)
+      -- Next keeps auto gain as it is set now.
+      local forward = scr:row(function() go("gainQ") end, nil, {text = T.next, press = function() go("done") end})
       return focus or forward
     end
 
     scr:text(T.doneTitle, nil, note)
-    scr:rows({{T.trimRow, describeTrim()}, {T.gainRow, describeGain()}})
-    return scr:row(function() go("gainQ") end)
+    local rows = {{T.trimRow, describeTrim()}, {T.gainRow, describeGain()}}
+    if hasAutoGain() then rows[#rows + 1] = {T.autoTitle, autoGainOn() and T.autoOn or T.autoOff} end
+    scr:rows(rows)
+    return scr:row(function() go(afterGain()) end)
   end
 
   function self.paint() scr:paint() end
