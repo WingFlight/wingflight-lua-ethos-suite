@@ -48,7 +48,8 @@ local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("
 -- way (app/setup_wizard_ui.lua's notLoaded()).
 local SHELL_MODULES = {
   "wfsuite.lib.msp_mixer_rules", "wfsuite.lib.msp_mixer_input", "wfsuite.lib.msp_mixer_config",
-  "wfsuite.lib.msp_servo_config", "wfsuite.lib.msp_servo", "wfsuite.lib.msp_rc_channels",
+  "wfsuite.lib.msp_servo_config", "wfsuite.lib.msp_servo", "wfsuite.lib.msp_servo_trim",
+  "wfsuite.lib.msp_rc_channels",
   "wfsuite.lib.setup_wizard_surfaces", "wfsuite.app.setup_wizard_ui", "wfsuite.app.setup_wizard_art",
   "wfsuite.app.plane3d",
 }
@@ -70,6 +71,7 @@ local mixerInput = requireModule("lib/msp_mixer_input.lua")
 local mixerConfig = requireModule("lib/msp_mixer_config.lua")
 local servoConfig = requireModule("lib/msp_servo_config.lua")
 local servoRead = requireModule("lib/msp_servo.lua")
+local servoTrim = requireModule("lib/msp_servo_trim.lua")
 local servoOverride = requireModule("lib/msp_servo_override.lua")
 local servoProbe = requireModule("lib/msp_servo_probe.lua")
 local mixerOverride = requireModule("lib/msp_mixer_override.lua")
@@ -236,6 +238,7 @@ local function open(opts)
   local rateKeys = {roll = "rate_stabilized_roll", pitch = "rate_stabilized_pitch", yaw = "rate_stabilized_yaw"}
   local inputs = {}        -- axis -> decoded mixer input record (sent back whole)
   local configs = {}       -- servo (0-based) -> decoded servo config
+  local trims = {}         -- servo (0-based) -> saved trim in us
   local mixConfig = nil    -- decoded MSP_MIXER_CONFIG
 
   local surfaces = {}
@@ -396,6 +399,7 @@ local function open(opts)
     rc = rc,
     rcRaw = rcRaw,
     configs = configs,
+    trims = trims,
     inputs = inputs,
     BOX_ANGLE = modeOverride.BOX_ANGLE,
     BOX_PASSTHROUGH = modeOverride.BOX_PASSTHROUGH,
@@ -1052,7 +1056,7 @@ local function open(opts)
   end
 
   local function requestRest()
-    outstanding = 1 + 1 + 3 + servoCount
+    outstanding = 1 + 1 + 3 + 1 + servoCount
     bus.publish("msp.request", mixerRules.buildReadPoolMessage(function(pool)
       if disposed then return end
       rules = pool
@@ -1070,6 +1074,14 @@ local function open(opts)
         answered()
       end, failed))
     end
+    -- Saved trims take travel from one side (surfacesLib.usableTravel()).
+    -- Filled in place: the steps hold this table.
+    bus.publish("msp.request", servoTrim.buildReadMessage(function(data)
+      if disposed then return end
+      for servo in pairs(trims) do trims[servo] = nil end
+      for servo, value in pairs(data) do trims[servo] = value end
+      answered()
+    end, failed))
     for servo = 0, servoCount - 1 do
       bus.publish("msp.request", servoConfig.buildReadMessage(servo, function(data)
         if disposed then return end

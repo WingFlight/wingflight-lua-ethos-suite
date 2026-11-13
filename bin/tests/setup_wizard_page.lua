@@ -1014,6 +1014,7 @@ check("travel: every surface inside its limits", shows("trv_ok"))
 before = #sent
 tick(1)
 check("travel: polls the live servo outputs for the gauges", #writesOf(103, before + 1) >= 1)
+check("the saved servo trims were read with the servo configs", #writesOf(233) >= 1)
 forced = writesOf(0x5F1B)
 check("travel: forces PASSTHROUGH", #forced >= 1 and bytes(forced[#forced].payload) == "16,39,1,12")
 session({connected = false, isArmed = false, apiVersionMajor = 22, apiVersionMinor = 14})
