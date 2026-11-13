@@ -5,12 +5,19 @@
 --     lua5.4 bin/servo_config_commands/verify_servo_config_commands.lua --self-test
 --
 -- What it drives:
---   * lib/msp_servo_config.lua: the read message (125), the packed write (212)
---     and the raw write (124), with their payloads.
+--   * lib/msp_servo_config.lua: the read message (125) and the write (212), with
+--     their payloads.
 --   * lib/msp_servo_center.lua (213) and lib/msp_servo_override.lua (193).
+--   * lib/msp_mixer_config.lua (42 / 43), which carries the one PWM update rate
+--     that replaced the per-servo rate.
 --
--- The numbers are the firmware's, from wingflight-firmware:
---   src/main/msp/msp_protocol.h:174-175 (124, 125), :193, :213, :260 (212).
+-- The numbers are the firmware's, from wingflight-firmware
+-- src/main/msp/msp_protocol.h: MSP_GET_SERVO_CONFIG 125,
+-- MSP_SET_SERVO_CONFIGURATION 212, MSP_SET_SERVO_CENTER 213,
+-- MSP_SET_SERVO_OVERRIDE 193. From MSP API 22.16 a servo index is the same in
+-- every one of them (index N is servo S(N+1)), and the servo record is seven
+-- 16-bit fields with no rate, so the write is 1 + 14 bytes; the firmware refuses
+-- any other length (msp.c, MSP_SET_SERVO_CONFIGURATION).
 -- The check reads them off the messages the modules build, so a renamed constant
 -- that still holds the wrong number is caught as well as a wrong constant name.
 --
@@ -78,18 +85,18 @@ local function bytes(payload)
 end
 
 -- Pins the command numbers and the payload layout. Returns how many checks failed.
-local function pinCommands(cfg, center, override)
+local function pinCommands(cfg, center, override, mixer)
   local before = failures
-  local data = {mid = 1301, min = -700, max = 700, rneg = 500, rpos = 500,
-    rate = 333, speed = 0, flags = 0}
+  -- rate is not a field any more: a caller that still passes one must not see it
+  -- on the wire.
+  local data = {mid = 1301, min = -600, max = 600, rneg = 500, rpos = 450,
+    rate = 333, speed = 120, flags = 1}
 
   print("Command numbers")
   check("read is MSP_GET_SERVO_CONFIG (125)", cfg.READ_COMMAND == 125,
     "got " .. tostring(cfg.READ_COMMAND))
-  check("raw write is MSP_SET_SERVO_CONFIG (124)", cfg.WRITE_RAW_COMMAND == 124,
-    "got " .. tostring(cfg.WRITE_RAW_COMMAND))
-  check("packed write is MSP_SET_SERVO_CONFIGURATION (212)", cfg.WRITE_PACKED_COMMAND == 212,
-    "got " .. tostring(cfg.WRITE_PACKED_COMMAND))
+  check("write is MSP_SET_SERVO_CONFIGURATION (212)", cfg.WRITE_COMMAND == 212,
+    "got " .. tostring(cfg.WRITE_COMMAND))
   check("centre is MSP_SET_SERVO_CENTER (213)", center.WRITE_COMMAND == 213,
     "got " .. tostring(center.WRITE_COMMAND))
   check("override is MSP_SET_SERVO_OVERRIDE (193)", override.WRITE_COMMAND == 193,
@@ -97,25 +104,32 @@ local function pinCommands(cfg, center, override)
 
   print("Messages")
   local read = cfg.buildReadMessage(12, function() end, function() end)
-  check("the read message sends 125 with raw index 12",
+  check("the read message sends 125 with servo index 12",
     read.command == 125 and bytes(read.payload) == "12",
     string.format("command %s, payload %s", tostring(read.command), bytes(read.payload)))
 
-  local packed = cfg.buildWriteMessage(12, data, nil, nil)
-  check("the packed write sends 212 and passes its index through unchanged",
-    packed.command == 212 and packed.payload[1] == 12,
-    string.format("command %s, index %s", tostring(packed.command), tostring(packed.payload[1])))
-
-  local raw = cfg.buildRawWriteMessage(12, data, nil, nil)
-  check("the raw write sends 124 and passes its index through unchanged",
-    raw.command == 124 and raw.payload[1] == 12,
-    string.format("command %s, index %s", tostring(raw.command), tostring(raw.payload[1])))
-  check("raw and packed writes carry the same 17 bytes (index + 8 U16)",
-    #raw.payload == 17 and bytes(raw.payload) == bytes(packed.payload),
-    string.format("raw %s / packed %s", bytes(raw.payload), bytes(packed.payload)))
+  local write = cfg.buildWriteMessage(12, data, nil, nil)
+  check("the write sends 212 and passes its index through unchanged",
+    write.command == 212 and write.payload[1] == 12,
+    string.format("command %s, index %s", tostring(write.command), tostring(write.payload[1])))
+  -- index, mid 1301, min -600, max 600, rneg 500, rpos 450, speed 120, flags 1
+  check("the write carries 15 bytes: index + mid, min, max, rneg, rpos, speed, flags",
+    bytes(write.payload) == "12,21,5,168,253,88,2,244,1,194,1,120,0,1,0",
+    bytes(write.payload))
   check("mid 1301 is little-endian at payload bytes 2-3 (21, 5)",
-    packed.payload[2] == 21 and packed.payload[3] == 5,
-    string.format("got %s, %s", tostring(packed.payload[2]), tostring(packed.payload[3])))
+    write.payload[2] == 21 and write.payload[3] == 5,
+    string.format("got %s, %s", tostring(write.payload[2]), tostring(write.payload[3])))
+
+  -- The read reply is the same seven fields, 14 bytes.
+  local decoded = cfg.decode({21, 5, 168, 253, 88, 2, 244, 1, 194, 1, 120, 0, 1, 0})
+  check("a 14-byte reply decodes to mid, min, max, rneg, rpos, speed, flags",
+    decoded.mid == 1301 and decoded.min == -600 and decoded.max == 600 and decoded.rneg == 500
+      and decoded.rpos == 450 and decoded.speed == 120 and decoded.flags == 1 and decoded.rate == nil,
+    string.format("mid %s min %s max %s rneg %s rpos %s speed %s flags %s rate %s",
+      tostring(decoded.mid), tostring(decoded.min), tostring(decoded.max), tostring(decoded.rneg),
+      tostring(decoded.rpos), tostring(decoded.speed), tostring(decoded.flags), tostring(decoded.rate)))
+  check("the simulator reply is 14 bytes", #read.simulatorResponse == 14,
+    "got " .. tostring(#read.simulatorResponse))
 
   local c = center.buildWriteMessage(12, 1301)
   check("the centre message sends 213 with index 12 and mid 1301",
@@ -134,31 +148,60 @@ local function pinCommands(cfg, center, override)
     fiRead.command == 125 and bytes(fiRead.payload) == "12",
     string.format("command %s, payload %s", tostring(fiRead.command), bytes(fiRead.payload)))
 
-  local fiPacked = inst.buildWriteMessage(data, nil, nil)
+  local fiWrite = inst.buildWriteMessage(data, nil, nil)
   check("forIndex buildWriteMessage delegates to 212 with bound index 12",
-    fiPacked.command == 212 and fiPacked.payload[1] == 12,
-    string.format("command %s, index %s", tostring(fiPacked.command), tostring(fiPacked.payload[1])))
+    fiWrite.command == 212 and fiWrite.payload[1] == 12,
+    string.format("command %s, index %s", tostring(fiWrite.command), tostring(fiWrite.payload[1])))
 
-  local fiRaw = inst.buildRawWriteMessage(data, nil, nil)
-  check("forIndex buildRawWriteMessage delegates to 124 with bound index 12",
-    fiRaw.command == 124 and fiRaw.payload[1] == 12,
-    string.format("command %s, index %s", tostring(fiRaw.command), tostring(fiRaw.payload[1])))
+  -- The PWM update rate moved out of the servo record (wingflight-firmware
+  -- msp.c, MSP_MIXER_CONFIG / MSP_SET_MIXER_CONFIG, MSP API 22.16).
+  print("Mixer config")
+  check("mixer config is read with 42 and written with 43",
+    mixer.READ_COMMAND == 42 and mixer.WRITE_COMMAND == 43,
+    string.format("read %s, write %s", tostring(mixer.READ_COMMAND), tostring(mixer.WRITE_COMMAND)))
+  -- model type 1, reserved 0, SBUS 16, F.Bus 24, bus output count 24, rate 333
+  local mix = mixer.decode({1, 0, 16, 24, 24, 77, 1})
+  check("a 7-byte reply decodes to model type, bus channel counts, bus output count and PWM rate",
+    mix.model_type == 1 and mix.sbus_out_channels == 16 and mix.fbus_master_channels == 24
+      and mix.bus_servo_output_count == 24 and mix.servo_pwm_rate == 333
+      and mix.bus_servo_clone_pwm == nil,
+    string.format("type %s sbus %s fbus %s count %s rate %s", tostring(mix.model_type),
+      tostring(mix.sbus_out_channels), tostring(mix.fbus_master_channels),
+      tostring(mix.bus_servo_output_count), tostring(mix.servo_pwm_rate)))
+  mix.servo_pwm_rate = 50
+  check("what was read goes back as the long form: type, reserved 0, both channel counts, rate",
+    bytes(mixer.buildWriteMessage(mix).payload) == "1,0,16,24,50,0",
+    bytes(mixer.buildWriteMessage(mix).payload))
+  check("a model type on its own goes out as the two-byte short form",
+    bytes(mixer.buildWriteMessage({model_type = 3}).payload) == "3,0",
+    bytes(mixer.buildWriteMessage({model_type = 3}).payload))
+  check("a reply without the rate never writes a rate of 0",
+    bytes(mixer.buildWriteMessage(mixer.decode({1, 0, 16, 24, 24})).payload) == "1,0",
+    bytes(mixer.buildWriteMessage(mixer.decode({1, 0, 16, 24, 24})).payload))
+  check("the mixer config simulator reply is 7 bytes at 50 Hz",
+    #mixer.buildReadMessage(function() end).simulatorResponse == 7
+      and mixer.decode({table.unpack(mixer.buildReadMessage(function() end).simulatorResponse)}).servo_pwm_rate == 50)
 
   return failures - before
 end
 
 -- Each entry swaps one command number in one module. Every swap must be caught.
 local MUTATIONS = {
-  {file = "msp_servo_config", from = "local WRITE_PACKED_COMMAND = 212",
-    to = "local WRITE_PACKED_COMMAND = 124", what = "the packed write sent as the raw command"},
+  {file = "msp_servo_config", from = "local WRITE_COMMAND = 212",
+    to = "local WRITE_COMMAND = 213", what = "the write sent as the centre command"},
   {file = "msp_servo_config", from = "local READ_COMMAND = 125",
-    to = "local READ_COMMAND = 124", what = "the read sent as the raw write"},
-  {file = "msp_servo_config", from = "local WRITE_RAW_COMMAND = 124",
-    to = "local WRITE_RAW_COMMAND = 212", what = "the raw write sent as the packed command"},
+    to = "local READ_COMMAND = 124", what = "the read sent as a write"},
+  {file = "msp_servo_config", from = "  mspcodec.writeU16(payload, data.speed or 0)",
+    to = "  mspcodec.writeU16(payload, data.rate or 0)\n  mspcodec.writeU16(payload, data.speed or 0)",
+    what = "the removed rate field written back before speed"},
   {file = "msp_servo_center", from = "local WRITE_COMMAND = 213",
     to = "local WRITE_COMMAND = 212", what = "the centre sent as the bulk command"},
   {file = "msp_servo_override", from = "local WRITE_COMMAND = 193",
     to = "local WRITE_COMMAND = 196", what = "the override sent as the all-servos command"},
+  {file = "msp_mixer_config", from = "mspcodec.readU8(buf) -- reserved, was bus_servo_clone_pwm",
+    to = "-- the reserved byte is not skipped", what = "the reserved byte read as the SBUS channel count"},
+  {file = "msp_mixer_config", from = "    mspcodec.writeU16(payload, data.servo_pwm_rate)",
+    to = "    mspcodec.writeU8(payload, data.servo_pwm_rate)", what = "the PWM rate written as one byte"},
 }
 
 -- Source text of one module with exactly one plain-text replacement.
@@ -170,7 +213,7 @@ local function mutatedSource(mutation)
   return text:sub(1, s - 1) .. mutation.to .. text:sub(e + 1)
 end
 
--- Loads the three modules, with one of them replaced by its mutated copy if given,
+-- Loads the modules, with one of them replaced by its mutated copy if given,
 -- and runs the pin. Returns the number of failed checks.
 local function runWith(mutation)
   local texts = {}
@@ -178,7 +221,8 @@ local function runWith(mutation)
   local cfg = loadModule("msp_servo_config", texts.msp_servo_config)
   local center = loadModule("msp_servo_center", texts.msp_servo_center)
   local override = loadModule("msp_servo_override", texts.msp_servo_override)
-  return pinCommands(cfg, center, override)
+  local mixer = loadModule("msp_mixer_config", texts.msp_mixer_config)
+  return pinCommands(cfg, center, override, mixer)
 end
 
 if not SELF_TEST then

@@ -115,8 +115,8 @@ local function appPages()
   return list
 end
 
--- A page whose menu guard refuses it with the simulator's replies (the servo
--- bus page needs a port configured for a servo bus) is reported, not failed:
+-- A page whose menu guard refuses it with the simulator's replies (an ESC
+-- forward-programming page needs that ESC protocol set) is reported, not failed:
 -- it was never measured, which is not the same as being over.
 print("App callbacks (limit " .. LIMIT .. "):")
 local pages = appPages()

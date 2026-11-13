@@ -1600,12 +1600,6 @@
         }
       },
       "servos": {
-        "bus": {
-          "english": "BUS Output",
-          "translation": "BUS Output",
-          "needs_translation": false,
-          "max_length": 10
-        },
         "center": {
           "english": "Center",
           "translation": "Center",
@@ -1677,18 +1671,6 @@
           "translation": "Servos",
           "needs_translation": false,
           "max_length": 6
-        },
-        "pwm": {
-          "english": "PWM Output",
-          "translation": "PWM Output",
-          "needs_translation": false,
-          "max_length": 10
-        },
-        "rate": {
-          "english": "Rate",
-          "translation": "Rate",
-          "needs_translation": false,
-          "max_length": 4
         },
         "reverse": {
           "english": "Reverse",
@@ -7614,11 +7596,11 @@
           "needs_translation": false,
           "max_length": 4
         },
-        "output_pwm_servo_fmt": {
-          "english": "PWM Servo %d",
-          "translation": "PWM Servo %d",
+        "output_servo_fmt": {
+          "english": "Servo %d",
+          "translation": "Servo %d",
           "needs_translation": false,
-          "max_length": 12
+          "max_length": 8
         },
         "role": {
           "english": "Role",
@@ -7643,12 +7625,6 @@
           "translation": "None",
           "needs_translation": false,
           "max_length": 4
-        },
-        "output_bus_servo_fmt": {
-          "english": "Bus Servo %d",
-          "translation": "Bus Servo %d",
-          "needs_translation": false,
-          "max_length": 12
         },
         "output_motor_fmt": {
           "english": "Motor %d",
@@ -9089,8 +9065,8 @@
           "max_length": 47
         },
         "st_all": {
-          "english": "Applies to every control-surface servo.",
-          "translation": "Applies to every control-surface servo.",
+          "english": "Applies to every servo on a PWM output.",
+          "translation": "Applies to every servo on a PWM output.",
           "needs_translation": false,
           "max_length": 39
         },
@@ -9100,11 +9076,11 @@
           "needs_translation": false,
           "max_length": 8
         },
-        "st_unknown": {
-          "english": "mixed or custom",
-          "translation": "mixed or custom",
+        "st_custom_fmt": {
+          "english": "%d Hz",
+          "translation": "%d Hz",
           "needs_translation": false,
-          "max_length": 15
+          "max_length": 5
         },
         "st_analog": {
           "english": "Analog",
@@ -9130,23 +9106,11 @@
           "needs_translation": false,
           "max_length": 37
         },
-        "st_narrow": {
-          "english": "Narrow band",
-          "translation": "Narrow band",
-          "needs_translation": false,
-          "max_length": 11
-        },
-        "st_narrow_help": {
-          "english": "560 Hz, only for 760 us servos; resets center, limits and scale.",
-          "translation": "560 Hz, only for 760 us servos; resets center, limits and scale.",
-          "needs_translation": false,
-          "max_length": 64
-        },
         "st_applied_fmt": {
-          "english": "%s set on every surface servo. It takes effect after a restart.",
-          "translation": "%s set on every surface servo. It takes effect after a restart.",
+          "english": "%s set on every PWM servo output. It takes effect after a restart.",
+          "translation": "%s set on every PWM servo output. It takes effect after a restart.",
           "needs_translation": false,
-          "max_length": 63
+          "max_length": 66
         },
         "mot_title": {
           "english": "Motor",

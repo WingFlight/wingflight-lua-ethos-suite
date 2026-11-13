@@ -2,9 +2,9 @@
 --
 -- Wire layout verified against wingflight-firmware's src/main/msp/msp.c
 -- (MSP_SERVO): one U16 per servo and nothing else, so the count is the reply
--- length / 2. Without bus servos that is MAX_SUPPORTED_SERVOS outputs; with
--- them, the configured PWM servos and then the bus servos. Either way the PWM
--- servos come first, at index 0..n-1, which is all the Setup Wizard reads.
+-- length / 2. The reply holds the servos in use (MSP_STATUS servo_count, up
+-- to 24), and index N is servo S(N+1), as in every servo message (MSP API
+-- 22.16).
 --
 -- decode() fills a caller's table in place, so a page polling this several
 -- times a second does not allocate a new table per reply.
@@ -18,9 +18,9 @@ local mspcodec = requireModule("lib/mspcodec.lua")
 
 local READ_COMMAND = 103
 
--- Eight servos at 1500 us.
+-- Four servos at 1500 us, matching MSP_STATUS's servo_count fixture.
 local SIMULATOR_RESPONSE = {}
-for i = 1, 8 do
+for i = 1, 4 do
   SIMULATOR_RESPONSE[2 * i - 1] = 220
   SIMULATOR_RESPONSE[2 * i] = 5
 end

@@ -539,7 +539,8 @@ local function connect(sessionSource)
   rig.handshake.buildUidReadMessage(function(id) expectedId = id end).processReply(nil, uidBytes())
   rig.tick()
   local api = rig.find(1)
-  api.processReply(api, { 0, 22, 14 })
+  -- A supported version: the suite's floor is MSP API 22.16.
+  api.processReply(api, { 0, 22, 16 })
   rig.tick()
   return rig, expectedId
 end

@@ -102,7 +102,8 @@ local function new(wiz)
     local output = surfacesLib.outputForAxis(surface, a, direction.stick, wiz.axisGains())
     local reversed = ((config.flags or 0) & surfacesLib.SERVO_FLAG_REVERSE) ~= 0
     local pos = surfacesLib.servoSide(output, reversed) == "pos"
-    return pos and "rpos" or "rneg", surfacesLib.maxScale(output, pos and config.max or -config.min)
+    local travelMin, travelMax = surfacesLib.usableTravel(config)
+    return pos and "rpos" or "rneg", surfacesLib.maxScale(output, pos and travelMax or -travelMin)
   end
 
   local function nudgeThrow(delta)

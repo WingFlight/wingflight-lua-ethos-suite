@@ -8,7 +8,7 @@ sidebar_label: Pages
 Reference documentation for each configuration and settings page reachable
 within the WFSuite Ethos system tool.
 
-**Coverage:** 89 reachable pages in navigation hierarchy. Drafts require review.
+**Coverage:** 88 reachable pages in navigation hierarchy. Drafts require review.
 
 The *Conditions* column names what hides, greys out or locks a page; the sentences
 and structure follow [_template.md](../_template.md).
@@ -65,8 +65,7 @@ is there. The rule is in [.agents/rules/documentation.md](../../.agents/rules/do
 | Mixer | [setup/mixer_config.md](setup/mixer_config.md) | Requires a running background task and a flight controller connection. | reviewed |
 | Mixer Rules | [setup/mixer_rules.md](setup/mixer_rules.md) | Requires a running background task and a flight controller connection. | reviewed |
 | Curves | [setup/curves.md](setup/curves.md) | Requires a running background task and a flight controller connection. | reviewed |
-| PWM Output | [setup/servos_pwm.md](setup/servos_pwm.md) | Requires a running background task and a flight controller connection. | draft |
-| BUS Output | [setup/servos_bus.md](setup/servos_bus.md) | Requires a running background task and a flight controller connection. Only available when servo bus output is configured. If that check cannot reach the flight controller, it is retried every 5 seconds. | draft |
+| Servos | [setup/servos.md](setup/servos.md) | Requires a running background task and a flight controller connection. | reviewed |
 | Battery | [setup/power_battery.md](setup/power_battery.md) | Requires a running background task and a flight controller connection. | draft |
 | Alerts | [setup/power_alerts.md](setup/power_alerts.md) | Requires a running background task and a flight controller connection. | draft |
 | Sources | [setup/power_source.md](setup/power_source.md) | Requires a running background task and a flight controller connection. | draft |

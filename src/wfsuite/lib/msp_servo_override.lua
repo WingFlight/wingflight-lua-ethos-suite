@@ -1,5 +1,6 @@
 -- MSP_SERVO_OVERRIDE / MSP_SERVO_OVERRIDE_ALL helpers
--- (cmd 193 indexed write / 196 all-servos write).
+-- (cmd 193 indexed write / 196 all-servos write). The index is the servo's
+-- own, 0..23 (index N is servo S(N+1)); 196 sets all 24.
 --
 -- From API 22.14 both take an optional trailing U16 timeout ms: the FC drops
 -- the override unless it is re-sent in time. Pages use hold()/holdAll() and

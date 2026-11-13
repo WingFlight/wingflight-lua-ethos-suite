@@ -44,7 +44,7 @@ local RESERVED_BRUSHED = 4
 --
 -- NO VERSION GATE HERE, and the reason is this repository's own floor rather than a
 -- preference. CASTLE needs MSP API 12.08 and SRXL2 needs 12.10 upstream; this suite
--- refuses to operate below 22.13 (lib/msp_api_version.lua:26, MIN_API_MINOR = 13,
+-- refuses to operate below 22.16 (lib/msp_api_version.lua, MIN_API_MINOR = 16,
 -- EXPECTED_API_MAJOR = 22), so every FC that can reach this page is already far past
 -- both floors. A gate here could never refuse anything, and a gate that cannot fire
 -- is a second thing to keep true. choicesFor() keeps the apiMinor argument anyway so
@@ -201,7 +201,7 @@ local msp_motor_config = {
   --
   --   apiMinor -- MSP_API_VERSION's minor, or nil if it is not known yet.
   --
-  -- On this side the argument currently changes nothing: the suite's floor is 22.13,
+  -- On this side the argument currently changes nothing: the suite's floor is 22.16,
   -- well past every protocol's introduction, so there is no protocol left to gate. The
   -- function is exported instead of the table anyway, because a table is what let the
   -- list drift out of step with the enum in the first place -- and because the pages

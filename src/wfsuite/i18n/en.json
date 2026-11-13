@@ -5256,12 +5256,6 @@
           "needs_translation": false,
           "translation": "Output"
         },
-        "output_bus_servo_fmt": {
-          "english": "Bus Servo %d",
-          "max_length": 12,
-          "needs_translation": false,
-          "translation": "Bus Servo %d"
-        },
         "output_motor_fmt": {
           "english": "Motor %d",
           "max_length": 8,
@@ -5274,11 +5268,11 @@
           "needs_translation": false,
           "translation": "None"
         },
-        "output_pwm_servo_fmt": {
-          "english": "PWM Servo %d",
-          "max_length": 12,
+        "output_servo_fmt": {
+          "english": "Servo %d",
+          "max_length": 8,
           "needs_translation": false,
-          "translation": "PWM Servo %d"
+          "translation": "Servo %d"
         },
         "role": {
           "english": "Role",
@@ -6740,12 +6734,6 @@
         }
       },
       "servos": {
-        "bus": {
-          "english": "BUS Output",
-          "max_length": 10,
-          "needs_translation": false,
-          "translation": "BUS Output"
-        },
         "center": {
           "english": "Center",
           "max_length": 6,
@@ -6817,18 +6805,6 @@
           "max_length": 6,
           "needs_translation": false,
           "translation": "Servos"
-        },
-        "pwm": {
-          "english": "PWM Output",
-          "max_length": 10,
-          "needs_translation": false,
-          "translation": "PWM Output"
-        },
-        "rate": {
-          "english": "Rate",
-          "max_length": 4,
-          "needs_translation": false,
-          "translation": "Rate"
         },
         "reverse": {
           "english": "Reverse",
@@ -9019,10 +8995,10 @@
           "translation": "Servo %d (%s)"
         },
         "st_all": {
-          "english": "Applies to every control-surface servo.",
+          "english": "Applies to every servo on a PWM output.",
           "max_length": 39,
           "needs_translation": false,
-          "translation": "Applies to every control-surface servo."
+          "translation": "Applies to every servo on a PWM output."
         },
         "st_analog": {
           "english": "Analog",
@@ -9037,10 +9013,16 @@
           "translation": "50 Hz, works with any standard servo."
         },
         "st_applied_fmt": {
-          "english": "%s set on every surface servo. It takes effect after a restart.",
-          "max_length": 63,
+          "english": "%s set on every PWM servo output. It takes effect after a restart.",
+          "max_length": 66,
           "needs_translation": false,
-          "translation": "%s set on every surface servo. It takes effect after a restart."
+          "translation": "%s set on every PWM servo output. It takes effect after a restart."
+        },
+        "st_custom_fmt": {
+          "english": "%d Hz",
+          "max_length": 5,
+          "needs_translation": false,
+          "translation": "%d Hz"
         },
         "st_digital": {
           "english": "Digital",
@@ -9060,18 +9042,6 @@
           "needs_translation": false,
           "translation": "What kind of servos drive the control surfaces?"
         },
-        "st_narrow": {
-          "english": "Narrow band",
-          "max_length": 11,
-          "needs_translation": false,
-          "translation": "Narrow band"
-        },
-        "st_narrow_help": {
-          "english": "560 Hz, only for 760 us servos; resets center, limits and scale.",
-          "max_length": 64,
-          "needs_translation": false,
-          "translation": "560 Hz, only for 760 us servos; resets center, limits and scale."
-        },
         "st_now_fmt": {
           "english": "Now: %s.",
           "max_length": 8,
@@ -9083,12 +9053,6 @@
           "max_length": 10,
           "needs_translation": false,
           "translation": "Servo type"
-        },
-        "st_unknown": {
-          "english": "mixed or custom",
-          "max_length": 15,
-          "needs_translation": false,
-          "translation": "mixed or custom"
         },
         "step_airframe": {
           "english": "Airframe",

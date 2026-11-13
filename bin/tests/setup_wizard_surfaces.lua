@@ -95,6 +95,31 @@ do
   check("axis gain scales reach", near(reach.pos.fraction, 0.5), reach.pos.fraction)
 end
 
+-- the limit is the travel the output can use at this centre
+do
+  local lo, hi = S.usableTravel({mid = 1500, min = -600, max = 600})
+  check("usable travel: the defaults are used in full", lo == -600 and hi == 600, lo .. "/" .. hi)
+  lo, hi = S.usableTravel({mid = 1700, min = -900, max = 600})
+  check("usable travel: held to the signal range at centre 1700", lo == -820 and hi == 459, lo .. "/" .. hi)
+  local elevator = S.surfacesFromRules({rule(SET, 2, 1, 1000)}, 8)[1]
+  local reach = S.travelReach(elevator, servo({mid = 1700, min = -600, max = 600}), gains)
+  check("reach: pos limit is the usable 459", reach.pos.limit == 459, reach.pos.limit)
+  check("reach: neg limit is the stored 600", reach.neg.limit == 600, reach.neg.limit)
+  check("reach: pos fraction against the usable travel", near(reach.pos.fraction, reach.pos.us / 459),
+    reach.pos.fraction)
+end
+
+-- a side with no travel at all clips as soon as it is asked to move
+do
+  local elevator = S.surfacesFromRules({rule(SET, 2, 1, 1000)}, 8)[1]
+  local reach = S.travelReach(elevator, servo({mid = 1500, min = -500, max = 0}), gains)
+  check("zero limit: asked to move, so it clips", reach.pos.fraction > 1 and reach.pos.fraction < 10,
+    reach.pos.fraction)
+  check("zero limit: the other side is unaffected", near(reach.neg.fraction, 1), reach.neg.fraction)
+  reach = S.travelReach(elevator, servo({mid = 1500, min = -500, max = 0}), {roll = 1, pitch = 0, yaw = 1})
+  check("zero limit: nothing asked, nothing clips", reach.pos.fraction == 0, reach.pos.fraction)
+end
+
 -- largest scale that keeps full stick inside the binding limit
 do
   check("maxScale(1, 700)", S.maxScale(1, 700) == 700)
@@ -120,6 +145,15 @@ do
   check("MUL rule makes no surface", #surfaces == 2, #surfaces)
   local past = S.servosPastCount({rule(SET, 2, 9, 1000), rule(SET, 2, 6, 1000), rule(SET, 2, 6, 0)}, 4, 8)
   check("servosPastCount: in slots only, once each", table.concat(past, ",") == "6", table.concat(past, ","))
+  -- The wizard's own call: 24 servo slots (MSP API 22.16). Outputs 25 and 26
+  -- are reserved and 27 is a motor, so none of them is a missing servo.
+  past = S.servosPastCount({rule(SET, 2, 24, 1000), rule(SET, 2, 9, 1000), rule(SET, 2, 25, 1000),
+    rule(SET, 2, 26, 1000), rule(SET, 2, 27, 1000)}, 8, 24)
+  check("servosPastCount: 24 slots, the reserved outputs and the motors left out",
+    table.concat(past, ",") == "9,24", table.concat(past, ","))
+  local bus = S.surfacesFromRules({rule(SET, 1, 9, 1000), rule(SET, 2, 24, 1000)}, 24)
+  check("a servo on a bus channel only is a surface like any other",
+    #bus == 2 and bus[1].servo == 8 and bus[2].servo == 23, #bus)
   local g = S.axisGainsFromRates({roll = 830, pitch = -1000})
   check("axis gains from rates", near(g.roll, 0.83) and near(g.pitch, -1) and near(g.yaw, 1))
 end

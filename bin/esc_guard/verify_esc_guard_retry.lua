@@ -1,24 +1,23 @@
--- Behaviour check for the retry behaviour of the two menu guards.
+-- Behaviour check for the retry behaviour of the ESC protocol menu guard.
 -- Ported from rotorflight-lua-ethos-suite#2422 (issue #2387 there).
 --
 -- Run it:
 --     lua5.4 bin/esc_guard/verify_esc_guard_retry.lua
 --
 -- What it drives, and why:
---   * The real src/wfsuite/app/esc_protocol_guard.lua and
---     src/wfsuite/app/servo_bus_guard.lua, together with the real
---     lib/msp_esc_sensor_config.lua and lib/msp_serial_config.lua, so the
---     decode paths are the production ones. Only the bus and os.clock() are
---     stubbed, which lets the sequence be stepped instead of waited out.
+--   * The real src/wfsuite/app/esc_protocol_guard.lua, together with the
+--     real lib/msp_esc_sensor_config.lua, so the decode path is the
+--     production one. Only the bus and os.clock() are stubbed, which lets
+--     the sequence be stepped instead of waited out.
 --   * The defect under test is a STATE, not a call: `attempted` stayed set
 --     after a timeout or a bus error, and only open() cleared it. One
 --     transient moment -- FC mid-reboot, queue momentarily full, link dropped
 --     and back -- greyed out all ten tiles in esc_forward_menu until the pilot
 --     left the section and came back.
---   * servo_bus_guard had the same latch, minus one exception: it resets when
---     canRequest() goes false, so it recovers from a disconnect. It did NOT
---     recover from a timeout, which is the more likely case. Both guards are
---     covered here.
+--   * app/servo_bus_guard.lua had the same latch and was covered here
+--     (cases 8, 9 and 11, and half of 13) until MSP API 22.16 made a servo a
+--     servo: there is one Servos page now, nothing to gate on a bus output,
+--     and that guard is gone. The case numbers are kept.
 --
 -- Cases, each against a false expectation:
 --   1. A successful read latches -- 20 further ticks issue no second request.
@@ -28,20 +27,15 @@
 --   5. Protocol 0 ("NONE") counts as answered and is not retried.
 --   6. open() breaks the backoff and reads immediately.
 --   7. A late reply from a superseded request changes nothing.
---   8. servo_bus_guard: timeout, then a retry, then success enables the tile.
---   9. servo_bus_guard: a successful read with no bus function leaves the
---      tiles disabled and is not retried -- that is an answer, not a failure.
 --  10. esc_protocol_guard: a late reply after timeout enables the tile and
---      prevents a second request/glitch when the backoff expires.
---  11. servo_bus_guard: a late reply after timeout enables the tile and
 --      prevents a second request/glitch when the backoff expires.
 --  12. esc_protocol_guard: link loss resets state and invalidates pending token;
 --      reconnect triggers an immediate read.
 --  13. Link loss during the backoff window clears nextAttemptAt so reconnect
---      does not wait out the remaining backoff (both guards).
+--      does not wait out the remaining backoff.
 --  14. An in-flight request aborted by link loss does not apply late reply.
 --
--- Cases 2, 3 and 8 must go RED against the pre-change files -- there
+-- Cases 2 and 3 must go RED against the pre-change file -- there
 -- `attempted` stays set and the second attempt never happens.
 
 local function scriptDir()
@@ -118,9 +112,7 @@ end
 package.loaded["wfsuite.lib.require"] = requireStub
 
 local escSensorConfig = requireStub("lib/msp_esc_sensor_config.lua")
-local serialConfig = requireStub("lib/msp_serial_config.lua")
 local esc_protocol_guard = realLoadfile(SUITE_PREFIX .. "app/esc_protocol_guard.lua", ...)()
-local servo_bus_guard = realLoadfile(SUITE_PREFIX .. "app/servo_bus_guard.lua", ...)()
 
 -- ── Helpers ─────────────────────────────────────────────────────────────────
 local function requestCount() return #requests end
@@ -159,55 +151,10 @@ local function newGuard(connected)
   })
 end
 
--- ── Servo-bus helpers ───────────────────────────────────────────────────────
--- msp_serial_config.decode reads 9-byte records: identifier(U8),
--- function_mask(U32), msp/gps/telem/blackbox baud index(U8 each). The mask is
--- assembled little-endian as buf[2] + buf[3]*256 + buf[4]*65536 +
--- buf[5]*16777216 (lib/mspcodec.lua's readU32), so SBUS_OUT (262144) needs buf[4]=4
--- and FBUS_OUT (524288) needs buf[4]=8.
-local SBUS_OUT_RECORD = { 1, 0, 0, 4, 0, 0, 0, 0, 0 }
-local NO_BUS_RECORD = { 1, 0, 0, 0, 0, 0, 0, 0, 0 }
-
--- The record constants above decide whether the whole servo section means
--- anything, and a byte in the wrong place fails SILENTLY: the guard then sees
--- "no bus function", the tile stays grey, and the check reports a guard bug
--- instead of a fixture bug. So the fixture verifies itself through the real
--- decoder before it is used. This was written after exactly that: the first
--- version had buf[3]=4, decoded to a mask of 1024, and case 8 failed for a
--- reason that had nothing to do with the guard.
-local function decodedMask(record)
-  local buf = {}
-  for i = 1, #record do buf[i] = record[i] end
-  buf.offset = 1
-  return (serialConfig.decode(buf).ports or {})[1] or {}
-end
-
-local function replyServo(number, record)
-  local msg = requests[number]
-  if not msg then return false end
-  local buf = {}
-  for i = 1, #record do buf[i] = record[i] end
-  buf.offset = 1
-  msg.processReply(nil, buf)
-  return true
-end
-
-local function newServoGuard(connected)
-  requests = {}
-  return servo_bus_guard.new({
-    canRequest = function() return connected ~= false end,
-  })
-end
-
 -- Tiles from src/wfsuite/app/tool.lua's esc_forward_menu -- all of them carry an
 -- escProtocolId.
 local BLHELI = { escProtocolId = 1 }
 local SCORPION = { escProtocolId = 4 }
-
--- src/wfsuite/app/tool.lua servos menu entries gated by requiresServoBus; the mask in
--- the entry is the only thing that matters to the guard.
-local SERVO_TILE = { requiresServoBus = true }
-local PLAIN_TILE = { requiresServoBus = false }
 
 local RETRY_INTERVAL = 5.0   -- must match RETRY_INTERVAL in esc_protocol_guard.lua
 local REQUEST_TIMEOUT = 3.0  -- must match REQUEST_TIMEOUT in esc_protocol_guard.lua
@@ -313,53 +260,6 @@ check("case 7  the late reply enables nothing", g.isEntryEnabled(BLHELI) == fals
 check("case 7  the second request can be answered", reply(2, 1) == true)
 check("case 7  the current reply enables the tile", g.isEntryEnabled(BLHELI) == true)
 
--- ── case 8: servo_bus_guard, timeout then success ───────────────────────────
--- The case that was NOT covered by the issue: this guard resets `attempted`
--- when canRequest() goes false, so a disconnect recovers. A timeout did not,
--- because canRequest() is true again on the next tick.
-check("fixture  SBUS_OUT record decodes to FUNCTION_MASK_SBUS_OUT",
-  decodedMask(SBUS_OUT_RECORD).function_mask == 262144,
-  tostring(decodedMask(SBUS_OUT_RECORD).function_mask))
-check("fixture  the no-bus record decodes to a zero mask",
-  decodedMask(NO_BUS_RECORD).function_mask == 0,
-  tostring(decodedMask(NO_BUS_RECORD).function_mask))
-
-g = newServoGuard()
-g.open()
-check("case 8  open() reads exactly once", requestCount() == 1)
-check("case 8  a tile without requiresServoBus is never gated",
-  g.isEntryEnabled(PLAIN_TILE) == true)
-advance(REQUEST_TIMEOUT + 0.1)
-g.wakeup()                              -- deadline passed -> failure
-check("case 8  no tile is enabled after the timeout", g.isEntryEnabled(SERVO_TILE) == false)
-for _ = 1, 10 do
-  advance(0.2)
-  g.wakeup()
-end
-check("case 8  nothing is sent inside the backoff window", requestCount() == 1,
-  "was " .. requestCount())
-advance(RETRY_INTERVAL)
-g.wakeup()
-check("case 8  a retry is issued after the backoff", requestCount() == 2,
-  "was " .. requestCount())
-check("case 8  the second request can be answered", replyServo(2, SBUS_OUT_RECORD) == true)
-check("case 8  the second attempt enables the tile", g.isEntryEnabled(SERVO_TILE) == true)
-check("case 8  two requests in total", requestCount() == 2, "was " .. requestCount())
-
--- ── case 9: servo_bus_guard, a read without a bus function is an answer ─────
-g = newServoGuard()
-g.open()
-check("case 9  the first request can be answered", replyServo(1, NO_BUS_RECORD) == true)
-check("case 9  the FC answered, so the read counts as done", requestCount() == 1)
-check("case 9  without a bus function the tile stays disabled",
-  g.isEntryEnabled(SERVO_TILE) == false)
-for _ = 1, 20 do
-  advance(0.5)
-  g.wakeup()
-end
-check("case 9  a read without a bus function is not retried", requestCount() == 1,
-  "was " .. requestCount())
-
 -- ── case 10: esc guard, late reply after timeout prevents retry and UI glitch ──
 g = newGuard()
 g.open()
@@ -374,22 +274,6 @@ advance(RETRY_INTERVAL)
 g.wakeup()
 check("case 10 tile stays enabled after backoff window", g.isEntryEnabled(BLHELI) == true)
 check("case 10 no duplicate request issued", requestCount() == 1,
-  "was " .. requestCount())
-
--- ── case 11: servo guard, late reply after timeout prevents retry and UI glitch 
-g = newServoGuard()
-g.open()
-check("case 11 open() reads exactly once", requestCount() == 1)
-advance(REQUEST_TIMEOUT + 0.1)
-g.wakeup() -- deadline passed -> timeout fail()
-check("case 11 tile disabled after timeout", g.isEntryEnabled(SERVO_TILE) == false)
-advance(0.4)
-check("case 11 late reply arrives before retry", replyServo(1, SBUS_OUT_RECORD) == true)
-check("case 11 late reply enables tile", g.isEntryEnabled(SERVO_TILE) == true)
-advance(RETRY_INTERVAL)
-g.wakeup()
-check("case 11 tile stays enabled after backoff window", g.isEntryEnabled(SERVO_TILE) == true)
-check("case 11 no duplicate request issued", requestCount() == 1,
   "was " .. requestCount())
 
 -- ── case 12: esc guard, link loss resets state and reconnect reads immediately ─
@@ -412,7 +296,7 @@ check("case 12 second read answered with new protocol", reply(2, 4) == true)
 check("case 12 new protocol enabled", g.isEntryEnabled(SCORPION) == true)
 check("case 12 old protocol disabled", g.isEntryEnabled(BLHELI) == false)
 
--- ── case 13: link loss during backoff clears retry wait on both guards ─────────
+-- ── case 13: link loss during backoff clears the retry wait ───────────────────
 connected = true
 requests = {}
 g = esc_protocol_guard.new({
@@ -428,23 +312,6 @@ advance(0.1) -- 0.6s total after timeout, far before 5.0s backoff expiry
 connected = true
 g.wakeup()
 check("case 13 ESC guard reads immediately after link loss in backoff", requestCount() == 2,
-  "was " .. requestCount())
-
-connected = true
-requests = {}
-g = servo_bus_guard.new({
-  canRequest = function() return connected end,
-})
-g.open()
-advance(REQUEST_TIMEOUT + 0.1)
-g.wakeup() -- timeout -> backoff armed for +5.0s
-advance(0.5)
-connected = false
-g.wakeup() -- link loss during backoff clears nextAttemptAt
-advance(0.1) -- 0.6s total after timeout, far before 5.0s backoff expiry
-connected = true
-g.wakeup()
-check("case 13 servo guard reads immediately after link loss in backoff", requestCount() == 2,
   "was " .. requestCount())
 
 -- ── case 14: aborted request on link loss does not apply late reply ───────────

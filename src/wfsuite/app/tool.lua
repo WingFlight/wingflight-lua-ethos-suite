@@ -27,7 +27,7 @@
 -- Everything else below is loadfile()'d lazily instead, on first actual
 -- need (matching the same ensureX() pattern already used in
 -- widgets/dashboard.lua): navigation/menuContainer/memstats are only
--- needed once create() actually runs, and the two protocol
+-- needed once create() actually runs, and the ESC protocol
 -- guards only get attached to MENUS right before create()'s own
 -- menuContainer.openRoot() call. Deferring menuContainer's own load this
 -- way also defers its own further eager chain (app/close_key.lua,
@@ -41,7 +41,6 @@ local navigation = nil
 local menuContainer = nil
 local memstats = nil
 local escProtocolGuard = nil
-local servoBusGuard = nil
 local settingsStore = nil
 
 local function ensureNavigation()
@@ -70,13 +69,6 @@ local function ensureEscProtocolGuard()
     escProtocolGuard = requireModule("app/esc_protocol_guard.lua")
   end
   return escProtocolGuard
-end
-
-local function ensureServoBusGuard()
-  if not servoBusGuard then
-    servoBusGuard = requireModule("app/servo_bus_guard.lua")
-  end
-  return servoBusGuard
 end
 
 local function ensureSettingsStore()
@@ -172,17 +164,12 @@ local MENUS = {
       -- tuning field itself (PID Controller only picks WHICH slot is
       -- assigned; this is where the slot's shape gets edited).
       {title = "@i18n(app.modules.curves.name)@", icon = lcd.loadMask("app/gfx/curves.png"), script = "app/pages/curves.lua", group = "@i18n(app.menu_section_mixer_servos)@"},
-      {title = "@i18n(app.modules.servos.name)@", icon = lcd.loadMask("app/gfx/servos.png"), menuId = "servos_menu", group = "@i18n(app.menu_section_mixer_servos)@"},
+      -- Every servo in use, on a PWM output, a bus channel or both, and the
+      -- one PWM update rate (MSP API 22.16: a servo is a servo).
+      {title = "@i18n(app.modules.servos.name)@", icon = lcd.loadMask("app/gfx/servos.png"), script = "app/pages/servos.lua", group = "@i18n(app.menu_section_mixer_servos)@"},
       {title = "@i18n(app.modules.power.name)@", icon = lcd.loadMask("app/gfx/power.png"), menuId = "power_menu", group = "@i18n(app.menu_section_power_motors)@"},
       {title = "@i18n(app.modules.esc_motors.name)@", icon = lcd.loadMask("app/gfx/esc_motors.png"), menuId = "esc_motors_menu", group = "@i18n(app.menu_section_power_motors)@"},
       {title = "@i18n(app.modules.governor.name)@", icon = lcd.loadMask("app/gfx/governor.png"), script = "app/pages/governor.lua", group = "@i18n(app.menu_section_power_motors)@"},
-    },
-  },
-  servos_menu = {
-    title = "@i18n(app.modules.servos.name)@",
-    entries = {
-      {title = "@i18n(app.modules.servos.pwm)@", icon = lcd.loadMask("app/gfx/servos_pwm.png"), script = "app/pages/servos_pwm.lua"},
-      {title = "@i18n(app.modules.servos.bus)@", icon = lcd.loadMask("app/gfx/servos_bus.png"), script = "app/pages/servos_bus.lua", requiresServoBus = true},
     },
   },
   controls_menu = {
@@ -508,8 +495,8 @@ local taskGuard = {
 }
 
 -- Attached to MENUS lazily, from create(), not here -- see this file's
--- header comment on why esc_protocol_guard.lua/servo_bus_guard.lua don't
--- loadfile() until then.
+-- header comment on why esc_protocol_guard.lua doesn't loadfile() until
+-- then.
 local function ensureMenuGuards()
   if not MENUS.esc_forward_menu.guard then
     MENUS.esc_forward_menu.guard = ensureEscProtocolGuard().new({
@@ -521,13 +508,6 @@ local function ensureMenuGuards()
   -- Gates only the SRXL2 ESC entry; the others carry no escProtocolId.
   if not MENUS.esc_motors_menu.guard then
     MENUS.esc_motors_menu.guard = ensureEscProtocolGuard().new({
-      canRequest = function()
-        return isBackgroundTaskRunning() and sessionConnected == true
-      end,
-    })
-  end
-  if not MENUS.servos_menu.guard then
-    MENUS.servos_menu.guard = ensureServoBusGuard().new({
       canRequest = function()
         return isBackgroundTaskRunning() and sessionConnected == true
       end,

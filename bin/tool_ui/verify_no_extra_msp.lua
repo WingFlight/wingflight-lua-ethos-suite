@@ -9,7 +9,7 @@
 -- counts every "msp.request" at bus.publish while driving the real tool.
 --
 -- What it drives, and why:
---   * The real src/wfsuite/app/tool.lua, including both real guards. Only the
+--   * The real src/wfsuite/app/tool.lua, including its real guards. Only the
 --     Ethos widgets, the background task and the link are stubbed. The last two
 --     have to report "running" and "connected", because the guards only request
 --     then (their canRequest in tool.lua) -- without them the run passes on
@@ -23,11 +23,12 @@
 --     stub, removing the latch floods the trace and this file goes red.
 --
 -- The path deliberately enters BOTH guarded menus:
---   root -> Hardware -> Servos                   (servo_bus_guard,    MSP 54)
 --   root -> Hardware -> ESC & Motors -> ESC Tools (esc_protocol_guard, MSP 123)
 -- ESC & Motors and ESC Tools each carry their own esc_protocol_guard (the
 -- first lights the SRXL2 ESC tile), so a cycle reads MSP 123 twice: once per
 -- guarded menu entered, never more.
+-- (Servos was a third guarded menu, read through MSP 54, until MSP API 22.16
+-- made it one page with nothing to gate; app/servo_bus_guard.lua is gone.)
 -- and ticks wakeup() 100 times inside the second one, because a retry storm
 -- can only arrive through wakeup(), which menu_container.lua forwards to the
 -- current menu's guard.
@@ -150,10 +151,8 @@ local bus = requireModule("lib/bus.lua")
 -- Reply payloads sized from the real decoders:
 --   123  msp_esc_sensor_config -- U8,U8,U16,U16,U8,S8,S8,S8 (11 bytes),
 --        protocol = 1
---   54   msp_serial_config     -- one 9-byte port record (U8,U32,U8,U8,U8,U8)
 local REPLY = {
   [123] = function() return { 1, 0, 200, 0, 0, 0, 0, 0, 0, 0, 0 } end,
-  [54] = function() return { 1, 0, 0, 0, 0, 0, 0, 0, 0 } end,
 }
 
 local trace = {}
@@ -173,7 +172,6 @@ end
 
 -- ── Run ─────────────────────────────────────────────────────────────────────
 local HW_ICON = "app/gfx/hardware.png"
-local SERVO_ICON = "app/gfx/servos.png"
 local ESC_MOTORS_ICON = "app/gfx/esc_motors.png"
 local ESC_ICON = "app/gfx/esc_tools.png"
 
@@ -212,14 +210,9 @@ for cycle = 1, CYCLES do
   registeredTool.create()
 
   -- Each section's text is captured immediately; later steps append to trace.
-  local markServos = #trace
+  local markHardware = #trace
   check(string.format("cycle %d  Hardware menu is reachable", cycle), press(HW_ICON))
-  check(string.format("cycle %d  Servos menu is reachable", cycle), press(SERVO_ICON))
-  local afterServos = #trace - markServos
-  local textServos = traceSince(markServos)
-
-  -- Back out of Servos into Hardware before going on to ESC & Motors.
-  registeredTool.event({}, EVT_KEY, KEY_RTN_BREAK)
+  local afterHardware = #trace - markHardware
 
   local markEsc = #trace
   check(string.format("cycle %d  ESC & Motors menu is reachable", cycle), press(ESC_MOTORS_ICON))
@@ -235,13 +228,12 @@ for cycle = 1, CYCLES do
 
   registeredTool.close()
 
-  tracePerCycle[#tracePerCycle + 1] = string.format("Servos=%d(%s) ESC=%d(%s) Tick=%d",
-    afterServos, textServos, afterEsc, textEsc, inTick)
+  tracePerCycle[#tracePerCycle + 1] = string.format("Hardware=%d ESC=%d(%s) Tick=%d",
+    afterHardware, afterEsc, textEsc, inTick)
 end
 
 -- ── Verdict ─────────────────────────────────────────────────────────────────
 local ESC_READ = 123      -- msp_esc_sensor_config.READ_COMMAND
-local SERIAL_READ = 54    -- msp_serial_config.READ_COMMAND
 
 out("")
 out("trace per cycle:")
@@ -254,8 +246,8 @@ out("")
 -- and holds the answer. Two ESC menus are entered, hence two ESC reads.
 for i = 1, #tracePerCycle do
   local t = tracePerCycle[i]
-  check(string.format("cycle %d  exactly one Servos read (MSP %d)", i, SERIAL_READ),
-    t:find("Servos=1%(" .. SERIAL_READ .. "%)") ~= nil, t)
+  check(string.format("cycle %d  the Hardware menu itself reads nothing", i),
+    t:find("^Hardware=0 ") ~= nil, t)
   check(string.format("cycle %d  one ESC read per ESC menu (MSP %d)", i, ESC_READ),
     t:find("ESC=2%(" .. ESC_READ .. "," .. ESC_READ .. "%)") ~= nil, t)
 end
@@ -272,7 +264,7 @@ check(TICKS .. " ticks inside the ESC menu produce no request",
   tracePerCycle[1]:find("Tick=0$") ~= nil, tracePerCycle[1])
 
 check("the same total number of requests in every cycle",
-  #trace == 3 * #tracePerCycle, -- one Servos read and two ESC reads
+  #trace == 2 * #tracePerCycle, -- two ESC reads
   "trace holds " .. #trace .. " entries for " .. #tracePerCycle .. " cycles")
 
 out("")

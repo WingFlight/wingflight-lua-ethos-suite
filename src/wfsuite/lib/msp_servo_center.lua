@@ -1,4 +1,5 @@
--- MSP_SET_SERVO_CENTER helper (cmd 213).
+-- MSP_SET_SERVO_CENTER helper (cmd 213): U8 servo index (0..23, index N is
+-- servo S(N+1)), U16 mid. The firmware limits mid to 1000..2000.
 
 if package.loaded["wfsuite.lib.msp_servo_center"] then
   return package.loaded["wfsuite.lib.msp_servo_center"]

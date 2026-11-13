@@ -1,14 +1,21 @@
--- Servos -> BUS Output.
+-- Setup -> Servos.
 --
--- BUS servos look almost identical to PWM in the UI, but the firmware
--- indexes them differently. The original suite uses:
---   read/center/override index = UI index + 8
---   config write index         = UI index + (servo_count - 24)
--- Keep those translations local and explicit here. The firmware has 24
--- bus servos (BUS_SERVO_CHANNELS); the page lists as many as the
--- configured SBUS/F.Bus output drives (MSP_MIXER_CONFIG's bus servo output
--- count: sbus_out_channels / fbus_master_channels), 16 if it isn't
--- reported.
+-- One list of every servo in use. A servo is a servo (MSP API 22.16): servo
+-- N is sent on PWM output N where the board has one and on channel N of a
+-- bus output (SBUS, F.Bus) when one is set up, and it is configured the same
+-- way either way. Index N - 1 is that servo in every servo message, so the
+-- tile's index is used as it is for the read, the write, the center and the
+-- override.
+--
+-- Builds the list from MSP_STATUS servo_count (the servos in use, up to 24),
+-- then opens an indexed per-servo config editor. Tool toggles servo override;
+-- while override is enabled, Center is live-written via SET_SERVO_CENTER and
+-- the other fields are locked, matching the original suite's safety shape
+-- without its global session table.
+--
+-- The PWM update rate (servo_pwm_rate) is not offered here: 50 Hz suits
+-- nearly every model, and the setup wizard's servo type step and the
+-- Configurator's Servos tab set it for the rest.
 
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local bus = requireModule("lib/bus.lua")
@@ -23,55 +30,35 @@ local servoCenter = requireModule("lib/msp_servo_center.lua")
 local servoConfig = requireModule("lib/msp_servo_config.lua")
 local servoOverride = requireModule("lib/msp_servo_override.lua")
 local status = requireModule("lib/msp_status.lua")
-local mixerConfig = requireModule("lib/msp_mixer_config.lua")
 
-local PAGE_TITLE = "@i18n(app.modules.servos.bus)@"
+local PAGE_TITLE = "@i18n(app.modules.servos.name)@"
 local MSG_LOADING_TITLE = "@i18n(app.msg_loading)@"
 local MSG_LOADING_BODY = "@i18n(app.msg_loading_from_fbl)@"
 local MSG_LOAD_ERROR = "@i18n(app.modules.ports.load_error_prefix)@"
 local BTN_OK = "@i18n(app.btn_ok)@"
 local BTN_CANCEL = "@i18n(app.btn_cancel)@"
-local BUS_OUTPUT_COUNT_DEFAULT = 16
-local BUS_OUTPUT_COUNT_MAX = 24
-local NUMBERED_ICON_COUNT = 16
-local BUS_CONFIG_OFFSET = 24
-local BUS_READ_BASE_INDEX = 8
-local LIVE_SETTLE = 0.05
-
 local YES_NO = {
   {"@i18n(app.modules.servos.tbl_no)@", 0},
   {"@i18n(app.modules.servos.tbl_yes)@", 1},
 }
 
-local BUS_FIELD_META = {
-  mid = {min = 1000, max = 2000, default = 1500},
-  min = {min = -500, max = -1, default = -500},
-  max = {min = 1, max = 500, default = 500},
-  rneg = {min = 100, max = 1000, default = 500},
-  rpos = {min = 100, max = 1000, default = 500},
-  speed = {min = 0, max = 60000, default = 0, suffix = "ms"},
-}
+local LIVE_SETTLE = 0.05
+-- MAX_SUPPORTED_SERVOS in the firmware.
+local MAX_SERVOS = 24
+-- app/gfx has servo1.png to servo16.png; the servos past them share servos.png.
+local NUMBERED_ICON_COUNT = 16
 
 local function servoTitle(index)
   return "@i18n(app.modules.servos.servo_prefix)@" .. index
 end
 
-local function readIndex(uiIndex)
-  return (uiIndex or 0) + BUS_READ_BASE_INDEX
-end
-
-local function configWriteIndex(uiIndex, servoCount)
-  local offset = (tonumber(servoCount) or BUS_CONFIG_OFFSET) - BUS_CONFIG_OFFSET
-  local value = (uiIndex or 0) + offset
-  if value < 0 then return 0 end
-  return value
-end
-
-local function buildRows(count)
+-- servoCount: MSP_STATUS servo_count, the servos in use.
+local function buildRows(servoCount)
   local rows = {}
+  local count = math.max(0, math.min(tonumber(servoCount) or 0, MAX_SERVOS))
   for i = 1, count do
-    local icon = i <= NUMBERED_ICON_COUNT and ("servo" .. i .. ".png") or "servos_bus.png"
-    rows[i] = {uiIndex = i - 1, title = servoTitle(i), icon = icon}
+    local icon = i <= NUMBERED_ICON_COUNT and ("servo" .. i .. ".png") or "servos.png"
+    rows[i] = {index = i - 1, title = servoTitle(i), icon = icon}
   end
   return rows
 end
@@ -89,8 +76,8 @@ local function unpackFlags(data)
   data.geometry = (flags == 2 or flags == 3) and 1 or 0
 end
 
--- Overrides go through the codec's hold/release so that, on firmware with
--- timed overrides (API 22.14+), they lapse if the radio or link goes away.
+-- Overrides go through the codec's hold/release so that they lapse on the
+-- flight controller if the radio or link goes away (timed overrides).
 local function publishOverrideAll(value)
   if value == servoOverride.OVERRIDE_OFF then
     servoOverride.releaseAll()
@@ -114,26 +101,14 @@ local function openEditor(opts, listState, row)
   local inOverride = inheritedOverride
   local lastCenter = nil
   local lastChangeAt = 0
-  local uiIndex = row.uiIndex
-  local rwIndex = readIndex(uiIndex)
-  local writeIndex = configWriteIndex(uiIndex, listState.servoCount)
-
-  local pageMsp = {
-    FIELD_META = BUS_FIELD_META,
-    buildReadMessage = function(onData, onError)
-      return servoConfig.buildReadMessage(rwIndex, onData, onError)
-    end,
-    buildWriteMessage = function(data, onWritten, onError)
-      return servoConfig.buildWriteMessage(writeIndex, data, onWritten, onError)
-    end,
-  }
+  local index = row.index
 
   local function disableOverride()
     if listState.inOverride then
       publishOverrideAll(servoOverride.OVERRIDE_OFF)
       listState.inOverride = false
     else
-      publishOverride(rwIndex, servoOverride.OVERRIDE_OFF)
+      publishOverride(index, servoOverride.OVERRIDE_OFF)
     end
     inOverride = false
   end
@@ -143,11 +118,13 @@ local function openEditor(opts, listState, row)
     -- Edits are saved with the page's Save; liveWrite would skip Back's unsaved-changes question.
     liveWrite = false,
     pageTitle = PAGE_TITLE .. " / " .. row.title,
-    logTag = "servos_bus_editor",
-    mspModule = pageMsp,
+    logTag = "servos_editor",
+    mspModule = servoConfig.forIndex(index),
     opts = {
       onBack = function()
-        if inOverride and not inheritedOverride then disableOverride() end
+        if inOverride and not inheritedOverride then
+          disableOverride()
+        end
         openList(opts, listState)
       end,
       setEventHandler = opts.setEventHandler,
@@ -195,7 +172,7 @@ local function openEditor(opts, listState, row)
                 if focusFn then focusFn() end
                 return true
               end
-              publishOverride(rwIndex, servoOverride.OVERRIDE_CENTER)
+              publishOverride(index, servoOverride.OVERRIDE_CENTER)
               inOverride = true
               inheritedOverride = false
               lastCenter = runtime.data.mid
@@ -222,13 +199,15 @@ local function openEditor(opts, listState, row)
       local now = os.clock()
       local current = rt.data.mid
       if current ~= lastCenter and (now - lastChangeAt) >= LIVE_SETTLE then
-        bus.publish("msp.request", servoCenter.buildWriteMessage(rwIndex, current))
+        bus.publish("msp.request", servoCenter.buildWriteMessage(index, current))
         lastCenter = current
         lastChangeAt = now
       end
     end,
     onDispose = function()
-      if inOverride and not inheritedOverride then disableOverride() end
+      if inOverride and not inheritedOverride then
+        disableOverride()
+      end
     end,
   })
 
@@ -318,15 +297,12 @@ openList = function(opts, listState)
   local col = 0
   local buttons = {}
 
-  for i, row in ipairs(rows) do
+  local function addTile(i, title, icon, press)
     buttons[i] = form.addButton(nil, {x = x, y = y, w = tileW, h = tileH}, {
-      text = tileGrid.fitLabel(row.title, tileW, tileFont),
-      icon = lcd.loadMask("app/gfx/" .. row.icon),
+      text = tileGrid.fitLabel(title, tileW, tileFont),
+      icon = lcd.loadMask("app/gfx/" .. icon),
       options = tileFont,
-      press = function()
-        listState.selected = i
-        openEditor(opts, listState, row)
-      end,
+      press = press,
     })
     col = col + 1
     if col >= numPerRow then
@@ -336,6 +312,13 @@ openList = function(opts, listState)
     else
       x = x + tileW + tilePadding
     end
+  end
+
+  for i, row in ipairs(rows) do
+    addTile(i, row.title, row.icon, function()
+      listState.selected = i
+      openEditor(opts, listState, row)
+    end)
   end
 
   if buttons[selected] then
@@ -348,7 +331,6 @@ end
 local function open(opts)
   local disposed = false
   local pendingStatus = nil
-  local pendingBusCount = nil
   local pendingError = nil
   local dialog = nil
   local listState = {inOverride = false}
@@ -401,9 +383,8 @@ local function open(opts)
         form.addLine(MSG_LOAD_ERROR .. " STATUS")
         return
       end
-      if pendingStatus and pendingBusCount then
-        listState.servoCount = pendingStatus.servo_count
-        listState.rows = buildRows(pendingBusCount)
+      if pendingStatus then
+        listState.rows = buildRows(pendingStatus.servo_count)
         closeDialog()
         opts.setWakeupHandler(nil)
         openList(opts, listState)
@@ -414,16 +395,6 @@ local function open(opts)
   bus.publish("msp.request", status.buildReadMessage(function(data)
     if disposed then return end
     pendingStatus = data
-  end, function()
-    if disposed then return end
-    pendingError = true
-  end))
-
-  bus.publish("msp.request", mixerConfig.buildReadMessage(function(data)
-    if disposed then return end
-    local count = data.bus_servo_output_count
-    if count == 0 then count = BUS_OUTPUT_COUNT_DEFAULT end
-    pendingBusCount = math.min(count, BUS_OUTPUT_COUNT_MAX)
   end, function()
     if disposed then return end
     pendingError = true

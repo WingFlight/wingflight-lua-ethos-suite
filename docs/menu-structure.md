@@ -13,7 +13,7 @@ contain only one entry. `bin/menu/` is obsolete tooling for the removed
 
 `app/menu_container.lua` loads pages and applies navigation guards. A running
 background task is required; entries marked `offline = true` may be opened without
-an FC connection. Servo bus and ESC protocol guards add feature-specific checks.
+an FC connection. The ESC protocol guards add feature-specific checks.
 `visibleWhen` controls visibility, including developer tools. Do not assume every
 page is locked while armed: verify each page and its shared runtime separately.
 

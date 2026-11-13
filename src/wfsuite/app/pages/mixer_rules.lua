@@ -7,11 +7,11 @@
 -- gain scaling) and app/pages/curves.lua's MSP_MIXER_CURVES (the curve
 -- *shapes* a rule's own Curve field can reference).
 --
--- Two screens, mirroring app/pages/servos_pwm.lua's list->editor shape
+-- Two screens, mirroring app/pages/servos.lua's list->editor shape
 -- (simpler than app/pages/curves.lua's three-screen category->slot->editor,
 -- since there's only one pool here, not two):
 --   open(): one-off whole-pool GET (own progress dialog, like
---     servos_pwm.lua's own top-level open()), then openList().
+--     servos.lua's own top-level open()), then openList().
 --   openList(): a full-width scrollable row per rule over the already-
 --     fetched pool (every slot listed, matching Curves' own "list every
 --     slot" convention -- no separate Add button; tapping an unused slot
@@ -190,25 +190,20 @@ end
 -- what summaryFor()/labelFor() see if either is ever called before that.
 local INPUT_OPTIONS = buildInputOptions(nil)
 
--- output: 37 entries (wire values 0-36) -- 0 None, 1-8 PWM Servo 1-8,
--- 9-26 Bus Servo 1-18 (wire value minus 8), 27-30 Motor 1-4 (wire value
--- minus 26), 31-36 Bus Servo 19-24 (wire value minus 12). Motors keep
--- 27-30, so the later bus servos come after them on the wire; the list
--- shows every servo before the motors. Matches wingflight-configurator's
--- Mixer.js outputOrder()/outputLabel() and firmware flight/mixer.h.
+-- output: 29 entries -- 0 None, 1-24 Servo 1-24 (the wire value is the
+-- servo number), 27-30 Motor 1-4 (wire value minus 26). 25 and 26 are
+-- reserved and never offered; 31-36 no longer exist (MSP API 22.16). A servo
+-- is a servo: servo N is sent on PWM output N where the board has one and on
+-- channel N of a bus output when one is set up, so there is one name for it.
+-- Matches wingflight-configurator's Mixer.js outputOrder()/outputLabel() and
+-- firmware flight/mixer.h.
 local OUTPUT_OPTIONS = {
   {"@i18n(app.modules.mixer_rules.output_none)@", 0},
 }
-for n = 1, 8 do
-  OUTPUT_OPTIONS[#OUTPUT_OPTIONS + 1] = {
-    string.format("@i18n(app.modules.mixer_rules.output_pwm_servo_fmt)@", n),
-    n,
-  }
-end
 for n = 1, 24 do
   OUTPUT_OPTIONS[#OUTPUT_OPTIONS + 1] = {
-    string.format("@i18n(app.modules.mixer_rules.output_bus_servo_fmt)@", n),
-    n <= 18 and (8 + n) or (12 + n),
+    string.format("@i18n(app.modules.mixer_rules.output_servo_fmt)@", n),
+    n,
   }
 end
 for n = 1, 4 do

@@ -303,7 +303,7 @@ function PageRuntime.new(config)
   -- copied out of a snapshot the page was already being handed.
   --
   -- Used so far by exactly one thing: app/pages/esc_motors_throttle.lua, which passes
-  -- it to motorConfig.protocolChoices(). On this suite's 22.13 floor that call does
+  -- it to motorConfig.protocolChoices(). On this suite's 22.16 floor that call does
   -- not filter anything today; the field exists so the page does not have to be
   -- rewritten when a protocol arrives that does need gating.
   self.apiVersionMinor = nil

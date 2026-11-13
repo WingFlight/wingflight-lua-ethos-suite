@@ -86,7 +86,7 @@ local function open(opts)
     key = "motor_pwm_protocol",
     -- From the codec rather than a table in this file, so the list cannot drift out
     -- of step with the firmware's enum. The apiMinor argument is unused on this side
-    -- (the suite's floor is 22.13, past every protocol); it is passed so the shape
+    -- (the suite's floor is 22.16, past every protocol); it is passed so the shape
     -- survives a future floor, and nil yields the same list, which is the safe
     -- direction.
     choices = motorConfig.protocolChoices(runtime.apiVersionMinor),

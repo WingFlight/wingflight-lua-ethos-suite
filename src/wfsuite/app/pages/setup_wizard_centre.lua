@@ -4,9 +4,9 @@
 -- surface servo is held at override 0, which puts it exactly at its Mid with
 -- nothing from the mixer on top (gyro, offsets, flaps). One screen per
 -- surface: nudge its Mid by -10/-1/+1/+10 us until the surface is neutral.
--- More than MID_WARN_US from the servo's normal centre (1500, or 760 for a
--- narrow-band servo) is flagged: the horn should be moved instead, or that
--- side loses travel.
+-- More than MID_WARN_US from the normal centre, 1500 us on every servo
+-- (narrow-band 760 us servos are not supported), is flagged: the horn should
+-- be moved instead, or that side loses travel.
 
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local ui = requireModule("app/setup_wizard_ui.lua")
@@ -33,9 +33,11 @@ local IDENTIFY_INTERVAL = 0.5
 local IDENTIFY_SECONDS = 3
 local NUDGES = {-10, -1, 1, 10}
 
-local function bandCentre(config)
-  return config.mid > 860 and 1500 or 760
-end
+-- Every servo centres on a standard pulse.
+local CENTRE = 1500
+-- SERVO_CENTER_MIN/MAX (firmware flight/servos.h): the FC keeps the centre in
+-- this range, so the nudges stop there too.
+local CENTRE_MIN, CENTRE_MAX = 1000, 2000
 
 local function new(wiz)
   local self = {}
@@ -72,7 +74,7 @@ local function new(wiz)
     stopIdentify()
     local surface = surfaces[index]
     wiz.editServo(surface.servo, function(config)
-      config.mid = config.mid + delta
+      config.mid = math.max(CENTRE_MIN, math.min(CENTRE_MAX, config.mid + delta))
     end)
     wiz.rebuild()
   end
@@ -81,7 +83,7 @@ local function new(wiz)
     local surface = surfaces[index]
     local config = surface and wiz.configs[surface.servo]
     if not config then return end
-    local offset = config.mid - bandCentre(config)
+    local offset = config.mid - CENTRE
     local range = 2 * MID_WARN_US
     local gh = math.min(h, 30)
     ui.gauge(x, y + math.floor((h - gh) / 2), w, gh, (offset + range) / (2 * range), colors,
@@ -102,7 +104,7 @@ local function new(wiz)
       for _, s in ipairs(surfaces) do
         local c = wiz.configs[s.servo]
         if c then
-          local off = c.mid - bandCentre(c)
+          local off = c.mid - CENTRE
           rows[#rows + 1] = {wiz.surfaceName(s), string.format(DONE_VALUE, c.mid, (off >= 0 and "+" or "") .. off),
             math.abs(off) > MID_WARN_US}
         end
@@ -111,7 +113,7 @@ local function new(wiz)
       return scr:row(back)
     end
     local config = wiz.configs[surface.servo]
-    local offset = config.mid - bandCentre(config)
+    local offset = config.mid - CENTRE
     local accent = math.abs(offset) > MID_WARN_US and T.far or (surface.kind == "flap" and T.flap or nil)
     scr:text(wiz.surfaceName(surface),
       T.intro .. " " .. string.format(T.value, config.mid, (offset >= 0 and "+" or "") .. offset), accent,

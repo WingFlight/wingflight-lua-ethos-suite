@@ -1,4 +1,4 @@
--- MSP2_WING_SET_SERVO_PROBE (cmd 0x5F1C, write, API 22.14): holds one PWM
+-- MSP2_WING_SET_SERVO_PROBE (cmd 0x5F1C, write, API 22.14): holds one
 -- servo at its Mid plus an offset in us, ignoring its Min/Max, so the Setup
 -- Wizard's Limits step can look for where a surface binds without widening
 -- the stored limits.
@@ -7,8 +7,9 @@
 -- flight/servos.c setServoProbe(): exactly 5 bytes, U8 servo, S16 offset us
 -- (-1000..1000, SERVO_LIMIT_MIN/MAX), U16 timeout ms. Timeout 0 clears the
 -- probe; otherwise the FC clamps it to 500-30000 and drops the probe unless
--- it is re-sent in time. Refused while armed, or for a servo past the PWM
--- servos.
+-- it is re-sent in time. Refused while armed, or for a servo index past 23.
+-- From API 22.16 it works on every servo, on a PWM output or a bus channel;
+-- the output stays inside the signal range, 880-2159 us.
 --
 -- hold() keeps it alive through lib/override_keepalive.lua, as the servo and
 -- mixer overrides do; release() clears it.

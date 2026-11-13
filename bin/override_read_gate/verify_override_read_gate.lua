@@ -5,12 +5,12 @@
 --     lua5.4 bin/override_read_gate/verify_override_read_gate.lua
 --
 -- What it drives, and why:
---   * The real app/pages/servos_pwm.lua and servos_bus.lua, with the real
---     app/page_runtime.lua. The header, the progress dialog and the tile grid are
+--   * The real app/pages/servos.lua (the one Servos page that replaced the PWM
+--     and BUS pages with MSP API 22.16), with the real app/page_runtime.lua. The header, the progress dialog and the tile grid are
 --     stubs; the MSP modules are the real ones with their message builders replaced,
 --     so every message the page publishes is recorded by the bus and the scenario
 --     answers each read the way the FC would.
---   * Two scenarios per page. In "read fails" the page's read errors out, so the
+--   * Two scenarios. In "read fails" the page's read errors out, so the
 --     runtime is not loaded. In "read succeeds" the page is loaded. Pressing Tool and
 --     confirming the override dialog must write the override only in the second.
 --   * Against unpatched master the "read fails" scenario writes the override anyway:
@@ -125,33 +125,14 @@ package.loaded["wfsuite.lib.settings_store"] = {
   save = function() return true end,
 }
 
--- Mixer config: for servos_bus reading bus_servo_output_count
-package.loaded["wfsuite.lib.msp_mixer_config"] = {
-  buildReadMessage = function(onData, onError)
-    return {kind = "mixerRead", onData = onData, onError = onError}
-  end,
-  buildWriteMessage = function(_, onWritten, onError)
-    return {kind = "mixerWrite", processReply = function() if onWritten then onWritten() end end, errorHandler = onError}
-  end,
-}
-
 -- Status (servo count) and servo config: real modules, read builders replaced.
 package.loaded["wfsuite.lib.msp_status"] = {
   buildReadMessage = function(onData, onError)
     return {kind = "statusRead", onData = onData, onError = onError}
   end,
 }
-
--- Serial config: servos_pwm reads the ports to know whether servo_count packs the
--- bus channels in, which is what decides how many PWM tiles its list builds.
-package.loaded["wfsuite.lib.msp_serial_config"] = {
-  buildReadMessage = function(onData, onError)
-    return {kind = "serialRead", onData = onData, onError = onError}
-  end,
-}
 do
   local servoConfig = requireModule("lib/msp_servo_config.lua")
-  -- servos_bus reads through the module-level builder with its own index
   servoConfig.buildReadMessage = function(_, onData, onError)
     return {kind = "servoRead", onData = onData, onError = onError}
   end
@@ -162,7 +143,6 @@ do
         return {kind = "servoRead", onData = onData, onError = onError}
       end,
       buildWriteMessage = function() return {kind = "servoWrite"} end,
-      buildRawWriteMessage = function() return {kind = "servoWrite"} end,
     }
   end
 end
@@ -233,15 +213,13 @@ local function pageOpts()
   }
 end
 
--- servos_pwm and servos_bus: status (and mixer for bus) reads, then a list, then a tap on a
--- tile opens the editor for that servo.
+-- The Servos page: the status read, then a list, then a tap on a tile opens the
+-- editor for that servo.
 local function openServoPage(page, outcome)
   resetScenario()
   page.open(pageOpts())
-  answerReads({statusRead = true, mixerRead = true, serialRead = true}, "ok", function(kind)
-    if kind == "statusRead" then return {servo_count = 2} end
-    if kind == "serialRead" then return {ports = {}} end
-    return {bus_servo_output_count = 2}
+  answerReads({statusRead = true}, "ok", function()
+    return {servo_count = 2}
   end)
   runWakeups(1)
   if #tiles == 0 then return false, "the list shows no servo tile" end
@@ -301,8 +279,7 @@ local function servoOpener(page)
   return function(outcome) return openServoPage(page, outcome) end
 end
 
-runScenarios("servos_pwm", 1, servoOpener(requireModule("app/pages/servos_pwm.lua")))
-runScenarios("servos_bus", 1, servoOpener(requireModule("app/pages/servos_bus.lua")))
+runScenarios("servos", 1, servoOpener(requireModule("app/pages/servos.lua")))
 
 print(string.format("\n%d checks, %d failed", checks, failures))
 os.exit(failures == 0 and 0 or 1)

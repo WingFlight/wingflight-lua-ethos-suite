@@ -50,6 +50,23 @@ M.SERVO_FLAG_REVERSE = 1
 M.SCALE_MIN = 50
 M.SCALE_MAX = 1000
 
+-- SERVO_CENTER_MIN/MAX and SERVO_SIGNAL_MIN/MAX (firmware flight/servos.h):
+-- the centre the FC accepts, and the range every servo's output is kept in.
+M.CENTER_MIN = 1000
+M.CENTER_MAX = 2000
+M.SIGNAL_MIN = 880
+M.SIGNAL_MAX = 2159
+
+-- Travel either side of the centre the output actually uses: Min/Max held so
+-- that centre + travel stays in the signal range (servoTravelMin/Max() in
+-- flight/servos.c, the configurator's servoUsableTravel()). The saved servo
+-- trim, which takes travel from one side, is not read by the suite and is
+-- not included.
+function M.usableTravel(servoConfig)
+  return math.max(servoConfig.min, M.SIGNAL_MIN - servoConfig.mid),
+    math.min(servoConfig.max, M.SIGNAL_MAX - servoConfig.mid)
+end
+
 -- Mixer outputs 1..n are servos 0..n-1 (MIXER_SERVO_OFFSET).
 local SERVO_OUTPUT_OFFSET = 1
 
@@ -144,10 +161,10 @@ function M.surfacesFromRules(rules, servoCount)
 end
 
 -- Servo numbers (1-based) that the surface mix drives but that are past the
--- board's servo outputs (up to `slots`), so surfacesFromRules() leaves them
--- out. The firmware only counts servo pins with a timer assigned (servoInit()
--- in flight/servos.c), so a flap mixed onto servo 5 of a board with 4 servo
--- pins never moves.
+-- servos in use (up to `slots`), so surfacesFromRules() leaves them out. The
+-- firmware only sends a servo that has a PWM output or a bus channel
+-- (getServoCount() in flight/servos.c), so a flap mixed onto servo 5 of a
+-- board with 4 servo pins and no bus output never moves.
 function M.servosPastCount(rules, servoCount, slots)
   local seen, out = {}, {}
   for i = 1, #rules do
@@ -203,11 +220,20 @@ function M.servoSide(output, reversed)
   return signed >= 0 and "pos" or "neg"
 end
 
+-- Fraction reported for a side that is asked to move but has no travel at
+-- all (limit 0): past the limit, and finite so it still shows as a percentage.
+local NO_TRAVEL_FRACTION = 9.99
+
+local function reachFraction(us, limit)
+  if limit > 0 then return us / limit end
+  return us > 0 and NO_TRAVEL_FRACTION or 0
+end
+
 -- Worst-case reach of each servo side with every axis at full stick in the
 -- direction that pushes that side furthest (and the flap channel, if the
 -- surface has one, at whichever end does the same), in us and as a fraction
--- of the side's travel limit. fraction > 1 means the surface hits its limit
--- before full stick on every axis at once.
+-- of the side's usable travel (usableTravel()). fraction > 1 means the
+-- surface hits its limit before full stick on every axis at once.
 function M.travelReach(surface, servoConfig, axisGains)
   local reversed = ((servoConfig.flags or 0) & M.SERVO_FLAG_REVERSE) ~= 0
   -- Highest and lowest mixer output, before reverse.
@@ -233,12 +259,13 @@ function M.travelReach(surface, servoConfig, axisGains)
 
   local posUs = pos * servoConfig.rpos
   local negUs = -neg * servoConfig.rneg
-  local posLimit = math.max(servoConfig.max, 0)
-  local negLimit = math.max(-servoConfig.min, 0)
+  local travelMin, travelMax = M.usableTravel(servoConfig)
+  local posLimit = math.max(travelMax, 0)
+  local negLimit = math.max(-travelMin, 0)
 
   return {
-    pos = {us = posUs, limit = posLimit, fraction = posLimit > 0 and posUs / posLimit or 0},
-    neg = {us = negUs, limit = negLimit, fraction = negLimit > 0 and negUs / negLimit or 0},
+    pos = {us = posUs, limit = posLimit, fraction = reachFraction(posUs, posLimit)},
+    neg = {us = negUs, limit = negLimit, fraction = reachFraction(negUs, negLimit)},
   }
 end
 

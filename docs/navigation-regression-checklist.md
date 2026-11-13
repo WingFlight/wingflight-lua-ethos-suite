@@ -7,22 +7,15 @@ Run these manually on radio after menu/navigation changes.
 1. `Advanced -> PID controller -> Back`
 Expected: returns to `Advanced` submenu with icons.
 
-2. `Hardware -> Setup -> Servos -> PWM -> Servo 1 -> Back -> Back -> Back`
+2. `Hardware -> Setup -> Servos -> Servo 1 -> Back -> Back`
 Expected:
-- Back 1: `PWM` servo list
-- Back 2: `Servos` submenu
-- Back 3: `Hardware / Setup` submenu with icons
+- Back 1: `Servos` servo list
+- Back 2: `Hardware / Setup` submenu with icons
 
-3. `Hardware -> Setup -> Servos -> BUS -> Servo 1 -> Back -> Back -> Back`
-Expected:
-- Back 1: `BUS` servo list
-- Back 2: `Servos` submenu
-- Back 3: `Hardware / Setup` submenu with icons
-
-4. `Hardware -> Setup -> Back`
+3. `Hardware -> Setup -> Back`
 Expected: `Hardware` submenu with icons.
 
-5. `Tools -> Profile Select -> Back`
+4. `Tools -> Profile Select -> Back`
 Expected: `Tools` submenu with icons.
 
 ## Legacy tools (now routed via openMenuContext)
