@@ -109,6 +109,17 @@ do
     reach.pos.fraction)
 end
 
+-- a side with no travel at all clips as soon as it is asked to move
+do
+  local elevator = S.surfacesFromRules({rule(SET, 2, 1, 1000)}, 8)[1]
+  local reach = S.travelReach(elevator, servo({mid = 1500, min = -500, max = 0}), gains)
+  check("zero limit: asked to move, so it clips", reach.pos.fraction > 1 and reach.pos.fraction < 10,
+    reach.pos.fraction)
+  check("zero limit: the other side is unaffected", near(reach.neg.fraction, 1), reach.neg.fraction)
+  reach = S.travelReach(elevator, servo({mid = 1500, min = -500, max = 0}), {roll = 1, pitch = 0, yaw = 1})
+  check("zero limit: nothing asked, nothing clips", reach.pos.fraction == 0, reach.pos.fraction)
+end
+
 -- largest scale that keeps full stick inside the binding limit
 do
   check("maxScale(1, 700)", S.maxScale(1, 700) == 700)

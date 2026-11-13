@@ -220,6 +220,15 @@ function M.servoSide(output, reversed)
   return signed >= 0 and "pos" or "neg"
 end
 
+-- Fraction reported for a side that is asked to move but has no travel at
+-- all (limit 0): past the limit, and finite so it still shows as a percentage.
+local NO_TRAVEL_FRACTION = 9.99
+
+local function reachFraction(us, limit)
+  if limit > 0 then return us / limit end
+  return us > 0 and NO_TRAVEL_FRACTION or 0
+end
+
 -- Worst-case reach of each servo side with every axis at full stick in the
 -- direction that pushes that side furthest (and the flap channel, if the
 -- surface has one, at whichever end does the same), in us and as a fraction
@@ -255,8 +264,8 @@ function M.travelReach(surface, servoConfig, axisGains)
   local negLimit = math.max(-travelMin, 0)
 
   return {
-    pos = {us = posUs, limit = posLimit, fraction = posLimit > 0 and posUs / posLimit or 0},
-    neg = {us = negUs, limit = negLimit, fraction = negLimit > 0 and negUs / negLimit or 0},
+    pos = {us = posUs, limit = posLimit, fraction = reachFraction(posUs, posLimit)},
+    neg = {us = negUs, limit = negLimit, fraction = reachFraction(negUs, negLimit)},
   }
 end
 
