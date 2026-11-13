@@ -125,28 +125,10 @@ package.loaded["wfsuite.lib.settings_store"] = {
   save = function() return true end,
 }
 
--- Mixer config: the Servos page's PWM rate screen reads it; not opened here.
-package.loaded["wfsuite.lib.msp_mixer_config"] = {
-  buildReadMessage = function(onData, onError)
-    return {kind = "mixerRead", onData = onData, onError = onError}
-  end,
-  buildWriteMessage = function(_, onWritten, onError)
-    return {kind = "mixerWrite", processReply = function() if onWritten then onWritten() end end, errorHandler = onError}
-  end,
-}
-
 -- Status (servo count) and servo config: real modules, read builders replaced.
 package.loaded["wfsuite.lib.msp_status"] = {
   buildReadMessage = function(onData, onError)
     return {kind = "statusRead", onData = onData, onError = onError}
-  end,
-}
-
--- Servo timing: the Servos page reads the PWM output count to decide whether to
--- offer the PWM rate.
-package.loaded["wfsuite.lib.msp_servo_timing"] = {
-  buildReadMessage = function(onData, onError)
-    return {kind = "timingRead", onData = onData, onError = onError}
   end,
 }
 do
@@ -231,14 +213,13 @@ local function pageOpts()
   }
 end
 
--- The Servos page: status and servo-timing reads, then a list, then a tap on a
--- tile opens the editor for that servo.
+-- The Servos page: the status read, then a list, then a tap on a tile opens the
+-- editor for that servo.
 local function openServoPage(page, outcome)
   resetScenario()
   page.open(pageOpts())
-  answerReads({statusRead = true, timingRead = true}, "ok", function(kind)
-    if kind == "statusRead" then return {servo_count = 2} end
-    return {count = 2, outputs = {}}
+  answerReads({statusRead = true}, "ok", function()
+    return {servo_count = 2}
   end)
   runWakeups(1)
   if #tiles == 0 then return false, "the list shows no servo tile" end

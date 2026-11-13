@@ -12,15 +12,10 @@ Expected:
 - Back 1: `Servos` servo list
 - Back 2: `Hardware / Setup` submenu with icons
 
-3. `Hardware -> Setup -> Servos -> PWM Rate -> Back -> Back`
-Expected:
-- Back 1: `Servos` servo list, focus on `PWM Rate`
-- Back 2: `Hardware / Setup` submenu with icons
-
-4. `Hardware -> Setup -> Back`
+3. `Hardware -> Setup -> Back`
 Expected: `Hardware` submenu with icons.
 
-5. `Tools -> Profile Select -> Back`
+4. `Tools -> Profile Select -> Back`
 Expected: `Tools` submenu with icons.
 
 ## Legacy tools (now routed via openMenuContext)

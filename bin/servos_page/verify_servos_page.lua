@@ -5,20 +5,16 @@
 --
 -- What it drives, and why:
 --   * The real app/pages/servos.lua, the real app/page_runtime.lua and the real
---     MSP servo-config and mixer-config modules. The status, servo-timing,
---     servo-config and mixer-config reads are recorded and answered by the
---     scenario; the write builders stay real, so the command number and the
---     payload are the ones the firmware would receive.
+--     MSP servo-config module. The status and servo-config reads are recorded
+--     and answered by the scenario; the write builder stays real, so the
+--     command number and the payload are the ones the firmware would receive.
 --   * The list: one tile per servo in use (MSP_STATUS servo_count, which is the
 --     servos in use and no longer "PWM outputs + bus channels"), capped at the
---     firmware's 24, followed by the PWM Rate tile on a board that has PWM servo
---     outputs (MSP2_WING_SERVO_TIMING count).
+--     firmware's 24, and nothing else. The page does not offer the PWM update
+--     rate, and reads only the status to build the list.
 --   * A save from a tile: one MSP_SET_SERVO_CONFIGURATION (212) carrying the
 --     tile's own index and the seven-field record, 15 bytes. There is one index
 --     space now, so no MSP_SET_SERVO_CONFIG (124) and no offset.
---   * The PWM rate: saved as the long form of MSP_SET_MIXER_CONFIG (43), which
---     must echo the model type and the two bus channel counts as read, because
---     the rate follows them on the wire.
 --
 -- This replaces bin/pwm_servo_write, which pinned the PWM page listing only the
 -- PWM outputs and writing them raw: the split it guarded no longer exists.
@@ -100,7 +96,6 @@ system = anything()
 
 local dialogs = {}
 local tiles = {}
-local choiceFields = {}
 form = anything()
 form.clear = function() end
 form.invalidate = function() end
@@ -110,15 +105,6 @@ form.addButton = function(_, _, opts)
   tiles[#tiles + 1] = opts
   return anything()
 end
--- A choice field that remembers its entries, including a later :values().
-form.addChoiceField = function(_, _, choices)
-  local field = anything()
-  local record = {choices = choices}
-  rawset(field, "values", function(_, values) record.choices = values end)
-  choiceFields[#choiceFields + 1] = record
-  return field
-end
-
 local lastHeaderOpts = nil
 package.loaded["wfsuite.app.header"] = {
   build = function(_, opts) lastHeaderOpts = opts; return anything() end,
@@ -141,26 +127,12 @@ package.loaded["wfsuite.lib.settings_store"] = {
   save = function() return true end,
 }
 
--- Status and servo timing: stubs with recorded reads, answered by the scenario.
+-- Status: a stub with a recorded read, answered by the scenario.
 package.loaded["wfsuite.lib.msp_status"] = {
   buildReadMessage = function(onData, onError)
     return {kind = "statusRead", onData = onData, onError = onError}
   end,
 }
-package.loaded["wfsuite.lib.msp_servo_timing"] = {
-  buildReadMessage = function(onData, onError)
-    return {kind = "timingRead", onData = onData, onError = onError}
-  end,
-}
-
--- Mixer config: the real module, with its read builder replaced so the scenario
--- answers it. The write builder stays real.
-do
-  local mixerConfig = requireModule("lib/msp_mixer_config.lua")
-  mixerConfig.buildReadMessage = function(onData, onError)
-    return {kind = "mixerRead", onData = onData, onError = onError}
-  end
-end
 
 -- Servo config: the real module. The reads are recorded for the scenario; the write
 -- builder stays real, so the command and the payload are the firmware's.
@@ -229,28 +201,21 @@ local function countWrites(command)
   return n
 end
 
--- Opens the page on a bench with the given servo count and PWM output count
--- (nil: the servo-timing read is refused), then the list. Returns the tiles.
-local function openList(servoCount, pwmCount)
-  sent, tiles, dialogs, choiceFields = {}, {}, {}, {}
+-- Opens the page on a bench with the given servo count, then the list. Returns
+-- the tiles and how many reads the page sent to build the list.
+local function openList(servoCount)
+  sent, tiles, dialogs = {}, {}, {}
   lastHeaderOpts, runtimeRef, currentWake = nil, nil, nil
   page.open({
     onBack = function() end,
     setWakeupHandler = function(fn) currentWake = fn end,
   })
-  answerReads({statusRead = true, timingRead = true}, function(kind)
-    if kind == "statusRead" then return {servo_count = servoCount} end
-    if pwmCount == nil then return nil end
-    return {count = pwmCount, outputs = {}}
+  local reads = #sent
+  answerReads({statusRead = true}, function()
+    return {servo_count = servoCount}
   end)
   runWakeups(1)
-  return tiles
-end
-
-local RATE_TILE = "@i18n(app.modules.servos.pwm_rate)@"
-
-local function hasRateTile()
-  return #tiles > 0 and tiles[#tiles].text == RATE_TILE
+  return tiles, reads
 end
 
 -- Presses tile k, lets its read complete, changes the page with `edit` and saves
@@ -283,41 +248,30 @@ end
 local SCENARIOS = {
   {
     label = "four PWM outputs, no bus output: 4 servos in use",
-    servoCount = 4, pwmCount = 4,
-    expectServos = 4, expectRate = true, tile = 2, expectIndex = 1,
+    servoCount = 4, expectServos = 4, tile = 2, expectIndex = 1,
   },
   {
     label = "four PWM outputs and a 24-channel F.Bus output: 24 servos in use",
-    servoCount = 24, pwmCount = 4,
-    expectServos = 24, expectRate = true, tile = 24, expectIndex = 23,
+    servoCount = 24, expectServos = 24, tile = 24, expectIndex = 23,
   },
   {
     label = "no PWM outputs, a 16-channel bus output: 18 servos in use",
-    servoCount = 18, pwmCount = 0,
-    expectServos = 18, expectRate = false, tile = 9, expectIndex = 8,
+    servoCount = 18, expectServos = 18, tile = 9, expectIndex = 8,
   },
   {
     label = "a servo count past the firmware's 24 is not trusted",
-    servoCount = 40, pwmCount = 8,
-    expectServos = 24, expectRate = true, tile = 1, expectIndex = 0,
-  },
-  {
-    label = "the servo-timing read is refused: the list still opens",
-    servoCount = 6, pwmCount = nil,
-    expectServos = 6, expectRate = true, tile = 6, expectIndex = 5,
+    servoCount = 40, expectServos = 24, tile = 1, expectIndex = 0,
   },
 }
 
 for _, s in ipairs(SCENARIOS) do
   print(s.label)
-  openList(s.servoCount, s.pwmCount)
-  local servoTiles = #tiles - (hasRateTile() and 1 or 0)
-  check("the list shows every servo in use",
+  local _, reads = openList(s.servoCount)
+  local servoTiles = #tiles
+  check("the list is built from the status read alone", reads == 1, "reads sent: " .. reads)
+  check("the list shows every servo in use, and no other tile",
     servoTiles == s.expectServos,
-    "servo tiles shown: " .. servoTiles .. ", expected " .. s.expectServos)
-  check(s.expectRate and "the PWM Rate tile follows the servos" or "there is no PWM Rate tile without PWM outputs",
-    hasRateTile() == s.expectRate,
-    "last tile: " .. tostring(tiles[#tiles] and tiles[#tiles].text))
+    "tiles shown: " .. servoTiles .. ", expected " .. s.expectServos)
   if servoTiles >= s.tile then
     local write, why = saveTile(s.tile, "servoRead", servoFixture(), 212)
     check("the save completes", write ~= nil, why)
@@ -337,7 +291,7 @@ for _, s in ipairs(SCENARIOS) do
 end
 
 print("tile icons")
-openList(24, 8)
+openList(24)
 check("servos 1 to 16 have their numbered icon",
   tiles[1].icon == "app/gfx/servo1.png" and tiles[16].icon == "app/gfx/servo16.png",
   tostring(tiles[1].icon) .. " / " .. tostring(tiles[16].icon))
@@ -351,43 +305,6 @@ do
     if f then f:close() else missing[#missing + 1] = tiles[i].icon end
   end
   check("every tile's icon file is in the suite", #missing == 0, table.concat(missing, ", "))
-end
-
--- ---------------------------------------------------------------------------
--- The PWM update rate
--- ---------------------------------------------------------------------------
-
-local function mixerFixture(rate)
-  return {model_type = 2, sbus_out_channels = 16, fbus_master_channels = 24,
-    bus_servo_output_count = 24, servo_pwm_rate = rate}
-end
-
-print("PWM rate: Standard to High speed")
-openList(4, 4)
-do
-  local write, why = saveTile(#tiles, "mixerRead", mixerFixture(50), 43, function(data)
-    data.servo_pwm_rate = 333
-  end)
-  check("the rate page offers Standard and High speed, and nothing else",
-    #choiceFields == 1 and #choiceFields[1].choices == 2
-      and choiceFields[1].choices[1][2] == 50 and choiceFields[1].choices[2][2] == 333,
-    "choice fields: " .. #choiceFields)
-  check("the save completes", write ~= nil, why)
-  -- model type 2, reserved 0, SBUS 16, F.Bus 24, rate 333 = 77 + 1 * 256
-  check("the rate goes out as MSP_SET_MIXER_CONFIG (43) with the model type and bus channel counts as read",
-    write ~= nil and bytes(write.payload) == "2,0,16,24,77,1",
-    write and bytes(write.payload))
-  check("no servo is written", countWrites(212) == 0 and countWrites(124) == 0)
-end
-
-print("PWM rate: a rate that is neither")
-openList(4, 4)
-do
-  saveTile(#tiles, "mixerRead", mixerFixture(100), 43)
-  local choices = choiceFields[1] and choiceFields[1].choices or {}
-  check("a stored rate of 100 Hz is listed as its own entry",
-    #choices == 3 and choices[3][2] == 100,
-    "entries: " .. #choices)
 end
 
 print(string.format("\n%d checks, %d failed", checks, failures))

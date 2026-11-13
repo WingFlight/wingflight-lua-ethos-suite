@@ -7919,41 +7919,6 @@
           "reverse_text": false,
           "translation": "Servomoteurs"
         },
-        "pwm_rate": {
-          "english": "PWM Rate",
-          "max_length": 8,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "PWM Rate"
-        },
-        "pwm_rate_high": {
-          "english": "High speed (333 Hz)",
-          "max_length": 19,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "High speed (333 Hz)"
-        },
-        "pwm_rate_note_digital": {
-          "english": "High speed is for digital servos only.",
-          "max_length": 38,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "High speed is for digital servos only."
-        },
-        "pwm_rate_note_restart": {
-          "english": "A change applies after a restart.",
-          "max_length": 33,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "A change applies after a restart."
-        },
-        "pwm_rate_standard": {
-          "english": "Standard (50 Hz)",
-          "max_length": 16,
-          "needs_translation": true,
-          "reverse_text": false,
-          "translation": "Standard (50 Hz)"
-        },
         "reverse": {
           "english": "Reverse",
           "max_length": 7,

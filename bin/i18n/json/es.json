@@ -1946,41 +1946,6 @@
           "max_length": 6,
           "reverse_text": false
         },
-        "pwm_rate": {
-          "english": "PWM Rate",
-          "translation": "PWM Rate",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 8
-        },
-        "pwm_rate_standard": {
-          "english": "Standard (50 Hz)",
-          "translation": "Standard (50 Hz)",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 16
-        },
-        "pwm_rate_high": {
-          "english": "High speed (333 Hz)",
-          "translation": "High speed (333 Hz)",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 19
-        },
-        "pwm_rate_note_digital": {
-          "english": "High speed is for digital servos only.",
-          "translation": "High speed is for digital servos only.",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 38
-        },
-        "pwm_rate_note_restart": {
-          "english": "A change applies after a restart.",
-          "translation": "A change applies after a restart.",
-          "needs_translation": true,
-          "reverse_text": false,
-          "max_length": 33
-        },
         "reverse": {
           "english": "Reverse",
           "translation": "Invertir sentido",

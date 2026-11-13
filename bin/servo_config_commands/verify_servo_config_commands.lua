@@ -9,8 +9,7 @@
 --     their payloads.
 --   * lib/msp_servo_center.lua (213) and lib/msp_servo_override.lua (193).
 --   * lib/msp_mixer_config.lua (42 / 43), which carries the one PWM update rate
---     that replaced the per-servo rate, and lib/msp_servo_timing.lua (0x5F27),
---     whose count is the board's PWM servo outputs.
+--     that replaced the per-servo rate.
 --
 -- The numbers are the firmware's, from wingflight-firmware
 -- src/main/msp/msp_protocol.h: MSP_GET_SERVO_CONFIG 125,
@@ -86,7 +85,7 @@ local function bytes(payload)
 end
 
 -- Pins the command numbers and the payload layout. Returns how many checks failed.
-local function pinCommands(cfg, center, override, mixer, timing)
+local function pinCommands(cfg, center, override, mixer)
   local before = failures
   -- rate is not a field any more: a caller that still passes one must not see it
   -- on the wire.
@@ -154,10 +153,9 @@ local function pinCommands(cfg, center, override, mixer, timing)
     fiWrite.command == 212 and fiWrite.payload[1] == 12,
     string.format("command %s, index %s", tostring(fiWrite.command), tostring(fiWrite.payload[1])))
 
-  -- The PWM update rate and the PWM output count moved out of the servo record
-  -- (wingflight-firmware msp.c, MSP_MIXER_CONFIG / MSP_SET_MIXER_CONFIG /
-  -- MSP2_WING_SERVO_TIMING, MSP API 22.16).
-  print("Mixer config and servo timing")
+  -- The PWM update rate moved out of the servo record (wingflight-firmware
+  -- msp.c, MSP_MIXER_CONFIG / MSP_SET_MIXER_CONFIG, MSP API 22.16).
+  print("Mixer config")
   check("mixer config is read with 42 and written with 43",
     mixer.READ_COMMAND == 42 and mixer.WRITE_COMMAND == 43,
     string.format("read %s, write %s", tostring(mixer.READ_COMMAND), tostring(mixer.WRITE_COMMAND)))
@@ -184,16 +182,6 @@ local function pinCommands(cfg, center, override, mixer, timing)
     #mixer.buildReadMessage(function() end).simulatorResponse == 7
       and mixer.decode({table.unpack(mixer.buildReadMessage(function() end).simulatorResponse)}).servo_pwm_rate == 50)
 
-  check("servo timing is read with MSP2_WING_SERVO_TIMING (0x5F27)", timing.READ_COMMAND == 0x5F27,
-    "got " .. tostring(timing.READ_COMMAND))
-  -- two PWM outputs: 50 Hz on timer group 0, 333 Hz on timer group 1
-  local t = timing.decode({2, 50, 0, 0, 77, 1, 1})
-  check("the count is the number of PWM outputs, then rate and timer group per output",
-    t.count == 2 and t.outputs[1].rate == 50 and t.outputs[1].group == 0
-      and t.outputs[2].rate == 333 and t.outputs[2].group == 1,
-    string.format("count %s", tostring(t.count)))
-  check("a board without PWM servo outputs reports none", timing.decode({0}).count == 0)
-
   return failures - before
 end
 
@@ -214,8 +202,6 @@ local MUTATIONS = {
     to = "-- the reserved byte is not skipped", what = "the reserved byte read as the SBUS channel count"},
   {file = "msp_mixer_config", from = "    mspcodec.writeU16(payload, data.servo_pwm_rate)",
     to = "    mspcodec.writeU8(payload, data.servo_pwm_rate)", what = "the PWM rate written as one byte"},
-  {file = "msp_servo_timing", from = "local READ_COMMAND = 0x5F27",
-    to = "local READ_COMMAND = 0x5F1C", what = "the servo timing read sent as the servo probe"},
 }
 
 -- Source text of one module with exactly one plain-text replacement.
@@ -236,8 +222,7 @@ local function runWith(mutation)
   local center = loadModule("msp_servo_center", texts.msp_servo_center)
   local override = loadModule("msp_servo_override", texts.msp_servo_override)
   local mixer = loadModule("msp_mixer_config", texts.msp_mixer_config)
-  local timing = loadModule("msp_servo_timing", texts.msp_servo_timing)
-  return pinCommands(cfg, center, override, mixer, timing)
+  return pinCommands(cfg, center, override, mixer)
 end
 
 if not SELF_TEST then

@@ -8,8 +8,8 @@ source: app/pages/servos.lua
 
 # Servos
 
-Set up each servo's center, travel limits, scale, speed and direction, trim a center
-live, and choose the PWM update rate of the flight controller's servo outputs.
+Set up each servo's center, travel limits, scale, speed and direction, and trim a
+center live.
 
 A servo is a servo, however it is connected. There are 24 servos. Servo N is sent on
 PWM output N where the board has one, and on channel N of a bus output (SBUS or F.Bus)
@@ -30,9 +30,6 @@ One tile per servo in use, **SERVO 1** first. The servos in use are servo 1 up t
 larger of the board's PWM servo outputs and the servos a bus output sends: the bus
 channel count (8, 12 or 24), or 18 with a 16-channel frame, where servos 17 and 18
 drive the frame's two digital channels. Tap a tile to edit that servo.
-
-The last tile, **PWM Rate**, is the update rate of the PWM outputs (below). It is left
-out on a board with no PWM servo outputs.
 
 The Tool button in the header switches servo override on for every servo: all of them
 go to their configured center, for setting up linkages. Switching it off, or leaving
@@ -59,20 +56,10 @@ travel it uses where center plus the limit would leave that range. With the cent
 
 Narrow-pulse (760 µs) servos are not supported. There is no update rate per servo.
 
-## PWM Rate
-
-| Setting | What it does |
-| --- | --- |
-| PWM Rate | **Standard (50 Hz)** or **High speed (333 Hz)**: how often every PWM servo output is updated. A rate set to something else from the CLI (25–333 Hz) is listed as its own entry. Default 50 Hz. |
-
-Standard suits any servo. High speed responds faster but is for digital servos only:
-it can damage an analog servo, so check the servo's data sheet. The rate is one setting
-for all PWM servo outputs and has no effect on a bus output.
-
-The flight controller applies the rate when it starts, so Save writes it, commits it
-to EEPROM and restarts the flight controller; the page shows *Restarting...* until it
-is back. It cannot be saved while armed. Opening **PWM Rate** switches the list's
-servo override off first, as the Tool button does.
+The PWM update rate of the servo outputs is one setting for all of them, 50 Hz by
+default, which suits any servo. This page does not offer it. The setup wizard's servo
+type step sets it (analog 50 Hz, digital 333 Hz), and so does the Configurator's
+Servos tab.
 
 ## Notes
 
