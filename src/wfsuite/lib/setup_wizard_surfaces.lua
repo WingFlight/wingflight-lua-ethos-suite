@@ -50,6 +50,23 @@ M.SERVO_FLAG_REVERSE = 1
 M.SCALE_MIN = 50
 M.SCALE_MAX = 1000
 
+-- SERVO_CENTER_MIN/MAX and SERVO_SIGNAL_MIN/MAX (firmware flight/servos.h):
+-- the centre the FC accepts, and the range every servo's output is kept in.
+M.CENTER_MIN = 1000
+M.CENTER_MAX = 2000
+M.SIGNAL_MIN = 880
+M.SIGNAL_MAX = 2159
+
+-- Travel either side of the centre the output actually uses: Min/Max held so
+-- that centre + travel stays in the signal range (servoTravelMin/Max() in
+-- flight/servos.c, the configurator's servoUsableTravel()). The saved servo
+-- trim, which takes travel from one side, is not read by the suite and is
+-- not included.
+function M.usableTravel(servoConfig)
+  return math.max(servoConfig.min, M.SIGNAL_MIN - servoConfig.mid),
+    math.min(servoConfig.max, M.SIGNAL_MAX - servoConfig.mid)
+end
+
 -- Mixer outputs 1..n are servos 0..n-1 (MIXER_SERVO_OFFSET).
 local SERVO_OUTPUT_OFFSET = 1
 
@@ -206,8 +223,8 @@ end
 -- Worst-case reach of each servo side with every axis at full stick in the
 -- direction that pushes that side furthest (and the flap channel, if the
 -- surface has one, at whichever end does the same), in us and as a fraction
--- of the side's travel limit. fraction > 1 means the surface hits its limit
--- before full stick on every axis at once.
+-- of the side's usable travel (usableTravel()). fraction > 1 means the
+-- surface hits its limit before full stick on every axis at once.
 function M.travelReach(surface, servoConfig, axisGains)
   local reversed = ((servoConfig.flags or 0) & M.SERVO_FLAG_REVERSE) ~= 0
   -- Highest and lowest mixer output, before reverse.
@@ -233,8 +250,9 @@ function M.travelReach(surface, servoConfig, axisGains)
 
   local posUs = pos * servoConfig.rpos
   local negUs = -neg * servoConfig.rneg
-  local posLimit = math.max(servoConfig.max, 0)
-  local negLimit = math.max(-servoConfig.min, 0)
+  local travelMin, travelMax = M.usableTravel(servoConfig)
+  local posLimit = math.max(travelMax, 0)
+  local negLimit = math.max(-travelMin, 0)
 
   return {
     pos = {us = posUs, limit = posLimit, fraction = posLimit > 0 and posUs / posLimit or 0},

@@ -95,6 +95,20 @@ do
   check("axis gain scales reach", near(reach.pos.fraction, 0.5), reach.pos.fraction)
 end
 
+-- the limit is the travel the output can use at this centre
+do
+  local lo, hi = S.usableTravel({mid = 1500, min = -600, max = 600})
+  check("usable travel: the defaults are used in full", lo == -600 and hi == 600, lo .. "/" .. hi)
+  lo, hi = S.usableTravel({mid = 1700, min = -900, max = 600})
+  check("usable travel: held to the signal range at centre 1700", lo == -820 and hi == 459, lo .. "/" .. hi)
+  local elevator = S.surfacesFromRules({rule(SET, 2, 1, 1000)}, 8)[1]
+  local reach = S.travelReach(elevator, servo({mid = 1700, min = -600, max = 600}), gains)
+  check("reach: pos limit is the usable 459", reach.pos.limit == 459, reach.pos.limit)
+  check("reach: neg limit is the stored 600", reach.neg.limit == 600, reach.neg.limit)
+  check("reach: pos fraction against the usable travel", near(reach.pos.fraction, reach.pos.us / 459),
+    reach.pos.fraction)
+end
+
 -- largest scale that keeps full stick inside the binding limit
 do
   check("maxScale(1, 700)", S.maxScale(1, 700) == 700)

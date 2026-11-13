@@ -35,6 +35,9 @@ local NUDGES = {-10, -1, 1, 10}
 
 -- Every servo centres on a standard pulse.
 local CENTRE = 1500
+-- SERVO_CENTER_MIN/MAX (firmware flight/servos.h): the FC keeps the centre in
+-- this range, so the nudges stop there too.
+local CENTRE_MIN, CENTRE_MAX = 1000, 2000
 
 local function new(wiz)
   local self = {}
@@ -71,7 +74,7 @@ local function new(wiz)
     stopIdentify()
     local surface = surfaces[index]
     wiz.editServo(surface.servo, function(config)
-      config.mid = config.mid + delta
+      config.mid = math.max(CENTRE_MIN, math.min(CENTRE_MAX, config.mid + delta))
     end)
     wiz.rebuild()
   end
