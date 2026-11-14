@@ -96,14 +96,18 @@ local function new(wiz)
   end
 
   -- Which scale field this stick direction uses on this servo, and the most
-  -- it may be before full stick passes that side's binding limit.
+  -- it may be before full stick passes that side's binding limit: nil when
+  -- the side has no travel left (the saved trim has used it), so no scale
+  -- fits.
   local function sideOf(surface, a, direction)
     local config = wiz.configs[surface.servo]
     local output = surfacesLib.outputForAxis(surface, a, direction.stick, wiz.axisGains())
     local reversed = ((config.flags or 0) & surfacesLib.SERVO_FLAG_REVERSE) ~= 0
     local pos = surfacesLib.servoSide(output, reversed) == "pos"
     local travelMin, travelMax = surfacesLib.usableTravel(config, wiz.trims[surface.servo])
-    return pos and "rpos" or "rneg", surfacesLib.maxScale(output, pos and travelMax or -travelMin)
+    local limit = pos and travelMax or -travelMin
+    if output ~= 0 and limit <= 0 then return pos and "rpos" or "rneg", nil end
+    return pos and "rpos" or "rneg", surfacesLib.maxScale(output, limit)
   end
 
   local function nudgeThrow(delta)
@@ -117,7 +121,9 @@ local function new(wiz)
     local item = fineList[fi]
     local field, most = sideOf(item.surface, axis(), item.direction)
     wiz.editServo(item.surface.servo, function(config)
-      config[field] = math.min(most, math.max(surfacesLib.SCALE_MIN, config[field] + delta * SCALE_STEP))
+      -- With no travel left the scale can come down but not go up.
+      config[field] = math.min(most or config[field],
+        math.max(surfacesLib.SCALE_MIN, config[field] + delta * SCALE_STEP))
     end)
     wiz.rebuild()
   end
@@ -197,7 +203,7 @@ local function new(wiz)
       local config = wiz.configs[item.surface.servo]
       local pct = math.floor(config[field] / SCALE_STEP + 0.5)
       scr:text(wiz.surfaceName(item.surface), T.fineIntro .. " " .. string.format(T.fine, item.direction.name, pct),
-        passNote or (config[field] >= most and T.sideLimit or nil), string.format(T.progress, fi, #fineList))
+        passNote or ((not most or config[field] >= most) and T.sideLimit or nil), string.format(T.progress, fi, #fineList))
       scr:picture(art.layout(wiz.surfaces(), axis(), item.direction.flip))
       -- Back and Next step through the surfaces and directions, then back
       -- to the axis.
