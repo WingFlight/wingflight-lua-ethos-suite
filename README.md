@@ -1,259 +1,110 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/WingFlight/wingflight-landing-page/master/logos/wf_logo_dark_white.svg">
+    <img src="https://raw.githubusercontent.com/WingFlight/wingflight-landing-page/master/logos/wf_logo_dark.svg" alt="Wingflight" width="420">
+  </picture>
+</p>
 
-![Wingflight](https://github.com/rotorflight/rotorflight/blob/master/images/rotorflight2.png?raw=true)
+# Wingflight Lua Suite for Ethos
 
-# WFSuite Lua Scripts for Ethos
+WFSuite puts a [Wingflight](https://github.com/WingFlight/wingflight-firmware) flight controller's
+settings on a FrSky Ethos radio. At the field you can set up a model, retune it, read its logs and
+check its status without a computer. Wingflight is open-source flight controller firmware for
+fixed-wing aircraft.
 
-**Wingflight** is a powerful flight control software suite built specifically for **fixed-wing RC aircraft**. It is not designed for multirotors or helicopters. The software includes:
+**[User guide](https://doc.wingflight.org/ethos-suite/)** ·
+**[Installing](https://doc.wingflight.org/ethos-suite/installing/)** ·
+**[Releases](https://github.com/WingFlight/wingflight-lua-ethos-suite/releases)** ·
+**[Discord](https://discord.gg/aEyyAJTXRw)**
 
--   **Wingflight Flight Controller Firmware**
-    
--   **Wingflight Configurator** – used for flashing and configuring the flight controller
-    
--   **Wingflight Blackbox Explorer** – for analyzing flight logs
-    
--   **Wingflight Lua Scripts** – used to configure the flight controller directly from your transmitter
-    
+| | |
+| --- | --- |
+| ![The dashboard widget](https://raw.githubusercontent.com/WingFlight/wingflight-docs/main/docs/assets/images/ethos-suite/home-dashboard.png) | ![The app's main menu](https://raw.githubusercontent.com/WingFlight/wingflight-docs/main/docs/assets/images/ethos-suite/root-menu.png) |
+| ![The PID page](https://raw.githubusercontent.com/WingFlight/wingflight-docs/main/docs/assets/images/ethos-suite/pids.png) | ![A flight log graph](https://raw.githubusercontent.com/WingFlight/wingflight-docs/main/docs/assets/images/ethos-suite/logs-graph.png) |
 
-These scripts support the following transmitter operating systems:
 
--   **EdgeTX / OpenTX**
-    
--   **Ethos** (this repository)
-    
+## What it installs
 
-Wingflight is a fixed-wing fork of [Rotorflight](https://github.com/rotorflight), which is itself based on **Betaflight 4.3**.
+- **The Wingflight app**, opened from the radio's System menu. Its pages read settings from the
+  flight controller over telemetry, let you change them and save them back.
+- **A dashboard widget** for the model's home screen: arming state, battery, fuel, RPM, profile
+  and flight count, with a choice of [themes](docs/dashboard-themes.md).
+- **A background task** that keeps the link to the flight controller and plays callouts and
+  alerts.
 
-> Note: the screenshots and web-simulator demo linked below still show the upstream Rotorflight UI/branding — they haven't been retaken for Wingflight yet. Treat them as illustrative of the underlying suite, not final Wingflight branding.
 
-----------
+## What the app does
 
-## Documentation
+- **Flight tuning:** PIDs, rates, flight feel, filters, gain curves, flight modes and thrust
+  vectoring
+- **Tune Advisor:** reads your recent flights and suggests one gain change at a time
+- **Setup:** ports, receiver, telemetry and controls; sensors and GPS navigation; mixer, curves
+  and servos; power, ESCs, motors and the governor
+- **Tools:** a setup wizard, profile copy and select, diagnostics and flight logs
+- **Settings:** audio callouts, dashboard themes and radio preferences
 
-See the [documentation guide](docs/README.md) and [configuration page index](docs/pages/README.md).
-Page references are marked as draft or reviewed.
+The [user guide](https://doc.wingflight.org/ethos-suite/) has a screen for every menu.
 
-## What is WFSuite?
 
-**WFSuite** is a touch-based, Lua-scripted GUI suite for the Ethos platform. It enables easy setup, tuning, and diagnostics of Wingflight-based aircraft using supported FrSky transmitters. It offers:
+## Requirements
 
--   Full touchscreen interface
-    
--   FrSky and ELRS receiver compatibility
-    
--   Multiple embedded tools and widgets
-    
+- A FrSky radio running **Ethos 1.6.2 or later**: X10, X12, X14, X18, X20 or Twin X Lite
+- A receiver that carries telemetry to the radio:
+  - FrSky, over S.Port or F.Port (ACCESS, ACCST, TD or TW receivers), or
+  - ExpressLRS, on a module Ethos supports
+- A suite version that matches your firmware. Each release says which firmware it is for.
 
-You can preview the experience using the interactive simulator:
 
-👉 [**Launch Web Simulator**](https://ethos.studio1247.com/nightly16/X20PRO_FCC?backup=https://github.com/rotorflight/rotorflight-lua-ethos-suite/raw/refs/heads/master/demo/DEMO.zip&reset=all&language=en)
+## Installation
 
-This opens the WFSuite in your browser, showcasing its functionality within the Ethos UI.
+**With the updater.** The
+[Wingflight Radio Updater](https://github.com/WingFlight/wingflight-lua-ethos-suite-updater/releases)
+for Windows, macOS and Linux downloads the suite and copies it to the radio.
 
-### Key UI Screens
+**By hand.** Download the zip for your language from the
+[releases page](https://github.com/WingFlight/wingflight-lua-ethos-suite/releases). Install it with
+Ethos Suite (*Lua Development Tools* → *Install Lua Scripts*), or unzip it and copy the `wfsuite`
+folder into the radio's `scripts` folder.
 
-**Status Widget**  
-Dashboard themes are available for different flight states. See the [Dashboard Themes Overview](docs/dashboard-themes/) to compare the available theme previews.
+Then turn on **Wingflight [Background]** in the model's Lua page. The full steps are in
+[Installing](https://doc.wingflight.org/ethos-suite/installing/).
 
-![Status](https://raw.githubusercontent.com/rotorflight/rotorflight-lua-ethos-suite/master/.github/gfx/status.png)
 
-**Flight Logs**  
-![Flight Logs](https://raw.githubusercontent.com/rotorflight/rotorflight-lua-ethos-suite/master/.github/gfx/logs.png)
+## Development
 
-**FBL Configuration (Home)**  
-![FBL Config](https://raw.githubusercontent.com/rotorflight/rotorflight-lua-ethos-suite/master/.github/gfx/home.png)
+See [docs/dev-environment.md](docs/dev-environment.md) for the full setup. In short:
 
-**Governor Configuration**  
-![Governor Config](https://raw.githubusercontent.com/rotorflight/rotorflight-lua-ethos-suite/master/.github/gfx/gov.png)
+- Visual Studio Code with the `Ethos` extension
+- Python 3; the deploy tasks install missing libraries on first run, or install them yourself:
 
-----------
+  ```bash
+  python -m pip install -r requirements.txt
+  ```
 
-## Features
+VS Code tasks:
 
-Inherited from Rotorflight/Betaflight, including:
+- **Deploy & Launch [SIM]** pushes the scripts to the simulator and starts it
+- **Deploy Radio** pushes them to a connected radio
+- **Deploy Radio + Serial Debug** does the same and opens the serial console
 
-### Protocol Support
+Contributor documentation is in [docs/](docs/README.md): system architecture, the MSP layer,
+dashboard themes, translations and a [reference for every page](docs/pages/README.md).
+[AGENTS.md](AGENTS.md) holds the rules for changing the code.
 
--   Receiver: CRSF, S.BUS, F.Port, DSM, IBUS, XBUS, EXBUS, GHOST, CPPM
-    
--   Telemetry: CRSF, S.Port, HoTT, and more
-    
--   ESC telemetry: BLHeli32, Hobbywing, Scorpion, Kontronik, OMP Hobby, ZTW, APD, YGE
-    
-
-### Remote Tuning & Configuration
-
--   Via transmitter knobs/switches
-    
--   Lua script interface on EdgeTX/OpenTX/Ethos
-    
-
-### Additional Capabilities
-
--   AUX outputs for custom motor/servo functions
-    
--   Fully customizable mixer
-    
--   Sensor support: voltage, current, BEC, etc.
-    
--   Advanced filtering: Dynamic RPM notch, FFT-based notch, and LPF
-    
--   High-speed Blackbox logging
-    
-
-### Plus Betaflight-Inherited Features:
-
--   Multiple configuration and rate profiles
-    
--   DSHOT, PWM, Multishot ESC protocols
-    
--   RGB LEDs and buzzers
-    
--   GPS integration
-    
-
-> Note: the helicopter-specific feature list (rotor governor, swash/TTA tuning, etc.) from the
-> Rotorflight original has been dropped above pending a proper fixed-wing feature audit — this
-> still needs a follow-up pass.
-
-----------
-
-## Lua Script Requirements
-
-To use WFSuite, you'll need:
-
--   **Ethos 1.6.2 or later**
-    
--   A compatible FrSky transmitter:
-    
-    -   X10, X12, X14, X18, X20, or Twin X Lite
-        
--   A supported receiver:
-    
-    -   FrSky (Smartport or F.Port over ACCESS, ACCST, TD, TW)
-        
-    -   ExpressLRS (ELRS) modules supported by Ethos
-        
-
-----------
-
-## Verified Compatible Receivers
-
-WFSuite has been successfully tested on the following receiver models (with X10, X14, X18, X20, XLite):
-
--   TWMX
-    
--   TD MX
-    
--   R9 MX ACCESS
-    
--   R9 Mini ACCESS
-    
--   Archer RS / Archer Plus RS / RS Mini (ACCESS / F.Port)
-    
--   RX6R ACCESS
-    
--   R-XSR ACCESS / ACCST F.Port
-    
--   ELRS (all versions)
-
-----------    
-
-## Installation Instructions
-
-### Radio Updater (GUI)
-
-For Windows, Mac & Linux users, a prebuilt GUI updater is available to simplify updating files on the radio without using VS Code or Python. Wingflight doesn't have its own updater build yet, so the Rotorflight updater tool is referenced here in the meantime:
-
-- **Download:** https://github.com/rotorflight/rotorflight-lua-ethos-suite-updater/releases
-- Standalone Windows executable (plus macOS/Linux builds)
-- Intended for end users or quick updates
-
-![Updater](https://raw.githubusercontent.com/rotorflight/rotorflight-lua-ethos-suite-updater/master/.github/gfx/updater.png)
-
-
-----------
-
-## Development Guide
-
-To build and deploy WFSuite locally:
-
-### Requirements
-
-See `docs/dev-environment.md` for the full developer environment setup guide.
-
--   Visual Studio Code (VS Code)
-    
--   Python 3
-    
--   Install libraries (optional: the deploy tasks install any that are missing on first run)
-    
-    ```bash
-    python -m pip install -r requirements.txt
-    ```
-
-    Radio HID control uses the `hidapi` package, which includes the native
-    library, so no separate `hidapi.dll` or `brew install hidapi` is needed.
-
-- Install the VS Code extension `Ethos`
-
-
-### VS Code Tasks
-
--   **Deploy & Launch** – Pushes scripts to the default simulator
-
--   **Deploy & Choose** – Pushes scripts to the selected simulator 
-    
--   **Deploy Radio** – Pushes scripts to the radio
-
--   **Deploy Radio and  Debug** – Pushes scripts to the radio and starts serial console
-    
-
-----------
-
-## Installation Instructions
-
-1.  Download the latest files:
-    
-    -   Click **Code** > **Download ZIP**
-        
-2.  Install using the Ethos Suite Lua Tools on your transmitter.
-    
-
-----------
 
 ## Contributing
 
-Wingflight is a community-driven open-source project. You can contribute by:
+Wingflight is a community project. You can help by:
 
--   Helping other users in [GitHub Discussions](https://github.com/WingFlight) or forums
-    
--   Reporting issues or requesting features via [GitHub](https://github.com/WingFlight)
-    
--   Testing and giving feedback on new versions
-    
--   Updating documentation and tutorials
-    
--   Translating the suite into other languages
-    
--   Contributing code (fixes, features, enhancements)
-    
+- testing new versions and [reporting bugs](https://github.com/WingFlight/wingflight-lua-ethos-suite/issues)
+- helping other pilots on [Discord](https://discord.gg/aEyyAJTXRw)
+- translating the suite, or keeping a translation up to date
+- fixing bugs and adding features
 
-----------
 
-## Project Origins
+## Origins
 
-Wingflight is **open source** and available free of charge, with no warranties.
+Wingflight is open source and free of charge, with no warranty.
 
--   Forked from [Rotorflight](https://github.com/rotorflight)
--   Which was forked from [Betaflight](https://github.com/betaflight)
-    
--   Which was forked from [Cleanflight](https://github.com/cleanflight)
-    
-
-🙏 A big thank you to everyone who has contributed along the way!
-
-----------
-
-## Contact
-
-📧 Reach out to the Wingflight team via [GitHub Issues and Discussions](https://github.com/WingFlight).
+WFSuite is a fork of the [Rotorflight Lua suite for Ethos](https://github.com/rotorflight/rotorflight-lua-ethos-suite).
+Thank you to everyone who contributed along the way.
