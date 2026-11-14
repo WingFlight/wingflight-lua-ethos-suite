@@ -32,7 +32,7 @@ local function fixture(armed, addressed)
     ['lib/msp_battery.lua']={buildBatteryConfigReadMessage=builder('batteryConfig'),buildSmartfuelConfigReadMessage=builder('smartfuelConfig')},
     ['lib/msp_rx_map.lua']={buildReadMessage=builder('rxMap')},
     ['lib/msp_build_id.lua']={buildReadMessage=builder('buildId')},
-    ['tasks/msp/virtual.lua']={load=function() return nil,'no codec pack' end},
+    ['tasks/msp/virtual.lua']={load=function() VIRTUAL_LOADS=VIRTUAL_LOADS+1; return nil,'no codec pack' end},
     ['lib/msp_telemetry_config.lua']={buildReadMessage=builder('telemetry')},
     ['lib/msp_dataflash_summary.lua']={buildReadMessage=builder('blackbox')},
     ['lib/msp_flight_stats.lua']={buildReadMessage=builder('stats')},
@@ -75,9 +75,9 @@ local function fixture(armed, addressed)
   return {
     wake=function(dt) now=now+(dt or 0.05); task.wakeup(queue,'crsf') end,
     arm=function(value) raw=value end,connect=function(value) active=value end,
-    reply=function(key,data,reason)
+    reply=function(key,data,reason,extra)
       local msg=assert(pending[key],key); pending[key]=nil
-      if reason then assert(msg.err)(reason) else msg.ok(data) end
+      if reason then assert(msg.err)(reason) else msg.ok(data,extra) end
     end,
     pending=function(key) return pending[key]~=nil end,count=function(key) return counts[key] or 0 end,
     snapshot=function() return snapshots[#snapshots] end,complete=task.isHandshakeComplete,
@@ -138,7 +138,12 @@ f.wake(3); eq(f.count('craftName'),0); eq(f.count('apiVersion'),1)
 f.connect(false); f.wake(); eq(f.pending('mcuId'),false); eq(f.snapshot().mcuId,nil)
 -- Addressed access (developer setting): the build id is read first, and like
 -- the other reads, a read dropped by arming resumes on disarm.
-f=fixture(false); f.wake(); eq(f.count('buildId'),0)
+-- The build id is read on every connect: a build without a config catalogue
+-- needs addressed access whatever the developer setting says.
+VIRTUAL_LOADS=0
+f=fixture(false); f.wake(); eq(f.count('buildId'),1)
+f.reply('buildId','0123456789abcdef',nil,false); f.wake(); eq(VIRTUAL_LOADS,0) -- catalogue present, setting off: no pack
+f=fixture(false); f.wake(); f.reply('buildId','0123456789abcdef',nil,true); f.wake(); eq(VIRTUAL_LOADS,1) -- no catalogue: the pack is loaded
 f=fixture(false,true); f.wake(); eq(f.count('buildId'),1); eq(f.pending('buildId'),true)
 f.arm(1); f.wake(); eq(f.pending('buildId'),false)
 f.arm(0); f.wake(); eq(f.count('buildId'),2)

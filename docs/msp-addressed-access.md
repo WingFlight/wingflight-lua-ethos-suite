@@ -81,6 +81,25 @@ is dequeued (never in the simulator):
 
 Disconnecting drops the pack and all verification.
 
+## Firmware without the config catalogue
+
+Once step 5 has deleted the catalogue, the firmware cannot answer the legacy
+config opcodes at all, so there is nothing to verify against. Such a firmware
+says so in `MSP2_WING_BUILD_ID`: capability bit 2,
+`MSP_PARAM_CAP_NO_CONFIG_CATALOGUE` (`lib/msp_build_id.lua` decodes it). The
+session therefore reads the build id on every connection, setting on or off,
+and for such a firmware:
+
+- addressed access is on whatever **Developer settings → Addressed MSP** says,
+  and so are addressed writes;
+- the pack is *authoritative*: every opcode it has a codec for is answered
+  locally from the first request, with no verification against the firmware;
+- without a pack for that build, config pages cannot load, and the session log
+  says so.
+
+A firmware that still has the catalogue reports the bit clear, and nothing in
+this section applies.
+
 ## Checks
 
 `bin/tests/msp-virtual/` runs `virtual.lua` under fengari: against the
