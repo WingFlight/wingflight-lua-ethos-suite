@@ -239,6 +239,8 @@ local function openScreen(nav, menus, rootEntries, screen, setEventHandler, setW
   -- would divide-by-zero-equivalent (infinite tiles on one "row") below.
   local windowWidth, windowHeight = lcd.getWindowSize()
   local numPerRow, tileW, tileH, tilePadding, tileFont = tileGrid.metrics(windowWidth, windowHeight)
+  -- A smaller font for the whole screen when a title would be cut in tileFont.
+  tileFont = tileGrid.fontForTitles(entries, tileW, tileFont, isEntryVisible)
 
   -- Spread the columns so the last one ends where the header's button row
   -- ends; the fixed tile gap alone leaves the grid a few pixels short (X20:
