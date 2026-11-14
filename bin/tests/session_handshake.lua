@@ -11,7 +11,7 @@ local apiVersion = (function()
   package.loaded['wfsuite.lib.require'] = saved
   return module
 end)()
-local function fixture(armed)
+local function fixture(armed, addressed)
   local now, active, raw = 10, true, armed and 1 or 0
   local snapshots, handlers, counts, pending = {}, {}, {}, {}
   local clears, decodes, reject = 0, 0, nil
@@ -31,6 +31,8 @@ local function fixture(armed)
     ['lib/msp_api_version.lua']={buildReadMessage=builder('apiVersion'),isSupported=apiVersion.isSupported},
     ['lib/msp_battery.lua']={buildBatteryConfigReadMessage=builder('batteryConfig'),buildSmartfuelConfigReadMessage=builder('smartfuelConfig')},
     ['lib/msp_rx_map.lua']={buildReadMessage=builder('rxMap')},
+    ['lib/msp_build_id.lua']={buildReadMessage=builder('buildId')},
+    ['tasks/msp/virtual.lua']={load=function() return nil,'no codec pack' end},
     ['lib/msp_telemetry_config.lua']={buildReadMessage=builder('telemetry')},
     ['lib/msp_dataflash_summary.lua']={buildReadMessage=builder('blackbox')},
     ['lib/msp_flight_stats.lua']={buildReadMessage=builder('stats')},
@@ -66,7 +68,9 @@ local function fixture(armed)
     elseif topic=='msp.request' then queue:add(value) end
   end}
   local task=assert(loadfile('src/wfsuite/tasks/session.lua'))(bus,
-    {load=function() return {} end,syncNameEnabled=function() return false end},{print=noop})
+    {load=function() return {} end,syncNameEnabled=function() return false end,
+      addressedAccessEnabled=function() return addressed==true end,addressedWritesEnabled=function() return false end},
+    {print=noop})
   task.setTelemetrySensors({getValue=function(_,key) if key=='system_status' then return raw end end,reset=noop})
   return {
     wake=function(dt) now=now+(dt or 0.05); task.wakeup(queue,'crsf') end,
@@ -132,5 +136,13 @@ f=fixture(false); f.wake(); f.reply('apiVersion',{major=12,minor=9})
 f.wake(3); eq(f.count('craftName'),0); eq(f.count('apiVersion'),1)
 -- Disconnect cancels outstanding requests before resetting metadata.
 f.connect(false); f.wake(); eq(f.pending('mcuId'),false); eq(f.snapshot().mcuId,nil)
+-- Addressed access (developer setting): the build id is read first, and like
+-- the other reads, a read dropped by arming resumes on disarm.
+f=fixture(false); f.wake(); eq(f.count('buildId'),0)
+f=fixture(false,true); f.wake(); eq(f.count('buildId'),1); eq(f.pending('buildId'),true)
+f.arm(1); f.wake(); eq(f.pending('buildId'),false)
+f.arm(0); f.wake(); eq(f.count('buildId'),2)
+f.reply('buildId','0123456789abcdef'); f.wake(3); eq(f.count('buildId'),2) -- answered: not asked again
+f=fixture(false,true); f.wake(); f.reply('buildId',nil,'timeout'); f.wake(3); eq(f.count('buildId'),1) -- failed: off for the connection
 os.clock=clock
 print('session handshake checks passed')

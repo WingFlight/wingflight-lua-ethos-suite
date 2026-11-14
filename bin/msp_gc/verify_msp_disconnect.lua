@@ -113,6 +113,8 @@ local function loadSession(opts)
       fromTelemetrySensor = function() return nil end, label = function() return nil end },
     -- session.lua publishes the main-power flag through this pure module (#2358 port).
     ["lib/main_power.lua"] = assert(loadfile(SUITE .. "/lib/main_power.lua"))(),
+    -- the build id read of addressed access (pure decoder)
+    ["lib/msp_build_id.lua"] = assert(loadfile(SUITE .. "/lib/msp_build_id.lua"))(),
   }
   package.loaded["wfsuite.lib.require"] = function(path)
     return assert(modules[path], "unexpected dependency: " .. tostring(path))
@@ -139,7 +141,8 @@ local function loadSession(opts)
   }
 
   local session = assert(loadfile(TASKS .. "/session.lua"))(bus,
-    { load = function() return {} end, syncNameEnabled = function() return false end },
+    { load = function() return {} end, syncNameEnabled = function() return false end,
+      addressedAccessEnabled = function() return false end, addressedWritesEnabled = function() return false end },
     { print = noop, msp = noop, enabled = function() return false end })
   -- setConnected()'s disconnect branch calls reset() on the sensor instance it
   -- holds; a stub without one aborts the branch under test before it finishes,

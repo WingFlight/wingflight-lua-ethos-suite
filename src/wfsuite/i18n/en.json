@@ -7246,6 +7246,18 @@
           "needs_translation": false,
           "translation": "Log MSP data"
         },
+        "addressed_access": {
+          "english": "Addressed MSP",
+          "max_length": 13,
+          "needs_translation": false,
+          "translation": "Addressed MSP"
+        },
+        "addressed_writes": {
+          "english": "Addr. writes",
+          "max_length": 13,
+          "needs_translation": false,
+          "translation": "Addr. writes"
+        },
         "low_voltage_alert": {
           "english": "Low voltage alert",
           "max_length": 17,
