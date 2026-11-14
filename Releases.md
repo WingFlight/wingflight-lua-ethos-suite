@@ -1,3 +1,12 @@
+# 0.0.42
+
+Use with the 0.0.42 firmware (MSP API 22.16), which is now required; older firmware is refused.
+Rework the servo pages for the firmware's 24 servos: one Servos page replaces the PWM and Bus pages, the clone option and the per-servo rate are gone, and mixer rule outputs are Servo 1 to 24 and Motor 1 to 4. The PWM rate is set in the setup wizard or the Configurator.
+Change the setup wizard to cover every servo in use, with no narrow-band (760us) handling. Its Throws and Travel check steps measure against the travel the output can really use at the current center, with the saved trim counted, and show a side with no travel as clipping.
+Change the SRXL2 motor 2 channel choices to Off and 2 to 32, following the firmware.
+Add a GPS CAN'T NAVIGATE banner when RTH, LOITER or GPS rescue is set up on a GPS that the firmware does not navigate on (NMEA, FBUS or CRSF).
+Fix labels losing part of their last character in some languages on the dashboard and the menu tiles.
+
 # 0.0.41
 
 Use with the 0.0.41 firmware (MSP API 22.15); the 0.0.38 to 0.0.40 firmware work too, without the SRXL2 ESC page.
