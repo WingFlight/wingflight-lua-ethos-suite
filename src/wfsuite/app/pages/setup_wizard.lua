@@ -107,6 +107,9 @@ local BTN_CANCEL = "@i18n(app.btn_cancel)@"
 local STEPS = {
   {key = "sensors", title = "@i18n(app.modules.setup_wizard.step_sensors)@"},
   {key = "receiver", title = "@i18n(app.modules.setup_wizard.step_receiver)@"},
+  -- Optional. Before the airframe, because a bus output is what gives the
+  -- model more servos than the board has pins for.
+  {key = "busoutput", title = "@i18n(app.modules.setup_wizard.step_busoutput)@"},
   {key = "airframe", title = "@i18n(app.modules.setup_wizard.step_airframe)@"},
   -- The one PWM update rate of the board's servo outputs: no surfaces needed.
   {key = "servotype", title = "@i18n(app.modules.setup_wizard.step_servotype)@"},

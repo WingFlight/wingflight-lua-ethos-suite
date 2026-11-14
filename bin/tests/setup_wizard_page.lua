@@ -328,7 +328,7 @@ check("opening clears mixer overrides on roll, pitch, yaw and flap",
   lastMixer(1, 1).value == 2501 and lastMixer(1, 2).value == 2501 and lastMixer(1, 3).value == 2501
   and lastMixer(1, 13).value == 2501)
 check("opening clears every servo override", #writesOf(196) == 1 and bytes(writesOf(196)[1].payload) == "209,7")
-check("the title names the step", headers[#headers].title == T("name") .. " / 7. " .. T("step_direction"),
+check("the title names the step", headers[#headers].title == T("name") .. " / 8. " .. T("step_direction"),
   headers[#headers].title)
 check("the step-list button shows the checklist icon",
   headers[#headers].opts.toolIcon == "app/gfx/nav/steps.png" and headers[#headers].opts.onTool ~= nil)
@@ -449,7 +449,7 @@ check("Save and continue writes EEPROM", #writesOf(250, before + 1) == 1)
 tick()
 tick()
 check("then opens the next step, Binding limits",
-  headers[#headers].title == T("name") .. " / 8. " .. T("step_limits"), headers[#headers].title)
+  headers[#headers].title == T("name") .. " / 9. " .. T("step_limits"), headers[#headers].title)
 check("with nothing left pending", headers[#headers].saveEnabled == false)
 before = #sent
 headers[#headers].opts.onBack()
@@ -685,6 +685,43 @@ press(T("btn_save_restart"))
 tick()
 tick()
 check("servo type: saves and restarts", #writesOf(250, before + 1) == 1 and #writesOf(68, before + 1) == 1)
+
+-- Servo bus: F.Bus on the SBUS connector with the pin swap, then SBUS, then
+-- save and restart. The board is an F7C5 (Nexus X), where UART1 is "S.BUS".
+do
+  local info = {87, 71, 70, 76, 0, 0, 0, 0, 0, 0, 4}
+  for _, b in ipairs({string.byte("F7C5", 1, -1)}) do info[#info + 1] = b end
+  replies[4] = info
+end
+openPage(14, "busoutput")
+settle()
+check("servo bus: opens on the port question", shows("bus_title") and button(T("bus_none")) ~= nil)
+check("servo bus: the ports carry the board's connector names", button("S.BUS") ~= nil and button("TELEM") ~= nil)
+before = #sent
+press("S.BUS")
+local busPorts = writesOf(55, before + 1)
+-- MSP_SET_SERIAL_CONFIG for UART1: FUNCTION_FBUS_MASTER is 1 << 19, so byte 3 of the mask is 8.
+check("servo bus: a new port gets F.Bus",
+  #busPorts == 1 and bytes(busPorts[1].payload) == "0,0,0,8,0,0,0,0,0", busPorts[1] and bytes(busPorts[1].payload))
+local busWiring = writesOf(0x5F0A, before + 1)
+-- The eight forwarding slots as read, then pin swap on and inverted as read.
+check("servo bus: the SBUS connector turns the pin swap on",
+  #busWiring == 1 and bytes(busWiring[1].payload) == "255,255,255,255,255,255,255,255,1,1",
+  busWiring[1] and bytes(busWiring[1].payload))
+check("servo bus: then asks for the protocol", shows("bus_proto_title"))
+before = #sent
+press("SBUS")
+busPorts = writesOf(55, before + 1)
+-- FUNCTION_SBUS_OUT is 1 << 18.
+check("servo bus: SBUS replaces F.Bus on the same port",
+  #busPorts == 1 and bytes(busPorts[1].payload) == "0,0,0,4,0,0,0,0,0", busPorts[1] and bytes(busPorts[1].payload))
+check("servo bus: the pin is an F.Bus setting, so SBUS leaves it", #writesOf(0x5F0A, before + 1) == 0)
+before = #sent
+press(T("btn_save_restart"))
+tick()
+tick()
+check("servo bus: saves and restarts", #writesOf(250, before + 1) == 1 and #writesOf(68, before + 1) == 1)
+replies[4] = nil
 
 -- Motor: the protocol, and a timed spin.
 openPage(14, "motor")
@@ -1101,8 +1138,8 @@ openPage(14, "direction")
 settle()
 headers[#headers].opts.onTool()
 tick()
-press("3. " .. T("step_airframe"))
-check("the step list opens a step", headers[#headers].title == T("name") .. " / 3. " .. T("step_airframe"))
+press("4. " .. T("step_airframe"))
+check("the step list opens a step", headers[#headers].title == T("name") .. " / 4. " .. T("step_airframe"))
 do
   local empty = {}
   for _ = 1, 32 * 14 do empty[#empty + 1] = 0 end
@@ -1111,7 +1148,7 @@ do
   settle()
   check("no surfaces: the step points to Airframe", button(T("go_airframe")) ~= nil)
   press(T("go_airframe"))
-  check("and that opens it", headers[#headers].title == T("name") .. " / 3. " .. T("step_airframe"))
+  check("and that opens it", headers[#headers].title == T("name") .. " / 4. " .. T("step_airframe"))
   replies[172] = nil
 end
 
@@ -1135,7 +1172,7 @@ local function footer()
   return row
 end
 
-local STEP_KEYS = {"sensors", "receiver", "airframe", "servotype", "motor", "centre", "direction", "limits",
+local STEP_KEYS = {"sensors", "receiver", "busoutput", "airframe", "servotype", "motor", "centre", "direction", "limits",
   "throws", "travel", "gyro", "trimgain", "modes", "style", "finish"}
 local FORWARD = {[T("btn_next")] = true, [T("dir_save_next")] = true, [T("fin_button")] = true,
   [T("btn_save_restart")] = true}

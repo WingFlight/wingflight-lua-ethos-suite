@@ -101,6 +101,13 @@ jobs:
         if: success() || failure()
         run: lua5.4 bin/tests/setup_wizard_mix.lua
 
+      # lib/setup_wizard_bus.lua ports the configurator's busOutput.js (the
+      # Servo bus step's port and pin rules), with the cases of the
+      # configurator's own test, and checks the F.Bus master wiring codec.
+      - name: Check the Setup Wizard servo bus rules
+        if: success() || failure()
+        run: lua5.4 bin/tests/setup_wizard_bus.lua
+
   # Per-language PR builds (mirrors push.yml behavior)
   # Per-language PR builds (mirrors push.yml behavior)
   create-zip:
