@@ -57,6 +57,19 @@ M.CENTER_MAX = 2000
 M.SIGNAL_MIN = 880
 M.SIGNAL_MAX = 2159
 
+-- SERVO_TRIM_LIMIT_PERCENT (flight/servos.h): the trim is limited to this
+-- share of the servo's larger scale.
+M.TRIM_LIMIT_PERCENT = 20
+
+-- The saved trim the flight controller adds to the output (getServoTrim() in
+-- flight/servos.c). A trim is held inside the limit when it is saved, but a
+-- scale lowered afterwards (the Throws step does that) leaves it larger than
+-- the limit, and the output then uses the limit.
+function M.appliedTrim(servoConfig, trim)
+  local limit = math.max(servoConfig.rneg or 0, servoConfig.rpos or 0) * M.TRIM_LIMIT_PERCENT // 100
+  return math.max(-limit, math.min(limit, trim or 0))
+end
+
 -- Travel either side of the centre the mixer output can move the servo over:
 -- Min/Max held so that centre + travel stays in the signal range
 -- (servoTravelMin/Max() in flight/servos.c), less the saved servo trim. The
@@ -64,7 +77,7 @@ M.SIGNAL_MAX = 2159
 -- from one side and gives it to the other (the configurator's
 -- servoStickConfig()). `trim` is the saved trim in us, 0 when left out.
 function M.usableTravel(servoConfig, trim)
-  trim = trim or 0
+  trim = M.appliedTrim(servoConfig, trim)
   return math.max(servoConfig.min, M.SIGNAL_MIN - servoConfig.mid) - trim,
     math.min(servoConfig.max, M.SIGNAL_MAX - servoConfig.mid) - trim
 end

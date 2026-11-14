@@ -111,7 +111,7 @@ end
 
 -- a saved trim takes travel from one side and gives it to the other
 do
-  local lo, hi = S.usableTravel({mid = 1500, min = -500, max = 500}, 100)
+  local lo, hi = S.usableTravel({mid = 1500, min = -500, max = 500, rneg = 500, rpos = 500}, 100)
   check("usable travel: +100 trim leaves 400 above and 600 below", lo == -600 and hi == 400, lo .. "/" .. hi)
   local elevator = S.surfacesFromRules({rule(SET, 2, 1, 1000)}, 8)[1]
   local reach = S.travelReach(elevator, servo({mid = 1500, min = -500, max = 500}), gains, 100)
@@ -121,6 +121,18 @@ do
     reach.neg.fraction)
   reach = S.travelReach(elevator, servo({mid = 1500, min = -500, max = 500}), gains)
   check("reach: no trim given is no trim", reach.pos.limit == 500 and reach.neg.limit == 500)
+end
+
+-- a saved trim larger than a fifth of the larger scale is applied as that fifth
+do
+  local cfg = {mid = 1500, min = -300, max = 300, rneg = 250, rpos = 250}
+  check("applied trim: 100 against scale 250 is 50", S.appliedTrim(cfg, 100) == 50, S.appliedTrim(cfg, 100))
+  check("applied trim: either sign", S.appliedTrim(cfg, -100) == -50)
+  check("applied trim: the larger scale counts",
+    S.appliedTrim({mid = 1500, min = -300, max = 300, rneg = 250, rpos = 500}, 100) == 100)
+  check("applied trim: none saved is none", S.appliedTrim(cfg, nil) == 0)
+  local lo, hi = S.usableTravel(cfg, 100)
+  check("usable travel: uses the applied trim", lo == -350 and hi == 250, lo .. "/" .. hi)
 end
 
 -- a side with no travel at all clips as soon as it is asked to move

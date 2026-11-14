@@ -58,7 +58,7 @@ local function new(wiz)
     local pulse = wiz.positions[servo]
     local config = wiz.configs[servo]
     if not pulse or pulse <= 0 or not config then return nil end
-    return pulse - config.mid - (wiz.trims[servo] or 0)
+    return pulse - config.mid - surfacesLib.appliedTrim(config, wiz.trims[servo])
   end
 
   local function drawGauge(gx, gy, gw, gh, row, colors)
