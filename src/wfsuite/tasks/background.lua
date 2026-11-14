@@ -261,7 +261,7 @@ local function registerSubtasks()
   -- tasks/sim_sensors.lua's own header for why it costs nothing otherwise.
   if system.getVersion().simulation == true then
     simSensors = simSensors or requireModule("tasks/sim_sensors.lua")
-    scheduler:add("sim_sensors", 2, function()
+    scheduler:add("sim_sensors", simSensors.interval, function()
       simSensors.wakeup()
     end)
   end
