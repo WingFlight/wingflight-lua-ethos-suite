@@ -109,6 +109,20 @@ do
     reach.pos.fraction)
 end
 
+-- a saved trim takes travel from one side and gives it to the other
+do
+  local lo, hi = S.usableTravel({mid = 1500, min = -500, max = 500}, 100)
+  check("usable travel: +100 trim leaves 400 above and 600 below", lo == -600 and hi == 400, lo .. "/" .. hi)
+  local elevator = S.surfacesFromRules({rule(SET, 2, 1, 1000)}, 8)[1]
+  local reach = S.travelReach(elevator, servo({mid = 1500, min = -500, max = 500}), gains, 100)
+  check("reach: full stick of 500 against 400 clips", reach.pos.limit == 400 and reach.pos.fraction > 1,
+    reach.pos.fraction)
+  check("reach: and has room on the other side", reach.neg.limit == 600 and reach.neg.fraction < 1,
+    reach.neg.fraction)
+  reach = S.travelReach(elevator, servo({mid = 1500, min = -500, max = 500}), gains)
+  check("reach: no trim given is no trim", reach.pos.limit == 500 and reach.neg.limit == 500)
+end
+
 -- a side with no travel at all clips as soon as it is asked to move
 do
   local elevator = S.surfacesFromRules({rule(SET, 2, 1, 1000)}, 8)[1]

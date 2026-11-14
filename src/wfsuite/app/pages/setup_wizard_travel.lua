@@ -52,12 +52,13 @@ local function new(wiz)
     return fraction * LIMIT_AT
   end
 
-  -- The servo's offset from its centre now, or nil before the first reply.
+  -- The servo's offset from its trimmed centre now, or nil before the first
+  -- reply. The limits are measured from the trimmed centre too.
   local function offsetNow(servo)
     local pulse = wiz.positions[servo]
     local config = wiz.configs[servo]
     if not pulse or pulse <= 0 or not config then return nil end
-    return pulse - config.mid
+    return pulse - config.mid - (wiz.trims[servo] or 0)
   end
 
   local function drawGauge(gx, gy, gw, gh, row, colors)
@@ -161,7 +162,7 @@ local function new(wiz)
     local list = wiz.surfaces()
     for i = 1, #list do
       local s = list[i]
-      local reach = surfacesLib.travelReach(s, wiz.configs[s.servo], gains)
+      local reach = surfacesLib.travelReach(s, wiz.configs[s.servo], gains, wiz.trims[s.servo])
       local neg = math.floor(reach.neg.fraction * 100 + 0.5)
       local pos = math.floor(reach.pos.fraction * 100 + 0.5)
       local over = neg > 100 or pos > 100

@@ -88,7 +88,7 @@ local function new(wiz)
     for _, s in ipairs(wiz.surfaces()) do
       if s.axes[a] then
         local alone = {servo = s.servo, axes = {[a] = s.axes[a]}, axisOrder = {a}, kind = s.kind}
-        local reach = surfacesLib.travelReach(alone, wiz.configs[s.servo], gains)
+        local reach = surfacesLib.travelReach(alone, wiz.configs[s.servo], gains, wiz.trims[s.servo])
         if reach.pos.fraction > 1 or reach.neg.fraction > 1 then names[#names + 1] = tostring(s.servo + 1) end
       end
     end
@@ -102,7 +102,7 @@ local function new(wiz)
     local output = surfacesLib.outputForAxis(surface, a, direction.stick, wiz.axisGains())
     local reversed = ((config.flags or 0) & surfacesLib.SERVO_FLAG_REVERSE) ~= 0
     local pos = surfacesLib.servoSide(output, reversed) == "pos"
-    local travelMin, travelMax = surfacesLib.usableTravel(config)
+    local travelMin, travelMax = surfacesLib.usableTravel(config, wiz.trims[surface.servo])
     return pos and "rpos" or "rneg", surfacesLib.maxScale(output, pos and travelMax or -travelMin)
   end
 

@@ -57,14 +57,16 @@ M.CENTER_MAX = 2000
 M.SIGNAL_MIN = 880
 M.SIGNAL_MAX = 2159
 
--- Travel either side of the centre the output actually uses: Min/Max held so
--- that centre + travel stays in the signal range (servoTravelMin/Max() in
--- flight/servos.c, the configurator's servoUsableTravel()). The saved servo
--- trim, which takes travel from one side, is not read by the suite and is
--- not included.
-function M.usableTravel(servoConfig)
-  return math.max(servoConfig.min, M.SIGNAL_MIN - servoConfig.mid),
-    math.min(servoConfig.max, M.SIGNAL_MAX - servoConfig.mid)
+-- Travel either side of the centre the mixer output can move the servo over:
+-- Min/Max held so that centre + travel stays in the signal range
+-- (servoTravelMin/Max() in flight/servos.c), less the saved servo trim. The
+-- trim is added before the output is held inside Min/Max, so it takes travel
+-- from one side and gives it to the other (the configurator's
+-- servoStickConfig()). `trim` is the saved trim in us, 0 when left out.
+function M.usableTravel(servoConfig, trim)
+  trim = trim or 0
+  return math.max(servoConfig.min, M.SIGNAL_MIN - servoConfig.mid) - trim,
+    math.min(servoConfig.max, M.SIGNAL_MAX - servoConfig.mid) - trim
 end
 
 -- Mixer outputs 1..n are servos 0..n-1 (MIXER_SERVO_OFFSET).
@@ -234,7 +236,7 @@ end
 -- surface has one, at whichever end does the same), in us and as a fraction
 -- of the side's usable travel (usableTravel()). fraction > 1 means the
 -- surface hits its limit before full stick on every axis at once.
-function M.travelReach(surface, servoConfig, axisGains)
+function M.travelReach(surface, servoConfig, axisGains, trim)
   local reversed = ((servoConfig.flags or 0) & M.SERVO_FLAG_REVERSE) ~= 0
   -- Highest and lowest mixer output, before reverse.
   local hi, lo = 0, 0
@@ -259,7 +261,7 @@ function M.travelReach(surface, servoConfig, axisGains)
 
   local posUs = pos * servoConfig.rpos
   local negUs = -neg * servoConfig.rneg
-  local travelMin, travelMax = M.usableTravel(servoConfig)
+  local travelMin, travelMax = M.usableTravel(servoConfig, trim)
   local posLimit = math.max(travelMax, 0)
   local negLimit = math.max(-travelMin, 0)
 
