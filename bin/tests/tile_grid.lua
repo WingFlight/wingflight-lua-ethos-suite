@@ -80,8 +80,26 @@ for _, font in ipairs({FONT_XS, FONT_S}) do
     assert(textWidth(result) <= 90, "Custom padding was ignored")
   end
 end
+
+-- A screen keeps FONT_S while every title fits its tile, and uses FONT_XS for all its
+-- tiles when one would be cut (120px tile, 108px for the text).
+local short, long = {title = "Short"}, {title = "A title too long"}
+lcd.font(FONT_XS)
+assert(textWidth(long.title) <= 108, "the long title must fit in FONT_XS")
+equal(grid.fontForTitles({short, short}, 120, FONT_S), FONT_S)
+equal(grid.fontForTitles({short, long, short}, 120, FONT_S), FONT_XS)
+equal(grid.fitLabel(long.title, 120, grid.fontForTitles({short, long}, 120, FONT_S)), long.title)
+-- An entry that gets no tile does not count, nor does a title that is not text.
+equal(grid.fontForTitles({short, long}, 120, FONT_S, function(entry) return entry ~= long end), FONT_S)
+equal(grid.fontForTitles({short, {title = 12345678901234567890}}, 120, FONT_S), FONT_S)
+-- Already the smallest font: nothing is measured.
+measurements = 0
+equal(grid.fontForTitles({short, long}, 110, FONT_XS), FONT_XS)
+equal(measurements, 0)
+
 local savedLcd = lcd
 lcd = nil
 equal(grid.fitText("Unavailable metrics", 10, FONT_XS), "Unavailable metrics")
+equal(grid.fontForTitles({long}, 120, FONT_S), FONT_S)
 lcd = savedLcd
 print("Tile grid checks passed: layouts, font selection, padding, UTF-8 and narrow widths")
