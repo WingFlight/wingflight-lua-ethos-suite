@@ -13,10 +13,11 @@
 -- dropped when it closes, and talks to the shell only through the `wiz` table
 -- below -- the counterpart of the configurator's setContext("setupWizard").
 --
--- Two configurator steps stay in the Configurator. The radio talks to the
--- flight controller through the receiver, so receiver protocol setup and the
--- ESC telemetry port can't be done from it: the Receiver step here only
--- checks the sticks and the channel order.
+-- One part of the configurator's wizard stays in the Configurator. The radio
+-- talks to the flight controller through the receiver, so the receiver port
+-- and protocol can't be set up from it: the Receiver step here only checks
+-- the sticks and the channel order. Every other step, the servo bus and ESC
+-- telemetry included, is here.
 --
 -- Safety, as in the configurator:
 --   * The wizard needs timed overrides (API 22.14). Everything it holds -- the
@@ -114,6 +115,8 @@ local STEPS = {
   -- The one PWM update rate of the board's servo outputs: no surfaces needed.
   {key = "servotype", title = "@i18n(app.modules.setup_wizard.step_servotype)@"},
   {key = "motor", title = "@i18n(app.modules.setup_wizard.step_motor)@"},
+  -- Optional. After the motor, whose ESC it reads.
+  {key = "esctelemetry", title = "@i18n(app.modules.setup_wizard.step_esctelemetry)@"},
   {key = "centre", title = "@i18n(app.modules.setup_wizard.step_centre)@", needsSurfaces = true},
   {key = "direction", title = "@i18n(app.modules.setup_wizard.step_direction)@", needsSurfaces = true},
   {key = "limits", title = "@i18n(app.modules.setup_wizard.step_limits)@", needsSurfaces = true},

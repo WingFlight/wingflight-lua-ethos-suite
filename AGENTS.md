@@ -255,7 +255,8 @@ firmware) rather than rotorflight (helicopter firmware). Status:
 - **Setup Wizard** (`app/pages/setup_wizard.lua` and one
   `app/pages/setup_wizard_<step>.lua` per step) is the radio's copy of
   wingflight-configurator's `src/tabs/setup_wizard/`, ported a step at a
-  time; every step but ESC telemetry is here. Screens are built by
+  time; every step is here, and only the receiver port and protocol are left
+  to the Configurator. Screens are built by
   `app/setup_wizard_ui.lua` and pictures drawn by `app/setup_wizard_art.lua`.
   When a step changes in either repository, check the other.
   `lib/setup_wizard_surfaces.lua`, `_controls.lua`, `_styles.lua` and

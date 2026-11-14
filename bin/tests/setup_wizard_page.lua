@@ -328,7 +328,7 @@ check("opening clears mixer overrides on roll, pitch, yaw and flap",
   lastMixer(1, 1).value == 2501 and lastMixer(1, 2).value == 2501 and lastMixer(1, 3).value == 2501
   and lastMixer(1, 13).value == 2501)
 check("opening clears every servo override", #writesOf(196) == 1 and bytes(writesOf(196)[1].payload) == "209,7")
-check("the title names the step", headers[#headers].title == T("name") .. " / 8. " .. T("step_direction"),
+check("the title names the step", headers[#headers].title == T("name") .. " / 9. " .. T("step_direction"),
   headers[#headers].title)
 check("the step-list button shows the checklist icon",
   headers[#headers].opts.toolIcon == "app/gfx/nav/steps.png" and headers[#headers].opts.onTool ~= nil)
@@ -449,7 +449,7 @@ check("Save and continue writes EEPROM", #writesOf(250, before + 1) == 1)
 tick()
 tick()
 check("then opens the next step, Binding limits",
-  headers[#headers].title == T("name") .. " / 9. " .. T("step_limits"), headers[#headers].title)
+  headers[#headers].title == T("name") .. " / 10. " .. T("step_limits"), headers[#headers].title)
 check("with nothing left pending", headers[#headers].saveEnabled == false)
 before = #sent
 headers[#headers].opts.onBack()
@@ -847,6 +847,270 @@ tick(4)
 local stops = writesOf(195, before + 1)
 check("motor: and stops by itself", #stops >= 1 and u16(stops[#stops].payload, 2) == 0)
 
+-- ESC telemetry: a protocol, then a free port, then save and restart; back on
+-- the wiring screen, the detection writes the wiring it found; then the
+-- battery meters.
+do
+  local function choiceFields()
+    local out = {}
+    for _, f in ipairs(fields) do
+      if f.kind == "choice" then out[#out + 1] = f end
+    end
+    return out
+  end
+  -- A board with six UARTs, all free: two rows of ports, with room for the
+  -- text above them. escMask is UART3's function mask, byte 2.
+  local function sixPorts(escMask)
+    replies[54] = function(m)
+      local out = {}
+      for i = 1, 6 * 9 do out[i] = m.simulatorResponse[i] end
+      out[2 * 9 + 3] = escMask
+      return out
+    end
+  end
+  -- The step with telemetry set up: HOBBYWING V4 (2) on UART3
+  -- (FUNCTION_ESC_SENSOR, 1024), the feature on.
+  local function configured()
+    replies[123] = {2, 0, 200, 0, 0, 15, 0, 0, 0, 0}
+    replies[36] = {0, 0, 0, 8}   -- FEATURE_ESC_SENSOR is bit 27
+    sixPorts(4)
+  end
+
+  sixPorts(0)
+  openPage(14, "esctelemetry")
+  settle()
+  check("esc telemetry: opens on the protocol question, Not used and a drop-down",
+    shows("esc_title") and button(T("esc_not_used")) ~= nil and #choiceFields() == 1
+      and headers[#headers].title == T("name") .. " / 7. " .. T("step_esctelemetry"), headers[#headers].title)
+  do
+    local offered, own = {}, false
+    for _, v in ipairs(choiceFields()[1].values) do
+      offered[v[2]] = true
+      if v[1] == "FrSky F.BUS" or v[1] == "SRXL2" then own = true end
+    end
+    check("esc telemetry: F.BUS and SRXL2 are not offered, the rest are",
+      not own and not offered[13] and not offered[14] and offered[1] and offered[2] and offered[12] and not offered[0])
+    check("esc telemetry: the drop-down shows Choose while none is set", choiceFields()[1].get() == -1)
+  end
+  before = #sent
+  press(T("esc_not_used"))
+  check("esc telemetry: Not used on a model without it writes nothing",
+    #writesOf(216, before + 1) == 0 and #writesOf(37, before + 1) == 0 and #writesOf(55, before + 1) == 0)
+  choiceFields()[1].set(2)
+  tick()
+  local escWrites, featureWrites = writesOf(216, before + 1), writesOf(37, before + 1)
+  check("esc telemetry: choosing a protocol writes the ESC sensor config",
+    #escWrites == 1 and bytes(escWrites[1].payload) == "2,0,200,0,0,15,0,0,0,0",
+    escWrites[1] and bytes(escWrites[1].payload))
+  check("esc telemetry: and turns the ESC sensor feature on",
+    #featureWrites == 1 and bytes(featureWrites[1].payload) == "0,0,0,8",
+    featureWrites[1] and bytes(featureWrites[1].payload))
+  check("esc telemetry: then asks for the port", shows("esc_port_title") and shows("esc_port_none"))
+  check("esc telemetry: the encoder goes through the ports, then Back and Save and restart", inScreenOrder())
+  before = #sent
+  press("UART3")
+  local escPorts = writesOf(55, before + 1)
+  -- MSP_SET_SERIAL_CONFIG for UART3: FUNCTION_ESC_SENSOR is 1024, so byte 2 of the mask is 4.
+  check("esc telemetry: choosing a port gives it the ESC telemetry function",
+    #escPorts == 1 and bytes(escPorts[1].payload) == "2,0,4,0,0,0,0,0,0", escPorts[1] and bytes(escPorts[1].payload))
+  check("esc telemetry: the feature is not written twice", #writesOf(37, before + 1) == 0)
+  check("esc telemetry: the change needs a restart", shows("esc_changed") and button(T("btn_save_restart")) ~= nil)
+  before = #sent
+  press("UART5")
+  escPorts = writesOf(55, before + 1)
+  check("esc telemetry: another port frees the first",
+    #escPorts == 2 and bytes(escPorts[1].payload) == "2,0,0,0,0,0,0,0,0"
+      and bytes(escPorts[2].payload) == "4,0,4,0,0,0,0,0,0",
+    escPorts[1] and bytes(escPorts[1].payload))
+
+  -- Save and restart: the flight controller comes back with what was saved,
+  -- and the step reopens on the wiring screen.
+  configured()
+  before = #sent
+  press(T("btn_save_restart"))
+  tick()
+  tick()
+  check("esc telemetry: saves and restarts", #writesOf(250, before + 1) == 1 and #writesOf(68, before + 1) == 1)
+  session({connected = false, isArmed = false, apiVersionMajor = 22, apiVersionMinor = 14})
+  tick()
+  session({connected = true, isArmed = false, apiVersionMajor = 22, apiVersionMinor = 14, handshake = {apiVersion = true}})
+  settle(6)
+  check("esc telemetry: after the restart the step reopens on the wiring screen",
+    shows("esc_wiring_title") and button(T("esc_detect")) ~= nil and button(T("esc_detect")).enabled
+      and headers[#headers].title == T("name") .. " / 7. " .. T("step_esctelemetry"), headers[#headers].title)
+
+  -- Detect wiring: start, poll while it runs, and on success write what was found.
+  local polls, answer = 0, nil
+  replies[0x5F14] = function(m)
+    local action = m.payload[1]
+    if action == 1 then return {1, 0, 0, 0, 0, 0, 0, 0, 4, 1} end   -- RUNNING, wiring 1 of 4
+    if action == 2 then return {0, 0, 0, 0, 0, 0, 0, 0, 4, 1} end   -- IDLE
+    polls = polls + 1
+    if polls < 3 then return {1, 2, 1, 1, 100, 0, 0, 0, 4, 1} end   -- RUNNING, wiring 3 of 4
+    return answer
+  end
+  answer = {2, 2, 1, 1, 200, 0, 2, 0, 4, 1}                         -- SUCCESS: half duplex, pin swap
+  before = #sent
+  press(T("esc_detect"))
+  local trialWrites = writesOf(0x5F14, before + 1)
+  check("esc telemetry: Detect wiring starts the trial",
+    #trialWrites >= 1 and bytes(trialWrites[1].payload) == "1", trialWrites[1] and bytes(trialWrites[1].payload))
+  check("esc telemetry: while it runs the button stops it",
+    button(T("esc_detect")) == nil and button(T("esc_stop")) ~= nil and shows("esc_trying_fmt"))
+  local inFlightOk = true
+  for _ = 1, 6 do
+    -- One request in flight: never a second poll before the first is answered.
+    if #sent - answeredUpTo > 1 then inFlightOk = false end
+    tick()
+  end
+  check("esc telemetry: the trial is polled one request at a time", polls == 3 and inFlightOk, polls)
+  escWrites = writesOf(216, before + 1)
+  check("esc telemetry: a wiring that is found writes half duplex and pin swap",
+    #escWrites == 1 and bytes(escWrites[1].payload) == "2,1,200,0,0,15,1,0,0,0",
+    escWrites[1] and bytes(escWrites[1].payload))
+  do
+    -- The stop goes first: the port goes back as it booted, then the config is written.
+    local stopAt, writeAt
+    for i = before + 1, #sent do
+      if sent[i].command == 0x5F14 and sent[i].payload[1] == 2 then stopAt = stopAt or i end
+      if sent[i].command == 216 then writeAt = i end
+    end
+    check("esc telemetry: the trial is stopped before the wiring is written", stopAt and writeAt and stopAt < writeAt)
+  end
+  check("esc telemetry: and asks for Save and restart",
+    shows("esc_found") and button(T("btn_save_restart")) ~= nil and not button(T("esc_detect")).enabled)
+  check("esc telemetry: pin swap and half duplex are not shown as settings", #choiceFields() == 0)
+  before = #sent
+  tick(1)
+  check("esc telemetry: no polling once the trial has ended", #writesOf(0x5F14, before + 1) == 0)
+
+  -- The wiring already set answers: nothing to write.
+  openPage(14, "esctelemetry")
+  settle()
+  check("esc telemetry: with telemetry set up the drop-down shows the protocol", choiceFields()[1].get() == 2)
+  press(T("btn_next"))
+  check("esc telemetry: Next goes to the port, the current one in focus",
+    shows("esc_port_title") and button("UART3").focused)
+  press(T("btn_next"))
+  polls, answer = 2, {2, 0, 0, 0, 200, 0, 2, 0, 4, 1}
+  before = #sent
+  press(T("esc_detect"))
+  settle()
+  check("esc telemetry: the wiring that is set answers, so nothing is written",
+    shows("esc_wiring_ok") and #writesOf(216, before + 1) == 0 and button(T("btn_save_restart")) == nil)
+
+  -- No answer on any wiring; a trial the flight controller refuses is not stopped.
+  polls, answer = 2, {3, 3, 0, 0, 0, 0, 0, 0, 4, 1}
+  press(T("esc_detect"))
+  settle()
+  check("esc telemetry: no answer on any wiring says so", shows("esc_not_found") and button(T("esc_detect")).enabled)
+  polls, answer = 2, {4, 0, 0, 0, 0, 0, 0, 0, 0, 1}
+  before = #sent
+  press(T("esc_detect"))
+  settle()
+  local stopsSent = 0
+  for _, m in ipairs(writesOf(0x5F14, before + 1)) do
+    if m.payload[1] == 2 then stopsSent = stopsSent + 1 end
+  end
+  check("esc telemetry: a refused trial says so and is not stopped", shows("esc_rejected") and stopsSent == 0, stopsSent)
+
+  -- Leaving the screen while it runs stops it.
+  polls, answer = -100, nil
+  press(T("esc_detect"))
+  before = #sent
+  press(T("btn_back"))
+  trialWrites = writesOf(0x5F14, before + 1)
+  check("esc telemetry: Back stops a running trial",
+    shows("esc_port_title") and #trialWrites >= 1 and bytes(trialWrites[#trialWrites].payload) == "2")
+  replies[0x5F14] = nil
+
+  -- Battery: voltage and current from the ESC, each yes or no.
+  press(T("btn_next"))
+  press(T("btn_next"))
+  check("esc telemetry: then the battery, two yes or no choices",
+    shows("esc_battery_title") and #choiceFields() == 2 and choiceFields()[1].get() == 0 and choiceFields()[2].get() == 0)
+  before = #sent
+  choiceFields()[1].set(1)
+  tick()
+  local batteryWrites = writesOf(33, before + 1)
+  -- MSP_SET_BATTERY_CONFIG: byte 4 is the voltage source, byte 5 the current source; 2 is the ESC.
+  check("esc telemetry: voltage from the ESC writes the voltage meter source",
+    #batteryWrites == 1 and batteryWrites[1].payload[4] == 2 and batteryWrites[1].payload[5] == 1
+      and #batteryWrites[1].payload == 81, batteryWrites[1] and bytes(batteryWrites[1].payload))
+  check("esc telemetry: a meter change needs a restart", shows("esc_changed") and button(T("btn_save_restart")) ~= nil)
+  before = #sent
+  choiceFields()[2].set(1)
+  tick()
+  choiceFields()[1].set(0)
+  tick()
+  batteryWrites = writesOf(33, before + 1)
+  check("esc telemetry: turning one off puts back the source it had",
+    #batteryWrites == 2 and batteryWrites[2].payload[4] == 1 and batteryWrites[2].payload[5] == 2,
+    batteryWrites[2] and bytes(batteryWrites[2].payload))
+
+  -- Not used: protocol none, the feature off, the port freed, the meter back.
+  press(T("btn_back"))
+  press(T("btn_back"))
+  press(T("btn_back"))
+  before = #sent
+  press(T("esc_not_used"))
+  escWrites, featureWrites, escPorts = writesOf(216, before + 1), writesOf(37, before + 1), writesOf(55, before + 1)
+  batteryWrites = writesOf(33, before + 1)
+  check("esc telemetry: Not used writes protocol none and turns the feature off",
+    #escWrites == 1 and escWrites[1].payload[1] == 0 and #featureWrites == 1
+      and bytes(featureWrites[1].payload) == "0,0,0,0", featureWrites[1] and bytes(featureWrites[1].payload))
+  check("esc telemetry: Not used frees the port",
+    #escPorts == 1 and bytes(escPorts[1].payload) == "2,0,0,0,0,0,0,0,0", escPorts[1] and bytes(escPorts[1].payload))
+  check("esc telemetry: Not used takes the battery off the ESC",
+    #batteryWrites == 1 and batteryWrites[1].payload[4] == 1 and batteryWrites[1].payload[5] == 1)
+  check("esc telemetry: Not used ends with Save and restart",
+    shows("esc_changed") and button(T("btn_save_restart")) ~= nil and choiceFields()[1].get() == -1)
+
+  -- Discard writes back what the step found when it made its first change.
+  before = #sent
+  headers[#headers].opts.onBack()
+  tick()
+  local discard
+  for _, b in ipairs(dialogs[#dialogs].opts.buttons) do
+    if b.label == T("leave_discard") then discard = b end
+  end
+  discard.action()
+  tick()
+  escWrites, featureWrites, escPorts = writesOf(216, before + 1), writesOf(37, before + 1), writesOf(55, before + 1)
+  batteryWrites = writesOf(33, before + 1)
+  -- The meters are already back on the board's own sensors, so they are not written again.
+  check("esc telemetry: Discard puts the protocol, the feature and the port back",
+    #escWrites == 1 and bytes(escWrites[1].payload) == "2,0,200,0,0,15,0,0,0,0"
+      and #featureWrites == 1 and bytes(featureWrites[1].payload) == "0,0,0,8"
+      and #escPorts == 1 and bytes(escPorts[1].payload) == "2,0,4,0,0,0,0,0,0"
+      and #batteryWrites == 0 and ctx.back == 1,
+    bytes(escWrites[1] and escWrites[1].payload or {}) .. " / " .. #featureWrites .. " / "
+      .. #escPorts .. " / " .. #batteryWrites .. " / " .. ctx.back)
+
+  -- F.BUS telemetry is set up elsewhere.
+  replies[123] = {13, 0, 200, 0, 0, 15, 0, 0, 0, 0}
+  openPage(14, "esctelemetry")
+  settle()
+  check("esc telemetry: F.BUS telemetry is left alone, with Next only",
+    shows("esc_elsewhere_fmt") and #choiceFields() == 0 and button(T("esc_not_used")) == nil
+      and button(T("btn_next")) ~= nil)
+  replies[123], replies[36], replies[54] = nil, nil, nil
+
+  -- No motor: nothing to set up.
+  replies[101] = function(m)
+    local out = {}
+    for i, b in ipairs(m.simulatorResponse) do out[i] = b end
+    out[28] = 0   -- motor_count
+    return out
+  end
+  openPage(14, "esctelemetry")
+  settle()
+  check("esc telemetry: a model with no motor is told so, with Next only",
+    shows("esc_no_motor") and #choiceFields() == 0 and button(T("esc_not_used")) == nil
+      and button(T("btn_next")) ~= nil)
+  replies[101] = nil
+end
+
 -- Centre: every surface held at its centre; nudging writes the Mid.
 openPage(14, "centre")
 settle()
@@ -1172,8 +1436,8 @@ local function footer()
   return row
 end
 
-local STEP_KEYS = {"sensors", "receiver", "busoutput", "airframe", "servotype", "motor", "centre", "direction", "limits",
-  "throws", "travel", "gyro", "trimgain", "modes", "style", "finish"}
+local STEP_KEYS = {"sensors", "receiver", "busoutput", "airframe", "servotype", "motor", "esctelemetry", "centre",
+  "direction", "limits", "throws", "travel", "gyro", "trimgain", "modes", "style", "finish"}
 local FORWARD = {[T("btn_next")] = true, [T("dir_save_next")] = true, [T("fin_button")] = true,
   [T("btn_save_restart")] = true}
 local badFooter, skips = {}, {}

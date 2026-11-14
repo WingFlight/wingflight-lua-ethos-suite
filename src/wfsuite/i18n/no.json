@@ -9645,6 +9645,195 @@
           "reverse_text": false,
           "translation": "No link to the flight controller."
         },
+        "esc_battery_text": {
+          "english": "The ESC can measure the battery in place of the flight controller's own sensors.",
+          "max_length": 80,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "The ESC can measure the battery in place of the flight controller's own sensors."
+        },
+        "esc_battery_title": {
+          "english": "Battery from the ESC",
+          "max_length": 20,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Battery from the ESC"
+        },
+        "esc_changed": {
+          "english": "The change takes effect after a restart.",
+          "max_length": 40,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "The change takes effect after a restart."
+        },
+        "esc_choose": {
+          "english": "Choose...",
+          "max_length": 9,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Choose..."
+        },
+        "esc_detect": {
+          "english": "Detect wiring",
+          "max_length": 13,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Detect wiring"
+        },
+        "esc_elsewhere_fmt": {
+          "english": "ESC telemetry is set to %s, which does not use an ESC telemetry port. Change it in the Configurator.",
+          "max_length": 100,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "ESC telemetry is set to %s, which does not use an ESC telemetry port. Change it in the Configurator."
+        },
+        "esc_found": {
+          "english": "The ESC answers on a different wiring. Save and restart to use it.",
+          "max_length": 66,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "The ESC answers on a different wiring. Save and restart to use it."
+        },
+        "esc_intro": {
+          "english": "Optional. An ESC with a telemetry wire can send voltage, current, temperature and RPM to a serial port.",
+          "max_length": 103,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Optional. An ESC with a telemetry wire can send voltage, current, temperature and RPM to a serial port."
+        },
+        "esc_no_motor": {
+          "english": "This model has no motor, so there is no ESC telemetry to set up.",
+          "max_length": 64,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "This model has no motor, so there is no ESC telemetry to set up."
+        },
+        "esc_no_reply": {
+          "english": "The flight controller did not answer. Try again.",
+          "max_length": 48,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "The flight controller did not answer. Try again."
+        },
+        "esc_not_found": {
+          "english": "No answer from the ESC. Check that it is powered, and the wire, port and protocol.",
+          "max_length": 82,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "No answer from the ESC. Check that it is powered, and the wire, port and protocol."
+        },
+        "esc_not_used": {
+          "english": "Not used",
+          "max_length": 8,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Not used"
+        },
+        "esc_not_used_help": {
+          "english": "No telemetry wire from the ESC.",
+          "max_length": 31,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "No telemetry wire from the ESC."
+        },
+        "esc_port_fmt": {
+          "english": "Which port is the %s telemetry wire plugged into? Ports in use are greyed out.",
+          "max_length": 78,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Which port is the %s telemetry wire plugged into? Ports in use are greyed out."
+        },
+        "esc_port_none": {
+          "english": "No port chosen yet.",
+          "max_length": 19,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "No port chosen yet."
+        },
+        "esc_port_title": {
+          "english": "ESC telemetry port",
+          "max_length": 18,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "ESC telemetry port"
+        },
+        "esc_protocol_help": {
+          "english": "The make of your ESC. Its manual says which telemetry it sends.",
+          "max_length": 63,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "The make of your ESC. Its manual says which telemetry it sends."
+        },
+        "esc_rejected": {
+          "english": "The flight controller can't test this wiring. Disarm, and check the port and protocol.",
+          "max_length": 86,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "The flight controller can't test this wiring. Disarm, and check the port and protocol."
+        },
+        "esc_stop": {
+          "english": "Stop",
+          "max_length": 4,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Stop"
+        },
+        "esc_stopped": {
+          "english": "Detection stopped.",
+          "max_length": 18,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Detection stopped."
+        },
+        "esc_title": {
+          "english": "ESC telemetry",
+          "max_length": 13,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "ESC telemetry"
+        },
+        "esc_trying_fmt": {
+          "english": "Trying wiring %d of %d...",
+          "max_length": 25,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Trying wiring %d of %d..."
+        },
+        "esc_use_current": {
+          "english": "Use the ESC's current and mAh used.",
+          "max_length": 35,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Use the ESC's current and mAh used."
+        },
+        "esc_use_voltage": {
+          "english": "Use the ESC's voltage for the battery.",
+          "max_length": 38,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Use the ESC's voltage for the battery."
+        },
+        "esc_wiring_ok": {
+          "english": "The ESC answers. The wiring is right.",
+          "max_length": 37,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "The ESC answers. The wiring is right."
+        },
+        "esc_wiring_text": {
+          "english": "Power the ESC, then press Detect wiring. The flight controller tries each way the wire can be connected until the ESC answers.",
+          "max_length": 126,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Power the ESC, then press Detect wiring. The flight controller tries each way the wire can be connected until the ESC answers."
+        },
+        "esc_wiring_title": {
+          "english": "ESC wiring",
+          "max_length": 10,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "ESC wiring"
+        },
         "fin_arm": {
           "english": "ARM switch",
           "max_length": 10,
@@ -10701,6 +10890,13 @@
           "needs_translation": true,
           "reverse_text": false,
           "translation": "Direction"
+        },
+        "step_esctelemetry": {
+          "english": "ESC telemetry",
+          "max_length": 13,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "ESC telemetry"
         },
         "step_finish": {
           "english": "Finish",
