@@ -10318,46 +10318,46 @@
           "translation": "Mode switches"
         },
         "mot_cal_done": {
-          "english": "Low throttle sent. If the ESC did not confirm, unplug the battery and try again.",
-          "max_length": 80,
+          "english": "Zero throttle is set. If the ESC did not confirm, unplug the battery and try again.",
+          "max_length": 83,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "Low throttle sent. If the ESC did not confirm, unplug the battery and try again."
+          "translation": "Zero throttle is set. If the ESC did not confirm, unplug the battery and try again."
         },
         "mot_cal_full": {
-          "english": "Start full throttle",
-          "max_length": 19,
+          "english": "Set full throttle",
+          "max_length": 17,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "Start full throttle"
+          "translation": "Set full throttle"
         },
         "mot_cal_full_text": {
-          "english": "Full throttle is held on every motor output until you press Low throttle. Keep the battery unplugged for now.",
-          "max_length": 109,
+          "english": "Full throttle stays on every motor output until you press Set zero throttle. Keep the battery unplugged for now.",
+          "max_length": 112,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "Full throttle is held on every motor output until you press Low throttle. Keep the battery unplugged for now."
+          "translation": "Full throttle stays on every motor output until you press Set zero throttle. Keep the battery unplugged for now."
         },
         "mot_cal_hold_text": {
-          "english": "Plug the battery in when it says so below. When the ESC then beeps to confirm full throttle, press Low throttle. It beeps again to confirm.",
-          "max_length": 139,
+          "english": "Plug the battery in when it says so below. When the ESC then beeps to confirm full throttle, press Set zero throttle. It beeps again to confirm.",
+          "max_length": 144,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "Plug the battery in when it says so below. When the ESC then beeps to confirm full throttle, press Low throttle. It beeps again to confirm."
+          "translation": "Plug the battery in when it says so below. When the ESC then beeps to confirm full throttle, press Set zero throttle. It beeps again to confirm."
         },
         "mot_cal_low": {
-          "english": "Low throttle",
-          "max_length": 12,
+          "english": "Set zero throttle",
+          "max_length": 17,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "Low throttle"
+          "translation": "Set zero throttle"
         },
         "mot_cal_plug_in": {
-          "english": "Full throttle is held. Plug the battery in now.",
-          "max_length": 47,
+          "english": "Full throttle is set. Plug the battery in now.",
+          "max_length": 46,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "Full throttle is held. Plug the battery in now."
+          "translation": "Full throttle is set. Plug the battery in now."
         },
         "mot_cal_ramping_fmt": {
           "english": "Going to full throttle: wait %d s.",
@@ -10374,11 +10374,11 @@
           "translation": "Calibration stopped. The output is back at zero."
         },
         "mot_cal_text": {
-          "english": "A PWM ESC has to learn where full and low throttle are. Unplug the flight battery from the ESC first. Press Next if the ESC is already calibrated.",
-          "max_length": 146,
+          "english": "A PWM ESC has to learn where full and zero throttle are. Unplug the flight battery from the ESC first. Press Next if the ESC is already calibrated.",
+          "max_length": 147,
           "needs_translation": true,
           "reverse_text": false,
-          "translation": "A PWM ESC has to learn where full and low throttle are. Unplug the flight battery from the ESC first. Press Next if the ESC is already calibrated."
+          "translation": "A PWM ESC has to learn where full and zero throttle are. Unplug the flight battery from the ESC first. Press Next if the ESC is already calibrated."
         },
         "mot_cal_title": {
           "english": "Calibrate the ESC",
