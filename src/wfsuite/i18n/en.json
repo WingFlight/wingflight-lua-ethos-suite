@@ -7914,6 +7914,12 @@
           "needs_translation": false,
           "translation": "With the bus powered, its F.Bus servos and sensors should answer within a few seconds."
         },
+        "bus_found": {
+          "english": "Found it. The bus answers on this wiring, which is now in use. Save to keep it.",
+          "max_length": 79,
+          "needs_translation": false,
+          "translation": "Found it. The bus answers on this wiring, which is now in use. Save to keep it."
+        },
         "bus_intro": {
           "english": "Optional. Servos on an F.Bus or SBUS line plug into a serial port, not the servo pins. Which port is the bus on?",
           "max_length": 112,
@@ -7926,11 +7932,23 @@
           "needs_translation": false,
           "translation": "Nothing answering. The bus may be on the port's other pin."
         },
+        "bus_no_answer_detect": {
+          "english": "Nothing answering. Detect wiring tries each pin and polarity.",
+          "max_length": 61,
+          "needs_translation": false,
+          "translation": "Nothing answering. Detect wiring tries each pin and polarity."
+        },
         "bus_none": {
           "english": "None",
           "max_length": 4,
           "needs_translation": false,
           "translation": "None"
+        },
+        "bus_not_found": {
+          "english": "Nothing answered on any wiring. Check the bus has power and is plugged into this port.",
+          "max_length": 86,
+          "needs_translation": false,
+          "translation": "Nothing answered on any wiring. Check the bus has power and is plugged into this port."
         },
         "bus_other_pin": {
           "english": "Use the other pin",
@@ -7955,6 +7973,12 @@
           "max_length": 12,
           "needs_translation": false,
           "translation": "Bus protocol"
+        },
+        "bus_rejected": {
+          "english": "The flight controller can't test the wiring now: the model is armed, or the board has an F.Bus mux.",
+          "max_length": 99,
+          "needs_translation": false,
+          "translation": "The flight controller can't test the wiring now: the model is armed, or the board has an F.Bus mux."
         },
         "bus_rx_pin_fmt": {
           "english": "F.Bus is on the RX pin of %s.",
@@ -7991,6 +8015,12 @@
           "max_length": 29,
           "needs_translation": false,
           "translation": "F.Bus is on the TX pin of %s."
+        },
+        "bus_wiring_ok": {
+          "english": "The bus answers on the wiring already set.",
+          "max_length": 42,
+          "needs_translation": false,
+          "translation": "The bus answers on the wiring already set."
         },
         "bypass_manual": {
           "english": "Switch MANUAL mode off.",
@@ -8297,6 +8327,12 @@
           "max_length": 20,
           "needs_translation": false,
           "translation": "Battery from the ESC"
+        },
+        "esc_castle": {
+          "english": "Castle Link reads telemetry on the throttle wire, so it needs no port.",
+          "max_length": 70,
+          "needs_translation": false,
+          "translation": "Castle Link reads telemetry on the throttle wire, so it needs no port."
         },
         "esc_changed": {
           "english": "The change takes effect after a restart.",
@@ -8826,6 +8862,72 @@
           "needs_translation": false,
           "translation": "Mode switches"
         },
+        "mot_cal_done": {
+          "english": "Low throttle sent. If the ESC did not confirm, unplug the battery and try again.",
+          "max_length": 80,
+          "needs_translation": false,
+          "translation": "Low throttle sent. If the ESC did not confirm, unplug the battery and try again."
+        },
+        "mot_cal_full": {
+          "english": "Start full throttle",
+          "max_length": 19,
+          "needs_translation": false,
+          "translation": "Start full throttle"
+        },
+        "mot_cal_full_text": {
+          "english": "Full throttle is held on every motor output until you press Low throttle. Keep the battery unplugged for now.",
+          "max_length": 109,
+          "needs_translation": false,
+          "translation": "Full throttle is held on every motor output until you press Low throttle. Keep the battery unplugged for now."
+        },
+        "mot_cal_hold_text": {
+          "english": "Plug the battery in when it says so below. When the ESC then beeps to confirm full throttle, press Low throttle. It beeps again to confirm.",
+          "max_length": 139,
+          "needs_translation": false,
+          "translation": "Plug the battery in when it says so below. When the ESC then beeps to confirm full throttle, press Low throttle. It beeps again to confirm."
+        },
+        "mot_cal_low": {
+          "english": "Low throttle",
+          "max_length": 12,
+          "needs_translation": false,
+          "translation": "Low throttle"
+        },
+        "mot_cal_plug_in": {
+          "english": "Full throttle is held. Plug the battery in now.",
+          "max_length": 47,
+          "needs_translation": false,
+          "translation": "Full throttle is held. Plug the battery in now."
+        },
+        "mot_cal_ramping_fmt": {
+          "english": "Going to full throttle: wait %d s.",
+          "max_length": 34,
+          "needs_translation": false,
+          "translation": "Going to full throttle: wait %d s."
+        },
+        "mot_cal_stopped": {
+          "english": "Calibration stopped. The output is back at zero.",
+          "max_length": 48,
+          "needs_translation": false,
+          "translation": "Calibration stopped. The output is back at zero."
+        },
+        "mot_cal_text": {
+          "english": "A PWM ESC has to learn where full and low throttle are. Unplug the flight battery from the ESC first. Press Next if the ESC is already calibrated.",
+          "max_length": 146,
+          "needs_translation": false,
+          "translation": "A PWM ESC has to learn where full and low throttle are. Unplug the flight battery from the ESC first. Press Next if the ESC is already calibrated."
+        },
+        "mot_cal_title": {
+          "english": "Calibrate the ESC",
+          "max_length": 17,
+          "needs_translation": false,
+          "translation": "Calibrate the ESC"
+        },
+        "mot_cal_unplugged": {
+          "english": "Battery unplugged",
+          "max_length": 17,
+          "needs_translation": false,
+          "translation": "Battery unplugged"
+        },
         "mot_changed": {
           "english": "The new protocol takes effect after a restart.",
           "max_length": 46,
@@ -8879,6 +8981,12 @@
           "max_length": 43,
           "needs_translation": false,
           "translation": "How the flight controller talks to the ESC."
+        },
+        "mot_motor_fmt": {
+          "english": "Motor %d",
+          "max_length": 8,
+          "needs_translation": false,
+          "translation": "Motor %d"
         },
         "mot_no_outputs": {
           "english": "This board has no motor output set up.",
@@ -8957,6 +9065,12 @@
           "max_length": 15,
           "needs_translation": false,
           "translation": "Check the motor"
+        },
+        "mot_spin_twin": {
+          "english": "One motor runs at a time: check which is which.",
+          "max_length": 47,
+          "needs_translation": false,
+          "translation": "One motor runs at a time: check which is which."
         },
         "mot_spinning": {
           "english": "Spinning...",

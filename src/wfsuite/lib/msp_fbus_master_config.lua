@@ -10,8 +10,11 @@
 -- expects.
 --
 -- The write is the eight slots, then the wiring when it was read. It has no
--- version byte. The forwarding slots apply at once; the wiring applies after
--- a restart, because the port is opened at boot.
+-- version byte. The forwarding slots apply at once. Firmware with the wiring
+-- trial (lib/msp_fbus_master_trial.lua) also applies a wiring change at once,
+-- by reopening the port, when it can: not while armed, with no F.Bus port
+-- open, or on an FBUS mux board. Otherwise, and on older firmware, the wiring
+-- applies after a restart.
 --
 -- pin_swap: F.Bus runs half-duplex on the UART's TX pin. With the swap on it
 -- runs on the RX pin, which is the pin a connector labelled SBUS has.

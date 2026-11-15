@@ -10,29 +10,42 @@
 --             A newly chosen port starts on F.Bus.
 --   protocol  F.Bus or SBUS, and how many channels the bus carries.
 --   signal    after the restart: for F.Bus, how many devices answer, which
---             proves the wiring, and "Use the other pin" when none does.
---             SBUS is one-way, so it is checked in the later steps, where
---             each servo is moved.
+--             proves the wiring. Detect wiring has the flight controller try
+--             each pin and polarity on the live port until a device answers
+--             (lib/msp_fbus_master_trial.lua). SBUS is one-way, so it is
+--             checked in the later steps, where each servo is moved.
 --
 -- F.Bus runs on the UART's TX pin. A connector labelled SBUS is the RX pin,
 -- so choosing that port turns the pin swap on and any other port turns it
--- off (lib/setup_wizard_bus.lua). The pin swap is never shown as a setting.
--- Firmware that doesn't send the port wiring (lib/msp_fbus_master_config.lua)
--- keeps whatever pin it has.
+-- off (lib/setup_wizard_bus.lua). The pin swap and the inversion are never
+-- shown as settings. Firmware that doesn't send the port wiring
+-- (lib/msp_fbus_master_config.lua) keeps whatever pin it has.
 --
--- A port, protocol or pin change applies after a restart, so the step ends
--- with Save and restart and comes back on the signal screen.
+-- A port or protocol change applies after a restart, so the step ends with
+-- Save and restart and comes back on the signal screen.
+--
+-- A wiring that Detect wiring finds is in use at once and already in the
+-- flight controller's configuration, so nothing is written and no restart is
+-- needed: the footer becomes Save and continue. No stop is sent after it,
+-- because a stop would put the old wiring back. Discard writes the old
+-- wiring, which that firmware applies at once. A run that is still going is
+-- stopped by Back, the step list, Save, arming, a lost link and leaving.
+--
+-- Firmware without the command answers the start with no payload. The button
+-- is then "Use the other pin", which flips the pin swap and needs a restart.
 
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local bus = requireModule("lib/bus.lua")
 local ui = requireModule("app/setup_wizard_ui.lua")
 -- Freed when the step closes (app/setup_wizard_ui.lua's notLoaded()).
 local OWNED = ui.notLoaded({
-  "wfsuite.lib.msp_serial_config", "wfsuite.lib.msp_fbus_master_config", "wfsuite.lib.msp_fbus_sensors",
+  "wfsuite.lib.msp_serial_config", "wfsuite.lib.msp_fbus_master_config", "wfsuite.lib.msp_fbus_master_trial",
+  "wfsuite.lib.msp_fbus_sensors",
   "wfsuite.lib.msp_board_info", "wfsuite.lib.port_labels", "wfsuite.lib.setup_wizard_bus",
 })
 local serialConfig = requireModule("lib/msp_serial_config.lua")
 local fbusMaster = requireModule("lib/msp_fbus_master_config.lua")
+local trialCodec = requireModule("lib/msp_fbus_master_trial.lua")
 local fbusSensors = requireModule("lib/msp_fbus_sensors.lua")
 local boardInfo = requireModule("lib/msp_board_info.lua")
 local portLabels = requireModule("lib/port_labels.lua")
@@ -56,10 +69,20 @@ local T = {
   sbusSignal = "@i18n(app.modules.setup_wizard.bus_sbus_signal)@",
   answering = "@i18n(app.modules.setup_wizard.bus_answering_fmt)@",
   noAnswer = "@i18n(app.modules.setup_wizard.bus_no_answer)@",
+  noAnswerDetect = "@i18n(app.modules.setup_wizard.bus_no_answer_detect)@",
   txPin = "@i18n(app.modules.setup_wizard.bus_tx_pin_fmt)@",
   rxPin = "@i18n(app.modules.setup_wizard.bus_rx_pin_fmt)@",
   otherPin = "@i18n(app.modules.setup_wizard.bus_other_pin)@",
   pinFixed = "@i18n(app.modules.setup_wizard.bus_pin_fixed)@",
+  detect = "@i18n(app.modules.setup_wizard.esc_detect)@",
+  stop = "@i18n(app.modules.setup_wizard.esc_stop)@",
+  trying = "@i18n(app.modules.setup_wizard.esc_trying_fmt)@",
+  found = "@i18n(app.modules.setup_wizard.bus_found)@",
+  wiringOk = "@i18n(app.modules.setup_wizard.bus_wiring_ok)@",
+  notFound = "@i18n(app.modules.setup_wizard.bus_not_found)@",
+  rejected = "@i18n(app.modules.setup_wizard.bus_rejected)@",
+  noReply = "@i18n(app.modules.setup_wizard.esc_no_reply)@",
+  stopped = "@i18n(app.modules.setup_wizard.esc_stopped)@",
   saveRestart = "@i18n(app.modules.setup_wizard.btn_save_restart)@",
 }
 
@@ -73,9 +96,15 @@ local PORT_COLS = 3
 -- controller's sensor telemetry for a moment.
 local SIGNAL_POLL_SECONDS = 2
 
--- The signal screen is where the step comes back after its own restart. Kept
+-- The flight controller stops a run that is not polled for 3 s. It gives
+-- each of the four wirings 1.5 s, so a run takes up to 6 s.
+local TRIAL_POLL_SECONDS = 0.3
+local TRIAL_TIMEOUT_SECONDS = 10
+
+-- The signal screen is where the step comes back after its own restart, and
+-- noTrial is that the firmware was found to have no wiring detection. Kept
 -- outside the step, which is dropped and loaded again around the restart.
-local resume = package.loaded["wfsuite.setup_wizard.busoutput.resume"] or {signal = false}
+local resume = package.loaded["wfsuite.setup_wizard.busoutput.resume"] or {signal = false, noTrial = false}
 package.loaded["wfsuite.setup_wizard.busoutput.resume"] = resume
 
 local function new(wiz)
@@ -90,7 +119,11 @@ local function new(wiz)
   local devices = nil       -- F.Bus devices answering; nil until the first reply
   local nextPollAt = 0
   local pollInFlight = false
+  local trial = nil         -- a wiring detection that is running
+  local outcome = nil       -- how the last one ended, as the text to show
+  local noTrial = resume.noTrial == true   -- firmware without the wiring detection
   local left = false
+  resume.noTrial = false
 
   local function labelOf(identifier)
     return board and portLabels.lookup(board.boardDesign, identifier, board.boardName) or nil
@@ -133,12 +166,14 @@ local function new(wiz)
     local masks = {}
     for i = 1, #ports do masks[i] = ports[i].function_mask or 0 end
     local mix = wiz.mixConfig()
-    return {
+    local o = {
       masks = masks,
       fbusChannels = mix and mix.fbus_master_channels,
       sbusChannels = mix and mix.sbus_out_channels,
-      pinSwap = canSetPin() and wiring.pin_swap or nil,
     }
+    -- Both are booleans, and false is a wiring to put back too.
+    if canSetPin() then o.pinSwap, o.inverted = wiring.pin_swap, wiring.inverted end
+    return o
   end
 
   local function writeWiring()
@@ -162,11 +197,14 @@ local function new(wiz)
       mix.fbus_master_channels, mix.sbus_out_channels = o.fbusChannels, o.sbusChannels
       writeMixer()
     end
-    if o.pinSwap ~= nil and canSetPin() then
-      wiring.pin_swap = o.pinSwap
+    -- Firmware with the wiring detection applies this at once; older
+    -- firmware at the next boot.
+    if o.pinSwap ~= nil and canSetPin() and (wiring.pin_swap ~= o.pinSwap or wiring.inverted ~= o.inverted) then
+      wiring.pin_swap, wiring.inverted = o.pinSwap, o.inverted
       writeWiring()
     end
     restart = false
+    outcome = nil
   end
 
   local function remember()
@@ -259,8 +297,96 @@ local function new(wiz)
     wiz.rebuild()
   end
 
+  -- Wiring detection. The replies arrive in the background task, where Ethos
+  -- forbids building a form: they are only recorded, and wakeup() acts on them.
+
+  local function startTrial()
+    if trial or restart or noTrial or wiz.armed() or not canSetPin() then return end
+    outcome = nil
+    local t = {startedAt = os.clock(), nextPollAt = 0, inFlight = true, starting = true,
+      combo = 0, count = trialCodec.COMBINATIONS}
+    t.onData = function(data)
+      if trial ~= t then return end
+      t.inFlight = false
+      t.reply = data
+    end
+    t.onError = function(reason)
+      if trial ~= t then return end
+      t.inFlight = false
+      t.failed = true
+      t.reason = reason
+    end
+    trial = t
+    bus.publish("msp.request", trialCodec.buildStartMessage(t.onData, t.onError))
+    wiz.rebuild()
+  end
+
+  -- Ends the run with the text to show. stop: the flight controller may still
+  -- be trying, so it is told to put the wiring back.
+  local function endTrial(text, stop)
+    if not trial then return end
+    trial = nil
+    if stop then bus.publish("msp.request", trialCodec.buildStopMessage()) end
+    outcome = text
+    -- The device count is read again.
+    devices, nextPollAt = nil, 0
+    if not left then wiz.rebuild() end
+  end
+
+  -- Only a run that is still going: after a wiring was found there is none,
+  -- and a stop then would put the old wiring back.
+  local function stopTrial()
+    endTrial(T.stopped, true)
+  end
+
+  -- A device answered on this wiring. The flight controller left it in use
+  -- and in its configuration: there is nothing to write, only to save.
+  local function wiringFound(pinSwap, inverted)
+    if pinSwap == wiring.pin_swap and inverted == wiring.inverted then
+      return endTrial(T.wiringOk, false)
+    end
+    remember()
+    wiring.pin_swap, wiring.inverted = pinSwap, inverted
+    endTrial(T.found, false)
+  end
+
+  local function trialReply(t, data)
+    local S = trialCodec.STATE
+    t.starting = false
+    if data.state == S.RUNNING then
+      local count = (data.combo_count or 0) > 0 and data.combo_count or trialCodec.COMBINATIONS
+      if t.combo ~= data.combo_index or t.count ~= count then
+        t.combo, t.count = data.combo_index, count
+        wiz.rebuild()
+      end
+    elseif data.state == S.SUCCESS then
+      wiringFound(data.pin_swap, data.inverted)
+    elseif data.state == S.FAILED then
+      -- The flight controller has put the wiring back by itself.
+      endTrial(T.notFound, false)
+    elseif data.state == S.REJECTED then
+      -- No run was started.
+      endTrial(T.rejected, false)
+    else
+      -- Idle: the flight controller gave the run up (not polled in time).
+      endTrial(T.stopped, false)
+    end
+  end
+
+  -- A request of the run that got no usable answer.
+  local function trialFailed(t)
+    if t.starting and trialCodec.unsupported(t.reason) then
+      -- Firmware without the command: the pin can still be switched by hand.
+      noTrial = true
+      return endTrial(nil, false)
+    end
+    endTrial(T.noReply, true)
+  end
+
   local function go(name)
+    stopTrial()
     screen = name
+    outcome = nil
     devices, nextPollAt = nil, 0
     wiz.rebuild()
   end
@@ -268,6 +394,7 @@ local function new(wiz)
   local function saveRestart()
     -- Back on the signal screen afterwards, if a bus is still set up.
     resume.signal = busLib.busPort(ports) ~= nil
+    resume.noTrial = noTrial
     wiz.saveAndReboot()
   end
 
@@ -331,21 +458,59 @@ local function new(wiz)
       return scr:row(function() go("protocol") end)
     end
     local status
-    if restart then
+    if trial then
+      status = string.format(T.trying, trial.combo + 1, trial.count)
+    elseif restart then
       status = T.changed
+    elseif outcome then
+      status = outcome
     elseif devices ~= nil then
-      status = devices > 0 and string.format(T.answering, devices) or T.noAnswer
+      status = devices > 0 and string.format(T.answering, devices) or (noTrial and T.noAnswer or T.noAnswerDetect)
     end
     local pin = canSetPin() and string.format(wiring.pin_swap and T.rxPin or T.txPin, portName(port)) or T.pinFixed
     scr:text(T.signalTitle, T.fbusSignal .. " " .. pin, status)
-    return scr:row(function() go("protocol") end,
-      canSetPin() and {{text = T.otherPin, small = true, disabled = wiz.armed(), press = useOtherPin}} or nil,
-      restart and SAVE_RESTART or nil)
+    local action
+    if not canSetPin() then
+      action = nil
+    elseif noTrial then
+      action = {text = T.otherPin, small = true, disabled = wiz.armed(), press = useOtherPin}
+    elseif trial then
+      action = {text = T.stop, primary = true, press = stopTrial}
+    else
+      -- The wiring can only be tried on the port the board booted with.
+      action = {text = T.detect, small = true, disabled = restart or wiz.armed(), press = startTrial}
+    end
+    -- The way forward waits for a run to end. After a new wiring was found
+    -- it is Save and continue (wiz.forward()).
+    local forward = restart and SAVE_RESTART or wiz.forward()
+    if trial then forward = {text = forward.text, press = forward.press, disabled = true} end
+    return scr:row(function() go("protocol") end, action and {action} or nil, forward)
   end
 
   function self.paint() scr:paint() end
 
   function self.wakeup(now)
+    -- A running detection: one request in flight, given up after the timeout.
+    -- The device count is not read meanwhile.
+    local t = trial
+    if t then
+      if t.failed then return trialFailed(t) end
+      if t.reply then
+        local data = t.reply
+        t.reply = nil
+        trialReply(t, data)
+        if trial ~= t then return end
+      end
+      if not wiz.canMove() then return endTrial(T.stopped, true) end
+      -- Nothing found in time is reported as nothing answering.
+      if now - t.startedAt > TRIAL_TIMEOUT_SECONDS then return endTrial(T.notFound, true) end
+      if t.inFlight or now < t.nextPollAt then return end
+      t.inFlight = true
+      t.nextPollAt = now + TRIAL_POLL_SECONDS
+      bus.publish("msp.request", trialCodec.buildPollMessage(t.onData, t.onError))
+      return
+    end
+
     if screen ~= "signal" or restart or pollInFlight or not ports then return end
     if busLib.busProtocol(ports) ~= "fbus" or now < nextPollAt then return end
     nextPollAt = now + SIGNAL_POLL_SECONDS
@@ -363,9 +528,18 @@ local function new(wiz)
     end))
   end
 
-  function self.released() scr:refresh() end
+  -- The step list, Save and Back: a detection does not run behind them.
+  function self.pause() stopTrial() end
 
-  function self.leave() left = true end
+  function self.released()
+    stopTrial()
+    scr:refresh()
+  end
+
+  function self.leave()
+    left = true
+    stopTrial()
+  end
 
   return self
 end

@@ -8,7 +8,9 @@
 --             Not used turns the ESC sensor feature off, frees the port, sets
 --             the protocol to none and takes the battery meters off the ESC.
 --             F.BUS and SRXL2 telemetry don't use an ESC telemetry port, so
---             they are not offered; when one is set the step says so.
+--             they are not offered; when one is set the step says so. With
+--             the Castle Link motor protocol the telemetry is read on the
+--             throttle wire: the step says so and changes nothing.
 --   port      a free serial port (the one the telemetry is on now is lit).
 --   wiring    after the restart: Detect wiring has the flight controller try
 --             each way the wire can be connected (half duplex, pin swap) on
@@ -33,7 +35,7 @@ local ui = requireModule("app/setup_wizard_ui.lua")
 local OWNED = ui.notLoaded({
   "wfsuite.lib.msp_serial_config", "wfsuite.lib.msp_esc_sensor_config", "wfsuite.lib.msp_esc_sensor_trial",
   "wfsuite.lib.msp_feature_config", "wfsuite.lib.msp_battery_config", "wfsuite.lib.msp_board_info",
-  "wfsuite.lib.port_labels",
+  "wfsuite.lib.port_labels", "wfsuite.lib.msp_motor_config",
 })
 local serialConfig = requireModule("lib/msp_serial_config.lua")
 local escSensor = requireModule("lib/msp_esc_sensor_config.lua")
@@ -42,12 +44,14 @@ local featureConfig = requireModule("lib/msp_feature_config.lua")
 local batteryConfig = requireModule("lib/msp_battery_config.lua")
 local boardInfo = requireModule("lib/msp_board_info.lua")
 local portLabels = requireModule("lib/port_labels.lua")
+local motorConfig = requireModule("lib/msp_motor_config.lua")
 
 local T = {
   title = "@i18n(app.modules.setup_wizard.esc_title)@",
   intro = "@i18n(app.modules.setup_wizard.esc_intro)@",
   noMotor = "@i18n(app.modules.setup_wizard.esc_no_motor)@",
   elsewhere = "@i18n(app.modules.setup_wizard.esc_elsewhere_fmt)@",
+  castle = "@i18n(app.modules.setup_wizard.esc_castle)@",
   notUsed = "@i18n(app.modules.setup_wizard.esc_not_used)@",
   notUsedHelp = "@i18n(app.modules.setup_wizard.esc_not_used_help)@",
   choose = "@i18n(app.modules.setup_wizard.esc_choose)@",
@@ -129,6 +133,7 @@ local function new(wiz)
   local ports = nil         -- every serial port but the USB VCP
   local esc = nil           -- lib/msp_esc_sensor_config.lua's data
   local features = nil      -- the enabled feature bits
+  local castle = false      -- the motor protocol is Castle Link
   local battery = nil       -- lib/msp_battery_config.lua's data; nil if the read failed
   local meterBefore = {}    -- the meter sources when the step opened
   local board = nil         -- MSP_BOARD_INFO, for the connector names
@@ -141,9 +146,12 @@ local function new(wiz)
     serial = function(ok, err) return serialConfig.buildReadMessage(ok, err) end,
     esc = function(ok, err) return escSensor.buildReadMessage(ok, err) end,
     feature = function(ok, err) return featureConfig.buildReadMessage(ok, err) end,
+    -- Only for Castle Link; the step works without it.
+    motor = function(ok, err) return motorConfig.buildReadMessage(ok, err) end,
   }, function(results)
     loaded = true
     esc = results.esc
+    castle = results.motor ~= nil and results.motor.motor_pwm_protocol == motorConfig.CASTLE_PROTOCOL
     features = results.feature and results.feature.enabledFeatures
     local back = resume.screen
     resume.screen = nil
@@ -458,6 +466,12 @@ local function new(wiz)
     if not loaded then
       scr:text(T.title, T.loading)
       return nil
+    end
+    -- Set up some other way: Castle Link reads telemetry on the throttle
+    -- wire, F.BUS and SRXL2 don't use an ESC telemetry port.
+    if castle then
+      scr:text(T.title, T.castle)
+      return scr:row()
     end
     if isElsewhere() then
       scr:text(T.title, string.format(T.elsewhere, PROTOCOL_NAMES[esc.protocol]))

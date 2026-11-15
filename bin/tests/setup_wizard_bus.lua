@@ -3,7 +3,7 @@
 -- src/tabs/setup_wizard/busOutput.js. These are the cases of the
 -- configurator's scripts/tests/setup-wizard-bus-output.test.mjs, with the same
 -- inputs and expected values, so a change on either side that the other lacks
--- shows up here. The codec check at the end is the suite's own.
+-- shows up here. The codec checks at the end are the suite's own.
 
 local ROOT = "src/wfsuite/"
 
@@ -108,6 +108,44 @@ do
   local v1 = C.decode({1, 10, 255, 255, 255, 255, 255, 255, 255})
   check("version 1 has no wiring", v1.pin_swap == nil and v1.inverted == nil)
   check("version 1 writes eight bytes", #C.encode(v1) == 8, #C.encode(v1))
+end
+
+print("MSP2_WING_FBUS_MASTER_TRIAL: the request is one action byte, the reply eight bytes")
+do
+  local C = assert(loadfile(ROOT .. "lib/msp_fbus_master_trial.lua"))()
+
+  check("the command is 0x5F37", C.COMMAND == 0x5F37)
+  check("start, poll and stop send their action",
+    C.buildStartMessage().payload[1] == 1 and C.buildPollMessage().payload[1] == 0
+      and C.buildStopMessage().payload[1] == 2 and #C.buildStartMessage().payload == 1)
+  check("the states are the firmware's",
+    C.STATE.IDLE == 0 and C.STATE.RUNNING == 1 and C.STATE.SUCCESS == 2 and C.STATE.FAILED == 3
+      and C.STATE.REJECTED == 4)
+
+  -- SUCCESS on wiring 3 of 4: pin swap on, not inverted, 259 valid frames, port open.
+  local d = C.decode({2, 2, 4, 1, 0, 3, 1, 1})
+  check("state, wiring tried and count", d.state == 2 and d.combo_index == 2 and d.combo_count == 4)
+  check("pin swap and inverted are booleans, as lib/msp_fbus_master_config.lua reads them",
+    d.pin_swap == true and d.inverted == false)
+  check("valid frames are a U16, then port open", d.frame_delta == 259 and d.port_open == true, d.frame_delta)
+  check("a reply that is too short is not decoded", C.decode({2, 2, 4, 1, 0, 3, 1}) == nil and C.decode({}) == nil)
+
+  local got, err
+  local m = C.buildStartMessage(function(data) got = data end, function(reason) err = reason end)
+  m.processReply(m, {1, 0, 4, 0, 1, 0, 0, 1})
+  check("a full reply reaches onData", got and got.state == 1 and got.inverted == true and err == nil)
+  got = nil
+  m.processReply(m, {})
+  check("no payload is reported as firmware without the command",
+    got == nil and err == "no_payload" and C.unsupported(err))
+  m.processReply(m, {1, 0, 4})
+  check("a short reply is an error, not that", err == "short_reply" and not C.unsupported(err))
+  check("an MSP error is firmware without the command, a timeout is not",
+    C.unsupported(true) and not C.unsupported("timeout") and not C.unsupported(nil))
+  for _, build in ipairs({C.buildStartMessage, C.buildPollMessage, C.buildStopMessage}) do
+    if C.decode(build().simulatorResponse) == nil then err = "simulator" end
+  end
+  check("every simulator reply decodes", err ~= "simulator")
 end
 
 print(string.format("\n%d checks, %d failed", checks, failures))
