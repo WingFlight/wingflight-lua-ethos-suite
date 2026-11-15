@@ -53,6 +53,11 @@ do
   check("another port", B.needsPinSwap(ports, labelOf, ports[3]) == false)
   check("no labels", B.needsPinSwap(ports, nil, ports[1]) == false)
   check("no port", B.needsPinSwap(ports, labelOf, nil) == false)
+  -- H7A1: UART3 is labelled RX, a UART RX pin too
+  local function rxLabel(id) return ({[2] = "RX"})[id] end
+  check("a connector labelled RX", B.needsPinSwap(ports, rxLabel, ports[3]) == true)
+  check("another port on that board", B.needsPinSwap(ports, rxLabel, ports[1]) == false)
+  check("RX is not offered first: only the SBUS connector is", B.recommendedPort(ports, rxLabel) == nil)
 end
 
 print("the SBUS connector is offered first when it is free")
@@ -146,6 +151,20 @@ do
     if C.decode(build().simulatorResponse) == nil then err = "simulator" end
   end
   check("every simulator reply decodes", err ~= "simulator")
+end
+
+print("MSP2_WING_FBUS_SENSORS: each F.Bus device's packet count, and which answered since the read before")
+do
+  local C = assert(loadfile(ROOT .. "lib/msp_fbus_sensors.lua"))()
+  -- Two devices: ID 5 on F.Bus with 300 packets, named "AB", one app ID; ID 7 on S.Port with 9.
+  local d = C.decode({2, 5, 0, 1, 44, 1, 0, 0, 2, 65, 66, 1, 0, 11, 7, 1, 0, 9, 0, 0, 0, 0, 0})
+  check("both are listed, one on F.Bus", d.total == 2 and d.fbus == 1, d.total .. "/" .. d.fbus)
+  check("the F.Bus device's packet count is kept by physical ID", d.counts[5] == 300 and d.counts[7] == nil, d.counts[5])
+  check("no read before: unknown", C.answering(nil, d.counts) == nil)
+  check("the count rose: answering", C.answering({[5] = 299}, d.counts) == 1)
+  check("the count stands still: not answering", C.answering({[5] = 300}, d.counts) == 0)
+  check("a device first listed has answered", C.answering({}, d.counts) == 1)
+  check("no devices", C.decode({0}).fbus == 0 and C.answering({}, C.decode({0}).counts) == 0)
 end
 
 print(string.format("\n%d checks, %d failed", checks, failures))

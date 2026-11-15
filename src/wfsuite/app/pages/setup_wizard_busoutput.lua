@@ -10,19 +10,31 @@
 --             A newly chosen port starts on F.Bus.
 --   protocol  F.Bus or SBUS, and how many channels the bus carries.
 --   signal    after the restart: for F.Bus, how many devices answer, which
---             proves the wiring. Detect wiring has the flight controller try
+--             proves the wiring. The flight controller lists every device
+--             it has heard, also one unplugged since, so a device counts
+--             only if its packet count rose since the read before
+--             (lib/msp_fbus_sensors.lua): the count shows from the second
+--             read. Detect wiring has the flight controller try
 --             each pin and polarity on the live port until a device answers
 --             (lib/msp_fbus_master_trial.lua). SBUS is one-way, so it is
 --             checked in the later steps, where each servo is moved.
 --
 -- F.Bus runs on the UART's TX pin. A connector labelled SBUS is the RX pin,
 -- so choosing that port turns the pin swap on and any other port turns it
--- off (lib/setup_wizard_bus.lua). The pin swap and the inversion are never
+-- off (lib/setup_wizard_bus.lua): a port is not offered before the wiring
+-- and the connector names have been read, or the pin would be left as it
+-- was. The pin swap and the inversion are never
 -- shown as settings. Firmware that doesn't send the port wiring
 -- (lib/msp_fbus_master_config.lua) keeps whatever pin it has.
 --
 -- A port or protocol change applies after a restart, so the step ends with
--- Save and restart and comes back on the signal screen.
+-- Save and restart and comes back on the signal screen. That a restart is
+-- needed is kept by the shell (wiz.needRestart()), so it is still true when
+-- the step is left through the step list and opened again.
+--
+-- Discard writes every port, the channel counts and the wiring back as they
+-- were recorded, whatever this instance of the step holds: the undo may
+-- belong to an earlier instance, whose own records are out of date.
 --
 -- A wiring that Detect wiring finds is in use at once and already in the
 -- flight controller's configuration, so nothing is written and no restart is
@@ -115,8 +127,10 @@ local function new(wiz)
   local ports = nil         -- every serial port but the USB VCP
   local wiring = nil        -- lib/msp_fbus_master_config.lua's data; nil if the read failed
   local board = nil         -- MSP_BOARD_INFO, for the connector names
-  local restart = false     -- a change that applies after a restart
-  local devices = nil       -- F.Bus devices answering; nil until the first reply
+  local wiringDone = false  -- the wiring read has ended, with or without a reply
+  local boardDone = false   -- and the board read
+  local devices = nil       -- F.Bus devices answering; nil until the second reply
+  local lastCounts = nil    -- their packet counts at the reply before
   local nextPollAt = 0
   local pollInFlight = false
   local trial = nil         -- a wiring detection that is running
@@ -153,27 +167,26 @@ local function new(wiz)
   -- wiring the pin is left alone, without the board the ports are UART names.
   wiz.fetch({wiring = function(ok, err) return fbusMaster.buildReadMessage(ok, err) end}, function(results)
     wiring = results.wiring
+    wiringDone = true
     wiz.rebuild()
   end)
   wiz.fetch({board = function(ok, err) return boardInfo.buildReadMessage(ok, err) end}, function(results)
     board = results.board
+    boardDone = true
     wiz.rebuild()
   end)
 
   -- Discard: what the ports, the channel counts and the pin were.
 
+  -- wiz.change() copies it, and only for the first change since a save.
   local function snapshot()
-    local masks = {}
-    for i = 1, #ports do masks[i] = ports[i].function_mask or 0 end
     local mix = wiz.mixConfig()
-    local o = {
-      masks = masks,
+    return {
+      ports = ports,
       fbusChannels = mix and mix.fbus_master_channels,
       sbusChannels = mix and mix.sbus_out_channels,
+      wiring = canSetPin() and wiring or nil,
     }
-    -- Both are booleans, and false is a wiring to put back too.
-    if canSetPin() then o.pinSwap, o.inverted = wiring.pin_swap, wiring.inverted end
-    return o
   end
 
   local function writeWiring()
@@ -185,12 +198,13 @@ local function new(wiz)
     if mix then bus.publish("msp.request", mixerConfig.buildWriteMessage(mix)) end
   end
 
+  -- Written from the record alone, every port: this may be the undo of an
+  -- instance of the step that has closed since, whose `ports` no longer say
+  -- what the flight controller holds.
   local function restore(o)
-    for i = 1, #ports do
-      if (ports[i].function_mask or 0) ~= o.masks[i] then
-        ports[i].function_mask = o.masks[i]
-        bus.publish("msp.request", serialConfig.buildWriteMessage(ports[i]))
-      end
+    for i = 1, #o.ports do
+      bus.publish("msp.request", serialConfig.buildWriteMessage(o.ports[i]))
+      if ports[i] then ports[i].function_mask = o.ports[i].function_mask end
     end
     local mix = wiz.mixConfig()
     if mix and o.fbusChannels then
@@ -199,11 +213,10 @@ local function new(wiz)
     end
     -- Firmware with the wiring detection applies this at once; older
     -- firmware at the next boot.
-    if o.pinSwap ~= nil and canSetPin() and (wiring.pin_swap ~= o.pinSwap or wiring.inverted ~= o.inverted) then
-      wiring.pin_swap, wiring.inverted = o.pinSwap, o.inverted
-      writeWiring()
+    if o.wiring then
+      bus.publish("msp.request", fbusMaster.buildWriteMessage(o.wiring))
+      if wiring then wiring.pin_swap, wiring.inverted = o.wiring.pin_swap, o.wiring.inverted end
     end
-    restart = false
     outcome = nil
   end
 
@@ -244,7 +257,7 @@ local function new(wiz)
     if changed then
       writePorts(changed)
       applyPin(port)
-      restart = true
+      wiz.needRestart()
       screen = "protocol"
     end
     wiz.rebuild()
@@ -254,7 +267,7 @@ local function new(wiz)
     if busLib.busPort(ports) then
       remember()
       writePorts(busLib.clearBusOutput(ports))
-      restart = true
+      wiz.needRestart()
     end
     wiz.rebuild()
   end
@@ -267,7 +280,7 @@ local function new(wiz)
     if changed then
       writePorts(changed)
       applyPin(port)
-      restart = true
+      wiz.needRestart()
     end
     wiz.rebuild()
   end
@@ -293,7 +306,7 @@ local function new(wiz)
     remember()
     wiring.pin_swap = not wiring.pin_swap
     writeWiring()
-    restart = true
+    wiz.needRestart()
     wiz.rebuild()
   end
 
@@ -301,7 +314,7 @@ local function new(wiz)
   -- forbids building a form: they are only recorded, and wakeup() acts on them.
 
   local function startTrial()
-    if trial or restart or noTrial or wiz.armed() or not canSetPin() then return end
+    if trial or wiz.restartNeeded() or noTrial or wiz.armed() or not canSetPin() then return end
     outcome = nil
     local t = {startedAt = os.clock(), nextPollAt = 0, inFlight = true, starting = true,
       combo = 0, count = trialCodec.COMBINATIONS}
@@ -329,7 +342,7 @@ local function new(wiz)
     if stop then bus.publish("msp.request", trialCodec.buildStopMessage()) end
     outcome = text
     -- The device count is read again.
-    devices, nextPollAt = nil, 0
+    devices, lastCounts, nextPollAt = nil, nil, 0
     if not left then wiz.rebuild() end
   end
 
@@ -387,7 +400,7 @@ local function new(wiz)
     stopTrial()
     screen = name
     outcome = nil
-    devices, nextPollAt = nil, 0
+    devices, lastCounts, nextPollAt = nil, nil, 0
     wiz.rebuild()
   end
 
@@ -402,7 +415,9 @@ local function new(wiz)
 
   function self.build()
     scr:begin()
-    if not ports then
+    -- Not before the wiring and the connector names are known (or their
+    -- reads have failed): a port chosen earlier would not get its pin.
+    if not ports or not wiringDone or not boardDone then
       scr:text(T.title, "@i18n(app.msg_loading)@")
       return nil
     end
@@ -413,7 +428,7 @@ local function new(wiz)
     if not port then screen = "port" end
 
     if screen == "port" then
-      scr:text(T.title, T.intro, restart and T.changed or nil)
+      scr:text(T.title, T.intro, wiz.restartNeeded() and T.changed or nil)
       local suggested = busLib.recommendedPort(ports, labelOf)
       local specs = {{text = T.none, primary = port == nil, press = chooseNone}}
       for _, p in ipairs(ports) do
@@ -428,11 +443,11 @@ local function new(wiz)
       if port == nil and suggested then specs[1].primary = false end
       -- The grid first: the encoder visits fields in the order they are made.
       local focus = scr:grid(specs, PORT_COLS)
-      local forward = scr:row(nil, nil, restart and SAVE_RESTART or nil)
+      local forward = scr:row(nil, nil, wiz.restartNeeded() and SAVE_RESTART or nil)
       return focus or forward
 
     elseif screen == "protocol" then
-      scr:text(T.protoTitle, string.format(T.protoIntro, portName(port)), restart and T.changed or nil)
+      scr:text(T.protoTitle, string.format(T.protoIntro, portName(port)), wiz.restartNeeded() and T.changed or nil)
       local values = {}
       for _, count in ipairs(busLib.PROTOCOLS[protocol].channels) do
         values[#values + 1] = {string.format(T.channels, count), count}
@@ -448,7 +463,7 @@ local function new(wiz)
       })
       -- The signal can only be checked on the port the board booted with.
       local forward = scr:row(function() go("port") end, nil,
-        restart and SAVE_RESTART or {text = "@i18n(app.modules.setup_wizard.btn_next)@", press = function() go("signal") end})
+        wiz.restartNeeded() and SAVE_RESTART or {text = "@i18n(app.modules.setup_wizard.btn_next)@", press = function() go("signal") end})
       return focus or forward
     end
 
@@ -460,7 +475,7 @@ local function new(wiz)
     local status
     if trial then
       status = string.format(T.trying, trial.combo + 1, trial.count)
-    elseif restart then
+    elseif wiz.restartNeeded() then
       status = T.changed
     elseif outcome then
       status = outcome
@@ -478,11 +493,11 @@ local function new(wiz)
       action = {text = T.stop, primary = true, press = stopTrial}
     else
       -- The wiring can only be tried on the port the board booted with.
-      action = {text = T.detect, small = true, disabled = restart or wiz.armed(), press = startTrial}
+      action = {text = T.detect, small = true, disabled = wiz.restartNeeded() or wiz.armed(), press = startTrial}
     end
     -- The way forward waits for a run to end. After a new wiring was found
     -- it is Save and continue (wiz.forward()).
-    local forward = restart and SAVE_RESTART or wiz.forward()
+    local forward = wiz.restartNeeded() and SAVE_RESTART or wiz.forward()
     if trial then forward = {text = forward.text, press = forward.press, disabled = true} end
     return scr:row(function() go("protocol") end, action and {action} or nil, forward)
   end
@@ -511,7 +526,7 @@ local function new(wiz)
       return
     end
 
-    if screen ~= "signal" or restart or pollInFlight or not ports then return end
+    if screen ~= "signal" or wiz.restartNeeded() or pollInFlight or not ports then return end
     if busLib.busProtocol(ports) ~= "fbus" or now < nextPollAt then return end
     nextPollAt = now + SIGNAL_POLL_SECONDS
     pollInFlight = true
@@ -519,8 +534,11 @@ local function new(wiz)
     bus.publish("msp.request", fbusSensors.buildReadMessage(function(data)
       pollInFlight = false
       if left then return end
-      if devices ~= data.fbus then
-        devices = data.fbus
+      -- Only the devices that answered since the reply before.
+      local answering = fbusSensors.answering(lastCounts, data.counts)
+      lastCounts = data.counts
+      if devices ~= answering then
+        devices = answering
         wiz.rebuild()
       end
     end, function()

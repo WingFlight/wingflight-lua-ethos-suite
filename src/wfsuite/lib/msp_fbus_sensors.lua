@@ -1,8 +1,12 @@
 -- Message-builder for MSP2_WING_FBUS_SENSORS (cmd 0x5F07, read only): the
 -- devices the flight controller's F.Bus master (or S.Port master) has heard
 -- from. The Setup Wizard's Servo bus step only needs how many answer on
--- F.Bus, which proves the bus wiring, so decode() counts them and skips the
--- rest of each record.
+-- F.Bus, which proves the bus wiring, so decode() counts them, keeps each
+-- one's packet count and skips the rest of each record.
+--
+-- The list has no age: a device that answered once stays in it after it is
+-- unplugged. A device is answering now only if its packet count rose since
+-- the read before, which answering() counts.
 --
 -- The reply is a count (U8), then per device: physical ID (U8), source (U8,
 -- 0 = F.Bus, 1 = S.Port), forwarded (U8), packet count (U32), a
@@ -20,19 +24,21 @@ local SOURCE_FBUS = 0
 
 local msp_fbus_sensors = {READ_COMMAND = READ_COMMAND}
 
--- {fbus = devices answering on F.Bus, total = every device listed}. A reply
--- cut short counts the devices that are whole.
+-- {fbus = devices listed on F.Bus, total = every device listed, counts =
+-- the packet count of each F.Bus device by physical ID}. A reply cut short
+-- counts the devices that are whole.
 function msp_fbus_sensors.decode(buf)
   buf.offset = 1
-  local data = {fbus = 0, total = 0}
+  local data = {fbus = 0, total = 0, counts = {}}
   if #buf < 1 then return data end
   local count = mspcodec.readU8(buf) or 0
   for _ = 1, count do
     -- Physical ID, source, forwarded, packet count, name length
     if buf.offset + 7 > #buf then break end
-    mspcodec.readU8(buf)
+    local physicalId = mspcodec.readU8(buf)
     local source = mspcodec.readU8(buf)
-    buf.offset = buf.offset + 5
+    mspcodec.readU8(buf)
+    local packets = mspcodec.readU32(buf)
     local nameLength = mspcodec.readU8(buf) or 0
     buf.offset = buf.offset + nameLength
     if buf.offset > #buf then break end
@@ -40,9 +46,24 @@ function msp_fbus_sensors.decode(buf)
     buf.offset = buf.offset + 2 * appIds
     if buf.offset > #buf + 1 then break end
     data.total = data.total + 1
-    if source == SOURCE_FBUS then data.fbus = data.fbus + 1 end
+    if source == SOURCE_FBUS then
+      data.fbus = data.fbus + 1
+      data.counts[physicalId] = packets
+    end
   end
   return data
+end
+
+-- How many F.Bus devices answered between two reads: those whose packet
+-- count rose (a device first listed in `counts` has answered too). nil
+-- without a read before, when it can't be known.
+function msp_fbus_sensors.answering(before, counts)
+  if not before then return nil end
+  local n = 0
+  for id, packets in pairs(counts) do
+    if packets > (before[id] or 0) then n = n + 1 end
+  end
+  return n
 end
 
 function msp_fbus_sensors.buildReadMessage(onData, onError)

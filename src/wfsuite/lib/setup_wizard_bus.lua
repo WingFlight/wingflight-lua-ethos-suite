@@ -69,10 +69,13 @@ end
 
 -- Whether F.Bus on this port needs the pin swap. F.Bus runs half-duplex on
 -- the UART's TX pin. A connector labelled SBUS is a receiver input, the
--- UART's RX pin, so F.Bus only reaches it with the pins swapped.
+-- UART's RX pin, and so is one labelled RX (the H7A1's UART3 in
+-- lib/port_labels.lua), so F.Bus only reaches either with the pins swapped.
 function M.needsPinSwap(ports, labelOf, port)
   if not port then return false end
-  return port.identifier == M.sbusConnectorIdentifier(ports, labelOf)
+  if port.identifier == M.sbusConnectorIdentifier(ports, labelOf) then return true end
+  local name = labelOf and labelOf(port.identifier)
+  return name ~= nil and string.upper(name) == "RX"
 end
 
 -- Takes every bus output off the ports. Returns the ports it changed.

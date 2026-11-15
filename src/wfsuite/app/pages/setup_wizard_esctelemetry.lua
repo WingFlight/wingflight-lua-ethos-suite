@@ -26,7 +26,15 @@
 --
 -- A protocol, port, wiring or meter source change applies after a restart,
 -- so those screens end with Save and restart, and the step comes back on the
--- wiring screen (the battery screen, after a restart from there).
+-- wiring screen (the battery screen, after a restart from there). That a
+-- restart is needed is kept by the shell (wiz.needRestart()), so it is still
+-- true when the step is left through the step list and opened again.
+--
+-- Discard writes every port, the ESC sensor config and the features back as
+-- they were recorded, whatever this instance of the step holds: the undo may
+-- belong to an earlier instance, whose own records are out of date. The
+-- battery has an undo of its own, recorded before its first change, because
+-- it is read separately and may arrive after another change was made.
 
 local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("lib/require.lua"))()
 local bus = requireModule("lib/bus.lua")
@@ -137,7 +145,6 @@ local function new(wiz)
   local battery = nil       -- lib/msp_battery_config.lua's data; nil if the read failed
   local meterBefore = {}    -- the meter sources when the step opened
   local board = nil         -- MSP_BOARD_INFO, for the connector names
-  local restart = false     -- a change that applies after a restart
   local trial = nil         -- a wiring detection that is running
   local outcome = nil       -- how the last one ended, as the text to show
   local left = false
@@ -242,40 +249,39 @@ local function new(wiz)
   -- Discard: what the ports, the ESC sensor config, the features and the
   -- meter sources were.
 
+  -- wiz.change() copies it, and only for the first change since a save.
   local function snapshot()
-    local masks = {}
-    for i = 1, #ports do masks[i] = maskOf(ports[i]) end
-    return {
-      masks = masks,
-      esc = esc,
-      features = features,
-      voltage = battery and battery.voltageMeterSource,
-      current = battery and battery.currentMeterSource,
-    }
+    return {ports = ports, esc = esc, features = features}
   end
 
+  -- Written from the record alone, every port: this may be the undo of an
+  -- instance of the step that has closed since, whose `ports` no longer say
+  -- what the flight controller holds.
   local function restore(o)
-    for i = 1, #ports do
-      if maskOf(ports[i]) ~= o.masks[i] then
-        ports[i].function_mask = o.masks[i]
-        writePort(ports[i])
-      end
+    for i = 1, #o.ports do
+      writePort(o.ports[i])
+      if ports[i] then ports[i].function_mask = o.ports[i].function_mask end
     end
     for key, value in pairs(o.esc) do esc[key] = value end
     writeEsc()
-    if features ~= o.features then
-      features = o.features
-      bus.publish("msp.request", featureConfig.buildWriteMessage({enabledFeatures = features}))
-    end
-    if battery and (battery.voltageMeterSource ~= o.voltage or battery.currentMeterSource ~= o.current) then
-      battery.voltageMeterSource, battery.currentMeterSource = o.voltage, o.current
-      writeBattery()
-    end
-    restart = false
+    features = o.features
+    bus.publish("msp.request", featureConfig.buildWriteMessage({enabledFeatures = features}))
   end
 
   local function remember()
     wiz.change("esc_telemetry", snapshot(), restore)
+  end
+
+  -- The battery config as it was read, whole: called before its first change.
+  local function restoreBattery(o)
+    bus.publish("msp.request", batteryConfig.buildWriteMessage(o))
+    if battery then
+      battery.voltageMeterSource, battery.currentMeterSource = o.voltageMeterSource, o.currentMeterSource
+    end
+  end
+
+  local function rememberBattery()
+    wiz.change("esc_battery", battery, restoreBattery)
   end
 
   -- Protocol and port.
@@ -286,7 +292,7 @@ local function new(wiz)
     esc.protocol = id
     writeEsc()
     setFeature(true)
-    restart = true
+    wiz.needRestart()
     outcome = nil
     screen = "port"
     wiz.rebuild()
@@ -311,11 +317,12 @@ local function new(wiz)
       local voltage = meterTarget("voltageMeterSource", false)
       local current = meterTarget("currentMeterSource", false)
       if voltage ~= battery.voltageMeterSource or current ~= battery.currentMeterSource then
+        rememberBattery()
         battery.voltageMeterSource, battery.currentMeterSource = voltage, current
         writeBattery()
       end
     end
-    restart = true
+    wiz.needRestart()
     outcome = nil
     wiz.rebuild()
   end
@@ -333,7 +340,7 @@ local function new(wiz)
     local current = escPort()
     if port == current then
       -- The wiring can only be detected on the port the board booted with.
-      if not restart then go("wiring") end
+      if not wiz.restartNeeded() then go("wiring") end
       return
     end
     if not isFree(port) then return end
@@ -345,7 +352,7 @@ local function new(wiz)
     port.function_mask = ESC_SENSOR_FUNCTION
     writePort(port)
     setFeature(true)
-    restart = true
+    wiz.needRestart()
     outcome = nil
     wiz.rebuild()
   end
@@ -358,7 +365,7 @@ local function new(wiz)
   end
 
   local function startTrial()
-    if trial or restart or wiz.armed() then return end
+    if trial or wiz.restartNeeded() or wiz.armed() then return end
     outcome = nil
     local t = {startedAt = os.clock(), nextPollAt = 0, inFlight = true, combo = 0, count = trialCodec.COMBINATIONS}
     t.onData = function(data)
@@ -402,7 +409,7 @@ local function new(wiz)
       remember()
       esc.half_duplex, esc.pin_swap = halfDuplex, pinSwap
       writeEsc()
-      restart = true
+      wiz.needRestart()
       outcome = T.found
     end
     wiz.rebuild()
@@ -436,11 +443,11 @@ local function new(wiz)
     if not battery then return end
     local target = meterTarget(key, on)
     if target == battery[key] then return end
-    remember()
+    rememberBattery()
     battery[key] = target
     writeBattery()
     -- A meter source is set up at boot.
-    restart = true
+    wiz.needRestart()
     wiz.rebuild()
   end
 
@@ -491,7 +498,7 @@ local function new(wiz)
     end
 
     if screen == "protocol" then
-      scr:text(T.title, T.intro, restart and T.changed or nil)
+      scr:text(T.title, T.intro, wiz.restartNeeded() and T.changed or nil)
       -- The list first: the encoder visits fields in the order they are made.
       local focus = scr:choices({
         {text = T.notUsed, help = T.notUsedHelp, current = not used, press = chooseNotUsed},
@@ -502,7 +509,7 @@ local function new(wiz)
       local forward
       if used then
         forward = {text = T.next, press = function() go("port") end}
-      elseif restart then
+      elseif wiz.restartNeeded() then
         forward = SAVE_RESTART
       end
       local rowFocus = scr:row(nil, nil, forward)
@@ -510,7 +517,7 @@ local function new(wiz)
 
     elseif screen == "port" then
       scr:text(T.portTitle, string.format(T.portIntro, PROTOCOL_NAMES[esc.protocol] or ""),
-        (restart and port) and T.changed or (not port and T.portNone or nil))
+        (wiz.restartNeeded() and port) and T.changed or (not port and T.portNone or nil))
       local specs = {}
       for _, p in ipairs(ports) do
         specs[#specs + 1] = {
@@ -522,7 +529,7 @@ local function new(wiz)
       end
       local focus = scr:grid(specs, PORT_COLS)
       local forward
-      if restart then
+      if wiz.restartNeeded() then
         forward = SAVE_RESTART
       elseif port then
         forward = {text = T.next, press = function() go("wiring") end}
@@ -534,7 +541,7 @@ local function new(wiz)
       local status = outcome
       if trial then
         status = string.format(T.trying, trial.combo + 1, trial.count)
-      elseif restart and not status then
+      elseif wiz.restartNeeded() and not status then
         status = T.changed
       end
       scr:text(T.wiringTitle, T.wiringText, status)
@@ -542,10 +549,10 @@ local function new(wiz)
       if trial then
         action = {text = T.stop, primary = true, press = stopTrial}
       else
-        action = {text = T.detect, primary = not restart, disabled = restart or wiz.armed(), press = startTrial}
+        action = {text = T.detect, primary = not wiz.restartNeeded(), disabled = wiz.restartNeeded() or wiz.armed(), press = startTrial}
       end
       local forward
-      if restart then
+      if wiz.restartNeeded() then
         forward = SAVE_RESTART
       elseif battery then
         forward = {text = T.next, press = function() go("battery") end}
@@ -557,7 +564,7 @@ local function new(wiz)
     end
 
     -- battery
-    scr:text(T.batteryTitle, T.batteryText, restart and T.changed or nil)
+    scr:text(T.batteryTitle, T.batteryText, wiz.restartNeeded() and T.changed or nil)
     local focus = scr:choices({
       {values = YES_NO, help = T.useVoltage, current = true,
         get = function() return battery.voltageMeterSource == METER_ESC and 1 or 0 end,
@@ -566,7 +573,7 @@ local function new(wiz)
         get = function() return battery.currentMeterSource == METER_ESC and 1 or 0 end,
         set = function(value) chooseMeter("currentMeterSource", tonumber(value) == 1) end},
     })
-    local rowFocus = scr:row(function() go("wiring") end, nil, restart and SAVE_RESTART or nil)
+    local rowFocus = scr:row(function() go("wiring") end, nil, wiz.restartNeeded() and SAVE_RESTART or nil)
     return focus or rowFocus
   end
 

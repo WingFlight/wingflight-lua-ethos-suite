@@ -11,7 +11,10 @@
 --             write (an ESC that doesn't answer may not arm), and while it
 --             is set the step says RPM needs DShot300 or a telemetry source.
 --             A change applies after a restart, so it ends with Save and
---             restart.
+--             restart. That a restart is needed is kept by the shell
+--             (wiz.needRestart()): the motor is not checked on a protocol
+--             that is not in use yet, also after the step is closed and
+--             opened again.
 --   prop      the propeller must be off before anything runs
 --   calibrate only for the PWM protocol (motor_pwm_protocol 0): a PWM ESC
 --             learns the throttle range. The pilot confirms the battery is
@@ -32,7 +35,12 @@
 -- does, and a lost link stops the motor. A rising override is slew-limited
 -- at a quarter of the range per second (MOTOR_OVERRIDE_RATE), so full
 -- throttle takes four seconds to reach: Low throttle is held back, and not
--- acted on, for RAMP_SECONDS. A falling one is not limited. Low throttle,
+-- acted on, for RAMP_SECONDS. If the re-sends stall for longer than the
+-- timeout the flight controller has dropped the output to zero, and the next
+-- write starts a new ramp: the wait then starts again. Once the pilot has
+-- been told to plug the battery in, the calibration stops instead, with the
+-- output at zero: full throttle is not sent again to an ESC that may be
+-- powered. A falling override is not limited. Low throttle,
 -- Cancel, Back, the step list, Save, leaving the step, arming and a lost
 -- link all write zero to every motor.
 --
@@ -127,6 +135,9 @@ end
 local TEST_THROTTLES = {5, 10, 20}
 local SPIN_SECONDS = 3
 local REFRESH = 0.25
+-- MOTOR_OVERRIDE_TIMEOUT: the flight controller drops an override this long
+-- after the last write.
+local OVERRIDE_TIMEOUT = 1.0
 -- The override's ramp from zero to full (MOTOR_OVERRIDE_RATE), and a margin.
 local RAMP_SECONDS = 5
 -- Built once: the ramp note is on screen for the whole ramp.
@@ -139,12 +150,12 @@ local function new(wiz)
   local screen = "protocol"
   local config = nil
   local original = nil
-  local changed = false
 
   -- What is driving the motors now: nil, "calibrate" or "spin". One at a time.
   local output = nil
   local outFirst, outLast, outValue = 0, 0, 0
   local nextWriteAt = 0
+  local lastWriteAt = 0     -- when the output was last sent
 
   local calStartedAt = nil  -- when full throttle was first sent
   local calReady = false    -- the ramp is over: Low throttle may be pressed
@@ -177,7 +188,8 @@ local function new(wiz)
   -- wakeup() re-sends it.
   local function hold(holder, first, last, value)
     output, outFirst, outLast, outValue = holder, first, last, value
-    nextWriteAt = os.clock() + REFRESH
+    lastWriteAt = os.clock()
+    nextWriteAt = lastWriteAt + REFRESH
     writeMotors(first, last, value)
   end
 
@@ -244,7 +256,7 @@ local function new(wiz)
     if protocol == DSHOT150 then nextConfig.use_dshot_telemetry = 0 end
     config = nextConfig
     bus.publish("msp.request", motorConfig.buildWriteMessage(config))
-    changed = true
+    wiz.needRestart()
     wiz.rebuild()
   end
 
@@ -268,7 +280,7 @@ local function new(wiz)
       end
       local dshot150 = config.motor_pwm_protocol == DSHOT150
       local note
-      if changed then
+      if wiz.restartNeeded() then
         note = dshot150 and T.changedNoRpm or T.changed
       elseif wiz.motorCount() == 0 then
         note = T.noMotor
@@ -291,10 +303,10 @@ local function new(wiz)
       -- motor runs now, so it waits until then.
       -- The list first: the encoder visits fields in the order they are made.
       local focus = scr:choices(specs)
-      local forward = scr:row(nil, (not changed) and {
+      local forward = scr:row(nil, (not wiz.restartNeeded()) and {
         {text = T.test, disabled = config.motor_pwm_protocol == motorConfig.DISABLED_PROTOCOL or wiz.motorCount() == 0,
           press = function() go("prop") end},
-      } or nil, changed and {text = T.saveRestart, press = function() wiz.saveAndReboot() end} or nil)
+      } or nil, wiz.restartNeeded() and {text = T.saveRestart, press = function() wiz.saveAndReboot() end} or nil)
       return focus or forward
 
     end
@@ -374,12 +386,19 @@ local function new(wiz)
     elseif spinUntil and now >= spinUntil then
       stopSpin()
     else
+      if output == "calibrate" and now - lastWriteAt > OVERRIDE_TIMEOUT then
+        -- The flight controller has dropped the output: the write below
+        -- starts a new ramp. After "plug the battery in" it is not sent.
+        if calReady then return endCalibration(T.calStopped) end
+        calStartedAt = now
+      end
       if output == "calibrate" and not calReady and now - calStartedAt >= RAMP_SECONDS then
         calReady = true
         wiz.rebuild()
       end
       if now >= nextWriteAt then
         nextWriteAt = now + REFRESH
+        lastWriteAt = now
         writeMotors(outFirst, outLast, outValue)
       end
     end
