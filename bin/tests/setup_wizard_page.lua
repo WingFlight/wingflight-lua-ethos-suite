@@ -195,21 +195,42 @@ end
 -- Replies by command, overriding the codec's simulator reply.
 local replies = {}
 
+-- Commands whose replies are held back until releaseHeld(command), to put one
+-- read's reply after another's.
+local held, heldMessages = {}, {}
+
+local function deliver(m)
+  if not m.processReply then return end
+  local buf = {}
+  local reply = replies[m.command]
+  if type(reply) == "function" then reply = reply(m) end
+  for i, b in ipairs(reply or m.simulatorResponse or {}) do buf[i] = b end
+  m.processReply(nil, buf)
+end
+
 local answeredUpTo = 0
 local function answerAll()
   inBackground = true
   while answeredUpTo < #sent do
     answeredUpTo = answeredUpTo + 1
     local m = sent[answeredUpTo]
-    if m.processReply then
-      local buf = {}
-      local reply = replies[m.command]
-      if type(reply) == "function" then reply = reply(m) end
-      for i, b in ipairs(reply or m.simulatorResponse or {}) do buf[i] = b end
-      m.processReply(nil, buf)
+    if held[m.command] then
+      heldMessages[#heldMessages + 1] = m
+    else
+      deliver(m)
     end
   end
   inBackground = false
+end
+
+local function releaseHeld(command)
+  held[command] = nil
+  inBackground = true
+  for i = 1, #heldMessages do
+    if heldMessages[i].command == command then deliver(heldMessages[i]) end
+  end
+  inBackground = false
+  heldMessages = {}
 end
 
 -- Helpers over what reached the wire -----------------------------------------
@@ -293,6 +314,7 @@ end
 local function openPage(apiMinor, stepKey)
   fields, dialogs, sent, headers = {}, {}, {}, {}
   answeredUpTo = 0
+  heldMessages = {}
   subscribers["session.update"] = nil
   for k in pairs(package.loaded) do
     if type(k) == "string" and k:match("^wfsuite%.") and k ~= "wfsuite.lib.require" then package.loaded[k] = nil end
@@ -328,7 +350,7 @@ check("opening clears mixer overrides on roll, pitch, yaw and flap",
   lastMixer(1, 1).value == 2501 and lastMixer(1, 2).value == 2501 and lastMixer(1, 3).value == 2501
   and lastMixer(1, 13).value == 2501)
 check("opening clears every servo override", #writesOf(196) == 1 and bytes(writesOf(196)[1].payload) == "209,7")
-check("the title names the step", headers[#headers].title == T("name") .. " / 7. " .. T("step_direction"),
+check("the title names the step", headers[#headers].title == T("name") .. " / 9. " .. T("step_direction"),
   headers[#headers].title)
 check("the step-list button shows the checklist icon",
   headers[#headers].opts.toolIcon == "app/gfx/nav/steps.png" and headers[#headers].opts.onTool ~= nil)
@@ -449,7 +471,7 @@ check("Save and continue writes EEPROM", #writesOf(250, before + 1) == 1)
 tick()
 tick()
 check("then opens the next step, Binding limits",
-  headers[#headers].title == T("name") .. " / 8. " .. T("step_limits"), headers[#headers].title)
+  headers[#headers].title == T("name") .. " / 10. " .. T("step_limits"), headers[#headers].title)
 check("with nothing left pending", headers[#headers].saveEnabled == false)
 before = #sent
 headers[#headers].opts.onBack()
@@ -519,6 +541,27 @@ headers[#headers].opts.onBack()
 
 local function settle(n)
   for _ = 1, n or 3 do tick() end
+end
+
+-- Leaves the step through the step list and opens step `n` from it: a new
+-- instance of the step, in the same visit to the wizard.
+local function reopenStep(n, key)
+  headers[#headers].opts.onTool()
+  tick()
+  press(n .. ". " .. T("step_" .. key))
+  settle()
+end
+
+-- Leaves the wizard, discarding what is not saved.
+local function discardAll()
+  headers[#headers].opts.onBack()
+  tick()
+  local discard
+  for _, b in ipairs(dialogs[#dialogs].opts.buttons) do
+    if b.label == T("leave_discard") then discard = b end
+  end
+  discard.action()
+  tick()
 end
 local function u16list(values)
   local out = {}
@@ -686,6 +729,427 @@ tick()
 tick()
 check("servo type: saves and restarts", #writesOf(250, before + 1) == 1 and #writesOf(68, before + 1) == 1)
 
+-- Servo bus: F.Bus on the SBUS connector with the pin swap, then SBUS, then
+-- save and restart. The board is an F7C5 (Nexus X), where UART1 is "S.BUS".
+do
+  local info = {87, 71, 70, 76, 0, 0, 0, 0, 0, 0, 4}
+  for _, b in ipairs({string.byte("F7C5", 1, -1)}) do info[#info + 1] = b end
+  replies[4] = info
+end
+openPage(14, "busoutput")
+settle()
+check("servo bus: opens on the port question", shows("bus_title") and button(T("bus_none")) ~= nil)
+check("servo bus: the ports carry the board's connector names", button("S.BUS") ~= nil and button("TELEM") ~= nil)
+before = #sent
+press("S.BUS")
+local busPorts = writesOf(55, before + 1)
+-- MSP_SET_SERIAL_CONFIG for UART1: FUNCTION_FBUS_MASTER is 1 << 19, so byte 3 of the mask is 8.
+check("servo bus: a new port gets F.Bus",
+  #busPorts == 1 and bytes(busPorts[1].payload) == "0,0,0,8,0,0,0,0,0", busPorts[1] and bytes(busPorts[1].payload))
+local busWiring = writesOf(0x5F0A, before + 1)
+-- The eight forwarding slots as read, then pin swap on and inverted as read.
+check("servo bus: the SBUS connector turns the pin swap on",
+  #busWiring == 1 and bytes(busWiring[1].payload) == "255,255,255,255,255,255,255,255,1,1",
+  busWiring[1] and bytes(busWiring[1].payload))
+check("servo bus: then asks for the protocol", shows("bus_proto_title"))
+before = #sent
+press("SBUS")
+busPorts = writesOf(55, before + 1)
+-- FUNCTION_SBUS_OUT is 1 << 18.
+check("servo bus: SBUS replaces F.Bus on the same port",
+  #busPorts == 1 and bytes(busPorts[1].payload) == "0,0,0,4,0,0,0,0,0", busPorts[1] and bytes(busPorts[1].payload))
+check("servo bus: the pin is an F.Bus setting, so SBUS leaves it", #writesOf(0x5F0A, before + 1) == 0)
+before = #sent
+press(T("btn_save_restart"))
+tick()
+tick()
+check("servo bus: saves and restarts", #writesOf(250, before + 1) == 1 and #writesOf(68, before + 1) == 1)
+replies[4] = nil
+
+-- Servo bus: Detect wiring on the signal screen. F.Bus is on UART1, as booted;
+-- the wiring read is the simulator's: pin swap off, inverted.
+do
+  local TRIAL = 0x5F37
+  -- FUNCTION_FBUS_MASTER is 1 << 19: byte 3 of UART1's function mask.
+  replies[54] = function(m)
+    local out = {}
+    for i, b in ipairs(m.simulatorResponse) do out[i] = b end
+    out[4] = 8
+    return out
+  end
+  local polls, answer = 0, nil
+  -- state, wiring tried, wirings, pin swap, inverted, valid frames (U16), port open
+  local RUNNING = {1, 1, 4, 1, 1, 0, 0, 1}
+  local function trialReplies()
+    replies[TRIAL] = function(m)
+      local action = m.payload[1]
+      if action == 1 then return {1, 0, 4, 0, 1, 0, 0, 1} end   -- RUNNING, wiring 1 of 4
+      if action == 2 then return {0, 0, 4, 0, 1, 0, 0, 1} end   -- IDLE
+      polls = polls + 1
+      if polls < 3 then return RUNNING end                      -- RUNNING, wiring 2 of 4
+      return answer
+    end
+  end
+  local function actions(from)
+    local out = {}
+    for _, m in ipairs(writesOf(TRIAL, from)) do out[#out + 1] = m.payload[1] end
+    return out
+  end
+  local function stops(from)
+    local n = 0
+    for _, action in ipairs(actions(from)) do if action == 2 then n = n + 1 end end
+    return n
+  end
+  local function toSignal()
+    openPage(14, "busoutput")
+    settle()
+    press("UART1")
+    press(T("btn_next"))
+    -- The device count is read every 2 s and shown from the second read; the
+    -- screen is rebuilt on the next wakeup.
+    tick()
+    tick(2.1)
+    tick()
+  end
+  local function saveEnabled() return headers[#headers].saveEnabled == true end
+
+  trialReplies()
+  toSignal()
+  check("servo bus: the signal screen offers Detect wiring, not Use the other pin",
+    shows("bus_signal_title") and shows("bus_tx_pin_fmt") and button(T("esc_detect")) ~= nil
+      and button(T("esc_detect")).enabled and button(T("bus_other_pin")) == nil)
+  check("servo bus: with nothing answering it points to Detect wiring", shows("bus_no_answer_detect"))
+
+  -- A device answers on the other pin.
+  polls, answer = 0, {2, 1, 4, 1, 1, 3, 0, 1}   -- SUCCESS: pin swap on, inverted
+  before = #sent
+  press(T("esc_detect"))
+  check("servo bus: Detect wiring starts the trial", actions(before + 1)[1] == 1, actions(before + 1)[1])
+  check("servo bus: while it runs it says which wiring, Stop is offered and Next waits",
+    shows("esc_trying_fmt") and button(T("esc_stop")) ~= nil and button(T("esc_detect")) == nil
+      and not button(T("btn_next")).enabled)
+  local inFlightOk, countReads = true, 0
+  local sensorsCommand = requireModule("lib/msp_fbus_sensors.lua").READ_COMMAND
+  for _ = 1, 6 do
+    -- One request in flight: never a second poll before the first is answered.
+    if #sent - answeredUpTo > 1 then inFlightOk = false end
+    if button(T("esc_stop")) then countReads = #writesOf(sensorsCommand, before + 1) end
+    tick(0.7)
+  end
+  check("servo bus: the trial is polled one request at a time", polls == 3 and inFlightOk, polls)
+  check("servo bus: no device count is read while the trial runs", countReads == 0, countReads)
+  check("servo bus: a new wiring is shown as found, on the RX pin",
+    shows("bus_found") and shows("bus_rx_pin_fmt") and not shows("bus_tx_pin_fmt"))
+  check("servo bus: the found wiring is already live: nothing is written, stopped or restarted",
+    #writesOf(0x5F0A, before + 1) == 0 and stops(before + 1) == 0 and #writesOf(68, before + 1) == 0
+      and #writesOf(250, before + 1) == 0)
+  check("servo bus: the wizard is left pending: Save and continue, no Save and restart",
+    saveEnabled() and button(T("dir_save_next")) ~= nil and button(T("btn_save_restart")) == nil
+      and button(T("esc_detect")).enabled)
+  before = #sent
+  tick(1)
+  check("servo bus: no polling once the trial has ended", #actions(before + 1) == 0)
+  before = #sent
+  press(T("dir_save_next"))
+  tick()
+  tick()
+  check("servo bus: Save and continue saves, without a restart or a stop, and opens the next step",
+    #writesOf(250, before + 1) == 1 and #writesOf(68, before + 1) == 0 and stops(before + 1) == 0
+      and headers[#headers].title == T("name") .. " / 4. " .. T("step_airframe"), headers[#headers].title)
+
+  -- Discard puts the old wiring back with a config write, not a stop.
+  toSignal()
+  polls = 2
+  press(T("esc_detect"))
+  settle()
+  check("servo bus: found again", shows("bus_found") and saveEnabled())
+  before = #sent
+  headers[#headers].opts.onBack()
+  tick()
+  local discard
+  for _, b in ipairs(dialogs[#dialogs].opts.buttons) do
+    if b.label == T("leave_discard") then discard = b end
+  end
+  discard.action()
+  tick()
+  local wiringWrites = writesOf(0x5F0A, before + 1)
+  check("servo bus: Discard writes the old wiring back and sends no stop",
+    #wiringWrites == 1 and bytes(wiringWrites[1].payload) == "255,255,255,255,255,255,255,255,0,1"
+      and stops(before + 1) == 0 and ctx.back == 1, wiringWrites[1] and bytes(wiringWrites[1].payload))
+
+  -- The wiring already set answers: nothing to save.
+  toSignal()
+  polls, answer = 2, {2, 0, 4, 0, 1, 3, 0, 1}
+  before = #sent
+  press(T("esc_detect"))
+  settle()
+  check("servo bus: the wiring already set answers, so there is nothing to save",
+    shows("bus_wiring_ok") and shows("bus_tx_pin_fmt") and not saveEnabled() and button(T("btn_next")) ~= nil
+      and button(T("dir_save_next")) == nil and #writesOf(0x5F0A, before + 1) == 0 and stops(before + 1) == 0)
+
+  -- Nothing answers on any wiring; a trial the flight controller refuses.
+  polls, answer = 2, {3, 3, 4, 0, 1, 0, 0, 1}
+  press(T("esc_detect"))
+  settle()
+  check("servo bus: no answer on any wiring says so",
+    shows("bus_not_found") and button(T("esc_detect")).enabled and not saveEnabled())
+  polls, answer = 2, {4, 0, 4, 0, 1, 0, 0, 1}
+  press(T("esc_detect"))
+  settle()
+  check("servo bus: a refused trial says the flight controller cannot test now",
+    shows("bus_rejected") and button(T("esc_detect")).enabled and not saveEnabled())
+
+  -- A run that never ends is given up, with a stop.
+  polls, answer = -100000, nil
+  before = #sent
+  press(T("esc_detect"))
+  for _ = 1, 30 do tick() end   -- 9 s
+  check("servo bus: still trying at 9 s", shows("esc_trying_fmt") and stops(before + 1) == 0)
+  for _ = 1, 6 do tick() end
+  check("servo bus: given up after 10 s, with a stop",
+    shows("bus_not_found") and stops(before + 1) == 1 and button(T("esc_detect")) ~= nil)
+
+  -- Back, the step list, arming, a lost link and leaving stop a run.
+  local function running()
+    press(T("esc_detect"))
+    before = #sent
+  end
+  local function stopped()
+    local a = actions(before + 1)
+    return a[#a] == 2
+  end
+  running()
+  press(T("esc_stop"))
+  check("servo bus: Stop stops a running trial", stopped() and shows("esc_stopped") and button(T("esc_detect")) ~= nil)
+  running()
+  press(T("btn_back"))
+  check("servo bus: Back stops a running trial", stopped() and shows("bus_proto_title"))
+  press(T("btn_next"))
+  running()
+  headers[#headers].opts.onTool()
+  tick()
+  check("servo bus: the step list stops a running trial", stopped())
+  headers[#headers].opts.onBack()
+  tick()
+  running()
+  session({connected = true, isArmed = true, apiVersionMajor = 22, apiVersionMinor = 14})
+  check("servo bus: arming stops a running trial", stopped())
+  tick()
+  check("servo bus: and Detect wiring is off while armed", not button(T("esc_detect")).enabled)
+  session({connected = true, isArmed = false, apiVersionMajor = 22, apiVersionMinor = 14})
+  tick()
+  running()
+  session({connected = false, isArmed = false, apiVersionMajor = 22, apiVersionMinor = 14})
+  check("servo bus: a lost link stops a running trial", stopped())
+  session({connected = true, isArmed = false, apiVersionMajor = 22, apiVersionMinor = 14})
+  tick()
+  running()
+  headers[#headers].opts.onBack()
+  tick()
+  check("servo bus: leaving the wizard stops a running trial", stopped() and ctx.back == 1)
+
+  -- Firmware without the command answers the start with no payload: the pin
+  -- is switched by hand, which needs a restart.
+  replies[TRIAL] = {}
+  toSignal()
+  before = #sent
+  press(T("esc_detect"))
+  settle()
+  check("servo bus: an empty reply falls back to Use the other pin",
+    button(T("bus_other_pin")) ~= nil and button(T("esc_detect")) == nil and stops(before + 1) == 0
+      and #actions(before + 1) == 1 and not saveEnabled())
+  tick(2.1)
+  tick(2.1)
+  tick()
+  check("servo bus: and the status no longer points to Detect wiring",
+    shows("bus_no_answer") and not shows("bus_no_answer_detect"))
+  before = #sent
+  press(T("bus_other_pin"))
+  wiringWrites = writesOf(0x5F0A, before + 1)
+  check("servo bus: Use the other pin writes the pin swap and asks for Save and restart",
+    #wiringWrites == 1 and bytes(wiringWrites[1].payload) == "255,255,255,255,255,255,255,255,1,1"
+      and shows("bus_changed") and button(T("btn_save_restart")) ~= nil,
+    wiringWrites[1] and bytes(wiringWrites[1].payload))
+  before = #sent
+  press(T("btn_save_restart"))
+  tick()
+  tick()
+  session({connected = false, isArmed = false, apiVersionMajor = 22, apiVersionMinor = 14})
+  tick()
+  session({connected = true, isArmed = false, apiVersionMajor = 22, apiVersionMinor = 14, handshake = {apiVersion = true}})
+  settle(6)
+  check("servo bus: after that restart the step reopens on the signal screen, still with Use the other pin",
+    #writesOf(68, before + 1) == 1 and shows("bus_signal_title") and button(T("bus_other_pin")) ~= nil
+      and button(T("esc_detect")) == nil)
+
+  -- An MSP error to the start is that firmware too.
+  replies[TRIAL] = function() return {1, 0, 4, 0, 1, 0, 0, 1} end
+  toSignal()
+  local m
+  do
+    local b = button(T("esc_detect"))
+    b.press()
+    m = sent[#sent]
+    answeredUpTo = #sent
+    inBackground = true
+    m.errorHandler(true)
+    inBackground = false
+    settle()
+  end
+  check("servo bus: an MSP error to the start falls back to Use the other pin",
+    m.command == TRIAL and button(T("bus_other_pin")) ~= nil and button(T("esc_detect")) == nil)
+  -- A start that times out is not: Detect wiring stays.
+  toSignal()
+  do
+    local b = button(T("esc_detect"))
+    b.press()
+    m = sent[#sent]
+    answeredUpTo = #sent
+    inBackground = true
+    m.errorHandler("timeout")
+    inBackground = false
+    settle()
+  end
+  check("servo bus: a start that times out says so and keeps Detect wiring",
+    shows("esc_no_reply") and button(T("esc_detect")) ~= nil and button(T("bus_other_pin")) == nil)
+
+  replies[TRIAL] = nil
+  check("servo bus: nothing built a form from a trial reply", #forbidden == 0, table.concat(forbidden, ","))
+
+  -- "N answering" counts only the devices that answered since the read
+  -- before: the flight controller lists every device it has ever heard.
+  local packets = 10
+  -- One device: physical ID 5, on F.Bus, not forwarded, packet count (U32), no name, no app IDs.
+  replies[0x5F07] = function() return {1, 5, 0, 0, packets % 256, packets // 256, 0, 0, 0, 0} end
+  openPage(14, "busoutput")
+  settle()
+  press("UART1")
+  press(T("btn_next"))
+  tick()
+  tick()
+  check("servo bus: the first read cannot tell whether a listed device still answers, so it shows no count",
+    #writesOf(0x5F07) == 1 and not shows("bus_answering_fmt") and not shows("bus_no_answer_detect"),
+    #writesOf(0x5F07))
+  packets = 400
+  tick(2.1)
+  tick()
+  check("servo bus: a device whose packet count rose is answering", shows("bus_answering_fmt"))
+  tick(2.1)
+  tick()
+  check("servo bus: a device still listed whose packet count stands still is not",
+    shows("bus_no_answer_detect") and not shows("bus_answering_fmt"))
+  packets = 401
+  tick(2.1)
+  tick()
+  check("servo bus: and it counts again once it answers", shows("bus_answering_fmt"))
+  replies[0x5F07], replies[54] = nil, nil
+end
+
+-- Servo bus: the reads may answer in any order, and the step may be closed
+-- and opened again before a restart.
+do
+  local info = {87, 71, 70, 76, 0, 0, 0, 0, 0, 0, 4}
+  for _, b in ipairs({string.byte("F7C5", 1, -1)}) do info[#info + 1] = b end
+  replies[4] = info
+  local SWAPPED = "255,255,255,255,255,255,255,255,1,1"
+  local AS_READ = "255,255,255,255,255,255,255,255,0,1"
+
+  -- The serial ports answer before the wiring: no port can be chosen yet.
+  held[0x5F09] = true
+  openPage(14, "busoutput")
+  settle()
+  check("servo bus: no port is offered before the wiring has been read",
+    button("S.BUS") == nil and button(T("bus_none")) == nil and #heldMessages == 1)
+  releaseHeld(0x5F09)
+  settle()
+  before = #sent
+  press("S.BUS")
+  local wiringWrites = writesOf(0x5F0A, before + 1)
+  check("servo bus: once it has, the SBUS connector still gets the pin swap",
+    #wiringWrites == 1 and bytes(wiringWrites[1].payload) == SWAPPED,
+    wiringWrites[1] and bytes(wiringWrites[1].payload))
+  before = #sent
+  discardAll()
+  wiringWrites = writesOf(0x5F0A, before + 1)
+  check("servo bus: and Discard puts back the wiring that was read",
+    #wiringWrites == 1 and bytes(wiringWrites[1].payload) == AS_READ,
+    wiringWrites[1] and bytes(wiringWrites[1].payload))
+
+  -- The same for the connector names: without them the SBUS connector is not known.
+  held[4] = true
+  openPage(14, "busoutput")
+  settle()
+  check("servo bus: no port is offered before the board has been read",
+    button("UART1") == nil and button("S.BUS") == nil and button(T("bus_none")) == nil)
+  releaseHeld(4)
+  settle()
+  check("servo bus: then the ports carry the connector names", button("S.BUS") ~= nil and button("UART1") == nil)
+  -- A wiring read that fails still lets the step go on, with the pin left alone.
+  held[0x5F09] = true
+  openPage(14, "busoutput")
+  settle()
+  do
+    local m = heldMessages[1]
+    held[0x5F09], heldMessages = nil, {}
+    inBackground = true
+    m.errorHandler("timeout")
+    inBackground = false
+    settle()
+  end
+  before = #sent
+  press("S.BUS")
+  check("servo bus: a wiring read that fails still offers the ports, and leaves the pin alone",
+    #writesOf(55, before + 1) == 1 and #writesOf(0x5F0A, before + 1) == 0)
+
+  -- A change that needs a restart is still owed after the step is closed
+  -- and opened again. The flight controller holds F.Bus on UART1 by then.
+  local function masks(list)
+    replies[54] = function(m)
+      local out = {}
+      for i, b in ipairs(m.simulatorResponse) do out[i] = b end
+      for index, mask in pairs(list) do out[(index - 1) * 9 + 4] = mask end
+      return out
+    end
+  end
+  openPage(14, "busoutput")
+  settle()
+  press("S.BUS")
+  check("servo bus: a new port asks for Save and restart", button(T("btn_save_restart")) ~= nil)
+  masks({[1] = 8})
+  reopenStep(3, "busoutput")
+  check("servo bus: closed and opened again, the step still asks for Save and restart",
+    shows("bus_title") and button(T("btn_save_restart")) ~= nil)
+  press("S.BUS")
+  check("servo bus: and there is no way to the signal screen before it",
+    shows("bus_proto_title") and shows("bus_changed") and button(T("btn_save_restart")) ~= nil
+      and button(T("btn_next")) == nil)
+  press(T("btn_back"))
+
+  -- Discard after that: the undo is the first instance's, and every port
+  -- goes back as it was, also the one the second instance chose.
+  before = #sent
+  press("TELEM")
+  local moved = writesOf(55, before + 1)
+  check("servo bus: the reopened step moves the bus to another port",
+    #moved == 2 and bytes(moved[1].payload) == "0,0,0,0,0,0,0,0,0" and bytes(moved[2].payload) == "1,0,0,8,0,0,0,0,0",
+    moved[2] and bytes(moved[2].payload))
+  before = #sent
+  discardAll()
+  do
+    local cleared, wrong = {}, 0
+    for _, m in ipairs(writesOf(55, before + 1)) do
+      local pl = m.payload
+      if pl[2] + pl[3] + pl[4] + pl[5] == 0 then cleared[pl[1]] = true else wrong = wrong + 1 end
+    end
+    wiringWrites = writesOf(0x5F0A, before + 1)
+    check("servo bus: Discard clears the bus from both ports and puts the wiring back",
+      cleared[0] and cleared[1] and wrong == 0 and #wiringWrites == 1
+        and bytes(wiringWrites[1].payload) == AS_READ and ctx.back == 1,
+      wrong .. " / " .. (wiringWrites[1] and bytes(wiringWrites[1].payload) or ""))
+  end
+  replies[4], replies[54] = nil, nil
+end
+
 -- Motor: the protocol, and a timed spin.
 openPage(14, "motor")
 settle()
@@ -796,19 +1260,614 @@ settle()
 check("motor: with DShot150 set, the step says RPM needs DShot300 or telemetry",
   shows("mot_dshot150_rpm") and not shows("mot_changed"))
 replies[131] = nil
-openPage(14, "motor")
-settle()
-press(T("mot_test"))
-press(T("mot_prop_off"))
-before = #sent
-press(T("mot_spin_fmt"))
-tick(0.3)
-local spins = writesOf(195, before + 1)
-check("motor: spins at 10%", #spins >= 1 and u16(spins[1].payload, 2) == 100, spins[1] and bytes(spins[1].payload))
-before = #sent
-tick(4)
-local stops = writesOf(195, before + 1)
-check("motor: and stops by itself", #stops >= 1 and u16(stops[#stops].payload, 2) == 0)
+
+-- Check motor: propeller off, calibrate a PWM ESC, spin one motor at a time.
+do
+  local CANCEL = "@i18n(app.btn_cancel)@"
+  local function motors(count)
+    replies[101] = function(m)
+      local out = {}
+      for i, b in ipairs(m.simulatorResponse) do out[i] = b end
+      out[28] = count   -- motor_count
+      return out
+    end
+  end
+  -- Motor override writes since `from`: per motor, the values in order.
+  local function overrides(from)
+    local out = {}
+    for _, m in ipairs(writesOf(195, from)) do
+      local motor = m.payload[1]
+      out[motor] = out[motor] or {}
+      table.insert(out[motor], s16(m.payload, 2))
+    end
+    return out
+  end
+  local function all(values, value)
+    if not values or #values == 0 then return false end
+    for _, v in ipairs(values) do if v ~= value then return false end end
+    return true
+  end
+  local function last(values) return values and values[#values] end
+  local function toProp()
+    openPage(14, "motor")
+    settle()
+    press(T("mot_test"))
+  end
+
+  -- A twin on the PWM protocol (the simulator's motor config).
+  motors(2)
+  toProp()
+  check("motor: Check motor asks about the propeller first",
+    shows("mot_prop_title") and button(T("mot_prop_off")) ~= nil
+      and headers[#headers].title == T("name") .. " / 6. " .. T("step_motor"), headers[#headers].title)
+  press(T("mot_prop_off"))
+  check("motor: on PWM the calibration comes before the spin, and asks about the battery",
+    shows("mot_cal_title") and shows("mot_cal_text") and button(T("mot_cal_unplugged")) ~= nil
+      and button(T("mot_cal_full")) == nil)
+  check("motor: the calibration can be skipped", button(T("btn_next")) ~= nil)
+  press(T("mot_cal_unplugged"))
+  check("motor: then Start full throttle, with no other way forward",
+    shows("mot_cal_full_text") and button(T("mot_cal_full")) ~= nil and button(T("btn_next")) == nil)
+  check("motor: nothing reaches the motors before that", #writesOf(195) == 0)
+
+  before = #sent
+  button(T("mot_cal_full")).press()
+  local w = overrides(before + 1)
+  check("motor: Start full throttle writes full throttle on every motor",
+    all(w[0], 1000) and all(w[1], 1000) and #w[0] == 1 and #w[1] == 1 and w[2] == nil)
+  tick()
+  check("motor: Low throttle waits for the ramp, Cancel has the focus",
+    shows("mot_cal_hold_text") and shows("mot_cal_ramping_fmt") and not button(T("mot_cal_low")).enabled
+      and button(CANCEL).focused)
+  button(T("mot_cal_low")).press()
+  tick()
+  check("motor: pressing Low throttle early does nothing",
+    shows("mot_cal_ramping_fmt") and not shows("mot_cal_done") and last(overrides(before + 1)[0]) == 1000)
+  for _ = 1, 13 do tick(0.3) end   -- 4.5 s in all
+  check("motor: still waiting at 4.5 s", not button(T("mot_cal_low")).enabled)
+  w = overrides(before + 1)
+  -- Re-sent at least every 0.3 s here, against the firmware's one-second deadline.
+  check("motor: full throttle is re-sent on every motor while it is held",
+    all(w[0], 1000) and all(w[1], 1000) and #w[0] >= 14 and #w[1] >= 14, #w[0])
+  tick(0.3)
+  tick(0.3)
+  tick()
+  check("motor: after 5 s it says to plug the battery in, and Low throttle is on",
+    shows("mot_cal_plug_in") and button(T("mot_cal_low")).enabled and button(T("mot_cal_low")).focused)
+  before = #sent
+  press(T("mot_cal_low"))
+  w = overrides(before + 1)
+  check("motor: Low throttle writes zero on every motor", all(w[0], 0) and all(w[1], 0))
+  check("motor: and says it is done, back on the battery question",
+    shows("mot_cal_done") and button(T("mot_cal_unplugged")) ~= nil)
+  before = #sent
+  tick(1)
+  check("motor: nothing is sent to the motors afterwards", #writesOf(195, before + 1) == 0)
+
+  -- Cancel, Back, the step list, Save, arming, a lost link and leaving all drop the output to zero.
+  local function startFull()
+    press(T("mot_cal_unplugged"))
+    press(T("mot_cal_full"))
+    before = #sent
+  end
+  local function droppedToZero()
+    local z = overrides(before + 1)
+    return last(z[0]) == 0 and last(z[1]) == 0
+  end
+  startFull()
+  press(CANCEL)
+  check("motor: Cancel writes zero and says the calibration stopped",
+    droppedToZero() and shows("mot_cal_stopped") and button(T("mot_cal_unplugged")) ~= nil)
+  startFull()
+  press(T("btn_back"))
+  check("motor: Back writes zero", droppedToZero() and shows("mot_cal_stopped"))
+  startFull()
+  headers[#headers].opts.onTool()
+  tick()
+  check("motor: the step list writes zero", droppedToZero())
+  headers[#headers].opts.onBack()
+  tick()
+  startFull()
+  headers[#headers].opts.onSave()
+  tick()
+  tick()
+  check("motor: Save in the header writes zero", droppedToZero() and shows("mot_cal_stopped"))
+  startFull()
+  session({connected = true, isArmed = true, apiVersionMajor = 22, apiVersionMinor = 14})
+  check("motor: arming writes zero", droppedToZero())
+  tick()
+  before = #sent
+  tick(1)
+  check("motor: and nothing is sent while armed", #writesOf(195, before + 1) == 0 and shows("mot_cal_stopped"))
+  session({connected = true, isArmed = false, apiVersionMajor = 22, apiVersionMinor = 14})
+  tick()
+  startFull()
+  session({connected = false, isArmed = false, apiVersionMajor = 22, apiVersionMinor = 14})
+  check("motor: a lost link writes zero", droppedToZero())
+  session({connected = true, isArmed = false, apiVersionMajor = 22, apiVersionMinor = 14})
+  tick()
+  startFull()
+  headers[#headers].opts.onBack()
+  tick()
+  check("motor: leaving the wizard writes zero", droppedToZero() and ctx.back == 1)
+
+  -- Spin: one motor at a time.
+  toProp()
+  press(T("mot_prop_off"))
+  press(T("btn_next"))
+  check("motor: Next skips the calibration, on to the spin",
+    shows("mot_spin_title") and shows("mot_spin_twin") and button(T("mot_motor_fmt")) ~= nil
+      and button("10%") ~= nil and button(T("mot_spin_fmt")) ~= nil)
+  check("motor: the encoder goes Back, the motor, the throttle, Spin, Next", inScreenOrder())
+  before = #sent
+  press(T("mot_spin_fmt"))
+  tick(0.3)
+  w = overrides(before + 1)
+  check("motor: Spin starts on the first motor only", w[1] == nil and all(w[0], 100) and #w[0] >= 2)
+  press(T("mot_stop"))
+  press(T("mot_motor_fmt"))   -- motor 2
+  press("10%")                -- 20 %
+  before = #sent
+  press(T("mot_spin_fmt"))
+  tick(0.3)
+  w = overrides(before + 1)
+  check("motor: Spin writes only the motor chosen, at the throttle chosen",
+    w[0] == nil and all(w[1], 200) and #w[1] >= 2 and shows("mot_spinning"), w[1] and table.concat(w[1], ","))
+  check("motor: Next waits for the spin to end, and Stop is offered",
+    button(T("mot_stop")) ~= nil and not button(T("btn_next")).enabled)
+  tick(4)
+  tick()
+  w = overrides(before + 1)
+  check("motor: it stops by itself after 3 s, with zero on every motor",
+    last(w[1]) == 0 and all(w[0], 0) and button(T("mot_spin_fmt")) ~= nil)
+  before = #sent
+  tick(1)
+  check("motor: and sends nothing more", #writesOf(195, before + 1) == 0)
+  press(T("mot_spin_fmt"))
+  before = #sent
+  press(T("mot_stop"))
+  w = overrides(before + 1)
+  check("motor: Stop ends it early", last(w[1]) == 0 and all(w[0], 0) and button(T("mot_spin_fmt")) ~= nil)
+  press(T("mot_spin_fmt"))
+  before = #sent
+  session({connected = true, isArmed = true, apiVersionMajor = 22, apiVersionMinor = 14})
+  w = overrides(before + 1)
+  check("motor: arming stops a spin, with zero on every motor", last(w[1]) == 0 and last(w[0]) == 0)
+  session({connected = true, isArmed = false, apiVersionMajor = 22, apiVersionMinor = 14})
+  tick()
+  press(T("btn_back"))
+  check("motor: Back from the spin on PWM is the calibration", shows("mot_cal_title"))
+  press(T("btn_next"))
+  before = #sent
+  press(T("btn_next"))
+  tick()
+  check("motor: Next from the spin opens the next step, with no restart",
+    headers[#headers].title == T("name") .. " / 7. " .. T("step_esctelemetry") and #writesOf(68, before + 1) == 0,
+    headers[#headers].title)
+
+  -- One motor: no motor button.
+  motors(1)
+  toProp()
+  press(T("mot_prop_off"))
+  press(T("btn_next"))
+  check("motor: with one motor there is no motor button",
+    shows("mot_spin_title") and button(T("mot_motor_fmt")) == nil and not shows("mot_spin_twin"))
+  before = #sent
+  press(T("mot_spin_fmt"))
+  tick(0.3)
+  w = overrides(before + 1)
+  check("motor: spins at 10%", all(w[0], 100) and w[1] == nil, w[0] and table.concat(w[0], ","))
+  before = #sent
+  tick(4)
+  w = overrides(before + 1)
+  check("motor: and stops by itself", last(w[0]) == 0)
+
+  -- DShot has no range to learn.
+  motorReply(0, 6)
+  toProp()
+  press(T("mot_prop_off"))
+  check("motor: DShot has no calibration, so the spin comes straight away",
+    shows("mot_spin_title") and not shows("mot_cal_title"))
+  press(T("btn_back"))
+  check("motor: Back from the spin on DShot is the propeller question", shows("mot_prop_title"))
+  replies[131] = nil
+
+  -- A stall: the flight controller drops an override that is not re-sent
+  -- within a second, and the next write starts a new ramp.
+  toProp()
+  press(T("mot_prop_off"))
+  press(T("mot_cal_unplugged"))
+  press(T("mot_cal_full"))
+  for _ = 1, 10 do tick(0.3) end   -- 3.3 s of ramp
+  tick(1.5)                        -- no write for 1.5 s
+  for _ = 1, 10 do tick(0.3) end   -- 7.8 s since the start, 3 s since the stall
+  check("motor: after a stall the wait for full throttle starts again",
+    not button(T("mot_cal_low")).enabled and shows("mot_cal_ramping_fmt") and not shows("mot_cal_plug_in"))
+  for _ = 1, 8 do tick(0.3) end    -- 5.4 s since the stall
+  check("motor: and Low throttle comes on 5 s after it",
+    button(T("mot_cal_low")).enabled and shows("mot_cal_plug_in"))
+  before = #sent
+  tick(1.5)
+  tick()
+  w = overrides(before + 1)
+  check("motor: a stall once the battery may be in stops the calibration, without full throttle again",
+    all(w[0], 0) and shows("mot_cal_stopped") and button(T("mot_cal_unplugged")) ~= nil,
+    w[0] and table.concat(w[0], ","))
+
+  -- A new protocol is not checked before the restart, also after the step
+  -- is closed and opened again.
+  openPage(14, "motor")
+  settle()
+  press(T("mot_dshot300"))
+  check("motor: a new protocol asks for Save and restart, with no Check motor",
+    button(T("btn_save_restart")) ~= nil and button(T("mot_test")) == nil)
+  reopenStep(6, "motor")
+  check("motor: closed and opened again, the step still asks for Save and restart",
+    shows("mot_changed") and button(T("btn_save_restart")) ~= nil and button(T("mot_test")) == nil)
+  before = #sent
+  press(T("btn_save_restart"))
+  tick()
+  tick()
+  session({connected = false, isArmed = false, apiVersionMajor = 22, apiVersionMinor = 14})
+  tick()
+  session({connected = true, isArmed = false, apiVersionMajor = 22, apiVersionMinor = 14, handshake = {apiVersion = true}})
+  settle(6)
+  check("motor: after the restart Check motor is back",
+    #writesOf(68, before + 1) == 1 and button(T("mot_test")) ~= nil and button(T("btn_save_restart")) == nil
+      and not shows("mot_changed"))
+  replies[101] = nil
+end
+
+-- ESC telemetry: a protocol, then a free port, then save and restart; back on
+-- the wiring screen, the detection writes the wiring it found; then the
+-- battery meters.
+do
+  local function choiceFields()
+    local out = {}
+    for _, f in ipairs(fields) do
+      if f.kind == "choice" then out[#out + 1] = f end
+    end
+    return out
+  end
+  -- A board with six UARTs, all free: two rows of ports, with room for the
+  -- text above them. escMask is UART3's function mask, byte 2.
+  local function sixPorts(escMask)
+    replies[54] = function(m)
+      local out = {}
+      for i = 1, 6 * 9 do out[i] = m.simulatorResponse[i] end
+      out[2 * 9 + 3] = escMask
+      return out
+    end
+  end
+  -- The step with telemetry set up: HOBBYWING V4 (2) on UART3
+  -- (FUNCTION_ESC_SENSOR, 1024), the feature on.
+  local function configured()
+    replies[123] = {2, 0, 200, 0, 0, 15, 0, 0, 0, 0}
+    replies[36] = {0, 0, 0, 8}   -- FEATURE_ESC_SENSOR is bit 27
+    sixPorts(4)
+  end
+
+  sixPorts(0)
+  openPage(14, "esctelemetry")
+  settle()
+  check("esc telemetry: opens on the protocol question, Not used and a drop-down",
+    shows("esc_title") and button(T("esc_not_used")) ~= nil and #choiceFields() == 1
+      and headers[#headers].title == T("name") .. " / 7. " .. T("step_esctelemetry"), headers[#headers].title)
+  do
+    local offered, own = {}, false
+    for _, v in ipairs(choiceFields()[1].values) do
+      offered[v[2]] = true
+      if v[1] == "FrSky F.BUS" or v[1] == "SRXL2" then own = true end
+    end
+    check("esc telemetry: F.BUS and SRXL2 are not offered, the rest are",
+      not own and not offered[13] and not offered[14] and offered[1] and offered[2] and offered[12] and not offered[0])
+    check("esc telemetry: the drop-down shows Choose while none is set", choiceFields()[1].get() == -1)
+  end
+  before = #sent
+  press(T("esc_not_used"))
+  check("esc telemetry: Not used on a model without it writes nothing",
+    #writesOf(216, before + 1) == 0 and #writesOf(37, before + 1) == 0 and #writesOf(55, before + 1) == 0)
+  choiceFields()[1].set(2)
+  tick()
+  local escWrites, featureWrites = writesOf(216, before + 1), writesOf(37, before + 1)
+  check("esc telemetry: choosing a protocol writes the ESC sensor config",
+    #escWrites == 1 and bytes(escWrites[1].payload) == "2,0,200,0,0,15,0,0,0,0",
+    escWrites[1] and bytes(escWrites[1].payload))
+  check("esc telemetry: and turns the ESC sensor feature on",
+    #featureWrites == 1 and bytes(featureWrites[1].payload) == "0,0,0,8",
+    featureWrites[1] and bytes(featureWrites[1].payload))
+  check("esc telemetry: then asks for the port", shows("esc_port_title") and shows("esc_port_none"))
+  check("esc telemetry: the encoder goes through the ports, then Back and Save and restart", inScreenOrder())
+  before = #sent
+  press("UART3")
+  local escPorts = writesOf(55, before + 1)
+  -- MSP_SET_SERIAL_CONFIG for UART3: FUNCTION_ESC_SENSOR is 1024, so byte 2 of the mask is 4.
+  check("esc telemetry: choosing a port gives it the ESC telemetry function",
+    #escPorts == 1 and bytes(escPorts[1].payload) == "2,0,4,0,0,0,0,0,0", escPorts[1] and bytes(escPorts[1].payload))
+  check("esc telemetry: the feature is not written twice", #writesOf(37, before + 1) == 0)
+  check("esc telemetry: the change needs a restart", shows("esc_changed") and button(T("btn_save_restart")) ~= nil)
+  before = #sent
+  press("UART5")
+  escPorts = writesOf(55, before + 1)
+  check("esc telemetry: another port frees the first",
+    #escPorts == 2 and bytes(escPorts[1].payload) == "2,0,0,0,0,0,0,0,0"
+      and bytes(escPorts[2].payload) == "4,0,4,0,0,0,0,0,0",
+    escPorts[1] and bytes(escPorts[1].payload))
+
+  -- Save and restart: the flight controller comes back with what was saved,
+  -- and the step reopens on the wiring screen.
+  configured()
+  before = #sent
+  press(T("btn_save_restart"))
+  tick()
+  tick()
+  check("esc telemetry: saves and restarts", #writesOf(250, before + 1) == 1 and #writesOf(68, before + 1) == 1)
+  session({connected = false, isArmed = false, apiVersionMajor = 22, apiVersionMinor = 14})
+  tick()
+  session({connected = true, isArmed = false, apiVersionMajor = 22, apiVersionMinor = 14, handshake = {apiVersion = true}})
+  settle(6)
+  check("esc telemetry: after the restart the step reopens on the wiring screen",
+    shows("esc_wiring_title") and button(T("esc_detect")) ~= nil and button(T("esc_detect")).enabled
+      and headers[#headers].title == T("name") .. " / 7. " .. T("step_esctelemetry"), headers[#headers].title)
+
+  -- Detect wiring: start, poll while it runs, and on success write what was found.
+  local polls, answer = 0, nil
+  replies[0x5F14] = function(m)
+    local action = m.payload[1]
+    if action == 1 then return {1, 0, 0, 0, 0, 0, 0, 0, 4, 1} end   -- RUNNING, wiring 1 of 4
+    if action == 2 then return {0, 0, 0, 0, 0, 0, 0, 0, 4, 1} end   -- IDLE
+    polls = polls + 1
+    if polls < 3 then return {1, 2, 1, 1, 100, 0, 0, 0, 4, 1} end   -- RUNNING, wiring 3 of 4
+    return answer
+  end
+  answer = {2, 2, 1, 1, 200, 0, 2, 0, 4, 1}                         -- SUCCESS: half duplex, pin swap
+  before = #sent
+  press(T("esc_detect"))
+  local trialWrites = writesOf(0x5F14, before + 1)
+  check("esc telemetry: Detect wiring starts the trial",
+    #trialWrites >= 1 and bytes(trialWrites[1].payload) == "1", trialWrites[1] and bytes(trialWrites[1].payload))
+  check("esc telemetry: while it runs the button stops it",
+    button(T("esc_detect")) == nil and button(T("esc_stop")) ~= nil and shows("esc_trying_fmt"))
+  local inFlightOk = true
+  for _ = 1, 6 do
+    -- One request in flight: never a second poll before the first is answered.
+    if #sent - answeredUpTo > 1 then inFlightOk = false end
+    tick()
+  end
+  check("esc telemetry: the trial is polled one request at a time", polls == 3 and inFlightOk, polls)
+  escWrites = writesOf(216, before + 1)
+  check("esc telemetry: a wiring that is found writes half duplex and pin swap",
+    #escWrites == 1 and bytes(escWrites[1].payload) == "2,1,200,0,0,15,1,0,0,0",
+    escWrites[1] and bytes(escWrites[1].payload))
+  do
+    -- The stop goes first: the port goes back as it booted, then the config is written.
+    local stopAt, writeAt
+    for i = before + 1, #sent do
+      if sent[i].command == 0x5F14 and sent[i].payload[1] == 2 then stopAt = stopAt or i end
+      if sent[i].command == 216 then writeAt = i end
+    end
+    check("esc telemetry: the trial is stopped before the wiring is written", stopAt and writeAt and stopAt < writeAt)
+  end
+  check("esc telemetry: and asks for Save and restart",
+    shows("esc_found") and button(T("btn_save_restart")) ~= nil and not button(T("esc_detect")).enabled)
+  check("esc telemetry: pin swap and half duplex are not shown as settings", #choiceFields() == 0)
+  before = #sent
+  tick(1)
+  check("esc telemetry: no polling once the trial has ended", #writesOf(0x5F14, before + 1) == 0)
+
+  -- The wiring already set answers: nothing to write.
+  openPage(14, "esctelemetry")
+  settle()
+  check("esc telemetry: with telemetry set up the drop-down shows the protocol", choiceFields()[1].get() == 2)
+  press(T("btn_next"))
+  check("esc telemetry: Next goes to the port, the current one in focus",
+    shows("esc_port_title") and button("UART3").focused)
+  press(T("btn_next"))
+  polls, answer = 2, {2, 0, 0, 0, 200, 0, 2, 0, 4, 1}
+  before = #sent
+  press(T("esc_detect"))
+  settle()
+  check("esc telemetry: the wiring that is set answers, so nothing is written",
+    shows("esc_wiring_ok") and #writesOf(216, before + 1) == 0 and button(T("btn_save_restart")) == nil)
+
+  -- No answer on any wiring; a trial the flight controller refuses is not stopped.
+  polls, answer = 2, {3, 3, 0, 0, 0, 0, 0, 0, 4, 1}
+  press(T("esc_detect"))
+  settle()
+  check("esc telemetry: no answer on any wiring says so", shows("esc_not_found") and button(T("esc_detect")).enabled)
+  polls, answer = 2, {4, 0, 0, 0, 0, 0, 0, 0, 0, 1}
+  before = #sent
+  press(T("esc_detect"))
+  settle()
+  local stopsSent = 0
+  for _, m in ipairs(writesOf(0x5F14, before + 1)) do
+    if m.payload[1] == 2 then stopsSent = stopsSent + 1 end
+  end
+  check("esc telemetry: a refused trial says so and is not stopped", shows("esc_rejected") and stopsSent == 0, stopsSent)
+
+  -- Leaving the screen while it runs stops it.
+  polls, answer = -100, nil
+  press(T("esc_detect"))
+  before = #sent
+  press(T("btn_back"))
+  trialWrites = writesOf(0x5F14, before + 1)
+  check("esc telemetry: Back stops a running trial",
+    shows("esc_port_title") and #trialWrites >= 1 and bytes(trialWrites[#trialWrites].payload) == "2")
+  replies[0x5F14] = nil
+
+  -- Battery: voltage and current from the ESC, each yes or no.
+  press(T("btn_next"))
+  press(T("btn_next"))
+  check("esc telemetry: then the battery, two yes or no choices",
+    shows("esc_battery_title") and #choiceFields() == 2 and choiceFields()[1].get() == 0 and choiceFields()[2].get() == 0)
+  before = #sent
+  choiceFields()[1].set(1)
+  tick()
+  local batteryWrites = writesOf(33, before + 1)
+  -- MSP_SET_BATTERY_CONFIG: byte 4 is the voltage source, byte 5 the current source; 2 is the ESC.
+  check("esc telemetry: voltage from the ESC writes the voltage meter source",
+    #batteryWrites == 1 and batteryWrites[1].payload[4] == 2 and batteryWrites[1].payload[5] == 1
+      and #batteryWrites[1].payload == 81, batteryWrites[1] and bytes(batteryWrites[1].payload))
+  check("esc telemetry: a meter change needs a restart", shows("esc_changed") and button(T("btn_save_restart")) ~= nil)
+  before = #sent
+  choiceFields()[2].set(1)
+  tick()
+  choiceFields()[1].set(0)
+  tick()
+  batteryWrites = writesOf(33, before + 1)
+  check("esc telemetry: turning one off puts back the source it had",
+    #batteryWrites == 2 and batteryWrites[2].payload[4] == 1 and batteryWrites[2].payload[5] == 2,
+    batteryWrites[2] and bytes(batteryWrites[2].payload))
+
+  -- Not used: protocol none, the feature off, the port freed, the meter back.
+  press(T("btn_back"))
+  press(T("btn_back"))
+  press(T("btn_back"))
+  before = #sent
+  press(T("esc_not_used"))
+  escWrites, featureWrites, escPorts = writesOf(216, before + 1), writesOf(37, before + 1), writesOf(55, before + 1)
+  batteryWrites = writesOf(33, before + 1)
+  check("esc telemetry: Not used writes protocol none and turns the feature off",
+    #escWrites == 1 and escWrites[1].payload[1] == 0 and #featureWrites == 1
+      and bytes(featureWrites[1].payload) == "0,0,0,0", featureWrites[1] and bytes(featureWrites[1].payload))
+  check("esc telemetry: Not used frees the port",
+    #escPorts == 1 and bytes(escPorts[1].payload) == "2,0,0,0,0,0,0,0,0", escPorts[1] and bytes(escPorts[1].payload))
+  check("esc telemetry: Not used takes the battery off the ESC",
+    #batteryWrites == 1 and batteryWrites[1].payload[4] == 1 and batteryWrites[1].payload[5] == 1)
+  check("esc telemetry: Not used ends with Save and restart",
+    shows("esc_changed") and button(T("btn_save_restart")) ~= nil and choiceFields()[1].get() == -1)
+
+  -- Discard writes back what the step found when it made its first change:
+  -- every port as it was, and the battery as it was read.
+  before = #sent
+  discardAll()
+  escWrites, featureWrites, escPorts = writesOf(216, before + 1), writesOf(37, before + 1), writesOf(55, before + 1)
+  batteryWrites = writesOf(33, before + 1)
+  check("esc telemetry: Discard puts the protocol, the feature, the ports and the battery back",
+    #escWrites == 1 and bytes(escWrites[1].payload) == "2,0,200,0,0,15,0,0,0,0"
+      and #featureWrites == 1 and bytes(featureWrites[1].payload) == "0,0,0,8"
+      and #escPorts == 6 and bytes(escPorts[3].payload) == "2,0,4,0,0,0,0,0,0"
+      and bytes(escPorts[2].payload) == "1,0,0,0,0,0,0,0,0"
+      and #batteryWrites == 1 and batteryWrites[1].payload[4] == 1 and batteryWrites[1].payload[5] == 1
+      and #batteryWrites[1].payload == 81 and ctx.back == 1,
+    bytes(escWrites[1] and escWrites[1].payload or {}) .. " / " .. #featureWrites .. " / "
+      .. #escPorts .. " / " .. #batteryWrites .. " / " .. ctx.back)
+
+  -- A port change is still owed a restart after the step is closed and
+  -- opened again, and Discard then clears the port the second instance chose.
+  do
+    -- Byte 2 of each port's function mask, by port number.
+    local function masks(list)
+      replies[54] = function(m)
+        local out = {}
+        for i = 1, 6 * 9 do out[i] = m.simulatorResponse[i] end
+        for index, mask in pairs(list) do out[(index - 1) * 9 + 3] = mask end
+        return out
+      end
+    end
+    masks({})   -- the protocol is set, with no port yet
+    openPage(14, "esctelemetry")
+    settle()
+    press(T("btn_next"))
+    press("UART2")
+    check("esc telemetry: a new port asks for Save and restart", button(T("btn_save_restart")) ~= nil)
+    masks({[2] = 4})   -- what the flight controller holds now
+    reopenStep(7, "esctelemetry")
+    press(T("btn_next"))
+    check("esc telemetry: closed and opened again, the port screen still asks for Save and restart",
+      shows("esc_port_title") and shows("esc_changed") and button(T("btn_save_restart")) ~= nil
+        and button(T("btn_next")) == nil and button("UART2").focused)
+    press("UART2")
+    check("esc telemetry: and the wiring cannot be detected before it",
+      shows("esc_port_title") and button(T("esc_detect")) == nil)
+    before = #sent
+    press("UART3")
+    escPorts = writesOf(55, before + 1)
+    check("esc telemetry: the reopened step moves the telemetry to another port",
+      #escPorts == 2 and bytes(escPorts[1].payload) == "1,0,0,0,0,0,0,0,0"
+        and bytes(escPorts[2].payload) == "2,0,4,0,0,0,0,0,0", escPorts[2] and bytes(escPorts[2].payload))
+    before = #sent
+    discardAll()
+    local cleared, wrong = {}, 0
+    for _, m in ipairs(writesOf(55, before + 1)) do
+      local pl = m.payload
+      if pl[2] + pl[3] + pl[4] + pl[5] == 0 then cleared[pl[1]] = true else wrong = wrong + 1 end
+    end
+    check("esc telemetry: Discard then clears both ports, leaving none on ESC telemetry",
+      cleared[1] and cleared[2] and wrong == 0 and ctx.back == 1, wrong)
+  end
+
+  -- The battery is read on its own and may answer after a change was made:
+  -- Discard still puts back the sources it had, here both on the ESC.
+  configured()
+  replies[32] = function(m)
+    local out = {}
+    for i, b in ipairs(m.simulatorResponse) do out[i] = b end
+    out[4], out[5] = 2, 2
+    return out
+  end
+  held[32] = true
+  openPage(14, "esctelemetry")
+  settle()
+  choiceFields()[1].set(3)   -- a change before the battery has answered
+  tick()
+  releaseHeld(32)
+  settle()
+  press(T("btn_back"))
+  before = #sent
+  press(T("esc_not_used"))
+  batteryWrites = writesOf(33, before + 1)
+  check("esc telemetry: Not used takes a battery that answered late off the ESC",
+    #batteryWrites == 1 and batteryWrites[1].payload[4] == 1 and batteryWrites[1].payload[5] == 1)
+  before = #sent
+  discardAll()
+  batteryWrites = writesOf(33, before + 1)
+  check("esc telemetry: and Discard puts its sources back, not None",
+    #batteryWrites == 1 and batteryWrites[1].payload[4] == 2 and batteryWrites[1].payload[5] == 2
+      and #batteryWrites[1].payload == 81,
+    batteryWrites[1] and (batteryWrites[1].payload[4] .. "," .. batteryWrites[1].payload[5]))
+  -- A change with no battery change leaves the battery alone on Discard.
+  openPage(14, "esctelemetry")
+  settle()
+  choiceFields()[1].set(3)
+  tick()
+  before = #sent
+  discardAll()
+  check("esc telemetry: Discard does not write a battery that was not changed", #writesOf(33, before + 1) == 0)
+  replies[32] = nil
+
+  -- F.BUS telemetry is set up elsewhere.
+  replies[123] = {13, 0, 200, 0, 0, 15, 0, 0, 0, 0}
+  openPage(14, "esctelemetry")
+  settle()
+  check("esc telemetry: F.BUS telemetry is left alone, with Next only",
+    shows("esc_elsewhere_fmt") and #choiceFields() == 0 and button(T("esc_not_used")) == nil
+      and button(T("btn_next")) ~= nil)
+  replies[123], replies[36], replies[54] = nil, nil, nil
+
+  -- Castle Link reads telemetry on the throttle wire.
+  motorReply(0, requireModule("lib/msp_motor_config.lua").CASTLE_PROTOCOL)
+  openPage(14, "esctelemetry")
+  settle()
+  check("esc telemetry: with Castle Link it says the throttle wire carries it, with Next only",
+    shows("esc_castle") and #choiceFields() == 0 and button(T("esc_not_used")) == nil
+      and button(T("btn_next")) ~= nil)
+  replies[131] = nil
+
+  -- No motor: nothing to set up.
+  replies[101] = function(m)
+    local out = {}
+    for i, b in ipairs(m.simulatorResponse) do out[i] = b end
+    out[28] = 0   -- motor_count
+    return out
+  end
+  openPage(14, "esctelemetry")
+  settle()
+  check("esc telemetry: a model with no motor is told so, with Next only",
+    shows("esc_no_motor") and #choiceFields() == 0 and button(T("esc_not_used")) == nil
+      and button(T("btn_next")) ~= nil)
+  replies[101] = nil
+end
 
 -- Centre: every surface held at its centre; nudging writes the Mid.
 openPage(14, "centre")
@@ -1101,8 +2160,8 @@ openPage(14, "direction")
 settle()
 headers[#headers].opts.onTool()
 tick()
-press("3. " .. T("step_airframe"))
-check("the step list opens a step", headers[#headers].title == T("name") .. " / 3. " .. T("step_airframe"))
+press("4. " .. T("step_airframe"))
+check("the step list opens a step", headers[#headers].title == T("name") .. " / 4. " .. T("step_airframe"))
 do
   local empty = {}
   for _ = 1, 32 * 14 do empty[#empty + 1] = 0 end
@@ -1111,7 +2170,7 @@ do
   settle()
   check("no surfaces: the step points to Airframe", button(T("go_airframe")) ~= nil)
   press(T("go_airframe"))
-  check("and that opens it", headers[#headers].title == T("name") .. " / 3. " .. T("step_airframe"))
+  check("and that opens it", headers[#headers].title == T("name") .. " / 4. " .. T("step_airframe"))
   replies[172] = nil
 end
 
@@ -1135,8 +2194,8 @@ local function footer()
   return row
 end
 
-local STEP_KEYS = {"sensors", "receiver", "airframe", "servotype", "motor", "centre", "direction", "limits",
-  "throws", "travel", "gyro", "trimgain", "modes", "style", "finish"}
+local STEP_KEYS = {"sensors", "receiver", "busoutput", "airframe", "servotype", "motor", "esctelemetry", "centre",
+  "direction", "limits", "throws", "travel", "gyro", "trimgain", "modes", "style", "finish"}
 local FORWARD = {[T("btn_next")] = true, [T("dir_save_next")] = true, [T("fin_button")] = true,
   [T("btn_save_restart")] = true}
 local badFooter, skips = {}, {}

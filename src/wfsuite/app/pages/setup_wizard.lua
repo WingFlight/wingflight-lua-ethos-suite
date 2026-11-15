@@ -13,10 +13,11 @@
 -- dropped when it closes, and talks to the shell only through the `wiz` table
 -- below -- the counterpart of the configurator's setContext("setupWizard").
 --
--- Two configurator steps stay in the Configurator. The radio talks to the
--- flight controller through the receiver, so receiver protocol setup and the
--- ESC telemetry port can't be done from it: the Receiver step here only
--- checks the sticks and the channel order.
+-- One part of the configurator's wizard stays in the Configurator. The radio
+-- talks to the flight controller through the receiver, so the receiver port
+-- and protocol can't be set up from it: the Receiver step here only checks
+-- the sticks and the channel order. Every other step, the servo bus and ESC
+-- telemetry included, is here.
 --
 -- Safety, as in the configurator:
 --   * The wizard needs timed overrides (API 22.14). Everything it holds -- the
@@ -107,10 +108,15 @@ local BTN_CANCEL = "@i18n(app.btn_cancel)@"
 local STEPS = {
   {key = "sensors", title = "@i18n(app.modules.setup_wizard.step_sensors)@"},
   {key = "receiver", title = "@i18n(app.modules.setup_wizard.step_receiver)@"},
+  -- Optional. Before the airframe, because a bus output is what gives the
+  -- model more servos than the board has pins for.
+  {key = "busoutput", title = "@i18n(app.modules.setup_wizard.step_busoutput)@"},
   {key = "airframe", title = "@i18n(app.modules.setup_wizard.step_airframe)@"},
   -- The one PWM update rate of the board's servo outputs: no surfaces needed.
   {key = "servotype", title = "@i18n(app.modules.setup_wizard.step_servotype)@"},
   {key = "motor", title = "@i18n(app.modules.setup_wizard.step_motor)@"},
+  -- Optional. After the motor, whose ESC it reads.
+  {key = "esctelemetry", title = "@i18n(app.modules.setup_wizard.step_esctelemetry)@"},
   {key = "centre", title = "@i18n(app.modules.setup_wizard.step_centre)@", needsSurfaces = true},
   {key = "direction", title = "@i18n(app.modules.setup_wizard.step_direction)@", needsSurfaces = true},
   {key = "limits", title = "@i18n(app.modules.setup_wizard.step_limits)@", needsSurfaces = true},
@@ -128,6 +134,13 @@ local STEPS = {
 -- restart, which the page itself sits through.
 local memory = package.loaded["wfsuite.setup_wizard.memory"] or {stepKey = nil}
 package.loaded["wfsuite.setup_wizard.memory"] = memory
+-- Steps whose change is on the flight controller but only used after a
+-- restart, by step key (wiz.needRestart()). Kept here, not in the step: a
+-- step is dropped when it closes, and the fact outlasts it, and the wizard
+-- being left, until the wizard restarts the flight controller.
+-- restartSaved is what it was at the last save, for Discard.
+memory.restart = memory.restart or {}
+memory.restartSaved = memory.restartSaved or {}
 
 -- The servos in use, on a PWM output, a bus channel or both: mixer output N
 -- drives servo config N - 1, servo override N - 1 and servo probe N - 1
@@ -415,6 +428,12 @@ local function open(opts)
   function wiz.armed() return armed == true end
   function wiz.change(key, original, restore) change(key, original, restore) end
   function wiz.markChanged() markChanged() end
+
+  -- The open step made a change that the flight controller only uses after a
+  -- restart: the step ends with Save and restart until the wizard has
+  -- restarted it, also when the step is closed and opened again.
+  function wiz.needRestart() memory.restart[STEPS[stepIndex].key] = true end
+  function wiz.restartNeeded() return memory.restart[STEPS[stepIndex].key] == true end
 
   -- Redraw the step's picture.
   function wiz.invalidate()
@@ -876,6 +895,8 @@ local function open(opts)
     changes = {}
     changeIndex = {}
     pending = false
+    -- What was saved without a restart still needs one.
+    for key in pairs(memory.restart) do memory.restart[key] = memory.restartSaved[key] end
   end
 
   -- Started from wakeup (see requestSave()): the progress dialog must not be
@@ -907,6 +928,8 @@ local function open(opts)
       pending = false
       changes = {}
       changeIndex = {}
+      for key in pairs(memory.restartSaved) do memory.restartSaved[key] = nil end
+      for key, value in pairs(memory.restart) do memory.restartSaved[key] = value end
       if headerHandle and headerHandle.setSaveEnabled then headerHandle.setSaveEnabled(false) end
       if done then done() end
     else
@@ -933,6 +956,9 @@ local function open(opts)
   -- moves the bar). A board that comes back sooner ends it early.
   local function startReboot()
     closeStep()
+    -- Everything saved is in use after this.
+    for key in pairs(memory.restart) do memory.restart[key] = nil end
+    for key in pairs(memory.restartSaved) do memory.restartSaved[key] = nil end
     rebootWait = {startedAt = os.clock(), sawDisconnect = false, remaining = REBOOT_TIMEOUT_SECONDS, percent = 0}
     bus.publish("msp.request", reboot.buildWriteMessage())
     closeProgress()

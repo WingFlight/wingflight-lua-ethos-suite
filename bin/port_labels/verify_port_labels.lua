@@ -4,9 +4,9 @@
 --     lua5.4 bin/port_labels/verify_port_labels.lua
 --
 -- What it drives:
---   * lib/port_labels.lua: the tables are empty (no WingFlight label data yet), so every
---     lookup must return nil and the page shows plain UART names. The lookup logic itself
---     is exercised with test entries injected into the same tables.
+--   * lib/port_labels.lua: the Wingflight Configurator's connector names per board design
+--     (the Setup Wizard's Servo bus step finds the SBUS connector by them), and the lookup
+--     logic itself with test entries injected into the same tables.
 --   * lib/msp_board_info.lua: parse() of MSP_BOARD_INFO replies, including truncated and
 --     generic-board cases, and the read message's error path.
 
@@ -72,16 +72,17 @@ local function truncate(buf, n)
 end
 
 -- ---------------------------------------------------------------------------
-print("labels: no WingFlight label data yet, every lookup is the plain UART name")
+print("labels: the Wingflight Configurator's names per board design")
 -- ---------------------------------------------------------------------------
 
-local designCount, nameCount = 0, 0
-for _ in pairs(port_labels.DESIGNS) do designCount = designCount + 1 end
-for _ in pairs(port_labels.BY_NAME) do nameCount = nameCount + 1 end
-check("no design tables copied from Rotorflight", designCount == 0, designCount)
-check("no board_name tables copied from Rotorflight", nameCount == 0, nameCount)
-check("RF007 design gives nil", port_labels.lookup("F7B5", 3) == nil)
-check("GOOSKY_F701 name gives nil", port_labels.lookup("RTFL", 3, "GOOSKY_F701") == nil)
+check("RF007 (F7B5): UART1 is S.BUS", port_labels.lookup("F7B5", 0) == "S.BUS", port_labels.lookup("F7B5", 0))
+check("RF007 (F7B5): UART4 is Port A", port_labels.lookup("F7B5", 3) == "Port A", port_labels.lookup("F7B5", 3))
+check("Nexus X (F7C5): UART1 is S.BUS", port_labels.lookup("F7C5", 0) == "S.BUS")
+check("Nexus F7 (F7A1): UART2 is S.BUS", port_labels.lookup("F7A1", 1) == "S.BUS")
+check("RF007 V3 (F7B5M): UART1 is the FBUS mux, not S.BUS", port_labels.lookup("F7B5M", 0) == "FBUS Mux")
+check("a UART the design does not name gives nil", port_labels.lookup("F7B5", 8) == nil)
+check("an unknown design gives nil", port_labels.lookup("RTFL", 3) == nil)
+check("an unlisted board_name falls through to the design", port_labels.lookup("F7B5", 0, "VANTAC_RF007") == "S.BUS")
 check("nil arguments give nil", port_labels.lookup(nil, nil, nil) == nil)
 
 -- ---------------------------------------------------------------------------
@@ -97,7 +98,7 @@ check("name entry beats design entry", port_labels.lookup("TEST_DESIGN", 2, "TES
 check("unlisted name falls through to design", port_labels.lookup("TEST_DESIGN", 2, "OTHER") == "Port X")
 check("generic design without name gives nil", port_labels.lookup("RTFL", 2) == nil)
 
--- Remove the injected entries again, so the tables are empty for the rest of the run.
+-- Remove the injected entries again.
 port_labels.DESIGNS["TEST_DESIGN"] = nil
 port_labels.BY_NAME["TEST_BOARD"] = nil
 

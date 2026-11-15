@@ -9819,6 +9819,13 @@
           "reverse_text": false,
           "max_length": 8
         },
+        "step_busoutput": {
+          "english": "Servo bus",
+          "translation": "Servo bus",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 9
+        },
         "step_airframe": {
           "english": "Airframe",
           "translation": "Airframe",
@@ -9839,6 +9846,13 @@
           "needs_translation": true,
           "reverse_text": false,
           "max_length": 5
+        },
+        "step_esctelemetry": {
+          "english": "ESC telemetry",
+          "translation": "ESC telemetry",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 13
         },
         "step_centre": {
           "english": "Center",
@@ -10792,6 +10806,97 @@
           "reverse_text": false,
           "max_length": 4
         },
+        "mot_motor_fmt": {
+          "english": "Motor %d",
+          "translation": "Motor %d",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 8
+        },
+        "mot_spin_twin": {
+          "english": "One motor runs at a time: check which is which.",
+          "translation": "One motor runs at a time: check which is which.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 47
+        },
+        "mot_cal_title": {
+          "english": "Calibrate the ESC",
+          "translation": "Calibrate the ESC",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 17
+        },
+        "mot_cal_text": {
+          "english": "A PWM ESC has to learn where full and zero throttle are. Unplug the flight battery from the ESC first. Press Next if the ESC is already calibrated.",
+          "translation": "A PWM ESC has to learn where full and zero throttle are. Unplug the flight battery from the ESC first. Press Next if the ESC is already calibrated.",
+          "needs_translation": true,
+          "max_length": 147,
+          "reverse_text": false
+        },
+        "mot_cal_unplugged": {
+          "english": "Battery unplugged",
+          "translation": "Battery unplugged",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 17
+        },
+        "mot_cal_full_text": {
+          "english": "Full throttle stays on every motor output until you press Set zero throttle. Keep the battery unplugged for now.",
+          "translation": "Full throttle stays on every motor output until you press Set zero throttle. Keep the battery unplugged for now.",
+          "needs_translation": true,
+          "max_length": 112,
+          "reverse_text": false
+        },
+        "mot_cal_full": {
+          "english": "Set full throttle",
+          "translation": "Set full throttle",
+          "needs_translation": true,
+          "max_length": 17,
+          "reverse_text": false
+        },
+        "mot_cal_hold_text": {
+          "english": "Plug the battery in when it says so below. When the ESC then beeps to confirm full throttle, press Set zero throttle. It beeps again to confirm.",
+          "translation": "Plug the battery in when it says so below. When the ESC then beeps to confirm full throttle, press Set zero throttle. It beeps again to confirm.",
+          "needs_translation": true,
+          "max_length": 144,
+          "reverse_text": false
+        },
+        "mot_cal_ramping_fmt": {
+          "english": "Going to full throttle: wait %d s.",
+          "translation": "Going to full throttle: wait %d s.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 34
+        },
+        "mot_cal_plug_in": {
+          "english": "Full throttle is set. Plug the battery in now.",
+          "translation": "Full throttle is set. Plug the battery in now.",
+          "needs_translation": true,
+          "max_length": 46,
+          "reverse_text": false
+        },
+        "mot_cal_low": {
+          "english": "Set zero throttle",
+          "translation": "Set zero throttle",
+          "needs_translation": true,
+          "max_length": 17,
+          "reverse_text": false
+        },
+        "mot_cal_done": {
+          "english": "Zero throttle is set. If the ESC did not confirm, unplug the battery and try again.",
+          "translation": "Zero throttle is set. If the ESC did not confirm, unplug the battery and try again.",
+          "needs_translation": true,
+          "max_length": 83,
+          "reverse_text": false
+        },
+        "mot_cal_stopped": {
+          "english": "Calibration stopped. The output is back at zero.",
+          "translation": "Calibration stopped. The output is back at zero.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 48
+        },
         "cen_intro": {
           "english": "The surfaces are held at center. Set the horn and linkage so the surface is close to neutral first, then fine-tune here.",
           "translation": "The surfaces are held at center. Set the horn and linkage so the surface is close to neutral first, then fine-tune here.",
@@ -11666,6 +11771,370 @@
           "needs_translation": true,
           "reverse_text": false,
           "max_length": 15
+        },
+        "bus_title": {
+          "english": "Servo bus",
+          "translation": "Servo bus",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 9
+        },
+        "bus_intro": {
+          "english": "Optional. Servos on an F.Bus or SBUS line plug into a serial port, not the servo pins. Which port is the bus on?",
+          "translation": "Optional. Servos on an F.Bus or SBUS line plug into a serial port, not the servo pins. Which port is the bus on?",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 112
+        },
+        "bus_none": {
+          "english": "None",
+          "translation": "None",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 4
+        },
+        "bus_proto_title": {
+          "english": "Bus protocol",
+          "translation": "Bus protocol",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 12
+        },
+        "bus_proto_fmt": {
+          "english": "The bus is on %s. Servo 1 is channel 1 on the bus, servo 2 is channel 2, and so on.",
+          "translation": "The bus is on %s. Servo 1 is channel 1 on the bus, servo 2 is channel 2, and so on.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 83
+        },
+        "bus_fbus_help": {
+          "english": "Servos and sensors answer, so the wiring can be checked.",
+          "translation": "Servos and sensors answer, so the wiring can be checked.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 56
+        },
+        "bus_sbus_help": {
+          "english": "One-way. Checked later, when each servo is moved.",
+          "translation": "One-way. Checked later, when each servo is moved.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 49
+        },
+        "bus_channels_fmt": {
+          "english": "%d channels",
+          "translation": "%d channels",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 11
+        },
+        "bus_channels_help": {
+          "english": "The highest servo number the bus carries.",
+          "translation": "The highest servo number the bus carries.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 41
+        },
+        "bus_changed": {
+          "english": "The change takes effect after a restart.",
+          "translation": "The change takes effect after a restart.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 40
+        },
+        "bus_signal_title": {
+          "english": "Bus signal",
+          "translation": "Bus signal",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 10
+        },
+        "bus_fbus_signal": {
+          "english": "With the bus powered, its F.Bus servos and sensors should answer within a few seconds.",
+          "translation": "With the bus powered, its F.Bus servos and sensors should answer within a few seconds.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 86
+        },
+        "bus_sbus_signal": {
+          "english": "SBUS is sent on the port's TX pin. Nothing answers on SBUS, so check it in the later steps, where each servo is moved.",
+          "translation": "SBUS is sent on the port's TX pin. Nothing answers on SBUS, so check it in the later steps, where each servo is moved.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 118
+        },
+        "bus_answering_fmt": {
+          "english": "%d answering.",
+          "translation": "%d answering.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 13
+        },
+        "bus_no_answer": {
+          "english": "Nothing answering. The bus may be on the port's other pin.",
+          "translation": "Nothing answering. The bus may be on the port's other pin.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 58
+        },
+        "bus_tx_pin_fmt": {
+          "english": "F.Bus is on the TX pin of %s.",
+          "translation": "F.Bus is on the TX pin of %s.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 29
+        },
+        "bus_rx_pin_fmt": {
+          "english": "F.Bus is on the RX pin of %s.",
+          "translation": "F.Bus is on the RX pin of %s.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 29
+        },
+        "bus_other_pin": {
+          "english": "Use the other pin",
+          "translation": "Use the other pin",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 17
+        },
+        "bus_pin_fixed": {
+          "english": "This firmware can't switch the pin from here.",
+          "translation": "This firmware can't switch the pin from here.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 45
+        },
+        "bus_no_answer_detect": {
+          "english": "Nothing answering. Detect wiring tries each pin and polarity.",
+          "translation": "Nothing answering. Detect wiring tries each pin and polarity.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 61
+        },
+        "bus_found": {
+          "english": "Found it. The bus answers on this wiring, which is now in use. Save to keep it.",
+          "translation": "Found it. The bus answers on this wiring, which is now in use. Save to keep it.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 79
+        },
+        "bus_wiring_ok": {
+          "english": "The bus answers on the wiring already set.",
+          "translation": "The bus answers on the wiring already set.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 42
+        },
+        "bus_not_found": {
+          "english": "Nothing answered on any wiring. Check the bus has power and is plugged into this port.",
+          "translation": "Nothing answered on any wiring. Check the bus has power and is plugged into this port.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 86
+        },
+        "bus_rejected": {
+          "english": "The flight controller can't test the wiring now: the model is armed, or the board has an F.Bus mux.",
+          "translation": "The flight controller can't test the wiring now: the model is armed, or the board has an F.Bus mux.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 99
+        },
+        "esc_title": {
+          "english": "ESC telemetry",
+          "translation": "ESC telemetry",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 13
+        },
+        "esc_intro": {
+          "english": "Optional. An ESC with a telemetry wire can send voltage, current, temperature and RPM to a serial port.",
+          "translation": "Optional. An ESC with a telemetry wire can send voltage, current, temperature and RPM to a serial port.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 103
+        },
+        "esc_no_motor": {
+          "english": "This model has no motor, so there is no ESC telemetry to set up.",
+          "translation": "This model has no motor, so there is no ESC telemetry to set up.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 64
+        },
+        "esc_elsewhere_fmt": {
+          "english": "ESC telemetry is set to %s, which does not use an ESC telemetry port. Change it in the Configurator.",
+          "translation": "ESC telemetry is set to %s, which does not use an ESC telemetry port. Change it in the Configurator.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 100
+        },
+        "esc_castle": {
+          "english": "Castle Link reads telemetry on the throttle wire, so it needs no port.",
+          "translation": "Castle Link reads telemetry on the throttle wire, so it needs no port.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 70
+        },
+        "esc_not_used": {
+          "english": "Not used",
+          "translation": "Not used",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 8
+        },
+        "esc_not_used_help": {
+          "english": "No telemetry wire from the ESC.",
+          "translation": "No telemetry wire from the ESC.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 31
+        },
+        "esc_choose": {
+          "english": "Choose...",
+          "translation": "Choose...",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 9
+        },
+        "esc_protocol_help": {
+          "english": "The make of your ESC. Its manual says which telemetry it sends.",
+          "translation": "The make of your ESC. Its manual says which telemetry it sends.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 63
+        },
+        "esc_port_title": {
+          "english": "ESC telemetry port",
+          "translation": "ESC telemetry port",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 18
+        },
+        "esc_port_fmt": {
+          "english": "Which port is the %s telemetry wire plugged into? Ports in use are greyed out.",
+          "translation": "Which port is the %s telemetry wire plugged into? Ports in use are greyed out.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 78
+        },
+        "esc_port_none": {
+          "english": "No port chosen yet.",
+          "translation": "No port chosen yet.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 19
+        },
+        "esc_changed": {
+          "english": "The change takes effect after a restart.",
+          "translation": "The change takes effect after a restart.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 40
+        },
+        "esc_wiring_title": {
+          "english": "ESC wiring",
+          "translation": "ESC wiring",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 10
+        },
+        "esc_wiring_text": {
+          "english": "Power the ESC, then press Detect wiring. The flight controller tries each way the wire can be connected until the ESC answers.",
+          "translation": "Power the ESC, then press Detect wiring. The flight controller tries each way the wire can be connected until the ESC answers.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 126
+        },
+        "esc_detect": {
+          "english": "Detect wiring",
+          "translation": "Detect wiring",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 13
+        },
+        "esc_stop": {
+          "english": "Stop",
+          "translation": "Stop",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 4
+        },
+        "esc_trying_fmt": {
+          "english": "Trying wiring %d of %d...",
+          "translation": "Trying wiring %d of %d...",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 25
+        },
+        "esc_found": {
+          "english": "The ESC answers on a different wiring. Save and restart to use it.",
+          "translation": "The ESC answers on a different wiring. Save and restart to use it.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 66
+        },
+        "esc_wiring_ok": {
+          "english": "The ESC answers. The wiring is right.",
+          "translation": "The ESC answers. The wiring is right.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 37
+        },
+        "esc_not_found": {
+          "english": "No answer from the ESC. Check that it is powered, and the wire, port and protocol.",
+          "translation": "No answer from the ESC. Check that it is powered, and the wire, port and protocol.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 82
+        },
+        "esc_rejected": {
+          "english": "The flight controller can't test this wiring. Disarm, and check the port and protocol.",
+          "translation": "The flight controller can't test this wiring. Disarm, and check the port and protocol.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 86
+        },
+        "esc_no_reply": {
+          "english": "The flight controller did not answer. Try again.",
+          "translation": "The flight controller did not answer. Try again.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 48
+        },
+        "esc_stopped": {
+          "english": "Detection stopped.",
+          "translation": "Detection stopped.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 18
+        },
+        "esc_battery_title": {
+          "english": "Battery from the ESC",
+          "translation": "Battery from the ESC",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 20
+        },
+        "esc_battery_text": {
+          "english": "The ESC can measure the battery in place of the flight controller's own sensors.",
+          "translation": "The ESC can measure the battery in place of the flight controller's own sensors.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 80
+        },
+        "esc_use_voltage": {
+          "english": "Use the ESC's voltage for the battery.",
+          "translation": "Use the ESC's voltage for the battery.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 38
+        },
+        "esc_use_current": {
+          "english": "Use the ESC's current and mAh used.",
+          "translation": "Use the ESC's current and mAh used.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 35
         }
       }
     },
