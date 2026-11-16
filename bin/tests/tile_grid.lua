@@ -34,8 +34,8 @@ local function equal(actual, expected)
 end
 
 for _, case in ipairs({
-  {472, 288, 4, 110, 118, 8, FONT_XS},
-  {632, 314, 5, 118, 124, 7, FONT_XS},
+  {472, 288, 4, 110, 118, 8, FONT_S},
+  {632, 314, 5, 118, 124, 7, FONT_S},
   {784, 406, 6, 120, 120, 10, FONT_S},
 }) do
   local cols, w, h, gap, font = grid.metrics(case[1], case[2])
@@ -81,25 +81,11 @@ for _, font in ipairs({FONT_XS, FONT_S}) do
   end
 end
 
--- A screen keeps FONT_S while every title fits its tile, and uses FONT_XS for all its
--- tiles when one would be cut (120px tile, 108px for the text).
-local short, long = {title = "Short"}, {title = "A title too long"}
-lcd.font(FONT_XS)
-assert(textWidth(long.title) <= 108, "the long title must fit in FONT_XS")
-equal(grid.fontForTitles({short, short}, 120, FONT_S), FONT_S)
-equal(grid.fontForTitles({short, long, short}, 120, FONT_S), FONT_XS)
-equal(grid.fitLabel(long.title, 120, grid.fontForTitles({short, long}, 120, FONT_S)), long.title)
--- An entry that gets no tile does not count, nor does a title that is not text.
-equal(grid.fontForTitles({short, long}, 120, FONT_S, function(entry) return entry ~= long end), FONT_S)
-equal(grid.fontForTitles({short, {title = 12345678901234567890}}, 120, FONT_S), FONT_S)
--- Already the smallest font: nothing is measured.
-measurements = 0
-equal(grid.fontForTitles({short, long}, 110, FONT_XS), FONT_XS)
-equal(measurements, 0)
+-- One tile font on every screen: the per-screen switch is gone.
+equal(grid.fontForTitles, nil)
 
 local savedLcd = lcd
 lcd = nil
 equal(grid.fitText("Unavailable metrics", 10, FONT_XS), "Unavailable metrics")
-equal(grid.fontForTitles({long}, 120, FONT_S), FONT_S)
 lcd = savedLcd
 print("Tile grid checks passed: layouts, font selection, padding, UTF-8 and narrow widths")

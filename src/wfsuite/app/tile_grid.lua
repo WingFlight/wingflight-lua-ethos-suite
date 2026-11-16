@@ -26,12 +26,13 @@ local function closestProfile(windowWidth, windowHeight)
 end
 
 -- Use wider tiles on compact radios: 4 columns at 472 px, 5 at 632 px,
--- and 6 at 784 px. Keep the smaller font on screens up to 640 px.
-local function chooseSpec(profile, windowWidth)
-  if windowWidth > LOW_RES_WIDTH then
-    return profile.large, FONT_S
-  end
-  return profile.large, FONT_XS
+-- and 6 at 784 px. Every tile on every screen uses FONT_S, so the tiles of all
+-- screens look alike. A title too wide for its tile is cut by fitLabel() with "...":
+-- that is accepted for the larger, easier-to-read font.
+local TILE_FONT = FONT_S
+
+local function chooseSpec(profile)
+  return profile.large, TILE_FONT
 end
 
 local function fitSpecToWindow(spec, windowWidth)
@@ -56,7 +57,7 @@ function tile_grid.metrics(windowWidth, windowHeight)
     windowWidth, windowHeight = lcd.getWindowSize()
   end
   local profile = closestProfile(windowWidth, windowHeight)
-  local spec, tileFont = chooseSpec(profile, windowWidth)
+  local spec, tileFont = chooseSpec(profile)
   local numPerRow, tileW, tileH, tilePadding = fitSpecToWindow(spec, windowWidth)
   return numPerRow, tileW, tileH, tilePadding, tileFont
 end
@@ -98,26 +99,6 @@ end
 
 function tile_grid.fitLabel(text, tileW, font, padding)
   return tile_grid.fitText(text, (tileW or 0) - (padding or BUTTON_INNER_PADDING), font)
-end
-
--- The font for the tiles of one screen. Only called while constructing buttons.
--- On the wide screens the tile font is FONT_S, and a title can be too long for the
--- tile in it: "PID Bandwidth" was cut to "PID Bandwid..." on 800x480, where it fits on
--- the X18, whose tiles use FONT_XS. A screen with such a title uses FONT_XS for all its
--- tiles, so every title is whole and the tiles of a screen stay alike.
--- isVisible(entry), optional, leaves out the entries that get no tile.
-function tile_grid.fontForTitles(entries, tileW, font, isVisible)
-  if font == FONT_XS or not (lcd and lcd.getTextSize and lcd.font) then return font end
-  local maxW = (tileW or 0) - BUTTON_INNER_PADDING
-  lcd.font(font)
-  for i = 1, #entries do
-    local entry = entries[i]
-    if (not isVisible or isVisible(entry)) and type(entry.title) == "string"
-        and lcd.getTextSize(entry.title) > maxW then
-      return FONT_XS
-    end
-  end
-  return font
 end
 
 return tile_grid
