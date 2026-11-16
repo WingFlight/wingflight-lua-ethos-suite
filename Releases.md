@@ -1,3 +1,15 @@
+# 0.0.43
+
+Use with the 0.0.43 firmware (MSP API 22.16); the 0.0.42 firmware works too, without servo names and F.Bus wiring detection.
+Add servo names: shown on the Servos tiles and set in the servo editor, shown on Mixer Rules outputs, and given by the Setup Wizard's Airframe step to the servos its mix assigns. Firmware without names shows numbers as before.
+Add a Servo bus step to the Setup Wizard for F.Bus and SBUS output, with Detect wiring on the 0.0.43 firmware.
+Add an ESC telemetry step to the Setup Wizard; only the receiver port and protocol are left to the Configurator.
+Add PWM ESC calibration and a spin test per motor to the Setup Wizard's Motor step.
+Add user dashboard themes: a theme folder in SCRIPTS:/wfsuite.user/dashboard/ is listed after the shipped themes.
+Change the menu tiles to one larger font on every radio; a title too wide for its tile is cut with "...".
+Fix the Tune Advisor counting a flight twice when the clear after its save did not reach the flight controller before the next flight.
+Fix Discard and restart handling in the Setup Wizard's Servo bus, ESC telemetry and Motor steps when a step is closed and opened again.
+
 # 0.0.42
 
 Use with the 0.0.42 firmware (MSP API 22.16), which is now required; older firmware is refused.
