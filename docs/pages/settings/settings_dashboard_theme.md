@@ -38,6 +38,15 @@ TODO: Verify persistence, reboot behaviour, profile scope and any restrictions i
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than
 firmware defaults; wire values may need scaling before display.
 
+## User themes
+
+Themes in folders under `SCRIPTS:/wfsuite.user/dashboard/<folder>/` are listed
+after the shipped themes, under their folder names, in every theme field on this
+page. The folder is read again each time the page opens. A user theme that
+cannot be loaded is drawn as **Default**. This page shows **Default** for a
+theme whose folder is gone, and saving the page stores that. See
+[Dashboard themes](../../dashboard-themes.md) for the folder layout.
+
 ## KSE4 and KSE5
 
 **KSE4** (`system/kse4`) and **KSE5** (`system/kse5`) follow the layouts of
