@@ -67,7 +67,23 @@ Rotorflight dashboard themes and objects are organized under:
 * **System**: `SCRIPTS:/wfsuite/widgets/dashboard/themes/<themename>/`
 * **User**:   `SCRIPTS:/wfsuite.user/dashboard/<themename>/`
 
-User themes override system themes of the same name and are safe from package updates.
+A package update does not touch user themes. A user theme is added to the theme
+list; it does not replace a system theme of the same name. It is listed after
+the system themes, under its folder name, and stored as `user/<themename>`,
+while a system theme is stored as `system/<themename>`. Its *Dashboard
+Settings* values go in their own `dashboard.user/<themename>` section of
+`settings.ini`.
+
+* A folder is a theme when it holds an `init.lua`. The folder name can use
+  letters, digits, `-`, `_` and `.`, but no spaces.
+* The theme pages read the folder again each time they open, so a theme copied
+  in over USB shows up without a restart.
+* If a user theme cannot be loaded (its folder is gone, or `init.lua` or a
+  phase file is missing or has an error), the dashboard draws **Default** in
+  its place and the Lua log has `[dashboard] user theme ... not loaded, using
+  Default`.
+* `@i18n(...)@` tags are not translated in a user theme. Write titles as the
+  plain text you want shown.
 
 ---
 
