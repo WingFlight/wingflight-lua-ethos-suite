@@ -125,6 +125,23 @@ away and saves it when you disarm.
 - Combining flights adds up the counts and averages each measurement weighted by how much data it came from.
   The flight controller weights its own figures slightly differently, so the combined response is a close
   estimate rather than exact; the stop figures combine exactly.
+- Sometimes the clear does not happen before the next flight: you arm again within a few seconds of the save,
+  or the clear fails three times on a poor link. The flight controller then keeps the saved flight and adds the
+  next one to it, so the next reading holds both. The radio notices this when, since that save, no clear was
+  answered and the link did not drop, and the new reading is on the same PID and rate profile and the same
+  tune, with more seconds and no count smaller. It saves the reading with a line naming the flight it holds,
+  and the page leaves that older flight out instead of counting it twice. Nothing saved is removed. The radio
+  cannot tell in three cases:
+  - After a link loss or a radio restart. A fresh pack restarts the flight controller, and the radio cannot
+    tell that apart from the same flight continuing. The reading is then saved beside the earlier flight
+    unmarked, and both count.
+  - A tune changed in flight and changed back.
+  - A clear the flight controller did but whose answer was lost.
+
+  In the last two cases one real flight can be left out of the advice.
+- In `history.csv` a flight whose reading holds an earlier saved flight is followed by a line
+  `contains,<date>,<flight seconds>` naming that flight. An older version of the suite skips that line and
+  counts both flights.
 - Built on flight controllers with more than 128 KB of flash.
 
 ## Source
