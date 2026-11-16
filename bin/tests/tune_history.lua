@@ -6,7 +6,9 @@
 -- reconnect; firmware without the tune advisor left alone), its pacing (a
 -- wait after the disarm and between requests, a failed axis asked again on
 -- its own, at most three link errors per disarm) and the page's aggregate
--- (only flights on the newest tune, counts added, ratios weighted).
+-- (only flights on the newest tune, counts added, ratios weighted), and the
+-- `contains` mark on a reading that also holds a saved flight the FC was not
+-- cleared of, which the aggregate then leaves out.
 
 local ROOT = "src/wfsuite/"
 
@@ -60,24 +62,31 @@ local tuneAdvisor = requireModule("lib/msp_tune_advisor.lua")
 local tuneHistory = requireModule("lib/tune_history.lua")
 
 -- Each reply is the simulator fixture with these overrides
-local reply = {seconds = 147, F = 100}
+local reply = {seconds = 147, F = 100, releases = nil}
 local realDecode = tuneAdvisor.decode
 tuneAdvisor.decode = function(buf)
   local data = realDecode(buf)
   data.seconds = reply.seconds
   data.a.F = reply.F
+  if reply.releases then data.a.releases = reply.releases end
   return data
 end
 
 local clock = 0
 os.clock = function() return clock end
+-- Each flight saved at its own date, as on a radio
+os.date = function() return string.format("2026-11-16 %08.1f", clock) end
 
 local MCU = "abc123"
 local HISTORY = "LOGS:/wfsuite/tune/" .. MCU .. "/history.csv"
 
+-- The active profiles every session update reports; false: unknown
+local profiles = {pid = 1, rate = 1}
 local handlers, requests, saved, states, task
 local function load()
   handlers, requests, saved, states = {}, {}, {}, {}
+  reply.F, reply.releases = 100, nil
+  profiles.pid, profiles.rate = 1, 1
   for k in pairs(files) do files[k] = nil end
   for i = #iniWrites, 1, -1 do iniWrites[i] = nil end
   local bus = {
@@ -92,7 +101,8 @@ local function load()
 end
 
 local function update(fields)
-  local snapshot = {connected = true, mcuId = MCU, craftName = "Wing"}
+  local snapshot = {connected = true, mcuId = MCU, craftName = "Wing",
+    pidProfile = profiles.pid or nil, rateProfile = profiles.rate or nil}
   for k, v in pairs(fields) do snapshot[k] = v end
   if fields.mcuId == false then snapshot.mcuId = nil end
   handlers["session.update"](snapshot)
@@ -134,7 +144,7 @@ local function lines()
 end
 
 local function fly(seconds, f)
-  reply.seconds, reply.F = seconds, f or 100
+  reply.seconds, reply.F = seconds, f or reply.F
   clock = clock + 60
   update({isArmed = true})
   update({isArmed = false})
@@ -432,6 +442,168 @@ do
   files[CHANGES] = "date;axis;setting\n2026-10-01 10:00:00,roll,P,50,60\n"
   check("rows under another header are still read", #tuneHistory.readChanges(MCU) == 1)
   files[CHANGES] = nil
+end
+
+-- A reading that holds the saved flight: the FC was not cleared after the save.
+-- Flight one is 140 s; the FC is not cleared, so the next reading holds 140 + 60 = 200 s.
+print("A reading that holds the saved flight")
+
+local function marks()
+  local n = 0
+  for _, line in ipairs(lines()) do
+    if line:match("^contains,") then n = n + 1 end
+  end
+  return n
+end
+
+local function savedSeconds()
+  local out = {}
+  for _, f in ipairs(tuneHistory.read(MCU)) do out[#out + 1] = tostring(f.seconds) end
+  return table.concat(out, ",")
+end
+
+local function combined()
+  local _, used, seconds = tuneHistory.aggregate(tuneHistory.read(MCU), 1)
+  return used, seconds
+end
+
+local function seen()
+  local used, seconds = combined()
+  return savedSeconds() .. " saved, " .. marks() .. " marks, " .. used .. " flights / " .. seconds .. " s combined"
+end
+
+-- Flies `seconds` and saves it with its clear not done: `how` is "arm" (the
+-- clear dropped by the queue, then an arm) or "fail" (three clears fail)
+local function flyUncleared(seconds, how)
+  reply.seconds = seconds
+  clock = clock + 60
+  update({isArmed = true})
+  update({isArmed = false})
+  if how == "fail" then
+    pump({clear = {n = 3, reason = "timeout"}}, nil, 60)
+  else
+    pump({clear = {n = 1, reason = "cleared"}}, 4)
+  end
+end
+
+-- Flight one (140 s) saved with its clear not done (see flyUncleared). `between`
+-- runs after the save, before the next flight, whose reading holds `nextSeconds`
+-- (default 200). `earlier`: a normal flight of 100 s first.
+local function heldCase(how, between, nextSeconds, earlier)
+  load()
+  if earlier then fly(100) end
+  flyUncleared(140, how)
+  if between then between() end
+  return fly(nextSeconds or 200)
+end
+
+do
+  local asked = heldCase("arm", nil, nil, true)
+  local used, seconds = combined()
+  check("armed again before the clear: the reading is saved marked, then cleared",
+    asked == "roll,pitch,yaw,clear" and marks() == 1, asked .. " / " .. seen())
+  check("armed again before the clear: 2 flights / 300 s with the earlier flight",
+    savedSeconds() == "100,140,200" and used == 2 and seconds == 300, seen())
+  local r = lines()
+  check("the mark follows the new flight's rows and names flight one",
+    r[#r]:match("^contains,2026%-11%-16 [%d%.]+,140$") ~= nil and r[#r - 1]:match(",200,yaw,") ~= nil, r[#r])
+  local flights = tuneHistory.read(MCU)
+  check("read() gives the newest flight what it contains",
+    flights[3].contains and flights[3].contains.date == flights[2].date and flights[3].contains.seconds == 140
+      and flights[2].contains == nil, tostring(flights[3].contains))
+end
+
+do
+  heldCase("fail", nil, nil, true)
+  local used, seconds = combined()
+  check("three clears failed: 2 flights / 300 s with the earlier flight",
+    marks() == 1 and used == 2 and seconds == 300, seen())
+end
+
+do
+  heldCase("arm", function()
+    update({connected = false, isArmed = false})
+    update({connected = true, isArmed = true})
+  end)
+  local used, seconds = combined()
+  check("after a new link the reading is saved unmarked, as before (2 flights / 340 s)",
+    marks() == 0 and used == 2 and seconds == 340, seen())
+end
+
+do
+  heldCase("arm", function() reply.F = 90 end)
+  check("another tune since the save: no mark", savedSeconds() == "140,200" and marks() == 0, seen())
+end
+
+do
+  heldCase("arm", function() reply.releases = 0 end)
+  local used, seconds = combined()
+  check("a count smaller than the saved flight's: no mark, both counted",
+    savedSeconds() == "140,200" and marks() == 0 and used == 2 and seconds == 340, seen())
+end
+
+do
+  heldCase("arm", nil, 120)
+  check("no more seconds than the saved flight: no mark", savedSeconds() == "140,120" and marks() == 0, seen())
+end
+
+do
+  heldCase("arm", function() profiles.pid = 2 end)
+  check("another PID profile: no mark", savedSeconds() == "140,200" and marks() == 0, seen())
+end
+
+do
+  heldCase("arm", function() profiles.pid = false end)
+  check("profiles unknown: no mark", savedSeconds() == "140,200" and marks() == 0, seen())
+end
+
+do
+  heldCase("arm", function() tuneHistory.erase(MCU) end)
+  check("history erased since the save: no mark", savedSeconds() == "200" and marks() == 0, seen())
+end
+
+do
+  -- the clear after flight one answered: the next flight is its own
+  load()
+  fly(140)
+  fly(200)
+  check("a clear answered: no mark", marks() == 0, seen())
+end
+
+do
+  -- flight two holds flight one, flight three holds flight two
+  load()
+  flyUncleared(140)
+  flyUncleared(200)
+  fly(260)
+  local used, seconds = combined()
+  check("chained marks: only the newest reading counts", savedSeconds() == "140,200,260" and marks() == 2
+    and used == 1 and seconds == 260, seen())
+  fly(30)
+  used, seconds = combined()
+  check("a later save keeps the marks", marks() == 2 and used == 2 and seconds == 290, seen())
+end
+
+do
+  heldCase("arm")
+  for n = 1, 4 do fly(10 + n) end
+  local used, seconds = combined()
+  check("a mark whose flight was trimmed away leaves nothing else out",
+    savedSeconds() == "200,11,12,13,14" and marks() == 1 and used == 5 and seconds == 250, seen())
+end
+
+do
+  local header = lines()[1]
+  local row = lines()[2]:gsub("^[^,]*,[^,]*,", "")
+  local function axisRow(prefix, name) return prefix .. (row:gsub("^[^,]*", name)) end
+  files[HISTORY] = table.concat({header,
+    axisRow("d1,100,", "roll"), axisRow("d1,100,", "pitch"), axisRow("d1,100,", "yaw"),
+    axisRow("d2,50,", "roll"), axisRow("d2,50,", "pitch"), axisRow("d2,50,", "yaw"),
+    "not a row", "contains,d1,100", ""}, "\n")
+  local flights = tuneHistory.read(MCU)
+  local _, used, seconds = tuneHistory.aggregate(flights, 1)
+  check("a mark after a line that does not read marks nothing",
+    #flights == 2 and flights[2].contains == nil and used == 2 and seconds == 150, used .. " / " .. seconds)
 end
 
 print()
