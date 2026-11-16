@@ -1974,6 +1974,13 @@
           "max_length": 6,
           "reverse_text": false
         },
+        "servo_name": {
+          "english": "Name",
+          "translation": "Name",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 4
+        },
         "speed": {
           "english": "Speed",
           "translation": "Snelheid",

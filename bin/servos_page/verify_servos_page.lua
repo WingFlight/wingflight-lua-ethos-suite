@@ -11,7 +11,11 @@
 --   * The list: one tile per servo in use (MSP_STATUS servo_count, which is the
 --     servos in use and no longer "PWM outputs + bus channels"), capped at the
 --     firmware's 24, and nothing else. The page does not offer the PWM update
---     rate, and reads only the status to build the list.
+--     rate, and reads the status and the servo names to build the list.
+--   * Servo names (MSP2_WING_SERVO_NAMES): a tile shows the name, the editor's
+--     Name field is written with Save, ahead of the config write, as
+--     MSP2_WING_SET_SERVO_NAME (0x5F3B). Firmware without names refuses the
+--     read: no names, no Name field, no name write.
 --   * A save from a tile: one MSP_SET_SERVO_CONFIGURATION (212) carrying the
 --     tile's own index and the seven-field record, 15 bytes. There is one index
 --     space now, so no MSP_SET_SERVO_CONFIG (124) and no offset.
@@ -105,6 +109,15 @@ form.addButton = function(_, _, opts)
   tiles[#tiles + 1] = opts
   return anything()
 end
+local textFields = {}
+form.addTextField = function(_, _, getter, setter)
+  local field = anything()
+  field.getter, field.setter = getter, setter
+  -- What Ethos shows: a text field reads its value once, here, and never again.
+  field.shown = getter()
+  textFields[#textFields + 1] = field
+  return field
+end
 local lastHeaderOpts = nil
 package.loaded["wfsuite.app.header"] = {
   build = function(_, opts) lastHeaderOpts = opts; return anything() end,
@@ -145,6 +158,14 @@ do
       return {kind = "servoRead", onData = onData, onError = onError}
     end
     return servo
+  end
+end
+
+-- Servo names: the real module, with the read recorded for the scenario.
+do
+  local servoNames = requireModule("lib/msp_servo_names.lua")
+  servoNames.buildReadMessage = function(onData, onError)
+    return {kind = "namesRead", onData = onData, onError = onError}
   end
 end
 
@@ -201,17 +222,19 @@ local function countWrites(command)
   return n
 end
 
--- Opens the page on a bench with the given servo count, then the list. Returns
--- the tiles and how many reads the page sent to build the list.
-local function openList(servoCount)
-  sent, tiles, dialogs = {}, {}, {}
+-- Opens the page on a bench with the given servo count, then the list. `names`
+-- answers the servo-names read; nil refuses it, as firmware without names does.
+-- Returns the tiles and how many reads the page sent to build the list.
+local function openList(servoCount, names)
+  sent, tiles, dialogs, textFields = {}, {}, {}, {}
   lastHeaderOpts, runtimeRef, currentWake = nil, nil, nil
   page.open({
     onBack = function() end,
     setWakeupHandler = function(fn) currentWake = fn end,
   })
   local reads = #sent
-  answerReads({statusRead = true}, function()
+  answerReads({statusRead = true, namesRead = true}, function(kind)
+    if kind == "namesRead" then return names end
     return {servo_count = servoCount}
   end)
   runWakeups(1)
@@ -268,7 +291,7 @@ for _, s in ipairs(SCENARIOS) do
   print(s.label)
   local _, reads = openList(s.servoCount)
   local servoTiles = #tiles
-  check("the list is built from the status read alone", reads == 1, "reads sent: " .. reads)
+  check("the list is built from the status and servo-names reads", reads == 2, "reads sent: " .. reads)
   check("the list shows every servo in use, and no other tile",
     servoTiles == s.expectServos,
     "tiles shown: " .. servoTiles .. ", expected " .. s.expectServos)
@@ -288,6 +311,57 @@ for _, s in ipairs(SCENARIOS) do
   else
     check("the save completes", false, "tile " .. s.tile .. " does not exist")
   end
+end
+
+print("servo names")
+do
+  local names = {}
+  for i = 0, 23 do names[i] = "" end
+  names[0], names[1], names[19] = "L AIL", "R AIL", "TAIL"
+  openList(24, names)
+  check("a named servo's tile shows its name",
+    tiles[1].text == "L AIL" and tiles[2].text == "R AIL", tostring(tiles[1].text))
+  check("an unnamed servo's tile keeps its number",
+    tiles[3].text == "@i18n(app.modules.servos.servo_prefix)@3", tostring(tiles[3].text))
+  check("past the numbered icons the number goes in front of the name",
+    tiles[20].text == "20 TAIL", tostring(tiles[20].text))
+
+  local shownAtBuild
+  local write, why = saveTile(1, "servoRead", servoFixture(), 0x5F3B, function()
+    shownAtBuild = textFields[1].shown
+    textFields[1].setter("  ELEVATOR!")
+  end)
+  -- An Ethos text field reads its value once, when built: it must already be the name.
+  check("the Name field shows the stored name from the start", shownAtBuild == "L AIL", tostring(shownAtBuild))
+  check("the editor has a Name field", #textFields == 1, "text fields: " .. #textFields)
+  check("Save writes the edited name with MSP2_WING_SET_SERVO_NAME", write ~= nil, why)
+  check("the name write carries the servo and the cleaned name",
+    write ~= nil and bytes(write.payload) == "0,69,76,69,86,65,84,79,82",
+    write and bytes(write.payload))
+  local nameAt, configAt
+  for i, m in ipairs(sent) do
+    if m.isWrite and m.command == 0x5F3B and not nameAt then nameAt = i end
+    if m.isWrite and m.command == 212 and not configAt then configAt = i end
+  end
+  check("the name is sent ahead of the config write", nameAt and configAt and nameAt < configAt,
+    tostring(nameAt) .. " / " .. tostring(configAt))
+end
+do
+  local names = {}
+  for i = 0, 23 do names[i] = "" end
+  names[0] = "L AIL"
+  openList(4, names)
+  saveTile(1, "servoRead", servoFixture(), 212)
+  check("an unchanged name is not written again", countWrites(0x5F3B) == 0,
+    "name writes: " .. countWrites(0x5F3B))
+end
+do
+  openList(4, nil)
+  local _, why = saveTile(1, "servoRead", servoFixture(), 212)
+  check("without names: the tiles keep their numbers",
+    tiles[1].text == "@i18n(app.modules.servos.servo_prefix)@1", tostring(tiles[1].text))
+  check("without names: no Name field and no name write",
+    #textFields == 0 and countWrites(0x5F3B) == 0, why)
 end
 
 print("tile icons")

@@ -6824,6 +6824,12 @@
           "needs_translation": false,
           "translation": "Scale Positive"
         },
+        "servo_name": {
+          "english": "Name",
+          "max_length": 4,
+          "needs_translation": false,
+          "translation": "Name"
+        },
         "servo_prefix": {
           "english": "SERVO ",
           "max_length": 6,

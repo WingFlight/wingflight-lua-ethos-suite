@@ -61,6 +61,7 @@ local curveSlotLabels = requireModule("app/curve_slot_labels.lua")
 local eeprom = requireModule("lib/msp_eeprom.lua")
 local mixerRules = requireModule("lib/msp_mixer_rules.lua")
 local rxMapApi = requireModule("lib/msp_rx_map.lua")
+local servoNamesApi = requireModule("lib/msp_servo_names.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.mixer_rules.name)@"
 local MSG_LOADING_TITLE = "@i18n(app.msg_loading)@"
@@ -197,21 +198,39 @@ local INPUT_OPTIONS = buildInputOptions(nil)
 -- channel N of a bus output when one is set up, so there is one name for it.
 -- Matches wingflight-configurator's Mixer.js outputOrder()/outputLabel() and
 -- firmware flight/mixer.h.
-local OUTPUT_OPTIONS = {
-  {"@i18n(app.modules.mixer_rules.output_none)@", 0},
-}
-for n = 1, 24 do
-  OUTPUT_OPTIONS[#OUTPUT_OPTIONS + 1] = {
-    string.format("@i18n(app.modules.mixer_rules.output_servo_fmt)@", n),
-    n,
-  }
+--
+-- A servo with a name (MSP2_WING_SERVO_NAMES, read by open() below) shows it:
+-- "Servo 1 (L AIL)", as the Configurator does.
+-- Inlined rather than taken from lib/servo_names.lua, which would load the
+-- setup wizard's surface code onto this page for one line.
+local function servoLabel(n, names)
+  local label = string.format("@i18n(app.modules.mixer_rules.output_servo_fmt)@", n)
+  local name = names and names[n - 1]
+  if name and name ~= "" then return label .. " (" .. name .. ")" end
+  return label
 end
-for n = 1, 4 do
-  OUTPUT_OPTIONS[#OUTPUT_OPTIONS + 1] = {
-    string.format("@i18n(app.modules.mixer_rules.output_motor_fmt)@", n),
-    26 + n,
+
+local function buildOutputOptions(names)
+  local options = {
+    {"@i18n(app.modules.mixer_rules.output_none)@", 0},
   }
+  for n = 1, 24 do
+    options[#options + 1] = {
+      servoLabel(n, names),
+      n,
+    }
+  end
+  for n = 1, 4 do
+    options[#options + 1] = {
+      string.format("@i18n(app.modules.mixer_rules.output_motor_fmt)@", n),
+      26 + n,
+    }
+  end
+  return options
 end
+
+-- Rebuilt with the servo names once open() has read them.
+local OUTPUT_OPTIONS = buildOutputOptions(nil)
 
 -- condition: 0=always active, 1-16=Logic Condition N (bare index -- see
 -- this file's own header for why).
@@ -476,6 +495,9 @@ local function open(opts)
   -- actually edits, bypassLabel()'s plain-name fallback covers the rest.
   local rxMap = nil
   local rxMapDone = false
+  -- Best-effort too: firmware without servo names refuses the read.
+  local servoNames = nil
+  local namesDone = false
   local dialog = nil
 
   local function closeDialog(force)
@@ -526,8 +548,9 @@ local function open(opts)
         form.addLine(MSG_LOAD_ERROR .. " " .. PAGE_TITLE)
         return
       end
-      if pendingPool and rxMapDone then
+      if pendingPool and rxMapDone and namesDone then
         INPUT_OPTIONS = buildInputOptions(rxMap)
+        OUTPUT_OPTIONS = buildOutputOptions(servoNames)
         local listState = {pool = pendingPool, selected = 1}
         closeDialog()
         opts.setWakeupHandler(nil)
@@ -552,6 +575,16 @@ local function open(opts)
     if disposed then return end
     rxMap = nil
     rxMapDone = true
+  end))
+
+  bus.publish("msp.request", servoNamesApi.buildReadMessage(function(names)
+    if disposed then return end
+    servoNames = names
+    namesDone = true
+  end, function()
+    if disposed then return end
+    servoNames = nil
+    namesDone = true
   end))
 end
 

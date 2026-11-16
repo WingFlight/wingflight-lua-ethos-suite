@@ -13,6 +13,11 @@
 -- the other fields are locked, matching the original suite's safety shape
 -- without its global session table.
 --
+-- Servo names (MSP2_WING_SERVO_NAMES, firmware #286): a tile shows the
+-- servo's name, and the editor has a Name field, written with the page's Save
+-- ahead of the config and the EEPROM write. On firmware without names the
+-- read is refused, and the page shows no names and no Name field.
+--
 -- The PWM update rate (servo_pwm_rate) is not offered here: 50 Hz suits
 -- nearly every model, and the setup wizard's servo type step and the
 -- Configurator's Servos tab set it for the rest.
@@ -29,6 +34,7 @@ local eeprom = requireModule("lib/msp_eeprom.lua")
 local servoCenter = requireModule("lib/msp_servo_center.lua")
 local servoConfig = requireModule("lib/msp_servo_config.lua")
 local servoOverride = requireModule("lib/msp_servo_override.lua")
+local servoNames = requireModule("lib/msp_servo_names.lua")
 local status = requireModule("lib/msp_status.lua")
 
 local PAGE_TITLE = "@i18n(app.modules.servos.name)@"
@@ -61,6 +67,15 @@ local function buildRows(servoCount)
     rows[i] = {index = i - 1, title = servoTitle(i), icon = icon}
   end
   return rows
+end
+
+-- A tile shows the servo's name when it has one. The numbered icons already
+-- show servos 1-16; past them the number goes in front of the name.
+local function tileTitle(row, names)
+  local name = names and names[row.index]
+  if not name or name == "" then return row.title end
+  if row.index < NUMBERED_ICON_COUNT then return name end
+  return (row.index + 1) .. " " .. name
 end
 
 local function flagsFor(reverse, geometry)
@@ -102,6 +117,10 @@ local function openEditor(opts, listState, row)
   local lastCenter = nil
   local lastChangeAt = 0
   local index = row.index
+  -- The Name field shows this. An Ethos text field reads its value once, when it
+  -- is built, and has no :value() to correct it later (see configuration.lua),
+  -- so it cannot wait for the read: the name came with the list.
+  local editedName = listState.names and (listState.names[index] or "") or nil
 
   local function disableOverride()
     if listState.inOverride then
@@ -117,7 +136,7 @@ local function openEditor(opts, listState, row)
   runtime = pageRuntime.new({
     -- Edits are saved with the page's Save; liveWrite would skip Back's unsaved-changes question.
     liveWrite = false,
-    pageTitle = PAGE_TITLE .. " / " .. row.title,
+    pageTitle = PAGE_TITLE .. " / " .. tileTitle(row, listState.names),
     logTag = "servos_editor",
     mspModule = servoConfig.forIndex(index),
     opts = {
@@ -136,10 +155,21 @@ local function openEditor(opts, listState, row)
     unloadPackageKeys = {
       "wfsuite.lib.msp_servo_center",
       "wfsuite.lib.msp_servo_config",
+      "wfsuite.lib.msp_servo_names",
       "wfsuite.lib.msp_servo_override",
     },
     onLoaded = function()
       unpackFlags(runtime.data)
+      -- The name was read with the list; it rides in data so Save and Back see an
+      -- edit. Clean is the stored name; an edit kept across a Reload stays an edit.
+      if editedName then
+        runtime.data.name = listState.names[index] or ""
+      end
+      runtime:captureCleanData()
+      if editedName and editedName ~= runtime.data.name then
+        runtime.data.name = editedName
+        runtime:refreshDirty()
+      end
       lastCenter = runtime.data.mid
       if inOverride then
         for key, field in pairs(runtime.fields) do
@@ -150,6 +180,13 @@ local function openEditor(opts, listState, row)
     end,
     beforeSave = function(rt)
       rt.data.flags = flagsFor(rt.data.reverse, rt.data.geometry)
+      -- Sent ahead of the config write, so the page's EEPROM write saves it too.
+      local name = rt.data.name
+      if listState.names and name ~= nil and name ~= (listState.names[index] or "") then
+        bus.publish("msp.request", servoNames.buildWriteMessage(index, name, function()
+          if listState.names then listState.names[index] = name end
+        end))
+      end
     end,
     toolIcon = "app/gfx/nav/override.png",
     onTool = function(focusFn)
@@ -213,6 +250,20 @@ local function openEditor(opts, listState, row)
 
   form.clear()
   runtime:buildChrome()
+  if listState.names then
+    local nameLine = form.addLine("@i18n(app.modules.servos.servo_name)@")
+    local nameField = form.addTextField(nameLine, nil,
+      function()
+        return editedName
+      end,
+      function(value)
+        editedName = servoNames.clean(value)
+        if not runtime.data then return end
+        runtime.data.name = editedName
+        runtime:refreshDirty()
+      end)
+    runtime:registerField("name", nameField)
+  end
   fieldLayout.buildSingle(runtime, "@i18n(app.modules.servos.center)@", {key = "mid"})
   fieldLayout.buildSingle(runtime, "@i18n(app.modules.servos.minimum)@", {key = "min"})
   fieldLayout.buildSingle(runtime, "@i18n(app.modules.servos.maximum)@", {key = "max"})
@@ -315,7 +366,7 @@ openList = function(opts, listState)
   end
 
   for i, row in ipairs(rows) do
-    addTile(i, row.title, row.icon, function()
+    addTile(i, tileTitle(row, listState.names), row.icon, function()
       listState.selected = i
       openEditor(opts, listState, row)
     end)
@@ -332,6 +383,9 @@ local function open(opts)
   local disposed = false
   local pendingStatus = nil
   local pendingError = nil
+  -- Best-effort: firmware without servo names refuses the read, which still
+  -- completes it, with no names.
+  local namesDone = false
   local dialog = nil
   local listState = {inOverride = false}
 
@@ -383,7 +437,7 @@ local function open(opts)
         form.addLine(MSG_LOAD_ERROR .. " STATUS")
         return
       end
-      if pendingStatus then
+      if pendingStatus and namesDone then
         listState.rows = buildRows(pendingStatus.servo_count)
         closeDialog()
         opts.setWakeupHandler(nil)
@@ -398,6 +452,16 @@ local function open(opts)
   end, function()
     if disposed then return end
     pendingError = true
+  end))
+
+  bus.publish("msp.request", servoNames.buildReadMessage(function(names)
+    if disposed then return end
+    listState.names = names
+    namesDone = true
+  end, function()
+    if disposed then return end
+    listState.names = nil
+    namesDone = true
   end))
 end
 

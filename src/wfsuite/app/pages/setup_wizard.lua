@@ -50,6 +50,7 @@ local requireModule = package.loaded["wfsuite.lib.require"] or assert(loadfile("
 local SHELL_MODULES = {
   "wfsuite.lib.msp_mixer_rules", "wfsuite.lib.msp_mixer_input", "wfsuite.lib.msp_mixer_config",
   "wfsuite.lib.msp_servo_config", "wfsuite.lib.msp_servo", "wfsuite.lib.msp_servo_trim",
+  "wfsuite.lib.msp_servo_names", "wfsuite.lib.servo_names",
   "wfsuite.lib.msp_rc_channels",
   "wfsuite.lib.setup_wizard_surfaces", "wfsuite.app.setup_wizard_ui", "wfsuite.app.setup_wizard_art",
   "wfsuite.app.plane3d",
@@ -73,6 +74,8 @@ local mixerConfig = requireModule("lib/msp_mixer_config.lua")
 local servoConfig = requireModule("lib/msp_servo_config.lua")
 local servoRead = requireModule("lib/msp_servo.lua")
 local servoTrim = requireModule("lib/msp_servo_trim.lua")
+local servoNamesApi = requireModule("lib/msp_servo_names.lua")
+local servoNameLib = requireModule("lib/servo_names.lua")
 local servoOverride = requireModule("lib/msp_servo_override.lua")
 local servoProbe = requireModule("lib/msp_servo_probe.lua")
 local mixerOverride = requireModule("lib/msp_mixer_override.lua")
@@ -253,6 +256,7 @@ local function open(opts)
   local configs = {}       -- servo (0-based) -> decoded servo config
   local trims = {}         -- servo (0-based) -> saved trim in us
   local mixConfig = nil    -- decoded MSP_MIXER_CONFIG
+  local servoNames = nil   -- servo (0-based) -> name; nil on firmware without names
 
   local surfaces = {}
   local missingServos = {}
@@ -606,6 +610,26 @@ local function open(opts)
     if mixConfig then
       mixConfig.model_type = modelType
       sendModelType()
+    end
+    -- Name the servos the mix assigns, as the Configurator's setup does
+    -- (lib/servo_names.lua). Undone with the mix.
+    if servoNames then
+      local before = copyDeep(servoNames)
+      local renamed = servoNameLib.assign(servoNames, rules)
+      if #renamed > 0 then
+        change("servoNames", before, function(o)
+          for servo = 0, servoNameLib.SERVO_COUNT - 1 do
+            local name = o[servo] or ""
+            if servoNames[servo] ~= name then
+              servoNames[servo] = name
+              bus.publish("msp.request", servoNamesApi.buildWriteMessage(servo, name))
+            end
+          end
+        end)
+        for _, servo in ipairs(renamed) do
+          bus.publish("msp.request", servoNamesApi.buildWriteMessage(servo, servoNames[servo]))
+        end
+      end
     end
     recompute()
   end
@@ -1082,7 +1106,18 @@ local function open(opts)
   end
 
   local function requestRest()
-    outstanding = 1 + 1 + 3 + 1 + servoCount
+    outstanding = 1 + 1 + 3 + 1 + 1 + servoCount
+    -- Best-effort: firmware without servo names refuses the read, and the
+    -- wizard then names nothing.
+    bus.publish("msp.request", servoNamesApi.buildReadMessage(function(names)
+      if disposed then return end
+      servoNames = names
+      answered()
+    end, function()
+      if disposed then return end
+      servoNames = nil
+      answered()
+    end))
     bus.publish("msp.request", mixerRules.buildReadPoolMessage(function(pool)
       if disposed then return end
       rules = pool
