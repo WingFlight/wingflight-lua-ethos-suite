@@ -1696,6 +1696,12 @@
           "needs_translation": false,
           "max_length": 6
         },
+        "servo_name": {
+          "english": "Name",
+          "translation": "Name",
+          "needs_translation": false,
+          "max_length": 4
+        },
         "speed": {
           "english": "Speed",
           "translation": "Speed",

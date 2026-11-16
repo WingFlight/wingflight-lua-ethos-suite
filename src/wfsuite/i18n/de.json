@@ -7940,6 +7940,13 @@
           "reverse_text": false,
           "translation": "Positives Scaling"
         },
+        "servo_name": {
+          "english": "Name",
+          "max_length": 4,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Name"
+        },
         "servo_prefix": {
           "english": "SERVO ",
           "max_length": 6,

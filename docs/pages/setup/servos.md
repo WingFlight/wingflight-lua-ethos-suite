@@ -31,6 +31,11 @@ larger of the board's PWM servo outputs and the servos a bus output sends: the b
 channel count (8, 12 or 24), or 18 with a 16-channel frame, where servos 17 and 18
 drive the frame's two digital channels. Tap a tile to edit that servo.
 
+A servo with a name shows it on its tile instead of **SERVO N** (servos 1–16 keep
+their number on the icon; from servo 17 the number goes in front of the name). Names
+need firmware with servo names (wingflight-firmware #286); on older firmware the
+tiles show only numbers and the editor has no Name field.
+
 The Tool button in the header switches servo override on for every servo: all of them
 go to their configured center, for setting up linkages. Switching it off, or leaving
 the page, returns the servos to the flight controller and saves the servo settings.
@@ -41,6 +46,7 @@ Each servo has the same settings and the same ranges.
 
 | Setting | What it does |
 | --- | --- |
+| Name | A short name for the servo, up to 8 characters (letters, digits, spaces and punctuation), such as `L AIL`. For reference only: nothing in flight uses it. Only with firmware that has servo names. |
 | Center | Pulse width at the middle of the travel, 1000–2000 µs. Default 1500. |
 | Minimum | Travel limit below the center, as an offset from it: −1000 to 0 µs. Default −600. |
 | Maximum | Travel limit above the center, as an offset from it: 0 to 1000 µs. Default 600. |
@@ -63,7 +69,8 @@ Servos tab.
 
 ## Notes
 
-- Save in a servo's editor writes that servo and commits it to EEPROM. It does not
+- Save in a servo's editor writes that servo, and its name when it changed, and
+  commits them to EEPROM. It does not
   restart the flight controller. Servo settings are aircraft-wide, independent of
   the selected PID or rate profile.
 - The Tool button is disabled until the page has loaded its values.

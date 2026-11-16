@@ -131,6 +131,14 @@ package.loaded["wfsuite.lib.msp_status"] = {
     return {kind = "statusRead", onData = onData, onError = onError}
   end,
 }
+-- Servo names: the list waits for this read too. The scenarios refuse it, as
+-- firmware without servo names does; names do not change the override gate.
+do
+  local servoNames = requireModule("lib/msp_servo_names.lua")
+  servoNames.buildReadMessage = function(onData, onError)
+    return {kind = "namesRead", onData = onData, onError = onError}
+  end
+end
 do
   local servoConfig = requireModule("lib/msp_servo_config.lua")
   servoConfig.buildReadMessage = function(_, onData, onError)
@@ -221,6 +229,7 @@ local function openServoPage(page, outcome)
   answerReads({statusRead = true}, "ok", function()
     return {servo_count = 2}
   end)
+  answerReads({namesRead = true}, "error")
   runWakeups(1)
   if #tiles == 0 then return false, "the list shows no servo tile" end
   tiles[1].press()

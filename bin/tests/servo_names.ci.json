@@ -1,0 +1,7 @@
+{
+  "id": "servo-names",
+  "name": "Check servo names",
+  "step": "Check servo names",
+  "script": "bin/tests/servo_names.lua",
+  "rationale": "lib/servo_names.lua ports the configurator's ServoNames.js, so a model set up from the\nradio or the Configurator gets the same servo names. The harness checks the names against\nthe configurator's own output for the wizard's mixes, the keep/clear rules on a new mix, and\nlib/msp_servo_names.lua's wire format."
+}

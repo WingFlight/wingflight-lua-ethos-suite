@@ -709,6 +709,20 @@ check("airframe: every rule slot is written", #ruleWrites == 32
 check("airframe: the model type is flying wing, and nothing else is written with it",
   #cfgWrites == 1 and bytes(cfgWrites[1].payload) == "1,0", cfgWrites[1] and bytes(cfgWrites[1].payload))
 check("airframe: the surfaces are elevons now", shows("surface_elevon"))
+-- Servo names (lib/servo_names.lua): the codec's simulator reply names
+-- servos 1-4 L AIL, R AIL, ELEV, RUDDER. The wing names its elevons and
+-- clears the names it no longer drives.
+do
+  local nameWrites = {}
+  for _, m in ipairs(writesOf(0x5F3B, before + 1)) do
+    local text = {}
+    for i = 2, #m.payload do text[#text + 1] = string.char(m.payload[i]) end
+    nameWrites[#nameWrites + 1] = m.payload[1] .. "=" .. table.concat(text)
+  end
+  local got = table.concat(nameWrites, ";")
+  check("airframe: names the elevons and clears the old surface names",
+    got == "0=L ELEVON;1=R ELEVON;2=;3=", got)
+end
 
 -- Servo type: digital sets the one PWM rate, then save and restart.
 openPage(14, "servotype")
