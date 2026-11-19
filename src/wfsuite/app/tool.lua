@@ -537,7 +537,9 @@ end)
 
 local function updateDeveloperMode(settings)
   local store = ensureSettingsStore()
-  developerModeEnabled = store.developerModeEnabled(settings or store.load())
+  settings = settings or store.load()
+  developerModeEnabled = store.developerModeEnabled(settings)
+  return settings
 end
 
 bus.subscribe("settings.update", updateDeveloperMode)
@@ -563,8 +565,10 @@ local function create()
   taskAlertPending = false
   taskAlertOpen = false
   taskAlertShown = false
-  updateDeveloperMode()
-  ensureMemstats()
+  local settings = updateDeveloperMode()
+  -- Reuse this read: a second full load during the cold menu build can exceed
+  -- Ethos's create() instruction budget before any tiles have been created.
+  ensureMemstats().setSettings(settings)
   ensureMenuGuards()
   ensureMenuContainer().openRoot(ensureNav(), ROOT_ENTRIES, setEventHandler, setWakeupHandler, setPaintHandler, setCleanupHandler, MENUS, taskGuard)
   -- Lets background-screen widgets (widgets/dashboard.lua) skip their own

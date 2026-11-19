@@ -3,5 +3,5 @@
   "name": "Check the tool's UI is not loaded at boot",
   "step": "Check the tool's UI is not loaded at boot",
   "script": "bin/tool_ui/verify_tool_ui_lazy.lua",
-  "rationale": "The system tool's UI subtree (menu_container, header, tile_grid,\nnavigation, the ESC protocol menu guard and its MSP codec, memstats)\nloads on first create(), not at boot. Nothing reaches that from a build step."
+  "rationale": "The tool UI remains unloaded until create(), and repeated opens reuse the cached UI modules. Cold create must read settings only once and pass that snapshot to memory diagnostics: a second full settings load plus lazy module initialization exceeded the ETHOS instruction budget and left the first open blank. Check that close and memory-log preference updates cause no additional settings reads, while saved enable/disable changes still take effect."
 }
