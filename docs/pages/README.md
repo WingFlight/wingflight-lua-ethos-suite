@@ -8,7 +8,7 @@ sidebar_label: Pages
 Reference documentation for each configuration and settings page reachable
 within the WFSuite Ethos system tool.
 
-**Coverage:** 88 reachable pages in navigation hierarchy. Drafts require review.
+**Coverage:** 89 reachable pages in navigation hierarchy. Drafts require review.
 
 The *Conditions* column names what hides, greys out or locks a page; the sentences
 and structure follow [_template.md](../_template.md).
@@ -120,6 +120,7 @@ is there. The rule is in [.agents/rules/documentation.md](../../.agents/rules/do
 | Preflight | [settings/settings_activelook_preflight.md](settings/settings_activelook_preflight.md) | Available without a flight controller connection; the background task must be running. | draft |
 | Inflight | [settings/settings_activelook_inflight.md](settings/settings_activelook_inflight.md) | Available without a flight controller connection; the background task must be running. | draft |
 | Postflight | [settings/settings_activelook_postflight.md](settings/settings_activelook_postflight.md) | Available without a flight controller connection; the background task must be running. | draft |
+| Alerts | [settings/settings_activelook_alerts.md](settings/settings_activelook_alerts.md) | Available without a flight controller connection; the background task must be running. | draft |
 | Voltage | [settings/settings_audio_events_voltage.md](settings/settings_audio_events_voltage.md) | Available without a flight controller connection; the background task must be running. | reviewed |
 | ESC temp | [settings/settings_audio_events_esc.md](settings/settings_audio_events_esc.md) | Available without a flight controller connection; the background task must be running. | reviewed |
 | Fuel | [settings/settings_audio_events_fuel.md](settings/settings_audio_events_fuel.md) | Available without a flight controller connection; the background task must be running. | reviewed |

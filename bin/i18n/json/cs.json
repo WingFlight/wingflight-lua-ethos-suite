@@ -2373,8 +2373,8 @@
           "max_length": 30
         },
         "activelook_setup_hint": {
-          "english": "One-time setup:\nModel > Glasses > Screen\nChoose the Full-Screen layout.\nAssign Rotorflight ActiveLook.",
-          "translation": "Jednorázové nastavení:\nModel > Brýle > Obrazovka\nVyberte rozvržení Full-Screen.\nPřiřaďte Rotorflight ActiveLook.",
+          "english": "One-time setup:\nModel > Glasses > Screen\nChoose the Full-Screen layout.\nAssign Wingflight ActiveLook.",
+          "translation": "Jednorázové nastavení:\nModel > Brýle > Obrazovka\nVyberte rozvržení Full-Screen.\nPřiřaďte Wingflight ActiveLook.",
           "needs_translation": false,
           "max_length": 120
         },

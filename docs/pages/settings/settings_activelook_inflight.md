@@ -24,6 +24,7 @@ Available without a flight controller connection; the background task must be ru
 | Setting | What it does |
 | --- | --- |
 | TODO | Inspect the page and its helpers; automatic extraction found no controls. |
+| Fuel icon | Shows a 28x28 fuel indicator at the bottom left during Inflight. Off by default. Uses the existing Smart Fuel value directly, without adding the reserve back. IDs 02-06 represent the nearest 0/25/50/75/100% level. Hidden without a fuel reading and while an alert overlay is shown (see [Alerts](settings_activelook_alerts.md)). |
 
 ## Notes
 

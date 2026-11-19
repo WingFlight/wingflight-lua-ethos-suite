@@ -2373,8 +2373,8 @@
           "max_length": 32
         },
         "activelook_setup_hint": {
-          "english": "One-time setup:\nModel > Glasses > Screen\nChoose the Full-Screen layout.\nAssign Rotorflight ActiveLook.",
-          "translation": "Configurazione iniziale:\nModello > Occhiali > Schermo\nScegliere il layout Full-Screen.\nAssegnare Rotorflight ActiveLook.",
+          "english": "One-time setup:\nModel > Glasses > Screen\nChoose the Full-Screen layout.\nAssign Wingflight ActiveLook.",
+          "translation": "Configurazione iniziale:\nModello > Occhiali > Schermo\nScegliere il layout Full-Screen.\nAssegnare Wingflight ActiveLook.",
           "needs_translation": false,
           "max_length": 120
         },

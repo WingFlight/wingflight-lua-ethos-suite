@@ -8,7 +8,7 @@ settings.
 
 ## Configure
 
-Open **System -> Settings -> ActiveLook** on the transmitter. All four pages
+Open **System -> Settings -> ActiveLook** on the transmitter. All five pages
 are available offline.
 
 The **Settings** page enables the widget, chooses an optional switch to blank
@@ -24,6 +24,23 @@ ESC and MCU temperature, link, fuel, current, voltage, cell voltage, motor
 RPM, and consumed capacity. Min/max slots are available for fuel, current,
 voltage, RPM and link; maximum-only slots are available for ESC and MCU
 temperature.
+
+The **Inflight** page can also show a five-level fuel icon at the bottom left
+(off by default). The **Alerts** page configures overlays for Smart Fuel, ESC
+temperature, ESC status, RF link and governor state; they are all off by
+default. See [Alerts](../pages/settings/settings_activelook_alerts.md) for
+their thresholds, priorities and live preview.
+
+## ETHOS Glasses menu
+
+On ETHOS 26.2.0 or newer, the **Settings** page offers an **ETHOS Glasses menu**
+switch (off by default). When it is on, the suite registers the Model -> Glasses
+menu at startup; a change takes effect after the transmitter restarts. While the
+switch is shown and off, the Wingflight ActiveLook display field is disabled.
+Turning the display on shows a one-time reminder: in Model -> Glasses -> Screen,
+choose the Full-Screen layout and assign Wingflight ActiveLook. If the startup
+read of the setting fails, registration is skipped for that run and the rest of
+the suite starts normally.
 
 ## Flight phases and statistics
 
@@ -61,5 +78,8 @@ offsets.
 
 Widget logic: `src/wfsuite/widgets/activelook.lua`. The flight phase comes from the session
 (`src/wfsuite/lib/flight_stats.lua`), the same one the dashboard shows. Settings and slot definitions:
-`src/wfsuite/lib/activelook_config.lua`. Simulator preview:
-`bin/activelook_preview/`.
+`src/wfsuite/lib/activelook_config.lua`. Alert engine: `src/wfsuite/lib/activelook_alerts.lua`.
+Simulator preview: `bin/activelook_preview/`; `export_docs.py` there regenerates the
+layout and alert images into `docs/assets/activelook-layouts/` on demand.
+
+Ported from the Rotorflight suite: rotorflight-lua-ethos-suite#2630, #2735, #2784 and #2810.

@@ -8208,10 +8208,10 @@
           "translation": "Einstellungen"
         },
         "activelook_setup_hint": {
-          "english": "One-time setup:\nModel > Glasses > Screen\nChoose the Full-Screen layout.\nAssign Rotorflight ActiveLook.",
+          "english": "One-time setup:\nModel > Glasses > Screen\nChoose the Full-Screen layout.\nAssign Wingflight ActiveLook.",
           "max_length": 120,
           "needs_translation": false,
-          "translation": "Einmalig einrichten:\nModell > Brille > Bildschirm\nFull-Screen-Layout wählen.\nRotorflight ActiveLook zuweisen."
+          "translation": "Einmalig einrichten:\nModell > Brille > Bildschirm\nFull-Screen-Layout wählen.\nWingflight ActiveLook zuweisen."
         },
         "activelook_smartfuel_max": {
           "english": "Max Smart Fuel",

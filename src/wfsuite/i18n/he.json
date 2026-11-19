@@ -8208,10 +8208,10 @@
           "translation": "הגדרות"
         },
         "activelook_setup_hint": {
-          "english": "One-time setup:\nModel > Glasses > Screen\nChoose the Full-Screen layout.\nAssign Rotorflight ActiveLook.",
+          "english": "One-time setup:\nModel > Glasses > Screen\nChoose the Full-Screen layout.\nAssign Wingflight ActiveLook.",
           "max_length": 120,
           "needs_translation": false,
-          "translation": "הגדרה חד פעמית:\nדגם > משקפיים > מסך\nבחרו פריסת Full-Screen.\nהקצו את Rotorflight ActiveLook."
+          "translation": "הגדרה חד פעמית:\nדגם > משקפיים > מסך\nבחרו פריסת Full-Screen.\nהקצו את Wingflight ActiveLook."
         },
         "activelook_smartfuel_max": {
           "english": "Max Smart Fuel",
