@@ -280,7 +280,8 @@ local function normalize(settings)
   end
   settings.dashboard.theme = dashboardThemeKey(settings.dashboard.theme_preflight)
 
-  settings.activelook = activelookConfig.withDefaults(settings.activelook)
+  -- withDefaults already owns a separate copy of every section.
+  activelookConfig.normalize(settings.activelook)
   return settings
 end
 
@@ -345,6 +346,47 @@ end
 function settings_store.load()
   safeMkdir(SETTINGS_DIR)
   return settings_store.withDefaults(ini.load_ini_file(SETTINGS_PATH) or {})
+end
+
+-- Startup only needs this flag. Loading and normalizing every setting here can
+-- exhaust Ethos's init instruction budget as saved dashboard sections grow.
+-- Stream without building tables, keeping the INI reader's last-value-wins rule.
+local function readStartupGlasses(file)
+  local section, value
+  while true do
+    local line, err = file:read("L")
+    if not line then
+      if err then error(err, 0) end
+      break
+    end
+    line = line:match("^%s*(.-)%s*$")
+    local heading = line:match("^%[(.+)%]$")
+    if heading then
+      section = heading:match("^%s*(.-)%s*$")
+    elseif section == "activelook" then
+      local saved = line:match("^register_glasses%s-=%s-(.*)$")
+      if saved then value = tonumber(saved) or saved end
+    end
+  end
+  return coerceBool(value, activelookConfig.DEFAULTS.register_glasses)
+end
+
+function settings_store.startupGlassesEnabled()
+  local file, openError, code = io.open(SETTINGS_PATH, "rb")
+  if not file then
+    -- ENOENT is the only failure that means no saved preference exists.
+    -- Unknown failures must reach main.init's guarded boot diagnostic too.
+    if code == 2 then return activelookConfig.DEFAULTS.register_glasses end
+    error(openError or "Cannot open glasses settings file", 0)
+  end
+  local ok, value = pcall(readStartupGlasses, file)
+  local closed, err = file:close()
+  if not ok then error(value, 0) end
+  -- ETHOS close() returns no values on success; standard Lua returns true.
+  if closed == false or (closed == nil and err ~= nil) then
+    error(err or "Cannot close glasses settings file", 0)
+  end
+  return value
 end
 
 function settings_store.save(settings)

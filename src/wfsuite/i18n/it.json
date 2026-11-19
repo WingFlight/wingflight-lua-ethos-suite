@@ -7984,6 +7984,125 @@
         }
       },
       "settings": {
+        "activelook_alerts": {
+          "english": "Alerts",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Alerts"
+        },
+        "activelook_esc_available": {
+          "english": "Status available",
+          "max_length": 17,
+          "needs_translation": false,
+          "translation": "Stato disponibile"
+        },
+        "activelook_esc_generic": {
+          "english": "Generic faults only",
+          "max_length": 21,
+          "needs_translation": false,
+          "translation": "Solo guasti generici"
+        },
+        "activelook_esc_messages": {
+          "english": "Show messages",
+          "max_length": 18,
+          "needs_translation": false,
+          "translation": "Mostra messaggi"
+        },
+        "activelook_esc_messages_all": {
+          "english": "Errors and warnings",
+          "max_length": 20,
+          "needs_translation": false,
+          "translation": "Errori e avvisi"
+        },
+        "activelook_esc_messages_errors": {
+          "english": "Errors only",
+          "max_length": 11,
+          "needs_translation": false,
+          "translation": "Solo errori"
+        },
+        "activelook_esc_messages_warnings": {
+          "english": "Warnings only",
+          "max_length": 13,
+          "needs_translation": false,
+          "translation": "Solo avvisi"
+        },
+        "activelook_esc_missing": {
+          "english": "Telemetry missing",
+          "max_length": 18,
+          "needs_translation": false,
+          "translation": "Telemetria assente"
+        },
+        "activelook_esc_offline": {
+          "english": "Connect to check",
+          "max_length": 20,
+          "needs_translation": false,
+          "translation": "Collegare per test"
+        },
+        "activelook_esc_setup": {
+          "english": "Set up telemetry",
+          "max_length": 21,
+          "needs_translation": false,
+          "translation": "Config. telemetria"
+        },
+        "activelook_esc_status": {
+          "english": "ESC Status",
+          "max_length": 10,
+          "needs_translation": false,
+          "translation": "Stato ESC"
+        },
+        "activelook_esc_status_warning": {
+          "english": "ESC Status Warning",
+          "max_length": 18,
+          "needs_translation": false,
+          "translation": "Avvisi stato ESC"
+        },
+        "activelook_esc_telemetry_help": {
+          "english": "Requires ESC1 Status and ESC1 Model ID telemetry. Use Set up telemetry to select both sensors, then save on the Telemetry page. ESC telemetry must already be configured on the flight controller.",
+          "max_length": 199,
+          "needs_translation": false,
+          "translation": "Richiede i sensori ESC1 Status e ESC1 Model ID. In Config. telemetria selezionare entrambi i sensori e salvare nella pagina Telemetria. La telemetria ESC deve essere già configurata sulla centralina."
+        },
+        "activelook_esc_temp_limit": {
+          "english": "ESC temp limit",
+          "max_length": 14,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "ESC temp limit"
+        },
+        "activelook_esc_temp_warning": {
+          "english": "ESC temp warning",
+          "max_length": 16,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "ESC temp warning"
+        },
+        "activelook_esc_unsupported": {
+          "english": "No status support",
+          "max_length": 21,
+          "needs_translation": false,
+          "translation": "Stato non supportato"
+        },
+        "activelook_glasses_menu": {
+          "english": "ETHOS Glasses menu",
+          "max_length": 21,
+          "needs_translation": false,
+          "translation": "Menu occhiali ETHOS"
+        },
+        "activelook_governor_lost": {
+          "english": "Lost headspeed",
+          "max_length": 14,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Lost headspeed"
+        },
+        "activelook_governor_status": {
+          "english": "Governor status",
+          "max_length": 15,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Governor status"
+        },
         "activelook_hide_display": {
           "english": "Hide Display",
           "max_length": 12,
@@ -7997,6 +8116,48 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Involo"
+        },
+        "activelook_inflight_fuel_icon": {
+          "english": "Smart Fuel icon",
+          "max_length": 15,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Icona Smart Fuel"
+        },
+        "activelook_low_fuel": {
+          "english": "Smart Fuel",
+          "max_length": 10,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Smart Fuel"
+        },
+        "activelook_low_fuel_icon": {
+          "english": "Icon",
+          "max_length": 4,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Icona"
+        },
+        "activelook_low_fuel_repeats": {
+          "english": "Repeats",
+          "max_length": 7,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Ripetizioni"
+        },
+        "activelook_low_fuel_seconds": {
+          "english": "Display duration",
+          "max_length": 16,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Durata display"
+        },
+        "activelook_low_fuel_warning": {
+          "english": "Smart Fuel warning",
+          "max_length": 18,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Avviso Smart Fuel"
         },
         "activelook_postflight": {
           "english": "Postflight",
@@ -8012,12 +8173,80 @@
           "reverse_text": false,
           "translation": "Privolo"
         },
+        "activelook_restart_radio": {
+          "english": "Save, then restart the radio.",
+          "max_length": 32,
+          "needs_translation": false,
+          "translation": "Salvare, poi riavviare la radio."
+        },
+        "activelook_rf_link_limit": {
+          "english": "RSSI limit",
+          "max_length": 10,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Link limit"
+        },
+        "activelook_rf_link_percent_limit": {
+          "english": "VFR/LQ limit",
+          "max_length": 12,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "VFR/LQ limit"
+        },
+        "activelook_rf_link_warning": {
+          "english": "RF link warning",
+          "max_length": 15,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "RF link warning"
+        },
         "activelook_settings": {
           "english": "Settings",
           "max_length": 8,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Impostazioni"
+        },
+        "activelook_setup_hint": {
+          "english": "One-time setup:\nModel > Glasses > Screen\nChoose the Full-Screen layout.\nAssign Wingflight ActiveLook.",
+          "max_length": 120,
+          "needs_translation": false,
+          "translation": "Configurazione iniziale:\nModello > Occhiali > Schermo\nScegliere il layout Full-Screen.\nAssegnare Wingflight ActiveLook."
+        },
+        "activelook_smartfuel_max": {
+          "english": "Max Smart Fuel",
+          "max_length": 14,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Smart Fuel max."
+        },
+        "activelook_smartfuel_min": {
+          "english": "Min Smart Fuel",
+          "max_length": 14,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Smart Fuel min."
+        },
+        "activelook_status_duration": {
+          "english": "Status duration",
+          "max_length": 15,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Status duration"
+        },
+        "activelook_use_audio_limit": {
+          "english": "Use audio limits & repeats",
+          "max_length": 26,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Limiti e ripetizioni audio"
+        },
+        "activelook_use_audio_repeats": {
+          "english": "Use audio repeats",
+          "max_length": 17,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Usa ripetizioni audio"
         },
         "adj_callouts": {
           "english": "Adjustment callouts",
@@ -13256,6 +13485,96 @@
     }
   },
   "widgets": {
+    "activelook": {
+      "alert_autorotation": {
+        "english": "AUTOROTATION",
+        "max_length": 12,
+        "needs_translation": false,
+        "reverse_text": false,
+        "translation": "AUTOROTAZ."
+      },
+      "alert_bailout": {
+        "english": "BAILOUT",
+        "max_length": 7,
+        "needs_translation": false,
+        "reverse_text": false,
+        "translation": "BAILOUT"
+      },
+      "alert_battery_empty": {
+        "english": "BATTERY EMPTY",
+        "max_length": 13,
+        "needs_translation": false,
+        "reverse_text": false,
+        "translation": "BATTERIA SCARICA"
+      },
+      "alert_esc_error": {
+        "english": "ESC ERROR",
+        "max_length": 10,
+        "needs_translation": false,
+        "translation": "ERRORE ESC"
+      },
+      "alert_esc_temp_high": {
+        "english": "ESC TEMP HIGH",
+        "max_length": 13,
+        "needs_translation": false,
+        "reverse_text": false,
+        "translation": "TEMP ESC ALTA"
+      },
+      "alert_esc_warning": {
+        "english": "ESC WARNING",
+        "max_length": 11,
+        "needs_translation": false,
+        "translation": "AVVISO ESC"
+      },
+      "alert_fuel_low": {
+        "english": "LOW FUEL",
+        "max_length": 8,
+        "needs_translation": false,
+        "reverse_text": false,
+        "translation": "POCO CARBURANTE"
+      },
+      "alert_governor": {
+        "english": "GOVERNOR",
+        "max_length": 8,
+        "needs_translation": false,
+        "reverse_text": false,
+        "translation": "GOVERNOR"
+      },
+      "alert_headspeed_lost": {
+        "english": "HEADSPEED LOST",
+        "max_length": 14,
+        "needs_translation": false,
+        "reverse_text": false,
+        "translation": "PERDITA GIRI"
+      },
+      "alert_limit": {
+        "english": "LIMIT",
+        "max_length": 5,
+        "needs_translation": false,
+        "reverse_text": false,
+        "translation": "LIMITE"
+      },
+      "alert_no_esc_data": {
+        "english": "NO ESC DATA",
+        "max_length": 16,
+        "needs_translation": false,
+        "translation": "DATI ESC ASSENTI"
+      },
+      "alert_rf_link_low": {
+        "english": "RF LINK LOW",
+        "max_length": 11,
+        "needs_translation": false,
+        "reverse_text": false,
+        "translation": "SEGNALE RF BASSO"
+      },
+      "alert_warning": {
+        "english": "WARNING!",
+        "max_length": 8,
+        "needs_translation": false,
+        "reverse_text": false,
+        "translation": "ATTENZIONE!"
+      }
+    },
     "battery": {
       "msg_battery_selected": {
         "english": "Selected battery:",

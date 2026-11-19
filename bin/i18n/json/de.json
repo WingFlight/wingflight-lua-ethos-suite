@@ -2241,6 +2241,97 @@
           "reverse_text": false,
           "max_length": 12
         },
+        "activelook_alerts": {
+          "english": "Alerts",
+          "translation": "Warnungen",
+          "needs_translation": false,
+          "max_length": 6,
+          "reverse_text": false
+        },
+        "activelook_esc_temp_warning": {
+          "english": "ESC temp warning",
+          "translation": "ESC-Temp.-Warnung",
+          "needs_translation": false,
+          "max_length": 16,
+          "reverse_text": false
+        },
+        "activelook_use_audio_limit": {
+          "english": "Use audio limits & repeats",
+          "translation": "Audio-Grenze & Wiederh.",
+          "needs_translation": false,
+          "max_length": 26,
+          "reverse_text": false
+        },
+        "activelook_esc_temp_limit": {
+          "english": "ESC temp limit",
+          "translation": "ESC-Temp.-Grenze",
+          "needs_translation": false,
+          "max_length": 14,
+          "reverse_text": false
+        },
+        "activelook_governor_lost": {
+          "english": "Lost headspeed",
+          "translation": "Drehzahlverlust",
+          "needs_translation": false,
+          "max_length": 14,
+          "reverse_text": false
+        },
+        "activelook_governor_status": {
+          "english": "Governor status",
+          "translation": "Governor-Status",
+          "needs_translation": false,
+          "max_length": 15,
+          "reverse_text": false
+        },
+        "activelook_status_duration": {
+          "english": "Status duration",
+          "translation": "Statusdauer",
+          "needs_translation": false,
+          "max_length": 15,
+          "reverse_text": false
+        },
+        "activelook_low_fuel": {
+          "english": "Smart Fuel",
+          "translation": "Smart Fuel",
+          "needs_translation": false,
+          "reverse_text": false,
+          "max_length": 10
+        },
+        "activelook_low_fuel_warning": {
+          "english": "Smart Fuel warning",
+          "translation": "Smart-Fuel-Warnung",
+          "needs_translation": false,
+          "reverse_text": false,
+          "max_length": 18
+        },
+        "activelook_low_fuel_repeats": {
+          "english": "Repeats",
+          "translation": "Wiederholungen",
+          "needs_translation": false,
+          "reverse_text": false,
+          "max_length": 7
+        },
+        "activelook_low_fuel_icon": {
+          "english": "Icon",
+          "translation": "Icon",
+          "needs_translation": false,
+          "reverse_text": false,
+          "max_length": 4
+        },
+        "activelook_low_fuel_seconds": {
+          "english": "Display duration",
+          "translation": "Anzeigedauer",
+          "needs_translation": false,
+          "reverse_text": false,
+          "max_length": 16
+        },
+        "activelook_inflight_fuel_icon": {
+          "english": "Smart Fuel icon",
+          "translation": "Smart-Fuel-Icon",
+          "needs_translation": false,
+          "max_length": 15,
+          "reverse_text": false
+        },
         "activelook_inflight": {
           "english": "Inflight",
           "translation": "Flug",
@@ -2268,6 +2359,24 @@
           "needs_translation": false,
           "reverse_text": false,
           "max_length": 8
+        },
+        "activelook_glasses_menu": {
+          "english": "ETHOS Glasses menu",
+          "translation": "ETHOS-Brillenmenü",
+          "needs_translation": false,
+          "max_length": 21
+        },
+        "activelook_restart_radio": {
+          "english": "Save, then restart the radio.",
+          "translation": "Speichern, dann Sender neu starten.",
+          "needs_translation": false,
+          "max_length": 35
+        },
+        "activelook_setup_hint": {
+          "english": "One-time setup:\nModel > Glasses > Screen\nChoose the Full-Screen layout.\nAssign Wingflight ActiveLook.",
+          "translation": "Einmalig einrichten:\nModell > Brille > Bildschirm\nFull-Screen-Layout wählen.\nWingflight ActiveLook zuweisen.",
+          "needs_translation": false,
+          "max_length": 120
         },
         "feature_activelook": {
           "english": "Wingflight ActiveLook",
@@ -2976,12 +3085,132 @@
           "reverse_text": false,
           "max_length": 16
         },
+        "activelook_rf_link_warning": {
+          "english": "RF link warning",
+          "translation": "RF-Link-Warnung",
+          "needs_translation": false,
+          "max_length": 15,
+          "reverse_text": false
+        },
+        "activelook_rf_link_limit": {
+          "english": "RSSI limit",
+          "translation": "RSSI-Grenzwert",
+          "needs_translation": false,
+          "max_length": 10,
+          "reverse_text": false
+        },
+        "activelook_rf_link_percent_limit": {
+          "english": "VFR/LQ limit",
+          "translation": "VFR/LQ-Grenze",
+          "needs_translation": false,
+          "max_length": 12,
+          "reverse_text": false
+        },
+        "activelook_use_audio_repeats": {
+          "english": "Use audio repeats",
+          "translation": "Audio-Wiederh. nutzen",
+          "needs_translation": false,
+          "max_length": 17,
+          "reverse_text": false
+        },
+        "activelook_smartfuel_min": {
+          "english": "Min Smart Fuel",
+          "translation": "Min. Smart Fuel",
+          "needs_translation": false,
+          "max_length": 14,
+          "reverse_text": false
+        },
+        "activelook_smartfuel_max": {
+          "english": "Max Smart Fuel",
+          "translation": "Max. Smart Fuel",
+          "needs_translation": false,
+          "max_length": 14,
+          "reverse_text": false
+        },
         "armed_warning": {
           "english": "Dashboard armed warning",
           "max_length": 23,
           "needs_translation": false,
           "translation": "Dashboard Armed-Warnung",
           "reverse_text": false
+        },
+        "activelook_esc_status": {
+          "english": "ESC Status",
+          "translation": "ESC-Status",
+          "needs_translation": false,
+          "max_length": 10
+        },
+        "activelook_esc_status_warning": {
+          "english": "ESC Status Warning",
+          "translation": "ESC-Statuswarnung",
+          "needs_translation": false,
+          "max_length": 18
+        },
+        "activelook_esc_offline": {
+          "english": "Connect to check",
+          "translation": "Zum Prüfen verbinden",
+          "needs_translation": false,
+          "max_length": 20
+        },
+        "activelook_esc_missing": {
+          "english": "Telemetry missing",
+          "translation": "Telemetrie fehlt",
+          "needs_translation": false,
+          "max_length": 17
+        },
+        "activelook_esc_unsupported": {
+          "english": "No status support",
+          "translation": "Kein Status verfügbar",
+          "needs_translation": false,
+          "max_length": 21
+        },
+        "activelook_esc_generic": {
+          "english": "Generic faults only",
+          "translation": "Nur allgemeine Fehler",
+          "needs_translation": false,
+          "max_length": 21
+        },
+        "activelook_esc_available": {
+          "english": "Status available",
+          "translation": "Status verfügbar",
+          "needs_translation": false,
+          "max_length": 16
+        },
+        "activelook_esc_setup": {
+          "english": "Set up telemetry",
+          "translation": "Telemetrie einrichten",
+          "needs_translation": false,
+          "max_length": 21
+        },
+        "activelook_esc_messages": {
+          "english": "Show messages",
+          "translation": "Meldungen anzeigen",
+          "needs_translation": false,
+          "max_length": 18
+        },
+        "activelook_esc_messages_all": {
+          "english": "Errors and warnings",
+          "translation": "Fehler und Warnungen",
+          "needs_translation": false,
+          "max_length": 20
+        },
+        "activelook_esc_messages_errors": {
+          "english": "Errors only",
+          "translation": "Nur Fehler",
+          "needs_translation": false,
+          "max_length": 11
+        },
+        "activelook_esc_messages_warnings": {
+          "english": "Warnings only",
+          "translation": "Nur Warnungen",
+          "needs_translation": false,
+          "max_length": 13
+        },
+        "activelook_esc_telemetry_help": {
+          "english": "Requires ESC1 Status and ESC1 Model ID telemetry. Use Set up telemetry to select both sensors, then save on the Telemetry page. ESC telemetry must already be configured on the flight controller.",
+          "translation": "Benötigt ESC1 Status und ESC1 Model ID als Telemetrie. Unter Telemetrie einrichten beide Sensoren wählen und dort speichern. Die ESC-Telemetrie muss am Flightcontroller bereits eingerichtet sein.",
+          "needs_translation": false,
+          "max_length": 195
         },
         "status_alerts": {
           "english": "FC status",
@@ -14375,6 +14604,96 @@
         "needs_translation": false,
         "reverse_text": false,
         "max_length": 7
+      }
+    },
+    "activelook": {
+      "alert_battery_empty": {
+        "english": "BATTERY EMPTY",
+        "translation": "AKKU LEER",
+        "needs_translation": false,
+        "max_length": 13,
+        "reverse_text": false
+      },
+      "alert_fuel_low": {
+        "english": "LOW FUEL",
+        "translation": "KRAFTSTOFF NIEDRIG",
+        "needs_translation": false,
+        "max_length": 8,
+        "reverse_text": false
+      },
+      "alert_esc_temp_high": {
+        "english": "ESC TEMP HIGH",
+        "translation": "ESC TEMP HOCH",
+        "needs_translation": false,
+        "max_length": 13,
+        "reverse_text": false
+      },
+      "alert_rf_link_low": {
+        "english": "RF LINK LOW",
+        "translation": "RF LINK SCHWACH",
+        "needs_translation": false,
+        "max_length": 11,
+        "reverse_text": false
+      },
+      "alert_warning": {
+        "english": "WARNING!",
+        "translation": "WARNUNG!",
+        "needs_translation": false,
+        "max_length": 8,
+        "reverse_text": false
+      },
+      "alert_headspeed_lost": {
+        "english": "HEADSPEED LOST",
+        "translation": "DREHZAHL VERLOREN",
+        "needs_translation": false,
+        "max_length": 14,
+        "reverse_text": false
+      },
+      "alert_governor": {
+        "english": "GOVERNOR",
+        "translation": "GOVERNOR",
+        "needs_translation": false,
+        "max_length": 8,
+        "reverse_text": false
+      },
+      "alert_autorotation": {
+        "english": "AUTOROTATION",
+        "translation": "AUTOROTATION",
+        "needs_translation": false,
+        "max_length": 12,
+        "reverse_text": false
+      },
+      "alert_bailout": {
+        "english": "BAILOUT",
+        "translation": "BAILOUT",
+        "needs_translation": false,
+        "max_length": 7,
+        "reverse_text": false
+      },
+      "alert_limit": {
+        "english": "LIMIT",
+        "translation": "GRENZE",
+        "needs_translation": false,
+        "max_length": 5,
+        "reverse_text": false
+      },
+      "alert_esc_error": {
+        "english": "ESC ERROR",
+        "translation": "ESC-FEHLER",
+        "needs_translation": false,
+        "max_length": 10
+      },
+      "alert_esc_warning": {
+        "english": "ESC WARNING",
+        "translation": "ESC-WARNUNG",
+        "needs_translation": false,
+        "max_length": 11
+      },
+      "alert_no_esc_data": {
+        "english": "NO ESC DATA",
+        "translation": "KEINE ESC-DATEN",
+        "needs_translation": false,
+        "max_length": 15
       }
     }
   }

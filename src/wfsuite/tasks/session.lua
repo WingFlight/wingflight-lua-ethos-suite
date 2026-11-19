@@ -103,6 +103,7 @@ local session = {
   throttlePercent = nil,
   rpm = nil,
   linkQuality = nil,
+  linkQualityIsPercent = false,
   tempEsc = nil,
   -- The speed controller's status word and signature, as published by telemetry (issue #2354).
   escStatusWord = nil,
@@ -424,6 +425,7 @@ local function flush()
     throttlePercent = session.throttlePercent,
     rpm = session.rpm,
     linkQuality = session.linkQuality,
+    linkQualityIsPercent = session.linkQualityIsPercent,
     tempEsc = session.tempEsc,
     escStatusWord = session.escStatusWord,
     escSignature = session.escSignature,
@@ -966,6 +968,7 @@ local function setConnected(value, mspQueue, protocol)
     session.throttlePercent = nil
     session.rpm = nil
     session.linkQuality = nil
+    session.linkQualityIsPercent = false
     session.tempEsc = nil
     session.escStatusWord = nil
     session.escSignature = nil
@@ -1075,6 +1078,12 @@ local function updateRfStatusTelemetry(protocol)
   end
 
   local linkQuality = telemetrySensors.getValue(protocol, "link")
+  local linkSource = telemetrySensors.getSource and telemetrySensors.getSource(protocol, "link")
+  local linkPercent = linkSource and linkSource.unit and linkSource:unit() == UNIT_PERCENT or false
+  if linkPercent ~= session.linkQualityIsPercent then
+    session.linkQualityIsPercent = linkPercent
+    changed = true
+  end
   if linkQuality ~= session.linkQuality then
     session.linkQuality = linkQuality
     changed = true

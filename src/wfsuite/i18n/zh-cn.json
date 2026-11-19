@@ -7984,6 +7984,125 @@
         }
       },
       "settings": {
+        "activelook_alerts": {
+          "english": "Alerts",
+          "max_length": 6,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Alerts"
+        },
+        "activelook_esc_available": {
+          "english": "Status available",
+          "max_length": 16,
+          "needs_translation": false,
+          "translation": "状态可用"
+        },
+        "activelook_esc_generic": {
+          "english": "Generic faults only",
+          "max_length": 21,
+          "needs_translation": false,
+          "translation": "仅报告一般故障"
+        },
+        "activelook_esc_messages": {
+          "english": "Show messages",
+          "max_length": 18,
+          "needs_translation": false,
+          "translation": "显示消息"
+        },
+        "activelook_esc_messages_all": {
+          "english": "Errors and warnings",
+          "max_length": 20,
+          "needs_translation": false,
+          "translation": "错误和警告"
+        },
+        "activelook_esc_messages_errors": {
+          "english": "Errors only",
+          "max_length": 11,
+          "needs_translation": false,
+          "translation": "仅错误"
+        },
+        "activelook_esc_messages_warnings": {
+          "english": "Warnings only",
+          "max_length": 13,
+          "needs_translation": false,
+          "translation": "仅警告"
+        },
+        "activelook_esc_missing": {
+          "english": "Telemetry missing",
+          "max_length": 17,
+          "needs_translation": false,
+          "translation": "缺少遥测"
+        },
+        "activelook_esc_offline": {
+          "english": "Connect to check",
+          "max_length": 20,
+          "needs_translation": false,
+          "translation": "连接后检查"
+        },
+        "activelook_esc_setup": {
+          "english": "Set up telemetry",
+          "max_length": 21,
+          "needs_translation": false,
+          "translation": "设置遥测"
+        },
+        "activelook_esc_status": {
+          "english": "ESC Status",
+          "max_length": 10,
+          "needs_translation": false,
+          "translation": "电调状态"
+        },
+        "activelook_esc_status_warning": {
+          "english": "ESC Status Warning",
+          "max_length": 18,
+          "needs_translation": false,
+          "translation": "电调状态警报"
+        },
+        "activelook_esc_telemetry_help": {
+          "english": "Requires ESC1 Status and ESC1 Model ID telemetry. Use Set up telemetry to select both sensors, then save on the Telemetry page. ESC telemetry must already be configured on the flight controller.",
+          "max_length": 195,
+          "needs_translation": false,
+          "translation": "需要 ESC1 Status 和 ESC1 Model ID 遥测传感器。在“设置遥测”中选择这两个传感器，然后在遥测页面保存。飞控上的电调遥测必须已配置。"
+        },
+        "activelook_esc_temp_limit": {
+          "english": "ESC temp limit",
+          "max_length": 14,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "ESC temp limit"
+        },
+        "activelook_esc_temp_warning": {
+          "english": "ESC temp warning",
+          "max_length": 16,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "ESC temp warning"
+        },
+        "activelook_esc_unsupported": {
+          "english": "No status support",
+          "max_length": 21,
+          "needs_translation": false,
+          "translation": "不支持状态反馈"
+        },
+        "activelook_glasses_menu": {
+          "english": "ETHOS Glasses menu",
+          "max_length": 21,
+          "needs_translation": false,
+          "translation": "ETHOS 眼镜菜单"
+        },
+        "activelook_governor_lost": {
+          "english": "Lost headspeed",
+          "max_length": 14,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Lost headspeed"
+        },
+        "activelook_governor_status": {
+          "english": "Governor status",
+          "max_length": 15,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Governor status"
+        },
         "activelook_hide_display": {
           "english": "Hide Display",
           "max_length": 12,
@@ -7997,6 +8116,48 @@
           "needs_translation": false,
           "reverse_text": false,
           "translation": "Inflight"
+        },
+        "activelook_inflight_fuel_icon": {
+          "english": "Smart Fuel icon",
+          "max_length": 15,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Smart Fuel 图标"
+        },
+        "activelook_low_fuel": {
+          "english": "Smart Fuel",
+          "max_length": 10,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Smart Fuel"
+        },
+        "activelook_low_fuel_icon": {
+          "english": "Icon",
+          "max_length": 4,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "图标"
+        },
+        "activelook_low_fuel_repeats": {
+          "english": "Repeats",
+          "max_length": 7,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "重复次数"
+        },
+        "activelook_low_fuel_seconds": {
+          "english": "Display duration",
+          "max_length": 16,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "显示时长"
+        },
+        "activelook_low_fuel_warning": {
+          "english": "Smart Fuel warning",
+          "max_length": 18,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "Smart Fuel 警告"
         },
         "activelook_postflight": {
           "english": "Postflight",
@@ -8012,12 +8173,80 @@
           "reverse_text": false,
           "translation": "P飞行"
         },
+        "activelook_restart_radio": {
+          "english": "Save, then restart the radio.",
+          "max_length": 29,
+          "needs_translation": false,
+          "translation": "先保存，再重启遥控器。"
+        },
+        "activelook_rf_link_limit": {
+          "english": "RSSI limit",
+          "max_length": 10,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Link limit"
+        },
+        "activelook_rf_link_percent_limit": {
+          "english": "VFR/LQ limit",
+          "max_length": 12,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "VFR/LQ limit"
+        },
+        "activelook_rf_link_warning": {
+          "english": "RF link warning",
+          "max_length": 15,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "RF link warning"
+        },
         "activelook_settings": {
           "english": "Settings",
           "max_length": 8,
           "needs_translation": false,
           "reverse_text": false,
           "translation": "设定"
+        },
+        "activelook_setup_hint": {
+          "english": "One-time setup:\nModel > Glasses > Screen\nChoose the Full-Screen layout.\nAssign Wingflight ActiveLook.",
+          "max_length": 120,
+          "needs_translation": false,
+          "translation": "首次设置：\n模型 > 眼镜 > 屏幕\n选择全屏布局（Full-Screen）。\n分配 Wingflight ActiveLook。"
+        },
+        "activelook_smartfuel_max": {
+          "english": "Max Smart Fuel",
+          "max_length": 14,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "最高 Smart Fuel"
+        },
+        "activelook_smartfuel_min": {
+          "english": "Min Smart Fuel",
+          "max_length": 14,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "最低 Smart Fuel"
+        },
+        "activelook_status_duration": {
+          "english": "Status duration",
+          "max_length": 15,
+          "needs_translation": true,
+          "reverse_text": false,
+          "translation": "Status duration"
+        },
+        "activelook_use_audio_limit": {
+          "english": "Use audio limits & repeats",
+          "max_length": 26,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "使用语音阈值和重复次数"
+        },
+        "activelook_use_audio_repeats": {
+          "english": "Use audio repeats",
+          "max_length": 17,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "使用语音重复次数"
         },
         "adj_callouts": {
           "english": "Adjustment callouts",
@@ -13256,6 +13485,96 @@
     }
   },
   "widgets": {
+    "activelook": {
+      "alert_autorotation": {
+        "english": "AUTOROTATION",
+        "max_length": 12,
+        "needs_translation": false,
+        "reverse_text": false,
+        "translation": "自旋降落"
+      },
+      "alert_bailout": {
+        "english": "BAILOUT",
+        "max_length": 7,
+        "needs_translation": false,
+        "reverse_text": false,
+        "translation": "快速恢复"
+      },
+      "alert_battery_empty": {
+        "english": "BATTERY EMPTY",
+        "max_length": 13,
+        "needs_translation": false,
+        "reverse_text": false,
+        "translation": "电池电量耗尽"
+      },
+      "alert_esc_error": {
+        "english": "ESC ERROR",
+        "max_length": 10,
+        "needs_translation": false,
+        "translation": "电调错误"
+      },
+      "alert_esc_temp_high": {
+        "english": "ESC TEMP HIGH",
+        "max_length": 13,
+        "needs_translation": false,
+        "reverse_text": false,
+        "translation": "电调温度过高"
+      },
+      "alert_esc_warning": {
+        "english": "ESC WARNING",
+        "max_length": 11,
+        "needs_translation": false,
+        "translation": "电调警告"
+      },
+      "alert_fuel_low": {
+        "english": "LOW FUEL",
+        "max_length": 8,
+        "needs_translation": false,
+        "reverse_text": false,
+        "translation": "燃油不足"
+      },
+      "alert_governor": {
+        "english": "GOVERNOR",
+        "max_length": 8,
+        "needs_translation": false,
+        "reverse_text": false,
+        "translation": "调速器"
+      },
+      "alert_headspeed_lost": {
+        "english": "HEADSPEED LOST",
+        "max_length": 14,
+        "needs_translation": false,
+        "reverse_text": false,
+        "translation": "旋翼转速丢失"
+      },
+      "alert_limit": {
+        "english": "LIMIT",
+        "max_length": 5,
+        "needs_translation": false,
+        "reverse_text": false,
+        "translation": "阈值"
+      },
+      "alert_no_esc_data": {
+        "english": "NO ESC DATA",
+        "max_length": 15,
+        "needs_translation": false,
+        "translation": "无电调数据"
+      },
+      "alert_rf_link_low": {
+        "english": "RF LINK LOW",
+        "max_length": 11,
+        "needs_translation": false,
+        "reverse_text": false,
+        "translation": "射频链路弱"
+      },
+      "alert_warning": {
+        "english": "WARNING!",
+        "max_length": 8,
+        "needs_translation": false,
+        "reverse_text": false,
+        "translation": "警告！"
+      }
+    },
     "battery": {
       "msg_battery_selected": {
         "english": "Selected battery:",

@@ -19,12 +19,20 @@ function common.openPage(title, opts, build)
   opts = opts or {}
   local disposed = false
   local headerHandle
+  local pageCleanup
   local settings = settingsStore.load()
   local original = settingsStore.clone(settings)
   settings.activelook = settings.activelook or {}
 
   local function isDirty()
-    return not settingsStore.same(settings, original)
+    local current, saved = settings.activelook, original.activelook or {}
+    for key, value in pairs(current) do
+      if saved[key] ~= value then return true end
+    end
+    for key in pairs(saved) do
+      if current[key] == nil then return true end
+    end
+    return false
   end
 
   local function updateSaveEnabled()
@@ -34,6 +42,7 @@ function common.openPage(title, opts, build)
   local function dispose()
     if disposed then return end
     disposed = true
+    if pageCleanup then pageCleanup(); pageCleanup = nil end
     bus.publish("activelook.control", {previewMode = nil})
     if opts.setWakeupHandler then opts.setWakeupHandler(nil) end
     if opts.setCleanupHandler then opts.setCleanupHandler(nil) end
@@ -41,10 +50,11 @@ function common.openPage(title, opts, build)
     original = nil
   end
 
-  local function leave()
+  local function leave(destination)
     if disposed then return end
     dispose()
-    if opts.onBack then opts.onBack() end
+    if destination then destination()
+    elseif opts.onBack then opts.onBack() end
   end
 
   local function save(focusFn)
@@ -81,13 +91,16 @@ function common.openPage(title, opts, build)
   form.clear()
   -- Back with unsaved changes asks first (issue #2504): Save saves and keeps the page,
   -- Discard leaves it, Stay keeps it.
-  local function goBack()
+  local function goBack(destination, canLeave)
     if disposed then return end
+    if canLeave and not canLeave() then return end
     if isDirty() then
       form.openDialog(leaveConfirm.args({
         canSave = true,
         save = function() save(nil) end,
-        discard = function() leave() end,
+        discard = function()
+          if not canLeave or canLeave() then leave(destination) end
+        end,
         focus = function()
           if headerHandle and headerHandle.focusSave then
             headerHandle.focusSave()
@@ -96,15 +109,15 @@ function common.openPage(title, opts, build)
       }))
       return
     end
-    leave()
+    leave(destination)
   end
 
   headerHandle = header.build(title, {
-    onBack = goBack,
+    onBack = function() goBack() end,
     onSave = function() confirmSave(headerHandle and headerHandle.focusSave) end,
   })
 
-  build(settings, updateSaveEnabled)
+  pageCleanup = build(settings, updateSaveEnabled, goBack)
   updateSaveEnabled()
 
   if opts.setEventHandler then
