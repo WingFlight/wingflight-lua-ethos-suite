@@ -29,6 +29,10 @@ Requires a running background task and a flight controller connection.
 
 ## Notes
 
+- The Source and Dest. Profile lists offer the profiles the flight controller has for the chosen type: PID
+  profiles or rate profiles. Save stays off until the flight controller has reported its counts, and while source
+  and destination are the same profile. If the counts cannot be read, the page says so; Reload asks again.
+
 TODO: Verify persistence, reboot behaviour, profile scope and any restrictions in
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than
 firmware defaults; wire values may need scaling before display.

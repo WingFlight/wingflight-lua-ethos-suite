@@ -5,6 +5,7 @@ local bus = requireModule("lib/bus.lua")
 local closeKey = requireModule("app/close_key.lua")
 local header = requireModule("app/header.lua")
 local progressDialog = requireModule("app/progress_dialog.lua")
+local statusMsp = requireModule("lib/msp_status.lua")
 local copyProfile = requireModule("lib/msp_copy_profile.lua")
 local eeprom = requireModule("lib/msp_eeprom.lua")
 
@@ -14,25 +15,44 @@ local BTN_CANCEL = "@i18n(app.btn_cancel)@"
 local MSG_SAVING_TITLE = "@i18n(app.msg_saving)@"
 local MSG_SAVING_BODY = "@i18n(app.msg_saving_settings)@"
 local MSG_SAVE_TITLE = "@i18n(app.modules.copyprofiles.msgbox_save)@"
--- The confirmation names what is copied and what is overwritten (#2349). The arguments are the
+-- The confirmation names what is copied and what is overwritten (rfsuite #2349). The arguments are the
 -- profile type, the source number and the destination number, the destination once more.
 local MSG_COPY_TITLE = "@i18n(app.modules.copyprofiles.msgbox_copy_title)@"
 local MSG_COPY_FMT = "@i18n(app.modules.copyprofiles.msgbox_copy_fmt)@"
 local MSG_SAVE_BODY = "@i18n(app.modules.copyprofiles.msgbox_msg)@"
+local MSG_LOAD_FAILED_TITLE = "@i18n(app.msg_load_failed_title)@"
+local MSG_LOAD_FAILED_BODY = "@i18n(app.msg_load_failed_body)@"
 
 local PROFILE_TYPE_CHOICES = {
   {"@i18n(app.modules.copyprofiles.profile_type_pid)@", 0},
   {"@i18n(app.modules.copyprofiles.profile_type_rate)@", 1},
 }
 
-local PROFILE_CHOICES = {
-  {"1", 0}, {"2", 1}, {"3", 2}, {"4", 3}, {"5", 4}, {"6", 5},
-}
+local PROFILE_TYPE_RATE = 1
+local MAX_PROFILE_COUNT = 6
 
-local function clampProfile(value)
+-- The profiles of the chosen type that the board has (MSP_STATUS reports both counts). A copy onto
+-- a profile the board does not have is acknowledged and changes nothing, so the choices are the
+-- board's own (rfsuite #2661). A count the reply does not carry (absent or 0) is read as the most the page
+-- knows; Select Profile does the same for an absent count.
+local function countFor(status, profileType)
+  local count = profileType == PROFILE_TYPE_RATE and status.control_rate_profile_count or status.pid_profile_count
+  count = math.floor(tonumber(count) or MAX_PROFILE_COUNT)
+  if count < 1 then return MAX_PROFILE_COUNT end
+  if count > MAX_PROFILE_COUNT then return MAX_PROFILE_COUNT end
+  return count
+end
+
+local function profileChoices(count)
+  local choices = {}
+  for i = 1, count do choices[#choices + 1] = {tostring(i), i - 1} end
+  return choices
+end
+
+local function clampProfile(value, count)
   value = math.floor(tonumber(value or 0) or 0)
   if value < 0 then return 0 end
-  if value > 5 then return 5 end
+  if value > count - 1 then return count - 1 end
   return value
 end
 
@@ -45,6 +65,13 @@ local function open(opts)
   local fields = {}
   local fieldsEnabled = nil
   local saveEnabled = nil
+  -- The board's profile counts, once read. Until then no profile can be chosen and Save stays off.
+  local status = nil
+  local loaded = false
+  -- The counts arrived, or the profile type changed: the lines are built on the next wakeup.
+  -- Never from the MSP reply itself: that runs in the background task, where form calls do
+  -- not reach this page's window, and the page stayed empty.
+  local pendingRebuild = false
   local data = {
     profileType = 0,
     sourceProfile = 0,
@@ -79,10 +106,12 @@ local function open(opts)
       end
     end
 
-    local nextSaveEnabled = nextFieldsEnabled and data.sourceProfile ~= data.destProfile
-    if headerHandle and saveEnabled ~= nextSaveEnabled then
-      saveEnabled = nextSaveEnabled
-      headerHandle.setSaveEnabled(nextSaveEnabled)
+    local nextSaveEnabled = loaded and nextFieldsEnabled and data.sourceProfile ~= data.destProfile
+    if headerHandle then
+      if saveEnabled ~= nextSaveEnabled then
+        saveEnabled = nextSaveEnabled
+        headerHandle.setSaveEnabled(nextSaveEnabled)
+      end
     end
   end
 
@@ -104,7 +133,7 @@ local function open(opts)
   end
 
   local function save(focusFn)
-    if disposed or busy or data.sourceProfile == data.destProfile then return end
+    if disposed or busy or not loaded or data.sourceProfile == data.destProfile then return end
     busy = true
     updateEnabled()
     showProgress()
@@ -135,7 +164,92 @@ local function open(opts)
     })
   end
 
-  local function buildPage()
+  -- The three lines. The profile lists follow the chosen type and the board's counts.
+  local function addFields()
+    local count = countFor(status, data.profileType)
+    data.sourceProfile = clampProfile(data.sourceProfile, count)
+    data.destProfile = clampProfile(data.destProfile, count)
+    local choices = profileChoices(count)
+
+    local line = form.addLine("@i18n(app.modules.copyprofiles.profile_type)@")
+    fields[#fields + 1] = form.addChoiceField(line, nil, PROFILE_TYPE_CHOICES,
+      function() return data.profileType end,
+      function(value)
+        data.profileType = tonumber(value) or 0
+        pendingRebuild = true
+        updateEnabled()
+      end)
+
+    line = form.addLine("@i18n(app.modules.copyprofiles.source_profile)@")
+    fields[#fields + 1] = form.addChoiceField(line, nil, choices,
+      function() return data.sourceProfile end,
+      function(value)
+        data.sourceProfile = clampProfile(value, countFor(status, data.profileType))
+        updateEnabled()
+      end)
+
+    line = form.addLine("@i18n(app.modules.copyprofiles.dest_profile)@")
+    fields[#fields + 1] = form.addChoiceField(line, nil, choices,
+      function() return data.destProfile end,
+      function(value)
+        data.destProfile = clampProfile(value, countFor(status, data.profileType))
+        updateEnabled()
+      end)
+  end
+
+  local buildPage
+
+  -- Clears the page and builds it again for the current counts and type. form.clear() takes
+  -- the header with it, so the header is built again too.
+  local function rebuildFields()
+    pendingRebuild = false
+    buildPage()
+    addFields()
+    updateEnabled()
+  end
+
+  local function showLoadFailed()
+    if headerHandle then headerHandle.setReloadEnabled(true) end
+    form.openDialog({
+      title = MSG_LOAD_FAILED_TITLE,
+      message = MSG_LOAD_FAILED_BODY,
+      buttons = {
+        {
+          label = BTN_OK,
+          action = function()
+            if headerHandle then headerHandle.focusReload() end
+            return true
+          end,
+        },
+      },
+      wakeup = function() end,
+      paint = function() end,
+      options = TEXT_LEFT,
+    })
+  end
+
+  -- Reads the board's counts. Lines are built once they are known; if the read fails the page
+  -- says so and Reload asks again.
+  local requestStatus
+  local function reloadStatus()
+    if disposed or loaded then return end
+    if headerHandle then headerHandle.setReloadEnabled(false) end
+    requestStatus()
+  end
+
+  requestStatus = function()
+    bus.publish("msp.request", statusMsp.buildReadMessage(function(data)
+      if disposed then return end
+      status = data
+      loaded = true
+      pendingRebuild = true
+    end, function()
+      if disposed then return end
+      showLoadFailed()
+    end))
+  end
+
+  buildPage = function()
     form.clear()
     fields = {}
     fieldsEnabled = nil
@@ -143,37 +257,14 @@ local function open(opts)
     headerHandle = header.build(PAGE_TITLE, {
       onBack = goBack,
       onSave = function() confirmSave(headerHandle and headerHandle.focusSave) end,
+      onReload = reloadStatus,
     })
     headerHandle.setReloadEnabled(false)
-
-    local line = form.addLine("@i18n(app.modules.copyprofiles.profile_type)@")
-    fields[#fields + 1] = form.addChoiceField(line, nil, PROFILE_TYPE_CHOICES,
-      function() return data.profileType end,
-      function(value)
-        data.profileType = tonumber(value) or 0
-        updateEnabled()
-      end)
-
-    line = form.addLine("@i18n(app.modules.copyprofiles.source_profile)@")
-    fields[#fields + 1] = form.addChoiceField(line, nil, PROFILE_CHOICES,
-      function() return data.sourceProfile end,
-      function(value)
-        data.sourceProfile = clampProfile(value)
-        updateEnabled()
-      end)
-
-    line = form.addLine("@i18n(app.modules.copyprofiles.dest_profile)@")
-    fields[#fields + 1] = form.addChoiceField(line, nil, PROFILE_CHOICES,
-      function() return data.destProfile end,
-      function(value)
-        data.destProfile = clampProfile(value)
-        updateEnabled()
-      end)
-
     updateEnabled()
   end
 
   buildPage()
+  requestStatus()
 
   if opts.setEventHandler then
     opts.setEventHandler(function(category, value)
@@ -185,7 +276,10 @@ local function open(opts)
     end)
   end
   if opts.setWakeupHandler then
-    opts.setWakeupHandler(updateEnabled)
+    opts.setWakeupHandler(function()
+      if pendingRebuild and loaded and not disposed then rebuildFields() end
+      updateEnabled()
+    end)
   end
   if opts.setCleanupHandler then
     opts.setCleanupHandler(function()
