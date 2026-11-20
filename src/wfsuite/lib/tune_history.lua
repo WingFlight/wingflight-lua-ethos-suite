@@ -218,12 +218,92 @@ end
 -- changed, with the value it replaced, so a change can be undone by hand,
 -- and so the page can tell how far its own changes have moved a setting
 -- (pilotValue()).
--- Appended, never trimmed, and kept by erase(): it is the pilot's record.
+-- Kept by erase(): it is the pilot's record. Started afresh above 16 KiB (see compact()).
 local CHANGES_HEADER = "date,axis,setting,from,to"
+
+local ROW_PATTERN = "^([^,]*),([^,]*),([^,]*),(%-?%d+),(%-?%d+)$"
+-- The record is started afresh once an Apply leaves it above this size (rfsuite #2807): it was
+-- appended forever and read whole on every page open.
+local COMPACT_BYTES = 16 * 1024
+
+local function changesPath(mcuId)
+  return BASE_DIR .. "/" .. mcuId .. "/changes.csv"
+end
+
+-- The record before the last restart, kept until the next one
+local function backupPath(path)
+  return path .. ".old"
+end
+
+local function axisOf(name)
+  for n = 1, AXIS_COUNT do
+    if AXIS_NAMES[n] == name then return n end
+  end
+  return nil
+end
+
+-- Calls fn(date, axis, key, from, to) for every row that parses, oldest first, reading the file
+-- line by line rather than as one string. Returns the bytes read, or nil when the file cannot
+-- be opened.
+local function eachRow(path, fn)
+  local file = io.open(path, "rb")
+  if not file then return nil end
+  local bytes = 0
+  while true do
+    local line = file:read("L")
+    if not line then break end
+    bytes = bytes + #line
+    local date, axisName, key, from, to = line:gsub("[\r\n]+$", ""):match(ROW_PATTERN)
+    local axis = axisOf(axisName)
+    if axis and fn then fn(date, axis, key, tonumber(from), tonumber(to)) end
+  end
+  pcall(function() file:close() end)
+  return bytes
+end
+
+-- Starts the record afresh with one row per setting: the page's newest unbroken chain of its
+-- own changes, from the value it started at to the value it ended at. pilotValue() follows only
+-- that chain back from the current value, so it answers the same as over the whole record for
+-- every setting and current value. The new record is staged beside the old one; the old one is
+-- kept as the backup.
+local function compact(path)
+  local chains, order = {}, {}
+  local read = eachRow(path, function(date, axis, key, from, to)
+    local id = axis .. "|" .. key
+    local c = chains[id]
+    if c and c.to == from then
+      c.to, c.date = to, date
+    elseif c then
+      c.from, c.to, c.date = from, to, date
+    else
+      chains[id] = {axis = axis, key = key, from = from, to = to, date = date}
+      order[#order + 1] = id
+    end
+  end)
+  if not read then return false end
+
+  local handle = atomicWrite.stage(path)
+  if not handle then return false end
+  local ok = pcall(function()
+    handle:write(CHANGES_HEADER, "\n")
+    for _, id in ipairs(order) do
+      local c = chains[id]
+      handle:write(string.format("%s,%s,%s,%d,%d\n", c.date, AXIS_NAMES[c.axis], c.key, c.from, c.to))
+    end
+  end)
+  if not ok then
+    atomicWrite.abort(handle, path)
+    return false
+  end
+  local backup = backupPath(path)
+  pcall(os.remove, backup)
+  pcall(os.rename, path, backup)
+  return atomicWrite.commit(handle, path)
+end
 
 -- changes: {key, from, to} as the Tune Advisor page builds them
 function tuneHistory.logChanges(mcuId, axis, changes)
-  local path = BASE_DIR .. "/" .. mcuId .. "/changes.csv"
+  local path = changesPath(mcuId)
   local isNew = not fileExists(path)
   local file = io.open(path, "a")
   if not file then return false end
@@ -233,28 +313,22 @@ function tuneHistory.logChanges(mcuId, axis, changes)
     file:write(string.format("%s,%s,%s,%d,%d\n", date, AXIS_NAMES[axis], c.key, c.from, c.to))
   end
   file:close()
+  -- A restart that fails keeps the full record: the Apply above is already in it
+  if (eachRow(path) or 0) > COMPACT_BYTES then compact(path) end
   return true
 end
 
--- The Apply record, oldest first: {axis, key, from, to} per row. Every row
--- that parses is read, whatever the header says: logChanges() appends to the
--- file as it is, so a header check would lose every later record. A missing
--- file, or one with no such rows, reads as no changes.
+-- The Apply record, oldest first: {axis, key, from, to} per row, read line by line. Every row
+-- that parses is read, whatever the header says: logChanges() appends to the file as it is, so
+-- a header check would lose every later record. A missing file, or one with no such rows, reads
+-- as no changes. An interrupted restart leaves only the backup, which is read instead.
 function tuneHistory.readChanges(mcuId)
   local changes = {}
-  local text = ini.load_file_as_string(BASE_DIR .. "/" .. mcuId .. "/changes.csv")
-  if not text then return changes end
-  local lines = splitLines(text)
-  for i = 1, #lines do
-    local axisName, key, from, to = lines[i]:match("^[^,]*,([^,]*),([^,]*),(%-?%d+),(%-?%d+)$")
-    local axis = nil
-    for n = 1, AXIS_COUNT do
-      if AXIS_NAMES[n] == axisName then axis = n end
-    end
-    if axis then
-      changes[#changes + 1] = {axis = axis, key = key, from = tonumber(from), to = tonumber(to)}
-    end
-  end
+  local path = changesPath(mcuId)
+  if not fileExists(path) then path = backupPath(path) end
+  eachRow(path, function(_, axis, key, from, to)
+    changes[#changes + 1] = {axis = axis, key = key, from = from, to = to}
+  end)
   return changes
 end
 
