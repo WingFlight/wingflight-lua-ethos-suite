@@ -12427,6 +12427,20 @@
           "reverse_text": false,
           "translation": "Stops bounce back %d%%. More P brakes them (or add B)."
         },
+        "why_f_above_fmt": {
+          "english": "F is already %d%% above your setting. Set it on PIDs to go further.",
+          "max_length": 67,
+          "needs_translation": false,
+          "reverse_text": true,
+          "translation": "F כבר %d%% מעל להגדרה שלך. להמשך יש לשנות בדף PIDs."
+        },
+        "why_f_below_fmt": {
+          "english": "F is already %d%% below your setting. Set it on PIDs to go further.",
+          "max_length": 67,
+          "needs_translation": false,
+          "reverse_text": true,
+          "translation": "F כבר %d%% מתחת להגדרה שלך. להמשך יש לשנות בדף PIDs."
+        },
         "why_fast": {
           "english": "The model turns faster than the stick asks for.",
           "max_length": 47,
@@ -12482,6 +12496,20 @@
           "needs_translation": true,
           "reverse_text": false,
           "translation": "P is already %d%% above your setting. Check the mechanics."
+        },
+        "why_rates_above_fmt": {
+          "english": "RC Rate is already %d%% above your setting. Set it on Rates to go further.",
+          "max_length": 74,
+          "needs_translation": false,
+          "reverse_text": true,
+          "translation": "RC Rate כבר %d%% מעל להגדרה שלך. להמשך יש לשנות בדף Rates."
+        },
+        "why_rates_below_fmt": {
+          "english": "RC Rate is already %d%% below your setting. Set it on Rates to go further.",
+          "max_length": 74,
+          "needs_translation": false,
+          "reverse_text": true,
+          "translation": "RC Rate כבר %d%% מתחת להגדרה שלך. להמשך יש לשנות בדף Rates."
         },
         "why_relax": {
           "english": "After a stop, the I-term pushes the model back.",

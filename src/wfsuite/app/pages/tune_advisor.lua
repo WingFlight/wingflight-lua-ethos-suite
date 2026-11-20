@@ -121,6 +121,10 @@ local T = {
   whyOk = "@i18n(app.modules.tune_advisor.why_ok)@",
   whyLimit = "@i18n(app.modules.tune_advisor.why_limit)@",
   whyPMaxFmt = "@i18n(app.modules.tune_advisor.why_p_max_fmt)@",
+  whyFBelowFmt = "@i18n(app.modules.tune_advisor.why_f_below_fmt)@",
+  whyFAboveFmt = "@i18n(app.modules.tune_advisor.why_f_above_fmt)@",
+  whyRatesBelowFmt = "@i18n(app.modules.tune_advisor.why_rates_below_fmt)@",
+  whyRatesAboveFmt = "@i18n(app.modules.tune_advisor.why_rates_above_fmt)@",
 
   applyHint = "@i18n(app.modules.tune_advisor.apply_hint)@",
   applyPrompt = "@i18n(app.modules.tune_advisor.apply_prompt)@",
@@ -170,6 +174,20 @@ local REBOUND_BAD = 0.12
 local ITERM_PUSH = 0.03         -- I at release, surface units
 local P_STEP = 1.2
 local P_RAISE_MAX = 1.5         -- P at most 50% above the pilot's own: two steps
+-- F, and the RC Rate an F step moves, stay within 3/5 to 5/3 of the pilot's own values (60% to
+-- 167%): two 20% steps either way, with room for the rounding of each (rfsuite #2788). Compared
+-- in integers, as to * 5 < own * 3: with 32-bit floats 100 * 0.6 is not exactly 60.
+local OWN_LOW_NUM, OWN_LOW_DEN = 3, 5
+local OWN_HIGH_NUM, OWN_HIGH_DEN = 5, 3
+
+-- Whether a step from `from` to `to` stays within the bound around the pilot's own value. A
+-- step back toward the pilot's own value is never held back, so a record from before this bound
+-- does not lock a setting. An own value of 0 or less has no bound.
+local function withinOwn(from, to, own)
+  if not own or own <= 0 then return true end
+  if math.abs(to - own) < math.abs(from - own) then return true end
+  return to * OWN_LOW_DEN >= own * OWN_LOW_NUM and to * OWN_HIGH_DEN <= own * OWN_HIGH_NUM
+end
 local RELAX_MAX = 10
 
 local MAX_ACTIONS = 3
@@ -249,12 +267,13 @@ end
 -- fits. The reasons for changes stay within MAX_WHYS; only the closing
 -- throttle fact can be cut.
 --
--- pilotP is the pilot's own P for this axis (tune_history.pilotValue()).
+-- pilotP is the pilot's own P for this axis (tune_history.pilotValue()); own holds the
+-- pilot's own F and RC Rate the same way ({F, rcRate}), or nil.
 --
 -- A change that would leave the range the FC accepts (P and F up to
 -- PID_GAIN_MAX, F down to PID_F_GAIN_MIN, RC Rate 1-200) is dropped with
 -- anything tied to it, and the reasons say so once (atLimit).
-local function advise(a, axis, name, pilotP, actions, whys, changes)
+local function advise(a, axis, name, pilotP, actions, whys, changes, own)
   local function room(n) return #actions + n <= MAX_ACTIONS end
   local function act(s) if #actions < MAX_ACTIONS then actions[#actions + 1] = s end end
   local function why(s) if #whys < MAX_WHYS then whys[#whys + 1] = s end end
@@ -264,6 +283,9 @@ local function advise(a, axis, name, pilotP, actions, whys, changes)
     if from ~= to then changes[#changes + 1] = {key = key, from = from, to = to, text = text} end
   end
   local limited = false
+  -- F was not stepped because it, or the RC Rate it moves, is as far from the pilot's own value
+  -- as this page goes: the stops are not told to fix F first, and P is not raised for this axis.
+  local ownHeld = false
   local function atLimit()
     if not limited then limited = true; why(T.whyLimit) end
   end
@@ -288,7 +310,17 @@ local function advise(a, axis, name, pilotP, actions, whys, changes)
     -- At a very low RC Rate the new one can round back to the same value: F
     -- alone would change the feel, so neither is given (not a limit).
     local fits = inRange("F", axis, newF) and inRange("rcRate", axis, newRate)
-    if fits and newRate ~= a.rcRate then
+    if own and not withinOwn(a.F, newF, own.F) then
+      -- As far from the pilot's own F as this page goes (rfsuite #2788)
+      ownHeld = true
+      why(hot and T.whyFast or T.whySlow)
+      why(string.format(a.F < own.F and T.whyFBelowFmt or T.whyFAboveFmt, round(math.abs(a.F / own.F - 1) * 100)))
+    elseif own and newRate ~= a.rcRate and not withinOwn(a.rcRate, newRate, own.rcRate) then
+      ownHeld = true
+      why(hot and T.whyFast or T.whySlow)
+      why(string.format(a.rcRate < own.rcRate and T.whyRatesBelowFmt or T.whyRatesAboveFmt,
+        round(math.abs(a.rcRate / own.rcRate - 1) * 100)))
+    elseif fits and newRate ~= a.rcRate then
       change(string.format(T.actFFmt, name, a.F, newF), "F", a.F, newF)
       change(string.format(T.actRateFmt, name, a.rcRate * RC_RATE_DPS, newRate * RC_RATE_DPS),
         "rcRate", a.rcRate, newRate)
@@ -328,7 +360,7 @@ local function advise(a, axis, name, pilotP, actions, whys, changes)
         why(T.whyRelax)
       elseif ffOff(a) then
         -- F first, unless F was at its limit: then nothing is advised here
-        if not limited then why(string.format(T.whyFixFFmt, rebound)) end
+        if not limited and not ownHeld then why(string.format(T.whyFixFFmt, rebound)) end
       elseif room(1) then
         local newP = math.max(round(a.P * P_STEP), a.P + 1)
         if not inRange("P", axis, newP) then
@@ -509,7 +541,12 @@ local function open(opts)
     clearList(whys)
     clearList(view.changes)
     local pilotP = tuneHistory.pilotValue(changeLog, axis, "P", a.P)
-    view.response, view.stops = advise(a, axis, AXES[selected][1], pilotP, actions, whys, view.changes)
+    -- The pilot's own F and RC Rate on this axis, followed back the same way (rfsuite #2788)
+    local own = {
+      F = tuneHistory.pilotValue(changeLog, axis, "F", a.F),
+      rcRate = tuneHistory.pilotValue(changeLog, axis, "rcRate", a.rcRate),
+    }
+    view.response, view.stops = advise(a, axis, AXES[selected][1], pilotP, actions, whys, view.changes, own)
     view.axis = axis
     for _, k in ipairs(tuneHistory.TUNE_KEYS) do view.tune[k] = a[k] end
     clearList(view.actions)
