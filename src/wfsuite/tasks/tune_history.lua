@@ -258,6 +258,12 @@ local function finishCapture()
       return
     end
   end
+  -- The profiles the flight was flown on: the FC resets its statistics when they change, so
+  -- they are the ones active now. 0 when the session does not know them (rfsuite #2785).
+  for i = 1, #replies do
+    replies[i].a.pidProfile = link.pidProfile or 0
+    replies[i].a.rateProfile = link.rateProfile or 0
+  end
   -- 0: no rate flight. Same as last time: the clear after that flight never
   -- got through and nothing new was flown.
   if seconds > 0 and lastSeconds[mcuId] ~= seconds then
