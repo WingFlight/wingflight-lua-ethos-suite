@@ -128,6 +128,11 @@ package.loaded["wfsuite.app.close_key"] = {shouldHandleClose = function() return
 package.loaded["wfsuite.app.progress_dialog"] = {open = function() return {close = noop, value = noop} end, SPEED = {}}
 package.loaded["wfsuite.lib.msp_copy_profile"] = {buildWriteMessage = function() return {} end}
 package.loaded["wfsuite.lib.msp_eeprom"] = {buildWriteMessage = function() return {} end}
+-- The board reports six profiles of each kind: the page builds its lists from the counts (#2661).
+package.loaded["wfsuite.lib.msp_status"] = {buildReadMessage = function(onData)
+  onData({pid_profile_count = 6, control_rate_profile_count = 6})
+  return {}
+end}
 
 local bus = requireModule("lib/bus.lua")
 local page = requireModule("app/pages/copy_profiles.lua")
@@ -135,7 +140,10 @@ local page = requireModule("app/pages/copy_profiles.lua")
 local function confirmAfter(profileType, source, dest)
   dialogs, choiceSetters = {}, {}
   headerOpts = nil
-  page.open({onBack = noop})
+  -- The lines are built on the page's wakeup after the counts arrive, not in the reply
+  local wakeup = nil
+  page.open({onBack = noop, setWakeupHandler = function(h) wakeup = h end})
+  if wakeup then wakeup() end
   local typeSet, sourceSet, destSet = choiceSetters[1], choiceSetters[2], choiceSetters[3]
   -- Values are the choice values: type 0 = PID, 1 = Rate; profiles 0-based.
   typeSet(profileType)
