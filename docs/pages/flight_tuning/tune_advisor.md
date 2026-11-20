@@ -54,7 +54,10 @@ The suggestions follow these rules:
 
 - **Turns faster or slower than asked** (more than 15% off): change F and RC Rate by the same amount in
   opposite directions. The stick moves the surfaces as far as before, but now asks for the rate the model
-  really flies. One step changes F by at most 20%.
+  really flies. One step changes F by at most 20%. F and RC Rate stay between 60% and 167% of your own values, which
+  allows two steps either way; your own value is the last one you set by hand, worked out from `changes.csv` as for
+  P. Past that the page gives no F step and the reasons say how far F or RC Rate already is: set them on *PIDs* or
+  *Rates* to go further. A step back toward your own value is always given.
 - **Full stick asks for more roll rate than the model reaches** (roll only), with the surfaces at their limit: lower RC Rate
   toward what the model reaches, by at most 20% per step, or add surface throw.
 - **Stops bounce back 12% or more**: if the I-term pushes back, raise *Flight Feel > Relax* by one. If F does not

@@ -144,11 +144,12 @@ local function statusReply()
   return buf
 end
 
+local paintFn = nil
 local function openPage()
   local page = assert(loadfile(ROOT .. "app/pages/tune_advisor.lua"))()
   page.open({
     setWakeupHandler = function(f) wakeup = f end,
-    setPaintHandler = function() end,
+    setPaintHandler = function(f) paintFn = f end,
     setCleanupHandler = function() end,
     setEventHandler = function() end,
     onBack = function() end,
@@ -574,6 +575,52 @@ do
   pump()
   check("no F change without an RC Rate change", saveEnabled == false)
   flightRoll = nil
+end
+
+print("F and the RC Rate it moves stay within reach of the pilot's own values (rfsuite #2788)")
+do
+  -- The fixture's roll runs hot: F 65 -> 52, with RC Rate raised by 65 / 52
+  local function shown()
+    local out = {}
+    lcd.drawText = function(_, _, text) out[#out + 1] = tostring(text) end
+    paintFn()
+    lcd.drawText = nil
+    return table.concat(out, "\n")
+  end
+
+  -- The page already lowered the pilot's F 110 twice: 52 would be past 60% of 110
+  resetFc()
+  changeLog = {{axis = 1, key = "F", from = 110, to = 85}, {axis = 1, key = "F", from = 85, to = 65}}
+  openPage()
+  pump()
+  local text = shown()
+  check("no F step past 60% of the pilot's own F", saveEnabled == false
+    and text:find("act_f_fmt", 1, true) == nil, tostring(saveEnabled))
+  check("the reasons say how far F already is", text:find("why_f_below_fmt", 1, true) ~= nil, text)
+
+  -- Within the bound: own F 80, 52 is 65% of it
+  resetFc()
+  changeLog = {{axis = 1, key = "F", from = 80, to = 65}}
+  openPage()
+  pump()
+  check("an F step within the bound is given", saveEnabled == true)
+
+  -- A step back toward the pilot's own value is never held back
+  resetFc()
+  changeLog = {{axis = 1, key = "F", from = 30, to = 65}}
+  openPage()
+  pump()
+  check("a step back toward the pilot's own F is given", saveEnabled == true)
+
+  -- RC Rate: the page raised the pilot's 12 to 18; 23 would be past 167% of 12
+  resetFc()
+  changeLog = {{axis = 1, key = "rcRate", from = 12, to = 18}}
+  openPage()
+  pump()
+  text = shown()
+  check("no F step whose RC Rate goes past 167% of the pilot's own", saveEnabled == false, tostring(saveEnabled))
+  check("the reasons say how far RC Rate already is", text:find("why_rates_above_fmt", 1, true) ~= nil, text)
+  changeLog = {}
 end
 
 print("P is raised at most 50% above the pilot's own P")

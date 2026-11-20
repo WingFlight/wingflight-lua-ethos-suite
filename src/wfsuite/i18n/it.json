@@ -12427,6 +12427,20 @@
           "reverse_text": false,
           "translation": "Stops bounce back %d%%. More P brakes them (or add B)."
         },
+        "why_f_above_fmt": {
+          "english": "F is already %d%% above your setting. Set it on PIDs to go further.",
+          "max_length": 67,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "F è già il %d%% sopra la tua impostazione. Per andare oltre usa PIDs."
+        },
+        "why_f_below_fmt": {
+          "english": "F is already %d%% below your setting. Set it on PIDs to go further.",
+          "max_length": 67,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "F è già il %d%% sotto la tua impostazione. Per andare oltre usa PIDs."
+        },
         "why_fast": {
           "english": "The model turns faster than the stick asks for.",
           "max_length": 47,
@@ -12482,6 +12496,20 @@
           "needs_translation": true,
           "reverse_text": false,
           "translation": "P is already %d%% above your setting. Check the mechanics."
+        },
+        "why_rates_above_fmt": {
+          "english": "RC Rate is already %d%% above your setting. Set it on Rates to go further.",
+          "max_length": 74,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "RC Rate è già il %d%% sopra la tua impostazione. Per andare oltre usa Escursioni."
+        },
+        "why_rates_below_fmt": {
+          "english": "RC Rate is already %d%% below your setting. Set it on Rates to go further.",
+          "max_length": 74,
+          "needs_translation": false,
+          "reverse_text": false,
+          "translation": "RC Rate è già il %d%% sotto la tua impostazione. Per andare oltre usa Escursioni."
         },
         "why_relax": {
           "english": "After a stop, the I-term pushes the model back.",
