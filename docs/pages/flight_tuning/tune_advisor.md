@@ -103,14 +103,14 @@ In-flight adjustments (*Setup* → *Controls* → *Adjustments*) can change the 
 P, F, RC Rate and Relax per axis, and the PID and rate profile. The firmware applies an adjustment straight
 away and saves it when you disarm.
 
-- **Adjusting during a flight starts the measurements again.** On firmware with wingflight-firmware pull request
-  #270 (development builds from 2026-11-10 on), a PID or rate profile switch during a flight, or a change to
-  a P, I, D, F, B or O gain, a master gain, Relax, a rate or an expo, makes the flight controller drop what it has measured and start again on the new tune. That holds for
-  an adjustment and for a write from the radio or the configurator alike. The flight is then saved with only the
-  part flown after the last change: a change shortly before landing leaves too little, or nothing, to save. A
-  flight the radio has not read yet is dropped with it. Leave these adjustments alone while collecting flights for
-  the advisor.
-- **On older firmware, adjusting during a flight mixes two tunes.** On a development build from before that pull
+- **Adjusting during a flight starts the measurements again.** On firmware that has wingflight-firmware pull
+  request #270, a PID or rate profile switch during a flight, or a change to a P, I, D, F, B or O gain, a master
+  gain, Relax, a rate or an expo, makes the flight controller drop what it has measured and start again on the new
+  tune. That holds for an adjustment and for a write from the radio or the configurator alike. The flight is then
+  saved with only the part flown after the last change: a change shortly before landing leaves too little, or
+  nothing, to save. A flight the radio has not read yet is dropped with it. Leave these adjustments alone while
+  collecting flights for the advisor.
+- **On older firmware, adjusting during a flight mixes two tunes.** On a development build without that pull
   request the flight controller checks the tune only when you arm, so a flight where you adjusted one of these
   settings (or switched profile) is measured partly on the old value and saved as if flown on the value you ended
   on. If you did use one, press *Clear* and fly again.
