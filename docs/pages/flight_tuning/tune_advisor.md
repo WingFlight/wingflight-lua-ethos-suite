@@ -84,8 +84,10 @@ The suggestions follow these rules:
 
 The flight controller writes each setting into the profile that is active when it arrives. So *Save* asks it which
 PID and rate profile are active before reading, before each write, before saving and after reading back. If you
-switch profile after a write has been sent, it stops before the next one and nothing is saved: restart the flight
-controller to undo the part already sent, then press *Save* again on the profile you flew.
+switch profile after a write has been sent but before saving, it stops before the next write and nothing is saved:
+restart the flight controller to undo the part already sent, then press *Save* again on the profile you flew. If you
+switch profile while it reads back, the changes are already saved and a restart does not undo them: it reports that
+the read-back did not confirm the change, so check the values on *PIDs*, *Rates* and *Flight Feel*.
 
 If writing fails, nothing is saved and restarting the flight controller undoes any part already sent. If the
 read-back does not confirm the change, check the values on *PIDs*, *Rates* and *Flight Feel*.
