@@ -27,6 +27,11 @@ Requires a running background task and a flight controller connection.
 
 ## Notes
 
+- Save writes into the PID profile that is active when the write arrives. So Save first asks the flight
+  controller which PID profile is active, and stops with nothing sent if it is not the one the page read
+  (for example a switch the telemetry has not shown yet). A write whose answer is lost is sent again only
+  after the same check.
+
 TODO: Verify persistence, reboot behaviour, profile scope and any restrictions in
 this page and its shared helpers. Codec defaults may be UI fallbacks rather than
 firmware defaults; wire values may need scaling before display.

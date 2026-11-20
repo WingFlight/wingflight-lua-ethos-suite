@@ -108,6 +108,22 @@ local MSG_RESTARTING_BODY = "@i18n(app.msg_restarting_fc)@"
 -- off). Matches the same value in the sibling rotorflight-lua-ethos-suite save
 -- pipeline this was ported from (#2361); its probe bound is 20 s too.
 local REBOOT_TIMEOUT_SECONDS = 20
+
+-- The MSP_STATUS field naming the profile a page's data belongs to, by
+-- profileField (rfsuite issue #2809). The FC writes a profile-scoped record
+-- into whichever profile is active when the write arrives, so before each write
+-- of such a page the FC is asked which profile is active (the telemetry value
+-- can lag or be absent). Pages with another profileField ("none",
+-- "batteryProfile", "tvProfile") are not checked: MSP_STATUS does not carry
+-- those profiles.
+local STATUS_PROFILE_FIELD = {
+  pidProfile = "current_pid_profile_index",
+  rateProfile = "current_control_rate_profile_index",
+}
+-- MSP_STATUS bytes up to current_control_rate_profile_index (lib/msp_status.lua)
+local STATUS_MIN_BYTES = 26
+-- Attempts per checked write, as many as the MSP queue's own (1 + 5 retries)
+local CHECKED_WRITE_ATTEMPTS = 6
 --
 -- Ported from rotorflight-lua-ethos-suite PR #2485 (Issue #2303): shown as a
 -- non-blocking header banner, not a modal dialog. The per-page MSP_SET_* writes
@@ -837,8 +853,58 @@ function PageRuntime:performSave(focusFn)
     finishSave()
   end
 
-  local function writeSource(index)
+  -- A save must stop, unsent, once the active profile is not the one the data
+  -- was read from: the write would land in the other profile. statusField is
+  -- nil for a page that is not checked.
+  local statusField = STATUS_PROFILE_FIELD[self.profileField]
+  -- The profile the writes must find: the one the data was read for, from
+  -- telemetry. Without it (no profile sensor, or the simulator, whose MSP_STATUS
+  -- fixture is not its telemetry profile) the FC's answer before the first write
+  -- is taken, and every later write must find the same.
+  local expectedProfile = nil
+  if statusField and system.getVersion().simulation ~= true then expectedProfile = self.loadedProfile end
+
+  local function stopSave(reason)
+    self_:log("performSave: STOPPED: " .. tostring(reason))
+    self_.pendingSaveError = reason
+    finishSave()
+  end
+
+  local function checkProfile(onSame)
     if self_.disposed then return end
+    -- Telemetry already shows the switch
+    if self_.loadedProfile ~= nil and self_.lastProfile ~= self_.loadedProfile then
+      stopSave("profile changed")
+      return
+    end
+    local statusMsp = requireModule("lib/msp_status.lua")
+    local message = statusMsp.buildReadMessage(function(status)
+      if self_.disposed then return end
+      local active = status[statusField] + 1
+      if expectedProfile == nil then expectedProfile = active end
+      if active ~= expectedProfile then
+        stopSave("profile changed")
+        return
+      end
+      onSame()
+    end, function(reason)
+      if self_.disposed then return end
+      stopSave("status " .. tostring(reason))
+    end)
+    local decode = message.processReply
+    message.processReply = function(msg, buf)
+      if type(buf) ~= "table" or #buf < STATUS_MIN_BYTES then
+        if not self_.disposed then stopSave("short status") end
+        return
+      end
+      decode(msg, buf)
+    end
+    bus.publish("msp.request", message)
+  end
+
+  local function writeSource(index, attempt)
+    if self_.disposed then return end
+    attempt = attempt or 1
     if index > #self_.sources then
       if not self_.eepromWrite then
         commitSave()
@@ -872,14 +938,31 @@ function PageRuntime:performSave(focusFn)
     end
 
     local values = self_.singleSource and self_.data or self_.data[source.key]
-    bus.publish("msp.request", source.mspModule.buildWriteMessage(values, function()
+    local message = source.mspModule.buildWriteMessage(values, function()
       if self_.disposed then return end
       writeSource(index + 1)
     end, function(reason)
+      if self_.disposed then return end
+      -- A checked write is resent from here, after the profile is checked
+      -- again: the queue's own resend could reach a profile selected since.
+      if statusField and attempt < CHECKED_WRITE_ATTEMPTS then
+        self_:log("performSave: write unanswered (" .. tostring(source.key) .. "), checking the profile again")
+        writeSource(index, attempt + 1)
+        return
+      end
       self_:log("performSave: write FAILED (" .. tostring(source.key) .. "): " .. tostring(reason))
       self_.pendingSaveError = reason or true
       finishSave()
-    end))
+    end)
+    if not statusField then
+      bus.publish("msp.request", message)
+      return
+    end
+    -- Sent once by the queue (see the error handler above)
+    message.maxRetries = 0
+    checkProfile(function()
+      bus.publish("msp.request", message)
+    end)
   end
 
   writeSource(1)

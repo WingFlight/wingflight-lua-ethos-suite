@@ -2,7 +2,12 @@
 -- Mocked UI and MSP transport: no physical radio or flight controller required.
 local function equal(a,b) assert(a==b,tostring(a)..' ~= '..tostring(b)) end
 KEY_ENTER_LONG,KEY_ENTER_BREAK=100,101
-system={killEvents=function(key) equal(key,KEY_ENTER_BREAK) end}
+system={killEvents=function(key) equal(key,KEY_ENTER_BREAK) end,getVersion=function() return {simulation=false} end}
+-- MSP_STATUS: page_runtime asks the active profile before each write of a profile page (rfsuite #2809).
+-- The FC answers profile 1, the one the page loaded; the request is not counted as a write.
+local STATUS_BYTES={} for i=1,30 do STATUS_BYTES[i]=0 end
+local statusCodec={buildReadMessage=function(onData) return {kind='status',processReply=function()
+  onData({current_pid_profile_index=0,current_control_rate_profile_index=0}) end} end}
 local function fixture(multi, armedGate, prefetched)
   package.loaded['wfsuite.app.page_runtime']=nil
   local reads, writes, dialogs={},{},{}
@@ -20,9 +25,11 @@ local function fixture(multi, armedGate, prefetched)
   local modules={
     ['lib/bus.lua']={subscribe=function(_,fn) fn({pidProfile=1,isArmed=false}) end,unsubscribe=function() end,
       publish=function(_,msg)
-        if msg.kind=='read' then reads[#reads+1]=msg
+        if msg.kind=='status' then msg.processReply(msg,STATUS_BYTES)
+        elseif msg.kind=='read' then reads[#reads+1]=msg
         else writes[#writes+1]=msg; msg.ok() end
       end},
+    ['lib/msp_status.lua']=statusCodec,
     ['lib/msp_eeprom.lua']={buildWriteMessage=function(ok,err) return {kind='eeprom',ok=ok,err=err} end},
     ['lib/msp_reboot.lua']={},
     ['app/close_key.lua']={shouldHandleClose=function() return false end},
