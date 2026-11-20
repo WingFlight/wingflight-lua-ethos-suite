@@ -206,6 +206,8 @@ local function pump(hook, wakeup)
     if hook then action, switchAfter = hook(m) end
     if action == "error" then
       m.errorHandler("timeout")
+    elseif action == "cleared" then
+      m.errorHandler("cleared")   -- the session dropped the queued request
     elseif m.command == STATUS then
       m.processReply(m, statusReply())
     elseif WRITE_TO_READ[m.command] then
@@ -320,6 +322,7 @@ for _, name in ipairs({ "pids", "rates" }) do
       table.concat(sent, ","))
     check("nothing is committed", not has(sent, EEPROM))
     check("reported as a failed save", reported(SAVE_FAILED), lastDialog())
+    check("the page reads the active profile again", has(sent, page.read), table.concat(sent, ","))
     if opts.cleanup then opts.cleanup() end
   end
 
@@ -358,6 +361,30 @@ do
     table.concat(sent, ","))
   check("the resend follows a status check", table.concat(sent, ","):find("101,202,101,202,250", 1, true) ~= nil,
     table.concat(sent, ","))
+  if opts.cleanup then opts.cleanup() end
+end
+
+out("pids: telemetry shows a switch while the status request is out")
+do
+  local rt, opts, page = openPage("pids")
+  local sent = save(rt, opts, function(m)
+    if m.command == STATUS then
+      session.pidProfile = 2
+      publishSession()
+      session.pidProfile = 1
+    end
+  end)
+  check("the write is not sent", not has(sent, page.write) and not has(sent, EEPROM), table.concat(sent, ","))
+  if opts.cleanup then opts.cleanup() end
+end
+
+out("pids: a write the session dropped from the queue is not resent")
+do
+  local rt, opts, page = openPage("pids")
+  local sent = save(rt, opts, function(m) if m.command == page.write then return "cleared" end end)
+  check("sent once, nothing committed", count(sent, page.write) == 1 and not has(sent, EEPROM),
+    table.concat(sent, ","))
+  check("reported as a failed save", reported(SAVE_FAILED), lastDialog())
   if opts.cleanup then opts.cleanup() end
 end
 
