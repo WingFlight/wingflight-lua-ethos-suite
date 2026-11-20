@@ -243,22 +243,42 @@ local function axisOf(name)
 end
 
 -- Calls fn(date, axis, key, from, to) for every row that parses, oldest first, reading the file
--- line by line rather than as one string. Returns the bytes read, or nil when the file cannot
--- be opened.
+-- line by line rather than as one string. Returns the bytes read and the rows that parsed, or nil
+-- when the file cannot be opened or a read fails (a failed read is not taken for the end of the
+-- file).
 local function eachRow(path, fn)
   local file = io.open(path, "rb")
   if not file then return nil end
-  local bytes = 0
+  local bytes, rows, failed = 0, 0, false
   while true do
-    local line = file:read("L")
-    if not line then break end
+    local line, err = file:read("L")
+    if not line then
+      failed = err ~= nil
+      break
+    end
     bytes = bytes + #line
     local date, axisName, key, from, to = line:gsub("[\r\n]+$", ""):match(ROW_PATTERN)
     local axis = axisOf(axisName)
-    if axis and fn then fn(date, axis, key, tonumber(from), tonumber(to)) end
+    if axis then
+      rows = rows + 1
+      if fn then fn(date, axis, key, tonumber(from), tonumber(to)) end
+    end
   end
   pcall(function() file:close() end)
-  return bytes
+  if failed then return nil end
+  return bytes, rows
+end
+
+-- A restart that stopped after the record was moved to the backup leaves no live record. The
+-- backup is the full record: it is put back before anything is appended, so the next Apply does
+-- not start a record of its own beside it. Returns false when it cannot be put back.
+local function recover(path)
+  if fileExists(path) then return true end
+  local backup = backupPath(path)
+  if not fileExists(backup) then return true end
+  pcall(os.rename, backup, path)
+  atomicWrite.discardTemp(path)
+  return fileExists(path)
 end
 
 -- Starts the record afresh with one row per setting: the page's newest unbroken chain of its
@@ -268,7 +288,7 @@ end
 -- kept as the backup.
 local function compact(path)
   local chains, order = {}, {}
-  local read = eachRow(path, function(date, axis, key, from, to)
+  local read, rowsRead = eachRow(path, function(date, axis, key, from, to)
     local id = axis .. "|" .. key
     local c = chains[id]
     if c and c.to == from then
@@ -280,7 +300,8 @@ local function compact(path)
       order[#order + 1] = id
     end
   end)
-  if not read then return false end
+  -- A failed read, or a file with no rows of ours, is left as it is
+  if not read or rowsRead == 0 then return false end
 
   local handle = atomicWrite.stage(path)
   if not handle then return false end
@@ -295,15 +316,32 @@ local function compact(path)
     atomicWrite.abort(handle, path)
     return false
   end
+  -- The full record becomes the backup. Without it the restart does not go ahead.
   local backup = backupPath(path)
   pcall(os.remove, backup)
   pcall(os.rename, path, backup)
-  return atomicWrite.commit(handle, path)
+  if fileExists(path) or not fileExists(backup) then
+    atomicWrite.abort(handle, path)
+    recover(path)
+    return false
+  end
+
+  -- Ethos' file:write/close do not report failures uniformly, so the new record is read back:
+  -- one row per chain, or the backup is put back in its place.
+  local committed = atomicWrite.commit(handle, path)
+  local _, rows = eachRow(path)
+  if not committed or rows ~= #order then
+    pcall(os.remove, path)
+    recover(path)
+    return false
+  end
+  return true
 end
 
 -- changes: {key, from, to} as the Tune Advisor page builds them
 function tuneHistory.logChanges(mcuId, axis, changes)
   local path = changesPath(mcuId)
+  if not recover(path) then return false end
   local isNew = not fileExists(path)
   local file = io.open(path, "a")
   if not file then return false end
