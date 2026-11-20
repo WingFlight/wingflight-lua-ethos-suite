@@ -97,6 +97,8 @@ older flights out. Each change written is added to `changes.csv` beside the flig
 old value, new value), so you can always see what the advisor changed and set it back by hand. *Clear*
 does not erase it.
 
+Once an Apply leaves `changes.csv` above 16 KiB, it is started afresh: it keeps one row per setting, the advisor's newest run of its own changes from the value it started at to the value it ended at, which is all the page needs to work out your own P. The full record before that is kept beside it as `changes.csv.old` until the next time.
+
 ## Adjustment functions
 
 In-flight adjustments (*Setup* → *Controls* → *Adjustments*) can change the same settings the advisor measures and writes:
