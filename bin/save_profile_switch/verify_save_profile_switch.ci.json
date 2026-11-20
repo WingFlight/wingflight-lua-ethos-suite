@@ -1,0 +1,7 @@
+{
+  "id": "save-profile-switch",
+  "name": "Save stops on a profile switch",
+  "step": "Check that a profile page's Save stops when the profile switches",
+  "script": "bin/save_profile_switch/verify_save_profile_switch.lua",
+  "rationale": "Ported from rfsuite #2809: the FC writes a PID or rate profile record into whichever profile\nis active when the write arrives. app/page_runtime.lua now asks MSP_STATUS for the active profile\nbefore each write of a page whose profileField is pidProfile or rateProfile, and stops unsent when it\nis not the profile the page read (or, without a telemetry profile, the FC's first answer). Each such\nwrite leaves the MSP queue once and is resent only after the check again, so a lost reply's resend\ncannot land in a profile selected meanwhile.\n\nThe harness drives the real PIDs and Rates pages through the real page_runtime and codecs against a\nmocked FC with one record per profile, and pins the request order, a switch the telemetry has not\nshown, telemetry showing the switch, a lost reply with and without a switch, bounded resends, a failed\nstatus request, no telemetry profile, and that a profileField \"none\" page is not checked."
+}

@@ -27,6 +27,13 @@ Requires a running background task and a flight controller connection.
 
 ## Notes
 
+- Save writes into the rate profile that is active when the write arrives. So Save first asks the flight
+  controller which rate profile is active, and stops with nothing sent if it is not the one the page read
+  (for example a switch the telemetry has not shown yet); the page then reads the active profile again.
+  A write whose answer is lost is sent again only after the same check. The check narrows the window but
+  cannot close it: a switch in the moment between the answer and the write still reaches the write.
+  Without a rate profile telemetry sensor the page does not know which profile it read, so Save takes the one
+  the flight controller names before writing, and a switch made between reading and Save is not caught.
 - The largest value of each field is set by the firmware, not by the page: RC Rate
   up to 200, Shape and RC Expo up to 100 (`src/main/fc/rc_rates.h:25-27`). A value saved
   above the limit is cut to the limit at the next boot.
