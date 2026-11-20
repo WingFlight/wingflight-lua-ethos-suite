@@ -82,6 +82,13 @@ The suggestions follow these rules:
 4. **Saving to flight controller**: commits them so they survive a restart.
 5. **Checking saved settings**: reads them back and confirms the new values.
 
+The flight controller writes each setting into the profile that is active when it arrives. So *Save* asks it which
+PID and rate profile are active before reading, before each write, before saving and after reading back. If you
+switch profile after a write has been sent but before saving, it stops before the next write and nothing is saved:
+restart the flight controller to undo the part already sent, then press *Save* again on the profile you flew. If you
+switch profile while it reads back, the changes are already saved and a restart does not undo them: it reports that
+the read-back did not confirm the change, so check the values on *PIDs*, *Rates* and *Flight Feel*.
+
 If writing fails, nothing is saved and restarting the flight controller undoes any part already sent. If the
 read-back does not confirm the change, check the values on *PIDs*, *Rates* and *Flight Feel*.
 
@@ -106,8 +113,9 @@ away and saves it when you disarm.
   knob moves, and at every power-up while its range is enabled, the value goes back to what the knob says. A value
   written by *Save* then lasts only until that happens. Before applying advice to a setting, remove its continuous
   adjustment or turn it off, or leave the knob where it gives the new value.
-- *Save* checks the profiles and values at the moment it writes, so an adjustment or profile switch made since the
-  flights stops it with nothing changed.
+- *Save* checks the values before it writes, so an adjustment made since the flights stops it with nothing changed.
+  It checks the profiles before each write: a switch before the first write stops it with nothing changed, and a
+  switch between two writes stops it with nothing saved (see *Applying the changes*).
 
 ## Notes
 
