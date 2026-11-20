@@ -20,7 +20,13 @@ or make them yourself on *PIDs*, *Rates* or *Flight Feel*. Then fly again and co
 The flight controller counts only armed, airborne rate flight. Time in ANGLE, ATT HOLD, TRAINER, the GPS modes,
 failsafe, MANUAL or PASSTHROUGH is left out. The page combines up to the last 5 flights flown with the same tune
 as the newest one: a flight before a change to P, F, B, Relax or RC Rate on that axis is left out, because the
-advice is worked out against the tune you fly now. A useful set is about ten seconds of rolls and pitch inputs
+advice is worked out against the tune you fly now. A flight on another PID or rate profile is left out too, even
+with the same values on that axis, and flights are only combined when the radio knew both profiles.
+
+> [!NOTE] After an update
+> The flight history file gains two columns (PID profile, rate profile). The page does not read a history with the
+> old columns, so its flights are not shown after the update. The file is replaced at the next saved flight.
+> Flights saved before the update are not kept. A useful set is about ten seconds of rolls and pitch inputs
 with the stick centred after each one, which one flight may or may not give.
 
 ## Where to find it
