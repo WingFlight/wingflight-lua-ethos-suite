@@ -1,0 +1,9 @@
+{
+  "name": "wfsuite-msp-virtual-tests",
+  "private": true,
+  "description": "Checks tasks/msp/virtual.lua against the configurator's virtual MSP layer, under fengari (Lua 5.3 in node).",
+  "type": "module",
+  "devDependencies": {
+    "fengari": "0.1.4"
+  }
+}

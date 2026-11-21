@@ -118,6 +118,7 @@ local REAL = {
   ["lib/msp_api_version.lua"] = true,
   ["lib/msp_handshake.lua"] = true,
   ["lib/main_power.lua"] = true,
+  ["lib/msp_build_id.lua"] = true,
   ["lib/msp_battery.lua"] = true,
   ["lib/msp_rx_map.lua"] = true,
   ["lib/msp_telemetry_config.lua"] = true,
@@ -193,7 +194,7 @@ local function newRig(opts)
   local settingsStore = {
     load = function() return {} end,
     simulatedApiVersionMode = function() return false end,
-    syncNameEnabled = function() return false end,
+    syncNameEnabled = function() return false end, addressedAccessEnabled = function() return false end, addressedWritesEnabled = function() return false end,
   }
   local debugLog = { print = noop, msp = noop, enabled = function() return false end }
 
