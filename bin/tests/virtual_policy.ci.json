@@ -1,0 +1,7 @@
+{
+  "id": "virtual-policy",
+  "name": "Check when addressed access answers locally",
+  "step": "Check when addressed access answers locally",
+  "script": "bin/tests/virtual_policy.lua",
+  "rationale": "tasks/msp/virtual.lua verifies each config opcode against the firmware's own reply before\nanswering it from PARAM_READ / PARAM_WRITE. A build without a config catalogue (after step\n5 of the firmware's parameter-addressing design, or a firmware that never had one) has no\nown reply, so the layer must answer at once, setters included. The harness pins both\npolicies and the BUILD_ID capability bit that selects them."
+}

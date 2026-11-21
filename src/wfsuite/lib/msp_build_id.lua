@@ -6,7 +6,9 @@
 -- because it has to be readable before anything else is known:
 --   U8 protocol, 8 bytes id, U16 capabilities, U32 manifest size, strings...
 -- Capability bit 1 set means the id is real; a build made without its
--- manifest reports zeroes and clears it.
+-- manifest reports zeroes and clears it. Bit 2 set means the build has no
+-- MSP config catalogue (msp_param.h MSP_PARAM_CAP_NO_CONFIG_CATALOGUE): config
+-- opcodes exist only as codecs, answered from PARAM_READ / PARAM_WRITE.
 
 if package.loaded["wfsuite.lib.msp_build_id"] then
   return package.loaded["wfsuite.lib.msp_build_id"]
@@ -17,19 +19,27 @@ local msp_build_id = {}
 msp_build_id.READ_COMMAND = 0x5F2A
 
 local CAP_BUILD_ID_VALID = 2
+local CAP_NO_CONFIG_CATALOGUE = 4
 
+local function hasCap(capabilities, bit)
+  return math.floor(capabilities / bit) % 2 == 1
+end
+
+-- id (16 hex digits, nil for a build without one), noCatalogue (boolean)
 function msp_build_id.decode(buf)
-  if not buf or #buf < 11 then return nil end
+  if not buf or #buf < 11 then return nil, false end
+  local capabilities = buf[10] + buf[11] * 256
+  local noCatalogue = hasCap(capabilities, CAP_NO_CONFIG_CATALOGUE)
+  if not hasCap(capabilities, CAP_BUILD_ID_VALID) then return nil, noCatalogue end
   local hex = {}
   for i = 2, 9 do
     hex[#hex + 1] = string.format("%02x", buf[i])
   end
-  local capabilities = buf[10] + buf[11] * 256
-  if math.floor(capabilities / CAP_BUILD_ID_VALID) % 2 ~= 1 then return nil end
-  return table.concat(hex)
+  return table.concat(hex), noCatalogue
 end
 
--- onData(id) with the 16-hex-digit id, or nil for a build without one.
+-- onData(id, noCatalogue): the 16-hex-digit id, or nil for a build without
+-- one, and whether the build has no config catalogue.
 function msp_build_id.buildReadMessage(onData, onError)
   return {
     command = msp_build_id.READ_COMMAND,
