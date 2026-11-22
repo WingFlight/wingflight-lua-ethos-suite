@@ -1,3 +1,20 @@
+# 0.0.44
+
+Use with the 0.0.44 firmware (MSP API 22.16, unchanged); the 0.0.43 firmware works too. On the 0.0.44 firmware the Setup Wizard's gyro check moves the surfaces much further when the model is tilted.
+Add ActiveLook alerts: Smart Fuel, ESC temperature, RF link and ESC status (errors and warnings), each with a priority, duration and repeats, set on a new Alerts page under the ActiveLook settings, with an inflight fuel icon. "Warning Duration" is now "Display duration".
+Add an option to register the ActiveLook widget with the ETHOS Glasses menu (ETHOS 26.2.0 and later).
+Change saving a PID or rate profile page to ask the flight controller for the active profile before each write: a save stops, unsent, when the profile was switched after the page was read, instead of writing into the other profile.
+Change the Tune Advisor's Apply the same way: a profile switch before the first write changes nothing, and a switch between writes stops before the next write and the save.
+Change the Tune Advisor to keep F, and the RC Rate an F step moves, within 60% to 167% of the pilot's own values, as P already was.
+Change the Tune Advisor to combine flights only when they were flown on the same PID and rate profile. A tune history saved before this update is not read, and is replaced at the next saved flight.
+Change the Tune Advisor's changes.csv to start afresh once it passes 16 KiB, keeping what the advice needs; the old file is kept as changes.csv.old.
+Change Copy Profiles to offer only the profiles the board has, and to keep Save off until they are read.
+Fix the Tune Advisor saving one axis's statistics as another's when a late reply arrived.
+Fix the Tune Advisor retrying a history save that cannot succeed every 5 s: it tries three times per disarm, then shows the flight as not saved.
+Fix the Tune Advisor's outcome dialog being unreachable on radios without a touch screen (X14).
+Fix the dashboard stopping with "Max instructions count reached" on first boot.
+Fix the ActiveLook setup hint naming the Rotorflight widget.
+
 # 0.0.43
 
 Use with the 0.0.43 firmware (MSP API 22.16); the 0.0.42 firmware works too, without servo names and F.Bus wiring detection.
