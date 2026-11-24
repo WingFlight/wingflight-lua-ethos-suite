@@ -27,7 +27,7 @@ Requires a running background task and a flight controller connection.
 | --- | --- |
 | Throttle Protocol | Which signal the FC uses to command the ESCs. The list follows the flight controller's own enum - see below. |
 | Update frequency | ESC pulse update frequency in Hz (50-8000). Defaults to 50 Hz; the simulator uses the same rate. Enabled for pulse protocols, CASTLE and SRXL2; greyed out for digital protocols and DISABLED. |
-| Motor Stop PWM Value | TODO: explain behaviour, displayed units, range and conditions. |
+| Motor Stop PWM Value | Pulse sent to the ESC while the motor is stopped, in µs (50-2250). Defaults to 980 µs; it must be low enough for the ESC to read it as throttle off, or the ESC will not arm. Enabled for pulse protocols, CASTLE and SRXL2; greyed out for digital protocols and DISABLED. |
 | 0% Throttle PWM Value | TODO: explain behaviour, displayed units, range and conditions. |
 | 100% Throttle PWM value | TODO: explain behaviour, displayed units, range and conditions. |
 | Unsynced ESC Update | TODO: explain behaviour, displayed units, range and conditions. |
