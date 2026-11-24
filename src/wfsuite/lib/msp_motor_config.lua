@@ -151,7 +151,7 @@ local WRITE_FIELDS = {
 local FIELD_META = {
   minthrottle = {min = 50, max = 2250, default = 1070, suffix = "us"},
   maxthrottle = {min = 50, max = 2250, default = 2000, suffix = "us"},
-  mincommand = {min = 50, max = 2250, default = 1000, suffix = "us"},
+  mincommand = {min = 50, max = 2250, default = 980, suffix = "us"},
   use_dshot_telemetry = {choices = ON_OFF_CHOICES},
   -- The BASE list, so the fallback for any caller that builds this field without
   -- asking for a filtered list is the subset valid on every FC this suite talks to.
