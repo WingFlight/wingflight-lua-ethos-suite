@@ -2323,7 +2323,7 @@
           "translation": "Czas wyświetlania",
           "needs_translation": false,
           "reverse_text": false,
-          "max_length": 17
+          "max_length": 16
         },
         "activelook_inflight_fuel_icon": {
           "english": "Smart Fuel icon",
@@ -2364,19 +2364,22 @@
           "english": "ETHOS Glasses menu",
           "translation": "Menu okularów ETHOS",
           "needs_translation": false,
-          "max_length": 21
+          "max_length": 18,
+          "reverse_text": false
         },
         "activelook_restart_radio": {
           "english": "Save, then restart the radio.",
           "translation": "Zapisz, a następnie uruchom radio ponownie.",
           "needs_translation": false,
-          "max_length": 43
+          "max_length": 29,
+          "reverse_text": false
         },
         "activelook_setup_hint": {
           "english": "One-time setup:\nModel > Glasses > Screen\nChoose the Full-Screen layout.\nAssign Wingflight ActiveLook.",
           "translation": "Konfiguracja jednorazowa:\nModel > Okulary > Ekran\nWybierz układ Full-Screen.\nPrzypisz Wingflight ActiveLook.",
           "needs_translation": false,
-          "max_length": 120
+          "max_length": 101,
+          "reverse_text": false
         },
         "feature_activelook": {
           "english": "Wingflight ActiveLook",
@@ -3138,79 +3141,92 @@
           "english": "ESC Status",
           "translation": "Stan ESC",
           "needs_translation": false,
-          "max_length": 10
+          "max_length": 10,
+          "reverse_text": false
         },
         "activelook_esc_status_warning": {
           "english": "ESC Status Warning",
           "translation": "Alerty stanu ESC",
           "needs_translation": false,
-          "max_length": 18
+          "max_length": 18,
+          "reverse_text": false
         },
         "activelook_esc_offline": {
           "english": "Connect to check",
           "translation": "Połącz, aby sprawdzić",
           "needs_translation": false,
-          "max_length": 21
+          "max_length": 16,
+          "reverse_text": false
         },
         "activelook_esc_missing": {
           "english": "Telemetry missing",
           "translation": "Brak telemetrii",
           "needs_translation": false,
-          "max_length": 17
+          "max_length": 17,
+          "reverse_text": false
         },
         "activelook_esc_unsupported": {
           "english": "No status support",
           "translation": "Stan nieobsługiwany",
           "needs_translation": false,
-          "max_length": 21
+          "max_length": 17,
+          "reverse_text": false
         },
         "activelook_esc_generic": {
           "english": "Generic faults only",
           "translation": "Tylko ogólne błędy",
           "needs_translation": false,
-          "max_length": 21
+          "max_length": 19,
+          "reverse_text": false
         },
         "activelook_esc_available": {
           "english": "Status available",
           "translation": "Stan dostępny",
           "needs_translation": false,
-          "max_length": 16
+          "max_length": 16,
+          "reverse_text": false
         },
         "activelook_esc_setup": {
           "english": "Set up telemetry",
           "translation": "Ustaw telemetrię",
           "needs_translation": false,
-          "max_length": 21
+          "max_length": 16,
+          "reverse_text": false
         },
         "activelook_esc_messages": {
           "english": "Show messages",
           "translation": "Pokaż komunikaty",
           "needs_translation": false,
-          "max_length": 18
+          "max_length": 13,
+          "reverse_text": false
         },
         "activelook_esc_messages_all": {
           "english": "Errors and warnings",
           "translation": "Błędy i ostrzeżenia",
           "needs_translation": false,
-          "max_length": 20
+          "max_length": 19,
+          "reverse_text": false
         },
         "activelook_esc_messages_errors": {
           "english": "Errors only",
           "translation": "Tylko błędy",
           "needs_translation": false,
-          "max_length": 11
+          "max_length": 11,
+          "reverse_text": false
         },
         "activelook_esc_messages_warnings": {
           "english": "Warnings only",
           "translation": "Tylko ostrzeżenia",
           "needs_translation": false,
-          "max_length": 17
+          "max_length": 13,
+          "reverse_text": false
         },
         "activelook_esc_telemetry_help": {
           "english": "Requires ESC1 Status and ESC1 Model ID telemetry. Use Set up telemetry to select both sensors, then save on the Telemetry page. ESC telemetry must already be configured on the flight controller.",
           "translation": "Wymaga czujników ESC1 Status i ESC1 Model ID. W Ustaw telemetrię wybierz oba czujniki i zapisz na stronie Telemetria. Telemetria ESC musi być wcześniej skonfigurowana w kontrolerze lotu.",
           "needs_translation": false,
-          "max_length": 195
+          "max_length": 194,
+          "reverse_text": false
         },
         "status_alerts": {
           "english": "FC status",
@@ -14716,19 +14732,22 @@
         "english": "ESC ERROR",
         "translation": "BŁĄD ESC",
         "needs_translation": false,
-        "max_length": 10
+        "max_length": 9,
+        "reverse_text": false
       },
       "alert_esc_warning": {
         "english": "ESC WARNING",
         "translation": "OSTRZEŻENIE ESC",
         "needs_translation": false,
-        "max_length": 15
+        "max_length": 11,
+        "reverse_text": false
       },
       "alert_no_esc_data": {
         "english": "NO ESC DATA",
         "translation": "BRAK DANYCH ESC",
         "needs_translation": false,
-        "max_length": 15
+        "max_length": 11,
+        "reverse_text": false
       }
     }
   }

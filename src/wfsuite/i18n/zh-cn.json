@@ -7995,72 +7995,84 @@
           "english": "Status available",
           "max_length": 16,
           "needs_translation": false,
+          "reverse_text": false,
           "translation": "状态可用"
         },
         "activelook_esc_generic": {
           "english": "Generic faults only",
-          "max_length": 21,
+          "max_length": 19,
           "needs_translation": false,
+          "reverse_text": false,
           "translation": "仅报告一般故障"
         },
         "activelook_esc_messages": {
           "english": "Show messages",
-          "max_length": 18,
+          "max_length": 13,
           "needs_translation": false,
+          "reverse_text": false,
           "translation": "显示消息"
         },
         "activelook_esc_messages_all": {
           "english": "Errors and warnings",
-          "max_length": 20,
+          "max_length": 19,
           "needs_translation": false,
+          "reverse_text": false,
           "translation": "错误和警告"
         },
         "activelook_esc_messages_errors": {
           "english": "Errors only",
           "max_length": 11,
           "needs_translation": false,
+          "reverse_text": false,
           "translation": "仅错误"
         },
         "activelook_esc_messages_warnings": {
           "english": "Warnings only",
           "max_length": 13,
           "needs_translation": false,
+          "reverse_text": false,
           "translation": "仅警告"
         },
         "activelook_esc_missing": {
           "english": "Telemetry missing",
           "max_length": 17,
           "needs_translation": false,
+          "reverse_text": false,
           "translation": "缺少遥测"
         },
         "activelook_esc_offline": {
           "english": "Connect to check",
-          "max_length": 20,
+          "max_length": 16,
           "needs_translation": false,
+          "reverse_text": false,
           "translation": "连接后检查"
         },
         "activelook_esc_setup": {
           "english": "Set up telemetry",
-          "max_length": 21,
+          "max_length": 16,
           "needs_translation": false,
+          "reverse_text": false,
           "translation": "设置遥测"
         },
         "activelook_esc_status": {
           "english": "ESC Status",
           "max_length": 10,
           "needs_translation": false,
+          "reverse_text": false,
           "translation": "电调状态"
         },
         "activelook_esc_status_warning": {
           "english": "ESC Status Warning",
           "max_length": 18,
           "needs_translation": false,
+          "reverse_text": false,
           "translation": "电调状态警报"
         },
         "activelook_esc_telemetry_help": {
           "english": "Requires ESC1 Status and ESC1 Model ID telemetry. Use Set up telemetry to select both sensors, then save on the Telemetry page. ESC telemetry must already be configured on the flight controller.",
-          "max_length": 195,
+          "max_length": 194,
           "needs_translation": false,
+          "reverse_text": false,
           "translation": "需要 ESC1 Status 和 ESC1 Model ID 遥测传感器。在“设置遥测”中选择这两个传感器，然后在遥测页面保存。飞控上的电调遥测必须已配置。"
         },
         "activelook_esc_temp_limit": {
@@ -8079,14 +8091,16 @@
         },
         "activelook_esc_unsupported": {
           "english": "No status support",
-          "max_length": 21,
+          "max_length": 17,
           "needs_translation": false,
+          "reverse_text": false,
           "translation": "不支持状态反馈"
         },
         "activelook_glasses_menu": {
           "english": "ETHOS Glasses menu",
-          "max_length": 21,
+          "max_length": 18,
           "needs_translation": false,
+          "reverse_text": false,
           "translation": "ETHOS 眼镜菜单"
         },
         "activelook_governor_lost": {
@@ -8177,6 +8191,7 @@
           "english": "Save, then restart the radio.",
           "max_length": 29,
           "needs_translation": false,
+          "reverse_text": false,
           "translation": "先保存，再重启遥控器。"
         },
         "activelook_rf_link_limit": {
@@ -8209,8 +8224,9 @@
         },
         "activelook_setup_hint": {
           "english": "One-time setup:\nModel > Glasses > Screen\nChoose the Full-Screen layout.\nAssign Wingflight ActiveLook.",
-          "max_length": 120,
+          "max_length": 101,
           "needs_translation": false,
+          "reverse_text": false,
           "translation": "首次设置：\n模型 > 眼镜 > 屏幕\n选择全屏布局（Full-Screen）。\n分配 Wingflight ActiveLook。"
         },
         "activelook_smartfuel_max": {
@@ -13544,8 +13560,9 @@
       },
       "alert_esc_error": {
         "english": "ESC ERROR",
-        "max_length": 10,
+        "max_length": 9,
         "needs_translation": false,
+        "reverse_text": false,
         "translation": "电调错误"
       },
       "alert_esc_temp_high": {
@@ -13559,6 +13576,7 @@
         "english": "ESC WARNING",
         "max_length": 11,
         "needs_translation": false,
+        "reverse_text": false,
         "translation": "电调警告"
       },
       "alert_fuel_low": {
@@ -13591,8 +13609,9 @@
       },
       "alert_no_esc_data": {
         "english": "NO ESC DATA",
-        "max_length": 15,
+        "max_length": 11,
         "needs_translation": false,
+        "reverse_text": false,
         "translation": "无电调数据"
       },
       "alert_rf_link_low": {

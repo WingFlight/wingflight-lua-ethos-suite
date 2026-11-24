@@ -7995,72 +7995,84 @@
           "english": "Status available",
           "max_length": 16,
           "needs_translation": false,
+          "reverse_text": true,
           "translation": "מצב זמין"
         },
         "activelook_esc_generic": {
           "english": "Generic faults only",
-          "max_length": 21,
+          "max_length": 19,
           "needs_translation": false,
+          "reverse_text": true,
           "translation": "תקלות כלליות בלבד"
         },
         "activelook_esc_messages": {
           "english": "Show messages",
-          "max_length": 18,
+          "max_length": 13,
           "needs_translation": false,
+          "reverse_text": true,
           "translation": "הצג הודעות"
         },
         "activelook_esc_messages_all": {
           "english": "Errors and warnings",
-          "max_length": 20,
+          "max_length": 19,
           "needs_translation": false,
+          "reverse_text": true,
           "translation": "שגיאות ואזהרות"
         },
         "activelook_esc_messages_errors": {
           "english": "Errors only",
           "max_length": 11,
           "needs_translation": false,
+          "reverse_text": true,
           "translation": "שגיאות בלבד"
         },
         "activelook_esc_messages_warnings": {
           "english": "Warnings only",
           "max_length": 13,
           "needs_translation": false,
+          "reverse_text": true,
           "translation": "אזהרות בלבד"
         },
         "activelook_esc_missing": {
           "english": "Telemetry missing",
           "max_length": 17,
           "needs_translation": false,
+          "reverse_text": true,
           "translation": "טלמטריה חסרה"
         },
         "activelook_esc_offline": {
           "english": "Connect to check",
-          "max_length": 20,
+          "max_length": 16,
           "needs_translation": false,
+          "reverse_text": true,
           "translation": "התחבר לבדיקה"
         },
         "activelook_esc_setup": {
           "english": "Set up telemetry",
-          "max_length": 21,
+          "max_length": 16,
           "needs_translation": false,
+          "reverse_text": true,
           "translation": "הגדרת טלמטריה"
         },
         "activelook_esc_status": {
           "english": "ESC Status",
           "max_length": 10,
           "needs_translation": false,
+          "reverse_text": true,
           "translation": "מצב ESC"
         },
         "activelook_esc_status_warning": {
           "english": "ESC Status Warning",
           "max_length": 18,
           "needs_translation": false,
+          "reverse_text": true,
           "translation": "התראות מצב ESC"
         },
         "activelook_esc_telemetry_help": {
           "english": "Requires ESC1 Status and ESC1 Model ID telemetry. Use Set up telemetry to select both sensors, then save on the Telemetry page. ESC telemetry must already be configured on the flight controller.",
-          "max_length": 195,
+          "max_length": 194,
           "needs_translation": false,
+          "reverse_text": true,
           "translation": "נדרשים חיישני הטלמטריה ESC1 Status ו-ESC1 Model ID. בהגדרת טלמטריה בחר את שני החיישנים ושמור בדף הטלמטריה. טלמטריית ESC חייבת להיות מוגדרת מראש בבקר הטיסה."
         },
         "activelook_esc_temp_limit": {
@@ -8079,14 +8091,16 @@
         },
         "activelook_esc_unsupported": {
           "english": "No status support",
-          "max_length": 21,
+          "max_length": 17,
           "needs_translation": false,
+          "reverse_text": true,
           "translation": "מצב לא נתמך"
         },
         "activelook_glasses_menu": {
           "english": "ETHOS Glasses menu",
-          "max_length": 21,
+          "max_length": 18,
           "needs_translation": false,
+          "reverse_text": true,
           "translation": "תפריט משקפיים ETHOS"
         },
         "activelook_governor_lost": {
@@ -8175,8 +8189,9 @@
         },
         "activelook_restart_radio": {
           "english": "Save, then restart the radio.",
-          "max_length": 30,
+          "max_length": 29,
           "needs_translation": false,
+          "reverse_text": true,
           "translation": "שמרו ואז הפעילו מחדש את הרדיו."
         },
         "activelook_rf_link_limit": {
@@ -8209,8 +8224,9 @@
         },
         "activelook_setup_hint": {
           "english": "One-time setup:\nModel > Glasses > Screen\nChoose the Full-Screen layout.\nAssign Wingflight ActiveLook.",
-          "max_length": 120,
+          "max_length": 101,
           "needs_translation": false,
+          "reverse_text": true,
           "translation": "הגדרה חד פעמית:\nדגם > משקפיים > מסך\nבחרו פריסת Full-Screen.\nהקצו את Wingflight ActiveLook."
         },
         "activelook_smartfuel_max": {
@@ -13544,8 +13560,9 @@
       },
       "alert_esc_error": {
         "english": "ESC ERROR",
-        "max_length": 10,
+        "max_length": 9,
         "needs_translation": false,
+        "reverse_text": true,
         "translation": "שגיאת ESC"
       },
       "alert_esc_temp_high": {
@@ -13559,6 +13576,7 @@
         "english": "ESC WARNING",
         "max_length": 11,
         "needs_translation": false,
+        "reverse_text": true,
         "translation": "אזהרת ESC"
       },
       "alert_fuel_low": {
@@ -13591,8 +13609,9 @@
       },
       "alert_no_esc_data": {
         "english": "NO ESC DATA",
-        "max_length": 15,
+        "max_length": 11,
         "needs_translation": false,
+        "reverse_text": true,
         "translation": "אין נתוני ESC"
       },
       "alert_rf_link_low": {

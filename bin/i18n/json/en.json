@@ -2032,7 +2032,7 @@
           "english": "ETHOS Glasses menu",
           "translation": "ETHOS Glasses menu",
           "needs_translation": false,
-          "max_length": 21
+          "max_length": 18
         },
         "activelook_restart_radio": {
           "english": "Save, then restart the radio.",
@@ -2044,7 +2044,7 @@
           "english": "One-time setup:\nModel > Glasses > Screen\nChoose the Full-Screen layout.\nAssign Wingflight ActiveLook.",
           "translation": "One-time setup:\nModel > Glasses > Screen\nChoose the Full-Screen layout.\nAssign Wingflight ActiveLook.",
           "needs_translation": false,
-          "max_length": 120
+          "max_length": 101
         },
         "feature_activelook": {
           "english": "Wingflight ActiveLook",
@@ -2710,7 +2710,7 @@
           "english": "Connect to check",
           "translation": "Connect to check",
           "needs_translation": false,
-          "max_length": 20
+          "max_length": 16
         },
         "activelook_esc_missing": {
           "english": "Telemetry missing",
@@ -2722,13 +2722,13 @@
           "english": "No status support",
           "translation": "No status support",
           "needs_translation": false,
-          "max_length": 21
+          "max_length": 17
         },
         "activelook_esc_generic": {
           "english": "Generic faults only",
           "translation": "Generic faults only",
           "needs_translation": false,
-          "max_length": 21
+          "max_length": 19
         },
         "activelook_esc_available": {
           "english": "Status available",
@@ -2740,19 +2740,19 @@
           "english": "Set up telemetry",
           "translation": "Set up telemetry",
           "needs_translation": false,
-          "max_length": 21
+          "max_length": 16
         },
         "activelook_esc_messages": {
           "english": "Show messages",
           "translation": "Show messages",
           "needs_translation": false,
-          "max_length": 18
+          "max_length": 13
         },
         "activelook_esc_messages_all": {
           "english": "Errors and warnings",
           "translation": "Errors and warnings",
           "needs_translation": false,
-          "max_length": 20
+          "max_length": 19
         },
         "activelook_esc_messages_errors": {
           "english": "Errors only",
@@ -2770,7 +2770,7 @@
           "english": "Requires ESC1 Status and ESC1 Model ID telemetry. Use Set up telemetry to select both sensors, then save on the Telemetry page. ESC telemetry must already be configured on the flight controller.",
           "translation": "Requires ESC1 Status and ESC1 Model ID telemetry. Use Set up telemetry to select both sensors, then save on the Telemetry page. ESC telemetry must already be configured on the flight controller.",
           "needs_translation": false,
-          "max_length": 195
+          "max_length": 194
         },
         "status_alerts": {
           "english": "FC status",
@@ -12651,7 +12651,7 @@
         "english": "ESC ERROR",
         "translation": "ESC ERROR",
         "needs_translation": false,
-        "max_length": 10
+        "max_length": 9
       },
       "alert_esc_warning": {
         "english": "ESC WARNING",
@@ -12663,7 +12663,7 @@
         "english": "NO ESC DATA",
         "translation": "NO ESC DATA",
         "needs_translation": false,
-        "max_length": 15
+        "max_length": 11
       }
     }
   }
