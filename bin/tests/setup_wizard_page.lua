@@ -673,6 +673,66 @@ do
   replies[114] = nil
 end
 
+-- Receiver: the stick centre. Roll, pitch and yaw (channels 1, 2 and 4 in
+-- the default map) rest at 1520, as on some ELRS radios; rc_center is 1500.
+do
+  local raw = {1520, 1520, 1000, 1520, 1000, 1000, 1000, 1000}
+  replies[114] = function() return u16list(raw) end
+  openPage(14, "receiver")
+  settle()
+  for _ = 1, 12 do tick(0.15) end
+  check("receiver: hints that the resting sticks are off centre", shows("rx_centre_hint_fmt"))
+  press(T("rx_centre_btn"))
+  check("receiver: the centre screen", shows("rx_centre_text"))
+  -- Pitch trimmed up: named, and nothing written.
+  raw[2] = 1540
+  settle()
+  before = #sent
+  press(T("rx_centre_detect"))
+  for _ = 1, 16 do tick(0.15) end
+  check("receiver: an off trim is named", shows("rx_centre_trim_fmt"))
+  check("receiver: nothing written for an off trim", #writesOf(67, before + 1) == 0)
+  raw[2] = 1520
+  -- The link drops: no new reply in the window, so the last cached
+  -- reading (perfectly still) is not taken as the centre.
+  held[114] = true
+  before = #sent
+  press(T("rx_centre_detect"))
+  for _ = 1, 16 do tick(0.15) end
+  check("receiver: no new RC replies is no signal", shows("rx_centre_nosignal"))
+  check("receiver: nothing written without new replies", #writesOf(67, before + 1) == 0)
+  held[114] = nil
+  heldMessages = {}
+  for _ = 1, 8 do tick(0.3) end
+  -- The write fails: the old centre is kept, so Detect writes it again.
+  held[67] = true
+  before = #sent
+  press(T("rx_centre_detect"))
+  for _ = 1, 16 do tick(0.15) end
+  local failed = writesOf(67, before + 1)[1]
+  check("receiver: Detect sends the write", failed ~= nil)
+  if failed then
+    answeredUpTo = #sent
+    inBackground = true
+    failed.errorHandler("timeout")
+    inBackground = false
+  end
+  held[67] = nil
+  heldMessages = {}
+  tick(0.05)
+  check("receiver: a failed write says so", paint():find("@i18n(app.msg_save_failed_title)@", 1, true) ~= nil)
+  settle()
+  before = #sent
+  press(T("rx_centre_detect"))
+  for _ = 1, 16 do tick(0.15) end
+  local w = writesOf(67, before + 1)
+  check("receiver: rc_center 1520 is written",
+    #w == 1 and u16(w[1].payload, 1) == 1520, w[1] and bytes(w[1].payload))
+  check("receiver: the rest of the RC config is kept", w[1] and u16(w[1].payload, 3) == 510)
+  check("receiver: says the centre is set", shows("rx_centre_set_fmt"))
+  replies[114] = nil
+end
+
 -- Airframe: a flying wing replaces the mix.
 openPage(14, "airframe")
 settle()

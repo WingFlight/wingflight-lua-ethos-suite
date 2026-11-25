@@ -415,6 +415,7 @@ local function open(opts)
     positions = positions,
     rc = rc,
     rcRaw = rcRaw,
+    rcReads = 0,             -- live RC replies so far: new readings show as a change
     configs = configs,
     trims = trims,
     inputs = inputs,
@@ -1201,8 +1202,12 @@ local function open(opts)
       msg = servoRead.buildReadMessage(positions, done, done)
     else
       local raw = step.liveRc == "raw"
+      local function got()
+        p.inFlight = false
+        wiz.rcReads = wiz.rcReads + 1
+      end
       msg = rcChannels.buildReadMessage(raw and rcChannels.RX_CHANNELS_COMMAND or rcChannels.RC_COMMAND,
-        raw and rcRaw or rc, done, done)
+        raw and rcRaw or rc, got, done)
     end
     bus.publish("msp.request", msg)
   end

@@ -2323,7 +2323,7 @@
           "translation": "Durée d’affichage",
           "needs_translation": false,
           "reverse_text": false,
-          "max_length": 17
+          "max_length": 16
         },
         "activelook_inflight_fuel_icon": {
           "english": "Smart Fuel icon",
@@ -2364,19 +2364,22 @@
           "english": "ETHOS Glasses menu",
           "translation": "Menu lunettes ETHOS",
           "needs_translation": false,
-          "max_length": 21
+          "max_length": 18,
+          "reverse_text": false
         },
         "activelook_restart_radio": {
           "english": "Save, then restart the radio.",
           "translation": "Enregistrer, puis redémarrer la radio.",
           "needs_translation": false,
-          "max_length": 38
+          "max_length": 29,
+          "reverse_text": false
         },
         "activelook_setup_hint": {
           "english": "One-time setup:\nModel > Glasses > Screen\nChoose the Full-Screen layout.\nAssign Wingflight ActiveLook.",
           "translation": "Configuration initiale :\nModèle > Lunettes > Écran\nChoisir le mode Full-Screen.\nAffecter Wingflight ActiveLook.",
           "needs_translation": false,
-          "max_length": 120
+          "max_length": 101,
+          "reverse_text": false
         },
         "feature_activelook": {
           "english": "Wingflight ActiveLook",
@@ -3138,79 +3141,92 @@
           "english": "ESC Status",
           "translation": "État ESC",
           "needs_translation": false,
-          "max_length": 10
+          "max_length": 10,
+          "reverse_text": false
         },
         "activelook_esc_status_warning": {
           "english": "ESC Status Warning",
           "translation": "Alertes état ESC",
           "needs_translation": false,
-          "max_length": 18
+          "max_length": 18,
+          "reverse_text": false
         },
         "activelook_esc_offline": {
           "english": "Connect to check",
           "translation": "Connecter pour tester",
           "needs_translation": false,
-          "max_length": 21
+          "max_length": 16,
+          "reverse_text": false
         },
         "activelook_esc_missing": {
           "english": "Telemetry missing",
           "translation": "Télémétrie absente",
           "needs_translation": false,
-          "max_length": 18
+          "max_length": 17,
+          "reverse_text": false
         },
         "activelook_esc_unsupported": {
           "english": "No status support",
           "translation": "État non pris en charge",
           "needs_translation": false,
-          "max_length": 23
+          "max_length": 17,
+          "reverse_text": false
         },
         "activelook_esc_generic": {
           "english": "Generic faults only",
           "translation": "Défauts généraux seuls",
           "needs_translation": false,
-          "max_length": 22
+          "max_length": 19,
+          "reverse_text": false
         },
         "activelook_esc_available": {
           "english": "Status available",
           "translation": "État disponible",
           "needs_translation": false,
-          "max_length": 16
+          "max_length": 16,
+          "reverse_text": false
         },
         "activelook_esc_setup": {
           "english": "Set up telemetry",
           "translation": "Régler télémétrie",
           "needs_translation": false,
-          "max_length": 21
+          "max_length": 16,
+          "reverse_text": false
         },
         "activelook_esc_messages": {
           "english": "Show messages",
           "translation": "Afficher messages",
           "needs_translation": false,
-          "max_length": 18
+          "max_length": 13,
+          "reverse_text": false
         },
         "activelook_esc_messages_all": {
           "english": "Errors and warnings",
           "translation": "Erreurs et alertes",
           "needs_translation": false,
-          "max_length": 20
+          "max_length": 19,
+          "reverse_text": false
         },
         "activelook_esc_messages_errors": {
           "english": "Errors only",
           "translation": "Erreurs seules",
           "needs_translation": false,
-          "max_length": 14
+          "max_length": 11,
+          "reverse_text": false
         },
         "activelook_esc_messages_warnings": {
           "english": "Warnings only",
           "translation": "Alertes seules",
           "needs_translation": false,
-          "max_length": 14
+          "max_length": 13,
+          "reverse_text": false
         },
         "activelook_esc_telemetry_help": {
           "english": "Requires ESC1 Status and ESC1 Model ID telemetry. Use Set up telemetry to select both sensors, then save on the Telemetry page. ESC telemetry must already be configured on the flight controller.",
           "translation": "Nécessite les capteurs ESC1 Status et ESC1 Model ID. Dans Régler télémétrie, sélectionnez les deux capteurs et enregistrez sur la page Télémétrie. La télémétrie ESC doit déjà être configurée sur le contrôleur de vol.",
           "needs_translation": false,
-          "max_length": 216
+          "max_length": 194,
+          "reverse_text": false
         },
         "status_alerts": {
           "english": "FC status",
@@ -10580,6 +10596,97 @@
           "reverse_text": false,
           "max_length": 11
         },
+        "rx_centre_btn": {
+          "english": "Center",
+          "translation": "Center",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 6
+        },
+        "rx_centre_title": {
+          "english": "Stick center",
+          "translation": "Stick center",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 12
+        },
+        "rx_centre_text": {
+          "english": "Center the roll, pitch and yaw trims and remove any subtrim. Center the sticks, let go, then press Detect.",
+          "translation": "Center the roll, pitch and yaw trims and remove any subtrim. Center the sticks, let go, then press Detect.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 106
+        },
+        "rx_centre_fmt": {
+          "english": "Center: %dus.",
+          "translation": "Center: %dus.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 13
+        },
+        "rx_centre_detect": {
+          "english": "Detect",
+          "translation": "Detect",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 6
+        },
+        "rx_centre_sampling": {
+          "english": "Hold still...",
+          "translation": "Hold still...",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 13
+        },
+        "rx_centre_hint_fmt": {
+          "english": "Centered sticks read %dus, center is set to %dus.",
+          "translation": "Centered sticks read %dus, center is set to %dus.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 49
+        },
+        "rx_centre_set_fmt": {
+          "english": "Center set to %dus.",
+          "translation": "Center set to %dus.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 19
+        },
+        "rx_centre_same_fmt": {
+          "english": "Center is right: %dus.",
+          "translation": "Center is right: %dus.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 22
+        },
+        "rx_centre_nosignal": {
+          "english": "No receiver signal.",
+          "translation": "No receiver signal.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 19
+        },
+        "rx_centre_moving": {
+          "english": "A stick moved. Let go and try again.",
+          "translation": "A stick moved. Let go and try again.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 36
+        },
+        "rx_centre_trim_fmt": {
+          "english": "%s does not match. Center its trim and subtrim.",
+          "translation": "%s does not match. Center its trim and subtrim.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 47
+        },
+        "rx_centre_range_fmt": {
+          "english": "Sticks read %dus, outside %d-%dus.",
+          "translation": "Sticks read %dus, outside %d-%dus.",
+          "needs_translation": true,
+          "reverse_text": false,
+          "max_length": 34
+        },
         "air_title": {
           "english": "Airframe",
           "translation": "Airframe",
@@ -14716,19 +14823,22 @@
         "english": "ESC ERROR",
         "translation": "ERREUR ESC",
         "needs_translation": false,
-        "max_length": 10
+        "max_length": 9,
+        "reverse_text": false
       },
       "alert_esc_warning": {
         "english": "ESC WARNING",
         "translation": "ALERTE ESC",
         "needs_translation": false,
-        "max_length": 11
+        "max_length": 11,
+        "reverse_text": false
       },
       "alert_no_esc_data": {
         "english": "NO ESC DATA",
         "translation": "PAS DE DONNÉES ESC",
         "needs_translation": false,
-        "max_length": 18
+        "max_length": 11,
+        "reverse_text": false
       }
     }
   }

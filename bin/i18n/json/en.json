@@ -2032,7 +2032,7 @@
           "english": "ETHOS Glasses menu",
           "translation": "ETHOS Glasses menu",
           "needs_translation": false,
-          "max_length": 21
+          "max_length": 18
         },
         "activelook_restart_radio": {
           "english": "Save, then restart the radio.",
@@ -2044,7 +2044,7 @@
           "english": "One-time setup:\nModel > Glasses > Screen\nChoose the Full-Screen layout.\nAssign Wingflight ActiveLook.",
           "translation": "One-time setup:\nModel > Glasses > Screen\nChoose the Full-Screen layout.\nAssign Wingflight ActiveLook.",
           "needs_translation": false,
-          "max_length": 120
+          "max_length": 101
         },
         "feature_activelook": {
           "english": "Wingflight ActiveLook",
@@ -2710,7 +2710,7 @@
           "english": "Connect to check",
           "translation": "Connect to check",
           "needs_translation": false,
-          "max_length": 20
+          "max_length": 16
         },
         "activelook_esc_missing": {
           "english": "Telemetry missing",
@@ -2722,13 +2722,13 @@
           "english": "No status support",
           "translation": "No status support",
           "needs_translation": false,
-          "max_length": 21
+          "max_length": 17
         },
         "activelook_esc_generic": {
           "english": "Generic faults only",
           "translation": "Generic faults only",
           "needs_translation": false,
-          "max_length": 21
+          "max_length": 19
         },
         "activelook_esc_available": {
           "english": "Status available",
@@ -2740,19 +2740,19 @@
           "english": "Set up telemetry",
           "translation": "Set up telemetry",
           "needs_translation": false,
-          "max_length": 21
+          "max_length": 16
         },
         "activelook_esc_messages": {
           "english": "Show messages",
           "translation": "Show messages",
           "needs_translation": false,
-          "max_length": 18
+          "max_length": 13
         },
         "activelook_esc_messages_all": {
           "english": "Errors and warnings",
           "translation": "Errors and warnings",
           "needs_translation": false,
-          "max_length": 20
+          "max_length": 19
         },
         "activelook_esc_messages_errors": {
           "english": "Errors only",
@@ -2770,7 +2770,7 @@
           "english": "Requires ESC1 Status and ESC1 Model ID telemetry. Use Set up telemetry to select both sensors, then save on the Telemetry page. ESC telemetry must already be configured on the flight controller.",
           "translation": "Requires ESC1 Status and ESC1 Model ID telemetry. Use Set up telemetry to select both sensors, then save on the Telemetry page. ESC telemetry must already be configured on the flight controller.",
           "needs_translation": false,
-          "max_length": 195
+          "max_length": 194
         },
         "status_alerts": {
           "english": "FC status",
@@ -9100,6 +9100,84 @@
           "needs_translation": false,
           "max_length": 11
         },
+        "rx_centre_btn": {
+          "english": "Center",
+          "translation": "Center",
+          "needs_translation": false,
+          "max_length": 6
+        },
+        "rx_centre_title": {
+          "english": "Stick center",
+          "translation": "Stick center",
+          "needs_translation": false,
+          "max_length": 12
+        },
+        "rx_centre_text": {
+          "english": "Center the roll, pitch and yaw trims and remove any subtrim. Center the sticks, let go, then press Detect.",
+          "translation": "Center the roll, pitch and yaw trims and remove any subtrim. Center the sticks, let go, then press Detect.",
+          "needs_translation": false,
+          "max_length": 106
+        },
+        "rx_centre_fmt": {
+          "english": "Center: %dus.",
+          "translation": "Center: %dus.",
+          "needs_translation": false,
+          "max_length": 13
+        },
+        "rx_centre_detect": {
+          "english": "Detect",
+          "translation": "Detect",
+          "needs_translation": false,
+          "max_length": 6
+        },
+        "rx_centre_sampling": {
+          "english": "Hold still...",
+          "translation": "Hold still...",
+          "needs_translation": false,
+          "max_length": 13
+        },
+        "rx_centre_hint_fmt": {
+          "english": "Centered sticks read %dus, center is set to %dus.",
+          "translation": "Centered sticks read %dus, center is set to %dus.",
+          "needs_translation": false,
+          "max_length": 49
+        },
+        "rx_centre_set_fmt": {
+          "english": "Center set to %dus.",
+          "translation": "Center set to %dus.",
+          "needs_translation": false,
+          "max_length": 19
+        },
+        "rx_centre_same_fmt": {
+          "english": "Center is right: %dus.",
+          "translation": "Center is right: %dus.",
+          "needs_translation": false,
+          "max_length": 22
+        },
+        "rx_centre_nosignal": {
+          "english": "No receiver signal.",
+          "translation": "No receiver signal.",
+          "needs_translation": false,
+          "max_length": 19
+        },
+        "rx_centre_moving": {
+          "english": "A stick moved. Let go and try again.",
+          "translation": "A stick moved. Let go and try again.",
+          "needs_translation": false,
+          "max_length": 36
+        },
+        "rx_centre_trim_fmt": {
+          "english": "%s does not match. Center its trim and subtrim.",
+          "translation": "%s does not match. Center its trim and subtrim.",
+          "needs_translation": false,
+          "max_length": 47
+        },
+        "rx_centre_range_fmt": {
+          "english": "Sticks read %dus, outside %d-%dus.",
+          "translation": "Sticks read %dus, outside %d-%dus.",
+          "needs_translation": false,
+          "max_length": 34
+        },
         "air_title": {
           "english": "Airframe",
           "translation": "Airframe",
@@ -12651,7 +12729,7 @@
         "english": "ESC ERROR",
         "translation": "ESC ERROR",
         "needs_translation": false,
-        "max_length": 10
+        "max_length": 9
       },
       "alert_esc_warning": {
         "english": "ESC WARNING",
@@ -12663,7 +12741,7 @@
         "english": "NO ESC DATA",
         "translation": "NO ESC DATA",
         "needs_translation": false,
-        "max_length": 15
+        "max_length": 11
       }
     }
   }
