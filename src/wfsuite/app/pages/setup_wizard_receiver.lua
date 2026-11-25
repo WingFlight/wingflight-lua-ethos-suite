@@ -12,6 +12,12 @@
 --   detect  move throttle, roll, pitch and yaw in turn; the channel that
 --           clearly moves is that function's (lib/setup_wizard_controls.lua
 --           movedChannel()), and the map is written (MSP_SET_RX_MAP).
+--   centre  stick centre (rc_center): with trims and sticks centred, Detect
+--           averages roll, pitch and yaw for 1.5 s
+--           (lib/setup_wizard_controls.lua centreFromSamples()) and writes
+--           rc_center (MSP_SET_RC_CONFIG). Radios don't all send 1500 us
+--           centred (some ELRS setups send 1520). While the sticks rest near
+--           centre, a hint shows when they don't match rc_center.
 --
 -- A reversed bar is fixed on the radio, not here, as the configurator says.
 
@@ -32,7 +38,26 @@ local T = {
   detectTitle = "@i18n(app.modules.setup_wizard.rx_detect_title)@",
   wrong = "@i18n(app.modules.setup_wizard.rx_wrong)@",
   restart = "@i18n(app.modules.setup_wizard.rx_restart)@",
+  centreBtn = "@i18n(app.modules.setup_wizard.rx_centre_btn)@",
+  centreTitle = "@i18n(app.modules.setup_wizard.rx_centre_title)@",
+  centreText = "@i18n(app.modules.setup_wizard.rx_centre_text)@",
+  centreFmt = "@i18n(app.modules.setup_wizard.rx_centre_fmt)@",
+  centreDetect = "@i18n(app.modules.setup_wizard.rx_centre_detect)@",
+  centreSampling = "@i18n(app.modules.setup_wizard.rx_centre_sampling)@",
+  centreHintFmt = "@i18n(app.modules.setup_wizard.rx_centre_hint_fmt)@",
+  centreSetFmt = "@i18n(app.modules.setup_wizard.rx_centre_set_fmt)@",
+  centreSameFmt = "@i18n(app.modules.setup_wizard.rx_centre_same_fmt)@",
+  centreNoSignal = "@i18n(app.modules.setup_wizard.rx_centre_nosignal)@",
+  centreMoving = "@i18n(app.modules.setup_wizard.rx_centre_moving)@",
+  centreTrimFmt = "@i18n(app.modules.setup_wizard.rx_centre_trim_fmt)@",
+  centreRangeFmt = "@i18n(app.modules.setup_wizard.rx_centre_range_fmt)@",
 }
+
+-- Stick centre sampling: one sample every SAMPLE_SECONDS; the live hint
+-- looks at the last LIVE_SAMPLES (1 s), Detect at DETECT_SAMPLES (1.5 s).
+local SAMPLE_SECONDS = 0.1
+local LIVE_SAMPLES = 10
+local DETECT_SAMPLES = 15
 
 local FUNCTIONS = {
   {name = "@i18n(app.modules.setup_wizard.axis_roll)@",
@@ -71,6 +96,18 @@ local function new(wiz)
   local map = nil
   local centre, span = 1500, 500
   local found, baseline, peaks = {}, {}, {}
+  -- The whole RC config as read, so writing rc_center keeps the rest.
+  local rc = nil
+
+  -- Stick centre: {roll, pitch, yaw} samples, reused in place. The live
+  -- hint fills them as a ring (liveIndex, liveCount); Detect from the
+  -- start (sampleCount).
+  local samples = {}
+  for i = 1, DETECT_SAMPLES do samples[i] = {0, 0, 0} end
+  local liveIndex, liveCount, nextSampleAt = 0, 0, 0
+  local sampling, sampleCount = false, 0
+  local hint = nil
+  local resultStatus, resultCentre, resultAxis, resultApplied = nil, nil, nil, false
 
   wiz.fetch({
     map = function(ok, err) return rxMap.buildReadMessage(ok, err) end,
@@ -78,6 +115,7 @@ local function new(wiz)
   }, function(results)
     map = results.map and rxMap.toList(results.map) or {0, 1, 2, 3, 4, 5, 6, 7}
     if results.rc then
+      rc = results.rc
       centre = results.rc.rc_center or centre
       span = results.rc.rc_deflection or span
     end
@@ -107,6 +145,83 @@ local function new(wiz)
     end)
     map = newMap
     bus.publish("msp.request", rxMap.buildWriteMessage(map))
+  end
+
+  local function writeCentre(newCentre)
+    wiz.change("rc_config", rc, function(o)
+      bus.publish("msp.request", rcConfig.buildWriteMessage(o))
+    end)
+    rc.rc_center = newCentre
+    centre = newCentre
+    bus.publish("msp.request", rcConfig.buildWriteMessage(rc))
+  end
+
+  local function openCentre()
+    screen = "centre"
+    resultStatus = nil
+    wiz.rebuild()
+  end
+
+  local function startCentre()
+    sampling, sampleCount = true, 0
+    resultStatus, hint = nil, nil
+    wiz.rebuild()
+  end
+
+  local function finishCentre()
+    sampling = false
+    local status, c, axis = controls.centreFromSamples(samples, sampleCount)
+    resultStatus, resultCentre, resultAxis, resultApplied = status, c, axis, false
+    if status == "ok" and controls.centreIsOff(c, centre) then
+      writeCentre(c)
+      resultApplied = true
+    end
+    -- The hint starts again from fresh readings.
+    liveIndex, liveCount = 0, 0
+    wiz.rebuild()
+  end
+
+  -- One sample of roll, pitch and yaw as the receiver sends them.
+  local function sampleTick()
+    local slot
+    if sampling then
+      sampleCount = sampleCount + 1
+      slot = samples[sampleCount]
+    else
+      liveIndex = liveIndex % LIVE_SAMPLES + 1
+      if liveCount < LIVE_SAMPLES then liveCount = liveCount + 1 end
+      slot = samples[liveIndex]
+    end
+    local raw = wiz.rcRaw
+    for a = 1, 3 do slot[a] = raw[(map[a] or 0) + 1] or 0 end
+    if sampling then
+      if sampleCount >= DETECT_SAMPLES then finishCentre() end
+      return
+    end
+    if liveCount < LIVE_SAMPLES then return end
+    local h = controls.suggestedCentre(samples, liveCount, centre)
+    if h ~= hint then
+      hint = h
+      wiz.rebuild()
+    end
+  end
+
+  -- The centre screen's status line.
+  local function centreStatus()
+    if sampling then return T.centreSampling end
+    if hint then return string.format(T.centreHintFmt, hint, centre) end
+    if resultStatus == "ok" then
+      return string.format(resultApplied and T.centreSetFmt or T.centreSameFmt, resultCentre)
+    elseif resultStatus == "noSignal" then
+      return T.centreNoSignal
+    elseif resultStatus == "moving" then
+      return T.centreMoving
+    elseif resultStatus == "trim" then
+      return string.format(T.centreTrimFmt, FUNCTIONS[resultAxis + 1].name)
+    elseif resultStatus == "range" then
+      return string.format(T.centreRangeFmt, resultCentre, controls.CENTRE_MIN, controls.CENTRE_MAX)
+    end
+    return nil
   end
 
   -- One bar per function, the target (full left) marked at its left end.
@@ -175,11 +290,24 @@ local function new(wiz)
       return nil
     end
     if screen == "check" then
-      scr:text(T.title, T.check .. " " .. string.format(T.order, controls.orderLabel(map)), T.reversed)
+      local accent = T.reversed
+      if hint then accent = string.format(T.centreHintFmt, hint, centre) end
+      scr:text(T.title, T.check .. " " .. string.format(T.order, controls.orderLabel(map)), accent)
       scr:draw(drawSticks, nil, true)
       scr:live(drawBars, BARS_LINES)
       -- Next when the bars follow the sticks; Detect when they don't.
-      return scr:row(nil, {{text = T.wrong, press = startDetect}})
+      -- Center needs the RC config to write back.
+      return scr:row(nil, {
+        {text = T.wrong, press = startDetect},
+        {text = T.centreBtn, press = openCentre, disabled = rc == nil},
+      })
+    end
+    if screen == "centre" then
+      scr:text(T.centreTitle, T.centreText .. " " .. string.format(T.centreFmt, centre), centreStatus())
+      scr:live(drawBars, BARS_LINES)
+      -- Back to the check; Next goes on from here too.
+      return scr:row(function() sampling = false; screen = "check"; wiz.rebuild() end,
+        {{text = T.centreDetect, primary = true, press = startCentre}})
     end
     local fn = FUNCTIONS[DETECT_ORDER[#found + 1]]
     scr:text(T.detectTitle, fn.move)
@@ -195,6 +323,13 @@ local function new(wiz)
   local lastShown = {}
 
   function self.wakeup()
+    if map and screen ~= "detect" then
+      local now = os.clock()
+      if now >= nextSampleAt then
+        nextSampleAt = now + SAMPLE_SECONDS
+        sampleTick()
+      end
+    end
     if screen == "detect" then
       local raw = wiz.rcRaw
       for i = 1, #raw do
