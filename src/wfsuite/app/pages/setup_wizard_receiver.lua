@@ -51,6 +51,7 @@ local T = {
   centreMoving = "@i18n(app.modules.setup_wizard.rx_centre_moving)@",
   centreTrimFmt = "@i18n(app.modules.setup_wizard.rx_centre_trim_fmt)@",
   centreRangeFmt = "@i18n(app.modules.setup_wizard.rx_centre_range_fmt)@",
+  centreWriteFailed = "@i18n(app.msg_save_failed_title)@",
 }
 
 -- Stick centre sampling: one sample every SAMPLE_SECONDS; the live hint
@@ -58,6 +59,10 @@ local T = {
 local SAMPLE_SECONDS = 0.1
 local LIVE_SAMPLES = 10
 local DETECT_SAMPLES = 15
+-- Detect needs at least this many new RC replies in its window: the
+-- samples are taken from the last reply, so with the link down they would
+-- all be the same cached reading, and look perfectly still.
+local DETECT_MIN_READS = 3
 
 local FUNCTIONS = {
   {name = "@i18n(app.modules.setup_wizard.axis_roll)@",
@@ -105,7 +110,7 @@ local function new(wiz)
   local samples = {}
   for i = 1, DETECT_SAMPLES do samples[i] = {0, 0, 0} end
   local liveIndex, liveCount, nextSampleAt = 0, 0, 0
-  local sampling, sampleCount = false, 0
+  local sampling, sampleCount, sampleReads = false, 0, 0
   local hint = nil
   local resultStatus, resultCentre, resultAxis, resultApplied = nil, nil, nil, false
 
@@ -147,13 +152,22 @@ local function new(wiz)
     bus.publish("msp.request", rxMap.buildWriteMessage(map))
   end
 
+  -- A failed write puts the old centre back, so the page does not take the
+  -- new one as applied, and a later Detect tries again.
   local function writeCentre(newCentre)
     wiz.change("rc_config", rc, function(o)
       bus.publish("msp.request", rcConfig.buildWriteMessage(o))
     end)
+    local old = centre
     rc.rc_center = newCentre
     centre = newCentre
-    bus.publish("msp.request", rcConfig.buildWriteMessage(rc))
+    bus.publish("msp.request", rcConfig.buildWriteMessage(rc, nil, function()
+      if centre ~= newCentre then return end
+      rc.rc_center = old
+      centre = old
+      resultStatus, resultApplied = "writeFailed", false
+      wiz.rebuild()
+    end))
   end
 
   local function openCentre()
@@ -163,14 +177,17 @@ local function new(wiz)
   end
 
   local function startCentre()
-    sampling, sampleCount = true, 0
+    sampling, sampleCount, sampleReads = true, 0, wiz.rcReads
     resultStatus, hint = nil, nil
     wiz.rebuild()
   end
 
   local function finishCentre()
     sampling = false
-    local status, c, axis = controls.centreFromSamples(samples, sampleCount)
+    local status, c, axis = "noSignal", nil, nil
+    if wiz.rcReads - sampleReads >= DETECT_MIN_READS then
+      status, c, axis = controls.centreFromSamples(samples, sampleCount)
+    end
     resultStatus, resultCentre, resultAxis, resultApplied = status, c, axis, false
     if status == "ok" and controls.centreIsOff(c, centre) then
       writeCentre(c)
@@ -220,6 +237,8 @@ local function new(wiz)
       return string.format(T.centreTrimFmt, FUNCTIONS[resultAxis + 1].name)
     elseif resultStatus == "range" then
       return string.format(T.centreRangeFmt, resultCentre, controls.CENTRE_MIN, controls.CENTRE_MAX)
+    elseif resultStatus == "writeFailed" then
+      return T.centreWriteFailed
     end
     return nil
   end
